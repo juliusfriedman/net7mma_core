@@ -74,8 +74,17 @@
     <ProjectReference Include="..\Codecs\Video\Mpeg4\Mpeg4.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\Concepts\Concepts.csproj" />
+    <ProjectReference Include="..\Containers\Asf\Container.Asf.csproj" />
     <ProjectReference Include="..\Containers\BaseMedia\Container.BaseMedia.csproj" />
     <ProjectReference Include="..\Containers\Container.csproj" />
+    <ProjectReference Include="..\Containers\Gxf\Container.Gxf.csproj" />
+    <ProjectReference Include="..\Containers\Matroska\Container.Matroska.csproj" />
+    <ProjectReference Include="..\Containers\Mcf\Container.Mcf.csproj" />
+    <ProjectReference Include="..\Containers\Mxf\Container.Mxf.csproj" />
+    <ProjectReference Include="..\Containers\Nut\Container.Nut.csproj" />
+    <ProjectReference Include="..\Containers\Ogg\Container.Ogg.csproj" />
+    <ProjectReference Include="..\Containers\Real\Container.Real.csproj" />
+    <ProjectReference Include="..\Containers\Riff\Container.Riff.csproj" />
     <ProjectReference Include="..\Cryptography\Cryptography.csproj" />
     <ProjectReference Include="..\Http\Http.csproj" />
     <ProjectReference Include="..\Ntp\Ntp.csproj" />
@@ -84,6 +93,7 @@
     <ProjectReference Include="..\RtspServer\RtspServer.csproj" />
     <ProjectReference Include="..\Rtsp\Rtsp.csproj" />
     <ProjectReference Include="..\Sdp\Sdp.csproj" />
+    <ProjectReference Include="..\Sip\Sip.csproj" />
   </ItemGroup>
 
 </Project>
