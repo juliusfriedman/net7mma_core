@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Aac\**" />
+    <Compile Remove="AC3\**" />
+    <Compile Remove="Alaw\**" />
+    <Compile Remove="Flac\**" />
+    <Compile Remove="G722\**" />
+    <Compile Remove="Mp3\**" />
+    <Compile Remove="Mulaw\**" />
+    <Compile Remove="Todo\**" />
+    <Compile Remove="Vorbis\**" />
+    <EmbeddedResource Remove="Aac\**" />
+    <EmbeddedResource Remove="AC3\**" />
+    <EmbeddedResource Remove="Alaw\**" />
+    <EmbeddedResource Remove="Flac\**" />
+    <EmbeddedResource Remove="G722\**" />
+    <EmbeddedResource Remove="Mp3\**" />
+    <EmbeddedResource Remove="Mulaw\**" />
+    <EmbeddedResource Remove="Todo\**" />
+    <EmbeddedResource Remove="Vorbis\**" />
+    <None Remove="Aac\**" />
+    <None Remove="AC3\**" />
+    <None Remove="Alaw\**" />
+    <None Remove="Flac\**" />
+    <None Remove="G722\**" />
+    <None Remove="Mp3\**" />
+    <None Remove="Mulaw\**" />
+    <None Remove="Todo\**" />
+    <None Remove="Vorbis\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Common.csproj" />
+    <ProjectReference Include="..\Codecs.csproj" />
+  </ItemGroup>
+
+</Project>

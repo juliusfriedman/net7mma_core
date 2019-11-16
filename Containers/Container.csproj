@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <AssemblyName>Media.Container</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Asf\**" />
+    <Compile Remove="BaseMedia\**" />
+    <Compile Remove="Gxf\**" />
+    <Compile Remove="Matroska\**" />
+    <Compile Remove="Mcf\**" />
+    <Compile Remove="Mpeg\**" />
+    <Compile Remove="Mxf\**" />
+    <Compile Remove="Nut\**" />
+    <Compile Remove="Ogg\**" />
+    <Compile Remove="Real\**" />
+    <Compile Remove="Riff\**" />
+    <Compile Remove="Todo\**" />
+    <EmbeddedResource Remove="Asf\**" />
+    <EmbeddedResource Remove="BaseMedia\**" />
+    <EmbeddedResource Remove="Gxf\**" />
+    <EmbeddedResource Remove="Matroska\**" />
+    <EmbeddedResource Remove="Mcf\**" />
+    <EmbeddedResource Remove="Mpeg\**" />
+    <EmbeddedResource Remove="Mxf\**" />
+    <EmbeddedResource Remove="Nut\**" />
+    <EmbeddedResource Remove="Ogg\**" />
+    <EmbeddedResource Remove="Real\**" />
+    <EmbeddedResource Remove="Riff\**" />
+    <EmbeddedResource Remove="Todo\**" />
+    <None Remove="Asf\**" />
+    <None Remove="BaseMedia\**" />
+    <None Remove="Gxf\**" />
+    <None Remove="Matroska\**" />
+    <None Remove="Mcf\**" />
+    <None Remove="Mpeg\**" />
+    <None Remove="Mxf\**" />
+    <None Remove="Nut\**" />
+    <None Remove="Ogg\**" />
+    <None Remove="Real\**" />
+    <None Remove="Riff\**" />
+    <None Remove="Todo\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Sdp\Sdp.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Audio\**" />
+    <Compile Remove="Image\**" />
+    <Compile Remove="Mpeg\**" />
+    <Compile Remove="Video\**" />
+    <EmbeddedResource Remove="Audio\**" />
+    <EmbeddedResource Remove="Image\**" />
+    <EmbeddedResource Remove="Mpeg\**" />
+    <EmbeddedResource Remove="Video\**" />
+    <None Remove="Audio\**" />
+    <None Remove="Image\**" />
+    <None Remove="Mpeg\**" />
+    <None Remove="Video\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj" />
+  </ItemGroup>
+
+</Project>

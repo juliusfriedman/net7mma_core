@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+    <AssemblyName>Media.RtspServer</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="4.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Codecs\Audio\Codecs.Audio.csproj" />
+    <ProjectReference Include="..\Codecs\Codecs.csproj" />
+    <ProjectReference Include="..\Codecs\Image\Codecs.Image.csproj" />
+    <ProjectReference Include="..\Codecs\Image\Jpeg\Codec.Jpeg.csproj" />
+    <ProjectReference Include="..\Codecs\Mpeg\Mpeg.csproj" />
+    <ProjectReference Include="..\Codecs\VIdeo\Codecs.Video.csproj" />
+    <ProjectReference Include="..\Codecs\Video\H264\Codec.H264.csproj" />
+    <ProjectReference Include="..\Codecs\Video\Mpeg2\Mpeg2.csproj" />
+    <ProjectReference Include="..\Codecs\Video\Mpeg4\Mpeg4.csproj" />
+    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Containers\BaseMedia\Container.BaseMedia.csproj" />
+    <ProjectReference Include="..\Containers\Container.csproj" />
+    <ProjectReference Include="..\Cryptography\Cryptography.csproj" />
+    <ProjectReference Include="..\Http\Http.csproj" />
+    <ProjectReference Include="..\Ntp\Ntp.csproj" />
+    <ProjectReference Include="..\RtpTools\RtpTools.csproj" />
+    <ProjectReference Include="..\Rtp\Rtp.csproj" />
+    <ProjectReference Include="..\Rtsp\Rtsp.csproj" />
+    <ProjectReference Include="..\Sdp\Sdp.csproj" />
+  </ItemGroup>
+
+</Project>

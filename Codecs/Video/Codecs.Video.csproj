@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="H261\**" />
+    <Compile Remove="H263\**" />
+    <Compile Remove="H264\**" />
+    <Compile Remove="H265\**" />
+    <Compile Remove="Mpeg2\**" />
+    <Compile Remove="Mpeg4\**" />
+    <Compile Remove="Mpeg\**" />
+    <Compile Remove="Thor\**" />
+    <Compile Remove="Todo\**" />
+    <Compile Remove="Vp8\**" />
+    <Compile Remove="VP9\**" />
+    <EmbeddedResource Remove="H261\**" />
+    <EmbeddedResource Remove="H263\**" />
+    <EmbeddedResource Remove="H264\**" />
+    <EmbeddedResource Remove="H265\**" />
+    <EmbeddedResource Remove="Mpeg2\**" />
+    <EmbeddedResource Remove="Mpeg4\**" />
+    <EmbeddedResource Remove="Mpeg\**" />
+    <EmbeddedResource Remove="Thor\**" />
+    <EmbeddedResource Remove="Todo\**" />
+    <EmbeddedResource Remove="Vp8\**" />
+    <EmbeddedResource Remove="VP9\**" />
+    <None Remove="H261\**" />
+    <None Remove="H263\**" />
+    <None Remove="H264\**" />
+    <None Remove="H265\**" />
+    <None Remove="Mpeg2\**" />
+    <None Remove="Mpeg4\**" />
+    <None Remove="Mpeg\**" />
+    <None Remove="Thor\**" />
+    <None Remove="Todo\**" />
+    <None Remove="Vp8\**" />
+    <None Remove="VP9\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Common.csproj" />
+    <ProjectReference Include="..\Codecs.csproj" />
+  </ItemGroup>
+
+</Project>

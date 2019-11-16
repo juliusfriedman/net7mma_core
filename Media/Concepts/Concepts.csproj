@@ -1,0 +1,146 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{76D6E405-4048-4588-8FC5-0895701E6D96}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Media.Concepts</RootNamespace>
+    <AssemblyName>Media.Concepts</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'x64_Release|AnyCPU'">
+    <OutputPath>bin\x64_Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <!-- Just for a while, disable the warning that says Types and Namespaces should not be the same -->
+    <CodeAnalysisRuleSet>
+      MinimumRecommendedRules.ruleset;
+      +!Microsoft.Naming#CA1724;
+    </CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Common\Properties\MediaAssemblyInfo.cs">
+      <Link>Properties\MediaAssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Properties\MediaAssemblyVersionInfo.cs">
+      <Link>Properties\MediaAssemblyVersionInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Properties\MediaCLSComplaintInfo.cs">
+      <Link>Properties\MediaCLSComplaintInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Common\Properties\MediaCLSInternalVisibleToUnitTestsAttribute.cs">
+      <Link>Properties\MediaCLSInternalVisibleToUnitTestsAttribute.cs</Link>
+    </Compile>
+    <Compile Include="Classes\Allocators.cs" />
+    <Compile Include="Classes\ArithmeticLogicUnit.cs" />
+    <Compile Include="Classes\Arrays.cs" />
+    <Compile Include="Classes\BindableBase.cs" />
+    <Compile Include="Classes\BitEnumerator.cs" />
+    <Compile Include="Classes\Bitwise.cs" />
+    <Compile Include="Classes\Bus.cs" />
+    <Compile Include="Classes\B\B.cs" />
+    <Compile Include="Classes\B\Buffer.cs" />
+    <Compile Include="Classes\CentralProcessingUnit.cs" />
+    <Compile Include="Classes\Clock.cs" />
+    <Compile Include="Classes\C\C.cs" />
+    <Compile Include="Classes\C\Connection.cs" />
+    <Compile Include="Classes\E\Enigma.cs" />
+    <Compile Include="Classes\E\Extensions.cs" />
+    <Compile Include="Classes\E\Interface.cs" />
+    <Compile Include="Classes\GC\Controller.cs" />
+    <Compile Include="Classes\Hardware.cs" />
+    <Compile Include="Classes\I\I.cs" />
+    <Compile Include="Classes\MethodHelper.cs" />
+    <Compile Include="Classes\Intrinsics.cs" />
+    <Compile Include="Classes\Sockets\Sockets.cs" />
+    <Compile Include="Classes\S\S.cs" />
+    <Compile Include="Classes\S\Symbols.cs" />
+    <Compile Include="Classes\T\T.cs" />
+    <Compile Include="Classes\V\v.cs" />
+    <Compile Include="Classes\W\Writings.cs" />
+    <Compile Include="Collections\LinkedCollections.cs" />
+    <Compile Include="Classes\CommonIntermediateLanguage.cs" />
+    <Compile Include="Classes\Disposable.cs" />
+    <Compile Include="Classes\Experimental.cs" />
+    <Compile Include="Classes\Stopwatch.cs" />
+    <Compile Include="Classes\Threading\Threading.cs" />
+    <Compile Include="Classes\Timer.cs" />
+    <Compile Include="Classes\UpdateableBase.cs" />
+    <Compile Include="Classes\VirtualScreen.cs" />
+    <Compile Include="Collections\SocketCollection.cs" />
+    <Compile Include="Collections\ThreadCollection.cs" />
+    <Compile Include="EndPoints.cs" />
+    <Compile Include="Interfaces\Interfaces.cs" />
+    <Compile Include="Interfaces\ITextData.cs" />
+    <Compile Include="Interfaces\IUpdateable.cs" />
+    <Compile Include="Interfaces\IUsable.cs" />
+    <Compile Include="Classes\Number.cs" />
+    <Compile Include="Classes\Physics.cs" />
+    <Compile Include="Math.cs" />
+    <Compile Include="Classes\Threading\Pool.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Classes\Unsafe.cs" />
+    <Compile Include="Classes\Units.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Classes\D\" />
+    <Folder Include="Classes\F\" />
+    <Folder Include="Classes\G\" />
+    <Folder Include="Classes\H\" />
+    <Folder Include="Classes\R\" />
+    <Folder Include="Classes\X\" />
+    <Folder Include="Classes\Y\" />
+    <Folder Include="Classes\Z\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Media.Common.csproj">
+      <Project>{c64cdaed-c863-454d-bfa6-95685868d054}</Project>
+      <Name>Media.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

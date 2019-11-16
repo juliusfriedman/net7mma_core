@@ -1,0 +1,89 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Compression\**" />
+    <Compile Remove="Concepts\**" />
+    <Compile Remove="Containers\**" />
+    <Compile Remove="Cryptography\**" />
+    <Compile Remove="Http\**" />
+    <Compile Remove="nCodec\**" />
+    <Compile Remove="Ntp\**" />
+    <Compile Remove="Reference\**" />
+    <Compile Remove="RtcpFeedback\**" />
+    <Compile Remove="Rtmp\**" />
+    <Compile Remove="RtpTools\**" />
+    <Compile Remove="Rtp\**" />
+    <Compile Remove="RtspServer\**" />
+    <Compile Remove="Rtsp\**" />
+    <Compile Remove="Sdp\**" />
+    <Compile Remove="Sip\**" />
+    <Compile Remove="Sockets\**" />
+    <Compile Remove="UnitTests\**" />
+    <EmbeddedResource Remove="Compression\**" />
+    <EmbeddedResource Remove="Concepts\**" />
+    <EmbeddedResource Remove="Containers\**" />
+    <EmbeddedResource Remove="Cryptography\**" />
+    <EmbeddedResource Remove="Http\**" />
+    <EmbeddedResource Remove="nCodec\**" />
+    <EmbeddedResource Remove="Ntp\**" />
+    <EmbeddedResource Remove="Reference\**" />
+    <EmbeddedResource Remove="RtcpFeedback\**" />
+    <EmbeddedResource Remove="Rtmp\**" />
+    <EmbeddedResource Remove="RtpTools\**" />
+    <EmbeddedResource Remove="Rtp\**" />
+    <EmbeddedResource Remove="RtspServer\**" />
+    <EmbeddedResource Remove="Rtsp\**" />
+    <EmbeddedResource Remove="Sdp\**" />
+    <EmbeddedResource Remove="Sip\**" />
+    <EmbeddedResource Remove="Sockets\**" />
+    <EmbeddedResource Remove="UnitTests\**" />
+    <None Remove="Compression\**" />
+    <None Remove="Concepts\**" />
+    <None Remove="Containers\**" />
+    <None Remove="Cryptography\**" />
+    <None Remove="Http\**" />
+    <None Remove="nCodec\**" />
+    <None Remove="Ntp\**" />
+    <None Remove="Reference\**" />
+    <None Remove="RtcpFeedback\**" />
+    <None Remove="Rtmp\**" />
+    <None Remove="RtpTools\**" />
+    <None Remove="Rtp\**" />
+    <None Remove="RtspServer\**" />
+    <None Remove="Rtsp\**" />
+    <None Remove="Sdp\**" />
+    <None Remove="Sip\**" />
+    <None Remove="Sockets\**" />
+    <None Remove="UnitTests\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Codecs\Audio\Codecs.Audio.csproj" />
+    <ProjectReference Include="..\Codecs\Codecs.csproj" />
+    <ProjectReference Include="..\Codecs\Image\Codecs.Image.csproj" />
+    <ProjectReference Include="..\Codecs\Image\Jpeg\Codec.Jpeg.csproj" />
+    <ProjectReference Include="..\Codecs\Mpeg\Mpeg.csproj" />
+    <ProjectReference Include="..\Codecs\VIdeo\Codecs.Video.csproj" />
+    <ProjectReference Include="..\Codecs\Video\H264\Codec.H264.csproj" />
+    <ProjectReference Include="..\Codecs\Video\Mpeg2\Mpeg2.csproj" />
+    <ProjectReference Include="..\Codecs\Video\Mpeg4\Mpeg4.csproj" />
+    <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Concepts\Concepts.csproj" />
+    <ProjectReference Include="..\Containers\BaseMedia\Container.BaseMedia.csproj" />
+    <ProjectReference Include="..\Containers\Container.csproj" />
+    <ProjectReference Include="..\Cryptography\Cryptography.csproj" />
+    <ProjectReference Include="..\Http\Http.csproj" />
+    <ProjectReference Include="..\Ntp\Ntp.csproj" />
+    <ProjectReference Include="..\RtpTools\RtpTools.csproj" />
+    <ProjectReference Include="..\Rtp\Rtp.csproj" />
+    <ProjectReference Include="..\RtspServer\RtspServer.csproj" />
+    <ProjectReference Include="..\Rtsp\Rtsp.csproj" />
+    <ProjectReference Include="..\Sdp\Sdp.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>true</Optimize>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Bmp\**" />
+    <Compile Remove="Gif\**" />
+    <Compile Remove="Jpeg\**" />
+    <Compile Remove="Png\**" />
+    <Compile Remove="Todo\**" />
+    <EmbeddedResource Remove="Bmp\**" />
+    <EmbeddedResource Remove="Gif\**" />
+    <EmbeddedResource Remove="Jpeg\**" />
+    <EmbeddedResource Remove="Png\**" />
+    <EmbeddedResource Remove="Todo\**" />
+    <None Remove="Bmp\**" />
+    <None Remove="Gif\**" />
+    <None Remove="Jpeg\**" />
+    <None Remove="Png\**" />
+    <None Remove="Todo\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\Common.csproj" />
+    <ProjectReference Include="..\Codecs.csproj" />
+  </ItemGroup>
+
+</Project>
