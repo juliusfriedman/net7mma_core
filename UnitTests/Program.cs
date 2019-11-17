@@ -3737,6 +3737,48 @@ a=appversion:1.0");
                 }
 
             #endregion
+
+            #region FlacReader
+
+            if (System.IO.Directory.Exists(localPath + "/Media/Audio/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Audio/flac/"))
+                {
+                    using (Media.Containers.Flac.FlacReader reader = new Media.Containers.Flac.FlacReader(fileName))
+                    {
+                        Console.WriteLine("Path:" + reader.Source);
+                        Console.WriteLine("Total Size:" + reader.Length);
+
+                        Console.WriteLine("Root Page:" + reader.Root.ToString());
+
+                        Console.WriteLine("Pages:");
+
+                        foreach (var block in reader)
+                        {
+                            Console.WriteLine("Position:" + reader.Position);
+                            Console.WriteLine("Offset: " + block.Offset);
+                            Console.WriteLine("DataOffset: " + block.DataOffset);
+                            Console.WriteLine("Complete: " + block.IsComplete);
+                            Console.WriteLine("Name: " + block.ToString());
+                            Console.WriteLine("HeaderFlags: " + Media.Containers.Flac.FlacReader.GetBlockType(block));
+                            Console.WriteLine("IsInvalid: " + Media.Containers.Flac.FlacReader.IsInvalid(block));
+                            Console.WriteLine("IsLastBlock: " + Media.Containers.Flac.FlacReader.IsLastBlock(block));
+                            Console.WriteLine("Size: " + block.TotalSize);
+                        }
+
+
+                        Console.WriteLine("File Level Properties");
+
+                        //Console.WriteLine("Created: " + reader.Created);
+
+                        //Console.WriteLine("Modified: " + reader.Modified);
+
+                        Console.WriteLine("Track Information:");
+
+                        foreach (var track in reader.GetTracks()) DumpTrack(track);
+                    }
+
+                }
+
+            #endregion
         }
 
         #endregion

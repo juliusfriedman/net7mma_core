@@ -1283,7 +1283,7 @@ namespace Media.Containers.Mxf
             {
                 Guid objectId = new Guid(mxfObject.Identifier);
 
-                if (names == null || names.Count() == 0 || (exact ? names.Contains(objectId) : names.Any(n => CompareUL(n, objectId, false == ignoreRegistry, false == ignoreVersion, false == ignoreType))))
+                if (names == null || names.Count() == 0 || (exact ? names.Contains(objectId) : names.Any(n => CompareUL(n, objectId, ignoreRegistry, ignoreVersion, ignoreType))))
                     yield return mxfObject;
 
                 count -= mxfObject.TotalSize;
