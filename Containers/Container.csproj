@@ -9,6 +9,7 @@
   <ItemGroup>
     <Compile Remove="Asf\**" />
     <Compile Remove="BaseMedia\**" />
+    <Compile Remove="Flac\**" />
     <Compile Remove="Gxf\**" />
     <Compile Remove="Matroska\**" />
     <Compile Remove="Mcf\**" />
@@ -21,6 +22,7 @@
     <Compile Remove="Todo\**" />
     <EmbeddedResource Remove="Asf\**" />
     <EmbeddedResource Remove="BaseMedia\**" />
+    <EmbeddedResource Remove="Flac\**" />
     <EmbeddedResource Remove="Gxf\**" />
     <EmbeddedResource Remove="Matroska\**" />
     <EmbeddedResource Remove="Mcf\**" />
@@ -33,6 +35,7 @@
     <EmbeddedResource Remove="Todo\**" />
     <None Remove="Asf\**" />
     <None Remove="BaseMedia\**" />
+    <None Remove="Flac\**" />
     <None Remove="Gxf\**" />
     <None Remove="Matroska\**" />
     <None Remove="Mcf\**" />

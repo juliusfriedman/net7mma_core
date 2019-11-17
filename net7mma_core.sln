@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29424.173
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Media", "Media\Media.csproj", "{5CE44C85-A862-4E11-A48D-19ADD76C9999}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Media.Consolidated", "Media\Media.Consolidated.csproj", "{5CE44C85-A862-4E11-A48D-19ADD76C9999}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common\Common.csproj", "{2A104CC0-EA03-40C2-A56D-FCE0FA82ACE1}"
 EndProject
@@ -78,6 +78,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codec.G722", "Codecs\Audio\G722\Codec.G722.csproj", "{A1A4249C-27AB-4A5E-AE9A-46846D02CAEB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codec.Mulaw", "Codecs\Audio\Mulaw\Codec.Mulaw.csproj", "{7CB205CF-EF14-4776-BBAA-E47F9E3235DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Container.Flac", "Containers\Flac\Container.Flac.csproj", "{A5CD0504-799C-4E00-A27F-DB150C57C42E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -237,6 +239,10 @@ Global
 		{7CB205CF-EF14-4776-BBAA-E47F9E3235DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7CB205CF-EF14-4776-BBAA-E47F9E3235DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7CB205CF-EF14-4776-BBAA-E47F9E3235DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5CD0504-799C-4E00-A27F-DB150C57C42E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5CD0504-799C-4E00-A27F-DB150C57C42E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5CD0504-799C-4E00-A27F-DB150C57C42E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5CD0504-799C-4E00-A27F-DB150C57C42E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

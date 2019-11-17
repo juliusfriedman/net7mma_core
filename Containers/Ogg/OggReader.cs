@@ -156,6 +156,7 @@ namespace Media.Containers.Ogg
                     case CapturePattern.fishead:
                     case CapturePattern.fisbone:
                     case CapturePattern.index: return result.ToString();
+                    //Todo should be Oggs to be sure and default should break.
                     //Was already Oggs, just return that
                     default: return CapturePattern.Oggs.ToString();
                 } 
@@ -1089,7 +1090,7 @@ namespace Media.Containers.Ogg
                     if (string.Compare(vorbis, "vorbis", false) != 0) continue;
 
                     int offset = 7;
-
+                    //https://www.xiph.org/vorbis/doc/v-comment.html
                     //Read Vendor Length
                     int vendorLength = Common.Binary.Read32(infoPage.Data, offset, Media.Common.Binary.IsBigEndian);
 

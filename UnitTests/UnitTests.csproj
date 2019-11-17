@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Codecs\Audio\Aac\Codec.Aac.csproj" />
     <ProjectReference Include="..\Codecs\Audio\AC3\Codec.AC3.csproj" />
     <ProjectReference Include="..\Codecs\Audio\Alaw\Codec.Alaw.csproj" />
     <ProjectReference Include="..\Codecs\Audio\Codecs.Audio.csproj" />
@@ -31,6 +32,7 @@
     <ProjectReference Include="..\Containers\Asf\Container.Asf.csproj" />
     <ProjectReference Include="..\Containers\BaseMedia\Container.BaseMedia.csproj" />
     <ProjectReference Include="..\Containers\Container.csproj" />
+    <ProjectReference Include="..\Containers\Flac\Container.Flac.csproj" />
     <ProjectReference Include="..\Containers\Gxf\Container.Gxf.csproj" />
     <ProjectReference Include="..\Containers\Matroska\Container.Matroska.csproj" />
     <ProjectReference Include="..\Containers\Mcf\Container.Mcf.csproj" />
@@ -41,7 +43,7 @@
     <ProjectReference Include="..\Containers\Riff\Container.Riff.csproj" />
     <ProjectReference Include="..\Cryptography\Cryptography.csproj" />
     <ProjectReference Include="..\Http\Http.csproj" />
-    <ProjectReference Include="..\Media\Media.csproj" />
+    <ProjectReference Include="..\Media\Media.Consolidated.csproj" />
     <ProjectReference Include="..\Ntp\Ntp.csproj" />
     <ProjectReference Include="..\RtpTools\RtpTools.csproj" />
     <ProjectReference Include="..\Rtp\Rtp.csproj" />

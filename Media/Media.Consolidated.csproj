@@ -63,7 +63,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Codecs\Audio\Aac\Codec.Aac.csproj" />
+    <ProjectReference Include="..\Codecs\Audio\AC3\Codec.AC3.csproj" />
+    <ProjectReference Include="..\Codecs\Audio\Alaw\Codec.Alaw.csproj" />
     <ProjectReference Include="..\Codecs\Audio\Codecs.Audio.csproj" />
+    <ProjectReference Include="..\Codecs\Audio\G722\Codec.G722.csproj" />
+    <ProjectReference Include="..\Codecs\Audio\Mulaw\Codec.Mulaw.csproj" />
     <ProjectReference Include="..\Codecs\Codecs.csproj" />
     <ProjectReference Include="..\Codecs\Image\Codecs.Image.csproj" />
     <ProjectReference Include="..\Codecs\Image\Jpeg\Codec.Jpeg.csproj" />

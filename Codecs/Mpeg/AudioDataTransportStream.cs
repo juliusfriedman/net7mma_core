@@ -54,6 +54,8 @@ namespace Media.Codec.Mpeg
 
         #endregion
 
+        //https://github.com/RandallFlagg/IdSharpCore/blob/master/IdSharp.AudioInfo/Mpeg/Inspection/MpegAudio.cs
+
         #region NestedTypes
 
         public class AudioDataTransportFrame // :

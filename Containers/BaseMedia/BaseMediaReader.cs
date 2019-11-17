@@ -86,6 +86,8 @@ namespace Media.Containers.BaseMedia
             "moov",
             "trak",
             "mdia",
+            "mdra",
+            "rmra",
             //"mdhd",
             //"hdlr",
             "minf",
@@ -107,6 +109,8 @@ namespace Media.Containers.BaseMedia
             //"stri", //sub track information box
             //"strd" //sub track definition box
             "meta",
+            "imap",
+            "imag",
             "iloc",
             "ipro",
             "sinf",
@@ -117,8 +121,13 @@ namespace Media.Containers.BaseMedia
             "paen", //partition entry 
             "segr", //file delivery session group 
             "gitn", //group id to name 
-            "meco" //additional metadata container 
+            "meco", //additional metadata container,
+            "udta",
+            "vnrp",
         };
+
+        //could add level to node by extending or adding bytes to header.
+        //Could also track in reader.
 
         public const string UserDefined = "uuid";
 
@@ -550,7 +559,7 @@ namespace Media.Containers.BaseMedia
 
                             break;
                         }
-                    default: throw new NotSupportedException();
+                    default: throw new NotSupportedException("Only Version 0 and 1 are defined.");
                 }
 
                 //Rate Volume NextTrack
