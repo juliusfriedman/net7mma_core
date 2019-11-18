@@ -541,19 +541,20 @@ namespace Media.Containers.Flac
             node = node ?? Root;
             VerifyBlockType(node, BlockType.StreamInfo);
             //METADATA_BLOCK_STREAMINFO
-            using (System.IO.BinaryReader br = new System.IO.BinaryReader(node.DataStream))
+            using (System.IO.BinaryReader bi = new System.IO.BinaryReader(node.DataStream))
             {
-                m_MinBlockSize = br.ReadInt16();
-                m_MaxBlockSize = br.ReadInt16();
-                using (BitReader b = new BitReader(br.BaseStream, IdentifierSize * 2, true))
+                using (BitReader br = new BitReader(bi.BaseStream, IdentifierSize * 2, true))
                 {
-                    m_MinFrameSize = b.ReadBits(24);
-                    m_MaxFrameSize = b.ReadBits(24);
-                    m_SampleRate = b.ReadBits(20);
-                    m_Channels = 1 + b.ReadBits(3);
-                    m_BitsPerSample = 1 + b.ReadBits(5);
-                    m_TotalSamples = b.ReadBits(36);
-                    m_Md5 = new string(br.ReadChars(16));
+                    m_MinBlockSize = bi.ReadInt16();
+                    m_MaxBlockSize = bi.ReadInt16();
+                    //Should verify there are 4 more bytes in the stream
+                    m_MinFrameSize = br.ReadBits(24);
+                    m_MaxFrameSize = br.ReadBits(24);
+                    m_SampleRate = br.ReadBits(20);
+                    m_Channels = 1 + br.ReadBits(3);
+                    m_BitsPerSample = 1 + br.ReadBits(5);
+                    m_TotalSamples = br.ReadBits(36);
+                    m_Md5 = new string(bi.ReadChars(16));
                 }
             }
         }

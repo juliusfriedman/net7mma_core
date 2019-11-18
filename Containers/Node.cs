@@ -50,7 +50,7 @@ namespace Media.Container
     /// <summary>
     /// Represents a superset of binary data within a <see cref="IMediaContainer"/>.
     /// </summary>
-    public class Node : Common.BaseDisposable
+    public class Node : Media.Common.BaseDisposable
     {
         #region Static API
 

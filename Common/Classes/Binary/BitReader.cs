@@ -250,6 +250,8 @@
         {
             try
             {
+                ReadBytesForBits(count);
+
                 return PeekBits(count);
             }
             finally
