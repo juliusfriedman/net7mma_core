@@ -16,7 +16,9 @@
 
         internal protected int m_ByteIndex = 0, m_BitIndex = 0;
 
-        internal bool m_LeaveOpen;
+        internal protected bool m_LeaveOpen;
+
+        internal protected Common.Binary.ByteOrder m_ByteOrder;
 
         #endregion
 
@@ -30,25 +32,100 @@
         /// <summary>
         /// Gets a value which indicates the amount of bytes which are available without reading more data from the <see cref="BaseStream"/>
         /// </summary>
-        public int BytesRemaining { get { return m_ByteCache.Count - m_ByteIndex; } }
+        public int BufferBytesRemaining { get { return m_ByteCache.Count - m_ByteIndex; } }
 
         /// <summary>
         /// Gets a value which indicates the amount of bits which remain in the current Byte.
         /// </summary>
-        public int BitsRemaining { get { return Common.Binary.BitsPerByte - m_BitIndex; } }
+        public int BufferBitsRemaining { get { return Common.Binary.BitsPerByte - m_BitIndex; } }
 
-        //IsAligned
+        /// <summary>
+        /// Gets the amount of bytes remaining in the stream.
+        /// </summary>
+        public long Remaining { get { return m_BaseStream.Length - m_BaseStream.Position; } }
+
+        /// <summary>
+        /// Indicates if the <see cref="BitIndex"/> is aligned to a byte boundary.
+        /// </summary>
+        public bool IsAligned { get { return m_BitIndex % Common.Binary.BitsPerByte == 0; } }
+
+        /// <summary>
+        /// Gets or Sets the current <see cref="System.Byte"/> based on the <see cref="ByteIndex"/>
+        /// </summary>
+        public byte CurrentByte
+        {
+            get { return m_ByteCache[m_ByteIndex]; }
+            set { m_ByteCache[m_ByteIndex] = value; }
+        }
+
+        /// <summary>
+        /// Gets the array in which values are stored
+        /// </summary>
+        public byte[] CurrentBuffer { get { return m_ByteCache.Array; } }
+
+        /// <summary>
+        /// Gets the <see cref="Common.MemorySegment"/> in which values are stored
+        /// </summary>
+        public Common.MemorySegment CurrentCache { get { return m_ByteCache; } }
+        
+        /// <summary>
+        /// Gets or Sets the index in the bits
+        /// </summary>
+        public int BitIndex
+        {
+            get { return m_BitIndex; }
+            set { m_BitIndex = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the index in the bytes
+        /// </summary>
+        public int ByteIndex
+        {
+            get { return m_ByteIndex; }
+            set { m_ByteIndex = value; }
+        }
 
         /// <summary>
         /// Gets the <see cref="System.IO.Stream"/> from which the data is read.
         /// </summary>
         public System.IO.Stream BaseStream { get { return m_BaseStream; } }
 
+        /// <summary>
+        /// Gets or Sets the underlying <see cref="Binary.ByteOrder"/> which is used to read values.
+        /// </summary>
+        public Common.Binary.ByteOrder ByteOrder { get { return m_ByteOrder; } set { m_ByteOrder = value; } }
+
         #endregion
 
         #region Constructor / Destructor
 
-        public BitReader(System.IO.Stream source, int cacheSize = 32, bool leaveOpen = false)
+        /// <summary>
+        /// Creates an instance with the specified properties
+        /// </summary>
+        /// <param name="source">The source <see cref="System.IO.Stream"/></param>
+        /// <param name="byteOrder">The <see cref="Binary.ByteOrder"/></param>
+        /// <param name="bitIndex">Starting bit offset</param>
+        /// <param name="byteIndex">Starting byte offset</param>
+        /// <param name="writable">Indicates if the bytes should allow writing past the end</param>
+        /// <param name="cacheSize">Cache array size</param>
+        /// <param name="leaveOpen">Indicates if Dispose will close the stream</param>
+        public BitReader(byte[] source, Binary.ByteOrder byteOrder, int bitIndex, int byteIndex, bool writable, int cacheSize = 32, bool leaveOpen = false)
+            : this(new System.IO.MemoryStream(source, writable), byteOrder, cacheSize, leaveOpen)
+        {
+            m_BitIndex = bitIndex;
+
+            m_ByteIndex = byteIndex;
+        }
+
+        /// <summary>
+        /// Creates an instance with the specified properties
+        /// </summary>
+        /// <param name="source">The source <see cref="System.IO.Stream"/></param>
+        /// <param name="byteOrder">The <see cref="Binary.ByteOrder"/></param>
+        /// <param name="cacheSize">Cache array size</param>
+        /// <param name="leaveOpen">Indicates if Dispose will close the stream</param>
+        public BitReader(System.IO.Stream source, Binary.ByteOrder byteOrder, int cacheSize = 32, bool leaveOpen = false)
             : base(true)
         {
             if (source == null) throw new System.ArgumentNullException("source");
@@ -58,21 +135,58 @@
             m_LeaveOpen = leaveOpen;
 
             m_ByteCache = new MemorySegment(cacheSize);
+
+            m_ByteOrder = byteOrder;
         }
 
+        /// <summary>
+        /// Creates an instance with the specified properties and <see cref="Common.Binary.SystemByteOrder"/>
+        /// </summary>
+        /// <param name="source">The source <see cref="System.IO.Stream"/></param>
+        /// <param name="cacheSize">Cache array size</param>
+        /// <param name="leaveOpen">Indicates if Dispose will close the stream</param>
+        public BitReader(System.IO.Stream source, int cacheSize = 32, bool leaveOpen = false)
+            : this(source, Binary.SystemByteOrder, cacheSize, leaveOpen) { }
+
+        /// <summary>
+        /// Calls <see cref="Dispose"/>
+        /// </summary>
         ~BitReader() { Dispose(); }
 
         #endregion
 
         #region Methods
 
-        //Align()
+        /// <summary>
+        /// Advances reading to the next byte boundary.
+        /// </summary>
+        public void ByteAlign()
+        {
+            m_BitIndex = 0;
+            ++m_ByteIndex;
+            //if(m_ByteIndex >= m_ByteCache.Count)
+        }
 
+        /// <summary>
+        /// Find the specified bits within the stream
+        /// </summary>
+        /// <param name="bitPattern"></param>
+        /// <param name="offset"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
         public bool Find(byte[] bitPattern, int offset, int length)
         {
             throw new System.NotImplementedException();
         }
 
+        /// <summary>
+        /// Find the specified bits within the stream starting from the end.
+        /// Note: must support <see cref="System.IO.Stream.Seek(long, System.IO.SeekOrigin)"/>
+        /// </summary>
+        /// <param name="bitPattern"></param>
+        /// <param name="offset"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
         public bool ReverseFind(byte[] bitPattern, int offset, int length)
         {
             throw new System.NotImplementedException();
@@ -86,17 +200,23 @@
         {
             if (countOfBits <= 0) return;
 
-            int bitsRemain = Common.Binary.BitsPerByte - m_BitIndex;
-
-            if (bitsRemain < countOfBits) return;
-
             int bytesToRead = Common.Binary.BitsToBytes(countOfBits);
 
-            if (bytesToRead + m_ByteIndex < m_ByteCache.Count) return;
+            if (bytesToRead > m_ByteCache.Count)
+            {
+                System.Array.Resize(ref m_ByteCache.m_Array, bytesToRead);
+                m_ByteCache.IncreaseLength(bytesToRead);
+            }
+
+            if (m_ByteIndex + bytesToRead >= m_ByteCache.Count)
+            {
+                if(m_BitIndex > 0) Recycle();
+                m_BitIndex = m_ByteIndex = 0;
+            }
 
             int bytesRead = 0;
 
-            while (bytesToRead > 0)
+            while (bytesToRead > 0 && Remaining > 0)
             {
                 bytesRead = m_BaseStream.Read(m_ByteCache.Array, m_ByteCache.Offset + m_ByteIndex + bytesRead, bytesToRead);
 
@@ -107,17 +227,8 @@
         /// <summary>
         /// Copies the bits which are left in the cache to the beginning of the cache
         /// </summary>
-        internal void Recycle()
+        internal protected void Recycle()
         {
-
-            //Could probably just array copy and keep the m_BitIndex, but up to 7 bits may be wasted.
-
-            //System.Array.Copy(m_ByteCache.Array, m_ByteIndex, m_ByteCache.Array, 0, m_ByteIndex);
-
-            //m_ByteIndex = 0;
-
-            //return;
-
             Common.Binary.CopyBitsTo(m_ByteCache.Array, m_ByteIndex, m_BitIndex, m_ByteCache.Array, 0, 0, Common.Binary.BytesToBits(m_ByteCache.Count - m_ByteIndex) + m_BitIndex);
 
             m_ByteIndex = m_BitIndex = 0;
@@ -132,35 +243,70 @@
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            return (byte)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte));
+            switch (m_ByteOrder)
+            {
+                case Binary.ByteOrder.Little:
+                    return (byte)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte));
+                case Binary.ByteOrder.Big:
+                    return (byte)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte));
+                default: throw new System.NotSupportedException("Please create an issue for your use case");
+            }
         }
 
         public short Peek16(bool reverse = false)
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            return (short)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort));
+            switch (m_ByteOrder)
+            {
+                case Binary.ByteOrder.Little:
+                    return (short)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort));
+                case Binary.ByteOrder.Big:
+                    return (short)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort));
+                default: throw new System.NotSupportedException("Please create an issue for your use case");
+            }
         }
 
         public int Peek24(bool reverse = false)
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            return (int)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize));
+            switch (m_ByteOrder)
+            {
+                case Binary.ByteOrder.Little:
+                    return (int)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize));
+                case Binary.ByteOrder.Big:
+                    return (int)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize));
+                default: throw new System.NotSupportedException("Please create an issue for your use case");
+            }
         }
 
         public int Peek32(bool reverse = false)
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            return (int)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger));
+            switch (m_ByteOrder)
+            {
+                case Binary.ByteOrder.Little:
+                    return (int)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger));
+                case Binary.ByteOrder.Big:
+                    return (int)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger));
+                default: throw new System.NotSupportedException("Please create an issue for your use case");
+            }
         }
 
         public long Peek64(bool reverse = false)
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            return (int)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong));
+            switch (m_ByteOrder)
+            {
+                case Binary.ByteOrder.Little:
+                    return (long)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong));
+                case Binary.ByteOrder.Big:
+                    return (long)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong));
+                default: throw new System.NotSupportedException("Please create an issue for your use case");
+            }
         }
         
         [System.CLSCompliant(false)]
@@ -168,7 +314,14 @@
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            return (reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, count) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, count));
+            switch (m_ByteOrder)
+            {
+                case Binary.ByteOrder.Little:
+                    return (reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, count) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, count));
+                case Binary.ByteOrder.Big:
+                    return (reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, count) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, count));
+                default: throw new System.NotSupportedException("Please create an issue for your use case");
+            }
         }
 
         //Reading methods need to keep track of current index, as well as where data in the cache ends.
@@ -189,11 +342,13 @@
         {
             try
             {
+                ReadBytesForBits(Common.Binary.BitsPerByte);
+
                 return Peek8(reverse);
             }
             finally
             {
-                Common.Binary.ComputeBits(8, ref m_BitIndex, ref m_ByteIndex);
+                Common.Binary.ComputeBits(Common.Binary.BitsPerByte, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 
@@ -201,11 +356,13 @@
         {
             try
             {
+                ReadBytesForBits(Common.Binary.BitsPerShort);
+
                 return Peek16(reverse);
             }
             finally
             {
-                Common.Binary.ComputeBits(16, ref m_BitIndex, ref m_ByteIndex);
+                Common.Binary.ComputeBits(Common.Binary.BitsPerShort, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 
@@ -213,6 +370,8 @@
         {
             try
             {
+                ReadBytesForBits(Common.Binary.TripleBitSize);
+
                 return Peek24(reverse);
             }
             finally
@@ -225,11 +384,13 @@
         {
             try
             {
+                ReadBytesForBits(Common.Binary.BitsPerInteger);
+
                 return Peek32(reverse);
             }
             finally
             {
-                Common.Binary.ComputeBits(32, ref m_BitIndex, ref m_ByteIndex);
+                Common.Binary.ComputeBits(Common.Binary.BitsPerInteger, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 
@@ -237,11 +398,13 @@
         {
             try
             {
+                ReadBytesForBits(Common.Binary.BitsPerLong);
+
                 return Peek64(reverse);
             }
             finally
             {
-                Common.Binary.ComputeBits(64, ref m_BitIndex, ref m_ByteIndex);
+                Common.Binary.ComputeBits(Common.Binary.BitsPerLong, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 

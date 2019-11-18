@@ -469,9 +469,10 @@ namespace Media.Containers.Flac
                 //Maybe a frame check for syncword 11111111111110
                 if (Media.Common.Binary.ReadBitsMSB(identifier, 0, 14) == 0b11111111111110)
                 {
+                    //CrC
                     lengthSize++;
 
-                    int val = 0, pos = IdentifierSize;
+                    int val = 0, pos = IdentifierSize - 1;
 
                     int blocksize = GetBlockSize(identifier);
 
@@ -483,9 +484,7 @@ namespace Media.Containers.Flac
 
                     lengthSize += sampleRate != 12 ? 2 : 1;
 
-                    lengthSize++;
-
-                    Array.Resize(ref identifier, lengthSize);
+                    Array.Resize(ref identifier, lengthSize + 1);
 
                     //blocksize am ende des frameheaders
                     if (blocksize != 0)
@@ -523,8 +522,8 @@ namespace Media.Containers.Flac
                 }
                 else
                 {
-                    //Decode the legnth of the data
-                    length = Media.Common.Binary.Read24(identifier, 1, BitConverter.IsLittleEndian);
+                    //Decode the legnth of the data and the frame footer
+                    length = Media.Common.Binary.Read24(identifier, 1, BitConverter.IsLittleEndian) + 2;
                 }
             }
             while (Position - offset < IdentifierSize && false == IsLastBlock(ref identifier[0])); //While it was not found within the IdentiferSize and is not the last block

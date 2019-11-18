@@ -7,7 +7,7 @@ namespace Media.Container
     /// Represents the basic logic around all media files including reading bytes and determining the amount of bytes remaining.
     /// Position and Length are cached to improve performance.
     /// </summary>
-    public abstract class MediaFileStream : System.IO.FileStream, IDisposable, Common.IDisposed, Container.IMediaContainer
+    public abstract class MediaFileStream : System.IO.FileStream, IDisposable, Media.Common.IDisposed, Container.IMediaContainer
     {
         #region Statics
 

@@ -11,8 +11,7 @@
 
         internal readonly System.IO.Stream m_BaseStream;
 
-        //Depreciate
-        internal readonly Binary.ByteOrder m_ByteOrder = Binary.SystemByteOrder;
+        internal Binary.ByteOrder m_ByteOrder = Binary.SystemByteOrder;
 
         int m_ByteIndex = 0, m_BitIndex = 0; 
         
@@ -40,15 +39,67 @@
         public int BitsRemaining { get { return Common.Binary.BitsPerByte - m_BitIndex; } }
 
         /// <summary>
+        /// Gets a value which indicates the amount of bytes which are available without calling <see cref="Flush"/>
+        /// </summary>
+        public int BufferBytesRemaining { get { return m_ByteCache.Count - m_ByteIndex; } }
+
+        /// <summary>
+        /// Gets a value which indicates the amount of bits which remain in the current Byte.
+        /// </summary>
+        public int BufferBitsRemaining { get { return Common.Binary.BitsPerByte - m_BitIndex; } }
+
+        /// <summary>
+        /// Gets the amount of bytes remaining in the stream.
+        /// </summary>
+        public long Remaining { get { return m_BaseStream.Length - m_BaseStream.Position; } }
+
+        /// <summary>
+        /// Indicates if the <see cref="BitIndex"/> is aligned to a byte boundary.
+        /// </summary>
+        public bool IsAligned { get { return m_BitIndex % Common.Binary.BitsPerByte == 0; } }
+
+        /// <summary>
         /// Gets the <see cref="System.IO.Stream"/> from which the data is written.
         /// </summary>
         public System.IO.Stream BaseStream { get { return m_BaseStream; } }
+
+        /// <summary>
+        /// Gets or Sets the index in the bits
+        /// </summary>
+        public int BitIndex
+        {
+            get { return m_BitIndex; }
+            set { m_BitIndex = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the index in the bytes
+        /// </summary>
+        public int ByteIndex
+        {
+            get { return m_ByteIndex; }
+            set { m_ByteIndex = value; }
+        }
+
+        /// <summary>
+        /// Gets or Sets the underlying <see cref="Binary.ByteOrder"/> which is used to read values.
+        /// </summary>
+        public Common.Binary.ByteOrder ByteOrder { get { return m_ByteOrder; } set { m_ByteOrder = value; } }
 
         #endregion
 
         #region Constructor / Destructor
 
-        public BitWriter(System.IO.Stream source, int cacheSize = 32, bool leaveOpen = false)
+        public BitWriter(byte[] buffer, bool writable, Common.Binary.ByteOrder byteOrder, int cacheSize = 32, bool leaveOpen = false) : base(true)
+        {
+            m_BaseStream = new System.IO.MemoryStream(buffer, writable);
+
+            m_LeaveOpen = leaveOpen;
+
+            m_ByteCache = new MemorySegment(buffer);
+        }
+
+        public BitWriter(System.IO.Stream source, Common.Binary.ByteOrder byteOrder, int cacheSize = 32, bool leaveOpen = false)
             : base(true)
         {
             if (source == null) throw new System.ArgumentNullException("source");
@@ -60,13 +111,32 @@
             m_ByteCache = new MemorySegment(cacheSize);
         }
 
+        /// <summary>
+        /// Constructs an instance of the writer using the specified options and the <see cref="Common.Binary.SystemByteOrder"/>
+        /// </summary>
+        /// <param name="source">The underlying <see cref="System.IO.Stream"/></param>
+        /// <param name="cacheSize">The amount of bytes to be used for writing before <see cref="Flush"/> is called.</param>
+        /// <param name="leaveOpen">Indicates if the <paramref name="source"/> should be left open when calling <see cref="Dispose"/></param>
+        public BitWriter(System.IO.Stream source, int cacheSize = 32, bool leaveOpen = false)
+            :this(source, Common.Binary.SystemByteOrder, cacheSize, leaveOpen)
+        {
+
+        }
+
         ~BitWriter() { Dispose(); }
 
         #endregion
 
         #region Methods
 
-        //Align()
+        /// <summary>
+        /// Advances reading to the next byte boundary.
+        /// </summary>
+        public void ByteAlign()
+        {
+            m_BitIndex = 0;
+            ++m_ByteIndex;
+        }
 
         public void Flush()
         {
@@ -81,11 +151,6 @@
             m_ByteIndex = m_BitIndex = 0;
         }
 
-        internal protected void IncrementBits(int count = 0)
-        {
-            Common.Binary.ComputeBits(count, ref m_BitIndex, ref m_ByteIndex);
-        }
-
         public void WriteBit(bool value)
         {
             try
@@ -95,19 +160,63 @@
             }
             finally
             {
-                IncrementBits(1);
+                Common.Binary.ComputeBits(1, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 
-        public void WriteBits(byte[] buffer, int byteOffset, int bitOffset, int bitCount)
+        [System.CLSCompliant(false)]
+        public void WriteU64(ulong value, bool reverse = false)
+        {
+            int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
+
+            switch (m_ByteOrder)
+            {
+                case Binary.ByteOrder.Little:
+                    if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
+                    else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
+                    return;
+                case Binary.ByteOrder.Big:
+                    if(reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
+                    else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
+                    return;
+                default: throw new System.NotSupportedException("Please create an issue for your use case");
+            }
+        }
+
+        public void Write64(long value, bool reverse = false)
+        {
+            int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
+
+            switch (m_ByteOrder)
+            {
+                case Binary.ByteOrder.Little:
+                    if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
+                    else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
+                    return;
+                case Binary.ByteOrder.Big:
+                    if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
+                    else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
+                    return;
+                default: throw new System.NotSupportedException("Please create an issue for your use case");
+            }
+        }
+
+        public void CopyBits(byte[] buffer, int byteOffset, int bitOffset, int bitCount)
         {
             try
             {
-                Binary.CopyBitsTo(buffer, byteOffset, bitOffset, m_ByteCache.Array, m_ByteCache.Offset, m_BitIndex, bitCount);
+                int bytes = Common.Binary.BitsToBytes(ref bitCount), toCopy = Common.Binary.Min(bytes, m_ByteCache.Array.Length);
+
+                while (bytes > 0)
+                {
+                    Binary.CopyBitsTo(buffer, byteOffset, bitOffset, m_ByteCache.Array, m_ByteCache.Offset, m_BitIndex, toCopy);
+                    Flush();
+                    bytes -= toCopy;
+                }
             }
             finally
             {
-                IncrementBits(bitCount);
+                Common.Binary.ComputeBits(bitCount, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 

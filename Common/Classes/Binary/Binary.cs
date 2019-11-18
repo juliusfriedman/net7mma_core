@@ -2407,7 +2407,7 @@ namespace Media.Common
             if (bitIndex >= Common.Binary.BitsPerByte)
             {
                 int rem;
-                byteIndex += System.Math.DivRem(bitIndex, Common.Binary.BitsPerByte, out rem);
+                byteIndex += System.Math.DivRem(count, Common.Binary.BitsPerByte, out rem);
                 bitIndex = rem;
             }
         }
@@ -3472,6 +3472,44 @@ namespace Media.UnitTests
                 if (bytesInWords > Binary.BytesPerInteger * inBytes || 
                     bytesInWords % Binary.BytesPerInteger != 0) throw new Exception("MachineWordsToBytes Unexpected Result");
             }
+        }
+
+        public static void Test_BitWriter_BitReader()
+        {
+            byte[] testBytes = new byte[8];
+            using(BitWriter bw = new BitWriter(testBytes, true, Common.Binary.SystemByteOrder))
+            {
+                bw.WriteU64(ulong.MaxValue, false);
+                using (BitReader br = new BitReader(bw.BaseStream))
+                {
+                    ulong result = (ulong)br.Read64();
+                    if (result != ulong.MaxValue) throw new Exception(String.Format("Expected:{0}, Found:{1}", ulong.MaxValue, result));
+
+                    br.BaseStream.Position = 0;
+
+                    result = br.ReadBits(64);
+                    if (result != ulong.MaxValue) throw new Exception(String.Format("Expected:{0}, Found:{1}", ulong.MaxValue, result));
+
+                    br.BaseStream.Position = 0;
+                    if (Common.Binary.Read64(br.CurrentBuffer, 0, true) != br.Read64(true)) throw new Exception("reverse");
+                }
+                bw.BaseStream.Position = 0;
+                bw.WriteU64(ulong.MaxValue, true);
+                using (BitReader br = new BitReader(bw.BaseStream))
+                {
+                    br.BaseStream.Position = 0;
+                    ulong result = (ulong)br.Read64(true);
+                    if (result != ulong.MaxValue) throw new Exception(String.Format("Expected:{0}, Found:{1}", ulong.MaxValue, result));
+
+                    br.BaseStream.Position = 0;
+                    result = br.ReadBits(64, true);
+                    if (result != ulong.MaxValue) throw new Exception(String.Format("Expected:{0}, Found:{1}", ulong.MaxValue, result));
+
+                    br.BaseStream.Position = 0;
+                    if (Common.Binary.Read64(br.CurrentBuffer, 0, true) != br.Read64(true)) throw new Exception("reverse");
+                }
+            }
+            
         }
 
         public static void Test_CountTrailingZeros()
