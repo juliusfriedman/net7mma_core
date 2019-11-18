@@ -14,7 +14,29 @@ namespace Media.Containers.Flac
 
         static byte[] VorbisBytes = System.Text.Encoding.UTF8.GetBytes("vorbis");
         static byte[] fLaCBytes = System.Text.Encoding.ASCII.GetBytes("fLaC");
+        public static readonly int[] SampleRateTable =
+        {
+            -1, 88200, 176400, 192000,
+            8000, 16000, 22050, 24000,
+            32000, 44100, 48000, 96000,
+            -1, -1, -1, -1
+        };
 
+        public static readonly int[] BitPerSampleTable =
+        {
+            -1, 8, 12, -1,
+            16, 20, 24, -1
+        };
+
+        public static readonly int[] FlacBlockSizes =
+        {
+            0, 192, 576, 1152,
+            2304, 4608, 0, 0,
+            256, 512, 1024, 2048,
+            4096, 8192, 16384
+        };
+
+        public const int FrameHeaderSize = 16;
         const int MaximumPageSize = 65307, IdentifierSize = 4, MinimumSize = IdentifierSize, MinimumReadSize = IdentifierSize;
 
         #endregion
@@ -37,6 +59,43 @@ namespace Media.Containers.Flac
             Invalid = 127
         }
 
+        /// <summary>
+        /// Defines the blocking strategy of the a flac frame.
+        /// </summary>
+        public enum BlockingStrategy
+        {
+            /// <summary>
+            /// The <see cref="FlacFrameHeader.BlockSize"/> of flac frames is variable.
+            /// </summary>
+            VariableBlockSize,
+            /// <summary>
+            /// Each flac frame uses the same <see cref="FlacFrameHeader.BlockSize"/>.
+            /// </summary>
+            FixedBlockSize
+        }
+
+        /// <summary>
+        /// Defines the channel assignments.
+        /// </summary>
+        public enum ChannelAssignment
+        {
+            /// <summary>
+            /// Independent assignment. 
+            /// </summary>
+            Independent = 0,
+            /// <summary>
+            /// Left/side stereo. Channel 0 becomes the left channel while channel 1 becomes the side channel.
+            /// </summary>
+            LeftSide = 1,
+            /// <summary>
+            /// Right/side stereo. Channel 0 becomes the right channel while channel 1 becomes the side channel.
+            /// </summary>
+            RightSide = 2,
+            /// <summary>
+            /// Mid/side stereo. Channel 0 becomes the mid channel while channel 1 becomes the side channel. 
+            /// </summary>
+            MidSide = 3,
+        }
 
         #endregion
 
@@ -101,6 +160,121 @@ namespace Media.Containers.Flac
 
         public static BlockType GetBlockType(ref byte blockType) { return (BlockType)(blockType & 0x7f); }
 
+        #region Frame Methods
+
+        public static int GetBlockSize(Node node)
+        {
+            if (node == null) throw new ArgumentNullException("node");
+            return GetBlockSize(node.Identifier);
+        }
+
+        public static int GetBlockSize(byte[] identifier)
+        {
+            #region blocksize
+
+            //blocksize
+            int val = identifier[2] >> 4;
+            int blocksize = -1;
+
+            if (val == 0)
+            {
+                throw new InvalidOperationException("Invalid Blocksize value: 0");
+                //return false;
+            }
+            if (val == 1)
+                blocksize = 192;
+            else if (val >= 2 && val <= 5)
+                blocksize = 576 << (val - 2);
+            else if (val == 6 || val == 7)
+                blocksize = val;
+            else if (val >= 8 && val <= 15)
+                blocksize = 256 << (val - 8);
+            else
+            {
+                throw new InvalidOperationException("Invalid Blocksize value: " + val);
+                //return false;
+            }
+
+            return val;
+
+            #endregion blocksize
+        }
+
+        public static int GetSampleRate(Node node)
+        {
+            if (node == null) throw new ArgumentNullException("node");
+            return GetSampleRate(node.Identifier);
+        }
+
+        public static int GetSampleRate(byte[] identifier)
+        {
+            #region samplerate
+
+            //samplerate
+            int sampleRate = identifier[2] & 0x0F;
+            if (sampleRate >= 1 && sampleRate <= 11)
+                sampleRate = SampleRateTable[sampleRate];           
+            else
+            {
+                throw new InvalidOperationException("Invalid SampleRate value: " + sampleRate);
+            }
+            return sampleRate;
+            #endregion samplerate
+        }
+
+        public static int GetChannels(Node node, out ChannelAssignment channelAssignment)
+        {
+            if (node == null) throw new ArgumentNullException("node");
+            return GetChannels(node.Identifier, out channelAssignment);
+        }
+
+        public static int GetChannels(byte[] identifier, out ChannelAssignment channelAssignment)
+        {
+            #region channels
+
+            int val = identifier[3] >> 4; //cc: unsigned
+            int channels;
+            if ((val & 8) != 0)
+            {
+                channels = 2;
+                if ((val & 7) > 2 || (val & 7) < 0)
+                {
+                    throw new InvalidOperationException("Invalid ChannelAssignment");
+                    //return false;
+                }
+                channelAssignment = (ChannelAssignment)((val & 7) + 1);
+            }
+            else
+            {
+                channels = val + 1;
+                channelAssignment = ChannelAssignment.Independent;
+            }
+            return channels;
+            #endregion channels
+        }
+
+        /// <summary>
+        /// A value indicating the bits per sample, a value of 0 indicates to see the <see cref="Root"/> for more information.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public static int GetBitsPerSample(Node node)
+        {
+            #region bitspersample
+
+            int bitsPerSample = (node.Identifier[3] & 0x0E) >> 1;
+            if (bitsPerSample == 3 || bitsPerSample >= 7 || bitsPerSample < 0)
+            {
+                throw new InvalidOperationException("Invalid BitsPerSampleIndex");
+            }
+            else
+                bitsPerSample = BitPerSampleTable[bitsPerSample];
+            return bitsPerSample;
+            #endregion bitspersample
+        }
+
+        #endregion
+
         #endregion
 
         #region Fields
@@ -110,12 +284,73 @@ namespace Media.Containers.Flac
         /// </summary>
         long m_FlacPosition = -1;
 
-        readonly List<Track> m_Tracks = new List<Track>();
+        List<Track> m_Tracks = null;
 
+        int? m_MinBlockSize = null, m_MaxBlockSize = null;
+
+        ulong? m_MinFrameSize = null, m_MaxFrameSize = null,
+        m_SampleRate = null, m_Channels = null, m_BitsPerSample = null, m_TotalSamples = null;
+
+        string m_Md5 = string.Empty;
         #endregion
 
         #region Properties
+
+        public int MinBlockSize
+        {
+            get
+            {
+                if (m_MinBlockSize.HasValue) return (int)m_MinBlockSize.Value;
+                ParseStreamInfo(Root);
+                return (int)m_MinBlockSize.GetValueOrDefault();
+            }
+        }
+        public int MaxBlockSize
+        {
+            get
+            {
+                if (m_MaxBlockSize.HasValue) return (int)m_MaxBlockSize.Value;
+                ParseStreamInfo(Root);
+                return (int)m_MaxBlockSize.GetValueOrDefault();
+            }
+        }
+
+        public int MinFrameSize
+        {
+            get
+            {
+                if (m_MinFrameSize.HasValue) return (int)m_MinFrameSize.Value;
+                ParseStreamInfo(Root);
+                return (int)m_MinFrameSize.GetValueOrDefault();
+            }
+        }
         
+        public int MaxFrameSize
+        {
+            get
+            {
+                if (m_MaxFrameSize.HasValue) return (int)m_MaxFrameSize.Value;
+                ParseStreamInfo();
+                return (int)m_MaxFrameSize.GetValueOrDefault();
+            }
+        }
+
+        public DateTime Created
+        {
+            get
+            {
+                return FileInfo.CreationTimeUtc;
+            }
+        }
+
+        public DateTime Modified
+        {
+            get
+            {
+                return FileInfo.LastWriteTimeUtc;
+            }
+        }
+
         /// <summary>
         /// Get's the position of the bytes which identity this stream as FLAC.
         /// </summary>
@@ -224,7 +459,7 @@ namespace Media.Containers.Flac
             //Allocate 4 bytes
             byte[] identifier = new byte[IdentifierSize];
 
-            int lengthSize = 3;
+            int lengthSize = IdentifierSize;
 
             do
             {
@@ -234,19 +469,57 @@ namespace Media.Containers.Flac
                 //Maybe a frame check for syncword 11111111111110
                 if (Media.Common.Binary.ReadBitsMSB(identifier, 0, 14) == 0b11111111111110)
                 {
-                    bool variableSize = Media.Common.Binary.ReadBitsMSB(identifier, 0, 1) == 1;
-                    //FrameHeader 
-                    //Handle variable size.
-                    int frameHeaderSize = 0; // identifier[2] >> 4;
-                    //blockSize etc..
+                    lengthSize++;
 
-                    //SubFrame
-                    //SubFrameHeader
-                    //Padding
-                    //FrameFooter
-                    Array.Resize(ref identifier, 5 + frameHeaderSize + 2);
-                    //Read the rest of the header and CRC8 and FrameFooter CRC16
-                    Read(identifier, IdentifierSize, 1 + frameHeaderSize + 2);
+                    int val = 0, pos = IdentifierSize;
+
+                    int blocksize = GetBlockSize(identifier);
+
+                    int sampleRate = GetSampleRate(identifier);
+
+                    #region FrameHeader
+
+                    lengthSize += blocksize == 7 ? 2 : 1;
+
+                    lengthSize += sampleRate != 12 ? 2 : 1;
+
+                    lengthSize++;
+
+                    Array.Resize(ref identifier, lengthSize);
+
+                    //blocksize am ende des frameheaders
+                    if (blocksize != 0)
+                    {
+                        val = ReadByte();
+                        identifier[++pos] = (byte)val;
+                        if (blocksize == 7)
+                        {
+                            val = (val << 8) | (identifier[++pos] = (byte)ReadByte());
+                        }
+                        blocksize = val + 1;
+                    }
+
+                    //samplerate
+                    if (sampleRate != 0)
+                    {
+                        val = ReadByte();
+                        identifier[++pos] = (byte)val;
+                        if (sampleRate != 12)
+                        {
+                            val = (val << 8) | (identifier[++pos] = (byte)ReadByte());
+                        }
+                        if (sampleRate == 12)
+                            sampleRate = val * 1000;
+                        else if (sampleRate == 13)
+                            sampleRate = val;
+                        else
+                            sampleRate = val * 10;
+                    }
+
+                    #endregion read hints
+
+                    //CRC
+                    identifier[pos++] = (byte)ReadByte();                    
                 }
                 else
                 {
@@ -263,23 +536,24 @@ namespace Media.Containers.Flac
         /// Parses a <see cref="BlockType.StreamInfo"/> <see cref="Media.Container.Node"/>
         /// </summary>
         /// <param name="node">The <see cref="Media.Container.Node"/> to parse</param>
-        internal protected void ParseStreamInfo(Media.Container.Node node)
+        internal protected void ParseStreamInfo(Container.Node node = null)
         {
+            node = node ?? Root;
             VerifyBlockType(node, BlockType.StreamInfo);
             //METADATA_BLOCK_STREAMINFO
-            using(System.IO.BinaryReader br = new System.IO.BinaryReader(node.DataStream))
+            using (System.IO.BinaryReader br = new System.IO.BinaryReader(node.DataStream))
             {
-                short MinBlockSize = br.ReadInt16();
-                short MaxBlockSize = br.ReadInt16();
-                using (BitReader b = new BitReader(this, IdentifierSize * 2, true))
+                m_MinBlockSize = br.ReadInt16();
+                m_MaxBlockSize = br.ReadInt16();
+                using (BitReader b = new BitReader(node.DataStream, IdentifierSize * 2, true))
                 {
-                    ulong MinFrameSize = b.ReadBits(24);
-                    ulong MaxFrameSize = b.ReadBits(24);
-                    ulong SampleRate = b.ReadBits(20);
-                    ulong Channels = 1 + b.ReadBits(3);
-                    ulong BitsPerSample = 1 + b.ReadBits(5);
-                    ulong TotalSamples = b.ReadBits(36);
-                    string Md5 = new string(br.ReadChars(16));
+                    m_MinFrameSize = b.ReadBits(24);
+                    m_MaxFrameSize = b.ReadBits(24);
+                    m_SampleRate = b.ReadBits(20);
+                    m_Channels = 1 + b.ReadBits(3);
+                    m_BitsPerSample = 1 + b.ReadBits(5);
+                    m_TotalSamples = b.ReadBits(36);
+                    m_Md5 = new string(br.ReadChars(16));
                 }
             }
         }
@@ -479,6 +753,16 @@ namespace Media.Containers.Flac
 
         #region Overloads
 
+        public override string ToTextualConvention(Node block)
+        {
+            if (block.Master.Equals(this))
+            {
+                return GetBlockType(block).ToString();
+            }
+
+            return base.ToTextualConvention(block);
+        }
+
         public override IEnumerator<Node> GetEnumerator()
         {
             while (Remaining >= MinimumReadSize)
@@ -511,6 +795,8 @@ namespace Media.Containers.Flac
             }
 
             Track lastTrack = null;
+
+            m_Tracks = new List<Track>();
 
             //Loop for K StreamInfo blocks and the single VorbisComment.
             foreach(var block in ReadBlocks(0, Length, BlockType.StreamInfo, BlockType.VorbisComment))

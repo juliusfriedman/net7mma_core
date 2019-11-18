@@ -8,6 +8,7 @@
         #region Fields
 
         //Todo, should inherit Stream and should also skip copying to read if possibly by applying mask or alignment on stream methods...
+        //https://github.com/tknpow22/BitReader.project/blob/master/BitReader/BitReader.cs
 
         internal readonly MemorySegment m_ByteCache;
 
@@ -172,47 +173,100 @@
 
         //Reading methods need to keep track of current index, as well as where data in the cache ends.
 
+        internal protected void IncrementBits(int count = 0)
+        {
+            m_BitIndex += count;
+            if (m_BitIndex >= Common.Binary.BitsPerByte)
+            {
+                int rem;
+                m_ByteIndex += System.Math.DivRem(m_BitIndex, Common.Binary.BitsPerByte, out rem);
+                m_BitIndex = rem;
+            }
+        }
+
         public bool ReadBit()
         {
-            if (m_BitIndex > Common.Binary.BitsPerByte)
+            try
             {
-                m_BitIndex = 0;
-
-                ++m_ByteIndex;
+                return Common.Binary.GetBit(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex);
             }
-
-            return Common.Binary.GetBit(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex++);
+            finally
+            {
+                IncrementBits(1);
+            }
         }
 
         public byte Read8(bool reverse = false)
-        {            
-            return Peek8(reverse);
+        {
+            try
+            {
+                return Peek8(reverse);
+            }
+            finally
+            {
+                IncrementBits(8);
+            }
         }
 
         public short Read16(bool reverse = false)
         {
-            return Peek16(reverse);
+            try
+            {
+                return Peek16(reverse);
+            }
+            finally
+            {
+                IncrementBits(16);
+            }
         }
 
         public int Read24(bool reverse = false)
         {
-            return Peek24(reverse);
+            try
+            {
+                return Peek24(reverse);
+            }
+            finally
+            {
+                IncrementBits(24);
+            }
         }
 
         public int Read32(bool reverse = false)
         {
-            return Peek32(reverse);
+            try
+            {
+                return Peek32(reverse);
+            }
+            finally
+            {
+                IncrementBits(32);
+            }
         }
 
         public long Read64(bool reverse = false)
         {
-            return Peek64(reverse);
+            try
+            {
+                return Peek64(reverse);
+            }
+            finally
+            {
+                IncrementBits(64);
+            }
         }
 
         [System.CLSCompliant(false)]
         public ulong ReadBits(int count, bool reverse = false)
         {
-            return PeekBits(count, reverse);
+            try
+            {
+                return PeekBits(count);
+            }
+            finally
+            {
+                IncrementBits(count);
+            }
         }
 
         public void CopyBits(int count, byte[] dest, int destByteOffset, int destBitOffset)

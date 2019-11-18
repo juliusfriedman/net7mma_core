@@ -81,17 +81,40 @@
             m_ByteIndex = m_BitIndex = 0;
         }
 
-        public void WriteBit(bool value)
+        internal protected void IncrementBits(int count = 0)
         {
+            m_BitIndex += count;
             if (m_BitIndex >= Common.Binary.BitsPerByte)
             {
-                m_BitIndex = 0;
-
-                ++m_ByteIndex;
+                int rem;
+                m_ByteIndex += System.Math.DivRem(m_BitIndex, Common.Binary.BitsPerByte, out rem);
+                m_BitIndex = rem;
             }
-         
-            //Set the bit and move the bit index
-            Binary.ExchangeBit(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex++, value);
+        }
+
+        public void WriteBit(bool value)
+        {
+            try
+            {
+                //Set the bit and move the bit index
+                Binary.ExchangeBit(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex, value);
+            }
+            finally
+            {
+                IncrementBits(1);
+            }
+        }
+
+        public void WriteBits(byte[] buffer, int byteOffset, int bitOffset, int bitCount)
+        {
+            try
+            {
+                Binary.CopyBitsTo(buffer, byteOffset, bitOffset, m_ByteCache.Array, m_ByteCache.Offset, m_BitIndex, bitCount);
+            }
+            finally
+            {
+                IncrementBits(bitCount);
+            }
         }
 
         //Write8(reverse)

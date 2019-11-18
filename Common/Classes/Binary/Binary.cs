@@ -1885,7 +1885,7 @@ namespace Media.Common
 
             int byteOffset, bitIndex, position, bitCountMinusOne = bitCount - 1;
 
-            //optimize by reading as many bits as possible with a single instruction
+            //optimize by reading as many bits as possible with a single instruction then unmask the needed values and or shift.
 
             for (int index = bitOffset, end = bitOffset + bitCount; index < end; ++index)
             {
@@ -1944,7 +1944,7 @@ namespace Media.Common
 
             int byteOffset, bitIndex, position;
 
-            //optimize read up to 8 bits or more at a time.
+            //optimize read up to 8 bits or more at a time then unmask or shift.
 
             for (int index = bitOffset, end = bitOffset + bitCount; index < end; ++index)
             {
@@ -2362,7 +2362,7 @@ namespace Media.Common
                 //While there is a bit needed decrement for the bit consumed
                 while (count-- > Binary.Nihil)
                 {
-                    //Check for the end of bits
+                    //Check for the end of bits in source
                     if (srcBitOffset >= Binary.BitsPerByte)
                     {
                         //reset
@@ -2373,7 +2373,17 @@ namespace Media.Common
                     }
 
                     //Get a bit from the byte at our offset and Set the bit in the result
-                    ExchangeBit(ref destBits[srcByteOffset], srcBitOffset, GetBit(ref srcBits[srcByteOffset], srcBitOffset));
+                    ExchangeBit(ref destBits[destByteOffset], destBitOffset, GetBit(ref srcBits[srcByteOffset], srcBitOffset));
+
+                    //Check for the end of bits in dest
+                    if (destBitOffset >= Binary.BitsPerByte)
+                    {
+                        //reset
+                        destBitOffset = Binary.Nihil;
+
+                        //move the index of the byte being written
+                        ++destByteOffset;
+                    }
 
                     //Increment for the bit consumed
                     ++srcBitOffset;
