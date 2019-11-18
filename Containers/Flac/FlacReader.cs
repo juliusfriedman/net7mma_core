@@ -545,7 +545,7 @@ namespace Media.Containers.Flac
             {
                 m_MinBlockSize = br.ReadInt16();
                 m_MaxBlockSize = br.ReadInt16();
-                using (BitReader b = new BitReader(node.DataStream, IdentifierSize * 2, true))
+                using (BitReader b = new BitReader(br.BaseStream, IdentifierSize * 2, true))
                 {
                     m_MinFrameSize = b.ReadBits(24);
                     m_MaxFrameSize = b.ReadBits(24);

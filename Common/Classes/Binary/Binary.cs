@@ -2393,6 +2393,27 @@ namespace Media.Common
 
         #endregion
 
+        #region ComputeBits
+
+        /// <summary>
+        /// Used to increment a bit and byte index with respect to count.
+        /// </summary>
+        /// <param name="count"></param>
+        /// <param name="bitIndex"></param>
+        /// <param name="byteIndex"></param>
+        internal static void ComputeBits(int count, ref int bitIndex, ref int byteIndex)
+        {
+            bitIndex += count;
+            if (bitIndex >= Common.Binary.BitsPerByte)
+            {
+                int rem;
+                byteIndex += System.Math.DivRem(bitIndex, Common.Binary.BitsPerByte, out rem);
+                bitIndex = rem;
+            }
+        }
+
+        #endregion
+
         #endregion
 
         #region Reading

@@ -83,13 +83,7 @@
 
         internal protected void IncrementBits(int count = 0)
         {
-            m_BitIndex += count;
-            if (m_BitIndex >= Common.Binary.BitsPerByte)
-            {
-                int rem;
-                m_ByteIndex += System.Math.DivRem(m_BitIndex, Common.Binary.BitsPerByte, out rem);
-                m_BitIndex = rem;
-            }
+            Common.Binary.ComputeBits(count, ref m_BitIndex, ref m_ByteIndex);
         }
 
         public void WriteBit(bool value)

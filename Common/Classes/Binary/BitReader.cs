@@ -173,17 +173,6 @@
 
         //Reading methods need to keep track of current index, as well as where data in the cache ends.
 
-        internal protected void IncrementBits(int count = 0)
-        {
-            m_BitIndex += count;
-            if (m_BitIndex >= Common.Binary.BitsPerByte)
-            {
-                int rem;
-                m_ByteIndex += System.Math.DivRem(m_BitIndex, Common.Binary.BitsPerByte, out rem);
-                m_BitIndex = rem;
-            }
-        }
-
         public bool ReadBit()
         {
             try
@@ -192,7 +181,7 @@
             }
             finally
             {
-                IncrementBits(1);
+                Common.Binary.ComputeBits(1, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 
@@ -204,7 +193,7 @@
             }
             finally
             {
-                IncrementBits(8);
+                Common.Binary.ComputeBits(8, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 
@@ -216,7 +205,7 @@
             }
             finally
             {
-                IncrementBits(16);
+                Common.Binary.ComputeBits(16, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 
@@ -228,7 +217,7 @@
             }
             finally
             {
-                IncrementBits(24);
+                Common.Binary.ComputeBits(24, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 
@@ -240,7 +229,7 @@
             }
             finally
             {
-                IncrementBits(32);
+                Common.Binary.ComputeBits(32, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 
@@ -252,7 +241,7 @@
             }
             finally
             {
-                IncrementBits(64);
+                Common.Binary.ComputeBits(64, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 
@@ -265,7 +254,7 @@
             }
             finally
             {
-                IncrementBits(count);
+                Common.Binary.ComputeBits(count, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 
