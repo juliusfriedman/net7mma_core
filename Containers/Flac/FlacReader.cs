@@ -5,6 +5,8 @@ using System.Text;
 using Media.Common;
 using Media.Container;
 
+//FLAC is a codec not a container.
+//https://github.com/filoe/cscore/blob/master/CSCore/Codecs/FLAC/FlacFrameHeader.cs
 namespace Media.Containers.Flac
 {
     public class FlacReader : Media.Container.MediaFileStream
@@ -44,7 +46,7 @@ namespace Media.Containers.Flac
         #region Nested Types        
 
         /// <summary>
-        /// Describes the types of blocks; <see href="https://xiph.org/flac/format.html#frame_header_notes">See Also</see>
+        /// Describes the types of blocks; <see href="https://xiph.org/flac/format.html#frame_header_notes">Frame Header Notes</see>
         /// </summary>
         public enum BlockType : byte
         {
@@ -113,6 +115,151 @@ namespace Media.Containers.Flac
             0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         };
 
+        #region utf8
+
+        internal static bool ReadUTF8_64Signed(System.IO.Stream stream, byte[] buffer, ref int offset, out long result)
+        {
+            ulong r;
+            var returnValue = ReadUTF8_64(stream, buffer, ref offset, out r);
+            result = (long)r;
+            return returnValue;
+        }
+
+        internal static bool ReadUTF8_64(System.IO.Stream stream, byte[] buffer, ref int offset, out ulong result)
+        {
+            //Should be ReadBits(8);
+            uint x = (uint)(buffer[offset++] = (byte)stream.ReadByte());
+            ulong v;
+            int i;
+
+            if ((x & 0x80) == 0)
+            {
+                v = x;
+                i = 0;
+            }
+            else if ((x & 0xC0) != 0 && (x & 0x20) == 0)
+            {
+                v = x & 0x1F;
+                i = 1;
+            }
+            else if ((x & 0xE0) != 0 && (x & 0x10) == 0) /* 1110xxxx */
+            {
+                v = x & 0x0F;
+                i = 2;
+            }
+            else if ((x & 0xF0) != 0 && (x & 0x08) == 0) /* 11110xxx */
+            {
+                v = x & 0x07;
+                i = 3;
+            }
+            else if ((x & 0xF8) != 0 && (x & 0x04) == 0) /* 111110xx */
+            {
+                v = x & 0x03;
+                i = 4;
+            }
+            else if ((x & 0xFC) != 0 && (x & 0x02) == 0) /* 1111110x */
+            {
+                v = x & 0x01;
+                i = 5;
+            }
+            else if ((x & 0xFE) != 0 && (x & 0x01) == 0)
+            {
+                v = 0;
+                i = 6;
+            }
+            else
+            {
+                result = ulong.MaxValue;
+                return false;
+            }
+
+            for (; i != 0; i--)
+            {
+                //Should be ReadBits(8);
+                x = (buffer[offset++] = (byte)stream.ReadByte());
+                if ((x & 0xC0) != 0x80)
+                {
+                    result = ulong.MaxValue;
+                    return false;
+                }
+
+                v <<= 6;
+                v |= (x & 0x3F);
+            }
+
+            result = v;
+            return true;
+        }
+
+        internal static bool ReadUTF8_32Signed(System.IO.Stream stream, byte[] buffer, ref int offset, out int result)
+        {
+            uint r;
+            var returnValue = ReadUTF8_32(stream, buffer, ref offset, out r);
+            result = (int)r;
+            return returnValue;
+        }
+
+        internal static bool ReadUTF8_32(System.IO.Stream stream, byte[] buffer, ref int offset, out uint result)
+        {
+            uint v, x;
+            int i;
+            //Should be ReadBits(8);
+            x = (uint)(buffer[offset++] = (byte)stream.ReadByte());
+            if ((x & 0x80) == 0)
+            {
+                v = x;
+                i = 0;
+            }
+            else if ((x & 0xC0) != 0 && (x & 0x20) == 0)
+            {
+                v = x & 0x1F;
+                i = 1;
+            }
+            else if ((x & 0xE0) != 0 && (x & 0x10) == 0) /* 1110xxxx */
+            {
+                v = x & 0x0F;
+                i = 2;
+            }
+            else if ((x & 0xF0) != 0 && (x & 0x08) == 0) /* 11110xxx */
+            {
+                v = x & 0x07;
+                i = 3;
+            }
+            else if ((x & 0xF8) != 0 && (x & 0x04) == 0) /* 111110xx */
+            {
+                v = x & 0x03;
+                i = 4;
+            }
+            else if ((x & 0xFC) != 0 && (x & 0x02) == 0) /* 1111110x */
+            {
+                v = x & 0x01;
+                i = 5;
+            }
+            else
+            {
+                result = uint.MaxValue;
+                return false;
+            }
+
+            for (; i != 0; i--)
+            {
+                x = (uint)(buffer[offset++] = (byte)stream.ReadByte());
+                if ((x & 0xC0) != 0x80)
+                {
+                    result = uint.MaxValue;
+                    return false;
+                }
+
+                v <<= 6;
+                v |= (x & 0x3F);
+            }
+
+            result = v;
+            return true;
+        }
+
+        #endregion utf8
+
         public static void VerifyBlockType(Node node, BlockType expected)
         {
             if (node == null) throw new ArgumentNullException("node");
@@ -133,10 +280,10 @@ namespace Media.Containers.Flac
             return IsLastBlock(ref node.Identifier[0]);
         }
 
-        public static bool IsReserved(Node node)
+        public static bool IsReservedBlock(Node node)
         {
             if (node == null) throw new ArgumentNullException("node");
-            return IsReserved(GetBlockType(ref node.Identifier[0]));
+            return IsReservedBlock(GetBlockType(ref node.Identifier[0]));
         }
 
         public static bool IsInvalid(Node node)
@@ -150,7 +297,7 @@ namespace Media.Containers.Flac
         public static bool IsLastBlock(ref byte blockType) { return (blockType & 0x80) != 0; }
 
 
-        public static bool IsReserved(BlockType blockType)
+        public static bool IsReservedBlock(BlockType blockType)
         {
             byte byteLockType = (byte)blockType;
             return byteLockType >= 7 && byteLockType <= 126;
@@ -159,6 +306,11 @@ namespace Media.Containers.Flac
         public static bool IsInvalid(BlockType blockType) { return blockType == BlockType.Invalid; }
 
         public static BlockType GetBlockType(ref byte blockType) { return (BlockType)(blockType & 0x7f); }
+
+        public static bool IsFrameHeader(byte[] identifier)
+        {
+            return Media.Common.Binary.ReadBitsMSB(identifier, 0, 14) == 0b11111111111110;
+        }
 
         #region Frame Methods
 
@@ -173,13 +325,11 @@ namespace Media.Containers.Flac
             #region blocksize
 
             //blocksize
-            int val = identifier[2] >> 4;
-            int blocksize = -1;
+            int val = identifier[2] >> 4, blocksize = -1;
 
             if (val == 0)
             {
                 throw new InvalidOperationException("Invalid Blocksize value: 0");
-                //return false;
             }
             if (val == 1)
                 blocksize = 192;
@@ -192,10 +342,9 @@ namespace Media.Containers.Flac
             else
             {
                 throw new InvalidOperationException("Invalid Blocksize value: " + val);
-                //return false;
             }
 
-            return val;
+            return blocksize;
 
             #endregion blocksize
         }
@@ -258,11 +407,16 @@ namespace Media.Containers.Flac
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        public static int GetBitsPerSample(Node node)
+        public static int GetBitsPerSample(Node node) {
+            if (node == null) throw new ArgumentNullException("node");
+            return GetBitsPerSample(node.Identifier);
+        }
+
+        public static int GetBitsPerSample(byte[] identififer)
         {
             #region bitspersample
 
-            int bitsPerSample = (node.Identifier[3] & 0x0E) >> 1;
+            int bitsPerSample = (identififer[3] & 0x0E) >> 1;
             if (bitsPerSample == 3 || bitsPerSample >= 7 || bitsPerSample < 0)
             {
                 throw new InvalidOperationException("Invalid BitsPerSampleIndex");
@@ -291,7 +445,7 @@ namespace Media.Containers.Flac
         ulong? m_MinFrameSize = null, m_MaxFrameSize = null,
         m_SampleRate = null, m_Channels = null, m_BitsPerSample = null, m_TotalSamples = null;
 
-        string m_Md5 = string.Empty;
+        string m_Md5 = string.Empty, m_Title = string.Empty;
         #endregion
 
         #region Properties
@@ -467,10 +621,15 @@ namespace Media.Containers.Flac
                 Read(identifier, 0, IdentifierSize);
 
                 //Maybe a frame check for syncword 11111111111110
-                if (Media.Common.Binary.ReadBitsMSB(identifier, 0, 14) == 0b11111111111110)
+                if (IsFrameHeader(identifier))
                 {
                     //CrC
                     lengthSize++;
+
+                    if ((identifier[3] & 0x01) != 0) // reserved bit -> 0
+                    {
+                        throw new Exception("Invalid FlacFrame. Reservedbit_1 is 1");
+                    }
 
                     int val = 0, pos = IdentifierSize - 1;
 
@@ -478,19 +637,46 @@ namespace Media.Containers.Flac
 
                     int sampleRate = GetSampleRate(identifier);
 
+                    //long position = ReadU
+
                     #region FrameHeader
 
                     lengthSize += blocksize == 7 ? 2 : 1;
 
                     lengthSize += sampleRate != 12 ? 2 : 1;
 
-                    Array.Resize(ref identifier, lengthSize + 1);
+                    //variable blocksize
+                    if ((identifier[1] & 0x01) != 0 ||
+                        m_MinBlockSize != m_MaxBlockSize)
+                    {
+                        lengthSize += 8;
+                        Array.Resize(ref identifier, lengthSize + 1);
+                        ulong samplenumber;
+                        if (false == ReadUTF8_64(this, identifier, ref pos, out samplenumber) && samplenumber != ulong.MaxValue)
+                        {
+                            //BlockingStrategy = BlockingStrategy.VariableBlockSize;
+                            //SampleNumber = (long)samplenumber;
+                            throw new Exception("Invalid UTF8 Samplenumber coding.");
+                            
+                        }
+                    }
+                    else //fixed blocksize
+                    {
+                        lengthSize += 4;
+                        Array.Resize(ref identifier, lengthSize + 1);
+                        uint framenumber;
+                        if (false == ReadUTF8_32(this, identifier, ref pos, out framenumber) && framenumber != uint.MaxValue)
+                        {
+                            throw new Exception("Invalid UTF8 Framenumber coding.");
+                            //BlockingStrategy = BlockingStrategy.FixedBlockSize;
+                            //FrameNumber = (int)framenumber;
+                        }
+                    }
 
                     //blocksize am ende des frameheaders
                     if (blocksize != 0)
                     {
-                        val = ReadByte();
-                        identifier[++pos] = (byte)val;
+                        val = (identifier[++pos] = (byte)ReadByte());
                         if (blocksize == 7)
                         {
                             val = (val << 8) | (identifier[++pos] = (byte)ReadByte());
@@ -501,7 +687,7 @@ namespace Media.Containers.Flac
                     //samplerate
                     if (sampleRate != 0)
                     {
-                        val = ReadByte();
+                        val = (identifier[++pos] = (byte)ReadByte());
                         identifier[++pos] = (byte)val;
                         if (sampleRate != 12)
                         {
@@ -518,12 +704,15 @@ namespace Media.Containers.Flac
                     #endregion read hints
 
                     //CRC
-                    identifier[pos++] = (byte)ReadByte();                    
+                    identifier[pos++] = (byte)ReadByte();
+
+                    //FrameFooter
+                    length = blocksize + 2;
                 }
                 else
                 {
                     //Decode the legnth of the data and the frame footer
-                    length = Media.Common.Binary.Read24(identifier, 1, BitConverter.IsLittleEndian) + 2;
+                    length = Media.Common.Binary.Read24(identifier, 1, BitConverter.IsLittleEndian);
                 }
             }
             while (Position - offset < IdentifierSize && false == IsLastBlock(ref identifier[0])); //While it was not found within the IdentiferSize and is not the last block
@@ -542,7 +731,7 @@ namespace Media.Containers.Flac
             //METADATA_BLOCK_STREAMINFO
             using (System.IO.BinaryReader bi = new System.IO.BinaryReader(node.DataStream))
             {
-                using (BitReader br = new BitReader(bi.BaseStream, IdentifierSize * 2, true))
+                using (BitReader br = new BitReader(bi.BaseStream, Binary.BitOrder.MostSignificant, IdentifierSize * 2, true))
                 {
                     m_MinBlockSize = bi.ReadInt16();
                     m_MaxBlockSize = bi.ReadInt16();
@@ -562,190 +751,130 @@ namespace Media.Containers.Flac
         /// Parses a <see cref="BlockType.VorbisComment"/> <see cref="Media.Container.Node"/>
         /// </summary>
         /// <param name="node">The <see cref="Media.Container.Node"/> to parse</param>
-        internal protected void ParseVorbisComment(Media.Container.Node node)
+        internal protected List<KeyValuePair<string, string>> ParseVorbisComment(Media.Container.Node node)
         {
             VerifyBlockType(node, BlockType.VorbisComment);
+
+            List<KeyValuePair<string, string>> results = new List<KeyValuePair<string, string>>();
+
+            int offset = 0;
+            //https://www.xiph.org/vorbis/doc/v-comment.html
+            //Read Vendor Length
+            int vendorLength = Common.Binary.Read32(node.Data, offset, Media.Common.Binary.IsBigEndian);
+
+            offset += 4;
+
+            offset += vendorLength;
+
+            //Determine if there is a comment list
+            if (vendorLength > 0 && offset + 4 < node.DataSize)
+            {
+                //Read User Comment List
+                int userCommentListLength = Common.Binary.Read32(node.Data, offset, Media.Common.Binary.IsBigEndian);
+
+                //Move the offset
+                offset += 4;
+
+                //Read User Comment List if available
+                if (userCommentListLength > 0)
+                {
+                    //While there is data to consume
+                    while (offset + 4 < node.DataSize)
+                    {
+
+                        //Read the item length
+                        int itemLength = Common.Binary.Read32(node.Data, offset, Media.Common.Binary.IsBigEndian);
+
+                        //Move the offset
+                        offset += 4;
+
+                        //Invalid entry.
+                        if (itemLength < 0 || itemLength + offset > node.DataSize) continue;
+
+                        //Get the string
+                        string item = System.Text.Encoding.UTF8.GetString(node.Data, offset, itemLength);
+
+                        //Split it
+                        string[] parts = item.Split((char)Common.ASCII.EqualsSign);
+
+                        //If there are 2 parts decide what to do.
+                        if (parts.Length > 1)
+                        {
+                            //Add the key and value
+                            results.Add(new KeyValuePair<string, string>(parts[0], parts[1]));
+
+                            switch (parts[0].ToLowerInvariant())
+                            {
+                                //case "date": timereference "158760000"
+                                //    {
+                                //        //2016-04-12
+                                //        break;
+                                //    }
+                                case "title":
+                                    {
+                                        m_Title = parts[1];
+                                        break;
+                                    }
+                                default: break;
+                            }
+                        }
+
+                        //Move the offset
+                        offset += itemLength;
+                    }
+                }
+            }
+
+            return results;
         }
 
         /// <summary>
         /// Parses a <see cref="BlockType.SeekTable"/> <see cref="Media.Container.Node"/>
         /// </summary>
         /// <param name="node">The <see cref="Media.Container.Node"/> to parse</param>
-        internal protected void ParseSeekTable(Media.Container.Node node)
+        internal protected List<Tuple<long, long, short>> ParseSeekTable(Media.Container.Node node)
         {
             VerifyBlockType(node, BlockType.SeekTable);
+            ///	NOTE
+            /// The number of seek points is implied by the metadata header 'length' field, i.e.equal to length / 18.
+            List <Tuple<long, long, short>> seekPoints = new List<Tuple<long, long, short>>((int)(node == null ? 0 : node.DataSize / 18));
+            if (node != null) for (int i = 0, e = (int)node.DataSize; i < e; i+=12)
+            {
+                //Add the decoded seekpoint
+                seekPoints.Add(new Tuple<long, long, short>(Common.Binary.Read64(node.Data, i, BitConverter.IsLittleEndian),
+                    Common.Binary.Read64(node.Data, i + 8, BitConverter.IsLittleEndian), 
+                    Common.Binary.Read16(node.Data, i + 10, BitConverter.IsLittleEndian)));
+            }
+            return seekPoints;
         }
 
-        //Needs a BitReader or to use the BitReader for each Frame.
-
-        //internal protected uint ReadUnary()
-        //{
-        //    uint result = 0;
-        //    uint unaryindicator = Cache >> 24;
-
-        //    while (unaryindicator == 0)
-        //    {
-        //        ReadByte();
-        //        result += 8;
-        //        unaryindicator = Cache >> 24;
-        //    }
-
-        //    result += UnaryTable[unaryindicator];
-        //    SeekBits((int)(result & 7) + 1);
-        //    return result;
-        //}
-
-        //internal protected int ReadUnarySigned()
-        //{
-        //    var value = ReadUnary();
-        //    return (int)(value >> 1 ^ -((int)(value & 1)));
-        //}
-
-        #region utf8
-
-        internal protected bool ReadUTF8_64Signed(out long result)
+        internal protected uint ReadUnary()
         {
-            ulong r;
-            var returnValue = ReadUTF8_64(out r);
-            result = (long)r;
-            return returnValue;
-        }
+            uint result = 0;
+            using(Common.BitReader br = new BitReader(this, Binary.BitOrder.MostSignificant, 32, true))
+            {
+                uint unaryindicator = (uint)(br.Peek24() >> 24);
 
-        internal protected bool ReadUTF8_64(out ulong result)
-        {
-            //Should be ReadBits(8);
-            uint x = (uint)ReadByte();
-            ulong v;
-            int i;
-
-            if ((x & 0x80) == 0)
-            {
-                v = x;
-                i = 0;
-            }
-            else if ((x & 0xC0) != 0 && (x & 0x20) == 0)
-            {
-                v = x & 0x1F;
-                i = 1;
-            }
-            else if ((x & 0xE0) != 0 && (x & 0x10) == 0) /* 1110xxxx */
-            {
-                v = x & 0x0F;
-                i = 2;
-            }
-            else if ((x & 0xF0) != 0 && (x & 0x08) == 0) /* 11110xxx */
-            {
-                v = x & 0x07;
-                i = 3;
-            }
-            else if ((x & 0xF8) != 0 && (x & 0x04) == 0) /* 111110xx */
-            {
-                v = x & 0x03;
-                i = 4;
-            }
-            else if ((x & 0xFC) != 0 && (x & 0x02) == 0) /* 1111110x */
-            {
-                v = x & 0x01;
-                i = 5;
-            }
-            else if ((x & 0xFE) != 0 && (x & 0x01) == 0)
-            {
-                v = 0;
-                i = 6;
-            }
-            else
-            {
-                result = ulong.MaxValue;
-                return false;
-            }
-
-            for (; i != 0; i--)
-            {
-                //Should be ReadBits(8);
-                x = (uint)ReadByte();
-                if ((x & 0xC0) != 0x80)
+                while (unaryindicator == 0)
                 {
-                    result = ulong.MaxValue;
-                    return false;
+                    ReadByte();
+                    result += 8;
+                    unaryindicator = (uint)(br.Peek24() >> 24);
                 }
 
-                v <<= 6;
-                v |= (x & 0x3F);
+                result += UnaryTable[unaryindicator];
+                br.SeekBits((int)(result & 7) + 1);
+                return result;
             }
-
-            result = v;
-            return true;
         }
 
-        internal protected bool ReadUTF8_32Signed(out int result)
+        internal protected int ReadUnarySigned()
         {
-            uint r;
-            var returnValue = ReadUTF8_32(out r);
-            result = (int)r;
-            return returnValue;
+            var value = ReadUnary();
+            return (int)(value >> 1 ^ -((int)(value & 1)));
         }
 
-        internal protected bool ReadUTF8_32(out uint result)
-        {
-            uint v, x;
-            int i;
-            //Should be ReadBits(8);
-            x = (uint)ReadByte();
-            if ((x & 0x80) == 0)
-            {
-                v = x;
-                i = 0;
-            }
-            else if ((x & 0xC0) != 0 && (x & 0x20) == 0)
-            {
-                v = x & 0x1F;
-                i = 1;
-            }
-            else if ((x & 0xE0) != 0 && (x & 0x10) == 0) /* 1110xxxx */
-            {
-                v = x & 0x0F;
-                i = 2;
-            }
-            else if ((x & 0xF0) != 0 && (x & 0x08) == 0) /* 11110xxx */
-            {
-                v = x & 0x07;
-                i = 3;
-            }
-            else if ((x & 0xF8) != 0 && (x & 0x04) == 0) /* 111110xx */
-            {
-                v = x & 0x03;
-                i = 4;
-            }
-            else if ((x & 0xFC) != 0 && (x & 0x02) == 0) /* 1111110x */
-            {
-                v = x & 0x01;
-                i = 5;
-            }
-            else
-            {
-                result = uint.MaxValue;
-                return false;
-            }
-
-            for (; i != 0; i--)
-            {
-                //Should be ReadBits(8);
-                x = (uint)ReadByte();
-                if ((x & 0xC0) != 0x80)
-                {
-                    result = uint.MaxValue;
-                    return false;
-                }
-
-                v <<= 6;
-                v |= (x & 0x3F);
-            }
-
-            result = v;
-            return true;
-        }
-
-        #endregion utf8
+       
 
         //Read method for frames and then indexer to use method. Apply from GetSample
 
@@ -757,6 +886,7 @@ namespace Media.Containers.Flac
         {
             if (block.Master.Equals(this))
             {
+                if (IsFrameHeader(block.Identifier)) return "FrameHeader";
                 return GetBlockType(block).ToString();
             }
 
@@ -801,13 +931,16 @@ namespace Media.Containers.Flac
             //Loop for K StreamInfo blocks and the single VorbisComment.
             foreach(var block in ReadBlocks(0, Length, BlockType.StreamInfo, BlockType.VorbisComment))
             {
+
+                List<KeyValuePair<string, string>> vorbisInfo;
+
                 //Determine the action based on the BlockType of the Node returned.
                 switch (GetBlockType(block))
                 {
                     //One per file
                     case BlockType.VorbisComment:
                         {
-                            ParseVorbisComment(block);
+                            vorbisInfo = ParseVorbisComment(block);
 
                             continue;
                         }
@@ -824,7 +957,9 @@ namespace Media.Containers.Flac
 
                             ParseStreamInfo(block);
 
-                            lastTrack = new Track(block, "", 0, DateTime.Now, DateTime.Now, 0, 0, 0, TimeSpan.Zero, TimeSpan.Zero, 0, Media.Sdp.MediaType.audio, null, 0, 0, true);
+                            //DateTime.Parse(vorbisInfo["date"]);
+
+                            lastTrack = new Track(block, m_Title, m_Tracks.Count, DateTime.Now, DateTime.Now, (long)m_TotalSamples, 0, 0, TimeSpan.Zero, TimeSpan.Zero, (long)m_SampleRate, Media.Sdp.MediaType.audio, fLaCBytes, 0, (byte)m_BitsPerSample, true);
 
                             continue;
                         }

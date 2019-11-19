@@ -1552,7 +1552,7 @@ namespace Media.Common
         /// Retrieves a bitfield from the given byte via shifting to discard bits to create a mask
         /// </summary>
         /// <param name="source">The octet to reveal the bit field in</param>
-        /// <param name="index">The non 0 based index of the octet to retrieve a bit from</param>
+        /// <param name="index">The 0 based index of the octet to retrieve a bit from</param>
         /// <returns>True if the bit field is set, otherwise false.</returns>
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -3109,6 +3109,9 @@ namespace Media.Common
     }
 
     #endregion
+
+    //MemSet, Copy
+    //https://github.com/filoe/cscore/blob/af1792ea680743c5172ece4727e2b331012e99de/CSCore/Utils/ILUtils.cs
 }
 
 //Move to seperate assembly
@@ -3477,7 +3480,7 @@ namespace Media.UnitTests
         public static void Test_BitWriter_BitReader()
         {
             byte[] testBytes = new byte[8];
-            using(BitWriter bw = new BitWriter(testBytes, true, Common.Binary.SystemByteOrder))
+            using(BitWriter bw = new BitWriter(testBytes, true, Common.Binary.SystemBitOrder))
             {
                 bw.WriteU64(ulong.MaxValue, false);
                 using (BitReader br = new BitReader(bw.BaseStream))
@@ -3491,7 +3494,7 @@ namespace Media.UnitTests
                     if (result != ulong.MaxValue) throw new Exception(String.Format("Expected:{0}, Found:{1}", ulong.MaxValue, result));
 
                     br.BaseStream.Position = 0;
-                    if (Common.Binary.Read64(br.CurrentBuffer, 0, true) != br.Read64(true)) throw new Exception("reverse");
+                    if (Common.Binary.Read64(br.Buffer, 0, true) != br.Read64(true)) throw new Exception("reverse");
                 }
                 bw.BaseStream.Position = 0;
                 bw.WriteU64(ulong.MaxValue, true);
@@ -3506,7 +3509,10 @@ namespace Media.UnitTests
                     if (result != ulong.MaxValue) throw new Exception(String.Format("Expected:{0}, Found:{1}", ulong.MaxValue, result));
 
                     br.BaseStream.Position = 0;
-                    if (Common.Binary.Read64(br.CurrentBuffer, 0, true) != br.Read64(true)) throw new Exception("reverse");
+                    if (Common.Binary.Read64(br.Buffer, 0, true) != br.Read64(true)) throw new Exception("reverse");
+
+                    br.SeekBits(-64);
+                    if (Common.Binary.Read64(br.Buffer, 0, true) != br.Read64(true)) throw new Exception("SeekBits");
                 }
             }
             
@@ -3572,7 +3578,7 @@ namespace Media.UnitTests
                 //Verify the result
                 if (i == Common.Binary.Zero && sclzl != 63 
                     || 
-                    i <= -1 && sclzl != Common.Binary.ThirtyOne 
+                    i <= -1 && sclzl != Common.Binary.Zero 
                     || 
                     i > 0 && sclzl - slz != Common.Binary.ThirtyOne) throw new Exception("CountLeadingZeros");
                 
@@ -3582,7 +3588,7 @@ namespace Media.UnitTests
                 //Verify the result
                 if (i == Common.Binary.Zero && clzll != Common.Binary.BitsPerLong 
                     || 
-                    i <= -1 && clzll != Common.Binary.BitsPerInteger 
+                    i <= -1 && clzll != Common.Binary.Zero 
                     || 
                     i > Common.Binary.Zero && sclzl - clzll != Common.Binary.One) throw new Exception("CountLeadingZeros");
             }

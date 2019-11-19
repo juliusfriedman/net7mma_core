@@ -11,7 +11,7 @@
 
         internal readonly System.IO.Stream m_BaseStream;
 
-        internal Binary.ByteOrder m_ByteOrder = Binary.SystemByteOrder;
+        internal Binary.BitOrder m_BitOrder = Binary.SystemBitOrder;
 
         int m_ByteIndex = 0, m_BitIndex = 0; 
         
@@ -82,24 +82,78 @@
         }
 
         /// <summary>
-        /// Gets or Sets the underlying <see cref="Binary.ByteOrder"/> which is used to read values.
+        /// Gets or Sets the underlying <see cref="Binary.BitOrder"/> which is used to read values.
         /// </summary>
-        public Common.Binary.ByteOrder ByteOrder { get { return m_ByteOrder; } set { m_ByteOrder = value; } }
+        public Common.Binary.BitOrder BitOrder { get { return m_BitOrder; } set { m_BitOrder = value; } }
+
+        /// <summary>
+        /// Gets or Sets the current <see cref="System.Byte"/> in the <see cref="Buffer"/> based on the <see cref="ByteIndex"/>
+        /// </summary>
+        public byte CurrentByte
+        {
+            get { return m_ByteCache[m_ByteIndex]; }
+            set { m_ByteCache[m_ByteIndex] = value; }
+        }
+
+        /// <summary>
+        /// Gets the array in which values are stored, the array may be larger than the size usable by the <see cref="Cache"/>
+        /// </summary>
+        public byte[] Buffer { get { return m_ByteCache.Array; } }
+
+        /// <summary>
+        /// Gets the <see cref="Common.MemorySegment"/> in which the <see cref="Buffer"/> is stored.
+        /// </summary>
+        public Common.MemorySegment Cache { get { return m_ByteCache; } }
 
         #endregion
 
         #region Constructor / Destructor
 
-        public BitWriter(byte[] buffer, bool writable, Common.Binary.ByteOrder byteOrder, int cacheSize = 32, bool leaveOpen = false) : base(true)
+        /// <summary>
+        /// Creates an instance with the specified properties
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="writable"></param>
+        /// <param name="bitOrder"></param>
+        /// <param name="bitOffset"></param>
+        /// <param name="byteOffset"></param>
+        /// <param name="cacheSize"></param>
+        /// <param name="leaveOpen"></param>
+        public BitWriter(byte[] buffer, bool writable, Common.Binary.BitOrder bitOrder, int bitOffset, int byteOffset, int cacheSize = 32, bool leaveOpen = false) 
+            : this(buffer, writable, bitOrder, cacheSize, leaveOpen)
+        {
+            m_BitIndex = bitOffset;
+
+            m_ByteIndex = byteOffset;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="writable"></param>
+        /// <param name="bitOrder"></param>
+        /// <param name="cacheSize"></param>
+        /// <param name="leaveOpen"></param>
+        public BitWriter(byte[] buffer, bool writable, Common.Binary.BitOrder bitOrder, int cacheSize = 32, bool leaveOpen = false) : base(true)
         {
             m_BaseStream = new System.IO.MemoryStream(buffer, writable);
 
             m_LeaveOpen = leaveOpen;
 
             m_ByteCache = new MemorySegment(buffer);
+
+            m_BitOrder = bitOrder;
         }
 
-        public BitWriter(System.IO.Stream source, Common.Binary.ByteOrder byteOrder, int cacheSize = 32, bool leaveOpen = false)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="bitOrder"></param>
+        /// <param name="cacheSize"></param>
+        /// <param name="leaveOpen"></param>
+        public BitWriter(System.IO.Stream source, Common.Binary.BitOrder bitOrder, int cacheSize = 32, bool leaveOpen = false)
             : base(true)
         {
             if (source == null) throw new System.ArgumentNullException("source");
@@ -109,6 +163,8 @@
             m_LeaveOpen = leaveOpen;
 
             m_ByteCache = new MemorySegment(cacheSize);
+
+            m_BitOrder = bitOrder;
         }
 
         /// <summary>
@@ -118,7 +174,7 @@
         /// <param name="cacheSize">The amount of bytes to be used for writing before <see cref="Flush"/> is called.</param>
         /// <param name="leaveOpen">Indicates if the <paramref name="source"/> should be left open when calling <see cref="Dispose"/></param>
         public BitWriter(System.IO.Stream source, int cacheSize = 32, bool leaveOpen = false)
-            :this(source, Common.Binary.SystemByteOrder, cacheSize, leaveOpen)
+            :this(source, Common.Binary.SystemBitOrder, cacheSize, leaveOpen)
         {
 
         }
@@ -169,13 +225,13 @@
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            switch (m_ByteOrder)
+            switch (m_BitOrder)
             {
-                case Binary.ByteOrder.Little:
+                case Binary.BitOrder.LeastSignificant:
                     if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
                     else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
                     return;
-                case Binary.ByteOrder.Big:
+                case Binary.BitOrder.MostSignificant:
                     if(reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
                     else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
                     return;
@@ -187,13 +243,13 @@
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            switch (m_ByteOrder)
+            switch (m_BitOrder)
             {
-                case Binary.ByteOrder.Little:
+                case Binary.BitOrder.LeastSignificant:
                     if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
                     else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
                     return;
-                case Binary.ByteOrder.Big:
+                case Binary.BitOrder.MostSignificant:
                     if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
                     else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
                     return;

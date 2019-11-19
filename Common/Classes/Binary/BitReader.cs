@@ -18,7 +18,7 @@
 
         internal protected bool m_LeaveOpen;
 
-        internal protected Common.Binary.ByteOrder m_ByteOrder;
+        internal protected Common.Binary.BitOrder m_BitOrder;
 
         #endregion
 
@@ -50,7 +50,7 @@
         public bool IsAligned { get { return m_BitIndex % Common.Binary.BitsPerByte == 0; } }
 
         /// <summary>
-        /// Gets or Sets the current <see cref="System.Byte"/> based on the <see cref="ByteIndex"/>
+        /// Gets or Sets the current <see cref="System.Byte"/> in the <see cref="Buffer"/> based on the <see cref="ByteIndex"/>
         /// </summary>
         public byte CurrentByte
         {
@@ -59,14 +59,14 @@
         }
 
         /// <summary>
-        /// Gets the array in which values are stored
+        /// Gets the array in which values are stored, the array may be larger than the size usable by the <see cref="Cache"/>
         /// </summary>
-        public byte[] CurrentBuffer { get { return m_ByteCache.Array; } }
+        public byte[] Buffer { get { return m_ByteCache.Array; } }
 
         /// <summary>
-        /// Gets the <see cref="Common.MemorySegment"/> in which values are stored
+        /// Gets the <see cref="Common.MemorySegment"/> in which the <see cref="Buffer"/> is stored.
         /// </summary>
-        public Common.MemorySegment CurrentCache { get { return m_ByteCache; } }
+        public Common.MemorySegment Cache { get { return m_ByteCache; } }
         
         /// <summary>
         /// Gets or Sets the index in the bits
@@ -92,9 +92,9 @@
         public System.IO.Stream BaseStream { get { return m_BaseStream; } }
 
         /// <summary>
-        /// Gets or Sets the underlying <see cref="Binary.ByteOrder"/> which is used to read values.
+        /// Gets or Sets the underlying <see cref="Binary.BitOrder"/> which is used to write values.
         /// </summary>
-        public Common.Binary.ByteOrder ByteOrder { get { return m_ByteOrder; } set { m_ByteOrder = value; } }
+        public Common.Binary.BitOrder BitOrder { get { return m_BitOrder; } set { m_BitOrder = value; } }
 
         #endregion
 
@@ -104,14 +104,14 @@
         /// Creates an instance with the specified properties
         /// </summary>
         /// <param name="source">The source <see cref="System.IO.Stream"/></param>
-        /// <param name="byteOrder">The <see cref="Binary.ByteOrder"/></param>
+        /// <param name="bitOrder">The <see cref="Binary.BitOrder"/></param>
         /// <param name="bitIndex">Starting bit offset</param>
         /// <param name="byteIndex">Starting byte offset</param>
         /// <param name="writable">Indicates if the bytes should allow writing past the end</param>
         /// <param name="cacheSize">Cache array size</param>
         /// <param name="leaveOpen">Indicates if Dispose will close the stream</param>
-        public BitReader(byte[] source, Binary.ByteOrder byteOrder, int bitIndex, int byteIndex, bool writable, int cacheSize = 32, bool leaveOpen = false)
-            : this(new System.IO.MemoryStream(source, writable), byteOrder, cacheSize, leaveOpen)
+        public BitReader(byte[] source, Binary.BitOrder bitOrder, int bitIndex, int byteIndex, bool writable, int cacheSize = 32, bool leaveOpen = false)
+            : this(new System.IO.MemoryStream(source, writable), bitOrder, cacheSize, leaveOpen)
         {
             m_BitIndex = bitIndex;
 
@@ -122,10 +122,10 @@
         /// Creates an instance with the specified properties
         /// </summary>
         /// <param name="source">The source <see cref="System.IO.Stream"/></param>
-        /// <param name="byteOrder">The <see cref="Binary.ByteOrder"/></param>
+        /// <param name="bitOrder">The <see cref="Binary.BitOrder"/></param>
         /// <param name="cacheSize">Cache array size</param>
         /// <param name="leaveOpen">Indicates if Dispose will close the stream</param>
-        public BitReader(System.IO.Stream source, Binary.ByteOrder byteOrder, int cacheSize = 32, bool leaveOpen = false)
+        public BitReader(System.IO.Stream source, Binary.BitOrder bitOrder, int cacheSize = 32, bool leaveOpen = false)
             : base(true)
         {
             if (source == null) throw new System.ArgumentNullException("source");
@@ -136,7 +136,7 @@
 
             m_ByteCache = new MemorySegment(cacheSize);
 
-            m_ByteOrder = byteOrder;
+            m_BitOrder = bitOrder;
         }
 
         /// <summary>
@@ -146,7 +146,7 @@
         /// <param name="cacheSize">Cache array size</param>
         /// <param name="leaveOpen">Indicates if Dispose will close the stream</param>
         public BitReader(System.IO.Stream source, int cacheSize = 32, bool leaveOpen = false)
-            : this(source, Binary.SystemByteOrder, cacheSize, leaveOpen) { }
+            : this(source, Binary.SystemBitOrder, cacheSize, leaveOpen) { }
 
         /// <summary>
         /// Calls <see cref="Dispose"/>
@@ -156,6 +156,16 @@
         #endregion
 
         #region Methods
+
+        /// <summary>
+        /// Seeks the <see cref="BitIndex"/> and <see cref="ByteIndex"/> and if needed the <see cref="BaseStream.Position"/>.
+        /// </summary>
+        /// <param name="bitCount"></param>
+        public void SeekBits(int bitCount)
+        {
+            m_ByteIndex += System.Math.DivRem(bitCount, Binary.BitsPerByte, out m_BitIndex);
+            m_BaseStream.Position += Common.Binary.BitsToBytes(ref bitCount);
+        }
 
         /// <summary>
         /// Advances reading to the next byte boundary.
@@ -243,11 +253,11 @@
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            switch (m_ByteOrder)
+            switch (m_BitOrder)
             {
-                case Binary.ByteOrder.Little:
+                case Binary.BitOrder.LeastSignificant:
                     return (byte)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte));
-                case Binary.ByteOrder.Big:
+                case Binary.BitOrder.MostSignificant:
                     return (byte)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte));
                 default: throw new System.NotSupportedException("Please create an issue for your use case");
             }
@@ -257,11 +267,11 @@
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            switch (m_ByteOrder)
+            switch (m_BitOrder)
             {
-                case Binary.ByteOrder.Little:
+                case Binary.BitOrder.LeastSignificant:
                     return (short)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort));
-                case Binary.ByteOrder.Big:
+                case Binary.BitOrder.MostSignificant:
                     return (short)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort));
                 default: throw new System.NotSupportedException("Please create an issue for your use case");
             }
@@ -271,11 +281,11 @@
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            switch (m_ByteOrder)
+            switch (m_BitOrder)
             {
-                case Binary.ByteOrder.Little:
+                case Binary.BitOrder.LeastSignificant:
                     return (int)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize));
-                case Binary.ByteOrder.Big:
+                case Binary.BitOrder.MostSignificant:
                     return (int)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize));
                 default: throw new System.NotSupportedException("Please create an issue for your use case");
             }
@@ -285,11 +295,11 @@
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            switch (m_ByteOrder)
+            switch (m_BitOrder)
             {
-                case Binary.ByteOrder.Little:
+                case Binary.BitOrder.LeastSignificant:
                     return (int)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger));
-                case Binary.ByteOrder.Big:
+                case Binary.BitOrder.MostSignificant:
                     return (int)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger));
                 default: throw new System.NotSupportedException("Please create an issue for your use case");
             }
@@ -299,11 +309,11 @@
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            switch (m_ByteOrder)
+            switch (m_BitOrder)
             {
-                case Binary.ByteOrder.Little:
+                case Binary.BitOrder.LeastSignificant:
                     return (long)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong));
-                case Binary.ByteOrder.Big:
+                case Binary.BitOrder.MostSignificant:
                     return (long)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong));
                 default: throw new System.NotSupportedException("Please create an issue for your use case");
             }
@@ -314,11 +324,11 @@
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            switch (m_ByteOrder)
+            switch (m_BitOrder)
             {
-                case Binary.ByteOrder.Little:
+                case Binary.BitOrder.LeastSignificant:
                     return (reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, count) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, count));
-                case Binary.ByteOrder.Big:
+                case Binary.BitOrder.MostSignificant:
                     return (reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, count) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, count));
                 default: throw new System.NotSupportedException("Please create an issue for your use case");
             }
