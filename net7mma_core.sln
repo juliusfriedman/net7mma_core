@@ -63,23 +63,23 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Container.Nut", "Containers
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sip", "Sip\Sip.csproj", "{A8114D74-8D27-47C2-A2F5-70F4965EF81B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Container.Mcf", "Containers\Mcf\Container.Mcf.csproj", "{0D200A09-4C64-4B86-851F-0ACC35805A0E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Container.Mcf", "Containers\Mcf\Container.Mcf.csproj", "{0D200A09-4C64-4B86-851F-0ACC35805A0E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Container.Gxf", "Containers\Gxf\Container.Gxf.csproj", "{D59CDA54-6FA9-48F5-9833-64F17AC62131}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Container.Gxf", "Containers\Gxf\Container.Gxf.csproj", "{D59CDA54-6FA9-48F5-9833-64F17AC62131}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Container.Real", "Containers\Real\Container.Real.csproj", "{E1021D3F-E11E-40E1-BCA4-8848970F8D17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Container.Real", "Containers\Real\Container.Real.csproj", "{E1021D3F-E11E-40E1-BCA4-8848970F8D17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codec.Aac", "Codecs\Audio\Aac\Codec.Aac.csproj", "{2B1CDDD8-C8DC-44EE-8C13-1ABA07BD8C00}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codec.Aac", "Codecs\Audio\Aac\Codec.Aac.csproj", "{2B1CDDD8-C8DC-44EE-8C13-1ABA07BD8C00}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codec.AC3", "Codecs\Audio\AC3\Codec.AC3.csproj", "{B62C26C0-8630-4DAC-BF79-2F82141D495F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codec.AC3", "Codecs\Audio\AC3\Codec.AC3.csproj", "{B62C26C0-8630-4DAC-BF79-2F82141D495F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codec.Alaw", "Codecs\Audio\Alaw\Codec.Alaw.csproj", "{EFE440B7-D618-4D40-8E1E-40F6EFDB69A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codec.G722", "Codecs\Audio\G722\Codec.G722.csproj", "{A1A4249C-27AB-4A5E-AE9A-46846D02CAEB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codec.G722", "Codecs\Audio\G722\Codec.G722.csproj", "{A1A4249C-27AB-4A5E-AE9A-46846D02CAEB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codec.Mulaw", "Codecs\Audio\Mulaw\Codec.Mulaw.csproj", "{7CB205CF-EF14-4776-BBAA-E47F9E3235DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Container.Flac", "Containers\Flac\Container.Flac.csproj", "{A5CD0504-799C-4E00-A27F-DB150C57C42E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codec.Flac", "Codecs\Audio\Flac\Codec.Flac.csproj", "{BA181A1D-EFFC-4460-886B-32763075AD43}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -239,10 +239,10 @@ Global
 		{7CB205CF-EF14-4776-BBAA-E47F9E3235DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7CB205CF-EF14-4776-BBAA-E47F9E3235DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7CB205CF-EF14-4776-BBAA-E47F9E3235DE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A5CD0504-799C-4E00-A27F-DB150C57C42E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A5CD0504-799C-4E00-A27F-DB150C57C42E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A5CD0504-799C-4E00-A27F-DB150C57C42E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A5CD0504-799C-4E00-A27F-DB150C57C42E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA181A1D-EFFC-4460-886B-32763075AD43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA181A1D-EFFC-4460-886B-32763075AD43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA181A1D-EFFC-4460-886B-32763075AD43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA181A1D-EFFC-4460-886B-32763075AD43}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

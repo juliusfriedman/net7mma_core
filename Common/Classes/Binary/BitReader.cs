@@ -433,6 +433,76 @@
             }
         }
 
+        /// <summary>
+        /// Reads 0 - 7 bytes into <see cref="Buffer"/> and returns an indication if the value was encoded correctly.
+        /// </summary>
+        /// <param name="result">The decoded UTF8 value</param>
+        /// <returns>True if the value was encoded correctly, otherwise False</returns>
+        internal bool ReadUTF8(out ulong result)
+        {
+            ulong v = 0, x;
+            int i;
+            x = m_ByteCache[++m_ByteIndex] = Read8();
+            if (0 == (x & 0x80))
+            {
+                v = x;
+                i = 0;
+            }
+            else if (0xC0 == (x & 0xE0)) /* 110xxxxx */
+            {
+                v = x & 0x1F;
+                i = 1;
+            }
+            else if (0xE0 == (x & 0xF0)) /* 1110xxxx */
+            {
+                v = x & 0x0F;
+                i = 2;
+            }
+            else if (0xF0 == (x & 0xF8)) /* 11110xxx */
+            {
+                v = x & 0x07;
+                i = 3;
+            }
+            else if (0xF8 == (x & 0xFC)) /* 111110xx */
+            {
+                v = x & 0x03;
+                i = 4;
+            }
+            else if (0xFC == (x & 0xFE)) /* 1111110x */
+            {
+                v = x & 0x01;
+                i = 5;
+            }
+            else if (0xFE == x) /* 11111110 */
+            {
+                v = 0;
+                i = 6;
+            }
+            else
+            {
+                result = v;
+                return false;
+            }
+
+            for (; i > 0; i--)
+            {
+                x = m_ByteCache[++m_ByteIndex] = Read8();
+
+                if (0x80 != (x & 0xC0))  /* 10xxxxxx */
+                {
+                    result = v;
+                    return false;
+                }
+
+                v <<= 6;
+                v |= (x & 0x3F);
+            }
+
+            result = v;
+
+            return true;
+        }
+
         public void CopyBits(int count, byte[] dest, int destByteOffset, int destBitOffset)
         {
             //Should accept dest and offsets for direct reads?

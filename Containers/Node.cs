@@ -38,11 +38,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 #endregion
 
 namespace Media.Container
@@ -50,7 +46,7 @@ namespace Media.Container
     /// <summary>
     /// Represents a superset of binary data within a <see cref="IMediaContainer"/>.
     /// </summary>
-    public class Node : Media.Common.BaseDisposable
+    public class Node : Media.Common.BaseDisposable, IDisposable
     {
         #region Static API
 

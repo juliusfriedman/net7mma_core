@@ -3742,14 +3742,14 @@ a=appversion:1.0");
 
             if (System.IO.Directory.Exists(localPath + "/Media/Audio/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Audio/flac/"))
                 {
-                    using (Media.Containers.Flac.FlacReader reader = new Media.Containers.Flac.FlacReader(fileName))
+                    using (Media.Codecs.Flac.FlacReader reader = new Media.Codecs.Flac.FlacReader(fileName))
                     {
                         Console.WriteLine("Path:" + reader.Source);
                         Console.WriteLine("Total Size:" + reader.Length);
 
-                        Console.WriteLine("Root Page:" + reader.Root.ToString());
+                        Console.WriteLine("Root Block:" + reader.Root.ToString());
 
-                        Console.WriteLine("Pages:");
+                        Console.WriteLine("Blocks:");
 
                         foreach (var block in reader)
                         {
@@ -3758,9 +3758,10 @@ a=appversion:1.0");
                             Console.WriteLine("DataOffset: " + block.DataOffset);
                             Console.WriteLine("Complete: " + block.IsComplete);
                             Console.WriteLine("Name: " + block.ToString());
-                            Console.WriteLine("HeaderFlags: " + Media.Containers.Flac.FlacReader.GetBlockType(block));
-                            Console.WriteLine("IsInvalid: " + Media.Containers.Flac.FlacReader.IsInvalid(block));
-                            Console.WriteLine("IsLastBlock: " + Media.Containers.Flac.FlacReader.IsLastBlock(block));
+                            Console.WriteLine("HeaderFlags: " + Media.Codecs.Flac.FlacReader.GetBlockType(block));
+                            Console.WriteLine("IsInvalid: " + Media.Codecs.Flac.FlacReader.IsInvalid(block));
+                            Console.WriteLine("IsLastBlock: " + Media.Codecs.Flac.FlacReader.IsLastBlock(block));
+                            Console.WriteLine("IsFrameHeader: " + Media.Codecs.Flac.FlacReader.IsFrameHeader(block));
                             Console.WriteLine("Size: " + block.TotalSize);
                         }
 
