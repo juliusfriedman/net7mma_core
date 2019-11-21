@@ -11,7 +11,7 @@ namespace Media.Codecs.Flac
 {
     public class FlacReader : Media.Container.MediaFileStream
     {
-
+        //https://github.com/xVir/FLACTools/tree/master/FLACCodecWin8
         #region Constants
         /// <summary>
         /// ASCII "fLaC"
@@ -666,6 +666,8 @@ namespace Media.Codecs.Flac
                     //CrC
                     lengthSize++;
 
+                    length = 0;
+
                     if ((identifier[3] & 0x01) != 0) // reserved bit -> 0
                     {
                         throw new Exception("Invalid FlacFrame. Reservedbit_1 is 1");
@@ -684,6 +686,8 @@ namespace Media.Codecs.Flac
                     lengthSize += blocksizeCode == 7 ? 2 : 1;
 
                     lengthSize += sampleRateCode != 12 ? 2 : 1;
+
+                    length = blocksizeCode;
 
                     //variable blocksize
                     if ((identifier[1] & 0x01) != 0 ||
@@ -722,6 +726,7 @@ namespace Media.Codecs.Flac
                             val = (val << 8) | (identifier[++pos] = (byte)ReadByte());
                         }
                         blocksizeCode = val + 1;
+                        length = blocksizeCode;
                     }
 
                     //samplerate
@@ -747,7 +752,7 @@ namespace Media.Codecs.Flac
                     identifier[pos++] = (byte)ReadByte();
 
                     //FrameFooter
-                    length = blocksizeCode + 2;
+                    length += 2;
                 }
                 else
                 {
@@ -773,24 +778,23 @@ namespace Media.Codecs.Flac
             {
                 using (BitReader br = new BitReader(bi.BaseStream, Binary.BitOrder.MostSignificant, IdentifierSize * 2, true))
                 {
-                    //Should verify there are x more bytes in the stream
-                    m_MinBlockSize = bi.ReadInt16();
-                    //Should verify there are x more bytes in the stream
-                    m_MaxBlockSize = bi.ReadInt16();
-                    //Should verify there are x more bytes in the stream
-                    m_MinFrameSize = br.Read24();
-                    //
-                    m_MaxFrameSize = br.Read24();
+                    m_MinBlockSize = Common.Binary.ReadU16(node.Data, 0, BitConverter.IsLittleEndian); //br.Read16();
+                    
+                    m_MaxBlockSize = Common.Binary.ReadU16(node.Data, 2, BitConverter.IsLittleEndian);
+                    
+                    m_MinFrameSize = (int)Common.Binary.ReadU24(node.Data, 4, BitConverter.IsLittleEndian);
+                    
+                    m_MaxFrameSize = (int)Common.Binary.ReadU24(node.Data, 7, BitConverter.IsLittleEndian);
 
-                    m_SampleRate = (int)br.ReadBits(20);
+                    m_SampleRate = (int)Common.Binary.ReadUInt64MSB(node.Data, 10, 20, 0);
 
-                    m_Channels = 1 + (int)br.ReadBits(3);
+                    m_Channels = 1 + (int)Common.Binary.ReadUInt64MSB(node.Data, 12, 3, 4);
 
-                    m_BitsPerSample = 1 + (byte)br.ReadBits(5);
+                    m_BitsPerSample = 1 + (int)Common.Binary.ReadUInt64MSB(node.Data, 12, 5, 7);
 
-                    m_TotalSamples = br.ReadBits(36);
+                    m_TotalSamples = Common.Binary.ReadUInt64MSB(node.Data, 13, 36, 4);
 
-                    m_Md5 = new string(bi.ReadChars(16));
+                    m_Md5 = new string(Encoding.ASCII.GetChars(node.Data, 8, 16));
                 }
             }
         }

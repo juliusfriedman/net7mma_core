@@ -57,6 +57,18 @@
     <None Update="Media\Audio\flac\ff-16b-2c-44100hz.flac">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Media\Audio\flac\flake.flac">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Media\Audio\flac\issue35_01.flac">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Media\Audio\flac\testfile1.flac">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Media\Audio\flac\testfile5.flac">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Media\Video\asf\pages.asf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

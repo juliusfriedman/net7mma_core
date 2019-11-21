@@ -190,7 +190,7 @@
         /// </summary>
         public void ByteAlign()
         {
-            m_BitIndex = 0;
+            m_BitIndex = Common.Binary.Zero;
             ++m_ByteIndex;
         }
 
@@ -204,7 +204,7 @@
 
             m_BaseStream.Write(m_ByteCache.Array, m_ByteCache.Offset + m_ByteIndex, toWrite);
 
-            m_ByteIndex = m_BitIndex = 0;
+            m_ByteIndex = m_BitIndex = Common.Binary.Zero;
         }
 
         public void WriteBit(bool value)
@@ -216,44 +216,172 @@
             }
             finally
             {
-                Common.Binary.ComputeBits(1, ref m_BitIndex, ref m_ByteIndex);
+                Common.Binary.ComputeBits(Common.Binary.One, ref m_BitIndex, ref m_ByteIndex);
+            }
+        }
+
+        [System.CLSCompliant(false)]
+        public void WriteS8(sbyte value, bool reverse = false)
+        {
+            try
+            {
+                int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
+
+                switch (m_BitOrder)
+                {
+                    case Binary.BitOrder.LeastSignificant:
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (byte)value, Common.Binary.BitsPerByte);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (byte)value, Common.Binary.BitsPerLong);
+                        return;
+                    case Binary.BitOrder.MostSignificant:
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (byte)value, Common.Binary.BitsPerByte);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (byte)value, Common.Binary.BitsPerLong);
+                        return;
+                    default: throw new System.NotSupportedException("Please create an issue for your use case");
+                }
+            }
+            finally
+            {
+                Common.Binary.ComputeBits(Common.Binary.BitsPerByte, ref m_BitIndex, ref m_ByteIndex);
+            }
+        }
+
+        public void Write8(byte value, bool reverse = false)
+        {
+            try
+            {
+                int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
+
+                switch (m_BitOrder)
+                {
+                    case Binary.BitOrder.LeastSignificant:
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerByte);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerByte);
+                        return;
+                    case Binary.BitOrder.MostSignificant:
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerByte);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerByte);
+                        return;
+                    default: throw new System.NotSupportedException("Please create an issue for your use case");
+                }
+            }
+            finally
+            {
+                Common.Binary.ComputeBits(Common.Binary.BitsPerByte, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 
         [System.CLSCompliant(false)]
         public void WriteU64(ulong value, bool reverse = false)
         {
-            int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
-
-            switch (m_BitOrder)
+            try
             {
-                case Binary.BitOrder.LeastSignificant:
-                    if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
-                    else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
-                    return;
-                case Binary.BitOrder.MostSignificant:
-                    if(reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
-                    else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
-                    return;
-                default: throw new System.NotSupportedException("Please create an issue for your use case");
+                int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
+
+                switch (m_BitOrder)
+                {
+                    case Binary.BitOrder.LeastSignificant:
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
+                        return;
+                    case Binary.BitOrder.MostSignificant:
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
+                        return;
+                    default: throw new System.NotSupportedException("Please create an issue for your use case");
+                }
+            }
+            finally
+            {
+                Common.Binary.ComputeBits(Common.Binary.BitsPerLong, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 
         public void Write64(long value, bool reverse = false)
         {
-            int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
-
-            switch (m_BitOrder)
+            try
             {
-                case Binary.BitOrder.LeastSignificant:
-                    if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
-                    else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
-                    return;
-                case Binary.BitOrder.MostSignificant:
-                    if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
-                    else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
-                    return;
-                default: throw new System.NotSupportedException("Please create an issue for your use case");
+                int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
+
+                switch (m_BitOrder)
+                {
+                    case Binary.BitOrder.LeastSignificant:
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
+                        return;
+                    case Binary.BitOrder.MostSignificant:
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
+                        return;
+                    default: throw new System.NotSupportedException("Please create an issue for your use case");
+                }
+            }
+            finally
+            {
+                Common.Binary.ComputeBits(Common.Binary.BitsPerLong, ref m_BitIndex, ref m_ByteIndex);
+            }
+        }
+
+        [System.CLSCompliant(false)]
+        public void WriteUTF8(uint val)
+        {
+            if (val < 0x80)
+            {
+                Write8((byte)val);
+                return;
+            }
+            int bytes = (Binary.Log2i(val) + Common.Binary.Quattuor) / Common.Binary.Quinque;
+            int shift = (bytes - 1) * Common.Binary.Sex;
+            WriteBits(Common.Binary.BitsPerByte, (256U - (256U >> bytes)) | (val >> shift));
+            while (shift >= Common.Binary.Sex)
+            {
+                shift -= Common.Binary.Sex;
+                WriteBits(Common.Binary.BitsPerByte, 0x80 | ((val >> shift) & Common.Binary.SixBitMaxValue));
+            }
+        }
+
+        public void WriteUnarySigned(int val)
+        {
+            // convert signed to unsigned
+            int v = -2 * val - 1;
+            v ^= (v >> 31);
+
+            // write quotient in unary
+            int q = v + 1;
+            while (q > 31)
+            {
+                WriteBits(31, 0);
+                q -= 31;
+            }
+            WriteBits(q, 1);
+        }
+
+        public void WriteBits(int bits, long val)
+        {
+            WriteBits(bits, (ulong)val);
+        }
+
+        [System.CLSCompliant(false)]
+        public void WriteBits(int bits, ulong value, bool reverse = false)
+        {
+            try
+            {
+                switch (m_BitOrder)
+                {
+                    case Binary.BitOrder.LeastSignificant:
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, bits);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, bits);
+                        return;
+                    case Binary.BitOrder.MostSignificant:
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, bits);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, bits);
+                        return;
+                    default: throw new System.NotSupportedException("Please create an issue for your use case");
+                }
+            }
+            finally
+            {
+                Common.Binary.ComputeBits(bits, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 

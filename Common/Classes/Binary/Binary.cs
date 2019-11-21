@@ -293,7 +293,10 @@ namespace Media.Common
         /// </summary>
         public const byte FiveBitMaxValue = Binary.TrīgintāŪnus;
 
-        //63 for 6 bit
+        /// <summary>
+        /// (00)111111 in Binary, Decimal 61
+        /// </summary>
+        public const byte SixBitMaxValue = 63;
 
         /// <summary>
         /// An octet which represents a set of 8 bits with only the 0th  bit clear. (127 Decimal)
@@ -328,6 +331,11 @@ namespace Media.Common
         /// An exception utilized when a value larger than allowed is utilized in a 5 bit field.
         /// </summary>
         public static OverflowException FiveBitOverflow = new OverflowException("Cannot store a number higher than 31 in 5 bits.");
+
+        /// <summary>
+        /// An exception utilized when a value larger than allowed is utilized in a 6 bit field.
+        /// </summary>
+        public static OverflowException SixBitOverflow = new OverflowException("Cannot store a number higher than 63 in 6 bits.");
 
         /// <summary>
         /// An exception utilized when a value larger than allowed is utilized in a 7 bit field (sbyte.MaxValue is not utilized because of the dependence on the value of sign bit)
@@ -1997,6 +2005,148 @@ namespace Media.Common
             return result;
         }
 
+        /// <summary>
+        /// Reads a signed <see cref="Common.Binary.BitsPerLong"/> value from <paramref name="data"/>
+        /// </summary>
+        /// <param name="data">The data</param>
+        /// <param name="byteOffset">The offset</param>
+        /// <param name="bitCount">The count of bits</param>
+        /// <param name="bitOffset">The bit offset</param>
+        /// <returns></returns>
+        public static Int64 ReadInt64MSB(byte[] data, int byteOffset, int bitCount, ref byte bitOffset)
+        {
+            return (Int64)ReadInt64MSB(data, byteOffset, bitCount, ref bitOffset);
+        }
+
+        /// <summary>
+        /// Provides a faster implementation of reading bits than <see cref="ReadBitsMSB(byte[], ref int, int)"/>
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="byteOffset"></param>
+        /// <param name="bitCount"></param>
+        /// <param name="bitOffset"></param>
+        /// <returns></returns>
+        [System.CLSCompliant(false)]
+        public static UInt64 ReadUInt64MSB(byte[] data, int byteOffset, int bitCount, ref byte bitOffset)
+        {
+            unchecked
+            {
+                UInt64 result = Common.Binary.Zero;
+
+                // Check input
+                if (bitCount > Common.Binary.BitsPerLong)
+                {
+                    throw new ArgumentOutOfRangeException("bitCount", bitCount, "Should be a value lower than or equal to 64.");
+                }
+
+                if (bitOffset > Common.Binary.BitsPerByte)
+                {
+                    throw new ArgumentOutOfRangeException("bitOffset", bitOffset, "Should be a value between 0 and 7.");
+                }
+
+                // Total amount of bits to read (the rest is masked)
+                int totalBitCount = bitCount + bitOffset;
+
+                // byteCount = Math.Ceiling(totalBitCount / 8) = How many bytes we'll be reading in total (maximum 8)
+                int byteCount = (byte)(totalBitCount >> Common.Binary.Tres); // totalBitCount / 8
+                if (totalBitCount % Common.Binary.BitsPerByte > Common.Binary.Zero) ++byteCount;
+
+                // Check if we won't read more bytes than there are available.
+                if (byteCount > (data.Length - byteOffset))
+                {
+                    throw new ArgumentOutOfRangeException("Provided arguments would require reading outside of the data array upper bounds.");
+                }
+
+                // The first byte needs to be masked with the bitOffset, as we might not read the first few bits
+                result = (byte)(((data[byteOffset] << bitOffset) & byte.MaxValue) >> bitOffset);
+
+                // If we have more than 1 byte we'll read these in one by one
+                for (int i = 1; i < byteCount; i++)
+                {
+                    result = (result << Common.Binary.BitsPerByte) + data[byteOffset + i];
+                }
+
+                // Bits masked at the end of the number (because we don't want to read up until the full last byte)
+                byte maskedBitCount = (byte)((byteCount << Common.Binary.Tres) - totalBitCount); // (byteCount * 8) - totalBitCount
+                result = result >> maskedBitCount;
+
+                return result;
+            }
+        }
+
+        public static UInt64 ReadUInt64MSB(byte[] data, int byteOffset, int bitCount, byte bitOffset = 0)
+        {
+            return ReadUInt64MSB(data, byteOffset, bitCount, ref bitOffset);
+        }
+
+        /// <summary>
+        /// Provides a faster implementation of reading bits than <see cref="ReadBitsLSB(byte[], ref int, int)"/>
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="byteOffset"></param>
+        /// <param name="bitCount"></param>
+        /// <param name="bitOffset"></param>
+        /// <returns></returns>
+        [System.CLSCompliant(false)]
+        public static UInt64 ReadUInt64LSB(byte[] data, int byteOffset, int bitCount, ref byte bitOffset)
+        {
+            unchecked
+            {
+                UInt64 result = Common.Binary.Zero;
+
+                // Check input
+                if (bitCount > Common.Binary.BitsPerLong)
+                {
+                    throw new ArgumentOutOfRangeException("bitCount", bitCount, "Should be a value lower than or equal to 64.");
+                }
+
+                if (bitOffset > Common.Binary.BitsPerByte)
+                {
+                    throw new ArgumentOutOfRangeException("bitOffset", bitOffset, "Should be a value between 0 and 7.");
+                }
+
+                // Total amount of bits to read (the rest is masked)
+                int totalBitCount = bitCount + bitOffset;
+
+                // byteCount = Math.Ceiling(totalBitCount / 8) = How many bytes we'll be reading in total (maximum 8)
+                int byteCount = (byte)(totalBitCount >> Common.Binary.Tres); // totalBitCount / 8
+                if (totalBitCount % Common.Binary.BitsPerByte > Common.Binary.Zero) ++byteCount;
+
+                // Check if we won't read more bytes than there are available.
+                if (byteCount > (data.Length - byteOffset))
+                {
+                    throw new ArgumentOutOfRangeException("Provided arguments would require reading outside of the data array upper bounds.");
+                }
+
+                // The first byte needs to be masked with the bitOffset, as we might not read the first few bits
+                result = (byte)((data[byteCount - 1] << bitOffset) & byte.MaxValue);
+
+                // If we have more than 1 byte we'll read these in one by one
+                for (int i = byteCount - 2; i >= 0; --i)
+                {
+                    result = (result << Common.Binary.BitsPerByte) + data[byteOffset + i];
+                }
+
+                // Bits masked at the end of the number (because we don't want to read up until the full last byte)
+                byte maskedBitCount = (byte)((byteCount << Common.Binary.Tres) - totalBitCount); // (byteCount * 8) - totalBitCount
+                result = result >> maskedBitCount;
+
+                return result;
+            }
+        }
+
+        [System.CLSCompliant(false)]
+        public static UInt64 ReadUInt64LSB(byte[] data, int byteOffset, int bitCount, byte bitOffset = 0)
+        {
+            return ReadUInt64LSB(data, byteOffset, bitCount, ref bitOffset);
+        }
+
+        [System.CLSCompliant(false)]
+        public static Int64 ReadInt64LSB(byte[] data, int byteOffset, int bitCount, byte bitOffset = 0)
+        {
+            return (Int64)ReadUInt64LSB(data, byteOffset, bitCount, ref bitOffset);
+        }
+
         #endregion
 
         #region WriteBits
@@ -3106,6 +3256,59 @@ namespace Media.Common
         //BCD?
 
         //ZigZag
+
+
+        #region Log2i
+
+        /// <summary>
+        /// Used for <see cref="Log2i"/> calls
+        /// </summary>
+        public static readonly byte[] ByteLog2Table = new byte[]
+    {
+            0,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3,
+            4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+            5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
+            5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
+            6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+            6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+            6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+            6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+            7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+            7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+            7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+            7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+            7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+            7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+            7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+            7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7
+    };
+
+        public static int Log2i(int v)
+        {
+            return Log2i((uint)v);
+        }
+
+        [System.CLSCompliant(false)]
+        public static int Log2i(ulong v)
+        {
+            int n = 0;
+            if (0 != (v & 0xffffffff00000000)) { v >>= 32; n += 32; }
+            if (0 != (v & 0xffff0000)) { v >>= 16; n += 16; }
+            if (0 != (v & 0xff00)) { v >>= 8; n += 8; }
+            return n + ByteLog2Table[v];
+        }
+
+        [System.CLSCompliant(false)]
+        public static int Log2i(uint v)
+        {
+            int n = 0;
+            if (0 != (v & 0xffff0000)) { v >>= 16; n += 16; }
+            if (0 != (v & 0xff00)) { v >>= 8; n += 8; }
+            return n + ByteLog2Table[v];
+        }
+
+        #endregion
+
     }
 
     #endregion
@@ -3436,6 +3639,10 @@ namespace Media.UnitTests
                     //Console.WriteLine(BitConverter.ToString(Octets, 0, SystemBits.Length));
 
                     //Console.WriteLine(Convert.ToString((long)v, 2));
+
+                    if (Common.Binary.ReadUInt64MSB(Octets, 0, Media.Common.Binary.BitsPerLong, 0) != Media.Common.Binary.ReadBitsMSB(Octets, 0, Media.Common.Binary.BitsPerLong)) throw new Exception("ReadInt64MSB Does not work.");
+
+                    if (Common.Binary.ReadUInt64LSB(Octets, 0, Media.Common.Binary.BitsPerLong, 0) != Media.Common.Binary.ReadBitsLSB(Octets, 0, Media.Common.Binary.BitsPerLong)) throw new Exception("ReadInt64LSB Does not work.");
                 }
 
                 #endregion

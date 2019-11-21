@@ -172,9 +172,9 @@
         /// </summary>
         public void ByteAlign()
         {
+            if (m_ByteIndex == 0) return;
             m_BitIndex = 0;
             ++m_ByteIndex;
-            //if(m_ByteIndex >= m_ByteCache.Count)
         }
 
         /// <summary>
@@ -203,7 +203,7 @@
         }
 
         /// <summary>
-        /// Reads the given amount of bits into the cache.
+        /// Reads the given amount of bits into the <see cref="Cache"/>.
         /// </summary>
         /// <param name="countOfBits">The amount of bits to read</param>
         internal void ReadBytesForBits(int countOfBits)
@@ -237,18 +237,21 @@
         /// <summary>
         /// Copies the bits which are left in the cache to the beginning of the cache
         /// </summary>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal protected void Recycle()
         {
             Common.Binary.CopyBitsTo(m_ByteCache.Array, m_ByteIndex, m_BitIndex, m_ByteCache.Array, 0, 0, Common.Binary.BytesToBits(m_ByteCache.Count - m_ByteIndex) + m_BitIndex);
 
             m_ByteIndex = m_BitIndex = 0;
         }
-        
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool PeekBit()
         {
             return Common.Binary.GetBit(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex);
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public byte Peek8(bool reverse = false)
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
@@ -263,6 +266,7 @@
             }
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public short Peek16(bool reverse = false)
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
@@ -277,6 +281,7 @@
             }
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public int Peek24(bool reverse = false)
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
@@ -291,6 +296,7 @@
             }
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public int Peek32(bool reverse = false)
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
@@ -305,6 +311,7 @@
             }
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public long Peek64(bool reverse = false)
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
@@ -318,7 +325,8 @@
                 default: throw new System.NotSupportedException("Please create an issue for your use case");
             }
         }
-        
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.CLSCompliant(false)]
         public ulong PeekBits(int count, bool reverse = false)
         {
@@ -334,12 +342,26 @@
             }
         }
 
-        //Reading methods need to keep track of current index, as well as where data in the cache ends.
-
+        /// <summary>
+        /// Reads a single bit from the <see cref="Cache"/>
+        /// </summary>
+        /// <returns>The value</returns>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool ReadBit()
         {
             try
             {
+                if (m_BitIndex >= Common.Binary.BitsPerByte)
+                {
+                    m_BitIndex = 0;
+                    ++m_ByteIndex;
+                }
+
+                if(m_ByteIndex >= m_ByteCache.Count)
+                {
+                    ReadBytesForBits(Common.Binary.BitsPerByte);
+                }
+
                 return Common.Binary.GetBit(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex);
             }
             finally
@@ -348,6 +370,11 @@
             }
         }
 
+        /// <summary>
+        /// Reads <see cref="Common.Binary.BitsPerByte"/> bits
+        /// </summary>
+        /// <param name="reverse">Indicates if the <see cref="BitOrder"/> is reversed</param>
+        /// <returns>The value read</returns>
         public byte Read8(bool reverse = false)
         {
             try
@@ -362,6 +389,11 @@
             }
         }
 
+        /// <summary>
+        /// Reads <see cref="Common.Binary.BitsPerShort"/> bits
+        /// </summary>
+        /// <param name="reverse">Indicates if the <see cref="BitOrder"/> is reversed</param>
+        /// <returns>The value read</returns>
         public short Read16(bool reverse = false)
         {
             try
@@ -376,6 +408,11 @@
             }
         }
 
+        /// <summary>
+        /// Reads <see cref="Common.Binary.TripleBitSize"/> bits
+        /// </summary>
+        /// <param name="reverse">Indicates if the <see cref="BitOrder"/> is reversed</param>
+        /// <returns>The value read</returns>
         public int Read24(bool reverse = false)
         {
             try
@@ -386,10 +423,15 @@
             }
             finally
             {
-                Common.Binary.ComputeBits(24, ref m_BitIndex, ref m_ByteIndex);
+                Common.Binary.ComputeBits(Common.Binary.TripleBitSize, ref m_BitIndex, ref m_ByteIndex);
             }
         }
 
+        /// <summary>
+        /// Reads <see cref="Common.Binary.BitsPerInteger"/> bits
+        /// </summary>
+        /// <param name="reverse">Indicates if the <see cref="BitOrder"/> is reversed</param>
+        /// <returns>The value read</returns>
         public int Read32(bool reverse = false)
         {
             try
@@ -404,6 +446,11 @@
             }
         }
 
+        /// <summary>
+        /// Reads <see cref="Common.Binary.BitsPerLong"/> bits
+        /// </summary>
+        /// <param name="reverse">Indicates if the <see cref="BitOrder"/> is reversed</param>
+        /// <returns>The value read</returns>
         public long Read64(bool reverse = false)
         {
             try
@@ -418,6 +465,12 @@
             }
         }
 
+        /// <summary>
+        /// Reads an arbitary amount of bits specified by <paramref name="count"/>
+        /// </summary>
+        /// <param name="count">The amount of bits to read</param>
+        /// <param name="reverse">Indicates if the <see cref="BitOrder"/> is reversed</param>
+        /// <returns></returns>
         [System.CLSCompliant(false)]
         public ulong ReadBits(int count, bool reverse = false)
         {
@@ -434,7 +487,27 @@
         }
 
         /// <summary>
-        /// Reads 0 - 7 bytes into <see cref="Buffer"/> and returns an indication if the value was encoded correctly.
+        /// 
+        /// </summary>
+        /// <param name="count"></param>
+        /// <param name="reverse">Indicates if the <see cref="BitOrder"/> is reversed</param>
+        /// <returns></returns>
+        public long ReadBitsSigned(int count, bool reverse = false)
+        {
+            try
+            {
+                ReadBytesForBits(count);
+
+                return (long)PeekBits(count);
+            }
+            finally
+            {
+                Common.Binary.ComputeBits(count, ref m_BitIndex, ref m_ByteIndex);
+            }
+        }
+
+        /// <summary>
+        /// Reads 1 - 7 bytes into <see cref="Buffer"/> and returns an indication if the value was encoded correctly.
         /// </summary>
         /// <param name="result">The decoded UTF8 value</param>
         /// <returns>True if the value was encoded correctly, otherwise False</returns>
@@ -503,6 +576,13 @@
             return true;
         }
 
+        /// <summary>
+        /// Copies to <paramref name="dest"/> at the <paramref name="destByteOffset"/> and <paramref name="destBitOffset"/>
+        /// </summary>
+        /// <param name="count">The amount of bits to copy</param>
+        /// <param name="dest">The destination</param>
+        /// <param name="destByteOffset">The offset in the destination</param>
+        /// <param name="destBitOffset">The bit offset within the <paramref name="destByteOffset"/></param>
         public void CopyBits(int count, byte[] dest, int destByteOffset, int destBitOffset)
         {
             //Should accept dest and offsets for direct reads?
@@ -511,12 +591,6 @@
 
             Common.Binary.CopyBitsTo(m_ByteCache.Array, m_ByteIndex, m_BitIndex, dest, destByteOffset, destBitOffset, count);
         }
-
-        //ReadBigEndian16
-
-        //ReadBigEndian32
-
-        //ReadBigEndian64
 
         #endregion
 
