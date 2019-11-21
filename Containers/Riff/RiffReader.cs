@@ -174,32 +174,32 @@ namespace Media.Containers.Riff
             return new string(chars);
         }
 
-        public static int ToFourCC(string FourCC)
+        public static int ToFourCC(string FourCC, int offset = 0)
         {
-            if (FourCC.Length != 4)
+            if (FourCC.Length - offset < 4)
             {
-                throw new Exception("FourCC strings must be [exactly] 4 characters long " + FourCC);
+                throw new Exception("FourCC strings with offset must be 4 characters long " + FourCC);
             }
 
-            int result = ((int)FourCC[3]) << 24
-                        | ((int)FourCC[2]) << 16
-                        | ((int)FourCC[1]) << 8
-                        | ((int)FourCC[0]);
+            int result = ((int)FourCC[offset  + 3]) << 24
+                        | ((int)FourCC[offset + 2]) << 16
+                        | ((int)FourCC[offset + 1]) << 8
+                        | ((int)FourCC[offset + 0]);
 
             return result;
         }
 
-        public static int ToFourCC(char[] FourCC)
+        public static int ToFourCC(char[] FourCC, int offset = 0)
         {
-            if (FourCC.Length != 4)
+            if (FourCC.Length - offset < 4)
             {
-                throw new Exception("FourCC char arrays must be [exactly] 4 characters long " + new string(FourCC));
+                throw new Exception("FourCC char arrays with offset must contain 4 characters" + new string(FourCC, offset, FourCC.Length - offset));
             }
 
-            int result = ((int)FourCC[3]) << 24
-                        | ((int)FourCC[2]) << 16
-                        | ((int)FourCC[1]) << 8
-                        | ((int)FourCC[0]);
+            int result = ((int)FourCC[offset + 3]) << 24
+                        | ((int)FourCC[offset + 2]) << 16
+                        | ((int)FourCC[offset + 1]) << 8
+                        | ((int)FourCC[offset + 0]);
 
             return result;
         }

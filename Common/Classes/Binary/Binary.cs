@@ -3686,40 +3686,78 @@ namespace Media.UnitTests
 
         public static void Test_BitWriter_BitReader()
         {
-            byte[] testBytes = new byte[8];
+            byte[] testBytes = new byte[8];            
+            bool reverse = true;
+            ulong expected = ulong.MaxValue;
+        Test:
             using(BitWriter bw = new BitWriter(testBytes, true, Common.Binary.SystemBitOrder))
             {
-                bw.WriteU64(ulong.MaxValue, false);
+                //Write the value
+                bw.WriteU64(expected, reverse);
+
+                //Use a BitReader to read the value
                 using (BitReader br = new BitReader(bw.BaseStream))
                 {
-                    ulong result = (ulong)br.Read64();
-                    if (result != ulong.MaxValue) throw new Exception(String.Format("Expected:{0}, Found:{1}", ulong.MaxValue, result));
+                    ulong result = (ulong)br.Read64(reverse);
+                    if (result != expected) throw new Exception(String.Format("Expected:{0}, Found:{1}", expected, result));
 
-                    br.BaseStream.Position = 0;
+                    br.BaseStream.Position = Common.Binary.Zero;
+                    if (br.BaseStream.Position != Common.Binary.Zero) throw new Exception("BitWriter - Position");
 
-                    result = br.ReadBits(64);
-                    if (result != ulong.MaxValue) throw new Exception(String.Format("Expected:{0}, Found:{1}", ulong.MaxValue, result));
+                    result = br.ReadBits(Common.Binary.BitsPerLong, reverse);
+                    if (result != expected) throw new Exception(String.Format("BitReader - Expected:{0}, Found:{1}", expected, result));
 
-                    br.BaseStream.Position = 0;
-                    if (Common.Binary.Read64(br.Buffer, 0, true) != br.Read64(true)) throw new Exception("reverse");
+                    br.BaseStream.Position = Common.Binary.Zero;
+                    if (Common.Binary.Read64(br.Buffer, Common.Binary.Zero, reverse) != br.Read64(reverse)) throw new Exception("reverse");
                 }
-                bw.BaseStream.Position = 0;
-                bw.WriteU64(ulong.MaxValue, true);
+
+                //Test moving the position of the writer
+                bw.BaseStream.Position = Common.Binary.Zero;
+                if (bw.BaseStream.Position != Common.Binary.Zero) throw new Exception("BitWriter - Position");
+                bw.WriteU64(expected, reverse);
+
+                //Test reading that same value at various positions
                 using (BitReader br = new BitReader(bw.BaseStream))
                 {
-                    br.BaseStream.Position = 0;
-                    ulong result = (ulong)br.Read64(true);
-                    if (result != ulong.MaxValue) throw new Exception(String.Format("Expected:{0}, Found:{1}", ulong.MaxValue, result));
+                    br.BaseStream.Position = Common.Binary.Zero;
+                    ulong result = (ulong)br.Read64(reverse);
+                    if (result != expected) throw new Exception(String.Format("WriteU64 / Read64 - Expected:{0}, Found:{1}", expected, result));
 
-                    br.BaseStream.Position = 0;
-                    result = br.ReadBits(64, true);
-                    if (result != ulong.MaxValue) throw new Exception(String.Format("Expected:{0}, Found:{1}", ulong.MaxValue, result));
+                    br.BaseStream.Position = Common.Binary.Zero;
+                    result = br.ReadBits(Common.Binary.BitsPerLong, reverse);
+                    if (result != expected) throw new Exception(String.Format("ReadBits - Expected:{0}, Found:{1}", expected, result));
 
-                    br.BaseStream.Position = 0;
-                    if (Common.Binary.Read64(br.Buffer, 0, true) != br.Read64(true)) throw new Exception("reverse");
+                    br.BaseStream.Position = Common.Binary.Zero;
+                    if (Common.Binary.Read64(br.Buffer, Common.Binary.Zero, reverse) != br.Read64(reverse)) throw new Exception("Read64");
 
-                    br.SeekBits(-64);
-                    if (Common.Binary.Read64(br.Buffer, 0, true) != br.Read64(true)) throw new Exception("SeekBits");
+                    br.SeekBits(-Common.Binary.BitsPerLong);
+                    if (br.BaseStream.Position != Common.Binary.Zero) throw new Exception("Seek Bits");
+                    if (Common.Binary.Read64(br.Buffer, Common.Binary.Zero, reverse) != br.Read64(reverse)) throw new Exception("SeekBits");
+
+                    br.SeekBits(-Common.Binary.BitsPerLong);
+                    if (br.BaseStream.Position != Common.Binary.Zero) throw new Exception("Seek Bits");
+
+                    br.SeekBits(Common.Binary.BitsPerInteger);
+                    if (br.BaseStream.Position != Common.Binary.BytesPerInteger) throw new Exception("Seek Bits");
+                    if (Common.Binary.Read32(br.Buffer, Common.Binary.Zero, reverse) != br.Read32(reverse)) throw new Exception("SeekBits");
+
+                    if (br.BaseStream.Position != Common.Binary.BytesPerLong) throw new Exception("Seek Bits");
+
+                    br.SeekBits(-Common.Binary.BitsPerLong);
+                    if (br.BaseStream.Position != Common.Binary.Zero) throw new Exception("Seek Bits");
+
+                    //Loop all bits in the buffer
+                    for (int i = Common.Binary.Zero; i < Common.Binary.BitsPerLong; ++i)
+                    {
+                        //Ensure the result of ReadBit matches that of GetBit
+                        if (br.ReadBit() != Common.Binary.GetBit(testBytes, i)) throw new Exception("ReadBit");
+                    }
+
+                    if (reverse)
+                    {
+                        reverse = false;
+                        goto Test;
+                    }
                 }
             }
             

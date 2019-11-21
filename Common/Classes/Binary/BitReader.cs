@@ -163,7 +163,7 @@
         /// <param name="bitCount"></param>
         public void SeekBits(int bitCount)
         {
-            m_ByteIndex += System.Math.DivRem(bitCount, Binary.BitsPerByte, out m_BitIndex);
+            m_ByteIndex += Common.Binary.Max(System.Math.DivRem(bitCount, Binary.BitsPerByte, out m_BitIndex), Common.Binary.Zero);            
             m_BaseStream.Position += Common.Binary.BitsToBytes(ref bitCount);
         }
 
@@ -172,7 +172,7 @@
         /// </summary>
         public void ByteAlign()
         {
-            if (m_ByteIndex == 0) return;
+            if (m_BitIndex == 0) return;
             m_BitIndex = 0;
             ++m_ByteIndex;
         }
@@ -218,9 +218,9 @@
                 m_ByteCache.IncreaseLength(bytesToRead);
             }
 
-            if (m_ByteIndex + bytesToRead >= m_ByteCache.Count)
+            if (m_BitIndex > 0 || m_ByteIndex + bytesToRead >= m_ByteCache.Count)
             {
-                if(m_BitIndex > 0) Recycle();
+                Recycle();
                 m_BitIndex = m_ByteIndex = 0;
             }
 

@@ -302,7 +302,7 @@ namespace Media.Common
         }
 
         /// <summary>
-        /// if <see cref="IsDisposed"/> returns, otherwise calls <see cref="Dispose"/> with the value of <see cref="ShouldDispose"/> and <see cref="GC.SuppressFinalize"/>
+        /// if <see cref="IsDisposed"/> returns, calls <see cref="GC.SuppressFinalize"/> and sets <see cref="State"/>
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         void Destruct()
@@ -327,7 +327,7 @@ namespace Media.Common
 
         /// <summary>
         /// Allows derived implemenations a chance to destory manged or unmanged resources.
-        /// Calls <see cref="Destruct"/> if not <see cref="IsFinalized"/>, <see cref="IsUndisposed"/>, <see cref="ShoulDispose"/>, and not <see cref="IsDisposed"/>
+        /// Calls <see cref="Destruct"/> if not <see cref="IsFinalized"/>, <see cref="IsUndisposed"/>, <see cref="ShouldDispose"/>, and not <see cref="IsDisposed"/>
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public virtual void Dispose()

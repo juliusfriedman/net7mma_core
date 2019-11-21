@@ -336,7 +336,7 @@
             while (shift >= Common.Binary.Sex)
             {
                 shift -= Common.Binary.Sex;
-                WriteBits(Common.Binary.BitsPerByte, 0x80 | ((val >> shift) & Common.Binary.SixBitMaxValue));
+                Write8((byte)(0x80 | ((val >> shift) & Common.Binary.SixBitMaxValue)));
             }
         }
 
