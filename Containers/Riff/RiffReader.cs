@@ -598,7 +598,7 @@ namespace Media.Containers.Riff
         {
             get
             {
-                if (false == m_Type.HasValue) ReadRoot();
+                if (false == m_Type.HasValue) ParseRoot();
                 return m_Type.Value;
             }
         }
@@ -607,7 +607,7 @@ namespace Media.Containers.Riff
         {
             get
             {
-                if (false == m_SubType.HasValue) ReadRoot();
+                if (false == m_SubType.HasValue) ParseRoot();
                 return m_SubType.Value;
             }
         }
@@ -830,6 +830,8 @@ namespace Media.Containers.Riff
 
             using (var chunk = ReadChunk(FourCharacterCode.fmt, Root.Offset))
             {
+                if (chunk == null) throw new InvalidOperationException("no 'fmt' Chunk found");
+
                 m_Format = Common.Binary.Read16(chunk.Data, 0, Common.Binary.IsBigEndian);
                 m_NumChannels = Common.Binary.Read16(chunk.Data, 2, Common.Binary.IsBigEndian);
                 m_SampleRate = Common.Binary.Read32(chunk.Data, 4, Common.Binary.IsBigEndian);
@@ -903,7 +905,7 @@ namespace Media.Containers.Riff
         //    //Parse PRT2 - TrackCount
         //}
 
-        internal void ReadRoot()
+        internal void ParseRoot()
         {
             using (Node root = Root)
             {
@@ -980,9 +982,11 @@ namespace Media.Containers.Riff
 
             if(SubType == FourCharacterCode.WAVE)
             {
+                
+
                 if (false == m_SampleRate.HasValue) ParseFmt();
-                Track track = new Track(ReadChunk(FourCharacterCode.data), "", 0, FileInfo.CreationTimeUtc, FileInfo.LastWriteTimeUtc, 
-                    BlockAlign, 0, 0, TimeSpan.Zero, TimeSpan.Zero, 
+                Track track = new Track(ReadChunk(FourCharacterCode.data), string.Empty, (int)(Length / BlockAlign), FileInfo.CreationTimeUtc, FileInfo.LastWriteTimeUtc, 
+                    BlockAlign, 0, 0, TimeSpan.Zero, TimeSpan.FromSeconds(Length / (SampleRate * Channels * BitsPerSample / Common.Binary.BitsPerByte)), 
                     m_SampleRate.Value, Sdp.MediaType.audio, Common.Binary.GetBytes(m_Format.Value, Common.Binary.IsBigEndian), (byte)m_NumChannels.Value, (byte)m_BitsPerSample.Value, 
                     true);
                 tracks.Add(track);
