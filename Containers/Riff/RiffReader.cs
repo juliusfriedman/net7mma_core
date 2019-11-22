@@ -130,7 +130,9 @@ namespace Media.Containers.Riff
             auds = 1935963489,
             data = 1635017060,
             mids = 1935960429,
-            txts = 1937012852
+            txts = 1937012852,
+            //WAVE
+            fmt = 544501094,
         }
 
         #endregion
@@ -254,11 +256,29 @@ namespace Media.Containers.Riff
             //}
         }
 
+        public static bool HasSubType(byte[] chunk, int offset = 0)
+        {
+            if (chunk == null) throw new ArgumentNullException(nameof(chunk));
+
+            if (chunk.Length - offset < 4) throw new ArgumentOutOfRangeException(nameof(offset));
+
+            FourCharacterCode fourCC = (FourCharacterCode)ToFourCC(chunk[0], chunk[1], chunk[2], chunk[3]);
+
+            return HasSubType(fourCC);
+        }
+
         public static FourCharacterCode GetSubType(Node chunk)
         {
             if (chunk == null) throw new ArgumentNullException("chunk");
 
             return (FourCharacterCode)(HasSubType(chunk) ? ToFourCC(chunk.Identifier[4], chunk.Identifier[5], chunk.Identifier[6], chunk.Identifier[7]) : ToFourCC(chunk.Identifier[0], chunk.Identifier[1], chunk.Identifier[2], chunk.Identifier[3]));
+        }
+
+        public static FourCharacterCode GetSubType(byte[] chunk, int offset = 0)
+        {
+            if (chunk.Length - offset < 4) throw new ArgumentOutOfRangeException(nameof(offset));
+
+            return (FourCharacterCode)(HasSubType(chunk) ? ToFourCC(chunk[offset + 4], chunk[offset + 5], chunk[offset + 6], chunk[offset + 7]) : ToFourCC(chunk[offset + 0], chunk[offset + 1], chunk[offset + 2], chunk[offset + 3]));
         }
 
         #endregion        
@@ -370,6 +390,9 @@ namespace Media.Containers.Riff
             //Get the fourCC of the node
             FourCharacterCode fourCC = (FourCharacterCode)Common.Binary.Read32(identifier, 0, Media.Common.Binary.IsBigEndian);
 
+            //Store the first
+            if (false == m_Type.HasValue) m_Type = fourCC;
+
             //Determine if 64 bit support is needed by inspecting the first node encountered.
             if (false == m_Needs64BitInfo.HasValue)
             {
@@ -391,6 +414,9 @@ namespace Media.Containers.Riff
 
                 //Adjust for the bytes read.
                 identifierSize += IdentifierSize;
+
+                //Store the SubType if needed.
+                if(false == m_SubType.HasValue) m_SubType = GetSubType(identifier);
             }
 
             //If this is a 64 bit entry
@@ -564,23 +590,93 @@ namespace Media.Containers.Riff
             m_Modified = FileInfo.LastWriteTimeUtc;
         }
 
-        int? m_MicroSecPerFrame, m_MaxBytesPerSec, m_PaddingGranularity, m_Flags, m_TotalFrames, m_InitialFrames, m_Streams, m_SuggestedBufferSize, m_Width, m_Height, m_Reserved;
+        int? m_MicroSecPerFrame, m_Format, m_SampleRate, m_BitsPerSample, m_NumChannels, m_MaxBytesPerSec, m_PaddingGranularity, m_Flags, m_TotalFrames, m_InitialFrames, m_Streams, m_SuggestedBufferSize, m_Width, m_Height, m_Reserved;
+
+        FourCharacterCode? m_Type, m_SubType;
+
+        public FourCharacterCode? Type
+        {
+            get
+            {
+                if (false == m_Type.HasValue) ReadRoot();
+                return m_Type.Value;
+            }
+        }
+
+        public FourCharacterCode? SubType
+        {
+            get
+            {
+                if (false == m_SubType.HasValue) ReadRoot();
+                return m_SubType.Value;
+            }
+        }
+
+        public int SampleRate
+        {
+            get
+            {
+                if (SubType != FourCharacterCode.WAVE) return Common.Binary.Zero;
+                if (false == m_SampleRate.HasValue) ParseFmt();
+                return m_SampleRate.Value;
+            }
+        }
+
+        public int BlockAlign
+        {
+            get
+            {
+                if (SubType != FourCharacterCode.WAVE) return Common.Binary.Zero;
+                if (false == m_SampleRate.HasValue) ParseFmt();
+                return m_NumChannels.Value * m_BitsPerSample.Value / Common.Binary.BitsPerByte;
+            }
+        }
+
+        public int BitsPerSample
+        {
+            get
+            {
+                if (SubType != FourCharacterCode.WAVE) return Common.Binary.Zero;
+                if(false == m_BitsPerSample.HasValue) ParseFmt();
+                return m_BitsPerSample.Value;
+            }
+        }
+
+        public int Channels
+        {
+            get
+            {
+                if (SubType != FourCharacterCode.WAVE) return Common.Binary.Zero;
+                if (false == m_NumChannels.HasValue) ParseFmt();
+                return m_NumChannels.Value;
+            }
+        }
 
         public int MicrosecondsPerFrame
         {
             get
             {
+                if (SubType == FourCharacterCode.WAVE) return Common.Binary.Zero;
                 if (false == m_MicroSecPerFrame.HasValue) ParseAviHeader();
                 return m_MicroSecPerFrame.Value;
             }
         }
 
+        /// <summary>
+        /// The ByteRate for WAVE or the MaxBytesPerSecond for avi compliant files.
+        /// </summary>
         public int MaxBytesPerSecond
         {
             get
             {
-                if (false == m_MaxBytesPerSec.HasValue) ParseAviHeader();
-                return m_MaxBytesPerSec.Value;
+                switch (SubType)
+                {
+                    case FourCharacterCode.WAVE:
+                        return SampleRate * Channels * BitsPerSample / Common.Binary.BitsPerByte;
+                    default:
+                        if (false == m_MaxBytesPerSec.HasValue) ParseAviHeader();
+                        return m_MaxBytesPerSec.Value;
+                }
             }
         }
 
@@ -588,6 +684,7 @@ namespace Media.Containers.Riff
         {
             get
             {
+                if (SubType == FourCharacterCode.WAVE) return Common.Binary.Zero;
                 if (false == m_PaddingGranularity.HasValue) ParseAviHeader();
                 return m_PaddingGranularity.Value;
             }
@@ -597,6 +694,7 @@ namespace Media.Containers.Riff
         {
             get
             {
+                if (SubType == FourCharacterCode.WAVE) return Common.Binary.Zero;
                 if (false == m_Flags.HasValue) ParseAviHeader();
                 return m_Flags.Value;
             }
@@ -618,6 +716,7 @@ namespace Media.Containers.Riff
         {
             get
             {
+                if (SubType == FourCharacterCode.WAVE) return Common.Binary.Zero;
                 if (false == m_TotalFrames.HasValue) ParseAviHeader();
                 return m_TotalFrames.Value;
             }
@@ -627,6 +726,7 @@ namespace Media.Containers.Riff
         {
             get
             {
+                if (SubType == FourCharacterCode.WAVE) return Common.Binary.Zero;
                 if (false == m_InitialFrames.HasValue) ParseAviHeader();
                 return m_InitialFrames.Value;
             }
@@ -636,6 +736,7 @@ namespace Media.Containers.Riff
         {
             get
             {
+                if (SubType == FourCharacterCode.WAVE) return Common.Binary.Zero;
                 if (false == m_SuggestedBufferSize.HasValue) ParseAviHeader();
                 return m_SuggestedBufferSize.Value;
             }
@@ -645,6 +746,7 @@ namespace Media.Containers.Riff
         {
             get
             {
+                if (SubType == FourCharacterCode.WAVE) return Common.Binary.Zero;
                 if (false == m_Streams.HasValue) ParseAviHeader();
                 return m_Streams.Value;
             }
@@ -654,6 +756,7 @@ namespace Media.Containers.Riff
         {
             get
             {
+                if (SubType == FourCharacterCode.WAVE) return Common.Binary.Zero;
                 if (false == m_Width.HasValue) ParseAviHeader();
                 return m_Width.Value;
             }
@@ -663,6 +766,7 @@ namespace Media.Containers.Riff
         {
             get
             {
+                if (SubType == FourCharacterCode.WAVE) return Common.Binary.Zero;
                 if (false == m_Height.HasValue) ParseAviHeader();
                 return m_Height.Value;
             }
@@ -672,8 +776,20 @@ namespace Media.Containers.Riff
         {
             get
             {
-                if (false == m_TotalFrames.HasValue) ParseAviHeader();
-                return TimeSpan.FromMilliseconds((double)m_TotalFrames.Value * m_MicroSecPerFrame.Value / (double)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond);
+                switch (SubType)
+                {
+                    case FourCharacterCode.WAVE:
+                        {
+                            if (false == m_BitsPerSample.HasValue) ParseFmt();
+
+                            return TimeSpan.Zero;
+                        }
+                    default:
+                        {
+                            if (false == m_TotalFrames.HasValue) ParseAviHeader();
+                            return TimeSpan.FromMilliseconds((double)m_TotalFrames.Value * m_MicroSecPerFrame.Value / (double)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond);
+                        }
+                }
             }
         }
 
@@ -681,9 +797,73 @@ namespace Media.Containers.Riff
         {
             get
             {
+                if (SubType == FourCharacterCode.WAVE) return Common.Binary.Zero;
                 if (false == m_Reserved.HasValue) ParseAviHeader();
                 return m_Reserved.Value;
             }
+        }
+
+        internal protected void ParseFmt()
+        {
+            /*
+            The "WAVE" format consists of two subchunks: "fmt " and "data":
+            The "fmt " subchunk describes the sound data's format:
+
+            12        4   Subchunk1ID      Contains the letters "fmt "
+                                           (0x666d7420 big-endian form).
+            16        4   Subchunk1Size    16 for PCM.  This is the size of the
+                                           rest of the Subchunk which follows this number.
+            20        2   AudioFormat      PCM = 1 (i.e. Linear quantization)
+                                           Values other than 1 indicate some 
+                                           form of compression.
+            22        2   NumChannels      Mono = 1, Stereo = 2, etc.
+            24        4   SampleRate       8000, 44100, etc.
+            28        4   ByteRate         == SampleRate * NumChannels * BitsPerSample/8
+            32        2   BlockAlign       == NumChannels * BitsPerSample/8
+                                           The number of bytes for one sample including
+                                           all channels. I wonder what happens when
+                                           this number isn't an integer?
+            34        2   BitsPerSample    8 bits = 8, 16 bits = 16, etc.
+                      2   ExtraParamSize   if PCM, then doesn't exist
+                      X   ExtraParams      space for extra parameters
+            */
+
+            using (var chunk = ReadChunk(FourCharacterCode.fmt, Root.Offset))
+            {
+                m_Format = Common.Binary.Read16(chunk.Data, 0, Common.Binary.IsBigEndian);
+                m_NumChannels = Common.Binary.Read16(chunk.Data, 2, Common.Binary.IsBigEndian);
+                m_SampleRate = Common.Binary.Read32(chunk.Data, 4, Common.Binary.IsBigEndian);
+                m_MaxBytesPerSec = Common.Binary.Read32(chunk.Data, 8, Common.Binary.IsBigEndian);
+                short blockAlign = Common.Binary.Read16(chunk.Data, 12, Common.Binary.IsBigEndian);
+                m_BitsPerSample = Common.Binary.Read16(chunk.Data, 14, Common.Binary.IsBigEndian);
+                if (blockAlign != BlockAlign) throw new InvalidOperationException("BlockAlign");
+                if (m_MaxBytesPerSec != MaxBytesPerSecond) throw new InvalidOperationException("MaxBytesPerSecond");
+                //If len > 16
+                // 2 bytes size for extra data
+                // extra data bytes for codec.
+            }
+
+
+        }
+
+        internal protected void ParseData()
+        {
+            /*
+            The "data" subchunk contains the size of the data and the actual sound:
+
+            36        4   Subchunk2ID      Contains the letters "data"
+                                           (0x64617461 big-endian form).
+            40        4   Subchunk2Size    == NumSamples * NumChannels * BitsPerSample/8
+                                           This is the number of bytes in the data.
+                                           You can also think of this as the size
+                                           of the read of the subchunk following this 
+                                           number.
+            44        *   Data             The actual sound data.
+            */
+
+            //using (var chunk = ReadChunk(FourCharacterCode.data, Root.Offset))
+            //{
+            //}
         }
 
         //void ParseInformation()
@@ -722,6 +902,15 @@ namespace Media.Containers.Riff
         //    //Parse PRT1 - Track  
         //    //Parse PRT2 - TrackCount
         //}
+
+        internal void ReadRoot()
+        {
+            using (Node root = Root)
+            {
+                m_Type = (FourCharacterCode)Common.Binary.Read32(root.Identifier, 0, Media.Common.Binary.IsBigEndian);
+                if (Media.Containers.Riff.RiffReader.HasSubType(root)) m_SubType = Media.Containers.Riff.RiffReader.GetSubType(root);
+            }
+        }
 
         //void ParseOdmlHeader() { /*Total Number of Frames in File?*/ }
 
@@ -782,179 +971,192 @@ namespace Media.Containers.Riff
                 foreach (Track track in m_Tracks) yield return track;
                 yield break;
             }
-
+            
             long position = Position;
 
             var tracks = new List<Track>();
 
             int trackId = 0;
 
-            //strh has all track level info, strn has stream name..
-            foreach (var strhChunk in ReadChunks(Root.Offset, FourCharacterCode.strh).ToArray())
+            if(SubType == FourCharacterCode.WAVE)
             {
-                int offset = 0, sampleCount = TotalFrames, startTime = 0, timeScale = 0, duration = (int)Duration.TotalMilliseconds, width = Width, height = Height, rate = MicrosecondsPerFrame;
-
-                string trackName = string.Empty;
-
-                Sdp.MediaType mediaType = Sdp.MediaType.unknown;
-
-                byte[] codecIndication = Media.Common.MemorySegment.EmptyBytes;
-
-                byte channels = 0, bitDepth = 0;
-
-                //Expect 56 Bytes
-
-                FourCharacterCode fccType = (FourCharacterCode)Common.Binary.Read32(strhChunk.Data, offset, Media.Common.Binary.IsBigEndian);
-
-                offset += 4;
-
-                switch (fccType)
+                if (false == m_SampleRate.HasValue) ParseFmt();
+                Track track = new Track(ReadChunk(FourCharacterCode.data), "", 0, FileInfo.CreationTimeUtc, FileInfo.LastWriteTimeUtc, 
+                    BlockAlign, 0, 0, TimeSpan.Zero, TimeSpan.Zero, 
+                    m_SampleRate.Value, Sdp.MediaType.audio, Common.Binary.GetBytes(m_Format.Value, Common.Binary.IsBigEndian), (byte)m_NumChannels.Value, (byte)m_BitsPerSample.Value, 
+                    true);
+                tracks.Add(track);
+                yield return track;
+            }
+            else
+            {
+                //strh has all track level info, strn has stream name..
+                foreach (var strhChunk in ReadChunks(Root.Offset, FourCharacterCode.strh).ToArray())
                 {
-                    case FourCharacterCode.iavs:
-                        {
-                            //Interleaved Audio and Video
-                            //Should be audio and video samples together....?
-                            //Things like this need a Special TrackType, MediaType doens't really cut it.
-                            break;
-                        }
-                    case FourCharacterCode.vids:
-                        {
-                            //avg_frame_rate = timebase
-                            mediaType = Sdp.MediaType.video;
+                    int offset = 0, sampleCount = TotalFrames, startTime = 0, timeScale = 0, duration = (int)Duration.TotalMilliseconds, width = Width, height = Height, rate = MicrosecondsPerFrame;
 
-                            sampleCount = ReadChunks(Root.Offset, ToFourCC(trackId.ToString("D2") + FourCharacterCode.dc.ToString()),
-                                                                  ToFourCC(trackId.ToString("D2") + FourCharacterCode.db.ToString())).Count();
-                            break;
-                        }
-                    case FourCharacterCode.mids: //Midi
-                    case FourCharacterCode.auds:
-                        {
-                            mediaType = Sdp.MediaType.audio;
+                    string trackName = string.Empty;
 
-                            sampleCount = ReadChunks(Root.Offset, ToFourCC(trackId.ToString("D2") + FourCharacterCode.wb.ToString())).Count();
+                    Sdp.MediaType mediaType = Sdp.MediaType.unknown;
 
-                            break;
-                        }
-                    case FourCharacterCode.txts:
-                        {
-                            sampleCount = ReadChunks(Root.Offset, ToFourCC(trackId.ToString("D2") + FourCharacterCode.tx.ToString())).Count();
-                            mediaType = Sdp.MediaType.text; break;
-                        }
-                    case FourCharacterCode.data:
-                        {
-                            mediaType = Sdp.MediaType.data; break;
-                        }
-                    default: break;
-                }
+                    byte[] codecIndication = Media.Common.MemorySegment.EmptyBytes;
 
-                //fccHandler
-                codecIndication = strhChunk.Data.Skip(offset).Take(4).ToArray();
+                    byte channels = 0, bitDepth = 0;
 
-                offset += 4 + (DWORDSIZE * 3);
+                    //Expect 56 Bytes
 
-                //Scale
-                timeScale = Common.Binary.Read32(strhChunk.Data, offset, Media.Common.Binary.IsBigEndian);
+                    FourCharacterCode fccType = (FourCharacterCode)Common.Binary.Read32(strhChunk.Data, offset, Media.Common.Binary.IsBigEndian);
 
-                offset += 4;
+                    offset += 4;
 
-                //Rate
-                rate = Common.Binary.Read32(strhChunk.Data, offset, Media.Common.Binary.IsBigEndian);
-
-                offset += 4;
-
-                //Defaults??? Should not be hard coded....
-                if (false == (timeScale > 0 && rate > 0))
-                {
-                    rate = 25;
-                    timeScale = 1;
-                }
-
-                //Start
-                startTime = Common.Binary.Read32(strhChunk.Data, offset, Media.Common.Binary.IsBigEndian);
-
-                offset += 4;
-
-                //Length of stream (as defined in rate and timeScale above)
-                duration = Common.Binary.Read32(strhChunk.Data, offset, Media.Common.Binary.IsBigEndian);
-
-                offset += 4;
-
-                //SuggestedBufferSize
-
-                //Quality
-
-                //SampleSize
-
-                //RECT rcFrame (ushort left, top, right, bottom)
-
-                //Get strf for additional info.
-
-                switch (mediaType)
-                {
-                    case Sdp.MediaType.video:
-                        {
-                            using (var strf = ReadChunk(FourCharacterCode.strf, strhChunk.Offset))
+                    switch (fccType)
+                    {
+                        case FourCharacterCode.iavs:
                             {
-                                if (strf != null)
-                                {
-                                    //BitmapInfoHeader
-                                    //Read 32 Width
-                                    width = (int)Common.Binary.ReadU32(strf.Data, 4, Media.Common.Binary.IsBigEndian);
-
-                                    //Read 32 Height
-                                    height = (int)Common.Binary.ReadU32(strf.Data, 8, Media.Common.Binary.IsBigEndian);
-
-                                    //Maybe...
-                                    //Read 16 panes 
-
-                                    //Read 16 BitDepth
-                                    bitDepth = (byte)(int)Common.Binary.ReadU16(strf.Data, 14, Media.Common.Binary.IsBigEndian);
-
-                                    //Read codec
-                                    codecIndication = strf.Data.Skip(16).Take(4).ToArray();
-                                }
+                                //Interleaved Audio and Video
+                                //Should be audio and video samples together....?
+                                //Things like this need a Special TrackType, MediaType doens't really cut it.
+                                break;
                             }
-
-                            break;
-                        }
-                    case Sdp.MediaType.audio:
-                        {
-                            //Expand Codec Indication based on iD?
-
-                            using (var strf = ReadChunk(FourCharacterCode.strf, strhChunk.Offset))
+                        case FourCharacterCode.vids:
                             {
-                                if (strf != null)
-                                {
-                                    //WaveFormat (EX) 
-                                    codecIndication = strf.Data.Take(2).ToArray();
-                                    channels = (byte)Common.Binary.ReadU16(strf.Data, 2, Media.Common.Binary.IsBigEndian);
-                                    bitDepth = (byte)Common.Binary.ReadU16(strf.Data, 4, Media.Common.Binary.IsBigEndian);
-                                }
+                                //avg_frame_rate = timebase
+                                mediaType = Sdp.MediaType.video;
+
+                                sampleCount = ReadChunks(Root.Offset, ToFourCC(trackId.ToString("D2") + FourCharacterCode.dc.ToString()),
+                                                                      ToFourCC(trackId.ToString("D2") + FourCharacterCode.db.ToString())).Count();
+                                break;
                             }
+                        case FourCharacterCode.mids: //Midi
+                        case FourCharacterCode.auds:
+                            {
+                                mediaType = Sdp.MediaType.audio;
 
-                            
-                            break;
-                        }
-                    //text format....
-                    default: break;
-                }
+                                sampleCount = ReadChunks(Root.Offset, ToFourCC(trackId.ToString("D2") + FourCharacterCode.wb.ToString())).Count();
 
-                using (var strn = ReadChunk(FourCharacterCode.strn, strhChunk.Offset))
-                {
-                    if (strn != null) trackName = Encoding.UTF8.GetString(strn.Data, 8, (int)(strn.DataSize - 8));
+                                break;
+                            }
+                        case FourCharacterCode.txts:
+                            {
+                                sampleCount = ReadChunks(Root.Offset, ToFourCC(trackId.ToString("D2") + FourCharacterCode.tx.ToString())).Count();
+                                mediaType = Sdp.MediaType.text; break;
+                            }
+                        case FourCharacterCode.data:
+                            {
+                                mediaType = Sdp.MediaType.data; break;
+                            }
+                        default: break;
+                    }
 
-                    //Variable BitRate must also take into account the size of each chunk / nBlockAlign * duration per frame.
+                    //fccHandler
+                    codecIndication = strhChunk.Data.Skip(offset).Take(4).ToArray();
 
-                    Track created = new Track(strhChunk, trackName, ++trackId, Created, Modified, sampleCount, height, width,
-                        TimeSpan.FromMilliseconds(startTime / timeScale),
-                        mediaType == Sdp.MediaType.audio ?
-                            TimeSpan.FromSeconds((double)duration / (double)rate) :
-                            TimeSpan.FromMilliseconds((double)duration * m_MicroSecPerFrame.Value / (double)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond),
-                        rate / timeScale, mediaType, codecIndication, channels, bitDepth);
+                    offset += 4 + (DWORDSIZE * 3);
 
-                    yield return created;
+                    //Scale
+                    timeScale = Common.Binary.Read32(strhChunk.Data, offset, Media.Common.Binary.IsBigEndian);
 
-                    tracks.Add(created);
+                    offset += 4;
+
+                    //Rate
+                    rate = Common.Binary.Read32(strhChunk.Data, offset, Media.Common.Binary.IsBigEndian);
+
+                    offset += 4;
+
+                    //Defaults??? Should not be hard coded....
+                    if (false == (timeScale > 0 && rate > 0))
+                    {
+                        rate = 25;
+                        timeScale = 1;
+                    }
+
+                    //Start
+                    startTime = Common.Binary.Read32(strhChunk.Data, offset, Media.Common.Binary.IsBigEndian);
+
+                    offset += 4;
+
+                    //Length of stream (as defined in rate and timeScale above)
+                    duration = Common.Binary.Read32(strhChunk.Data, offset, Media.Common.Binary.IsBigEndian);
+
+                    offset += 4;
+
+                    //SuggestedBufferSize
+
+                    //Quality
+
+                    //SampleSize
+
+                    //RECT rcFrame (ushort left, top, right, bottom)
+
+                    //Get strf for additional info.
+
+                    switch (mediaType)
+                    {
+                        case Sdp.MediaType.video:
+                            {
+                                using (var strf = ReadChunk(FourCharacterCode.strf, strhChunk.Offset))
+                                {
+                                    if (strf != null)
+                                    {
+                                        //BitmapInfoHeader
+                                        //Read 32 Width
+                                        width = (int)Common.Binary.ReadU32(strf.Data, 4, Media.Common.Binary.IsBigEndian);
+
+                                        //Read 32 Height
+                                        height = (int)Common.Binary.ReadU32(strf.Data, 8, Media.Common.Binary.IsBigEndian);
+
+                                        //Maybe...
+                                        //Read 16 panes 
+
+                                        //Read 16 BitDepth
+                                        bitDepth = (byte)(int)Common.Binary.ReadU16(strf.Data, 14, Media.Common.Binary.IsBigEndian);
+
+                                        //Read codec
+                                        codecIndication = strf.Data.Skip(16).Take(4).ToArray();
+                                    }
+                                }
+
+                                break;
+                            }
+                        case Sdp.MediaType.audio:
+                            {
+                                //Expand Codec Indication based on iD?
+
+                                using (var strf = ReadChunk(FourCharacterCode.strf, strhChunk.Offset))
+                                {
+                                    if (strf != null)
+                                    {
+                                        //WaveFormat (EX) 
+                                        codecIndication = strf.Data.Take(2).ToArray();
+                                        channels = (byte)Common.Binary.ReadU16(strf.Data, 2, Media.Common.Binary.IsBigEndian);
+                                        bitDepth = (byte)Common.Binary.ReadU16(strf.Data, 4, Media.Common.Binary.IsBigEndian);
+                                    }
+                                }
+
+
+                                break;
+                            }
+                        //text format....
+                        default: break;
+                    }
+
+                    using (var strn = ReadChunk(FourCharacterCode.strn, strhChunk.Offset))
+                    {
+                        if (strn != null) trackName = Encoding.UTF8.GetString(strn.Data, 8, (int)(strn.DataSize - 8));
+
+                        //Variable BitRate must also take into account the size of each chunk / nBlockAlign * duration per frame.
+
+                        Track created = new Track(strhChunk, trackName, ++trackId, Created, Modified, sampleCount, height, width,
+                            TimeSpan.FromMilliseconds(startTime / timeScale),
+                            mediaType == Sdp.MediaType.audio ?
+                                TimeSpan.FromSeconds((double)duration / (double)rate) :
+                                TimeSpan.FromMilliseconds((double)duration * m_MicroSecPerFrame.Value / (double)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond),
+                            rate / timeScale, mediaType, codecIndication, channels, bitDepth);
+
+                        yield return created;
+
+                        tracks.Add(created);
+                    }
                 }
             }
             

@@ -1266,8 +1266,8 @@ namespace Media.Common
         internal static byte[] Mod37BitPosition = new byte[]
         {
             0, //-1
-            0, 1, 26, 2, 23, 27, 0, 3, 16, 24, 30, 28, 11, 0, 13, 4,
-            7, 17, 0, 25, 22, 31, 15, 29, 10, 12, 6, 0, 21, 14, 9, 5,
+            0, 1, 26, 2, 23, 27, 0, 3, 16, 24, 30, 28, 11, 0, 13, 4, 
+            7, 17, 0, 25, 22, 31, 15, 29, 10, 12, 6, 0, 21, 14, 9, 5, 
             20, 8, 19, 18
         };
 
@@ -3099,7 +3099,11 @@ namespace Media.Common
         /// <returns>The reversed unsigned 8 bit value</returns>
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static byte ReverseU8(ref byte source) { return BitsReverseTable[source]; }
+        public static byte ReverseU8(ref byte source)
+        {
+            //Range check.
+            return BitsReverseTable[source];
+        }
 
         public static byte ReverseU8(byte source) { return ReverseU8(ref source); }
 
@@ -3263,7 +3267,8 @@ namespace Media.Common
         /// <summary>
         /// Used for <see cref="Log2i"/> calls
         /// </summary>
-        public static readonly byte[] ByteLog2Table = new byte[]
+        /// <remarks><see cref="https://github.com/xVir/FLACTools/blob/master/FLACCodecWin8/BitReader.cs">See Also</see></remarks>
+        internal static readonly byte[] ByteLog2Table = new byte[]
     {
             0,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3,
             4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
@@ -3283,18 +3288,33 @@ namespace Media.Common
             7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7
     };
 
+        /// <summary>
+        /// Integer space based implementation of <see cref="System.Math.Log(double, double)"/> or <see cref="System.Math.Log2(double)"/>
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
         public static int Log2i(int v)
         {
             return Log2i((uint)v);
+        }
+
+        /// <summary>
+        /// Integer space based implementation of <see cref="System.Math.Log(double, double)"/> or <see cref="System.Math.Log2(double)"/>
+        /// </summary>
+        /// <param name="v"></param>
+        /// <returns></returns>
+        public static int Log2i(long v)
+        {
+            return Log2i((ulong)v);
         }
 
         [System.CLSCompliant(false)]
         public static int Log2i(ulong v)
         {
             int n = 0;
-            if (0 != (v & 0xffffffff00000000)) { v >>= 32; n += 32; }
-            if (0 != (v & 0xffff0000)) { v >>= 16; n += 16; }
-            if (0 != (v & 0xff00)) { v >>= 8; n += 8; }
+            if (0 != (v & 0xffffffff00000000)) { v >>= BitsPerInteger; n += BitsPerInteger; }
+            if (0 != (v & 0xffff0000)) { v >>= BitsPerShort; n += BitsPerShort; }
+            if (0 != (v & 0xff00)) { v >>= BitsPerByte; n += BitsPerByte; }
             return n + ByteLog2Table[v];
         }
 
@@ -3302,8 +3322,8 @@ namespace Media.Common
         public static int Log2i(uint v)
         {
             int n = 0;
-            if (0 != (v & 0xffff0000)) { v >>= 16; n += 16; }
-            if (0 != (v & 0xff00)) { v >>= 8; n += 8; }
+            if (0 != (v & 0xffff0000)) { v >>= BitsPerShort; n += BitsPerShort; }
+            if (0 != (v & 0xff00)) { v >>= BitsPerByte; n += BitsPerByte; }
             return n + ByteLog2Table[v];
         }
 

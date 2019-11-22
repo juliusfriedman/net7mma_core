@@ -69,6 +69,21 @@
     <None Update="Media\Audio\flac\testfile5.flac">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Media\Audio\wav\CantinaBand3.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Media\Audio\wav\CantinaBand60.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Media\Audio\wav\ImperialMarch60.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Media\Audio\wav\StarWars3.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Media\Audio\wav\StarWars60.wav">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Media\Video\asf\pages.asf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

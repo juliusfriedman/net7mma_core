@@ -3249,9 +3249,89 @@ a=appversion:1.0");
 
                         Console.WriteLine("Root Chunk:" + Media.Containers.Riff.RiffReader.ToFourCharacterCode(reader.Root.Identifier));
 
+                        Console.WriteLine("File Type:" + reader.Type);
+
+                        Console.WriteLine("File SubType:" + reader.SubType);
+
                         Console.WriteLine("File Level Information");
 
                         Console.WriteLine("Microseconds Per Frame:" + reader.MicrosecondsPerFrame);
+
+                        Console.WriteLine("Max Bytes Per Seconds:" + reader.MaxBytesPerSecond);
+
+                        Console.WriteLine("Flags:" + reader.Flags);
+                        Console.WriteLine("HasIndex:" + reader.HasIndex);
+                        Console.WriteLine("MustUseIndex:" + reader.MustUseIndex);
+                        Console.WriteLine("IsInterleaved:" + reader.IsInterleaved);
+                        Console.WriteLine("TrustChunkType:" + reader.TrustChunkType);
+                        Console.WriteLine("WasCaptureFile:" + reader.WasCaptureFile);
+                        Console.WriteLine("Copyrighted:" + reader.Copyrighted);
+
+                        Console.WriteLine("Total Frames:" + reader.TotalFrames);
+
+                        Console.WriteLine("Initial Frames:" + reader.InitialFrames);
+
+                        Console.WriteLine("Streams:" + reader.Streams);
+
+                        Console.WriteLine("Suggested Buffer Size:" + reader.SuggestedBufferSize);
+
+                        Console.WriteLine("Width:" + reader.Width);
+
+                        Console.WriteLine("Height:" + reader.Height);
+
+                        Console.WriteLine("Reserved:" + reader.Reserved);
+
+                        Console.WriteLine("Duration:" + reader.Duration);
+
+                        Console.WriteLine("Created:" + reader.Created);
+
+                        Console.WriteLine("Last Modified:" + reader.Modified);
+
+                        Console.WriteLine("Chunks:");
+
+                        foreach (var chunk in reader)
+                        {
+                            Console.WriteLine("Position:" + reader.Position);
+                            Console.WriteLine("Offset: " + chunk.Offset);
+                            Console.WriteLine("DataOffset: " + chunk.DataOffset);
+                            Console.WriteLine("Complete: " + chunk.IsComplete);
+
+                            string name = Media.Containers.Riff.RiffReader.ToFourCharacterCode(chunk.Identifier);
+
+                            Console.WriteLine("Name: " + name);
+
+                            //Show how the common type can be read.
+                            if (Media.Containers.Riff.RiffReader.HasSubType(chunk)) Console.WriteLine("Type: " + Media.Containers.Riff.RiffReader.GetSubType(chunk));
+
+                            Console.WriteLine("DataSize: " + chunk.DataSize);
+                            Console.WriteLine("TotalSize: " + chunk.DataSize);
+                        }
+
+                        Console.WriteLine("Track Information:");
+
+                        foreach (var track in reader.GetTracks()) DumpTrack(track);
+                    }
+
+            #endregion
+
+            #region RiffReader on Wave Files
+
+            if (System.IO.Directory.Exists(localPath + "/Media/Audio/wav/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Audio/wav/")) using (Media.Containers.Riff.RiffReader reader = new Media.Containers.Riff.RiffReader(fileName))
+                    {
+                        Console.WriteLine("Path:" + reader.Source);
+                        Console.WriteLine("Total Size:" + reader.Length);
+
+                        Console.WriteLine("Root Chunk:" + Media.Containers.Riff.RiffReader.ToFourCharacterCode(reader.Root.Identifier));
+
+                        Console.WriteLine("File Type:" + reader.Type);
+
+                        Console.WriteLine("File SubType:" + reader.SubType);
+
+                        Console.WriteLine("File Level Information");
+
+                        Console.WriteLine("SampleRate:" + reader.SampleRate);
+
+                        Console.WriteLine("BlockAlign:" + reader.BlockAlign);
 
                         Console.WriteLine("Max Bytes Per Seconds:" + reader.MaxBytesPerSecond);
 
