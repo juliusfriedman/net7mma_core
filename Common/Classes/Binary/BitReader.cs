@@ -536,13 +536,12 @@
         [System.CLSCompliant(false)]
         public uint ReadUnary(bool reverse = false)
         {
-            uint val = 0;
-            ulong result = ReadBits(8, reverse) >> 56;
-            while (result == 0)
+            uint val = Binary.Zero;
+            ulong result = ReadBits(Binary.BitsPerByte, reverse) >> 56;
+            while (result == Binary.Zero)
             {
-                result = ReadBits(8, reverse) >> 56;
+                result = ReadBits(Binary.BitsPerByte, reverse) >> 56;
             }
-
             val += ByteToUnary[result];
             SeekBits((int)(val & Binary.Septem) + Binary.One);
             return val;
@@ -551,7 +550,7 @@
         /// <summary>
         /// /// Reads data from the <see cref="BaseStream"/> into the <see cref="Cache"/>
         /// </summary>
-        /// <returns>The number of bytes read or -1 for EOF.</returns>
+        /// <returns>The number of bits read or 0 for EOF.</returns>
         public int Fill()
         {
             return m_Remaining = Common.Binary.BitsPerByte * m_BaseStream.Read(m_ByteCache.Array, m_ByteCache.Offset, m_ByteCache.Count - m_ByteIndex);

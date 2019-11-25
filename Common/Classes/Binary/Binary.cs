@@ -3719,7 +3719,7 @@ namespace Media.UnitTests
             using (BitReader br = new BitReader(testBytes, Binary.SystemBitOrder, 0, 0, false))
             {
                 //Fill the buffer so Peek can be used.
-                br.Fill();
+                if(br.Fill() != br.BitPosition) throw new Exception("BitPosition");
                 //Seek to the beginning
                 br.SeekBits(-(int)br.BitPosition);
                 //Loop all bytes
@@ -3861,26 +3861,24 @@ namespace Media.UnitTests
                         //Loop all bits in the buffer
                         for (int b = Common.Binary.Zero; b < Common.Binary.BitsPerLong; ++b)
                         {
-                            //Advances by 8 so would need to test only every 8
-                            //if (br.BitPosition != b) throw new Exception("BitPosition");
-
                             bool bitResult = br.ReadBit(reverse),
                                 expected = (reverse ? Common.Binary.GetBitReverse(testBytes, b) : Common.Binary.GetBit(testBytes, b));// (reverse ? Common.Binary.GetBitReverse(br.Buffer, b) : Common.Binary.GetBit(br.Buffer, b));
-
-                            //Ensure the result of ReadBit matches that of GetBit
-                            //if (bitResult != (reverse ? Common.Binary.GetBitReverse(testBytes, b) : Common.Binary.GetBit(testBytes, b))) throw new Exception("ReadBit@" + b.ToString());
 
                             //Ensure the buffer bit matches the result of ReadBit
                             if (bitResult != expected) throw new Exception("ReadBit@" + b.ToString() + " is not " + expected);
                         }
 
+                        //Reading with !reverse should produce reverse                    
+                        br.SeekBits(-(int)br.BitPosition);
+                        if ((ulong)br.Read64(!reverse) != r) throw new Exception("reverse");
+
+                        //Tests for Unary
+
                         //bw.BaseStream.Position = 0;
 
-                        //bw.WriteUnarySigned((int)i);
+                        //bw.WriteUnarySigned((int)i, reverse);
 
-                        //bw.BaseStream.Position = 0;
-
-                        //br.SeekBits(-br.BitIndex);
+                        //bw.BaseStream.Position = 0;                        
 
                         //if (br.ReadUnary(reverse) != (reverse ? r : i)) throw new Exception("WriteUnarySigned / ReadUnarySigned");
                     }

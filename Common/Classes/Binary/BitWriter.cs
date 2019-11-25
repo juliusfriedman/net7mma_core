@@ -367,7 +367,7 @@
         /// Writes unary binary data
         /// </summary>
         /// <param name="val"></param>
-        public void WriteUnarySigned(int val) //bool reverse = false
+        public void WriteUnarySigned(int val, bool reverse = false)
         {
             // convert signed to unsigned
             int v = -Binary.Two * val - Binary.One;
@@ -378,11 +378,11 @@
             
             while (q > Binary.ThirtyOne)
             {
-                WriteBits(Binary.ThirtyOne, Binary.Zero);
+                WriteBits(Binary.ThirtyOne, Binary.Zero, reverse);
                 q -= Binary.ThirtyOne;
             }
 
-            WriteBits(q, Binary.One);
+            WriteBits(q, Binary.One, reverse);
         }
 
         /// <summary>
