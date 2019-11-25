@@ -194,19 +194,26 @@
             ++m_ByteIndex;
         }
 
+        /// <summary>
+        /// Writes all data from the <see cref="Cache"/> to the <see cref="BaseStream"/>
+        /// </summary>
         public void Flush()
         {
-            int toWrite = m_ByteCache.Count - m_ByteIndex;
+            int toWrite = m_ByteIndex;
 
             if (m_BitIndex > 0) ++toWrite;
 
             if (toWrite <= 0) return;
 
-            m_BaseStream.Write(m_ByteCache.Array, m_ByteCache.Offset + m_ByteIndex, toWrite);
+            m_BaseStream.Write(m_ByteCache.Array, m_ByteCache.Offset, toWrite);
 
             m_ByteIndex = m_BitIndex = Common.Binary.Zero;
         }
 
+        /// <summary>
+        /// Write a bit to the <see cref="Cache"/>
+        /// </summary>
+        /// <param name="value"></param>
         public void WriteBit(bool value)
         {
             try
@@ -220,22 +227,25 @@
             }
         }
 
+        /// <summary>
+        /// Write a sbyte to the <see cref="Cache"/>
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="reverse"></param>
         [System.CLSCompliant(false)]
         public void WriteS8(sbyte value, bool reverse = false)
         {
             try
             {
-                int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
-
                 switch (m_BitOrder)
                 {
                     case Binary.BitOrder.LeastSignificant:
                         if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (byte)value, Common.Binary.BitsPerByte);
-                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (byte)value, Common.Binary.BitsPerLong);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (byte)value, Common.Binary.BitsPerByte);
                         return;
                     case Binary.BitOrder.MostSignificant:
                         if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (byte)value, Common.Binary.BitsPerByte);
-                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (byte)value, Common.Binary.BitsPerLong);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (byte)value, Common.Binary.BitsPerByte);
                         return;
                     default: throw new System.NotSupportedException("Please create an issue for your use case");
                 }
@@ -246,12 +256,15 @@
             }
         }
 
+        /// <summary>
+        /// Write a byte to the <see cref="Cache"/>
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="reverse"></param>
         public void Write8(byte value, bool reverse = false)
         {
             try
             {
-                int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
-
                 switch (m_BitOrder)
                 {
                     case Binary.BitOrder.LeastSignificant:
@@ -271,13 +284,16 @@
             }
         }
 
+        /// <summary>
+        /// Write a ulong to the <see cref="Cache"/>
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="reverse"></param>
         [System.CLSCompliant(false)]
         public void WriteU64(ulong value, bool reverse = false)
         {
             try
             {
-                int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
-
                 switch (m_BitOrder)
                 {
                     case Binary.BitOrder.LeastSignificant:
@@ -297,12 +313,15 @@
             }
         }
 
+        /// <summary>
+        /// Write a long to the <see cref="Cache"/>
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="reverse"></param>
         public void Write64(long value, bool reverse = false)
         {
             try
             {
-                int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
-
                 switch (m_BitOrder)
                 {
                     case Binary.BitOrder.LeastSignificant:
@@ -322,6 +341,10 @@
             }
         }
 
+        /// <summary>
+        /// Writes UTF8 compliant data
+        /// </summary>
+        /// <param name="val"></param>
         [System.CLSCompliant(false)]
         public void WriteUTF8(uint val)
         {
@@ -332,7 +355,7 @@
             }
             int bytes = (Binary.Log2i(val) + Common.Binary.Quattuor) / Common.Binary.Quinque;
             int shift = (bytes - 1) * Common.Binary.Sex;
-            WriteBits(Common.Binary.BitsPerByte, (256U - (256U >> bytes)) | (val >> shift));
+            WriteBits(Common.Binary.BitsPerByte, ((uint)Binary.TrīgintāDuoBitSize - ((uint)Binary.TrīgintāDuoBitSize >> bytes)) | (val >> shift));
             while (shift >= Common.Binary.Sex)
             {
                 shift -= Common.Binary.Sex;
@@ -340,27 +363,44 @@
             }
         }
 
-        public void WriteUnarySigned(int val)
+        /// <summary>
+        /// Writes unary binary data
+        /// </summary>
+        /// <param name="val"></param>
+        public void WriteUnarySigned(int val) //bool reverse = false
         {
             // convert signed to unsigned
-            int v = -2 * val - 1;
-            v ^= (v >> 31);
+            int v = -Binary.Two * val - Binary.One;
+            v ^= (v >> Binary.ThirtyOne);
 
             // write quotient in unary
-            int q = v + 1;
-            while (q > 31)
+            int q = v + Binary.One;
+            
+            while (q > Binary.ThirtyOne)
             {
-                WriteBits(31, 0);
-                q -= 31;
+                WriteBits(Binary.ThirtyOne, Binary.Zero);
+                q -= Binary.ThirtyOne;
             }
-            WriteBits(q, 1);
+
+            WriteBits(q, Binary.One);
         }
 
-        public void WriteBits(int bits, long val)
+        /// <summary>
+        /// Writes an arbitary amount of bits from val
+        /// </summary>
+        /// <param name="bits"></param>
+        /// <param name="val"></param>
+        public void WriteBits(int bits, long val, bool reverse = false)
         {
-            WriteBits(bits, (ulong)val);
+            WriteBits(bits, (ulong)val, reverse);
         }
 
+        /// <summary>
+        /// Writes an abitary amount of bits from val
+        /// </summary>
+        /// <param name="bits"></param>
+        /// <param name="value"></param>
+        /// <param name="reverse"></param>
         [System.CLSCompliant(false)]
         public void WriteBits(int bits, ulong value, bool reverse = false)
         {
@@ -385,7 +425,14 @@
             }
         }
 
-        public void CopyBits(byte[] buffer, int byteOffset, int bitOffset, int bitCount)
+        /// <summary>
+        /// Writs an arbitary amount of bits from the <paramref name="buffer"/>
+        /// </summary>
+        /// <param name="buffer"></param>
+        /// <param name="byteOffset"></param>
+        /// <param name="bitOffset"></param>
+        /// <param name="bitCount"></param>
+        public void WriteBits(byte[] buffer, int byteOffset, int bitOffset, int bitCount)
         {
             try
             {
@@ -403,26 +450,6 @@
                 Common.Binary.ComputeBits(bitCount, ref m_BitIndex, ref m_ByteIndex);
             }
         }
-
-        //Write8(reverse)
-
-        //Write16(reverse)
-
-        //Write24(reverse)
-
-        //Write32(reverse)
-
-        //Write64(reverse)
-
-        //WriteNBit(reverse)
-
-        //WriteBigEndian16
-
-        //WriteBigEndian32
-
-        //WriteBigEndian64
-
-        //Should check against m_ByteOrder
 
         #endregion
 

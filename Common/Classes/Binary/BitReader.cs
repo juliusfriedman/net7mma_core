@@ -5,6 +5,31 @@
     /// </summary>
     public class BitReader : BaseDisposable
     {
+
+        #region Statics
+
+        public static readonly byte[] ByteToUnary = new byte[]
+        {
+            8, 7, 6, 6, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4,
+            3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        };
+
+        #endregion
+
         #region Fields
 
         //Todo, should inherit Stream and should also skip copying to read if possibly by applying mask or alignment on stream methods...
@@ -14,7 +39,7 @@
 
         internal readonly System.IO.Stream m_BaseStream;
 
-        internal protected int m_ByteIndex = 0, m_BitIndex = 0;
+        internal protected int m_ByteIndex = 0, m_BitIndex = 0, m_Remaining = 0;
 
         internal protected bool m_LeaveOpen;
 
@@ -45,18 +70,14 @@
         public long Remaining { get { return m_BaseStream.Length - m_BaseStream.Position; } }
 
         /// <summary>
-        /// Indicates if the <see cref="BitIndex"/> is aligned to a byte boundary.
+        /// Gets the amount of bits remaining in the <see cref="Buffer"/>
         /// </summary>
-        public bool IsAligned { get { return m_BitIndex % Common.Binary.BitsPerByte == 0; } }
+        public long RemainingBits { get { return m_Remaining; } }
 
         /// <summary>
-        /// Gets or Sets the current <see cref="System.Byte"/> in the <see cref="Buffer"/> based on the <see cref="ByteIndex"/>
+        /// Indicates if the <see cref="BitIndex"/> is aligned to a byte boundary.
         /// </summary>
-        public byte CurrentByte
-        {
-            get { return m_ByteCache[m_ByteIndex]; }
-            set { m_ByteCache[m_ByteIndex] = value; }
-        }
+        public bool IsAligned { get { return Binary.Zero == (m_BitIndex & Binary.Septem); } }
 
         /// <summary>
         /// Gets the array in which values are stored, the array may be larger than the size usable by the <see cref="Cache"/>
@@ -78,7 +99,7 @@
         }
 
         /// <summary>
-        /// Gets or sets the index in the bytes
+        /// Gets or sets the index in the bytes of the <see cref="Buffer"/>
         /// </summary>
         public int ByteIndex
         {
@@ -90,6 +111,11 @@
         /// Gets the <see cref="System.IO.Stream"/> from which the data is read.
         /// </summary>
         public System.IO.Stream BaseStream { get { return m_BaseStream; } }
+
+        /// <summary>
+        /// Gets the bit position of the stream
+        /// </summary>
+        public long BitPosition { get { return m_BitIndex + (m_BaseStream.Position * Common.Binary.BitsPerByte); } }
 
         /// <summary>
         /// Gets or Sets the underlying <see cref="Binary.BitOrder"/> which is used to write values.
@@ -163,8 +189,13 @@
         /// <param name="bitCount"></param>
         public void SeekBits(int bitCount)
         {
-            m_ByteIndex += Common.Binary.Max(System.Math.DivRem(bitCount, Binary.BitsPerByte, out m_BitIndex), Common.Binary.Zero);            
-            m_BaseStream.Position += Common.Binary.BitsToBytes(ref bitCount);
+            m_Remaining = 0;
+            //if (m_Remaining < 0) m_Remaining = 0;
+            int bytes = System.Math.DivRem(bitCount, Binary.BitsPerByte, out m_BitIndex);
+            m_ByteIndex += bytes;
+            if (m_ByteIndex < 0) m_ByteIndex = 0;
+            //if (m_Remaining >= bitCount) return;
+            /*m_Remaining -= Common.Binary.BitsPerByte * (int)*/m_BaseStream.Seek(bytes, System.IO.SeekOrigin.Current);           
         }
 
         /// <summary>
@@ -172,8 +203,8 @@
         /// </summary>
         public void ByteAlign()
         {
-            if (m_BitIndex == 0) return;
-            m_BitIndex = 0;
+            if (m_BitIndex == Binary.Zero) return;
+            m_BitIndex = Binary.Zero;
             ++m_ByteIndex;
         }
 
@@ -208,20 +239,19 @@
         /// <param name="countOfBits">The amount of bits to read</param>
         internal void ReadBytesForBits(int countOfBits)
         {
-            if (countOfBits <= 0) return;
+            if (countOfBits <= m_Remaining) return;
 
             int bytesToRead = Common.Binary.BitsToBytes(countOfBits);
+
+            if (m_Remaining > 0 && m_ByteIndex + bytesToRead >= m_ByteCache.Count || countOfBits >= m_Remaining)
+            {
+                Recycle();
+            }
 
             if (bytesToRead > m_ByteCache.Count)
             {
                 System.Array.Resize(ref m_ByteCache.m_Array, bytesToRead);
-                m_ByteCache.IncreaseLength(bytesToRead);
-            }
-
-            if (m_BitIndex > 0 || m_ByteIndex + bytesToRead >= m_ByteCache.Count)
-            {
-                Recycle();
-                m_BitIndex = m_ByteIndex = 0;
+                m_ByteCache.IncreaseLength(bytesToRead - m_ByteCache.Count);
             }
 
             int bytesRead = 0;
@@ -230,8 +260,10 @@
             {
                 bytesRead = m_BaseStream.Read(m_ByteCache.Array, m_ByteCache.Offset + m_ByteIndex + bytesRead, bytesToRead);
 
-                bytesToRead -= bytesRead;
+                bytesToRead -= bytesRead;               
             }
+
+            m_Remaining += Common.Binary.BitsPerByte * bytesRead;
         }
 
         /// <summary>
@@ -240,15 +272,33 @@
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal protected void Recycle()
         {
-            Common.Binary.CopyBitsTo(m_ByteCache.Array, m_ByteIndex, m_BitIndex, m_ByteCache.Array, 0, 0, Common.Binary.BytesToBits(m_ByteCache.Count - m_ByteIndex) + m_BitIndex);
+            //If there are any bytes then copy them to the offset of the cache from the index
+            if (m_Remaining > 0 && m_ByteIndex > Common.Binary.Zero && m_ByteIndex < m_ByteCache.Count)
+            {
+                int count = m_ByteCache.Count - m_ByteIndex;
+                System.Buffer.BlockCopy(m_ByteCache.Array, m_ByteIndex, m_ByteCache.Array, m_ByteCache.Offset, count);
+                //System.Array.Clear(m_ByteCache.Array, m_ByteCache.Offset + count, count);
+            }
+            
+            //Reset the ByteIndex
+            m_ByteIndex = m_ByteCache.Offset;
 
-            m_ByteIndex = m_BitIndex = 0;
+            //Leave the BitIndex in place
         }
 
+        /// <summary>
+        /// Peek a bit from the <see cref="Cache"/>
+        /// </summary>
+        /// <param name="reverse">Indicates if the bit will be read using <see cref="Common.Binary.GetBit"/> or <see cref="Common.Binary.GetBitReverse"/></param>
+        /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public bool PeekBit()
+        public bool PeekBit(bool reverse = false)
         {
-            return Common.Binary.GetBit(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex);
+            switch (reverse) 
+            {
+                case false: return Common.Binary.GetBitReverse(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex);
+                case true: return Common.Binary.GetBit(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex);
+            }
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -342,31 +392,26 @@
             }
         }
 
+
         /// <summary>
-        /// Reads a single bit from the <see cref="Cache"/>
+        /// Reads a single bit from the <see cref="Cache"/> at the <see cref="ByteIndex"/> and <see cref="BitIndex"/>.
+        /// Up to <see cref="Common.Binary.BitsPerByte"/> bits maybe read.
         /// </summary>
-        /// <returns>The value</returns>
+        /// <param name="reverse">Indicates if the <see cref="BitIndex"/> should be used verbatim</param>
+        /// <returns>The bool which represents the value</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public bool ReadBit()
+        public bool ReadBit(bool reverse = false)
         {
             try
             {
-                if (m_BitIndex >= Common.Binary.BitsPerByte)
-                {
-                    m_BitIndex = 0;
-                    ++m_ByteIndex;
-                }
+                ReadBytesForBits(Common.Binary.One);
 
-                if(m_ByteIndex >= m_ByteCache.Count)
-                {
-                    ReadBytesForBits(Common.Binary.BitsPerByte);
-                }
-
-                return Common.Binary.GetBit(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex);
+                return PeekBit(reverse);
             }
             finally
             {
-                Common.Binary.ComputeBits(1, ref m_BitIndex, ref m_ByteIndex);
+                Common.Binary.ComputeBits(Common.Binary.One, ref m_BitIndex, ref m_ByteIndex);
+                --m_Remaining;
             }
         }
 
@@ -386,6 +431,7 @@
             finally
             {
                 Common.Binary.ComputeBits(Common.Binary.BitsPerByte, ref m_BitIndex, ref m_ByteIndex);
+                m_Remaining -= Common.Binary.BitsPerByte;
             }
         }
 
@@ -405,6 +451,7 @@
             finally
             {
                 Common.Binary.ComputeBits(Common.Binary.BitsPerShort, ref m_BitIndex, ref m_ByteIndex);
+                m_Remaining -= Common.Binary.BitsPerShort;
             }
         }
 
@@ -424,6 +471,7 @@
             finally
             {
                 Common.Binary.ComputeBits(Common.Binary.TripleBitSize, ref m_BitIndex, ref m_ByteIndex);
+                m_Remaining -= Common.Binary.TripleBitSize;
             }
         }
 
@@ -443,6 +491,7 @@
             finally
             {
                 Common.Binary.ComputeBits(Common.Binary.BitsPerInteger, ref m_BitIndex, ref m_ByteIndex);
+                m_Remaining -= Common.Binary.BitsPerInteger;
             }
         }
 
@@ -462,7 +511,37 @@
             finally
             {
                 Common.Binary.ComputeBits(Common.Binary.BitsPerLong, ref m_BitIndex, ref m_ByteIndex);
+                m_Remaining -= Common.Binary.BitsPerLong;
             }
+        }
+
+        public int ReadUnarySigned(bool reverse = false) 
+        {
+            return (int)ReadUnary(reverse);
+        }
+
+        [System.CLSCompliant(false)]
+        public uint ReadUnary(bool reverse = false)
+        {
+            uint val = 0;
+            ulong result = ReadBits(8, reverse) >> 56;
+            while (result == 0)
+            {
+                result = ReadBits(8, reverse) >> 56;
+            }
+
+            val += ByteToUnary[result];
+            SeekBits((int)(val & Binary.Septem) + Binary.One);
+            return val;
+        }
+
+        /// <summary>
+        /// /// Reads data from the <see cref="BaseStream"/> into the <see cref="Cache"/>
+        /// </summary>
+        /// <returns>The number of bytes read or -1 for EOF.</returns>
+        public int Fill()
+        {
+            return m_Remaining = Common.Binary.BitsPerByte * m_BaseStream.Read(m_ByteCache.Array, m_ByteCache.Offset, m_ByteCache.Count - m_ByteIndex);
         }
 
         /// <summary>
@@ -483,11 +562,13 @@
             finally
             {
                 Common.Binary.ComputeBits(count, ref m_BitIndex, ref m_ByteIndex);
+
+                m_Remaining -= count;
             }
         }
 
         /// <summary>
-        /// 
+        /// Reads an arbitary amount of bits specified by <paramref name="count"/>
         /// </summary>
         /// <param name="count"></param>
         /// <param name="reverse">Indicates if the <see cref="BitOrder"/> is reversed</param>
@@ -503,6 +584,8 @@
             finally
             {
                 Common.Binary.ComputeBits(count, ref m_BitIndex, ref m_ByteIndex);
+
+                m_Remaining -= count;
             }
         }
 

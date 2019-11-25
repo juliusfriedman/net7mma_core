@@ -552,12 +552,12 @@ namespace Media.Containers.Riff
                     {
                         //Thanks bartmeirens!
 
-                        //try parsing with current culture
+                        //try parsing with current culture should specify all parts (m d time year)
                         if (false == DateTime.TryParseExact(parts[1], "MMM", System.Globalization.CultureInfo.CurrentCulture,
                                 System.Globalization.DateTimeStyles.AssumeUniversal, out createdDateTime))
                         {
                             //: parse using invariant (en-US)
-                            if(false == DateTime.TryParseExact(parts[1], "MMM", System.Globalization.CultureInfo.CurrentCulture,
+                            if(false == DateTime.TryParseExact(parts[1], "MMM", System.Globalization.CultureInfo.InvariantCulture,
                                 System.Globalization.DateTimeStyles.AssumeUniversal, out createdDateTime))
                             {
                                 //The month portion of the result contains the data, the rest is blank
@@ -627,7 +627,7 @@ namespace Media.Containers.Riff
             get
             {
                 if (SubType != FourCharacterCode.WAVE) return Common.Binary.Zero;
-                if (false == m_SampleRate.HasValue) ParseFmt();
+                if (false == m_NumChannels.HasValue) ParseFmt();
                 return m_NumChannels.Value * m_BitsPerSample.Value / Common.Binary.BitsPerByte;
             }
         }
@@ -982,8 +982,6 @@ namespace Media.Containers.Riff
 
             if(SubType == FourCharacterCode.WAVE)
             {
-                
-
                 if (false == m_SampleRate.HasValue) ParseFmt();
                 Track track = new Track(ReadChunk(FourCharacterCode.data), string.Empty, (int)(Length / BlockAlign), FileInfo.CreationTimeUtc, FileInfo.LastWriteTimeUtc, 
                     BlockAlign, 0, 0, TimeSpan.Zero, TimeSpan.FromSeconds(Length / (SampleRate * Channels * BitsPerSample / Common.Binary.BitsPerByte)), 
