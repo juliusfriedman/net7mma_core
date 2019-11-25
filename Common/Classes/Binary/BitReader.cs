@@ -194,6 +194,8 @@
             int bytes = System.Math.DivRem(bitCount, Binary.BitsPerByte, out m_BitIndex);
             m_ByteIndex += bytes;
             if (m_ByteIndex < 0) m_ByteIndex = 0;
+            //Todo, should determine if the Position NEEDS to be moved here or if that is natural
+            //when remaining is > than bitCount the bytes are already in the buffer and we can ignore seeking.
             //if (m_Remaining >= bitCount) return;
             /*m_Remaining -= Common.Binary.BitsPerByte * (int)*/m_BaseStream.Seek(bytes, System.IO.SeekOrigin.Current);           
         }
@@ -237,53 +239,64 @@
         /// Reads the given amount of bits into the <see cref="Cache"/>.
         /// </summary>
         /// <param name="countOfBits">The amount of bits to read</param>
-        internal void ReadBytesForBits(int countOfBits)
+        /// <returns>The number of bytes read into the <see cref="Cache"/></returns>
+        internal int ReadBytesForBits(int countOfBits)
         {
-            if (countOfBits <= m_Remaining) return;
+            if (countOfBits <= m_Remaining) return 0;
 
             int bytesToRead = Common.Binary.BitsToBytes(countOfBits);
 
-            if (m_Remaining > 0 && m_ByteIndex + bytesToRead >= m_ByteCache.Count || countOfBits >= m_Remaining)
-            {
-                Recycle();
-            }
+            //Call recycle to use the buffer efficiently and determine the index in reading.
+            if (Recycle()) m_ByteIndex = m_ByteCache.Offset;
 
+            //If the bytesToRead cannot fit in the buffer then resize it
             if (bytesToRead > m_ByteCache.Count)
             {
                 System.Array.Resize(ref m_ByteCache.m_Array, bytesToRead);
                 m_ByteCache.IncreaseLength(bytesToRead - m_ByteCache.Count);
             }
 
+            //How many bytes read
             int bytesRead = 0;
 
-            while (bytesToRead > 0 && Remaining > 0)
+            //While there are bytes to read
+            while (bytesToRead > 0)
             {
+                //Read into the buffer
                 bytesRead = m_BaseStream.Read(m_ByteCache.Array, m_ByteCache.Offset + m_ByteIndex + bytesRead, bytesToRead);
 
+                //Check for EOF
+                if (bytesRead == 0) break;
+
+                //Adjust for the bytesRead
                 bytesToRead -= bytesRead;               
             }
 
+            //Compute how many bits are in the buffer.
             m_Remaining += Common.Binary.BitsPerByte * bytesRead;
+
+            //Indicate if reading was complete.
+            return bytesToRead;
         }
 
         /// <summary>
         /// Copies the bits which are left in the cache to the beginning of the cache
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void Recycle()
+        internal protected bool Recycle(bool clear = false)
         {
             //If there are any bytes then copy them to the offset of the cache from the index
             if (m_Remaining > 0 && m_ByteIndex > Common.Binary.Zero && m_ByteIndex < m_ByteCache.Count)
             {
                 int count = m_ByteCache.Count - m_ByteIndex;
                 System.Buffer.BlockCopy(m_ByteCache.Array, m_ByteIndex, m_ByteCache.Array, m_ByteCache.Offset, count);
-                //System.Array.Clear(m_ByteCache.Array, m_ByteCache.Offset + count, count);
+                if(clear) System.Array.Clear(m_ByteCache.Array, m_ByteCache.Offset + m_ByteIndex, count);
+                //Indicate to Reset the ByteIndex
+                return true;
             }
-            
-            //Reset the ByteIndex
-            m_ByteIndex = m_ByteCache.Offset;
-
             //Leave the BitIndex in place
+            //Indicate if the ByteIndex needs to be reset.
+            return m_ByteIndex >= m_ByteCache.Count;
         }
 
         /// <summary>

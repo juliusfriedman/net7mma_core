@@ -3731,27 +3731,23 @@ namespace Media.UnitTests
                     //Get the expected byte
                     byte expected = testBytes[i];
 
-                    ////Read a byte from the stream
-                    //byte b = br.Peek8(reverse);
+                    //Read a byte from the stream
+                    byte b = br.Peek8(reverse);
 
-                    ////Ensure Peek works
-                    //if (br.Peek8(reverse) != expected) throw new Exception("Peek8");
+                    //Ensure Peek works
+                    if (b != expected) throw new Exception("Peek8");
 
                     //Ensure the Position before reading
                     if (br.BaseStream.Position != i) throw new Exception("Position");
 
                     //Read a byte and advance the Position
-                    byte b = br.Read8(reverse);
+                    b = br.Read8(reverse);
 
                     //Ensure the Position before reading
                     if (br.BaseStream.Position != i + 1) throw new Exception("Position");
 
                     //Test equality to the soruce
                     if (expected != b) throw new Exception("source");
-
-                    //Peek can only be used when Fill or Read is used with larger sizes or after Seeking
-                    //In this case the read fills the buffer with the previous value so peeking returns the same value as read.
-                    //if (br.Peek8(reverse) != b) throw new Exception("Peek8");
 
                     //Ensure the BitPosition
                     if (br.BitPosition != Binary.BitsPerByte * i + Binary.BitsPerByte) throw new Exception("BitPosition");
