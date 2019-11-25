@@ -363,27 +363,28 @@
             }
         }
 
-        /// <summary>
-        /// Writes unary binary data
-        /// </summary>
-        /// <param name="val"></param>
-        public void WriteUnarySigned(int val, bool reverse = false)
-        {
-            // convert signed to unsigned
-            int v = -Binary.Two * val - Binary.One;
-            v ^= (v >> Binary.ThirtyOne);
+        //For Flac.BitWriter
+        ///// <summary>
+        ///// Writes unary binary data
+        ///// </summary>
+        ///// <param name="val"></param>
+        //public void WriteUnarySigned(int val, bool reverse = false)
+        //{
+        //    // convert signed to unsigned
+        //    int v = -Binary.Two * val - Binary.One;
+        //    v ^= (v >> Binary.ThirtyOne);
 
-            // write quotient in unary
-            int q = v + Binary.One;
+        //    // write quotient in unary
+        //    int q = v + Binary.One;
             
-            while (q > Binary.ThirtyOne)
-            {
-                WriteBits(Binary.ThirtyOne, Binary.Zero, reverse);
-                q -= Binary.ThirtyOne;
-            }
+        //    while (q > Binary.ThirtyOne)
+        //    {
+        //        WriteBits(Binary.ThirtyOne, Binary.Zero, reverse);
+        //        q -= Binary.ThirtyOne;
+        //    }
 
-            WriteBits(q, Binary.One, reverse);
-        }
+        //    WriteBits(q, Binary.One, reverse);
+        //}
 
         /// <summary>
         /// Writes an arbitary amount of bits from val

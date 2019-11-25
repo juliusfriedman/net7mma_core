@@ -528,24 +528,25 @@
             }
         }
 
-        public int ReadUnarySigned(bool reverse = false) 
-        {
-            return (int)ReadUnary(reverse);
-        }
+        //For Flac.BitReader
+        ////public int ReadUnarySigned(bool reverse = false) 
+        ////{
+        ////    return (int)ReadUnary(reverse);
+        ////}
 
-        [System.CLSCompliant(false)]
-        public uint ReadUnary(bool reverse = false)
-        {
-            uint val = Binary.Zero;
-            ulong result = ReadBits(Binary.BitsPerByte, reverse) >> 56;
-            while (result == Binary.Zero)
-            {
-                result = ReadBits(Binary.BitsPerByte, reverse) >> 56;
-            }
-            val += ByteToUnary[result];
-            SeekBits((int)(val & Binary.Septem) + Binary.One);
-            return val;
-        }
+        ////[System.CLSCompliant(false)]
+        ////public uint ReadUnary(bool reverse = false)
+        ////{
+        ////    uint val = Binary.Zero;
+        ////    ulong result = ReadBits(Binary.BitsPerByte, reverse) >> 56;
+        ////    while (result == Binary.Zero)
+        ////    {
+        ////        result = ReadBits(Binary.BitsPerByte, reverse) >> 56;
+        ////    }
+        ////    val += ByteToUnary[result];
+        ////    SeekBits((int)(val & Binary.Septem) + Binary.One);
+        ////    return val;
+        ////}
 
         /// <summary>
         /// /// Reads data from the <see cref="BaseStream"/> into the <see cref="Cache"/>

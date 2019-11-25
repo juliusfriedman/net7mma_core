@@ -3872,13 +3872,13 @@ namespace Media.UnitTests
                         br.SeekBits(-(int)br.BitPosition);
                         if ((ulong)br.Read64(!reverse) != r) throw new Exception("reverse");
 
-                        //Tests for Unary
+                        ////Tests for Unary, TODO Flac.BitReader/BitWriter
 
                         //bw.BaseStream.Position = 0;
 
                         //bw.WriteUnarySigned((int)i, reverse);
 
-                        //bw.BaseStream.Position = 0;                        
+                        //br.SeekBits(-(int)br.BitPosition);
 
                         //if (br.ReadUnary(reverse) != (reverse ? r : i)) throw new Exception("WriteUnarySigned / ReadUnarySigned");
                     }
