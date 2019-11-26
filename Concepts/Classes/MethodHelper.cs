@@ -13,9 +13,72 @@ namespace Media.Concepts.Classes
     /// <summary>
     /// A simple program to test Injection
     /// </summary>
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+
+    public static unsafe MethodReplacementState Replace(MethodInfo methodToReplace, MethodInfo methodToInject)
+        {
+            RuntimeHelpers.PrepareMethod(methodToReplace.MethodHandle);
+            RuntimeHelpers.PrepareMethod(methodToInject.MethodHandle);
+            MethodReplacementState state;
+
+            IntPtr tar = methodToReplace.MethodHandle.Value;
+            if (!methodToReplace.IsVirtual)
+                tar += 8;
+            else
+            {
+                var index = (int)(((*(long*)tar) >> 32) & 0xFF);
+                var classStart = *(IntPtr*)(methodToReplace.DeclaringType.TypeHandle.Value + (IntPtr.Size == 4 ? 40 : 64));
+                tar = classStart + IntPtr.Size * index;
+            }
+            var inj = methodToInject.MethodHandle.Value + 8;
+            if (System.Diagnostics.Debugger.IsAttached)
+            {
+                tar = *(IntPtr*)tar + 1;
+                inj = *(IntPtr*)inj + 1;
+                state.Location = tar;
+                state.OriginalValue = new IntPtr(*(int*)tar);
+
+                *(int*)tar = *(int*)inj + (int)(long)inj - (int)(long)tar;
+                return state;
+
+            }
+            state.Location = tar;
+            state.OriginalValue = *(IntPtr*)tar;
+            *(IntPtr*)tar = *(IntPtr*)inj;
+            return state;
+        }    
+
+    public struct MethodReplacementState : IDisposable
+    {
+        internal IntPtr Location;
+        internal IntPtr OriginalValue;
+        public void Dispose()
+        {
+            this.Restore();
+        }
+
+        public unsafe void Restore()
+        {
+#if DEBUG
+            *(int*)Location = (int)OriginalValue;
+#else
+            *(IntPtr*)Location = OriginalValue;
+#endif
+        }
+    }
+
+    public static void WriteTest()
+        {
+            System.Console.WriteLine("TEST");
+        }
+
+    public static void WriteTest2()
+    {
+        System.Console.WriteLine("TEST2");
+    }
+
+    static void Main(string[] args)
         {
             Target targetInstance = new Target();
 
@@ -121,7 +184,8 @@ namespace Media.Concepts.Classes
             {
                 if (Environment.Version.Major == 4)
                 {
-                    MethodInfo methodDescriptior = typeof(System.Reflection.Emit.DynamicMethod).GetMethod("GetMethodDescriptor", BindingFlags.Instance | BindingFlags.NonPublic);
+                    MethodInfo methodDescriptior = typeof(System.Reflection.Emit.DynamicMethod).GetMethod("GetMethodDescriptor", 
+                                      BindingFlags.Instance | BindingFlags.NonPublic);
                     return ((RuntimeMethodHandle)methodDescriptior.Invoke(method as System.Reflection.Emit.DynamicMethod, null)).GetFunctionPointer();
                 }
                 else
@@ -215,29 +279,16 @@ namespace Media.Concepts.Classes
 
             unsafe
             {
-                // Some dwords in the met
-                int skip;
-
-                // Read the method index.
-                UInt64* location = (UInt64*)(method.MethodHandle.Value.ToPointer());
-                int index = (int)(((*location) >> 32) & 0xFF);
-
-                if (IntPtr.Size == 8)
-                {
-                    skip = 8;
-                    // Get the method table
-                    ulong* classStart = (ulong*)method.DeclaringType.TypeHandle.Value.ToPointer();
-                    ulong* address = classStart + index + skip;
-                    return new IntPtr(address);
-                }
+                IntPtr tar = method.MethodHandle.Value;
+                if (!method.IsVirtual)
+                    tar += 8;
                 else
                 {
-                    skip = 10;
-                    // Get the method table
-                    uint* classStart = (uint*)method.DeclaringType.TypeHandle.Value.ToPointer();
-                    uint* address = classStart + index + skip;
-                    return new IntPtr(address);
+                    var index = (int)(((*(long*)tar) >> 32) & 0xFF);
+                    var classStart = *(IntPtr*)(method.DeclaringType.TypeHandle.Value + (IntPtr.Size == 4 ? 40 : 64));
+                    tar = classStart + IntPtr.Size * index;
                 }
+                return tar;
             }
         }
 
@@ -276,10 +327,7 @@ namespace Media.Concepts.Classes
                 uint* d = (uint*)destAdr.ToPointer();
                 *d = *((uint*)srcAdr.ToPointer());
             }
-            if (codeSize <= 0)
-            {
-                System.Buffer.MemoryCopy((void*)srcAdr, (void*)GetMethodAddress(dest), codeSize, codeSize);
-            }
+            if (codeSize > 0) System.Buffer.MemoryCopy((void*)srcAdr, (void*)GetMethodAddress(dest), codeSize, codeSize);
         }
         
         /// <summary>
@@ -299,56 +347,30 @@ namespace Media.Concepts.Classes
 
             unsafe
             {
-                //Check alignment
-
-                if (IntPtr.Size == 4)
-                {
-                    int* inj = (int*)GetMethodAddress(source) + 2;
-                    int* tar = (int*)GetMethodAddress(destination) + 2;
-                    if (System.Diagnostics.Debugger.IsAttached)
-                    {
-                        byte* injInst = (byte*)*inj;
-                        byte* tarInst = (byte*)*tar;
-
-                        int* injSrc = (int*)(injInst + 1);
-                        int* tarSrc = (int*)(tarInst + 1);
-
-                        *tarSrc = (((int)injInst + 5) + *injSrc) - ((int)tarInst + 5);
-                    }
-                    else
-                    {
-                        *tar = *inj;
-                    }
-                }
+                IntPtr tar = source.MethodHandle.Value;
+                if (!source.IsVirtual)
+                    tar += 8;
                 else
                 {
-                    int* inj = (int*)GetMethodAddress(source) + 1;
-                    int* tar = (int*)GetMethodAddress(destination) + 1;
-                    if (System.Diagnostics.Debugger.IsAttached)
-                    {
-                        System.Diagnostics.Debug.WriteLine("\nVersion x64 Debug\n");
-                        byte* injInst = (byte*)*inj;
-                        byte* tarInst = (byte*)*tar;
-
-
-                        int* injSrc = (int*)(injInst + 1);
-                        int* tarSrc = (int*)(tarInst + 1);
-
-                        *tarSrc = (((int)injInst + 5) + *injSrc) - ((int)tarInst + 5);
-
-                    }
-                    else
-                    {
-                        *tar = *inj;
-                    }
-#if DEBUG
-                    System.Diagnostics.Debug.WriteLine("MethodHelper.Redirect =>" + source.Name + "@" + source.DeclaringType.Name + " now will use the code of " + destination.Name + "@" + destination.DeclaringType.Name);
-#endif
+                    var index = (int)(((*(long*)tar) >> 32) & 0xFF);
+                    var classStart = *(IntPtr*)(source.DeclaringType.TypeHandle.Value + (IntPtr.Size == 4 ? 40 : 64));
+                    tar = classStart + IntPtr.Size * index;
                 }
+                var inj = destination.MethodHandle.Value + 8;
+#if DEBUG
+                    tar = *(IntPtr*)tar + 1;
+                    inj = *(IntPtr*)inj + 1;
+                    *(int*)tar = *(int*)inj + (int)(long)inj - (int)(long)tar;
+                    return;
+
+#else
+                *(IntPtr*)tar = *(IntPtr*)inj;
+                return;
+#endif
             }
         }
 
-        #endregion
+#endregion
 
         /// <summary>
         /// Redirects a method to another method

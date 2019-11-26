@@ -3892,6 +3892,15 @@ a=appversion:1.0");
             //    System.Console.WriteLine("ReadCpuType: " + readCpuType.NativeInvoke());
             //}
 
+            Concepts.Classes.Program.WriteTest();
+
+            using (var state = Concepts.Classes.Program.Replace(Media.Common.Extensions.ExpressionExtensions.SymbolExtensions.GetMethodInfo(() => Concepts.Classes.Program.WriteTest()), Media.Common.Extensions.ExpressionExtensions.SymbolExtensions.GetMethodInfo(() => Concepts.Classes.Program.WriteTest2())))
+            {
+                Concepts.Classes.Program.WriteTest();
+            }
+
+            Concepts.Classes.Program.WriteTest();
+
             System.Console.WriteLine(Concepts.Hardware.PlatformRtdsc.GetTimestampUnsigned());
 
             if (false == Concepts.Hardware.Intrinsics.CpuId.IsSupported()) System.Console.WriteLine("Hardware.Intrinsics Not Supported!");
