@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 //Modified based on the following examples:
 //http://stackoverflow.com/questions/7299097/dynamically-replace-the-contents-of-a-c-sharp-method
 //http://www.codeproject.com/Articles/37549/CLR-Injection-Runtime-Method-Replacer
-
+//https://stackoverflow.com/questions/45972562/c-sharp-how-to-get-runtimemethodhandle-from-dynamicmethod
 namespace Media.Concepts.Classes
 {
     #region Example
@@ -119,9 +119,17 @@ namespace Media.Concepts.Classes
         {
             if (method is System.Reflection.Emit.DynamicMethod)
             {
-                FieldInfo fieldInfo = typeof(System.Reflection.Emit.DynamicMethod).GetField("m_method",
+                if (Environment.Version.Major == 4)
+                {
+                    MethodInfo methodDescriptior = typeof(System.Reflection.Emit.DynamicMethod).GetMethod("GetMethodDescriptor", BindingFlags.Instance | BindingFlags.NonPublic);
+                    return ((RuntimeMethodHandle)methodDescriptior.Invoke(method as System.Reflection.Emit.DynamicMethod, null)).GetFunctionPointer();
+                }
+                else
+                {
+                    FieldInfo fieldInfo = typeof(System.Reflection.Emit.DynamicMethod).GetField("m_method",
                                       BindingFlags.NonPublic | BindingFlags.Instance);
-                return ((RuntimeMethodHandle)fieldInfo.GetValue(method)).Value;
+                    return ((RuntimeMethodHandle)fieldInfo.GetValue(method)).Value;
+                }
             }
             return method.MethodHandle.Value;
         }
@@ -184,7 +192,7 @@ namespace Media.Concepts.Classes
         public static IntPtr GetMethodAddress(MethodBase method)
         {
             if ((method is System.Reflection.Emit.DynamicMethod))
-            {
+            {             
                 unsafe
                 {
                     byte* ptr = (byte*)GetDynamicMethodRuntimeHandle(method).ToPointer();
@@ -208,7 +216,7 @@ namespace Media.Concepts.Classes
             unsafe
             {
                 // Some dwords in the met
-                int skip = 10;
+                int skip;
 
                 // Read the method index.
                 UInt64* location = (UInt64*)(method.MethodHandle.Value.ToPointer());
@@ -216,6 +224,7 @@ namespace Media.Concepts.Classes
 
                 if (IntPtr.Size == 8)
                 {
+                    skip = 8;
                     // Get the method table
                     ulong* classStart = (ulong*)method.DeclaringType.TypeHandle.Value.ToPointer();
                     ulong* address = classStart + index + skip;
@@ -223,6 +232,7 @@ namespace Media.Concepts.Classes
                 }
                 else
                 {
+                    skip = 10;
                     // Get the method table
                     uint* classStart = (uint*)method.DeclaringType.TypeHandle.Value.ToPointer();
                     uint* address = classStart + index + skip;
@@ -252,23 +262,21 @@ namespace Media.Concepts.Classes
         /// </summary>
         /// <param name="srcAdr"></param>
         /// <param name="dest"></param>
+        /// <param name="codeSize">The optional amount of bytes to copy from <paramref name="srcAdr"/> to <paramref name="dest"/></param>
         public unsafe static void Patch(IntPtr srcAdr, MethodBase dest, int codeSize = 0)
         {
-            IntPtr destAdr = GetMethodAddress(dest);
-            if (codeSize <= 0)
+            IntPtr destAdr = GetMethodAddress(dest);            
+            if (IntPtr.Size == 8)
             {
-                if (IntPtr.Size == 8)
-                {
-                    ulong* d = (ulong*)destAdr.ToPointer();
-                    *d = *((ulong*)srcAdr.ToPointer());
-                }
-                else
-                {
-                    uint* d = (uint*)destAdr.ToPointer();
-                    *d = *((uint*)srcAdr.ToPointer());
-                }
+                ulong* d = (ulong*)destAdr.ToPointer();
+                *d = *((ulong*)srcAdr.ToPointer());
             }
             else
+            {
+                uint* d = (uint*)destAdr.ToPointer();
+                *d = *((uint*)srcAdr.ToPointer());
+            }
+            if (codeSize <= 0)
             {
                 System.Buffer.MemoryCopy((void*)srcAdr, (void*)GetMethodAddress(dest), codeSize, codeSize);
             }
@@ -295,44 +303,47 @@ namespace Media.Concepts.Classes
 
                 if (IntPtr.Size == 4)
                 {
-                    int* inj = (int*)source.MethodHandle.Value.ToPointer() + 2;
-                    int* tar = (int*)destination.MethodHandle.Value.ToPointer() + 2;
-#if DEBUG
-                    byte* injInst = (byte*)*inj;
-                    byte* tarInst = (byte*)*tar;
+                    int* inj = (int*)GetMethodAddress(source) + 2;
+                    int* tar = (int*)GetMethodAddress(destination) + 2;
+                    if (System.Diagnostics.Debugger.IsAttached)
+                    {
+                        byte* injInst = (byte*)*inj;
+                        byte* tarInst = (byte*)*tar;
 
-                    int* injSrc = (int*)(injInst + 1);
-                    int* tarSrc = (int*)(tarInst + 1);
+                        int* injSrc = (int*)(injInst + 1);
+                        int* tarSrc = (int*)(tarInst + 1);
 
-                    *tarSrc = (((int)injInst + 5) + *injSrc) - ((int)tarInst + 5);
-#else
-                    *tar = *inj;
-#endif
+                        *tarSrc = (((int)injInst + 5) + *injSrc) - ((int)tarInst + 5);
+                    }
+                    else
+                    {
+                        *tar = *inj;
+                    }
                 }
                 else
                 {
+                    int* inj = (int*)GetMethodAddress(source) + 1;
+                    int* tar = (int*)GetMethodAddress(destination) + 1;
+                    if (System.Diagnostics.Debugger.IsAttached)
+                    {
+                        System.Diagnostics.Debug.WriteLine("\nVersion x64 Debug\n");
+                        byte* injInst = (byte*)*inj;
+                        byte* tarInst = (byte*)*tar;
 
-                    long* inj = (long*)source.MethodHandle.Value.ToPointer() + 1;
-                    long* tar = (long*)destination.MethodHandle.Value.ToPointer() + 1;
-#if DEBUG
-                    System.Diagnostics.Debug.WriteLine("\nVersion x64 Debug\n");
-                    byte* injInst = (byte*)*inj;
-                    byte* tarInst = (byte*)*tar;
 
+                        int* injSrc = (int*)(injInst + 1);
+                        int* tarSrc = (int*)(tarInst + 1);
 
-                    int* injSrc = (int*)(injInst + 1);
-                    int* tarSrc = (int*)(tarInst + 1);
+                        *tarSrc = (((int)injInst + 5) + *injSrc) - ((int)tarInst + 5);
 
-                    *tarSrc = (((int)injInst + 5) + *injSrc) - ((int)tarInst + 5);
-                    
-#else
-                    *tar = *inj;
-#endif
-
+                    }
+                    else
+                    {
+                        *tar = *inj;
+                    }
 #if DEBUG
                     System.Diagnostics.Debug.WriteLine("MethodHelper.Redirect =>" + source.Name + "@" + source.DeclaringType.Name + " now will use the code of " + destination.Name + "@" + destination.DeclaringType.Name);
 #endif
-
                 }
             }
         }

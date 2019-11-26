@@ -300,7 +300,7 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// 
         /// </summary>
-        public const double Zero = Common.Binary.DoubleZero, 
+        public const double Zero = Common.Binary.DoubleZero,
             One = 1.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001;
 
         /// <summary>
@@ -317,97 +317,164 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// The Error
         /// </summary>
-        Number Error;
+        internal protected Number Error;
 
-            /// <summary>
-            /// Create the;
-            /// </summary>
-            public IdealUnit()
-                : base(One)
+        /// <summary>
+        /// Create the;
+        /// </summary>
+        public IdealUnit()
+            : base(One)
+        {
+            Constant = MinValue.Constant;
+
+            Units = MinValue.Units;
+
+            Error = Zero;
+        }
+
+        /// <summary>
+        /// Create a;
+        /// </summary>
+        /// <param name="units"></param>
+        public IdealUnit(Number units)
+            : base(Zero)
+        {
+            Units = units;
+
+            Error = Zero;
+        }
+
+        /// <summary>
+        /// Create from;
+        /// </summary>
+        /// <param name="other"></param>
+        public IdealUnit(IdealUnit other) : base(One, other) { }
+
+        /// <summary>
+        /// <see cref="UnitBase"/>
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="other"></param>
+        public IdealUnit(Number value, IdealUnit other)
+            : base(One, other)
+        {
+            Units = value;
+
+            Error = One;
+        }
+
+        /// <summary>
+        /// The symbol
+        /// </summary>
+        protected override List<string> m_Symbols
+        {
+            get
             {
-                Constant = MinValue.Constant;
-
-                Units = MinValue.Units;
-
-                Error = Zero;
+                return IndirectUnitSymbols;
             }
-
-            /// <summary>
-            /// Create a;
-            /// </summary>
-            /// <param name="units"></param>
-            public IdealUnit(Number units)
-                : base(Zero)
-            {
-                Units = units;
-
-                Error = Zero;
-            }
-
-            /// <summary>
-            /// Create from;
-            /// </summary>
-            /// <param name="other"></param>
-            public IdealUnit(IdealUnit other) : base(One, other) { }
-
-            /// <summary>
-            /// <see cref="UnitBase"/>
-            /// </summary>
-            /// <param name="value"></param>
-            /// <param name="other"></param>
-            public IdealUnit(Number value, IdealUnit other)
-                : base(One, other)
-            {
-                Units = value;
-
-                Error = One;
-            }
-
-            /// <summary>
-            /// The symbol
-            /// </summary>
-            protected override List<string> m_Symbols
-            {
-                get
-                {
-                    return IndirectUnitSymbols;
-                }
-            }
+        }
 
         //Use IdealUnit for conversions to other units and allow the error to be specified.
 
-            Number IndirectionUnit.Error
-            {
-                get { return this.Error; }
-            }
+        Number IndirectionUnit.Error
+        {
+            get { return this.Error; }
+        }
 
-            IEnumerable<string> IUnit.Symbols
-            {
-                get { return IndirectUnitSymbols; }
-            }
+        IEnumerable<string> IUnit.Symbols
+        {
+            get { return IndirectUnitSymbols; }
+        }
 
-            Number IUnit.Constant
-            {
-                get { return this.Constant; }
-            }
+        Number IUnit.Constant
+        {
+            get { return this.Constant; }
+        }
 
-            Number IUnit.TotalUnits
-            {
-                get { return this.TotalUnits; }
-            }
+        Number IUnit.TotalUnits
+        {
+            get { return this.TotalUnits; }
+        }
     }
 
-    //ScalarUnit => IdeaUnit
+    //One value
+    //ScalarUnit => IdealUnit
 
-    //VectoralUnit => IdeaUnit
+    //Many values
+    //VectoralUnit => IdealUnit
 
+    /// <summary>
+    /// A form of <see cref="Unit"/> which represents values through bias.
+    /// </summary>
     class VisceralUnit : IdealUnit
     {
 
     }
 
     /// <summary>
-    /// 
+    /// A <see cref="IUnit"/> which contains an <see cref="Action"/> which is called by the <see cref="Sample"/> method.
+    /// </summary>
+    public class InformalUnit : IdealUnit
+    {
+
+        //IsError ()=> LastValue != 0 && LastValue >= 0x80000000
+
+        /// <summary>
+        /// Any <see cref="IUnit"/> which is conveyed from the <see cref="OnSample"/> method
+        /// </summary>
+        public IUnit LastValue;
+
+        /// <summary>
+        /// Typically used to compute a value or call a function
+        /// </summary>
+        Action OnSample = Common.Extensions.Delegate.ActionExtensions.NoOp;
+
+        /// <summary>
+        /// Stores the current instance in <see cref="LastValue"/> and calls <see cref="OnSample"/> which may modify this instance to pass values.
+        /// </summary>
+        public virtual void Sample()
+        {
+            LastValue = this;
+            try
+            {
+                OnSample();
+            }
+            catch
+            {
+                Error = this.TotalUnits;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Subclass of <see cref="InformalUnit"/> with a <see cref="ValueType"/>
+    /// </summary>
+    public class InformationalUnit : InformalUnit
+    {
+        /// <summary>
+        /// The <see cref="ValueType"/> which is used by the <see cref="IUnit"/>
+        /// </summary>
+        public ValueType Value;
+
+        /// <summary>
+        /// Calls <see cref="InformalUnit.Sample"/> and then copies the result to <see cref="Value"/> as a <see cref="Double"/>
+        /// </summary>
+        public override void Sample()
+        {
+            try
+            {
+                base.Sample();
+                Value = this.TotalUnits.ToDouble();
+            }
+            catch
+            {
+                Error = this.TotalUnits.ToDouble();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Class which is useful for measuring and converting distance
     /// </summary>
     public static class Distances
     {
@@ -613,7 +680,7 @@ namespace Media.Concepts.Classes
     }
     
     /// <summary>
-    /// 
+    /// Class which is usefl for measuring and converting frequency
     /// </summary>
     public static class Frequencies
     {
@@ -835,7 +902,7 @@ namespace Media.Concepts.Classes
     }
 
     /// <summary>
-    /// 
+    /// Class which is useful for measuring and converting temperature
     /// </summary>
     public static class Temperatures
     {
@@ -990,7 +1057,7 @@ namespace Media.Concepts.Classes
     }
 
     /// <summary>
-    /// 
+    /// A description of mass with respect to physical and mathematical properties.
     /// </summary>
     public static class Masses
     {
@@ -1157,16 +1224,35 @@ namespace Media.Concepts.Classes
     }
 
     /// <summary>
-    /// 
+    /// A description of energy with respect to physical and mathematical properties.
     /// </summary>
     public static class Energies
     {
-
+        /// <summary>
+        /// The interface of the <see cref="IUnit"/> which describes conversions to and from energy.
+        /// </summary>
         public interface IEnergy : IUnit
         {
+            /// <summary>
+            /// Gets the <see cref="Number"/> which implies the total joules of the energy
+            /// </summary>
             Number TotalJoules { get; }
+
+            //Number TotalNewtons { get; }
+
+            //TotalCharge or TotalColumbs is useful
+
+            //ToDistance
+
+            //ToWavelength
+
+            //Etc
         }
 
+        /// <summary>
+        /// A representation of energy in the form of math.
+        /// This class can be useful for converting a <see cref="IUnit"/> to <see cref="IEnergy"/> for calulcations.
+        /// </summary>
         public class Energy : UnitBase, IEnergy
         {
 
@@ -1366,7 +1452,7 @@ namespace Media.Concepts.Classes
 
             public override bool Equals(object obj)
             {
-                if (obj is IEnergy) return true;
+                if (obj is IEnergy) return obj as IEnergy == this;
                 return base.Equals(obj);
             }
 
@@ -1376,11 +1462,10 @@ namespace Media.Concepts.Classes
             }
 
         }
-
     }
 
     /// <summary>
-    /// 
+    /// A class which is useful for describing velocity.
     /// </summary>
     public static class Velocities
     {
@@ -1389,6 +1474,9 @@ namespace Media.Concepts.Classes
             Number TotalMetersPerSecond { get; }
         }
 
+        /// <summary>
+        /// A class which is useful for calculations involing speed / velocity
+        /// </summary>
         public class Velocity : UnitBase, IVelocity
         {
             //Should be Number to avoid readonly ValueType
@@ -1512,7 +1600,7 @@ namespace Media.Concepts.Classes
 
             public override bool Equals(object obj)
             {
-                if (obj is IVelocity) return true;
+                if (obj is IVelocity) return obj as IVelocity == this;
                 return base.Equals(obj);
             }
 
@@ -1524,22 +1612,30 @@ namespace Media.Concepts.Classes
     }
 
     /// <summary>
-    /// 
+    /// A class which is useful for describing forces in newtons
     /// </summary>
     public static class Forces
     {
+        /// <summary>
+        /// An interface which provides access to the <see cref="TotalNewtons"/> of the <see cref="IForce"/>
+        /// </summary>
         public interface IForce : IUnit
         {
+            /// <summary>           
+            /// </summary>
             Number TotalNewtons { get; }
         }
 
-        /*
-        newton is the unit for force
-        joules is the unit for work done
-        by definition, work done = force X distance
-        so multiply newton by metre to get joules
-        1 newton = 1 joule/meter
-         */
+        /// <summary>
+        /// A class which is usefl for representing and converting to newtonian representation.
+        /// </summary>
+        /// <remarks>
+        /// newton is the unit for force
+        /// joules is the unit for work done
+        /// by definition, work done = force X distance
+        /// so multiply newton by metre to get joules
+        /// 1 newton = 1 joule/meter
+        /// </remarks>
         public class Force : UnitBase, IForce
         {
 
@@ -1559,19 +1655,35 @@ namespace Media.Concepts.Classes
                 "N"
             };
 
+            /// <summary>
+            /// Constructs the default 1 newton = 1 joule/meter
+            /// </summary>
             public Force()
                 : base(Newton)
             {
             }
 
-            public Force(double celcius)
+            /// <summary>
+            /// Constructs a newtonian <see cref="Force"/> with the given parameters
+            /// </summary>
+            /// <param name="value">The newtonian value which describes to the <see cref="TotalNewtons"/></param>
+            public Force(double value)
                 : base(Newton)
             {
-                Units = celcius;
+                Units = value;
             }
 
+            /// <summary>
+            /// Constructs a newtonian <see cref="Force"/> from another <see cref="Force"/>
+            /// </summary>
+            /// <param name="other">The other <see cref="Force"/></param>
             public Force(Force other) : base(Newton, other) { }
 
+            /// <summary>
+            /// Constructs a newtonian <see cref="Force"/> from another <see cref="Force"/> with the specified parameters
+            /// </summary>
+            /// <param name="value">The newtonian value which describes to the <see cref="TotalNewtons"/></param>
+            /// <param name="other">The other <see cref="Force"/></param>
             public Force(Number value, Force other) : base(Newton, other) { Units = value; }
 
             protected override List<string> m_Symbols
@@ -1638,7 +1750,7 @@ namespace Media.Concepts.Classes
 
             public override bool Equals(object obj)
             {
-                if (obj is IForce) return true;
+                if (obj is IForce) return ((IForce)obj) == this;
                 return base.Equals(obj);
             }
 
@@ -1650,7 +1762,7 @@ namespace Media.Concepts.Classes
     }
 
     /// <summary>
-    /// 
+    /// A class which is useful for dealing with the frequency and velocity of wave forms
     /// </summary>
     public static class Wavelengths
     {
@@ -1663,6 +1775,9 @@ namespace Media.Concepts.Classes
             Energies.IEnergy TotalJoules { get; }
 
             Velocities.IVelocity TotalVelocity { get; }
+
+            //Shape is Waveform
+            //ToWaveform(Shape)
         }
 
         /*
@@ -1672,6 +1787,9 @@ namespace Media.Concepts.Classes
         so multiply newton by metre to get joules
         1 newton = 1 joule/meter
          */
+        /// <summary>
+        /// A class which is useful for computing the frequency and velocity of waves from physical <see cref="Forces"/>
+        /// </summary>
         public class Wavelength : UnitBase, IWavelength
         {
 
@@ -1794,7 +1912,7 @@ namespace Media.Concepts.Classes
 
             public override bool Equals(object obj)
             {
-                if (obj is IWavelength) return true;
+                if (obj is IWavelength) return obj as IWavelength == this;
                 return base.Equals(obj);
             }
 
@@ -1806,4 +1924,5 @@ namespace Media.Concepts.Classes
     }
 
     //Current ->     //http://en.wikipedia.org/wiki/Coulomb
+    //Charge
 }

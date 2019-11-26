@@ -79,6 +79,7 @@ namespace Media.Concepts.Classes
     /// <summary>
     /// Interface which allows Hardware access
     /// </summary>
+    [System.CLSCompliant(true)]
     public interface IHardware
     {
         
@@ -118,6 +119,7 @@ namespace Media.Concepts.Classes
     /// <summary>
     /// Represents the Processor itself.. 
     /// </summary>
+    [System.CLSCompliant(true)]
     public /*abstract*/ class Processor : IProcessor
     {
         internal int Id = System.Threading.Thread.CurrentThread.ManagedThreadId;
@@ -146,15 +148,22 @@ namespace Media.Concepts.Classes
 
         public delegate void ReferenceOperation(ref Bitable a, ref Bitable b);
 
-        public static Common.Binary.ByteOrder SystemEndian = Common.Binary.IsLittleEndian ? Common.Binary.ByteOrder.Little : Common.Binary.ByteOrder.Big;
+        public static Common.Binary.ByteOrder SystemEndian = Common.Binary.SystemByteOrder;
 
         public readonly IHardware Hardware;
-
+        
+        /// <summary>
+        /// Allows one to swap the values on the stack if needed or otherwise prepare them for computation
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void Prepare(ref Bitable a, ref Bitable b)
         {
             //
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void Swap(ref Bitable a, ref Bitable b, bool useSwap = true)
         {
             if (useSwap)
@@ -587,6 +596,8 @@ namespace Media.Concepts.Classes
 
         Number Max(ref Number a, ref Number b);
 
+        //Equals
+
         //IFormattable...
         //string DefaultFormat { get; }
     }
@@ -957,6 +968,13 @@ namespace Media.Concepts.Classes
             b ^= (byte)(Size << index);
         }
 
+        /// <summary>
+        /// Implicit bool conversion, if any none 0 value then True otherwise False
+        /// </summary>
+        /// <param name="b"></param>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static implicit operator bool(Bits b) { return b.m_Bits != 0; }
+
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static implicit operator byte(Bits b) { return b.m_Bits; }
 
@@ -1032,7 +1050,7 @@ namespace Media.Concepts.Classes
             return new Bits((byte)(b.m_Bits / amount));
         }
 
-        //
+        //Binary Operators
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static Bits operator ^(Bits b, Bits other)
@@ -1088,9 +1106,13 @@ namespace Media.Concepts.Classes
             return new Bits((byte)(b.m_Bits / other.m_Bits));
         }
 
-        //>=, <=
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static Bits operator %(Bits b, Bits other)
+        {
+            return new Bits((byte)(b.m_Bits % other.m_Bits));
+        }
 
-        //%
+        //>=, <=
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Bits b, int a) { return a.Equals(b.m_Bits); }
