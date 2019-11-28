@@ -438,7 +438,8 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static byte Min(ref byte min, ref byte max)
         {
-            return (byte)(max + ((min - max) & (min - max) >> ThirtyOne));
+            return (byte)(max ^ ((min ^ max) & -(min < max ? 1 : 0)));
+
         }
 
         [CLSCompliant(false)]
@@ -450,8 +451,8 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int Min(ref int min, ref int max)
         {
-            int mask = min - max;
-            return (max + (mask & mask >> QuadrupleBitSize));
+            return (int)(max ^ ((min ^ max) & -(min < max ? 1 : 0)));
+
         }
 
         [CLSCompliant(false)]
@@ -464,8 +465,8 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static uint Min(ref uint min, ref uint max)
         {
-            uint mask = min - max;
-            return (max + (mask & mask >> QuadrupleBitSize));
+            return (uint)(max ^ ((min ^ max) & (uint)(-(min < max ? 1 : 0))));
+
         }
 
         [CLSCompliant(false)]
@@ -477,8 +478,8 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static long Min(ref long min, ref long max)
         {
-            long mask = min - max;
-            return (max + (mask & mask >> OctupleBitSize));
+            return (long)(max ^ ((min ^ max) & -(min < max ? 1 : 0)));
+
         }
 
         [CLSCompliant(false)]
@@ -491,8 +492,8 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ulong Min(ref ulong min, ref ulong max)
         {
-            ulong mask = min - max;
-            return (max + (mask & mask >> OctupleBitSize));
+            return (ulong)(max ^ ((min ^ max) & (ulong)(-(min < max ? 1 : 0))));
+
         }
 
         [CLSCompliant(false)]
@@ -512,10 +513,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static byte Max(ref byte min, ref byte max)
         {
-            //return (byte)(min ^ ((min ^ max) & -(min < max ? 1 : 0)));
-            int mask = min - max;
-            mask = mask >> ThirtyOne;
-            return (byte)(min + ((max - min) & mask));
+            return (byte)(min ^ ((min ^ max) & -(min < max ? 1 : 0)));
         }
 
         [CLSCompliant(false)]
@@ -528,8 +526,7 @@ namespace Media.Common
         [CLSCompliant(false)]
         public static uint Max(ref uint min, ref uint max)
         {
-            uint mask = min - max;
-            return min - (mask & mask >> QuadrupleBitSize);
+            return min ^ ((min ^ max) & (uint)(-(min < max ? 1 : 0)));
         }
 
         [CLSCompliant(false)]
@@ -541,8 +538,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int Max(ref int min, ref int max)
         {
-            int mask = min - max;
-            return min - (mask & mask >> QuadrupleBitSize);
+            return min ^ ((min ^ max) & -(min < max ? 1 : 0));
         }
 
         [CLSCompliant(false)]
@@ -554,9 +550,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static long Max(ref long min, ref long max)
         {
-            long mask = min - max;
-            mask = mask >> OctupleBitSize;
-            return min - ((max - min) & mask);
+            return (long)(min ^ ((min ^ max) & -(min < max ? 1 : 0)));
 
         }
 
@@ -564,9 +558,8 @@ namespace Media.Common
         [CLSCompliant(false)]
         public static ulong Max(ref ulong min, ref ulong max)
         {
-            ulong mask = min - max;
-            mask = mask >> OctupleBitSize;
-            return min - ((max - min) & mask);
+            return (ulong)(min ^ ((min ^ max) & (ulong)(-(min < max ? 1 : 0))));
+
         }
 
         [CLSCompliant(false)]
@@ -1290,7 +1283,7 @@ namespace Media.Common
         {
             switch (value)
             {
-                case 0: return BitsPerInteger;
+                case Zero: return BitsPerInteger;
                 case (byte.MaxValue):
                 case ((ushort)short.MaxValue):
                 case ushort.MaxValue:
@@ -1371,7 +1364,7 @@ namespace Media.Common
         {
             switch (value)
             {
-                case 0: return BitsPerInteger;
+                case Zero: return BitsPerInteger;
                 case uint.MaxValue: return 0;
                 case int.MaxValue: return 1;
                 case byte.MaxValue: return 24;
