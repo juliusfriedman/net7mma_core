@@ -16,7 +16,7 @@ namespace Media.Concepts.Classes
     internal class Program
     {
 
-    public static unsafe MethodReplacementState Replace(MethodInfo methodToReplace, MethodInfo methodToInject)
+    public static unsafe MethodReplacementState Replace(MethodInfo methodToReplace, MethodInfo methodToInject, bool debug = false)
         {
             RuntimeHelpers.PrepareMethod(methodToReplace.MethodHandle);
             RuntimeHelpers.PrepareMethod(methodToInject.MethodHandle);
@@ -32,7 +32,7 @@ namespace Media.Concepts.Classes
                 tar = classStart + IntPtr.Size * index;
             }
             var inj = methodToInject.MethodHandle.Value + 8;
-            if (System.Diagnostics.Debugger.IsAttached)
+            if (debug || System.Diagnostics.Debugger.IsAttached)
             {
                 tar = *(IntPtr*)tar + 1;
                 inj = *(IntPtr*)inj + 1;
@@ -98,7 +98,7 @@ namespace Media.Concepts.Classes
 
             //Injection.install(3);
 
-            MethodHelper.Redirect(targetType, "targetMethod3", targetType, "injectionMethod3");
+            MethodHelper.Redirect(targetType, nameof(Target.targetMethod3), targetType, "injectionMethod3");
 
             //Injection.install(4);
 
@@ -329,7 +329,7 @@ namespace Media.Concepts.Classes
             }
             if (codeSize > 0) System.Buffer.MemoryCopy((void*)srcAdr, (void*)GetMethodAddress(dest), codeSize, codeSize);
         }
-        
+
         /// <summary>
         /// Redirects a method to another method
         /// </summary>
@@ -356,12 +356,12 @@ namespace Media.Concepts.Classes
                     var classStart = *(IntPtr*)(source.DeclaringType.TypeHandle.Value + (IntPtr.Size == 4 ? 40 : 64));
                     tar = classStart + IntPtr.Size * index;
                 }
-                var inj = destination.MethodHandle.Value + 8;
+                IntPtr inj = destination.MethodHandle.Value + 8;
 #if DEBUG
-                    tar = *(IntPtr*)tar + 1;
-                    inj = *(IntPtr*)inj + 1;
-                    *(int*)tar = *(int*)inj + (int)(long)inj - (int)(long)tar;
-                    return;
+                tar = *(IntPtr*)tar + 1;
+                inj = *(IntPtr*)inj + 1;
+                *(int*)tar = *(int*)inj + (int)(long)inj - (int)(long)tar;
+                return;
 
 #else
                 *(IntPtr*)tar = *(IntPtr*)inj;

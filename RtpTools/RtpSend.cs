@@ -788,7 +788,7 @@ namespace Media.RtpTools
                 }
 
                 //Read until '\n' occurs
-                RtpSendExtensions.ReadLineFeed(reader.BaseStream, out lineBytes);
+                Common.Extensions.Stream.StreamExtensions.ReadLineFeed(reader.BaseStream, out lineBytes);
 
                 //Keep track of the amount of bytes read
                 lineBytesLength = lineBytes.Length;
@@ -1189,17 +1189,6 @@ namespace Media.RtpTools
 
             //Return the name as found
             return description.EncodingName;
-        }
-
-        /// <summary>
-        /// Reads all bytes which occur in the stream until '\n' or the End of Stream occurs.
-        /// </summary>
-        /// <param name="stream"></param>
-        /// <param name="result"></param>
-        internal static void ReadLineFeed(System.IO.Stream stream, out byte[] result)
-        {
-            //The length of the array allocated is known and should also be returned...
-            result = RtpDump.RtpDumpExtensions.ReadDelimitedValue(stream, Common.ASCII.LineFeed, true);
         }
     }
 }

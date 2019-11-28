@@ -977,5 +977,65 @@ namespace Media.Common.Extensions.Stream
         }
 
         #endregion
+
+        /// <summary>
+        /// Reads a binary sequence terminated by first by <paramref name="delimit"/> and then by the end of the file if not found.
+        /// </summary>
+        /// <param name="reader">The binary read to read from</param>
+        /// <param name="delimit">The byte to read for</param>
+        /// <param name="includeDelimit">An optional value indicating if delimit should be present in the result</param>
+        /// <returns>The bytes read from the reader</returns>
+        public static byte[] ReadDelimitedValue(this System.IO.Stream stream, byte delimit = Common.ASCII.LineFeed, bool includeDelimit = false)
+        {
+            //The result of reading from the stream
+            byte[] result = null;
+
+            try
+            {
+                //Declare a value which will end up in a register on the stack
+                int register = -1;
+
+                //Indicate when to terminate reading.
+                bool terminate = false;
+
+                //Use a MemoryStream as to not lock the reader
+                using (var buffer = new System.IO.MemoryStream())
+                {
+                    //While data can be read from the stream
+                    while (false == terminate)
+                    {
+                        //Read a byte from the stream
+                        register = stream.ReadByte();
+
+                        //Check for termination
+                        terminate = register == -1 || register == delimit;
+
+                        //If the byte read is equal to the delimit and the delimit byte is not included then return the array contained in the MemoryStream.
+                        if (terminate && false == includeDelimit) break;
+
+                        //Write the value read from the reader to the MemoryStream
+                        buffer.WriteByte((byte)register);
+                    }
+                    //If terminating then return the array contained in the MemoryStream.
+                    result = buffer.ToArray();
+                }
+            }
+            catch { throw; }
+
+            //Return the bytes read from the stream
+            return result;
+        }
+
+        /// <summary>
+        /// Reads all bytes which occur in the stream until '\n' or the End of Stream occurs using <see cref="ReadDelimitedValue"/>
+        /// result contains the LineFeed
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="result"></param>
+        public static void ReadLineFeed(this System.IO.Stream stream, out byte[] result)
+        {
+            //The length of the array allocated is known and should also be returned...
+            result = Common.Extensions.Stream.StreamExtensions.ReadDelimitedValue(stream, Common.ASCII.LineFeed, true);
+        }
     }
 }

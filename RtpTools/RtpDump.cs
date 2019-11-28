@@ -174,7 +174,7 @@ namespace Media.RtpTools.RtpDump
             //Todo use the EncodingExtensions class
 
             //////Progress past the FileHeader should be #!rtpplay1.0 and IP/Port\n
-            m_FileIdentifier = RtpDumpExtensions.ReadDelimitedValue(m_Reader.BaseStream);
+            m_FileIdentifier = Common.Extensions.Stream.StreamExtensions.ReadDelimitedValue(m_Reader.BaseStream);
 
             //Get the length of the file header
             int length = m_FileIdentifier.Length;
@@ -1038,110 +1038,5 @@ namespace Media.RtpTools.RtpDump
 
             return result;
         }
-
-        /// <summary>
-        /// Reads a binary sequence terminated by first by <paramref name="delimit"/> and then by the end of the file if not found.
-        /// </summary>
-        /// <param name="reader">The binary read to read from</param>
-        /// <param name="delimit">The byte to read for</param>
-        /// <param name="includeDelimit">An optional value indicating if delimit should be present in the result</param>
-        /// <returns>The bytes read from the reader</returns>
-        internal static byte[] ReadDelimitedValue(System.IO.Stream stream, byte delimit = Common.ASCII.LineFeed, bool includeDelimit = false)
-        {
-            //The result of reading from the stream
-            byte[] result = null;
-
-            try
-            {
-                //Declare a value which will end up in a register on the stack
-                int register = -1;
-
-                //Indicate when to terminate reading.
-                bool terminate = false;
-
-                //Use a MemoryStream as to not lock the reader
-                using (var buffer = new System.IO.MemoryStream())
-                {
-                    //While data can be read from the stream
-                    while (false == terminate) 
-                    {
-                        //Read a byte from the stream
-                        register = stream.ReadByte();
-
-                        //Check for termination
-                        terminate = register == -1 || register == delimit;
-
-                        //If the byte read is equal to the delimit and the delimit byte is not included then return the array contained in the MemoryStream.
-                        if (terminate && false == includeDelimit) break;
-
-                        //Write the value read from the reader to the MemoryStream
-                        buffer.WriteByte((byte)register);
-                    }
-                    //If terminating then return return the array contained in the MemoryStream.
-                    result = buffer.ToArray();
-                }
-            }
-            catch { /*Hide*/ }
-            
-            //Return the bytes read from the stream
-            return result;
-        }
-
-        //internal static void ReadAsciiSpace(System.IO.Stream stream, out byte[] result) 
-        //{
-        //    result = ReadDelimitedValue(stream, Common.ASCII.Space, true);
-        //    return;
-        //}
-
-        ///// <summary>
-        ///// Reads a binary sequence terminated by first by <paramref name="delimit"/> and then by the end of the file if not found.
-        ///// </summary>
-        ///// <param name="reader">The binary read to read from</param>
-        ///// <param name="delimit">The byte to read for</param>
-        ///// <param name="includeDelimit">An optional value indicating if delimit should be present in the result</param>
-        ///// <returns>The bytes read from the reader</returns>
-        //internal static byte[] ReadDelimitedValue(System.IO.Stream stream, byte[] delimit, bool includeDelimit = false, bool matchDelemit = true)
-        //{
-        //    //The result of reading from the stream
-        //    byte[] result = null;
-
-        //    try
-        //    {
-        //        //Declare a value which will end up in a register on the stack
-        //        int delimitLength = delimit.Length;
-
-        //        //Indicate when to terminate reading.
-        //        bool terminate = false;
-
-        //        //Use a BinaryReader to get ReadByte, we are only reading bytes
-        //        using (var buffer = new System.IO.BinaryReader(stream, System.Text.Encoding.Default, true))
-        //        {
-        //            //Use a MemoryStream to not force allocation until delimit or EOS is found
-        //            using (var memory = new System.IO.MemoryStream(delimitLength))
-        //            {
-        //                //While data can be read from the stream
-        //                while (!terminate)
-        //                {
-        //                    result = buffer.ReadBytes(delimitLength);
-
-        //                    int resultingLength = result.Length;
-
-        //                    terminate = resultingLength < delimitLength || (matchDelemit ? result.SequenceEqual(delimit) : result.Any(b => delimit.Any(d => d == b)));
-
-        //                    if (terminate && !includeDelimit) break;
-                            
-        //                    memory.Write(result, 0, resultingLength);
-        //                }
-
-        //                //The result is the memory in the memory stream
-        //                result = memory.ToArray();
-        //            }
-        //        }
-        //    }
-        //    catch { /*Hide*/ }
-
-        //    //Return the bytes read from the stream
-        //    return result;
-        //}      
     }
 }
