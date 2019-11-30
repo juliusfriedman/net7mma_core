@@ -492,8 +492,10 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ulong Min(ref ulong min, ref ulong max)
         {
+            //CMOV
+            //min < max ? min : max;
+            //ELSE
             return (ulong)(max ^ ((min ^ max) & (ulong)(-(min < max ? 1 : 0))));
-
         }
 
         [CLSCompliant(false)]
@@ -538,7 +540,11 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int Max(ref int min, ref int max)
         {
+            //CMOV
+            //return min > max ? min : max;
+            //ELSE
             return min ^ ((min ^ max) & -(min < max ? 1 : 0));
+            
         }
 
         [CLSCompliant(false)]
@@ -3367,7 +3373,7 @@ namespace Media.UnitTests
 
             if (Binary.Min(0, 1) != Math.Min(0, 1)) throw new Exception("Min");
 
-            if (Binary.Max(0, 1) != Math.Max(0, 1)) throw new Exception("Max");
+            if (Binary.Min(-64, -128) != Math.Min(-64, -128)) throw new Exception("Min");
 
             if (Binary.Min(long.MinValue, long.MaxValue) != Math.Min(long.MinValue, long.MaxValue)) throw new Exception("Min");
 
@@ -3376,6 +3382,12 @@ namespace Media.UnitTests
             if (Binary.Min(uint.MinValue, uint.MaxValue) != Math.Min(uint.MinValue, uint.MaxValue)) throw new Exception("Min");
 
             if (Binary.Min(ulong.MinValue, ulong.MaxValue) != Math.Min(ulong.MinValue, ulong.MaxValue)) throw new Exception("Min");
+
+            if (Binary.Max(0, 1) != Math.Max(0, 1)) throw new Exception("Max");
+
+            if (Binary.Max(0, -1) != Math.Max(0, -1)) throw new Exception("Max");
+
+            if (Binary.Max(-64, -128) != Math.Max(-64, -128)) throw new Exception("Max");
 
             if (Binary.Max(long.MinValue, long.MaxValue) != Math.Max(long.MinValue, long.MaxValue)) throw new Exception("Max");
 

@@ -848,7 +848,7 @@ namespace Media.Containers.Riff
 
         }
 
-        internal protected void ParseData()
+        internal protected void ParseData(Container.Node node)
         {
             /*
             The "data" subchunk contains the size of the data and the actual sound:

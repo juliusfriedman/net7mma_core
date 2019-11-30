@@ -1252,6 +1252,7 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// A representation of energy in the form of math.
         /// This class can be useful for converting a <see cref="IUnit"/> to <see cref="IEnergy"/> for calulcations.
+        /// <seealso href="https://en.wikipedia.org/wiki/Erg">Erg</seealso>, This class can be sub-classed or composed to define other units.
         /// </summary>
         public class Energy : UnitBase, IEnergy
         {
@@ -1288,6 +1289,11 @@ namespace Media.Concepts.Classes
 
             public const double DekajoulesPerJoule = 0.1;
 
+            public const double NanojoulesPerJoule = 1e+9;
+
+            //* 0.0000001 Converts from erg to Newtons | Joule
+            public const double ErgPerJoule = 1e+7;
+
             public const double Joule = 1;
 
             public const double ExajoulesPerJoule = 1.0e-18;
@@ -1299,6 +1305,10 @@ namespace Media.Concepts.Classes
             public const double CentijoulesPerJoule = 100;
 
             public const double TeraelectronvoltsPerJoule = 6241506.48;
+
+            public const double FootPoundsPerJoule = 1.356;
+
+            //public const double USThermoPerJoule = 1.055e+8
 
             public const double FemtojoulesPerJoule = 1000000000000000;
 
@@ -1327,6 +1337,10 @@ namespace Media.Concepts.Classes
                 Units = joules;
             }
 
+            /// <summary>
+            /// Converts a corresponding <see cref="Masses.IMass"/> to Erg or <see cref="IEnergy"/>
+            /// </summary>
+            /// <param name="m"></param>
             public Energy(Masses.IMass m) :
                 this(System.Math.Pow(m.TotalKilograms.ToDouble() * Velocities.Velocity.MaxValue.TotalMetersPerSecond.ToDouble(), 2))
             {
@@ -1341,22 +1355,32 @@ namespace Media.Concepts.Classes
                 }
             }
 
-            public virtual Number TotalJoules
+            public Number TotalJoules
             {
                 get { return Units; }
             }
 
-            public virtual Number Decijoules
+            public Number Decijoules
             {
                 get { return TotalJoules / DecijoulesPerJoule; }
             }
 
-            public virtual Number Dekajoules
+            public Number Dekajoules
             {
                 get { return TotalJoules / DekajoulesPerJoule; }
             }
 
-            public virtual Number TotalITUCalories
+            public Number TotalErg
+            {
+                get { return TotalJoules * 1e+7; }
+            }
+
+            public Number Kilojoules
+            {
+                get { return TotalJoules * 1000; }
+            }
+
+            public Number TotalITUCalories
             {
                 get { return TotalJoules / ITUCaloriesPerJoule; }
             }
@@ -1461,6 +1485,51 @@ namespace Media.Concepts.Classes
                 return Constant.GetHashCode() << 16 | Units.GetHashCode() >> 16;
             }
 
+        }
+
+        /// <summary>
+        /// An example derivation of <see cref="Energy"/> in Nanojoules.
+        /// This example would be more succinct as 2 methods within Energy which should be a partial class. (ToNanoEnergy, FromNanoEnergy)
+        /// </summary>
+        public class NanoEnergy : Energy
+        {
+
+            public static implicit operator double(NanoEnergy t) { return t.Units.ToDouble(); }
+
+            public static implicit operator NanoEnergy(double t) { return new NanoEnergy(t); }
+
+            /// <summary>
+            /// `(-0)`
+            /// </summary>
+            /// <remarks>
+            /// Where as 0 would imply infinite `time` but not `frequency` and make such diambiguation quite difficult. (∞)
+            /// </remarks>
+            public new static readonly NanoEnergy MinValue = -0D;
+
+            /// <summary>
+            /// `1`
+            /// </summary>
+            public new static readonly NanoEnergy One = Energy.NanojoulesPerJoule;
+
+            /// <summary>
+            /// `0`
+            /// </summary>
+            public new static readonly NanoEnergy Zero = 0D;
+
+            /// <summary>
+            /// Constructs a new instance
+            /// </summary>
+            /// <param name="nanoJoules"></param>
+            public NanoEnergy(double nanoJoules) : base(nanoJoules / Energy.NanojoulesPerJoule)
+            {
+
+            }
+
+            /// <summary>
+            /// Constructs a new instance
+            /// </summary>
+            /// <param name="energy"></param>
+            public NanoEnergy(Energy energy) : base(energy.TotalJoules * Energy.NanojoulesPerJoule) { }
         }
     }
 
@@ -1649,6 +1718,9 @@ namespace Media.Concepts.Classes
             public static implicit operator Force(double t) { return new Force(t); }
 
             public const double Newton = 1D;
+
+            //0.0000001 Converts from erg
+            //10000000 Converts to erg
 
             static readonly List<string> ForceSymbols = new List<string>()
             {

@@ -414,16 +414,13 @@ namespace Media.Concepts.Classes
             return absoluteAddress;
         }
 
-  //      public static void HijackNew()
+  //      public static void HijackNew(System.Reflection.MethodBase method)
   //      {
-  //          var methodHandle = typeof(GenericMemoryAllocator).GetMethod(nameof(RawAllocate)).MethodHandle;
-  //          RuntimeHelpers.PrepareMethod(methodHandle);
+  //          var defaultAllocAddress = (long)GetAllocMethodAddress();
 
-  //          var myAllocAddress = Marshal.ReadIntPtr(methodHandle.Value, 8);
-  //          var defaultAllocAddress = GetAllocMethodAddress();
+  //          var myAllocAddress = (long)MethodHelper.GetMethodAddress(method);
 
-
-  //          int offset = (int)((long)myAllocAddress - defaultAllocAddress - 4 - 1); // 4 bytes for relative address and one byte for opcode
+  //          int offset = (int)(myAllocAddress - defaultAllocAddress - 4 - 1); // 4 bytes for relative address and one byte for opcode
   //          byte[] instruction = {
   //      0xE9, // Long jump instruction
 		//(byte)(offset & 0xFF),
@@ -432,8 +429,8 @@ namespace Media.Concepts.Classes
   //      (byte)((offset >> 24) & 0xFF)
   //  };
 
-  //          UnlockPage((IntPtr)defaultAllocAddress);
-  //          Marshal.Copy(instruction, 0, (IntPtr)defaultAllocAddress, instruction.Length);
+  //          //UnlockPage((IntPtr)defaultAllocAddress);
+  //          System.Runtime.InteropServices.Marshal.Copy(instruction, 0, (System.IntPtr)defaultAllocAddress, instruction.Length);
   //      }
 
         #endregion

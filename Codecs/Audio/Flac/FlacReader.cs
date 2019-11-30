@@ -855,6 +855,7 @@ namespace Media.Codecs.Flac
                             //Add the key and value
                             results.Add(new KeyValuePair<string, string>(parts[0], parts[1]));
 
+                            //Handle any parts needed such as title, date or timereference..
                             switch (parts[0].ToLowerInvariant())
                             {
                                 //case "date": timereference "158760000"
@@ -870,6 +871,10 @@ namespace Media.Codecs.Flac
                                 default: break;
                             }
                         }
+                        //else
+                        //{
+                        //    results.Add(new KeyValuePair<string, string>(parts[0], string.Empty));
+                        //}
 
                         //Move the offset
                         offset += itemLength;
@@ -890,7 +895,7 @@ namespace Media.Codecs.Flac
             ///	NOTE
             /// The number of seek points is implied by the metadata header 'length' field, i.e.equal to length / 18.
             List <Tuple<long, long, short>> seekPoints = new List<Tuple<long, long, short>>((int)(node == null ? 0 : node.DataSize / 18));
-            if (node != null) for (int i = 0, e = (int)node.DataSize; i < e; i+=12)
+            if (node != null) for (int i = 0, e = (int)node.DataSize; i < e; i+=18)
             {
                 //Add the decoded seekpoint
                 seekPoints.Add(new Tuple<long, long, short>(Common.Binary.Read64(node.Data, i, BitConverter.IsLittleEndian),

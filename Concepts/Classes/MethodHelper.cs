@@ -335,7 +335,7 @@ namespace Media.Concepts.Classes
         /// </summary>
         /// <param name="source"></param>
         /// <param name="destination"></param>
-        public static void Redirect(MethodInfo source, MethodInfo destination)
+        public static void Redirect(MethodInfo source, MethodInfo destination, bool debug = false)
         {
             if (source == null) throw new InvalidOperationException("source must be specified");
 
@@ -357,16 +357,14 @@ namespace Media.Concepts.Classes
                     tar = classStart + IntPtr.Size * index;
                 }
                 IntPtr inj = destination.MethodHandle.Value + 8;
-#if DEBUG
-                tar = *(IntPtr*)tar + 1;
-                inj = *(IntPtr*)inj + 1;
-                *(int*)tar = *(int*)inj + (int)(long)inj - (int)(long)tar;
-                return;
-
-#else
+                if (debug || System.Diagnostics.Debugger.IsAttached) {
+                    tar = *(IntPtr*)tar + 1;
+                    inj = *(IntPtr*)inj + 1;
+                    *(int*)tar = *(int*)inj + (int)(long)inj - (int)(long)tar;
+                    return;
+                }
                 *(IntPtr*)tar = *(IntPtr*)inj;
                 return;
-#endif
             }
         }
 
