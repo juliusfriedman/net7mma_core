@@ -309,6 +309,7 @@
         {
             switch (reverse) 
             {
+                default://.net core 3.1 requires this or the build error is that this method doesn't return on all code paths....
                 case false: return Common.Binary.GetBitReverse(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex);
                 case true: return Common.Binary.GetBit(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex);
             }

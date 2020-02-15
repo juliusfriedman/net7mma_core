@@ -2192,14 +2192,17 @@ namespace Media.Http
 
             ArraySegment<byte> existingBuffer;
 
-            buffer = default(System.Collections.Generic.IList<System.ArraySegment<byte>>);
+            //buffer = default(System.Collections.Generic.IList<System.ArraySegment<byte>>);
+
+            buffer = System.Collections.Immutable.ImmutableList<System.ArraySegment<byte>>.Empty;
 
             if (m_Buffer.TryGetBuffer(out existingBuffer))
             {
-                buffer = new System.Collections.Generic.List<System.ArraySegment<byte>>()
-                {
-                    existingBuffer
-                };
+                //buffer = new System.Collections.Generic.List<System.ArraySegment<byte>>()
+                //{
+                //    existingBuffer
+                //};
+                buffer.Add(existingBuffer);
 
                 return true;
             }
