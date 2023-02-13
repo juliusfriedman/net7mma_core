@@ -1534,9 +1534,12 @@ namespace Media.UnitTests
 
             using (Common.SegmentStream stream = new Common.SegmentStream())
             {
-                stream.AddMemory(new Common.MemorySegment(new byte[] { 0x00, 0x00 }, 0, 1));
                 var buffer = new byte[128];
                 var result = stream.Read(buffer, 0, 4);
+                if (result > 0)
+                    throw new InvalidOperationException("Cannot read more than what is available");
+                stream.AddMemory(new Common.MemorySegment(new byte[] { 0x00, 0x00 }, 0, 1));
+                result = stream.Read(buffer, 0, 4);
                 if (result > 1)
                     throw new InvalidOperationException("Cannot read more than what is available");
                 stream.Write(buffer, 0, 1);
