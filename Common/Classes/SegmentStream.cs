@@ -40,6 +40,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using Media.Common.Interfaces;
 #endregion
 
 namespace Media.Common
@@ -80,6 +81,13 @@ namespace Media.Common
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public SegmentStream() { Segments = new System.Collections.Generic.List<Common.MemorySegment>(); }
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public SegmentStream(Common.MemorySegment existing)
+            : this(new List<Common.MemorySegment>() { existing })
+        {
+
+        }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public SegmentStream(IList<Common.MemorySegment> existing)
@@ -1506,6 +1514,36 @@ namespace Media.UnitTests
 
                 //Ensure nothing remains
                 if (stream.Remains > 0) throw new Exception(nameof(stream.Remains));
+            }
+        }
+
+        public static void TestReadMoreThanPossible()
+        {
+            using (Common.SegmentStream stream = new Common.SegmentStream(new Common.MemorySegment(new byte[] { 0x00, 0x00 }, 0, 1)))
+            {
+                var buffer = new byte[128];
+                var result = stream.Read(buffer, 0, 4);
+                if (result > stream.Length)
+                    throw new InvalidOperationException("Cannot read more than what is available");
+                stream.Write(buffer, 0, 1);
+                stream.Position = 0;
+                result = stream.Read(buffer, 0, 4);
+                if (result > stream.Length)
+                    throw new InvalidOperationException("Cannot read more than what is available");
+            }
+
+            using (Common.SegmentStream stream = new Common.SegmentStream())
+            {
+                stream.AddMemory(new Common.MemorySegment(new byte[] { 0x00, 0x00 }, 0, 1));
+                var buffer = new byte[128];
+                var result = stream.Read(buffer, 0, 4);
+                if (result > stream.Length)
+                    throw new InvalidOperationException("Cannot read more than what is available");
+                stream.Write(buffer, 0, 1);
+                stream.Position = 0;
+                result = stream.Read(buffer, 0, 4);
+                if (result > stream.Length)
+                    throw new InvalidOperationException("Cannot read more than what is available");
             }
         }
 
