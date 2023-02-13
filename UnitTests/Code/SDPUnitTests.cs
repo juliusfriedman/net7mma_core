@@ -1235,7 +1235,7 @@ a=control:track2";
 
         System.Diagnostics.Debug.Assert(sessionDescription.Length == sessionDescription.ToString().Length, "Did not calculate length correctly");
 
-        //There is an extra new line in sessionDescription.ToString() at the end of the last line wherer as the testVector does not have it.
+        //There is an extra new line in sessionDescription.ToString() at the end of the last line where as the testVector does not have it.
         System.Diagnostics.Debug.Assert(string.Compare(sessionDescription.ToString(), testVector) == 1, "Did not output exactly same string");
     }
 
