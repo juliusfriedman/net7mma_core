@@ -41,6 +41,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using Media.Common;
 
@@ -1258,28 +1259,8 @@ namespace Media.Common
         //Could be moved to BinaryMethods
         #region Bit Methods
 
-        #region CountTrailing / CountLeading Zeros
-
-        internal static byte[] DeBruijnPositions =
-	    {
-	        0, 1, 28, 2, 29, 14, 24, 3, 30, 22, 20, 15, 25, 17, 4, 8,
-	        31, 27, 13, 23, 21, 19, 16, 7, 26, 12, 18, 6, 11, 5, 10, 9
-	    };
-
-        //https://gist.github.com/andrewrk/1883543
-        // map a bit value mod 37 to its position for 64 bit..
-        // about 3x slower than __builtin_ctz
-        internal static byte[] Mod37BitPosition = new byte[]
-        {
-            0, //-1
-            0, 1, 26, 2, 23, 27, 0, 3, 16, 24, 30, 28, 11, 0, 13, 4, 
-            7, 17, 0, 25, 22, 31, 15, 29, 10, 12, 6, 0, 21, 14, 9, 5, 
-            20, 8, 19, 18
-        };
-
-
         /// <summary>
-        /// builtin_ctz implementation
+        /// <see cref="BitOperations.TrailingZeroCount"/>
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
@@ -1287,39 +1268,19 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int CountTrailingZeros(ref uint value)
         {
-            switch (value)
-            {
-                case Zero: return BitsPerInteger;
-                case (byte.MaxValue):
-                case ((ushort)short.MaxValue):
-                case ushort.MaxValue:
-                case uint.MaxValue:
-                case int.MaxValue: return 0;
-                default:
-                    {
-                        unchecked
-                        {
-                            //Use the 64 bit method if possible. (Machine may also be helpful)
-                            if (Machine.IsX64())
-                            {
-                                return (int)Mod37BitPosition[(-value & value) % 37];
-                            }
-
-                            //Uses a lookup based on the magic constant
-
-                            return DeBruijnPositions[((uint)(value & -value) * 0x077CB531U) >> 27];
-                        }
-                    }
-            }
+            return BitOperations.TrailingZeroCount(value);
         }
 
         [CLSCompliant(false)]
-        public static int CountTrailingZeros(uint value) { return CountTrailingZeros(ref value); }
+        public static int CountTrailingZeros(uint value)
+        {
+            return BitOperations.TrailingZeroCount(value);
+        }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int CountTrailingZeros(int value)
         {
-            uint temp = (uint)value; return Common.Binary.Max(0, CountTrailingZeros(ref temp) - 1);
+            return BitOperations.TrailingZeroCount(value);
         }
 
         /// <summary>
@@ -1331,36 +1292,23 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int CountTrailingZeros(ref ulong value)
         {
-            switch (value)
-            {
-                case 0: return BitsPerLong;
-                //128 (0x80)
-                //case ((byte)sbyte.MaxValue): return 7;
-                case (byte.MaxValue):
-                case ((ushort)short.MaxValue):
-                case ushort.MaxValue:
-                case ulong.MaxValue:
-                case long.MaxValue:
-                case uint.MaxValue:
-                case int.MaxValue: return 0;
-                default:
-                    {
-                        return CountTrailingZeros((uint)(value & uint.MaxValue)) + CountTrailingZeros((uint)(value >> BitsPerInteger));
-                    }
-            }
+            return BitOperations.TrailingZeroCount(value);
         }
 
         [CLSCompliant(false)]
-        public static int CountTrailingZeros(ulong value) { return CountTrailingZeros(ref value); }
+        public static int CountTrailingZeros(ulong value)
+        {
+            return BitOperations.TrailingZeroCount(value);
+        }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int CountTrailingZeros(long value)
         {
-            ulong temp = (ulong)value; return Common.Binary.Max(0, CountTrailingZeros(ref temp) - 1);
+            return BitOperations.TrailingZeroCount(value);
         }
 
         /// <summary>
-        /// builtin_clz implementation
+        /// <see cref="BitOperations.LeadingZeroCount"/>
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
@@ -1368,54 +1316,20 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int CountLeadingZeros(ref uint value)
         {
-            switch (value)
-            {
-                case Zero: return BitsPerInteger;
-                case uint.MaxValue: return 0;
-                case int.MaxValue: return 1;
-                case byte.MaxValue: return 24;
-                //case 128: return 25;
-                default:
-                    {
-                        //Could reverse the int and return CountTrailing...
-                        
-                        //Could use rebase
-                        //int lz = (int)(32 - Math.Log((double)value + 1, 2d));
-                        //lz += (int)((value - (0x80000000u >> lz)) >> 31);
-
-                        //Ensure a power of two, could also use a different sequence and constant to avoid
-                        //https://en.wikipedia.org/wiki/Find_first_set
-
-                        //uint x = value;
-                        value |= value >> 1;
-                        value |= value >> 2;
-                        value |= value >> 4;
-                        value |= value >> 8;
-                        value |= value >> 16;
-                        value++;
-
-                        //Without a lookup
-                        //return Common.Binary.BitsPerInteger - HammingWeight((int)(value & (-value)) - 1);
-
-                        //using the BitsSet lookup (also allocates 4 bytes)
-                        //return Common.Binary.BitsPerInteger - BitsSet((int)(value & (-value)) - 1)
-
-                        //This uses CountTrailingZeros because of the benefit for 32 or 64 bit...
-                        return Common.Binary.BitsPerInteger - CountTrailingZeros(ref value);
-
-                        //Could also precompute a better table.
-                    }
-            }
+            return BitOperations.LeadingZeroCount(value);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int CountLeadingZeros(int value)
         {
-            uint temp = (uint)value; return Max(0, CountLeadingZeros(ref temp) - 1);
+            return BitOperations.LeadingZeroCount((ulong)value);
         }
 
         [CLSCompliant(false)]
-        public static int CountLeadingZeros(uint value) { return CountLeadingZeros(ref value); }
+        public static int CountLeadingZeros(uint value)
+        {
+            return BitOperations.LeadingZeroCount((ulong)value);
+        }
 
         /// <summary>
         /// builtin_clzll implementation
@@ -1426,20 +1340,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int CountLeadingZeros(ref ulong value)
         {
-            switch (value)
-            {
-                case 0: return BitsPerLong;
-                //short.MaxValue
-                case byte.MaxValue: return BitsPerInteger + 24; //56
-                case ushort.MaxValue: return BitsPerInteger + BitsPerShort; //48
-                case int.MaxValue: return BitsPerInteger + 1; // 33
-                case uint.MaxValue: return BitsPerInteger; // 32
-                case long.MaxValue: return 1;
-                default:
-                    {
-                        return  CountLeadingZeros((uint)(value << BitsPerInteger)) + CountLeadingZeros((uint)(value & uint.MaxValue));
-                    }
-            }
+            return BitOperations.TrailingZeroCount(value);
         }
 
         [CLSCompliant(false)]
@@ -1448,37 +1349,19 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int CountLeadingZeros(long value)
         {
-            ulong temp = (ulong)value; return Max(0, CountLeadingZeros(ref temp) - 1);
+            return BitOperations.LeadingZeroCount((ulong)value);
         }
 
         public static long GreatestCommonDivisor(long a, long b)
         {
-            return (long)GreatestCommonDivisor((ulong)a, (ulong)b);
+            return (long)BigInteger.GreatestCommonDivisor(a, b);
         }
 
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ulong GreatestCommonDivisor(ulong a, ulong b)
         {
-
-            if (a == 0) return b;
-            if (b == 0) return a;
-
-            //Rather than subtracting 32 from the result cast to uint
-
-            int shift = Common.Binary.CountTrailingZeros((uint)(a | b));
-            a >>= Common.Binary.CountTrailingZeros((uint)a);
-
-            do
-            {
-                b >>= Common.Binary.CountTrailingZeros((uint)b);
-
-                if (a > b) a -= b;
-                else b -= a;
-
-            } while (b > 0);
-
-            return a << shift;
+            return (ulong)BigInteger.GreatestCommonDivisor(a, b);
         }
 
         #endregion
@@ -3347,8 +3230,6 @@ namespace Media.Common
 
     }
 
-    #endregion
-
     //MemSet, Copy
     //https://github.com/filoe/cscore/blob/af1792ea680743c5172ece4727e2b331012e99de/CSCore/Utils/ILUtils.cs
 }
@@ -3901,94 +3782,6 @@ namespace Media.UnitTests
             {
                 reverse = true;
                 goto Test;
-            }
-        }
-
-        public static void Test_CountTrailingZeros()
-        {
-            //Loop all negitive values in the 16 bit range and 0
-            for (int i = short.MinValue; i <= ushort.MinValue; ++i)
-            {
-                //Get the amount of leading zeros in i (31 bits)
-                int stz = Common.Binary.CountTrailingZeros(i);
-
-                //Check for any result when i was less than 0 because the sign bit should be present.
-                if (i == 0 && stz != Common.Binary.ThirtyOne || i < Common.Binary.Zero && stz < Common.Binary.Zero) throw new Exception("CountTrailingZeros");
-
-                //Get the amount of leading zeros in the 32 bit conversion of i
-                int ctz = Common.Binary.CountTrailingZeros((uint)i);
-
-                //Verify the difference
-                if (i == Common.Binary.Zero && ctz != Common.Binary.BitsPerInteger || ctz > stz && ctz - stz != Common.Binary.One) throw new Exception("CountTrailingZeros");
-
-                //Check for any result when i was less than 0 because the sign bit should be present.
-                if (i < Common.Binary.Zero && ctz < Common.Binary.Zero) throw new Exception("CountTrailingZeros");
-
-                //Get the amount of leading zeros in the 63 bit conversion of i
-                int stzl = Common.Binary.CountTrailingZeros((long)i);
-
-                //Verify the result
-                if (i == Common.Binary.Zero && stzl != 63 || i > 0 && stzl - stz != Common.Binary.ThirtyOne) throw new Exception("CountTrailingZeros");
-
-                //Get the amount of leading zeros in the 64 bit conversion of i
-                int tzll = Common.Binary.CountTrailingZeros((ulong)i);
-
-                //Verify the result
-                if (i == Common.Binary.Zero && tzll != Common.Binary.BitsPerLong || i > 0 && tzll - stzl != Common.Binary.One) throw new Exception("CountTrailingZeros");
-            }
-        }
-
-        public static void Test_CountLeadingZeros() //Uses CountTrailingZeros
-        {
-            //Loop all negitive values in the 16 bit range and 0
-            for (int i = short.MinValue; i <= ushort.MinValue; ++i)
-            {
-                //Get the amount of leading zeros in i (31 bits)
-                int slz = Common.Binary.CountLeadingZeros(i);
-
-                //Check for any result when i was less than 0 because the sign bit should be present.
-                if (i < Common.Binary.Zero && slz > Common.Binary.Zero) throw new Exception("CountLeadingZeros");
-
-                //Get the amount of leading zeros in the 32 bit conversion of i
-                int clz = Common.Binary.CountLeadingZeros((uint)i);
-
-                //Verify the difference
-                if (clz > slz && clz - slz != Common.Binary.One) throw new Exception("CountLeadingZeros");
-
-                //Check for any result when i was less than 0 because the sign bit should be present.
-                if (i < 0 && clz > Common.Binary.Zero) throw new Exception("CountLeadingZeros");
-
-                //Get the amount of leading zeros in the 63 bit conversion of i
-                int sclzl = Common.Binary.CountLeadingZeros((long)i);
-
-                //Verify the result
-                if (i == Common.Binary.Zero && sclzl != 63 
-                    || 
-                    i <= -1 && sclzl != Common.Binary.Zero 
-                    || 
-                    i > 0 && sclzl - slz != Common.Binary.ThirtyOne) throw new Exception("CountLeadingZeros");
-                
-                //Get the amount of leading zeros in the 64 bit conversion of i
-                int clzll = Common.Binary.CountLeadingZeros((ulong)i);
-
-                //Verify the result
-                if (i == Common.Binary.Zero && clzll != Common.Binary.BitsPerLong 
-                    || 
-                    i <= -1 && clzll != Common.Binary.Zero 
-                    || 
-                    i > Common.Binary.Zero && sclzl - clzll != Common.Binary.One) throw new Exception("CountLeadingZeros");
-            }
-        }
-
-        public static void Test_GreatestCommonDivisor() // Uses CountTrailingZeros
-        {
-            for (int i = 0; i <= ushort.MaxValue; ++i)
-            {
-                var left = Common.Binary.GreatestCommonDivisor(i, i + 1);
-
-                var right = Common.Extensions.Math.MathExtensions.GreatestCommonDivisor(i, i + 1);
-
-                if (left != right) throw new Exception("Invalid result!");
             }
         }
     }
