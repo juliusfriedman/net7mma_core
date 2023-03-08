@@ -46,6 +46,7 @@ using Media.Rtcp;
 using Media.Rtp;
 using Media.Sdp;
 using System.Threading;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Media.Rtsp
 {
@@ -331,14 +332,14 @@ namespace Media.Rtsp
 
         #region Private
 
-        ClientProtocolType m_RtspProtocol;
+        internal ClientProtocolType m_RtspProtocol;
 
-        RtspMessage m_LastTransmitted;
+        internal RtspMessage m_LastTransmitted;
 
-        AuthenticationSchemes m_AuthenticationScheme;
+        internal AuthenticationSchemes m_AuthenticationScheme;
 
         //Todo should also store time of last auth... 
-        string m_AuthorizationHeader; //could also just store the parts or use a StringCollection
+        internal string m_AuthorizationHeader; //could also just store the parts or use a StringCollection
 
         //Todo
         //readonly List<Uri> m_History = new List<Uri>();
@@ -351,37 +352,37 @@ namespace Media.Rtsp
         /// <summary>
         /// The buffer this client uses for all requests 4MB * 2 by default.
         /// </summary>
-        Common.MemorySegment m_Buffer;
+        internal Common.MemorySegment m_Buffer;
 
         /// <summary>
         /// The remote IPAddress to which the Location resolves via Dns
         /// </summary>
-        IPAddress m_RemoteIP;
+        internal IPAddress m_RemoteIP;
 
         /// <summary>
         /// The remote RtspEndPoint
         /// </summary>
-        EndPoint m_RemoteRtsp;
+        internal EndPoint m_RemoteRtsp;
 
         /// <summary>
         /// The socket used for Rtsp Communication
         /// </summary>
-        Socket m_RtspSocket;
+        internal Socket m_RtspSocket;
 
         /// <summary>
         /// The protcol in which Rtsp data will be transpored from the server
         /// </summary>
-        ProtocolType m_RtpProtocol;
+        internal ProtocolType m_RtpProtocol;
 
         /// <summary>
         /// The session description associated with the media at Location
         /// </summary>
-        SessionDescription m_SessionDescription;
+        internal SessionDescription m_SessionDescription;
 
         /// <summary>
         /// Keep track of timed values.
         /// </summary>
-        TimeSpan m_RtspSessionTimeout = DefaultSessionTimeout,
+        internal TimeSpan m_RtspSessionTimeout = DefaultSessionTimeout,
             m_ConnectionTime = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan,
             m_LastServerDelay = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan,
             //Appendix G.  Requirements for Unreliable Transport of RTSP
@@ -390,7 +391,7 @@ namespace Media.Rtsp
         /// <summary>
         /// Keep track of certain values.
         /// </summary>
-        int m_SentBytes, m_ReceivedBytes,
+        internal int m_SentBytes, m_ReceivedBytes,
              m_RtspPort,
              m_CSeq = -1, m_RCSeq, //-1 values, rtsp 2. indicates to start at 0...
              m_SentMessages, m_ReTransmits,
@@ -402,12 +403,12 @@ namespace Media.Rtsp
         //Todo, Two timers? should use a single thread instead....
         Timer m_KeepAliveTimer, m_ProtocolMonitor;
 
-        DateTime? m_BeginConnect, m_EndConnect, m_StartedPlaying;
+        internal DateTime? m_BeginConnect, m_EndConnect, m_StartedPlaying;
 
         //Todo,
         //List<Sdp.MediaDescription> For playing and paused. Could use a List<Tuple<TimeSpan, MediaDescription>>> to allow the timeline when pausing etc..
 
-        NetworkCredential m_Credential;
+        internal NetworkCredential m_Credential;
 
         #endregion
 
@@ -2228,7 +2229,7 @@ namespace Media.Rtsp
             }
         }
 
-        protected virtual void ProcessServerSentRequest(RtspMessage toProcess = null)
+        internal protected virtual void ProcessServerSentRequest(RtspMessage toProcess = null)
         {
             if (false == IgnoreServerSentMessages &&
                 toProcess == null ||
@@ -2390,7 +2391,7 @@ namespace Media.Rtsp
         /// <param name="sender">The RtpClient instance which called this method</param>
         /// <param name="memory">The memory to parse</param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        void ProcessInterleavedData(object sender, byte[] data, int offset, int length)
+        internal void ProcessInterleavedData(object sender, byte[] data, int offset, int length)
         {
             if (length <= 0 | offset + length >= data.Length | Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(data) | Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
 
@@ -3834,8 +3835,6 @@ namespace Media.Rtsp
         {
             return SendRtspMessage(message, out error, out sequenceNumber, useClientProtocolVersion, hasResponse, m_MaximumTransactionAttempts, m_RtspSocket);
         }
-
-        //Todo, Session overload and when no session is provided lookup session or use existing logic...
 
         public RtspMessage SendRtspMessage(RtspMessage message, out SocketError error, out int sequenceNumber, bool useClientProtocolVersion = true, bool hasResponse = true, int attempts = 0, System.Net.Sockets.Socket socket = null)
         {
@@ -5560,9 +5559,8 @@ namespace Media.Rtsp
                                 {
                                     //Message possibly not complete... Session header may be truncated...
 
-                                    //Todo, move the properties to calulcate from the RtspSession
                                     //Create a session
-                                    session = new RtspSession(setup, response)
+                                    session = new RtspSession(this, setup, response)
                                     {
                                         EnableKeepAliveRequest = DisableKeepAliveRequest.Equals(false),
                                         ControlLocation = location

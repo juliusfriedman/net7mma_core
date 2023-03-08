@@ -986,18 +986,18 @@ namespace Media.Rtp
                 return false;
             }
 
-            //buffer  = new System.Collections.Generic.List<ArraySegment<byte>>()
-            //{
-            //    Common.MemorySegmentExtensions.ToByteArraySegment(Header.First16Bits.m_Memory),
-            //    Common.MemorySegmentExtensions.ToByteArraySegment(Header.SegmentToLast10Bytes),
-            //    Common.MemorySegmentExtensions.ToByteArraySegment(Payload),
-            //};
+            buffer = new System.Collections.Generic.List<ArraySegment<byte>>()
+            {
+                Common.MemorySegmentExtensions.ToByteArraySegment(Header.First16Bits.m_Memory),
+                Common.MemorySegmentExtensions.ToByteArraySegment(Header.SegmentToLast10Bytes),
+                Common.MemorySegmentExtensions.ToByteArraySegment(Payload),
+            };
 
-            var builder = System.Collections.Immutable.ImmutableList.CreateBuilder<ArraySegment<byte>>();
-            builder.Add(Common.MemorySegmentExtensions.ToByteArraySegment(Header.First16Bits.m_Memory));
-            builder.Add(Common.MemorySegmentExtensions.ToByteArraySegment(Header.SegmentToLast10Bytes));
-            builder.Add(Common.MemorySegmentExtensions.ToByteArraySegment(Payload));
-            buffer = builder.ToImmutable();
+            //var builder = System.Collections.Immutable.ImmutableList.CreateBuilder<ArraySegment<byte>>();
+            //builder.Add(Common.MemorySegmentExtensions.ToByteArraySegment(Header.First16Bits.m_Memory));
+            //builder.Add(Common.MemorySegmentExtensions.ToByteArraySegment(Header.SegmentToLast10Bytes));
+            //builder.Add(Common.MemorySegmentExtensions.ToByteArraySegment(Payload));
+            //buffer = builder.ToImmutable();
 
             return true;
         }

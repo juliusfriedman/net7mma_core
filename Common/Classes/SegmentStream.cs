@@ -1554,6 +1554,31 @@ namespace Media.UnitTests
                 if(stream.Position != stream.Length)
                     throw new InvalidOperationException("Should be at end of stream.");
             }
+
+            using (Common.SegmentStream stream = new Common.SegmentStream())
+            {
+                var buffer = new byte[128];
+                var position = 0;
+                var length = 16;
+                stream.AddMemory(new Common.MemorySegment(buffer, position += position, length));
+                stream.AddPersistedMemory(new Common.MemorySegment(buffer, position += position, length));
+                stream.AddPersistedMemory(new Common.MemorySegment(buffer, position += position, length));
+                stream.AddPersistedMemory(new Common.MemorySegment(buffer, position += position, length));
+                stream.AddMemory(new Common.MemorySegment(buffer, position += position, length));
+                stream.AddMemory(new Common.MemorySegment(buffer, position += position, length));
+                stream.AddMemory(new Common.MemorySegment(buffer, position += position, length));
+                stream.AddPersistedMemory(new Common.MemorySegment(buffer, position += position, length - 1));
+                if (stream.Length != buffer.Length - 1) throw new InvalidOperationException();
+                stream.Position = stream.Length - length - 1;
+                var result = stream.Read(buffer, 0, length);
+                if (result != length)
+                    throw new InvalidOperationException("Should have read length.");
+                result = stream.Read(buffer, 0, 2);
+                if (result != 1)
+                    throw new InvalidOperationException("Should have read 1.");
+                if (stream.Position != stream.Length)
+                    throw new InvalidOperationException("Should be at end of stream.");
+            }
         }
 
         //TestAppend

@@ -1355,7 +1355,11 @@ namespace Media.Sdp
         }
 
         public static bool operator !=(SessionDescription a, SessionDescriptionLine b) { return (a == b).Equals(false); }
-        
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(m_SessionVersionLine, m_OriginatorLine, m_NameLine, m_MediaDescriptions, m_TimeDescriptions, m_Lines);
+        }
     }
 
     public static class SessionDescriptionExtensions

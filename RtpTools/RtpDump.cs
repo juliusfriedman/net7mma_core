@@ -695,7 +695,7 @@ namespace Media.RtpTools.RtpDump
                         if (m_FileHeader == null && m_Format.HasFileHeader()) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(reader, "Did not find the expected Binary file header.");
 
                         //If not present use the start time indicated in the first entry...
-                        if (m_Start == null) m_Start = startTime ?? reader.m_StartTime;
+                        if (m_Start == default) m_Start = startTime ?? reader.m_StartTime;
                     }
                 }
                 catch (Exception ex)//Only catch exceptions which are unexpected and raise a generic DumpWriter exception
