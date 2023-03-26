@@ -36,6 +36,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
+using Media.Common;
+
 namespace Media.Concepts.Hardware
 {
     /// <summary>
@@ -2820,16 +2822,11 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             static void Fallback(byte[] buffer)
             {
-                //Could use WMI or Proc/CpuInfo
-                if (MaximumFeatureLevel == -1 | MaximumExtendedFeatureLevel == -1) return;
-
-                FeatureInformation.Clear();
-
-                MaximumFeatureLevel = -1;
-
-                MaximumExtendedFeatureLevel = -1;
-
-                VendorString = string.Empty;
+                var registers = System.Runtime.Intrinsics.X86.X86Base.CpuId(0, 0);
+                Binary.Write32(buffer, 0, false, registers.Eax);
+                Binary.Write32(buffer, 4, false, registers.Ebx);
+                Binary.Write32(buffer, 8, false, registers.Ecx);
+                Binary.Write32(buffer, 12, false, registers.Edx);
             }
 
             #endregion
@@ -3004,18 +3001,6 @@ namespace Media.Concepts.Hardware
                 if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer, out length)) throw new System.ArgumentNullException("buffer");
                 else if (length < 16) throw new System.InvalidOperationException("buffer must have room to store at least 4 32 bit values.");
 
-                //eax
-                Common.Binary.Write32(buffer, 0, false, level);
-
-                //ebx
-                //Unused
-
-                //ecx
-                if (subLeaf > 0) Common.Binary.Write32(buffer, 8, false, subLeaf);
-
-                //edx
-                //Unused
-
                 CpuIdEx(buffer);
             }
 
@@ -3039,19 +3024,6 @@ namespace Media.Concepts.Hardware
             {
                 //The input and result buffer
                 byte[] buffer = new byte[16];
-
-
-                //eax
-                Common.Binary.Write32(buffer, 0, false, level);
-
-                //ebx
-                //Unused
-
-                //ecx
-                if (subLeaf > 0) Common.Binary.Write32(buffer, 8, false, subLeaf);
-
-                //edx
-                //Unused
 
                 Invoke(level, ref buffer, subLeaf);
 
