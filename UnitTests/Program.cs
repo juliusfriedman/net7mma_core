@@ -2177,13 +2177,13 @@ namespace Media.UnitTests
 
                     //server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("RaghavaTest", "rtsp://mpv.cdn3.bigCDN.com:554/bigCDN/_definst_/mp4:bigbuckbunnyiphone_400.mp4", Media.Rtsp.RtspClient.ClientProtocolType.Udp));
 
-                    server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("mp4T:BigBuckBunny_115k.mov", "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov", Media.Rtsp.RtspClient.ClientProtocolType.Tcp));
+                    //server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("mp4T:BigBuckBunny_115k.mov", "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov", Media.Rtsp.RtspClient.ClientProtocolType.Tcp));
 
                     //server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("mp4:vBigBuckBunny_115k.mov", "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov", Media.Rtsp.RtspClient.ClientProtocolType.Udp, 8192,  Sdp.MediaType.video, null, null, true));
 
                     //server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("mp4:aBigBuckBunny_115k.mov", "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov", Media.Rtsp.RtspClient.ClientProtocolType.Udp, 8192,  Sdp.MediaType.audio, null, null, true));
 
-                    server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("mp4:BigBuckBunny_115k.mov", "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov", Media.Rtsp.RtspClient.ClientProtocolType.Udp));//, 8192, null, null, null, true));
+                    //server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("mp4:BigBuckBunny_115k.mov", "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov", Media.Rtsp.RtspClient.ClientProtocolType.Udp));//, 8192, null, null, null, true));
 
                     //server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("OmegaUdp", "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov", Media.Rtsp.RtspClient.ClientProtocolType.Udp));
 
@@ -2270,88 +2270,88 @@ namespace Media.UnitTests
                     //server.AddMedia(new Media.Rtsp.Server.Media.MJPEGMedia("HttpTestMJpeg", new Uri("http://extcam-16.se.axis.com/axis-cgi/mjpg/video.cgi?")));
 
                     //Make a 1080p MJPEG Stream
-                    //Media.Rtsp.Server.MediaTypes.RFC2435Media mirror = new Media.Rtsp.Server.MediaTypes.RFC2435Media("Mirror", null, false, 1920, 1080, false);
+                    Media.Rtsp.Server.MediaTypes.RFC2435Media mirror = new Media.Rtsp.Server.MediaTypes.RFC2435Media("Mirror", null, false, 1920, 1080, false);
 
-                    //server.TryAddMedia(mirror);
+                    server.TryAddMedia(mirror);
 
-                    //System.Threading.Thread captureThread = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart((o) =>
-                    //{
+                    System.Threading.Thread captureThread = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart((o) =>
+                    {
 
-                    //Start:
+                    Start:
 
-                    //    using (var bmpScreenshot = new System.Drawing.Bitmap(Screen.PrimaryScreen.Bounds.Width,
-                    //               Screen.PrimaryScreen.Bounds.Height,
-                    //               System.Drawing.Imaging.PixelFormat.Format32bppArgb))
-                    //    {
-                    //        // Create a graphics object from the bitmap.
-                    //        using (var gfxScreenshot = System.Drawing.Graphics.FromImage(bmpScreenshot))
-                    //        {
-                    //            //Could also use mirror.State.
-                    //            while (server.IsRunning)
-                    //            {
-                    //                try
-                    //                {
+                        using (var bmpScreenshot = new System.Drawing.Bitmap(1920,
+                                   1080,
+                                   System.Drawing.Imaging.PixelFormat.Format32bppArgb))
+                        {
+                            // Create a graphics object from the bitmap.
+                            using (var gfxScreenshot = System.Drawing.Graphics.FromImage(bmpScreenshot))
+                            {
+                                //Could also use mirror.State.
+                                while (server.IsRunning)
+                                {
+                                    try
+                                    {
 
-                    //                    //System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Highest;
+                                        //System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Highest;
 
-                    //                    // Take the screenshot from the upper left corner to the right bottom corner.
-                    //                    gfxScreenshot.CopyFromScreen(Screen.PrimaryScreen.Bounds.X,
-                    //                                                Screen.PrimaryScreen.Bounds.Y,
-                    //                                                0,
-                    //                                                0,
-                    //                                                Screen.PrimaryScreen.Bounds.Size,
-                    //                                                System.Drawing.CopyPixelOperation.SourceCopy);
+                                        // Take the screenshot from the upper left corner to the right bottom corner.
+                                        gfxScreenshot.CopyFromScreen(0,
+                                                                    0,
+                                                                    0,
+                                                                    0,
+                                                                    new System.Drawing.Size(1920, 1080),
+                                                                    System.Drawing.CopyPixelOperation.SourceCopy);
 
-                    //                    //Could put this on another thread for increased speed.
+                                        //Could put this on another thread for increased speed.
 
-                    //                    //Perhaps sources should also support a BeingPacketize, EndPacketize paradigm.
+                                        //Perhaps sources should also support a BeingPacketize, EndPacketize paradigm.
 
-                    //                    //System.Threading.ThreadPool.QueueUserWorkItem((cb) =>
-                    //                    //{
-                    //                        //Convert to JPEG and put in packets
-                    //                        mirror.Packetize(bmpScreenshot);
-                    //                    //});
+                                        //System.Threading.ThreadPool.QueueUserWorkItem((cb) =>
+                                        //{
+                                        //Convert to JPEG and put in packets
+                                        mirror.Packetize(bmpScreenshot);
+                                        //});
 
-                    //                    //HALT, REST
-                    //                    if (false == System.Threading.Thread.Yield())
-                    //                    {
-                    //                        //System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;
+                                        //HALT, REST
+                                        if (false == System.Threading.Thread.Yield())
+                                        {
+                                            //System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;
 
-                    //                        System.Threading.Thread.Sleep(mirror.ClockRate);
-                    //                    }
-                    //                }
-                    //                catch (Exception ex)
-                    //                {
-                    //                    server.Logger.LogException(ex);
+                                            System.Threading.Thread.Sleep(mirror.ClockRate);
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        server.Logger.LogException(ex);
 
-                    //                    gfxScreenshot.Dispose();
+                                        gfxScreenshot.Dispose();
 
-                    //                    bmpScreenshot.Dispose();
+                                        bmpScreenshot.Dispose();
 
-                    //                    if(server != null && server.IsRunning) goto Start;
-                    //                }
-                    //            }
+                                        if (server != null && server.IsRunning) goto Start;
+                                    }
+                                }
 
-                    //            int exit = 1;
+                                int exit = 1;
 
-                    //            if(exit == 1) return;
-                    //        }
-                    //    }
-                    //}));                
+                                if (exit == 1) return;
+                            }
+                        }
+                    }));
 
                     //Start the server
                     server.Start();
 
-                    ////Wait for the server to start.
-                    //while (false.Equals(server.IsRunning)) System.Threading.Thread.Sleep(0);
+                    //Wait for the server to start.
+                    while (false.Equals(server.IsRunning)) System.Threading.Thread.Sleep(0);
 
-                    ////Start taking pictures of the desktop and making packets in a seperate thread.
-                    //if (false.Equals(object.ReferenceEquals(captureThread, null)))
-                    //{
-                    //    //captureThread.Priority = System.Threading.ThreadPriority.BelowNormal;
+                    //Start taking pictures of the desktop and making packets in a seperate thread.
+                    if (false.Equals(object.ReferenceEquals(captureThread, null)))
+                    {
+                        //captureThread.Priority = System.Threading.ThreadPriority.BelowNormal;
 
-                    //    captureThread.Start();
-                    //}                               
+                        captureThread.Start();
+                    }
 
                     //If you add more streams they will be started once the server is started
 

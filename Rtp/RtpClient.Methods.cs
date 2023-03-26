@@ -1243,6 +1243,8 @@ namespace Media.Rtp
             //If there is not enough data for a frame header return
             if (bufferOffset + sessionRequired > bufferLength) return -1;
 
+            //TODO if RFC4571 is specified do check here to avoid reading channel.
+
             //The amount of data needed for the frame comes from TryReadFrameHeader
             int frameLength = TryReadFrameHeader(buffer, bufferOffset, out frameChannel, BigEndianFrameControl, true);
 

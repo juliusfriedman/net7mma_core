@@ -821,8 +821,11 @@ namespace Media.Rtsp
                     //Include the IP Header
                     m_UdpServerSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.PacketInformation, true);
 
+                    var eventArgs = new SocketAsyncEventArgs();
+                    eventArgs.Completed += ProcessAccept;
                     //Maybe use Peek
-                    m_UdpServerSocket.BeginReceiveFrom(Media.Common.MemorySegment.EmptyBytes, 0, 0, SocketFlags.Partial, ref inBound, ProcessAccept, m_UdpServerSocket);
+                    if (m_UdpServerSocket.ReceiveFromAsync(eventArgs))
+                        ProcessAccept(m_UdpServerSocket, eventArgs);
                 }
                 catch (Exception ex)
                 {
@@ -1639,7 +1642,7 @@ namespace Media.Rtsp
         /// </summary>
         internal void AcceptLoop()
         {
-            IAsyncResult lastAccept = null;
+            SocketAsyncEventArgs lastAccept = null;
 
             //Indicate Thread Started
             m_Started = DateTime.UtcNow;
@@ -1668,13 +1671,17 @@ namespace Media.Rtsp
                     else if (m_Sessions.Count < m_MaximumSessions)
                     {
                         //If not already accepting
-                        if (lastAccept == null || lastAccept.IsCompleted)
+                        if (lastAccept == null)
                         {
+                            var eventArgs = new SocketAsyncEventArgs();
+                            eventArgs.Completed += ProcessAccept;
                             //Start a thread acceping with a 0 size buffer
-                            lastAccept = m_TcpServerSocket.BeginAccept(0, new AsyncCallback(ProcessAccept), m_TcpServerSocket);
+                            if (!m_TcpServerSocket.AcceptAsync(eventArgs))
+                                ProcessAccept(m_TcpServerSocket, eventArgs);
 
                             //Sample the clock
                             lastAcceptStarted = DateTime.UtcNow;
+                            lastAccept = eventArgs;
                         }
 
                         //Ensure lowest priority
@@ -1710,9 +1717,7 @@ namespace Media.Rtsp
                         #endregion
 
                         //While running and not completed, wait timeOut
-                        while (false.Equals(lastAccept.IsCompleted) &&
-                            false.Equals(lastAccept.AsyncWaitHandle.WaitOne(halfTimeout)) &&
-                            IsRunning)
+                        while (IsRunning)
                         {
                             //If the signal was recieved then stop looping
                             if (m_AcceptSignal.Wait(halfTimeout)) break;
@@ -1762,7 +1767,7 @@ namespace Media.Rtsp
         /// Handles the accept of rtsp client sockets into the server
         /// </summary>
         /// <param name="ar">IAsyncResult with a Socket object in the AsyncState property</param>
-        internal void ProcessAccept(IAsyncResult ar)
+        internal void ProcessAccept(object sender, SocketAsyncEventArgs e)
         {
             try
             {
@@ -1773,13 +1778,11 @@ namespace Media.Rtsp
                 
                 bool reconfigure = false;
 
-                if (object.ReferenceEquals(ar, null) || false.Equals(ar.IsCompleted)) return;
-
                 //The Socket needed to create a ClientSession
                 Socket clientSocket = null;
 
                 //See if there is a socket in the state object
-                Socket server = (Socket)ar.AsyncState;
+                Socket server = (Socket)sender;
 
                 //If there is no socket then an accept has cannot be performed
                 if (object.ReferenceEquals(server, null)) return;
@@ -1788,7 +1791,7 @@ namespace Media.Rtsp
                 if (server.ProtocolType == ProtocolType.Udp)
                 {
                     //Should always be 0 for our server any servers passed in
-                    int acceptBytes = server.EndReceive(ar);
+                    int acceptBytes = e.BytesTransferred;
 
                     //Create a new socket for the client
                     clientSocket = new Socket(server.RemoteEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
@@ -1809,7 +1812,12 @@ namespace Media.Rtsp
 
                     //Start receiving again if this was our server
                     if (m_UdpServerSocket.Handle == server.Handle)
-                        m_UdpServerSocket.BeginReceive(Media.Common.MemorySegment.EmptyBytes, 0, 0, SocketFlags.Partial, ProcessAccept, m_UdpServerSocket);
+                    {
+                        var eventArgs = new SocketAsyncEventArgs();
+                        e.Completed += ProcessAccept;
+                        if (!m_UdpServerSocket.ReceiveAsync(eventArgs))
+                            ProcessAccept(m_UdpServerSocket, eventArgs);
+                    }
                 }
                 else if (server.ProtocolType == ProtocolType.Tcp) //Tcp
                 {
@@ -1817,7 +1825,7 @@ namespace Media.Rtsp
                     //They are not discarded just not receieved until the first receive.
                     if (server.IsBound && IsRunning)
                     {
-                        clientSocket = server.EndAccept(ar);
+                        clientSocket = e.AcceptSocket;
 
                         //Configuring the server?
                         //ConfigureRtspServerSocket(server, out interframeGap, ref reconfigure, clientSocket);
@@ -1900,14 +1908,12 @@ namespace Media.Rtsp
         /// Handles the recieving of sockets data from a ClientSession's RtspSocket
         /// </summary>
         /// <param name="ar">The asynch result</param>
-        internal void ProcessReceive(IAsyncResult ar)
+        internal void ProcessReceive(object sender, SocketAsyncEventArgs e)
         {
-            if (object.ReferenceEquals(ar, null) || 
-                ar.IsCompleted.Equals(false) || 
-                IsRunning.Equals(false)) return;
+            if (IsRunning.Equals(false)) return;
 
             //Get the client information from the result
-            ClientSession session = (ClientSession)ar.AsyncState;
+            ClientSession session = (ClientSession)e.UserToken;
 
             //Check if the recieve can proceed.
             if (Common.IDisposedExtensions.IsNullOrDisposed(session) ||
@@ -1920,7 +1926,7 @@ namespace Media.Rtsp
                 EndPoint inBound = session.RemoteEndPoint;
 
                 //Declare how much was recieved
-                int received = session.m_RtspSocket.EndReceiveFrom(ar, ref inBound);                
+                int received = e.BytesTransferred;
                 
                 //If we received any application layer data
                 if (received > 0)
@@ -2139,13 +2145,13 @@ namespace Media.Rtsp
         /// Handles the sending of responses to clients which made requests
         /// </summary>
         /// <param name="ar">The asynch result</param>
-        internal void ProcessSendComplete(IAsyncResult ar)
+        internal void ProcessSendComplete(object sender, SocketAsyncEventArgs e)
         {
             unchecked
             {
-                if (object.ReferenceEquals(ar, null) || ar.IsCompleted.Equals(false)) return;
+                if (object.ReferenceEquals(sender, null)) return;
 
-                ClientSession session = (ClientSession)ar.AsyncState;
+                ClientSession session = (ClientSession)e.UserToken;
 
                 try
                 {
@@ -2154,7 +2160,7 @@ namespace Media.Rtsp
                     if (IDisposedExtensions.IsNullOrDisposed(session) || session.IsDisconnected || false.Equals(session.HasRuningServer)) return;
 
                     //Ensure the bytes were completely sent..
-                    int sent = session.m_RtspSocket.EndSendTo(ar);
+                    int sent = e.BytesTransferred;
 
                     //See how much was needed.
                     int neededLength = session.m_SendBuffer.Length;
@@ -2176,7 +2182,7 @@ namespace Media.Rtsp
                         //Determine how much remains
                         int remains = neededLength - sent;
 
-                        if (remains > 0)
+                        if (remains > 0 && e.SocketError != SocketError.ConnectionAborted)
                         {
                             //Start sending the rest of the data
                             session.SendRtspData(session.m_SendBuffer, sent, remains);

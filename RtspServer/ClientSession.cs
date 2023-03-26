@@ -146,7 +146,7 @@ namespace Media.Rtsp//.Server
         internal System.Collections.Hashtable Storage = System.Collections.Hashtable.Synchronized(new System.Collections.Hashtable());
 
         //Keep track of the last send or receive when using Async
-        internal IAsyncResult LastRecieve, LastSend;
+        internal SocketAsyncEventArgs LastRecieve, LastSend;
 
         /// <summary>
         /// The RtpClient.TransportContext instances which provide valid data to this ClientSession.
@@ -382,17 +382,6 @@ namespace Media.Rtsp//.Server
                 false.Equals(m_RtspSocket.Poll(m_SocketPollMicroseconds, SelectMode.SelectRead)))
             {
                 //Wait for the last recieve to complete
-                //Might not need this when not using Async.
-                if (object.ReferenceEquals(LastRecieve, null).Equals(false))
-                {
-                    if (false.Equals(LastRecieve.IsCompleted))
-                    {
-                        WaitHandle wait = LastRecieve.AsyncWaitHandle;
-
-                        Media.Common.Extensions.WaitHandle.WaitHandleExtensions.TryWaitOnHandleAndDispose(ref wait);
-                    }
-                }
-
                 //If session is disposed or the socket is shared then jump
                 if (SharesSocket) goto NotDisconnected;
             }
@@ -402,7 +391,17 @@ namespace Media.Rtsp//.Server
 
             if(SharesSocket) goto NotDisconnected;
 
-            if (object.ReferenceEquals(m_RtspSocket, null).Equals(false) && HasRuningServer) LastRecieve = m_RtspSocket.BeginReceiveFrom(m_Buffer.Array, m_Buffer.Offset, m_Buffer.Count, SocketFlags.None, ref RemoteEndPoint, new AsyncCallback(m_Server.ProcessReceive), this);
+            if (object.ReferenceEquals(m_RtspSocket, null).Equals(false) && HasRuningServer)
+            {
+                LastRecieve = new SocketAsyncEventArgs();
+                LastRecieve.SetBuffer(m_Buffer.Array, m_Buffer.Offset, m_Buffer.Count);
+                LastRecieve.RemoteEndPoint = RemoteEndPoint;
+                LastRecieve.UserToken = this;
+                LastRecieve.Completed += m_Server.ProcessReceive;
+                //m_RtspSocket.ReceiveAsync(m_Buffer.Array, m_Buffer.Offset, m_Buffer.Count, SocketFlags.None, ref RemoteEndPoint, new AsyncCallback(m_Server.ProcessReceive), this);
+                if (!m_RtspSocket.ReceiveAsync(LastRecieve))
+                    m_Server.ProcessReceive(m_Server, LastRecieve);
+            }
 
         NotDisconnected:
             //Mark as not disconnected.
@@ -428,32 +427,6 @@ namespace Media.Rtsp//.Server
 
             try
             {
-                //while the socket cannot write in bit time
-                while (IsDisconnected.Equals(false) &&
-                       IsDisposed.Equals(false) &&
-                       HasRuningServer &&
-                       m_RtspSocket.Poll(m_SocketPollMicroseconds, SelectMode.SelectWrite).Equals(false)) 
-                {
-                    ////Wait for the last send to complete
-                    if (object.ReferenceEquals(LastSend, null).Equals(false))
-                    {
-                        if (false.Equals(IsDisconnected) && LastSend.IsCompleted.Equals(false))
-                        {
-                            WaitHandle wait = LastSend.AsyncWaitHandle;
-
-                            Media.Common.Extensions.WaitHandle.WaitHandleExtensions.TryWaitOnHandleAndDispose(ref wait);
-                        }
-                        else if (false.Equals(IsDisconnected) && m_RtspSocket.Poll(m_SocketPollMicroseconds, SelectMode.SelectRead))
-                        {
-                            if(HasRuningServer) StartReceive();
-
-                            WaitHandle wait = LastRecieve.AsyncWaitHandle;
-
-                            Media.Common.Extensions.WaitHandle.WaitHandleExtensions.TryWaitOnHandleAndDispose(ref wait);
-                        }
-                    }
-                }
-
                 //If session is disposed then return
                 if (IsDisposed || HasRuningServer.Equals(false)) return;
 
@@ -464,8 +437,16 @@ namespace Media.Rtsp//.Server
                 IsDisconnected = false;
 
                 //The state is this session.
-                LastSend = m_RtspSocket.BeginSendTo(m_SendBuffer, offset, length, flags, other ?? RemoteEndPoint, m_Server.ProcessSendComplete, this);
-
+                LastSend = new SocketAsyncEventArgs();
+                LastSend.SetBuffer(m_SendBuffer, offset, length);
+                LastSend.RemoteEndPoint = other ?? RemoteEndPoint;
+                LastSend.UserToken = this;
+                LastSend.Completed += m_Server.ProcessSendComplete;
+                LastSend.SocketFlags = flags;
+                //m_SendBuffer, offset, length, flags, other ?? RemoteEndPoint, m_Server.ProcessSendComplete, this
+                if (!m_RtspSocket.SendAsync(LastSend))
+                    m_Server.ProcessSendComplete(m_Server, LastSend);
+                
                 //Mark as not disconnected.
                 //IsDisconnected = false;
             }
