@@ -1643,6 +1643,8 @@ namespace Media.Rtsp
         internal void AcceptLoop()
         {
             SocketAsyncEventArgs lastAccept = null;
+            var eventArgs = new SocketAsyncEventArgs();
+            eventArgs.Completed += ProcessAccept;            
 
             //Indicate Thread Started
             m_Started = DateTime.UtcNow;
@@ -1673,8 +1675,7 @@ namespace Media.Rtsp
                         //If not already accepting
                         if (lastAccept == null)
                         {
-                            var eventArgs = new SocketAsyncEventArgs();
-                            eventArgs.Completed += ProcessAccept;
+                            eventArgs.AcceptSocket = null;
                             //Start a thread acceping with a 0 size buffer
                             if (!m_TcpServerSocket.AcceptAsync(eventArgs))
                                 ProcessAccept(m_TcpServerSocket, eventArgs);

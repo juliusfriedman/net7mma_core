@@ -401,7 +401,6 @@ namespace Media.Rtsp//.Server
                     LastRecieve.Completed += m_Server.ProcessReceive;
                 }
                 LastRecieve.RemoteEndPoint = RemoteEndPoint;
-                //m_RtspSocket.ReceiveAsync(m_Buffer.Array, m_Buffer.Offset, m_Buffer.Count, SocketFlags.None, ref RemoteEndPoint, new AsyncCallback(m_Server.ProcessReceive), this);
                 if (!m_RtspSocket.ReceiveAsync(LastRecieve))
                     m_Server.ProcessReceive(m_Server, LastRecieve);
             }
