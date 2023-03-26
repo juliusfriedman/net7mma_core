@@ -1816,10 +1816,8 @@ namespace Media.Rtsp
                     //Start receiving again if this was our server
                     if (m_UdpServerSocket.Handle == server.Handle)
                     {
-                        var eventArgs = new SocketAsyncEventArgs();
-                        e.Completed += ProcessAccept;
-                        if (!m_UdpServerSocket.ReceiveAsync(eventArgs))
-                            ProcessAccept(m_UdpServerSocket, eventArgs);
+                        if (!m_UdpServerSocket.ReceiveAsync(e))
+                            ProcessAccept(m_UdpServerSocket, e);
                     }
                 }
                 else if (server.ProtocolType == ProtocolType.Tcp) //Tcp
