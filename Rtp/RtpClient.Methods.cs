@@ -1162,6 +1162,10 @@ namespace Media.Rtp
             Media.Common.Extensions.Thread.ThreadExtensions.TryAbortAndFree(ref m_WorkerThread);
 
             Started = System.DateTime.MinValue;
+
+            m_EventData.Clear();
+
+            m_EventReady.Set();
         }
 
         public void DisposeAndClearTransportContexts()
@@ -2179,7 +2183,7 @@ namespace Media.Rtp
                         }
 
                         //Reset the event when all frames are dispatched
-                        if (m_EventData.IsEmpty)
+                        if (IsActive && m_EventData.IsEmpty)
                         {
                             m_EventReady.Reset();
 

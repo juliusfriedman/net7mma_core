@@ -393,11 +393,14 @@ namespace Media.Rtsp//.Server
 
             if (object.ReferenceEquals(m_RtspSocket, null).Equals(false) && HasRuningServer)
             {
-                LastRecieve = new SocketAsyncEventArgs();
-                LastRecieve.SetBuffer(m_Buffer.Array, m_Buffer.Offset, m_Buffer.Count);
+                if (LastRecieve == null)
+                {
+                    LastRecieve = new SocketAsyncEventArgs();
+                    LastRecieve.SetBuffer(m_Buffer.Array, m_Buffer.Offset, m_Buffer.Count);
+                    LastRecieve.UserToken = this;
+                    LastRecieve.Completed += m_Server.ProcessReceive;
+                }
                 LastRecieve.RemoteEndPoint = RemoteEndPoint;
-                LastRecieve.UserToken = this;
-                LastRecieve.Completed += m_Server.ProcessReceive;
                 //m_RtspSocket.ReceiveAsync(m_Buffer.Array, m_Buffer.Offset, m_Buffer.Count, SocketFlags.None, ref RemoteEndPoint, new AsyncCallback(m_Server.ProcessReceive), this);
                 if (!m_RtspSocket.ReceiveAsync(LastRecieve))
                     m_Server.ProcessReceive(m_Server, LastRecieve);
@@ -437,12 +440,15 @@ namespace Media.Rtsp//.Server
                 IsDisconnected = false;
 
                 //The state is this session.
-                LastSend = new SocketAsyncEventArgs();
-                LastSend.SetBuffer(m_SendBuffer, offset, length);
+                if(LastSend == null)
+                {
+                    LastSend = new SocketAsyncEventArgs();
+                    LastSend.UserToken = this;
+                    LastSend.Completed += m_Server.ProcessSendComplete;
+                }
                 LastSend.RemoteEndPoint = other ?? RemoteEndPoint;
-                LastSend.UserToken = this;
-                LastSend.Completed += m_Server.ProcessSendComplete;
                 LastSend.SocketFlags = flags;
+                LastSend.SetBuffer(m_SendBuffer, offset, length);
                 if (!m_RtspSocket.SendAsync(LastSend))
                     m_Server.ProcessSendComplete(m_Server, LastSend);
             }

@@ -4256,12 +4256,14 @@ namespace Media.Rtp
 
             ThreadEvents = false;
 
+            m_WorkerThread = m_EventThread = null;
+
             m_EventData.Clear();
+
+            m_EventReady.Reset();
 
             //Allow a waiting thread to exit
             m_EventReady.Set();
-
-            m_EventReady.Reset();
 
             AdditionalSourceDescriptionItems.Clear();
 
