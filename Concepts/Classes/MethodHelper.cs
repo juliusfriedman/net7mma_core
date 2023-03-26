@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 //Modified based on the following examples:
 //http://stackoverflow.com/questions/7299097/dynamically-replace-the-contents-of-a-c-sharp-method
@@ -16,57 +17,83 @@ namespace Media.Concepts.Classes
     internal class Program
     {
 
-    public static unsafe MethodReplacementState Replace(MethodInfo methodToReplace, MethodInfo methodToInject, bool debug = false)
+        private static IntPtr GetMethodAddress(MethodInfo mi)
+        {
+            const ushort SLOT_NUMBER_MASK = 0xffff; // 2 bytes mask
+            const int MT_OFFSET_32BIT = 0x28;       // 40 bytes offset
+            const int MT_OFFSET_64BIT = 0x40;       // 64 bytes offset
+
+            IntPtr address;
+
+            // JIT compilation of the method
+            RuntimeHelpers.PrepareMethod(mi.MethodHandle);
+
+            IntPtr md = mi.MethodHandle.Value;             // MethodDescriptor address
+            IntPtr mt = mi.DeclaringType.TypeHandle.Value; // MethodTable address
+
+            if (mi.IsVirtual)
+            {
+                // The fixed-size portion of the MethodTable structure depends on the process type
+                int offset = IntPtr.Size == 4 ? MT_OFFSET_32BIT : MT_OFFSET_64BIT;
+
+                // First method slot = MethodTable address + fixed-size offset
+                // This is the address of the first method of any type (i.e. ToString)
+                IntPtr ms = Marshal.ReadIntPtr(mt + offset);
+
+                // Get the slot number of the virtual method entry from the MethodDesc data structure
+                long shift = Marshal.ReadInt64(md) >> 32;
+                int slot = (int)(shift & SLOT_NUMBER_MASK);
+
+                // Get the virtual method address relative to the first method slot
+                address = ms + (slot * IntPtr.Size);
+            }
+            else
+            {
+                // Bypass default MethodDescriptor padding (8 bytes) 
+                // Reach the CodeOrIL field which contains the address of the JIT-compiled code
+                address = md + 8;
+            }
+
+            return address;
+        }
+
+        public static void RedirectTo(MethodInfo origin, MethodInfo target)
+        {
+            IntPtr ori = GetMethodAddress(origin);
+            IntPtr tar = GetMethodAddress(target);
+
+            Marshal.Copy(new IntPtr[] { Marshal.ReadIntPtr(tar) }, 0, ori, 1);
+        }
+
+        public static unsafe MethodReplacementState Replace(MethodInfo methodToReplace, MethodInfo methodToInject, bool debug = false)
         {
             RuntimeHelpers.PrepareMethod(methodToReplace.MethodHandle);
             RuntimeHelpers.PrepareMethod(methodToInject.MethodHandle);
             MethodReplacementState state;
-
-            IntPtr tar = methodToReplace.MethodHandle.Value;
-            if (!methodToReplace.IsVirtual)
-                tar += 8;
-            else
-            {
-                var index = (int)(((*(long*)tar) >> 32) & 0xFF);
-                var classStart = *(IntPtr*)(methodToReplace.DeclaringType.TypeHandle.Value + (IntPtr.Size == 4 ? 40 : 64));
-                tar = classStart + IntPtr.Size * index;
-            }
-            var inj = methodToInject.MethodHandle.Value + 8;
-            if (debug || System.Diagnostics.Debugger.IsAttached)
-            {
-                tar = *(IntPtr*)tar + 1;
-                inj = *(IntPtr*)inj + 1;
-                state.Location = tar;
-                state.OriginalValue = new IntPtr(*(int*)tar);
-
-                *(int*)tar = *(int*)inj + (int)(long)inj - (int)(long)tar;
-                return state;
-
-            }
-            state.Location = tar;
-            state.OriginalValue = *(IntPtr*)tar;
-            *(IntPtr*)tar = *(IntPtr*)inj;
+            RedirectTo(methodToReplace, methodToInject);
+            state.Location = GetMethodAddress(methodToReplace);
+            state.OriginalValue = GetMethodAddress(methodToInject);
             return state;
-        }    
-
-    public struct MethodReplacementState : IDisposable
-    {
-        internal IntPtr Location;
-        internal IntPtr OriginalValue;
-        public void Dispose()
-        {
-            this.Restore();
         }
 
-        public unsafe void Restore()
+        public struct MethodReplacementState : IDisposable
         {
+            internal IntPtr Location;
+            internal IntPtr OriginalValue;
+            public void Dispose()
+            {
+                this.Restore();
+            }
+
+            public unsafe void Restore()
+            {
 #if DEBUG
-            *(int*)Location = (int)OriginalValue;
+                *(int*)Location = (int)OriginalValue;
 #else
             *(IntPtr*)Location = OriginalValue;
 #endif
+            }
         }
-    }
 
     public static void WriteTest()
         {
@@ -255,41 +282,42 @@ namespace Media.Concepts.Classes
         /// <returns></returns>
         public static IntPtr GetMethodAddress(MethodBase method)
         {
-            if ((method is System.Reflection.Emit.DynamicMethod))
-            {             
-                unsafe
-                {
-                    byte* ptr = (byte*)GetDynamicMethodRuntimeHandle(method).ToPointer();
-                    if (IntPtr.Size == 8)
-                    {
-                        ulong* address = (ulong*)ptr;
-                        address += 6;
-                        return new IntPtr(address);
-                    }
-                    else
-                    {
-                        uint* address = (uint*)ptr;
-                        address += 6;
-                        return new IntPtr(address);
-                    }
-                }
-            }
+            const ushort SLOT_NUMBER_MASK = 0xffff; // 2 bytes mask
+            const int MT_OFFSET_32BIT = 0x28;       // 40 bytes offset
+            const int MT_OFFSET_64BIT = 0x40;       // 64 bytes offset
 
+            IntPtr address;
+
+            // JIT compilation of the method
             RuntimeHelpers.PrepareMethod(method.MethodHandle);
 
-            unsafe
+            IntPtr md = method.MethodHandle.Value;             // MethodDescriptor address
+            IntPtr mt = method.DeclaringType.TypeHandle.Value; // MethodTable address
+
+            if (method.IsVirtual)
             {
-                IntPtr tar = method.MethodHandle.Value;
-                if (!method.IsVirtual)
-                    tar += 8;
-                else
-                {
-                    var index = (int)(((*(long*)tar) >> 32) & 0xFF);
-                    var classStart = *(IntPtr*)(method.DeclaringType.TypeHandle.Value + (IntPtr.Size == 4 ? 40 : 64));
-                    tar = classStart + IntPtr.Size * index;
-                }
-                return tar;
+                // The fixed-size portion of the MethodTable structure depends on the process type
+                int offset = IntPtr.Size == 4 ? MT_OFFSET_32BIT : MT_OFFSET_64BIT;
+
+                // First method slot = MethodTable address + fixed-size offset
+                // This is the address of the first method of any type (i.e. ToString)
+                IntPtr ms = Marshal.ReadIntPtr(mt + offset);
+
+                // Get the slot number of the virtual method entry from the MethodDesc data structure
+                long shift = Marshal.ReadInt64(md) >> 32;
+                int slot = (int)(shift & SLOT_NUMBER_MASK);
+
+                // Get the virtual method address relative to the first method slot
+                address = ms + (slot * IntPtr.Size);
             }
+            else
+            {
+                // Bypass default MethodDescriptor padding (8 bytes) 
+                // Reach the CodeOrIL field which contains the address of the JIT-compiled code
+                address = md + 8;
+            }
+
+            return address;
         }
 
         /// <summary>
@@ -345,27 +373,10 @@ namespace Media.Concepts.Classes
 
             RuntimeHelpers.PrepareMethod(destination.MethodHandle);
 
-            unsafe
-            {
-                IntPtr tar = source.MethodHandle.Value;
-                if (!source.IsVirtual)
-                    tar += 8;
-                else
-                {
-                    var index = (int)(((*(long*)tar) >> 32) & 0xFF);
-                    var classStart = *(IntPtr*)(source.DeclaringType.TypeHandle.Value + (IntPtr.Size == 4 ? 40 : 64));
-                    tar = classStart + IntPtr.Size * index;
-                }
-                IntPtr inj = destination.MethodHandle.Value + 8;
-                if (debug || System.Diagnostics.Debugger.IsAttached) {
-                    tar = *(IntPtr*)tar + 1;
-                    inj = *(IntPtr*)inj + 1;
-                    *(int*)tar = *(int*)inj + (int)(long)inj - (int)(long)tar;
-                    return;
-                }
-                *(IntPtr*)tar = *(IntPtr*)inj;
-                return;
-            }
+            IntPtr ori = GetMethodAddress(source);
+            IntPtr tar = GetMethodAddress(destination);
+
+            Marshal.Copy(new IntPtr[] { Marshal.ReadIntPtr(tar) }, 0, ori, 1);
         }
 
 #endregion

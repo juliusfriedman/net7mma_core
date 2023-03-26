@@ -2820,7 +2820,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             static void Fallback(byte[] buffer)
             {
-                var registers = System.Runtime.Intrinsics.X86.X86Base.CpuId(0, 0);
+                var registers = System.Runtime.Intrinsics.X86.X86Base.CpuId(Common.Binary.Read32(buffer, 0, false), Common.Binary.Read32(buffer, 8, false));
                 Common.Binary.Write32(buffer, 0, false, registers.Eax);
                 Common.Binary.Write32(buffer, 4, false, registers.Ebx);
                 Common.Binary.Write32(buffer, 8, false, registers.Ecx);
