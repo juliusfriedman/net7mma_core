@@ -36,8 +36,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
-using Media.Common;
-
 namespace Media.Concepts.Hardware
 {
     /// <summary>
@@ -2823,10 +2821,10 @@ namespace Media.Concepts.Hardware
             static void Fallback(byte[] buffer)
             {
                 var registers = System.Runtime.Intrinsics.X86.X86Base.CpuId(0, 0);
-                Binary.Write32(buffer, 0, false, registers.Eax);
-                Binary.Write32(buffer, 4, false, registers.Ebx);
-                Binary.Write32(buffer, 8, false, registers.Ecx);
-                Binary.Write32(buffer, 12, false, registers.Edx);
+                Common.Binary.Write32(buffer, 0, false, registers.Eax);
+                Common.Binary.Write32(buffer, 4, false, registers.Ebx);
+                Common.Binary.Write32(buffer, 8, false, registers.Ecx);
+                Common.Binary.Write32(buffer, 12, false, registers.Edx);
             }
 
             #endregion
