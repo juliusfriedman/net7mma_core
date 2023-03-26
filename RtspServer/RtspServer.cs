@@ -1726,6 +1726,8 @@ namespace Media.Rtsp
                         //Reset the signal
                         m_AcceptSignal.Reset();
 
+                        lastAccept = null;
+
                         //Ensure below normal priorty
                         System.Threading.Thread.CurrentThread.Priority = ThreadPriority.BelowNormal;
 

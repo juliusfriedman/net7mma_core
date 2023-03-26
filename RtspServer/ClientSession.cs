@@ -443,12 +443,8 @@ namespace Media.Rtsp//.Server
                 LastSend.UserToken = this;
                 LastSend.Completed += m_Server.ProcessSendComplete;
                 LastSend.SocketFlags = flags;
-                //m_SendBuffer, offset, length, flags, other ?? RemoteEndPoint, m_Server.ProcessSendComplete, this
                 if (!m_RtspSocket.SendAsync(LastSend))
                     m_Server.ProcessSendComplete(m_Server, LastSend);
-                
-                //Mark as not disconnected.
-                //IsDisconnected = false;
             }
             catch (Exception ex)
             {
