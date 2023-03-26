@@ -84,6 +84,9 @@
     <None Update="Media\Audio\wav\StarWars60.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Media\bark.rtp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Media\Video\asf\pages.asf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -2152,6 +2152,8 @@ namespace Media.Rtsp
             {
                 if (object.ReferenceEquals(sender, null)) return;
 
+                if (e.SocketError != SocketError.Success) throw new SocketException((int)e.SocketError);
+
                 ClientSession session = (ClientSession)e.UserToken;
 
                 try
@@ -2183,7 +2185,7 @@ namespace Media.Rtsp
                         //Determine how much remains
                         int remains = neededLength - sent;
 
-                        if (remains > 0 && e.SocketError != SocketError.ConnectionAborted)
+                        if (remains > 0)
                         {
                             //Start sending the rest of the data
                             session.SendRtspData(session.m_SendBuffer, sent, remains);

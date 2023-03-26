@@ -1447,17 +1447,17 @@ namespace Media.UnitTests
 
             //ToDo a byte by byte compairson on a dump file before modifying
 
-            System.IO.File.Delete(currentPath + @"\mybark.rtp");
+            //System.IO.File.Delete(currentPath + @"\mybark.rtp");
 
-            System.IO.File.Delete(currentPath + @"\BinaryDump.rtpdump");
+            //System.IO.File.Delete(currentPath + @"\BinaryDump.rtpdump");
 
-            System.IO.File.Delete(currentPath + @"\AsciiDump.rtpdump");
+            //System.IO.File.Delete(currentPath + @"\AsciiDump.rtpdump");
 
-            System.IO.File.Delete(currentPath + @"\HexDump.rtpdump");
+            //System.IO.File.Delete(currentPath + @"\HexDump.rtpdump");
 
-            System.IO.File.Delete(currentPath + @"\Header.rtpdump");
+            //System.IO.File.Delete(currentPath + @"\Header.rtpdump");
 
-            System.IO.File.Delete(currentPath + @"\ShortDump.rtpdump");
+            //System.IO.File.Delete(currentPath + @"\ShortDump.rtpdump");
         }
 
         static void TestRtspClient(string location, System.Net.NetworkCredential cred = null, Media.Rtsp.RtspClient.ClientProtocolType? protocol = null, System.Net.AuthenticationSchemes? authenticationScheme = System.Net.AuthenticationSchemes.None)
