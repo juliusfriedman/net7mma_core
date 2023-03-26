@@ -40,7 +40,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.RtpTools.RtpDump
 {
@@ -455,6 +454,8 @@ namespace Media.RtpTools.RtpDump
             m_FileIdentifier = null;
             Close();
             base.Dispose(ShouldDispose);
+            m_Reader.Dispose();
+            m_Reader = null;
         }
 
         /// <summary>
@@ -880,6 +881,7 @@ namespace Media.RtpTools.RtpDump
             if (IsDisposed || false == ShouldDispose) return;
             Close();
             base.Dispose(ShouldDispose);
+            m_Writer.Dispose();
             m_FileHeader = null;
             m_Writer = null;
         }

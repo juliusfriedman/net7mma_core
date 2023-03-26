@@ -552,7 +552,7 @@ namespace Media.RtpTools
                 totalLength += packet.Length;
 
                 if (format == FileFormat.Hex)
-                    hexPayload.Append(BitConverter.ToString(packet.Payload.ToArray()).Replace("-", string.Empty));
+                    hexPayload.Append(Convert.ToHexString(packet.Payload.ToArray()));
             }
 
             //Insert the header
@@ -684,7 +684,7 @@ namespace Media.RtpTools
                         builder.Append(string.Format(RtpSend.NonQuotedFormat, "ext_len", rtpExtension.LengthInWords));
                         builder.Append((char)Common.ASCII.LineFeed);
 
-                        builder.Append(string.Format(RtpSend.HexFormat, "ext_data",  BitConverter.ToString(rtpExtension.Data.ToArray()).Replace("-", string.Empty), (char)Common.ASCII.LineFeed));
+                        builder.Append(string.Format(RtpSend.HexFormat, "ext_data",  Convert.ToHexString(rtpExtension.Data.ToArray()), (char)Common.ASCII.LineFeed));
                     }
                 }
             }
@@ -693,7 +693,7 @@ namespace Media.RtpTools
             if (format == FileFormat.Hex)
             {
                 var data = packet.PayloadData;
-                if (data.Any()) builder.Append(string.Format(RtpSend.HexFormat, "data", BitConverter.ToString(data.ToArray()).Replace("-", string.Empty), (char)Common.ASCII.LineFeed));
+                if (data.Any()) builder.Append(string.Format(RtpSend.HexFormat, "data", Convert.ToHexString(data.ToArray()), (char)Common.ASCII.LineFeed));
                 else builder.Append(string.Format(HexFormat, "data", NullSpecifier, (char)Common.ASCII.LineFeed));
             }
 

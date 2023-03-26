@@ -162,7 +162,7 @@ namespace Media.Cryptography
         public static string GetHashString(byte[] input)
         {
             if (null == input) throw new System.ArgumentNullException("input", "Unable to calculate hash over null input data");
-            return new StringBuilder(new String(Encoding.UTF8.GetChars(GetHash(input)))).Replace("-", "").ToString();
+            return new StringBuilder(new String(Encoding.UTF8.GetChars(GetHash(input)))).ToString();
         }
 
         public static string GetHashString(string input, Encoding encoding)

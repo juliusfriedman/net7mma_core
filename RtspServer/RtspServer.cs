@@ -3573,12 +3573,12 @@ namespace Media.Rtsp
 
                     //The MD5 hash of the combined HA1 result, server nonce (nonce), request counter (nc), client nonce (cnonce), quality of protection code (qop) and HA2 result is calculated. The result is the "response" value provided by the client.
                     byte[] ResponseHash = Cryptography.MD5.GetHash(request.ContentEncoding.GetBytes(string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}:{2}:{3}:{4}:{5}", 
-                        Convert.ToString(HA1).Replace("-", string.Empty), 
+                        Convert.ToHexString(HA1), 
                         nonce.Replace("nonce=", string.Empty), 
-                        nc.Replace("nc=", string.Empty), 
+                        nc.Replace("nc=", string.Empty),
                         cnonce.Replace("cnonce=", string.Empty), 
                         qop.Replace("qop=", string.Empty), 
-                        Convert.ToString(HA2).Replace("-", string.Empty))));
+                        Convert.ToHexString(HA2))));
 
                     //return the result of a mutal hash creation via comparison
                     return ResponseHash.SequenceEqual(Media.Common.Extensions.String.StringExtensions.HexStringToBytes(response.Replace("response=", string.Empty)));

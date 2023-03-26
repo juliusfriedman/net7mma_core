@@ -774,7 +774,7 @@ namespace Media.UnitTests
             Media.Utility.Random.NextBytes(random);
 
             // Create SDP offer (Step 1).
-            string originatorAndSession = String.Format("{0} {1} {2} {3} {4} {5}", "-", BitConverter.ToString(random).Replace("-", string.Empty), "0", "IN", "IP4", "10.1.1.2");
+            string originatorAndSession = String.Format("{0} {1} {2} {3} {4} {5}", "-", Convert.ToHexString(random), "0", "IN", "IP4", "10.1.1.2");
             using (var sdp = new Media.Sdp.SessionDescription(0, originatorAndSession, "sipsorcery"))
             {
                 sdp.Add(new Media.Sdp.SessionDescriptionLine("c=IN IP4 10.1.1.2"), false);
