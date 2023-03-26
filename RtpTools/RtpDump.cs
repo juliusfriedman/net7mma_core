@@ -126,7 +126,7 @@ namespace Media.RtpTools.RtpDump
         /// </summary>
         /// <param name="path">The file to read</param>
         public DumpReader(string path, FileFormat? format = null, bool shouldDispose = true)
-            : this(new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite), false, format, shouldDispose)
+            : this(new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite | System.IO.FileShare.Delete), false, format, shouldDispose)
         {
             m_Path = path;
         }
@@ -715,7 +715,7 @@ namespace Media.RtpTools.RtpDump
         /// <param name="source">The IPEndPoint from which RtpPackets were recieved</param>
         /// <param name="utcStart">The optional time the file started recording</param>
         /// <param name="overWrite">Indicates the file should be overwritten</param>
-        public DumpWriter(string filePath, FileFormat format, System.Net.IPEndPoint source, DateTime? utcStart = null, bool overWrite = false, bool modify = false, bool shouldDispose = true) : this(new System.IO.FileStream(filePath, !modify ? overWrite ? System.IO.FileMode.Create : System.IO.FileMode.CreateNew : System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.Write, System.IO.FileShare.ReadWrite), format, source, utcStart, modify, shouldDispose) { }       
+        public DumpWriter(string filePath, FileFormat format, System.Net.IPEndPoint source, DateTime? utcStart = null, bool overWrite = false, bool modify = false, bool shouldDispose = true) : this(new System.IO.FileStream(filePath, !modify ? overWrite ? System.IO.FileMode.Create : System.IO.FileMode.CreateNew : System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.Write, System.IO.FileShare.ReadWrite | System.IO.FileShare.Delete), format, source, utcStart, modify, shouldDispose) { }       
 
         #endregion
 

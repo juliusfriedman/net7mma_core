@@ -485,7 +485,7 @@ namespace Media.UnitTests
                 //Wowza RTSP (H264 Video)
                 new
                 {
-                    Uri = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov", //Single media item
+                    Uri = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4", //Single media item
                     Creds = default(System.Net.NetworkCredential),
                     Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
                     Type = System.Net.AuthenticationSchemes.None
@@ -4280,7 +4280,7 @@ a=appversion:1.0");
             if (writeNames) writeInfo("Running all tests within: " + instanceType.Name);
 
             //Get the methods of the class
-            foreach (var method in  System.Reflection.IntrospectionExtensions.GetTypeInfo(instanceType).GetMethods())
+            foreach (var method in instanceType.GetMethods())
                 //System.Reflection.IntrospectionExtensions.GetTypeInfo(instanceType).DeclaredMethods) // gives also the anonymous methods!!!
             {
                 //Ensure for the void type
