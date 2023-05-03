@@ -1566,7 +1566,7 @@ namespace Media.Rtsp
 
                 try
                 {
-                    new Thread(() =>
+                    ThreadPool.QueueUserWorkItem((s) =>
                     {
                         try
                         {
@@ -1583,10 +1583,7 @@ namespace Media.Rtsp
                             if (ex is ThreadAbortException) System.Threading.Thread.ResetAbort();
                         }
 
-                    }, Common.Extensions.Thread.ThreadExtensions.MinimumStackSize)
-                    {
-                        Priority = ThreadPriority.AboveNormal
-                    }.Start();
+                    }, this);
                 }                
                 catch(Exception ex)
                 {
@@ -1608,7 +1605,7 @@ namespace Media.Rtsp
 
                 try
                 {
-                    new Thread(() =>
+                    ThreadPool.QueueUserWorkItem((s) =>
                     {
                         try
                         {
@@ -1624,10 +1621,7 @@ namespace Media.Rtsp
 
                             if (ex is ThreadAbortException) System.Threading.Thread.ResetAbort();
                         }
-                    }, Common.Extensions.Thread.ThreadExtensions.MinimumStackSize)
-                    {
-                        Priority = ThreadPriority.AboveNormal
-                    }.Start();
+                    });
                 }
                 catch (Exception ex)
                 {

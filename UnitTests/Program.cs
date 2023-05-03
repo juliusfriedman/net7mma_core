@@ -2185,6 +2185,8 @@ namespace Media.UnitTests
 
                     //server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("mp4:BigBuckBunny_115k.mov", "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov", Media.Rtsp.RtspClient.ClientProtocolType.Udp));//, 8192, null, null, null, true));
 
+                    server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("wowza", "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4"));
+
                     //server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("OmegaUdp", "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov", Media.Rtsp.RtspClient.ClientProtocolType.Udp));
 
                     //server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("Zeta", "rtsp://rtsp-v3-spbtv.msk.spbtv.com:554/spbtv_v3_1/332_110.sdp", Media.Rtsp.RtspClient.ClientProtocolType.Tcp));
@@ -2348,7 +2350,7 @@ namespace Media.UnitTests
                     //Start taking pictures of the desktop and making packets in a seperate thread.
                     if (false.Equals(object.ReferenceEquals(captureThread, null)))
                     {
-                        //captureThread.Priority = System.Threading.ThreadPriority.BelowNormal;
+                        captureThread.Priority = System.Threading.ThreadPriority.BelowNormal;
 
                         captureThread.Start();
                     }

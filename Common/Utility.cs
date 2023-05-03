@@ -58,7 +58,7 @@ namespace Media
     {
         #region Properties
 
-        public readonly static Random Random = new Random();
+        public readonly static Random Random = Random.Shared;
 
         #endregion
 
