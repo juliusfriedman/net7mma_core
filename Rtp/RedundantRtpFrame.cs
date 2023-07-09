@@ -216,7 +216,7 @@
             result.Timestamp = packet.Timestamp;
 
             //Set the SequenceNumber
-            result.Timestamp = packet.SequenceNumber;
+            result.SequenceNumber = packet.SequenceNumber;
 
             //Set the marker bit if it needs to be set.
             result.Marker = marker || packet.Marker;
