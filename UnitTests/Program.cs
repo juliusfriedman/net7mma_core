@@ -3903,7 +3903,7 @@ a=appversion:1.0");
 
             Concepts.Classes.Program.WriteTest();
 
-            System.Console.WriteLine(Concepts.Hardware.PlatformRtdsc.GetTimestampUnsigned());
+            //System.Console.WriteLine(Concepts.Hardware.PlatformRtdsc.GetTimestampUnsigned());
 
             if (false == Concepts.Hardware.Intrinsics.CpuId.IsSupported()) System.Console.WriteLine("Hardware.Intrinsics Not Supported!");
             else

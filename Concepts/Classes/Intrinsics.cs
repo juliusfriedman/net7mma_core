@@ -2058,15 +2058,25 @@ namespace Media.Concepts.Hardware
 
                 System.Array.Clear(CpuId.CpuIdBuffer, 0, 16);
 
-                //Invoke CPUID
-                using (var cpuId = new CpuId())
-                {
-                    //Invoke with the level and leaf
-                    cpuId.Invoke(level, ref CpuId.CpuIdBuffer, subLeaf);
+                var registers = System.Runtime.Intrinsics.X86.X86Base.CpuId(level, subLeaf);
 
-                    //Create a copy of the buffer, Store the result in the CpuIdResults using the key.
-                    previous = CpuId.CpuIdResults[key] = Common.MemorySegment.CreateCopy(CpuIdBuffer, 0, 16);
-                }
+                previous = CpuId.CpuIdResults[key] = Common.MemorySegment.CreateCopy(CpuIdBuffer, 0, 16);
+
+                Common.Binary.Write32(previous.Array, previous.Offset, false, registers.Eax);
+                Common.Binary.Write32(previous.Array, previous.Offset + 4, false, registers.Ebx);
+                Common.Binary.Write32(previous.Array, previous.Offset + 8, false, registers.Ecx);
+                Common.Binary.Write32(previous.Array, previous.Offset + 12, false, registers.Edx);
+
+
+                ////Invoke CPUID
+                //using (var cpuId = new CpuId())
+                //{
+                //    //Invoke with the level and leaf
+                //    cpuId.Invoke(level, ref CpuId.CpuIdBuffer, subLeaf);
+
+                //    //Create a copy of the buffer, Store the result in the CpuIdResults using the key.
+                //    previous = CpuId.CpuIdResults[key] = Common.MemorySegment.CreateCopy(CpuIdBuffer, 0, 16);
+                //}
 
                 //Return the data
                 return previous;
@@ -2729,20 +2739,17 @@ namespace Media.Concepts.Hardware
             /// <param name="extended">Indicates if the extended features should also be read</param>
             internal static void ReadFeatures(bool extended)
             {
-                using (CpuId cpuId = new CpuId())
-                {
-                    //Extract values for supported features: (EAX=<1)
-                    //EAX => Extended Family, Extended MOdel, Type, Family, Model and Stepping ID (PSN)
-                    //EBX => Brand Index, CLFUSH line size, Count of logical processors (valid only if Hyper Threading bit is set), Processor local APIC (P4 +)
-                    //ECX =< Reserved
-                    //EDX => Feature Flags
+                //Extract values for supported features: (EAX=<1)
+                //EAX => Extended Family, Extended MOdel, Type, Family, Model and Stepping ID (PSN)
+                //EBX => Brand Index, CLFUSH line size, Count of logical processors (valid only if Hyper Threading bit is set), Processor local APIC (P4 +)
+                //ECX =< Reserved
+                //EDX => Feature Flags
 
-                    //Get all features
-                    for (int i = 1; i < CpuId.MaximumFeatureLevel; i++) CpuId.RetrieveInformation(i);
+                //Get all features
+                for (int i = 1; i < CpuId.MaximumFeatureLevel; i++) CpuId.RetrieveInformation(i);
 
-                    //Get all supported extended features
-                    if (extended) for (int i = -2147483648, e = CpuId.GetMaximumExtendedFeatureLevel(); i <= e; i++) CpuId.RetrieveInformation(i);
-                }
+                //Get all supported extended features
+                if (extended) for (int i = 0, e = CpuId.GetMaximumExtendedFeatureLevel(); i <= e; i++) CpuId.RetrieveInformation(i);
             }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -2820,7 +2827,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             static void Fallback(byte[] buffer)
             {
-                var registers = System.Runtime.Intrinsics.X86.X86Base.CpuId(Common.Binary.Read32(buffer, 0, false), Common.Binary.Read32(buffer, 8, false));
+                var registers = System.Runtime.Intrinsics.X86.X86Base.CpuId(Common.Binary.Read32(buffer, 0, false), Common.Binary.Read32(buffer, 4, false));
                 Common.Binary.Write32(buffer, 0, false, registers.Eax);
                 Common.Binary.Write32(buffer, 4, false, registers.Ebx);
                 Common.Binary.Write32(buffer, 8, false, registers.Ecx);
@@ -2908,82 +2915,44 @@ namespace Media.Concepts.Hardware
                 //Determine based on the State
                 switch (State)
                 {
+                    //Successully ran before
+                    case IntrinsicState.Unknown:
+                    case IntrinsicState.Available:
                     case IntrinsicState.NotAvailable:
                         {
                             //Create the delegate to use the fallback
                             CpuIdEx = Fallback;
 
                             //Allocate a new EntryPoint
-                            EntryPoint = new PlatformMethod();
+                            //EntryPoint = new PlatformMethod();
 
                             //Setup the InstructionPointer
-                            EntryPoint.InstructionPointer = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(CpuIdEx);
+                            //EntryPoint.InstructionPointer = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(CpuIdEx);
 
                             //Fallback
                             CpuIdEx(CpuIdBuffer);
 
-                            break;
-                        }
-                    //Successully ran before
-                    case IntrinsicState.Unknown:
-                    case IntrinsicState.Available:
-                        {
-                            //Use the faster code
-                            EntryPoint.SetInstructions(x86CodeBytes, x64CodeBytes, machine);
+                            //Store the result
+                            CpuIdResults[0] = Common.MemorySegment.CreateCopy(CpuIdBuffer, 0, 16);
 
-                            //Allocate the memory and allow execution
-                            EntryPoint.VirtualAllocate();
+                            //Store the new maximum feature level
+                            MaximumFeatureLevel = Common.Binary.Read32(CpuIdBuffer, 0, false);
 
-                            EntryPoint.VirtualProtect();
+                            System.Text.StringBuilder builder = new System.Text.StringBuilder(32);
 
-                            // Create a delegate to the "function"
-                            CpuIdEx = (CpuIdExDelegate)System.Runtime.InteropServices.Marshal.GetDelegateForFunctionPointer(EntryPoint.InstructionPointer, typeof(CpuIdExDelegate));
+                            builder.Append(System.Text.ASCIIEncoding.ASCII.GetChars(CpuIdBuffer, 4, 4));
+                            builder.Append(System.Text.ASCIIEncoding.ASCII.GetChars(CpuIdBuffer, 12, 4));
+                            builder.Append(System.Text.ASCIIEncoding.ASCII.GetChars(CpuIdBuffer, 8, 4));
 
-                            if (State == IntrinsicState.Unknown)
-                            {
-                                //Set to compiled
-                                State = IntrinsicState.Compiled;
+                            //concatenate the ebx, edx, ecx register values after extracting the character data
+                            VendorString = builder.ToString();
 
-                                try
-                                {
-                                    //Invoke with the level 0 to the static buffer, subleaf 0
-                                    CpuIdEx(CpuIdBuffer);
-
-                                    //Store the result
-                                    CpuIdResults[0] = Common.MemorySegment.CreateCopy(CpuIdBuffer, 0, 16);
-
-                                    //Store the new maximum feature level
-                                    MaximumFeatureLevel = Common.Binary.Read32(CpuIdBuffer, 0, false);
-
-                                    System.Text.StringBuilder builder = new System.Text.StringBuilder(32);
-
-                                    builder.Append(System.Text.ASCIIEncoding.ASCII.GetChars(CpuIdBuffer, 4, 4));
-                                    builder.Append(System.Text.ASCIIEncoding.ASCII.GetChars(CpuIdBuffer, 12, 4));
-                                    builder.Append(System.Text.ASCIIEncoding.ASCII.GetChars(CpuIdBuffer, 8, 4));
-
-                                    //concatenate the ebx, edx, ecx register values after extracting the character data
-                                    VendorString = builder.ToString();
-
-                                    //Indicate available.
-                                    Intrinsics.SetRuntimeState(this, State = IntrinsicState.Available);
-                                }
-                                catch
-                                {
-                                    Intrinsics.SetRuntimeState(this, State = IntrinsicState.NotAvailable);
-
-                                    //SEH, Dispose the function
-                                    EntryPoint.Dispose();
-
-                                    //Set the delegate to null
-                                    CpuIdEx = null;
-                                }
-
-                                //If the function is not available then allocate the fallback
-                                if (State == IntrinsicState.NotAvailable) goto case IntrinsicState.NotAvailable;
-                            }
+                            //Indicate available.
+                            Intrinsics.SetRuntimeState(this, State = IntrinsicState.Available);
 
                             break;
                         }
+                   
                 }
 
             }

@@ -430,156 +430,17 @@ namespace Media.Common
 
         #region Min, Max
 
-        /// <summary>
-        /// Returns the minimum value which is bounded inclusively by min and max.
-        /// </summary>
-        /// <param name="min">The minimum value</param>
-        /// <param name="max">The maximum value</param>
-        /// <returns>The value.</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static byte Min(ref byte min, ref byte max)
-        {
-            return (byte)(max ^ ((min ^ max) & -(min < max ? 1 : 0)));
-
-        }
-
-        [CLSCompliant(false)]
-        public static byte Min(byte min, byte max)
-        {
-            return Min(ref min, ref max);
-        }
+        public static T Min<T>(ref T a, ref T b) where T : IComparable<T> => a.CompareTo(b) < Zero ? a : b;
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static int Min(ref int min, ref int max)
-        {
-            return (int)(max ^ ((min ^ max) & -(min < max ? 1 : 0)));
-
-        }
-
-        [CLSCompliant(false)]
-        public static int Min(int min, int max)
-        {
-            return Min(ref min, ref max);
-        }
-
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static uint Min(ref uint min, ref uint max)
-        {
-            return (uint)(max ^ ((min ^ max) & (uint)(-(min < max ? 1 : 0))));
-
-        }
-
-        [CLSCompliant(false)]
-        public static uint Min(uint min, uint max)
-        {
-            return Min(ref min, ref max);
-        }
+        public static T Max<T>(ref T a, ref T b) where T : IComparable<T> => a.CompareTo(b) > Zero ? a : b;
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static long Min(ref long min, ref long max)
-        {
-            return (long)(max ^ ((min ^ max) & -(min < max ? 1 : 0)));
-
-        }
-
-        [CLSCompliant(false)]
-        public static ulong Min(ulong min, ulong max)
-        {
-            return Min(ref min, ref max);
-        }
-
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static ulong Min(ref ulong min, ref ulong max)
-        {
-            //CMOV
-            //min < max ? min : max;
-            //ELSE
-            return (ulong)(max ^ ((min ^ max) & (ulong)(-(min < max ? 1 : 0))));
-        }
-
-        [CLSCompliant(false)]
-        public static long Min(long min, long max)
-        {
-            return Min(ref min, ref max);
-        }
-
-        //mixed overloads with ref....??
-
-        /// <summary>
-        /// Returns the maximum value which is bounded inclusively by min and max.
-        /// </summary>
-        /// <param name="min">The minimum value</param>
-        /// <param name="max">The maximum value</param>
-        /// <returns>The value</returns>
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static byte Max(ref byte min, ref byte max)
-        {
-            return (byte)(min ^ ((min ^ max) & -(min < max ? 1 : 0)));
-        }
-
-        [CLSCompliant(false)]
-        public static byte Max(byte min, byte max)
-        {
-            return Max(ref min, ref max);
-        }
+        public static T Min<T>(T a, T b) where T : IComparable<T> => Min(ref a, ref b);
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [CLSCompliant(false)]
-        public static uint Max(ref uint min, ref uint max)
-        {
-            return min ^ ((min ^ max) & (uint)(-(min < max ? 1 : 0)));
-        }
-
-        [CLSCompliant(false)]
-        public static uint Max(uint min, uint max)
-        {
-            return Max(ref min, ref max);
-        }
-
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static int Max(ref int min, ref int max)
-        {
-            //CMOV
-            //return min > max ? min : max;
-            //ELSE
-            return min ^ ((min ^ max) & -(min < max ? 1 : 0));
-            
-        }
-
-        [CLSCompliant(false)]
-        public static int Max(int min, int max)
-        {
-            return Max(ref min, ref max);
-        }
-
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static long Max(ref long min, ref long max)
-        {
-            return (long)(min ^ ((min ^ max) & -(min < max ? 1 : 0)));
-
-        }
-
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        [CLSCompliant(false)]
-        public static ulong Max(ref ulong min, ref ulong max)
-        {
-            return (ulong)(min ^ ((min ^ max) & (ulong)(-(min < max ? 1 : 0))));
-
-        }
-
-        [CLSCompliant(false)]
-        public static ulong Max(ulong min, ulong max)
-        {
-            return Max(ref min, ref max);
-        }
-
-        [CLSCompliant(false)]
-        public static long Max(long min, long max)
-        {
-            return Max(ref min, ref max);
-        }
+        public static T Max<T>(T a, T b) where T : IComparable<T> => Max(ref a, ref b);
 
         #endregion
 
