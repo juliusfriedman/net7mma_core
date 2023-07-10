@@ -387,7 +387,7 @@ namespace Media.Containers.BaseMedia
                 while (skipped < dataSize)
                 {
                     //Todo use unsafe conversion
-                    toSkip = (ulong)Common.Binary.Clamp(dataSize, 0, long.MaxValue);
+                    toSkip = Common.Binary.Clamp(dataSize, (ulong)0, (ulong)long.MaxValue);
                     
                     //Todo unsigned overloads.
                     Skip((long)toSkip);

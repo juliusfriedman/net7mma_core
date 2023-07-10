@@ -408,23 +408,9 @@ namespace Media.Common
 
         #region Abs
 
-        public static int Abs(int value) { return Abs(ref value); }
+        public static T Abs<T>(ref T value) where T : struct, INumber<T> => T.Abs(value);
 
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static int Abs(ref int value) { long v = value; return(int)Abs(ref v); }
-
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static long Abs(long value) { return Abs(ref value); }
-
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static long Abs(ref long value)
-        {
-            long mask = value >> 28;//BytesPerInteger * Binary.Septem;
-
-            return (value + mask) ^ mask;
-        }
+        public static T Abs<T>(T value) where T : struct, INumber<T> => Abs(ref value);
 
         #endregion
 
@@ -448,59 +434,9 @@ namespace Media.Common
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-        public static byte Clamp(ref byte value, ref byte min, ref byte max)
-        {
-            return Binary.Min(Binary.Max(min, value), max);
-        }
+        public static T Clamp<T>(ref T value, ref T min, ref T max) where T : IComparable<T> => Min(Max(ref min, ref value), max);
 
-        [CLSCompliant(false)]
-        public static byte Clamp(byte value, byte min, byte max)
-        {
-            return Clamp(ref value, ref min, ref max);
-        }
-
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static int Clamp(ref int value, ref int min, ref int max)
-        {
-            return Binary.Min(Binary.Max(ref min, ref value), max);
-        }
-
-        [CLSCompliant(false)]
-        public static int Clamp(int value, int min, int max)
-        {
-            return Clamp(ref value, ref min, ref max);
-        }
-
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static long Clamp(ref long value, ref long min, ref long max)
-        {
-            return Binary.Min(Binary.Max(ref min, ref value), max);
-        }
-
-        [CLSCompliant(false)]
-        public static long Clamp(long value, long min, long max)
-        {
-            return Clamp(ref value, ref min, ref max);
-        }
-
-        /// <summary>
-        /// Provides a value which inclusively bound by the given parameters
-        /// </summary>
-        /// <param name="value">The value</param>
-        /// <param name="min">The minimum value</param>
-        /// <param name="max">The maximum value</param>
-        /// <returns>The bound value</returns>
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static double Clamp(ref double value, ref double min, ref double max)
-        {
-            return BitConverter.Int64BitsToDouble(Binary.Min(Binary.Max(BitConverter.DoubleToInt64Bits(min), BitConverter.DoubleToInt64Bits(value)), BitConverter.DoubleToInt64Bits(max)));
-        }
-
-        [CLSCompliant(false)]
-        public static double Clamp(double value, double min, double max)
-        {
-            return Clamp(ref value, ref min, ref max);
-        }
+        public static T Clamp<T>(T value, T min, T max) where T : IComparable<T> => Clamp(ref value, ref min, ref max);
 
         #endregion
 
@@ -508,81 +444,26 @@ namespace Media.Common
 
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsPowerOfTwo(ref long x) { return Binary.Nihil == (x & (x - Binary.Ūnus)); }
+        public static bool IsPowerOfTwo<T>(ref T x) where T : struct, IBinaryNumber<T> => T.Zero == (x & (x - T.One));
 
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsPowerOfTwo(ref int x) { return Binary.Nihil == (x & (x - Binary.Ūnus)); }
-
-        public static bool IsPowerOfTwo(long x) { return IsPowerOfTwo(ref x); }
-
-        public static bool IsPowerOfTwo(int x) { return IsPowerOfTwo(ref x); }
-
-        //Uint
-
-        //ULong
+        public static bool IsPowerOfTwo<T>(T x) where T : struct, IBinaryNumber<T> => IsPowerOfTwo(ref x);
 
         #endregion
 
         #region IsEven
 
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsEven(ref int x) { return Binary.Nihil == (x & Binary.Ūnus); }
+        public static bool IsEven<T>(ref T x) where T : struct, IBinaryNumber<T> => T.Zero == (x & T.One);
 
-        public static bool IsEven(int x) { return IsEven(ref x); }
-
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsEven(ref uint x) { return Binary.Nihil == (x & Binary.Ūnus); }
-
-        [CLSCompliant(false)]
-        public static bool IsEven(uint x) { return IsEven(ref x); }
-
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsEven(ref long x) { return Binary.Nihil == (x & Binary.Ūnus); }
-
-        public static bool IsEven(long x) { return IsEven(ref x); }
-
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsEven(ref ulong x) { return Binary.Nihil == (x & Binary.Ūnus); }
-
-        [CLSCompliant(false)]
-        public static bool IsEven(ulong x) { return IsEven(ref x); }
+        public static bool IsEven<T>(T x) where T : struct, IBinaryNumber<T> => IsEven(ref x);
 
         #endregion
 
         #region IsOdd
 
-        [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsOdd(ref int x) { return Binary.Ūnus == (x & Binary.Ūnus); }
+        public static bool IsOdd<T>(ref T x) where T : struct, IBinaryNumber<T> => T.One == (x & T.Zero);
 
-        public static bool IsOdd(int x) { return IsOdd(ref x); }
-
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsOdd(ref uint x) { return Binary.Ūnus == (x & Binary.Ūnus); }
-
-        [CLSCompliant(false)]
-        public static bool IsOdd(uint x) { return IsOdd(ref x); }
-
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsOdd(ref long x) { return Binary.Ūnus == (x & Binary.Ūnus); }
-
-        [CLSCompliant(false)]
-        public static bool IsOdd(long x) { return IsOdd(ref x); }
-
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsOdd(ref ulong x) { return Binary.Ūnus == (x & Binary.Ūnus); }
-
-        [CLSCompliant(false)]
-        public static bool IsOdd(ulong x) { return IsOdd(ref x); }
-
+        public static bool IsOdd<T>(T x) where T : struct, IBinaryNumber<T> => IsOdd(ref x);
 
         #endregion
 

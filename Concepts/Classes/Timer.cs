@@ -158,7 +158,7 @@ namespace Media.Concepts.Classes
 
         Approximate:
 
-            ulong approximate = (ulong)Common.Binary.Clamp((m_Clock.AverageOperationsPerTick / (Frequency.Ticks + 1)), 1, ulong.MaxValue), x = 0;
+            ulong approximate = Common.Binary.Clamp((ulong)(m_Clock.AverageOperationsPerTick / (Frequency.Ticks + 1)), (ulong)1, ulong.MaxValue), x = 0;
 
             try
             {
@@ -182,7 +182,7 @@ namespace Media.Concepts.Classes
 
                                     Producer.Enqueue((long)m_Ticks++);
 
-                                    x = (ulong)Common.Binary.Clamp((m_Bias = m_Ops / approximate), 0, m_Bias);
+                                    x = Common.Binary.Clamp((m_Bias = m_Ops / approximate), (ulong)0, m_Bias);
 
                                     while (false.Equals(m_Enabled.Equals(uint.MinValue)) && 1 > --x /*&& Producer.Count <= m_Frequency.Ticks*/) Producer.Enqueue((long)++m_Ticks);
 

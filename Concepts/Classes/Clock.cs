@@ -35,6 +35,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * v//
  */
 #endregion
+using Media.Common;
+
 namespace Media.Concepts.Classes
 {
     //Windows.Media.Clock has a fairly complex but complete API
@@ -135,7 +137,7 @@ namespace Media.Concepts.Classes
         public Clock(bool shouldDispose = true)
             : this(System.DateTimeOffset.Now.Offset, System.Globalization.CultureInfo.CurrentCulture.Calendar, shouldDispose)
         {
-            try { if (false == GC && System.Runtime.GCSettings.LatencyMode != System.Runtime.GCLatencyMode.NoGCRegion) GC = System.GC.TryStartNoGCRegion(0); }
+            try { if (false == GC && System.Runtime.GCSettings.LatencyMode != System.Runtime.GCLatencyMode.NoGCRegion) GC = System.GC.TryStartNoGCRegion(Binary.BitsPerDecimal); }
             catch { }
             finally
             {

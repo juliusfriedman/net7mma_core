@@ -698,7 +698,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
 
                 //Factor restricted to range of 1 and 100 (or maxQ)
-                int factor = (int)(clamp ? Common.Binary.Clamp(Q, 1, maxQ) : Q);
+                int factor = (int)(clamp ? Common.Binary.Clamp(Q, (uint)1, (uint)maxQ) : Q);
 
                 // 4.2 Text
                 // S = 5000 / Q          for  1 <= Q <= 50

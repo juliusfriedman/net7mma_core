@@ -179,17 +179,15 @@ namespace Media.Common.Interfaces
         /// <summary>
         /// The `bridge` between <see cref="Keyword"/> and <see cref="string"/>
         /// </summary>
-        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit)]
+        //[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit)]
         public class StringClass : Classes.Class, ITryGet, ITryGet<StringClass>, InterClass
         {
             public const StringClass Nil = null;
 
             public static readonly StringClass Empty = new StringClass(string.Empty);
 
-            [System.Runtime.InteropServices.FieldOffset(0)]
             object Object;
 
-            [System.Runtime.InteropServices.FieldOffset(0)]
             string String;
 
             public StringClass(string the)
