@@ -417,16 +417,16 @@ namespace Media.Common
         #region Min, Max
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static T Min<T>(ref T a, ref T b) where T : IComparable<T> => a.CompareTo(b) < Zero ? a : b;
+        public static T Min<T>(ref T a, ref T b) where T : INumber<T> => T.Min(a, b);
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static T Max<T>(ref T a, ref T b) where T : IComparable<T> => a.CompareTo(b) > Zero ? a : b;
+        public static T Max<T>(ref T a, ref T b) where T : INumber<T> => T.Max(a, b);
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static T Min<T>(T a, T b) where T : IComparable<T> => Min(ref a, ref b);
+        public static T Min<T>(T a, T b) where T : INumber<T> => Min(ref a, ref b);
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static T Max<T>(T a, T b) where T : IComparable<T> => Max(ref a, ref b);
+        public static T Max<T>(T a, T b) where T : INumber<T> => Max(ref a, ref b);
 
         #endregion
 
@@ -434,9 +434,9 @@ namespace Media.Common
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-        public static T Clamp<T>(ref T value, ref T min, ref T max) where T : IComparable<T> => Min(Max(ref min, ref value), max);
+        public static T Clamp<T>(ref T value, ref T min, ref T max) where T : INumber<T> => T.Clamp(value, min, max);
 
-        public static T Clamp<T>(T value, T min, T max) where T : IComparable<T> => Clamp(ref value, ref min, ref max);
+        public static T Clamp<T>(T value, T min, T max) where T : INumber<T> => Clamp(ref value, ref min, ref max);
 
         #endregion
 
