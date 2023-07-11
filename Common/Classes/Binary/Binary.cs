@@ -2669,10 +2669,12 @@ namespace Media.Common
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ushort ReverseUnsignedShort(ref ushort source)
-        {
-            if (source == ushort.MinValue || source == ushort.MaxValue) return source;
-            return (ushort)(((source & 0xFFU) << 8) | ((source >> 8) & 0xFFU));
-        }
+            => source switch
+            {
+                ushort.MinValue => source,
+                ushort.MaxValue => source,
+                _ => (ushort)(((source & 0xFFU) << 8) | ((source >> 8) & 0xFFU))
+            };
 
         [CLSCompliant(false)]
         public static uint ReverseUnsignedInt(uint source) { return ReverseUnsignedInt(ref source); }
@@ -2681,10 +2683,15 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static uint ReverseUnsignedInt(ref uint source)
         {
-            if (source == uint.MinValue || source == uint.MaxValue) return source;
-            return (uint)((((source & 0x000000FFU) << 24) | ((source & 0x0000FF00U) << 8) | ((source & 0x00FF0000U) >> 8) | ((source & 0xFF000000U) >> 24)));
+            switch (source)
+            {
+                case uint.MinValue:
+                case uint.MaxValue:
+                    return source;
+                default:
+                    return ((source & 0x000000FFU) << 24) | ((source & 0x0000FF00U) << 8) | ((source & 0x00FF0000U) >> 8) | ((source & 0xFF000000U) >> 24);
+            }
         }
-
 
         [CLSCompliant(false)]
         public static ulong ReverseUnsignedLong(ulong source) { return ReverseUnsignedLong(ref source); }
@@ -2693,9 +2700,15 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ulong ReverseUnsignedLong(ref ulong source)
         {
-            if (source == ulong.MinValue || source == ulong.MaxValue) return source;
-            return (source & 0x00000000000000FFUL) << 56 | (source & 0x000000000000FF00UL) << 40 | (source & 0x0000000000FF0000UL) << 24 | (source & 0x00000000FF000000UL) << 8 |
+            switch (source)
+            {
+                case ulong.MaxValue:
+                case ulong.MinValue:
+                    return source;
+                default:
+                    return (source & 0x00000000000000FFUL) << 56 | (source & 0x000000000000FF00UL) << 40 | (source & 0x0000000000FF0000UL) << 24 | (source & 0x00000000FF000000UL) << 8 |
                    (source & 0x000000FF00000000UL) >> 8 | (source & 0x0000FF0000000000UL) >> 24 | (source & 0x00FF000000000000UL) >> 40 | (source & 0xFF00000000000000UL) >> 56;
+            }
         }
 
         /// <summary>
