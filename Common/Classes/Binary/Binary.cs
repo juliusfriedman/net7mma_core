@@ -444,7 +444,7 @@ namespace Media.Common
 
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsPowerOfTwo<T>(ref T x) where T : struct, IBinaryNumber<T> => T.Zero == (x & (x - T.One));
+        public static bool IsPowerOfTwo<T>(ref T x) where T : struct, IBinaryNumber<T> => T.IsPow2(x);
 
         public static bool IsPowerOfTwo<T>(T x) where T : struct, IBinaryNumber<T> => IsPowerOfTwo(ref x);
 
@@ -452,18 +452,18 @@ namespace Media.Common
 
         #region IsEven
 
-        public static bool IsEven<T>(ref T x) where T : struct, IBinaryNumber<T> => T.Zero == (x & T.One);
+        public static bool IsEven<T>(ref T x) where T : struct, INumber<T> => T.IsEvenInteger(x);
 
-        public static bool IsEven<T>(T x) where T : struct, IBinaryNumber<T> => IsEven(ref x);
+        public static bool IsEven<T>(T x) where T : struct, INumber<T> => IsEven(ref x);
 
         #endregion
 
         #region IsOdd
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsOdd<T>(ref T x) where T : struct, IBinaryNumber<T> => T.One == (x & T.Zero);
+        public static bool IsOdd<T>(ref T x) where T : struct, INumber<T> => T.IsOddInteger(x);
 
-        public static bool IsOdd<T>(T x) where T : struct, IBinaryNumber<T> => IsOdd(ref x);
+        public static bool IsOdd<T>(T x) where T : struct, INumber<T> => IsOdd(ref x);
 
         #endregion
 
