@@ -474,22 +474,10 @@ namespace Media.Common
         /// </summary>
         /// <param name="arg"></param>
         /// <returns>True if the value is negative, otherwise false</returns>
-        [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsNegative(ref int arg) { return (arg & SignMask) == SignMask; }
+        public static bool IsNegative<T>(ref T arg) where T : INumber<T> => T.IsNegative(arg);
 
-        public static bool IsNegative(int arg) { return IsNegative(ref arg); }
-
-        /// <summary>
-        /// Determines if the given value is negitive
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns>True if the value is negative, otherwise false</returns>
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsNegative(ref long arg) { return (arg & SignMask) == SignMask; }
-
-        public static bool IsNegative(long arg) { return IsNegative(ref arg); }
+        public static bool IsNegative<T>(T arg) where T : INumber<T> => IsNegative(ref arg);
 
         #endregion
 
@@ -500,50 +488,16 @@ namespace Media.Common
         /// </summary>
         /// <param name="arg"></param>
         /// <returns>True if the value is positive, otherwise false</returns>
-        [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsPositive(ref int arg) { return (BitConverter.DoubleToInt64Bits(arg) & SignMask) != SignMask; }
+        public static bool IsPositive<T>(ref T arg) where T : INumber<T> => T.IsPositive(arg);
 
-        public static bool IsPositive(int arg) { return IsPositive(ref arg); }
-
-        /// <summary>
-        /// Determines if the given value is positive
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns>True if the value is positive, otherwise false</returns>
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsPositive(ref long arg) { return (BitConverter.DoubleToInt64Bits(arg) & SignMask) != SignMask; }
-
-        public static bool IsPositive(long arg) { return IsPositive(ref arg); }
+        public static bool IsPositive<T>(T arg) where T : INumber<T> => IsPositive(ref arg);
 
         #endregion
 
         #region Sign
 
-        public static int Sign(int value) { return Sign(ref value); }
-
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static int Sign(ref int value)
-        {
-            return ((value > Binary.Nihil) ? Binary.Ūnus : Binary.Nihil) - ((value < Binary.Nihil) ? Binary.Ūnus : Binary.Nihil);
-
-            //Same as Math.Sign
-            //return value > 0 ? 1 : value < 0 ? -1 : 0;
-        }
-
-        public static int Sign(long value) { return Sign(ref value); }
-
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static int Sign(ref long value)
-        {
-            return ((value > Binary.Nihil) ? Binary.Ūnus : Binary.Nihil) - ((value < Binary.Nihil) ? Binary.Ūnus : Binary.Nihil);
-
-            //Same as Math.Sign
-            //return value > 0 ? 1 : value < 0 ? -1 : 0;
-        }
+        public static int Sign<T>(T value) where T : INumber<T> => T.Sign(value);
 
         #endregion
 
@@ -674,28 +628,6 @@ namespace Media.Common
         /// The value of the sign bit, 1 or 0
         /// </summary>
         public static readonly bool SignBit = Convert.ToBoolean(SignMask);
-
-        /// <summary>
-        /// Determines if the given value is negitive
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns>True if the value is negative, otherwise false</returns>
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsNegative(ref double arg) { return (BitConverter.DoubleToInt64Bits(arg) & SignMask) == SignMask; }
-
-        public static bool IsNegative(double arg) { return IsNegative(ref arg); }
-
-        /// <summary>
-        /// Determines if the given value is positive
-        /// </summary>
-        /// <param name="arg"></param>
-        /// <returns>True if the value is positive, otherwise false</returns>
-        [CLSCompliant(false)]
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool IsPositive(ref double arg) { return (BitConverter.DoubleToInt64Bits(arg) & SignMask) != SignMask; }
-
-        public static bool IsPositive(double arg) { return IsPositive(ref arg); }
 
         #endregion
 
