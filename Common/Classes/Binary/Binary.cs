@@ -1680,7 +1680,7 @@ namespace Media.Common
 
                         *(byte*)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<byte>(bytes, byteOffset) &= (byte)~(Binary.Ūnus << bitIndex);
 
-                        fixed (byte* x = &bytes[byteOffset]) { *x &= (byte)~(Binary.Ūnus << bitIndex); } 
+                        //fixed (byte* x = &bytes[byteOffset]) { *x &= (byte)~(Binary.Ūnus << bitIndex); } 
                     }
                 }
 #elif NATIVE
