@@ -39,6 +39,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #region Using Statements
 
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -2982,6 +2983,8 @@ namespace Media.UnitTests
                     //Determine what the reverse byte order would look like
                     ushort reversed = Media.Common.Binary.ReverseUnsignedShort(ref v);
 
+                    if (reversed != BinaryPrimitives.ReverseEndianness(v)) throw new Exception("Binary->ReverseUnsignedShort Does not work");
+
                     //Use the system to get the binary representation of the number
                     byte[] SystemBits = BitConverter.GetBytes(reverse ? reversed : v);
 
@@ -3061,6 +3064,8 @@ namespace Media.UnitTests
                     //Determine what the reverse byte order would look like
                     uint reversed = Media.Common.Binary.ReverseUnsignedInt(ref v);
 
+                    if (reversed != BinaryPrimitives.ReverseEndianness(v)) throw new Exception("Binary->ReverseUnsignedInt Does not work");
+
                     //Use the system to get the binary representation of the number
                     byte[] SystemBits = BitConverter.GetBytes(reverse ? reversed : v);
 
@@ -3109,6 +3114,8 @@ namespace Media.UnitTests
 
                     //Determine what the reverse byte order would look like
                     ulong reversed = Media.Common.Binary.ReverseUnsignedLong(ref v);
+
+                    if (reversed != BinaryPrimitives.ReverseEndianness(v)) throw new Exception("Binary->ReverseUnsignedLong Does not work");
 
                     //Use the system to get the binary representation of the number
                     byte[] SystemBits = BitConverter.GetBytes(reverse ? reversed : v);
