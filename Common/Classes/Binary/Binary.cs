@@ -435,7 +435,7 @@ namespace Media.Common
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-        public static T Clamp<T>(ref T value, ref T min, ref T max) where T : INumber<T> => T.Clamp(value, Min(ref min, ref max), Max(ref min, ref max));
+        public static T Clamp<T>(ref T value, ref T min, ref T max) where T : INumber<T> => Min(Max(min, value), max);
 
         public static T Clamp<T>(T value, T min, T max) where T : INumber<T> => Clamp(ref value, ref min, ref max);
 
