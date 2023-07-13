@@ -295,11 +295,9 @@ namespace Media.Sdp
 
                             //Could always parse as ulong and truncate to double...
 
-                            //ulong res;
-
-                            //if (ulong.TryParse(token.Substring(0, tokenLength), out res))
+                            //if (long.TryParse(token.Substring(0, tokenLength), out var res))
                             //{
-                            //    result = result.Add(TimeSpan.FromTicks((long)res));
+                            //    result = result.Add(TimeSpan.FromSeconds(res));
                             //}
 
                             continue;
