@@ -528,6 +528,10 @@ namespace Media.Common
     {
         //public static System.IO.MemoryStream ToMemoryStream() readable, writeable, publicablyVisible...
 
+        public static Span<byte> ToSpan(this MemorySegment segment) => new Span<byte>(segment.Array, segment.Offset, segment.Count);
+
+        public static Memory<byte> ToMemory(this MemorySegment segment) => new Memory<byte>(segment.Array, segment.Offset, segment.Count);
+
         public static byte[] ToArray(this MemorySegment segment)
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(segment)) return null;
