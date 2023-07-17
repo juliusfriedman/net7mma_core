@@ -2185,7 +2185,7 @@ namespace Media.UnitTests
 
                     //server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("mp4:BigBuckBunny_115k.mov", "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov", Media.Rtsp.RtspClient.ClientProtocolType.Udp));//, 8192, null, null, null, true));
 
-                    server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("wowza", "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4"));
+                    //server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("wowza", "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4"));
 
                     //server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("OmegaUdp", "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mov", Media.Rtsp.RtspClient.ClientProtocolType.Udp));
 

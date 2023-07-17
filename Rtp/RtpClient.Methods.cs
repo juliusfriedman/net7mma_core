@@ -437,7 +437,7 @@ namespace Media.Rtp
                 c = TransportContexts[i];
 
                 if (false.Equals(Media.Common.IDisposedExtensions.IsNullOrDisposed(c)) &&
-                    System.Linq.Enumerable.Contains(channels, c.DataChannel) || System.Linq.Enumerable.Contains(channels, c.ControlChannel)) break;
+                    System.MemoryExtensions.IndexOfAny(channels, c.DataChannel, c.ControlChannel) >= 0) break;
 
                 c = null;
             }
