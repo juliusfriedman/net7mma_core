@@ -46,7 +46,6 @@ using Media.Rtcp;
 using Media.Rtp;
 using Media.Sdp;
 using System.Threading;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Media.Rtsp
 {
@@ -5096,7 +5095,7 @@ namespace Media.Rtsp
             }
             catch (Exception ex)
             {
-                if (ex is Media.Common.ITaggedException) throw ex; 
+                if (ex is Media.Common.ITaggedException) throw; 
                 
                 Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "An error occured", ex);
             }
@@ -5980,8 +5979,6 @@ namespace Media.Rtsp
 
                     #endregion
 
-                    
-
                     //Setup Complete
                     return response;
                 }
@@ -6155,7 +6152,7 @@ namespace Media.Rtsp
             //Check if the media was previsouly playing
             if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(context)) && 
                 false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(mediaDescription)) && 
-                false.Equals(m_Playing.Keys.Contains(mediaDescription)))
+                false.Equals(m_Playing.ContainsKey(mediaDescription)))
             {
                 //Keep track of whats playing
                 m_Playing.Add(mediaDescription, new MediaSessionState(SessionDescription, mediaDescription));
