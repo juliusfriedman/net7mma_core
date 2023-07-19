@@ -263,15 +263,18 @@ namespace Media.Common
                     return;
                 }
 
-                //If the other instance is now finalized
-                if (other.IsFinalized)
-                {
-                    //Probably not needed since we are taking our own reference to the fields in other and not to other iteself.
-                    other.Resurrect();
+                #region Unused Resurrect
+                //Maybe already finalized, don't add more already finalized objects to the finalization queue.
+                ////If the other instance is now finalized
+                //if (other.IsFinalized)
+                //{
+                //    //Probably not needed since we are taking our own reference to the fields in other and not to other iteself.
+                //    other.Resurrect();
 
-                    //Reregister for finalize the other instance
-                    GC.ReRegisterForFinalize(other);
-                }
+                //    //Reregister for finalize the other instance
+                //    GC.ReRegisterForFinalize(other);
+                //}
+                #endregion
             }
 
             m_Array = other.Array;
