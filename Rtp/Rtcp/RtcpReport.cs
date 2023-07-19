@@ -55,7 +55,6 @@ namespace Media.Rtcp
     /// <notes>Could drop the abstract notation if desired</notes>
     public abstract class RtcpReport : RtcpPacket, IEnumerable<IReportBlock>
     {
-
         #region Statics
 
         //Should be extensions because it makes intellisense weird for all derived types.
@@ -440,5 +439,4 @@ namespace Media.Rtcp
     }
 
     #endregion
-
 }
