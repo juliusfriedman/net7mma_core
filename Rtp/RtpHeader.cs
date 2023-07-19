@@ -516,7 +516,7 @@ namespace Media.Rtp
 
             copied += SegmentToLast10Bytes.Count;
 
-            offset += SegmentToLast10Bytes.Count;
+            //offset += SegmentToLast10Bytes.Count;
 
             return copied;
         }
