@@ -3680,7 +3680,7 @@ namespace Media.Rtsp
 
             //Get the tokens in the header
             //Todo, use response.m_StringWhiteSpace to ensure the encoding is parsed correctly...
-            string[] baseParts = authenticateHeader.Split(Media.Common.Extensions.Linq.LinqExtensions.Yield(((char)Common.ASCII.Space)).ToArray(), 2, StringSplitOptions.RemoveEmptyEntries);
+            string[] baseParts = authenticateHeader.Split(RtspMessage.SpaceSplit, 2, StringSplitOptions.RemoveEmptyEntries);
 
             //If nothing was in the header then return the response given.
             if (baseParts.Length.Equals(0)) return response;
