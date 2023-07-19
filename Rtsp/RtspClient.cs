@@ -2580,6 +2580,9 @@ namespace Media.Rtsp
 
                                 //Handle any data remaining in the buffer
                                 //(Must ensure Length property of RtspMessage is exact).
+                                //TODO, Create a test...
+                                //If there is more lower data here than it possibly could be Rtp it should be handled by passing to the RtpClient for processing.
+                                //The reason why its not is that the RtpClient only passed up chunks at a time and it would already have the other data in its buffer.
                                 if(received > 0) ProcessInterleavedData(sender, data, offset + received, length - received);
 
                                 //done
