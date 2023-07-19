@@ -619,7 +619,6 @@ namespace Media.Rtcp
         public static bool operator !=(RtcpHeader a, RtcpHeader b) { return (a == b).Equals(false); }
 
         #endregion
-
     }
 
     #endregion
