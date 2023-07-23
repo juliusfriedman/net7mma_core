@@ -81,7 +81,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codec.Mulaw", "Codecs\Audio
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codec.Flac", "Codecs\Audio\Flac\Codec.Flac.csproj", "{BA181A1D-EFFC-4460-886B-32763075AD43}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Media.Rtcp.Feedback", "RtcpFeedback\Media.Rtcp.Feedback.csproj", "{29B9387E-F491-49DB-996A-27855DFE5C23}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rtcp.Feedback", "RtcpFeedback\Rtcp.Feedback.csproj", "{29B9387E-F491-49DB-996A-27855DFE5C23}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

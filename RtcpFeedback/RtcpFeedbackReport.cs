@@ -91,7 +91,6 @@ namespace Media.Rtcp.Feedback
         {
             get
             {
-
                 return (int)Common.Binary.ReadU32(Payload.Array, Payload.Offset, Common.Binary.IsLittleEndian);
             }
             set

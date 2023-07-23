@@ -913,17 +913,15 @@ namespace Media.Rtsp.Server.MediaTypes
 
         //profile_idc, profile_iop, level_idc
 
-        protected byte[] sps = { 0x00, 0x00, 0x00, 0x01, 0x67, 0x42, 0x00, 0x0a, 0xf8, 0x41, 0xa2 };
+        protected byte[] sps = { 0x67, 0x42, 0x00, 0x0a, 0xf8, 0x41, 0xa2 };
 
-        protected byte[] pps = { 0x00, 0x00, 0x00, 0x01, 0x68, 0xce, 0x38, 0x80 };
+        protected byte[] pps = { 0x68, 0xce, 0x38, 0x80 };
 
-        byte[] //slice_header = { 0x00, 0x00, 0x00, 0x01, 0x05, 0x88, 0x84, 0x21, 0xa0 },
-            slice_header1 = { 0x00, 0x00, 0x00, 0x01, 0x65, 0x88, 0x84, 0x21, 0xa0 },
-            slice_header2 = { 0x00, 0x00, 0x00, 0x01, 0x65, 0x88, 0x94, 0x21, 0xa0 };
+        byte[] slice_header = { 0x05, 0x88, 0x84, 0x21, 0xa0 };
 
-        bool useSliceHeader1 = true;
-        
         byte[] macroblock_header = { 0x0d, 0x00 };
+
+        byte[] slice_end = { 0x80 };
 
         #endregion
 
@@ -961,8 +959,22 @@ namespace Media.Rtsp.Server.MediaTypes
 
             SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=rtpmap:96 H264/90000")); //<- 96 must match the Payload description given above
 
+            // Make the profile-level-id
+            // Eg a string of profile-level-id=42A01E is
+            // a Profile eg Constrained Baseline, Baseline, Extended, Main, High. This defines which features in H264 are used
+            // a Level eg 1,2,3 or 4. This defines a max resoution for the video. 2=up to SD, 3=upto 1080p. Decoders can then reserve sufficient RAM for frame buffers
+            int profile_idc = 77; // Main Profile
+            int profile_iop = 0; // bit 7 (msb) is 0 so constrained_flag is false
+            int level = 42; // Level 4.2
+
+
+            string profile_level_id_str = profile_idc.ToString("X2") // convert to hex, padded to 2 characters
+                                        + profile_iop.ToString("X2")
+                                        + level.ToString("X2");
+
+
             //Prepare the profile information which is useful for receivers decoding the data, in this profile the Id, Sps and Pps are given in a base64 string.
-            SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=fmtp:96 profile-level-id=" + Common.Binary.ReadU24(sps, 4, Media.Common.Binary.IsBigEndian).ToString("X2") + ";sprop-parameter-sets=" + Convert.ToBase64String(sps, 4, sps.Length - 4) + ',' + Convert.ToBase64String(pps, 4, pps.Length - 4)));            
+            SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=fmtp:96 profile-level-id=" + profile_level_id_str + ";sprop-parameter-sets=" + Convert.ToBase64String(sps, 4, sps.Length - 4) + ',' + Convert.ToBase64String(pps, 4, pps.Length - 4)));            
 
             //Create a context
             m_RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1,  //data and control channel id's (can be any number and should not overlap but can...)
@@ -1020,13 +1032,12 @@ namespace Media.Rtsp.Server.MediaTypes
                         for (int j = 0; j < Width / 16; j++)
                             macroBlocks.Add(EncodeMacroblock(i, j, yuv)); //Add an encoded macroblock to the list
 
-                    macroBlocks.Add(new byte[] { 0x80 });//Stop bit (Wasteful by itself)
+                    macroBlocks.Add(slice_end);//Stop bit (Wasteful by itself)
 
-                    //Packetize the data with the slice header (omit start code)
-                    newFrame.Packetize((useSliceHeader1 ? slice_header1 : slice_header2).Skip(4).Concat(macroBlocks.SelectMany(mb => mb)).ToArray());
+                    newFrame.MaxPackets = 4096;
 
-                    //Change slice header next time.
-                    useSliceHeader1 = !useSliceHeader1;
+                    //Packetize the data with the slice header
+                    newFrame.Packetize(slice_header.Concat(macroBlocks.SelectMany(mb => mb)).ToArray());
 
                     //Add the frame
                     AddFrame(newFrame);

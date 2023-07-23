@@ -2276,6 +2276,11 @@ namespace Media.UnitTests
 
                     server.TryAddMedia(mirror);
 
+                    //Make a H264 Stream
+                    Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1080, "TinyStream", null, false);
+
+                    server.TryAddMedia(tinyStream);
+
                     System.Threading.Thread captureThread = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart((o) =>
                     {
 
@@ -2312,6 +2317,7 @@ namespace Media.UnitTests
                                         //{
                                         //Convert to JPEG and put in packets
                                         mirror.Packetize(bmpScreenshot);
+                                        tinyStream.Packetize(bmpScreenshot);
                                         //});
 
                                         //HALT, REST
