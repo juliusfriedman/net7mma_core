@@ -2281,6 +2281,14 @@ namespace Media.UnitTests
 
                     server.TryAddMedia(tinyStream);
 
+                    //Make some RFC7655Media (Audio)
+                    Media.Rtsp.Server.MediaTypes.RFC7655Media alawStream = new Rtsp.Server.MediaTypes.RFC7655Media("TestALaw", null, 98, 1, Rtsp.Server.MediaTypes.RFC7655Media.CompandingLaw.ALaw);
+                    Media.Rtsp.Server.MediaTypes.RFC7655Media mulawStream = new Rtsp.Server.MediaTypes.RFC7655Media("TestMuLaw", null, 98, 1, Rtsp.Server.MediaTypes.RFC7655Media.CompandingLaw.Mulaw);
+
+                    server.TryAddMedia(alawStream);
+                    server.TryAddMedia(mulawStream);
+
+
                     System.Threading.Thread captureThread = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart((o) =>
                     {
 
@@ -2319,6 +2327,10 @@ namespace Media.UnitTests
                                         mirror.Packetize(bmpScreenshot);
                                         tinyStream.Packetize(bmpScreenshot);
                                         //});
+
+                                        //Put some audio in the audio stream
+                                        var randomAudio = new byte[320];
+                                        alawStream.Packetize(randomAudio, 0, randomAudio.Length);
 
                                         //HALT, REST
                                         if (false == System.Threading.Thread.Yield())

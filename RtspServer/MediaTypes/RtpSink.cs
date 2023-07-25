@@ -60,6 +60,10 @@ namespace Media.Rtsp.Server.MediaTypes
 
         #endregion
 
+        #region Fields
+
+        #endregion
+
         #region Methods
 
         #region Elaboration

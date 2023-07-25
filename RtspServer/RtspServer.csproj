@@ -11,7 +11,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Codecs\Audio\Aac\Codec.Aac.csproj" />
+    <ProjectReference Include="..\Codecs\Audio\AC3\Codec.AC3.csproj" />
+    <ProjectReference Include="..\Codecs\Audio\Alaw\Codec.Alaw.csproj" />
     <ProjectReference Include="..\Codecs\Audio\Codecs.Audio.csproj" />
+    <ProjectReference Include="..\Codecs\Audio\Flac\Codec.Flac.csproj" />
+    <ProjectReference Include="..\Codecs\Audio\G722\Codec.G722.csproj" />
+    <ProjectReference Include="..\Codecs\Audio\Mulaw\Codec.Mulaw.csproj" />
     <ProjectReference Include="..\Codecs\Codecs.csproj" />
     <ProjectReference Include="..\Codecs\Image\Codecs.Image.csproj" />
     <ProjectReference Include="..\Codecs\Image\Jpeg\Codec.Jpeg.csproj" />
@@ -21,8 +27,17 @@
     <ProjectReference Include="..\Codecs\Video\Mpeg2\Mpeg2.csproj" />
     <ProjectReference Include="..\Codecs\Video\Mpeg4\Mpeg4.csproj" />
     <ProjectReference Include="..\Common\Common.csproj" />
+    <ProjectReference Include="..\Containers\Asf\Container.Asf.csproj" />
     <ProjectReference Include="..\Containers\BaseMedia\Container.BaseMedia.csproj" />
     <ProjectReference Include="..\Containers\Container.csproj" />
+    <ProjectReference Include="..\Containers\Gxf\Container.Gxf.csproj" />
+    <ProjectReference Include="..\Containers\Matroska\Container.Matroska.csproj" />
+    <ProjectReference Include="..\Containers\Mcf\Container.Mcf.csproj" />
+    <ProjectReference Include="..\Containers\Mxf\Container.Mxf.csproj" />
+    <ProjectReference Include="..\Containers\Nut\Container.Nut.csproj" />
+    <ProjectReference Include="..\Containers\Ogg\Container.Ogg.csproj" />
+    <ProjectReference Include="..\Containers\Real\Container.Real.csproj" />
+    <ProjectReference Include="..\Containers\Riff\Container.Riff.csproj" />
     <ProjectReference Include="..\Cryptography\Cryptography.csproj" />
     <ProjectReference Include="..\Http\Http.csproj" />
     <ProjectReference Include="..\Ntp\Ntp.csproj" />
