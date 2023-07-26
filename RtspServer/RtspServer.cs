@@ -3070,7 +3070,6 @@ namespace Media.Rtsp
             //Determine if we have the track
             string track = request.Location.Segments.Last().Replace("/", string.Empty);
 
-
             int trackId, symbolIndex;
 
             Sdp.MediaDescription mediaDescription;

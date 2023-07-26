@@ -943,13 +943,13 @@ namespace Media.Rtsp.Server.MediaTypes
 
         public override void Start()
         {
-            if (m_RtpClient != null) return;
+            if (RtpClient != null) return;
 
             base.Start();
 
             //Remove JPEG Track
             SessionDescription.RemoveMediaDescription(0);
-            m_RtpClient.TransportContexts.Clear();
+            RtpClient.TransportContexts.Clear();
 
             //Add a MediaDescription to our Sdp on any available port for RTP/AVP Transport using the given payload type            
             SessionDescription.Add(new Sdp.MediaDescription(Sdp.MediaType.video, 0, Rtp.RtpClient.RtpAvpProfileIdentifier, 96)); //This is the payload description, it is defined in the profile
@@ -974,10 +974,10 @@ namespace Media.Rtsp.Server.MediaTypes
 
 
             //Prepare the profile information which is useful for receivers decoding the data, in this profile the Id, Sps and Pps are given in a base64 string.
-            SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=fmtp:96 profile-level-id=" + profile_level_id_str + ";sprop-parameter-sets=" + Convert.ToBase64String(sps, 4, sps.Length - 4) + ',' + Convert.ToBase64String(pps, 4, pps.Length - 4)));            
+            SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=fmtp:96 profile-level-id=" + profile_level_id_str + ";sprop-parameter-sets=" + Convert.ToBase64String(sps, 4, sps.Length - 4) + ',' + Convert.ToBase64String(pps, 4, pps.Length - 4)));
 
             //Create a context
-            m_RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1,  //data and control channel id's (can be any number and should not overlap but can...)
+            RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1,  //data and control channel id's (can be any number and should not overlap but can...)
                 sourceId, //A randomId which was alredy generated 
                 SessionDescription.MediaDescriptions.First(), //This is the media description we just created.
                 false, //Don't enable Rtcp reports because this source doesn't communicate with any clients

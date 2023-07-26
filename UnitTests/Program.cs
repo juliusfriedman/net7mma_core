@@ -2276,10 +2276,17 @@ namespace Media.UnitTests
 
                     server.TryAddMedia(mirror);
 
-                    //Make a H264 Stream
+                    //Make a H264 Stream (Not yet working)
                     Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1080, "TinyStream", null, false);
 
                     server.TryAddMedia(tinyStream);
+
+                    //Make some RtpAudioSink
+                    Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmaStream = new Rtsp.Server.MediaTypes.RtpAudioSink("pcma", null, 8, 1, 8000);
+                    Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmuStream = new Rtsp.Server.MediaTypes.RtpAudioSink("pcmu", null, 0, 1, 8000);
+
+                    server.TryAddMedia(pcmaStream);
+                    server.TryAddMedia(pcmuStream);
 
                     //Make some RFC7655Media (Audio)
                     Media.Rtsp.Server.MediaTypes.RFC7655Media alawStream = new Rtsp.Server.MediaTypes.RFC7655Media("TestALaw", null, 98, 1, Rtsp.Server.MediaTypes.RFC7655Media.CompandingLaw.ALaw);
@@ -2288,9 +2295,11 @@ namespace Media.UnitTests
                     server.TryAddMedia(alawStream);
                     server.TryAddMedia(mulawStream);
 
-
                     System.Threading.Thread captureThread = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart((o) =>
                     {
+
+                        //Put some audio in the audio stream
+                        var randomAudio = new byte[320];
 
                     Start:
 
@@ -2325,12 +2334,15 @@ namespace Media.UnitTests
                                         //{
                                         //Convert to JPEG and put in packets
                                         mirror.Packetize(bmpScreenshot);
-                                        tinyStream.Packetize(bmpScreenshot);
+                                        //tinyStream.Packetize(bmpScreenshot);
                                         //});
 
-                                        //Put some audio in the audio stream
-                                        var randomAudio = new byte[320];
+                                        Utility.Random.NextBytes(randomAudio);
+
                                         alawStream.Packetize(randomAudio, 0, randomAudio.Length);
+                                        mulawStream.Packetize(randomAudio, 0, randomAudio.Length);
+                                        pcmaStream.EnqueData(randomAudio, 0);
+                                        pcmuStream.EnqueData(randomAudio, 0);
 
                                         //HALT, REST
                                         if (false == System.Threading.Thread.Yield())

@@ -34,6 +34,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * v//
  */
 
+using Media.Common.Collections.Generic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -2289,10 +2290,7 @@ namespace Media.Rtsp.Server.MediaTypes
         //Should be moved to RtpSourceSource;
         protected readonly int sourceId = RFC3550.Random32(RFC2435Frame.RtpJpegPayloadType); //Doesn't really matter what seed was used, if really desired could be set in constructor
 
-        protected Queue<Rtp.RtpFrame> m_Frames = new Queue<Rtp.RtpFrame>();
-
-        //RtpClient so events can be sourced to Clients through RtspServer
-        protected Rtp.RtpClient m_RtpClient;
+        protected ConcurrentLinkedQueueSlim<Rtp.RtpFrame> m_Frames = new ConcurrentLinkedQueueSlim<Rtp.RtpFrame>();
 
         //Watches for files if given in constructor
         protected System.IO.FileSystemWatcher m_Watcher;
@@ -2321,11 +2319,6 @@ namespace Media.Rtsp.Server.MediaTypes
         public virtual bool Interlaced { get; protected set; }
 
         //Should also allow payloadsize e.g. BytesPerPacketPayload to be set here?
-
-        /// <summary>
-        /// Implementes the SessionDescription property for RtpSourceStream
-        /// </summary>
-        public override Rtp.RtpClient RtpClient { get { return m_RtpClient; } }
 
         #endregion
 
@@ -2381,11 +2374,11 @@ namespace Media.Rtsp.Server.MediaTypes
         //SourceStream Implementation
         public override void Start()
         {
-            if (m_RtpClient != null) return;
+            if (RtpClient != null) return;
 
             //Create a RtpClient so events can be sourced from the Server to many clients without this Client knowing about all participants
             //If this class was used to send directly to one person it would be setup with the recievers address
-            m_RtpClient = new Rtp.RtpClient();
+            RtpClient = new Rtp.RtpClient();
 
             SessionDescription = new Sdp.SessionDescription(0, "v√ƒ", Name);
             SessionDescription.Add(new Sdp.Lines.SessionConnectionLine()
@@ -2415,7 +2408,7 @@ namespace Media.Rtsp.Server.MediaTypes
             //See the notes about having a Generic.Dictionary to support various tracks
 
             //Create a context
-            m_RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1,  //data and control channel id's (can be any number and should not overlap but can...)
+            RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1,  //data and control channel id's (can be any number and should not overlap but can...)
                 RFC3550.Random32(RFC2435Frame.RtpJpegPayloadType), //A randomId which was alredy generated 
                 SessionDescription.MediaDescriptions.First(), //This is the media description we just created.
                 false, //Don't enable Rtcp reports because this source doesn't communicate with any clients
@@ -2439,11 +2432,11 @@ namespace Media.Rtsp.Server.MediaTypes
             //Add the line with the clock rate in ms, obtained by TimeSpan.TicksPerMillisecond * clockRate            
 
             //Make the thread
-            m_RtpClient.m_WorkerThread = new System.Threading.Thread(SendPackets);
-            m_RtpClient.m_WorkerThread.TrySetApartmentState(System.Threading.ApartmentState.MTA);
+            RtpClient.m_WorkerThread = new System.Threading.Thread(SendPackets);
+            RtpClient.m_WorkerThread.TrySetApartmentState(System.Threading.ApartmentState.MTA);
             //m_RtpClient.m_WorkerThread.IsBackground = true;
             //m_RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.BelowNormal;
-            m_RtpClient.m_WorkerThread.Name = "SourceStream-" + Id;
+            RtpClient.m_WorkerThread.Name = "SourceStream-" + Id;
 
             //If we are watching and there are already files in the directory then add them to the Queue
             if (m_Watcher != null && false == string.IsNullOrWhiteSpace(base.Source.LocalPath) && System.IO.Directory.Exists(base.Source.LocalPath))
@@ -2472,12 +2465,12 @@ namespace Media.Rtsp.Server.MediaTypes
                 }
 
                 //If we have not been stopped already
-                if (/*State != StreamState.Started && */ m_RtpClient.m_WorkerThread != null)
+                if (/*State != StreamState.Started && */ RtpClient.m_WorkerThread != null)
                 {
                     //Only ready after all pictures are in the queue
                     IsReady = true;
                     State = StreamState.Started;
-                    m_RtpClient.m_WorkerThread.Start();
+                    RtpClient.m_WorkerThread.Start();
                 }
 #if DEBUG
                 System.Diagnostics.Debug.WriteLine("ImageStream" + Id + " Started");
@@ -2488,7 +2481,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 //We are ready
                 IsReady = true;
                 State = StreamState.Started;
-                m_RtpClient.m_WorkerThread.Start();
+                RtpClient.m_WorkerThread.Start();
             }
 
             //Finally the state is set to Started
@@ -2576,7 +2569,7 @@ namespace Media.Rtsp.Server.MediaTypes
         //This logic is general enough, that it could go in RtpSource...
         internal override void SendPackets()
         {
-            m_RtpClient.FrameChangedEventsEnabled = false;
+            RtpClient.FrameChangedEventsEnabled = false;
 
             unchecked
             {
@@ -2586,7 +2579,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     {
                         if (m_Frames.Count == 0 && State == StreamState.Started)
                         {
-                            if (m_RtpClient.IsActive) m_RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.Lowest;
+                            if (RtpClient.IsActive) RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.Lowest;
 
                             System.Threading.Thread.Sleep(ClockRate);
 
@@ -2596,18 +2589,18 @@ namespace Media.Rtsp.Server.MediaTypes
                         //int period = (clockRate * 1000 / m_Frames.Count);
 
                         //Dequeue a frame or die
-                        Rtp.RtpFrame frame = m_Frames.Dequeue();
+                        Rtp.RtpFrame frame;
 
-                        if (Common.IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) continue;
+                        if (!m_Frames.TryDequeue(out frame) || Common.IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) continue;
 
                         //Get the transportChannel for the packet
-                        Rtp.RtpClient.TransportContext transportContext = m_RtpClient.GetContextBySourceId(frame.SynchronizationSourceIdentifier);
+                        Rtp.RtpClient.TransportContext transportContext = RtpClient.GetContextBySourceId(frame.SynchronizationSourceIdentifier);
 
                         //If there is a context
                         if (transportContext != null)
                         {
                             //Increase priority
-                            m_RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.AboveNormal;
+                            RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.AboveNormal;
 
                             //Ensure HasRecievedRtpWithinSendInterval is true
                             //transportContext.m_LastRtpIn = DateTime.UtcNow;
@@ -2617,7 +2610,7 @@ namespace Media.Rtsp.Server.MediaTypes
                             frame.Timestamp = (int)transportContext.RtpTimestamp;
 
                             //Fire a frame changed event manually
-                            if (m_RtpClient.FrameChangedEventsEnabled) m_RtpClient.OnRtpFrameChanged(frame, transportContext, true);
+                            if (RtpClient.FrameChangedEventsEnabled) RtpClient.OnRtpFrameChanged(frame, transportContext, true);
 
                             //Todo, should not copy packets
 
@@ -2653,7 +2646,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                 }
 
                                 //Fire an event so the server sends a packet to all clients connected to this source
-                                if (false == m_RtpClient.FrameChangedEventsEnabled) m_RtpClient.OnRtpPacketReceieved(packet, transportContext);
+                                if (false == RtpClient.FrameChangedEventsEnabled) RtpClient.OnRtpPacketReceieved(packet, transportContext);
 
                                 //Put the packet back to ensure the timestamp and other values are correct.
                                 if(Loop) frame.Add(packet);
@@ -2689,7 +2682,7 @@ namespace Media.Rtsp.Server.MediaTypes
                             frame.Dispose();
                         }
 
-                        m_RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.BelowNormal;
+                        RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.BelowNormal;
 
                         System.Threading.Thread.Sleep(ClockRate);
                     }

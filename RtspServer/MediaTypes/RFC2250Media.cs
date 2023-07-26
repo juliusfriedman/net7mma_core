@@ -94,21 +94,21 @@ namespace Media.Rtsp.Server.MediaTypes
 
         public override void Start()
         {
-            if (m_RtpClient != null) return;
+            if (RtpClient != null) return;
 
             base.Start();
 
             //Remove JPEG Track
             SessionDescription.RemoveMediaDescription(0);
 
-            m_RtpClient.TransportContexts.Clear();
+            RtpClient.TransportContexts.Clear();
 
             //Add a MediaDescription to our Sdp on any available port for RTP/AVP Transport using the RtpMpegPayloadType            
             SessionDescription.Add(new Sdp.MediaDescription(Sdp.MediaType.video, 0, Rtp.RtpClient.RtpAvpProfileIdentifier, RFC2250Frame.RtpMpegPayloadType));
 
             //Add a Interleave (We are not sending Rtcp Packets becaues the Server is doing that) We would use that if we wanted to use this ImageSteam without the server.            
             //See the notes about having a Generic.Dictionary to support various tracks
-            m_RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1, sourceId, SessionDescription.MediaDescriptions.First(), false, sourceId));
+            RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1, sourceId, SessionDescription.MediaDescriptions.First(), false, sourceId));
 
             //Add the control line
             SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=control:trackID=1"));

@@ -3,6 +3,7 @@ using Media.Codecs.Audio.Mulaw;
 using Media.Common;
 using Media.Rtp;
 using System;
+using System.Linq;
 
 namespace Media.Rtsp.Server.MediaTypes;
 
@@ -16,7 +17,7 @@ public class RFC7655Media : RtpAudioSink
     /// <summary>
     /// Used to identify the codec
     /// </summary>
-    const string RfcEncodingName = "G711";
+    const string RfcEncodingName = "G711-0";
 
     /// <summary>
     /// Used to specify the clock rate
@@ -69,8 +70,11 @@ public class RFC7655Media : RtpAudioSink
 
         bool aLaw = Codec is ALawCodec;
 
-        SessionDescription.Add(new Media.Sdp.Lines.RtpMapLine(PayloadType, RfcEncodingName, RfcClockRate, Channels.ToString()));
-        SessionDescription.Add(new Media.Sdp.Lines.FormatTypeLine(PayloadType, aLaw ? "complaw=al" : "complaw=mu"));
+        var mediaDescription = SessionDescription.MediaDescriptions.First();
+
+        mediaDescription.Add(new Media.Sdp.Lines.RtpMapLine(PayloadType, RfcEncodingName, RfcClockRate, Channels.ToString()));
+        mediaDescription.Add(new Media.Sdp.Lines.FormatTypeLine(PayloadType, aLaw ? "complaw=al" : "complaw=mu"));
+        mediaDescription.Add(new Media.Sdp.Lines.SessionAttributeLine("ptime", "20"));
     }
 
     /// <summary>
@@ -81,29 +85,6 @@ public class RFC7655Media : RtpAudioSink
     /// <param name="length"></param>
     public bool Packetize(byte[] data, int offset, int length)
     {
-        //Always half the size
-        Span<byte> encoded = new byte[length / 2];
-
-        //Get the shorts which are the samples
-        Span<short> rawSamples = System.Runtime.InteropServices.MemoryMarshal.Cast<byte, short>(new Span<byte>(data, offset, length));
-
-        //Loop all samples and put the output byte as encoded from the input sample
-
-        if(Codec is ALawCodec)
-        {
-            for(int i = 0, o = 0; i < rawSamples.Length; ++i)
-            {
-                encoded[o++] = ALawEncoder.LinearToALawSample(rawSamples[i]);
-            }
-        }
-        else
-        {
-            for (int i = 0, o = 0; i < rawSamples.Length; ++i)
-            {
-                encoded[o++] = MuLawEncoder.LinearToMuLawSample(rawSamples[i]);
-            }
-        }
-
         //Get the context for the payloadType so we can increment the timestamps and sequence numbers.
         var transportContext = RtpClient.GetContextBySourceId(sourceId);
 
@@ -111,7 +92,7 @@ public class RFC7655Media : RtpAudioSink
         RtpFrame newFrame = new RtpFrame();
 
         //Create the packet
-        RtpPacket newPacket = new RtpPacket(encoded.Length + RtpHeader.Length)
+        RtpPacket newPacket = new RtpPacket(length / 2 + RtpHeader.Length)
         {
             Timestamp = transportContext.SenderRtpTimestamp,
             SequenceNumber = transportContext.SendSequenceNumber,
@@ -119,11 +100,25 @@ public class RFC7655Media : RtpAudioSink
             Marker = true,
         };
 
-        //Copy the data to the packet
-        encoded.CopyTo(newPacket.Payload.ToSpan());
-
         //Add the packet to the frame
         newFrame.Add(newPacket);
+
+        //Loop all samples and put the [i]nput bytes into the encoder and [o]utput byte into the Payload
+
+        if (Codec is ALawCodec)
+        {
+            for(int i = offset, o = 0; i < length; i += 2)
+            {
+                newPacket.Payload[o++] = ALawEncoder.LinearToALawSample(Common.Binary.Read16(data, i, System.BitConverter.IsLittleEndian));
+            }
+        }
+        else
+        {
+            for (int i = offset, o = 0; i < length; i += 2)
+            {
+                newPacket.Payload[o++] = MuLawEncoder.LinearToMuLawSample(Common.Binary.Read16(data, i, System.BitConverter.IsLittleEndian));
+            }
+        }
 
         //Return the value indicating if the frame was queued.
         return m_Frames.TryEnqueue(ref newFrame);

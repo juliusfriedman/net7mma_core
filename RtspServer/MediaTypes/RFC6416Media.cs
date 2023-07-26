@@ -206,13 +206,13 @@ namespace Media.Rtsp.Server.MediaTypes
 
         public override void Start()
         {
-            if (m_RtpClient != null) return;
+            if (RtpClient != null) return;
 
             base.Start();
 
             //Remove generic MPEG Track
             SessionDescription.RemoveMediaDescription(0);
-            m_RtpClient.TransportContexts.Clear();
+            RtpClient.TransportContexts.Clear();
 
             //Add a MediaDescription to our Sdp on any available port for RTP/AVP Transport using the given payload type         
             SessionDescription.Add(new Sdp.MediaDescription(Sdp.MediaType.video, 0, Rtp.RtpClient.RtpAvpProfileIdentifier, 96));
@@ -230,9 +230,9 @@ namespace Media.Rtsp.Server.MediaTypes
             SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("fmtp:96 profile-level-id=1"));
             SessionDescription.MediaDescriptions.Last().Add(new Sdp.SessionDescriptionLine("fmtp:97 profile-level-id=15; profile=1;"));
 
-            m_RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1, sourceId, SessionDescription.MediaDescriptions.First(), false, sourceId));
+            RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1, sourceId, SessionDescription.MediaDescriptions.First(), false, sourceId));
 
-            m_RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(2, 3, sourceId, SessionDescription.MediaDescriptions.Last(), false, sourceId));
+            RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(2, 3, sourceId, SessionDescription.MediaDescriptions.Last(), false, sourceId));
         }
 
         /// <summary>

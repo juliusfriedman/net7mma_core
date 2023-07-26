@@ -140,7 +140,7 @@ namespace Media.Sdp
             
             //Todo, should just add 2 parts, ':' and value...
 
-            public SessionAttributeLine(string seperator = null,  int partCount = 1, 
+            public SessionAttributeLine(string seperator = null,  int partCount = 2, 
                 string attributeName = Common.Extensions.String.StringExtensions.UnknownString,                 
                 string attributeValue = null)
                 : base(AttributeType, seperator, partCount)
@@ -172,6 +172,11 @@ namespace Media.Sdp
                         SetPart(1, attributeValue);
                     }
                 }
+            }
+
+            public SessionAttributeLine(string attributeName, string attributeValue)
+                : this(null, 2, attributeName, attributeValue)
+            {
             }
 
             //Should have params values overload with optional seperator(s)
@@ -2153,7 +2158,7 @@ namespace Media.Sdp
             }
 
             public PayloadTypeInformationLine(string attibuteType, int payloadType, string informationToken)
-                : this(payloadType.ToString(), informationToken)
+                : this(attibuteType, payloadType.ToString(), informationToken)
             {
 
             }

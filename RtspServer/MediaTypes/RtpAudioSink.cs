@@ -12,10 +12,8 @@ using System.Collections.Generic;
 
 namespace Media.Rtsp.Server.MediaTypes;
 
-public abstract class RtpAudioSink : RtpSink
+public class RtpAudioSink : RtpSink
 {
-    RtpClient m_RtpClient;
-
     protected ConcurrentLinkedQueueSlim<RtpFrame> m_Frames = new ConcurrentLinkedQueueSlim<RtpFrame>();
 
     protected readonly int sourceId;
@@ -66,7 +64,7 @@ public abstract class RtpAudioSink : RtpSink
     /// </summary>
     internal override void SendPackets()
     {
-        m_RtpClient.FrameChangedEventsEnabled = false;
+        RtpClient.FrameChangedEventsEnabled = false;
 
         unchecked
         {
@@ -76,7 +74,7 @@ public abstract class RtpAudioSink : RtpSink
                 {
                     if (m_Frames.Count == 0 && State == StreamState.Started)
                     {
-                        if (m_RtpClient.IsActive) m_RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.Lowest;
+                        if (RtpClient.IsActive) RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.Lowest;
 
                         System.Threading.Thread.Sleep(ClockRate);
 
@@ -91,20 +89,20 @@ public abstract class RtpAudioSink : RtpSink
                     if (!m_Frames.TryDequeue(out frame) || IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) continue;
 
                     //Get the transportChannel for the packet
-                    RtpClient.TransportContext transportContext = m_RtpClient.GetContextBySourceId(frame.SynchronizationSourceIdentifier);
+                    RtpClient.TransportContext transportContext = RtpClient.GetContextBySourceId(frame.SynchronizationSourceIdentifier);
 
                     //If there is a context
                     if (transportContext != null)
                     {
                         //Increase priority
-                        m_RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.AboveNormal;
+                        RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.AboveNormal;
 
                         transportContext.RtpTimestamp += ClockRate;
 
                         frame.Timestamp = (int)transportContext.RtpTimestamp;
 
                         //Fire a frame changed event manually
-                        if (m_RtpClient.FrameChangedEventsEnabled) m_RtpClient.OnRtpFrameChanged(frame, transportContext, true);
+                        if (RtpClient.FrameChangedEventsEnabled) RtpClient.OnRtpFrameChanged(frame, transportContext, true);
 
                         //Take all the packet from the frame                            
                         IEnumerable<RtpPacket> packets = frame;
@@ -133,7 +131,7 @@ public abstract class RtpAudioSink : RtpSink
                             }
 
                             //Fire an event so the server sends a packet to all clients connected to this source
-                            if (false == m_RtpClient.FrameChangedEventsEnabled) m_RtpClient.OnRtpPacketReceieved(packet, transportContext);
+                            if (false == RtpClient.FrameChangedEventsEnabled) RtpClient.OnRtpPacketReceieved(packet, transportContext);
 
                             //Put the packet back to ensure the timestamp and other values are correct.
                             if (Loop) frame.Add(packet);
@@ -163,7 +161,7 @@ public abstract class RtpAudioSink : RtpSink
                         frame.Dispose();
                     }
 
-                    m_RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.BelowNormal;
+                    RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.BelowNormal;
 
                     System.Threading.Thread.Sleep(ClockRate);
                 }
@@ -190,11 +188,11 @@ public abstract class RtpAudioSink : RtpSink
     /// </summary>
     public override void Start()
     {
-        if (m_RtpClient != null) return;
+        if (RtpClient != null) return;
 
         //Create a RtpClient so events can be sourced from the Server to many clients without this Client knowing about all participants
         //If this class was used to send directly to one person it would be setup with the recievers address
-        m_RtpClient = new RtpClient();
+        RtpClient = new RtpClient();
 
         SessionDescription = new SessionDescription(0, "v√ƒ", Name);
         SessionDescription.Add(new SessionConnectionLine()
@@ -225,7 +223,7 @@ public abstract class RtpAudioSink : RtpSink
         //See the notes about having a Generic.Dictionary to support various tracks
 
         //Create a context
-        m_RtpClient.TryAddContext(new RtpClient.TransportContext(
+        RtpClient.TryAddContext(new RtpClient.TransportContext(
             0, //Data Channel
             1, //Control Channel
             RFC3550.Random32(PayloadType), //A randomId which was alredy generated 

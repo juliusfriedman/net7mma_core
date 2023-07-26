@@ -54,13 +54,9 @@ namespace Media.Rtsp.Server.MediaTypes
         /// Packets...
         /// </summary>
         /// <remarks>In or Out is a semantic not distinguished here</remarks>
-        protected System.Collections.Generic.Queue<Common.IPacket> Packets = new System.Collections.Generic.Queue<Common.IPacket>();
+        protected readonly System.Collections.Generic.Queue<Common.IPacket> Packets = new System.Collections.Generic.Queue<Common.IPacket>();
 
         //public double MaxSendRate { get; protected set; }
-
-        #endregion
-
-        #region Fields
 
         #endregion
 
@@ -194,9 +190,9 @@ namespace Media.Rtsp.Server.MediaTypes
         /// <param name="client"></param>
         /// <param name="perPacket"></param>
         public RtpSink(string name, System.Uri source, Rtp.RtpClient client, bool perPacket = false)
-            : base(name, source, perPacket)
+            : base(name, source, client, perPacket)
         {
-            //RtpClient = client;
+
         }
 
         #endregion
