@@ -2341,6 +2341,8 @@ namespace Media.UnitTests
 
                                         alawStream.Packetize(randomAudio, 0, randomAudio.Length);
                                         mulawStream.Packetize(randomAudio, 0, randomAudio.Length);
+
+                                        //Should be put through encoder...
                                         pcmaStream.EnqueData(randomAudio, 0);
                                         pcmuStream.EnqueData(randomAudio, 0);
 

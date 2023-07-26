@@ -34,20 +34,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * v//
  */
 
-using Media.Common.Collections.Generic;
+using RtspServer.MediaTypes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Media.Rtsp.Server.MediaTypes
 {
     /// <summary>
     /// Sends System.Drawing.Images over Rtp by encoding them as a RFC2435 Jpeg
     /// </summary>
-    public class RFC2435Media : RtpSink
+    public class RFC2435Media : RtpVideoSink
     {
-
         #region NestedTypes
 
         /// <summary>
@@ -2281,24 +2279,6 @@ namespace Media.Rtsp.Server.MediaTypes
 
         #endregion
 
-        #region Fields
-
-        //Should be moved to SourceStream? Should have Fps and calculate for developers?
-        //Should then be a TimeSpan or Frequency
-        internal protected int ClockRate = 9;//kHz //90 dekahertz
-
-        //Should be moved to RtpSourceSource;
-        protected readonly int sourceId = RFC3550.Random32(RFC2435Frame.RtpJpegPayloadType); //Doesn't really matter what seed was used, if really desired could be set in constructor
-
-        protected ConcurrentLinkedQueueSlim<Rtp.RtpFrame> m_Frames = new ConcurrentLinkedQueueSlim<Rtp.RtpFrame>();
-
-        //Watches for files if given in constructor
-        protected System.IO.FileSystemWatcher m_Watcher;
-
-        protected int m_FramesPerSecondCounter = 0;
-
-        #endregion
-
         //FFMPEG / et al have problems when quality >= 100
 
         //use 50 because that is where the rfc quality was based on
@@ -2306,21 +2286,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         static List<string> SupportedImageFormats = new List<string>(System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders().SelectMany(enc => enc.FilenameExtension.Split((char)Common.ASCII.SemiColon)).Select(s => s.Substring(1).ToLowerInvariant()));
 
-        #region Propeties
-
-        public virtual double FramesPerSecond { get { return Math.Max(m_FramesPerSecondCounter, 1) / Math.Abs(Uptime.TotalSeconds); } }
-
-        public virtual int Width { get; protected set; } //EnsureDimensios
-
-        public virtual int Height { get; protected set; }
-
-        public virtual int Quality { get; protected set; }
-
-        public virtual bool Interlaced { get; protected set; }
-
-        //Should also allow payloadsize e.g. BytesPerPacketPayload to be set here?
-
-        #endregion
+        protected System.IO.FileSystemWatcher m_Watcher;
 
         #region Constructor
 
@@ -2380,29 +2346,31 @@ namespace Media.Rtsp.Server.MediaTypes
             //If this class was used to send directly to one person it would be setup with the recievers address
             RtpClient = new Rtp.RtpClient();
 
-            SessionDescription = new Sdp.SessionDescription(0, "v√ƒ", Name);
-            SessionDescription.Add(new Sdp.Lines.SessionConnectionLine()
+            //Create the session description
+            SessionDescription = new Sdp.SessionDescription(0, "v√ƒ", Name)
             {
-                ConnectionNetworkType = Sdp.Lines.SessionConnectionLine.InConnectionToken,
-                ConnectionAddressType = Sdp.SessionDescription.WildcardString,
-                ConnectionAddress = System.Net.IPAddress.Any.ToString()
-            });
+                new Sdp.Lines.SessionConnectionLine()
+                {
+                    ConnectionNetworkType = Sdp.Lines.SessionConnectionLine.InConnectionToken,
+                    ConnectionAddressType = Sdp.SessionDescription.WildcardString,
+                    ConnectionAddress = System.Net.IPAddress.Any.ToString()
+                },
 
-            //Add a MediaDescription to our Sdp on any available port for RTP/AVP Transport using the RtpJpegPayloadType            
-            SessionDescription.Add(new Sdp.MediaDescription(Sdp.MediaType.video, 
+                //Add a MediaDescription to our Sdp on any available port for RTP/AVP Transport using the RtpJpegPayloadType            
+                new Sdp.MediaDescription(Sdp.MediaType.video,
                 0,  //Any port...
-                Rtp.RtpClient.RtpAvpProfileIdentifier, 
-                RFC2435Media.RFC2435Frame.RtpJpegPayloadType));
+                Rtp.RtpClient.RtpAvpProfileIdentifier,
+                RFC2435Media.RFC2435Frame.RtpJpegPayloadType),
 
-            //Indicate control to each media description contained
-            SessionDescription.Add(new Sdp.SessionDescriptionLine("a=control:*"));
+                //Indicate control to each media description contained
+                new Sdp.SessionDescriptionLine("a=control:*"),
 
-            //Ensure the session members know they can only receive
-            SessionDescription.Add(new Sdp.SessionDescriptionLine("a=sendonly")); //recvonly?
+                //Ensure the session members know they can only receive
+                new Sdp.SessionDescriptionLine("a=sendonly"), //recvonly?
 
-            //that this a broadcast.
-            SessionDescription.Add(new Sdp.SessionDescriptionLine("a=type:broadcast"));
-
+                //that this a broadcast.
+                new Sdp.SessionDescriptionLine("a=type:broadcast")
+            };
 
             //Add a Interleave (We are not sending Rtcp Packets becaues the Server is doing that) We would use that if we wanted to use this ImageSteam without the server.            
             //See the notes about having a Generic.Dictionary to support various tracks
@@ -2413,7 +2381,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 SessionDescription.MediaDescriptions.First(), //This is the media description we just created.
                 false, //Don't enable Rtcp reports because this source doesn't communicate with any clients
                 sourceId, // This context is not in discovery
-                2,
+                0,//Should be 1 when first packet is encoded...
                 true)
             {
                 //Never has to send

@@ -58,6 +58,10 @@ namespace Media.Rtsp.Server.MediaTypes
 
         //public double MaxSendRate { get; protected set; }
 
+        //Should also allow payloadsize e.g. BytesPerPacketPayload to be set here?
+
+        //Should have ClockRate and other basic properties herer
+
         #endregion
 
         #region Methods
