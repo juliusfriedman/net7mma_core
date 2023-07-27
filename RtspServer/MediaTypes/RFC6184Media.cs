@@ -995,7 +995,11 @@ namespace Media.Rtsp.Server.MediaTypes
                     if (thumb.PixelFormat != System.Drawing.Imaging.PixelFormat.Format32bppArgb) throw new NotSupportedException("Only ARGB is currently supported.");
 
                     //Create a new frame
-                    var newFrame = new RFC6184Frame(96); //should all payload type to come from the media description...
+                    var newFrame = new RFC6184Frame(96)
+                    {
+                        SynchronizationSourceIdentifier = SourceId,
+                        MaxPackets = 4096,
+                    };
 
                     //Get RGB Stride
                     System.Drawing.Imaging.BitmapData data = ((System.Drawing.Bitmap)thumb).LockBits(new System.Drawing.Rectangle(0, 0, thumb.Width, thumb.Height),

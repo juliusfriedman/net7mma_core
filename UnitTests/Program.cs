@@ -2278,19 +2278,21 @@ namespace Media.UnitTests
                     //server.AddMedia(new Media.Rtsp.Server.Media.MJPEGMedia("HttpTestMJpeg", new Uri("http://extcam-16.se.axis.com/axis-cgi/mjpg/video.cgi?")));
 
                     //Make a 1080p MJPEG Stream
-                    Media.Rtsp.Server.MediaTypes.RFC2435Media mirror = new Media.Rtsp.Server.MediaTypes.RFC2435Media("Mirror", null, false, 1920, 1080, true, 25);
+                    Media.Rtsp.Server.MediaTypes.RFC2435Media mirror = new Media.Rtsp.Server.MediaTypes.RFC2435Media("Mirror", null, false, 1920, 1088, true, 25);
                     server.TryAddMedia(mirror);
 
-                    //Make a H264 Stream (Not yet working)
+                    //Make a H264 Stream (Not yet working 100%)
                     Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1088, "TinyStream", null, false);
                     server.TryAddMedia(tinyStream);
 
                     //Make some RtpAudioSink (Not yet working)
                     Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmaStream = new Rtsp.Server.MediaTypes.RtpAudioSink("pcma", null, 8, 1, 8000);
                     Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmuStream = new Rtsp.Server.MediaTypes.RtpAudioSink("pcmu", null, 0, 1, 8000);
+                    Media.Rtsp.Server.MediaTypes.RtpAudioSink rtpDumpAudioStream = new Rtsp.Server.MediaTypes.RtpAudioSink("rtpDump", null, 0, 1, 8000);
 
                     server.TryAddMedia(pcmaStream);
                     server.TryAddMedia(pcmuStream);
+                    server.TryAddMedia(rtpDumpAudioStream);
 
                     ////Make some RFC7655Media (Audio) (VLC Doesn't support?)
                     //Media.Rtsp.Server.MediaTypes.RFC7655Media alawStream = new Rtsp.Server.MediaTypes.RFC7655Media("TestALaw", null, 98, 1, Rtsp.Server.MediaTypes.RFC7655Media.CompandingLaw.ALaw);
@@ -2353,7 +2355,7 @@ namespace Media.UnitTests
                     Start:
 
                         using (var bmpScreenshot = new System.Drawing.Bitmap(1920,
-                                   1080,
+                                   1088,
                                    System.Drawing.Imaging.PixelFormat.Format32bppArgb))
                         {
                             // Create a graphics object from the bitmap.
@@ -2372,28 +2374,26 @@ namespace Media.UnitTests
                                                                     0,
                                                                     0,
                                                                     0,
-                                                                    new System.Drawing.Size(1920, 1080),
+                                                                    new System.Drawing.Size(mirror.Width, mirror.Height),
                                                                     System.Drawing.CopyPixelOperation.SourceCopy);
 
                                         //Could put this on another thread for increased speed.
 
                                         //Perhaps sources should also support a BeingPacketize, EndPacketize paradigm.
 
-                                        //System.Threading.ThreadPool.QueueUserWorkItem((cb) =>
-                                        //{
                                         //Convert to JPEG and put in packets
                                         mirror.Packetize(bmpScreenshot);
-                                        //tinyStream.Packetize(bmpScreenshot);
-                                        //});
 
-                                        //alawStream.Packetize(silence, 0, silence.Length);
-                                        //mulawStream.Packetize(silence, 0, silence.Length);
+                                        //Convert to H264 and put in packets
+                                        tinyStream.Packetize(bmpScreenshot);
+
+                                        //Convert audio and put in packets
 
                                         audio = ALawEncoder.LinearToALaw(generateAudioFrame());
                                         pcmaStream.Packetize(audio, 0, audio.Length);
 
-                                        //audio = MuLawEncoder.LinearToMuLaw(generateAudioFrame());
-                                        //pcmuStream.Packetize(audio, 0, audio.Length);
+                                        audio = MuLawEncoder.LinearToMuLaw(generateAudioFrame());
+                                        pcmuStream.Packetize(audio, 0, audio.Length);
 
                                         //HALT, REST
                                         if (false == System.Threading.Thread.Yield())
@@ -2422,7 +2422,7 @@ namespace Media.UnitTests
                         }
                     }));
 
-                    pcmuStream.Loop = true;
+                    rtpDumpAudioStream.Loop = true;
 
                     System.Threading.Thread rtpToolThread = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart((o) =>
                     {
@@ -2438,8 +2438,9 @@ namespace Media.UnitTests
                                     continue;
                                 using (RtpPacket rtp = new RtpPacket(entry.Blob, entry.Pointer + RtpToolEntry.sizeOf_RD_packet_T))
                                 {
-                                    rtp.SynchronizationSourceIdentifier = pcmuStream.SourceId;
-                                    pcmuStream.Frames.Enqueue(new RtpFrame { rtp.Clone() });
+                                    //Streams lookup the packet by the ssrc, this could be changed to use the payload type etc
+                                    rtp.SynchronizationSourceIdentifier = rtpDumpAudioStream.SourceId;
+                                    rtpDumpAudioStream.Frames.Enqueue(new RtpFrame { rtp.Clone() });
                                 }
                             }
                         }

@@ -275,6 +275,8 @@ public class RtpAudioSink : RtpSink
 
     /// <summary>
     /// Todo, IEncoder and IDecoder need to expose methods for this to work without a bunch of if else statements.
+    /// This method should take something like short[] to indicate it accepts pcm samples.
+    /// We already expose <see cref="RtpSink.SendData(byte[], int, int)"/> but Sink works in packets and this class works in frames....
     /// </summary>
     /// <param name="data"></param>
     /// <param name="offset"></param>
@@ -291,13 +293,15 @@ public class RtpAudioSink : RtpSink
         RtpFrame newFrame = new RtpFrame();
 
         //Create the packet
-        RtpPacket newPacket = new RtpPacket(length / 2 + RtpHeader.Length)
+        RtpPacket newPacket = new RtpPacket(length + RtpHeader.Length)
         {
             SynchronizationSourceIdentifier = SourceId,
             Timestamp = transportContext.RtpTimestamp,
             PayloadType = PayloadType,
             Marker = true,
         };
+
+        data.CopyTo(newPacket.Payload.Array, offset);
 
         //Assign next sequence number
         switch (transportContext.RecieveSequenceNumber)
@@ -309,26 +313,6 @@ public class RtpAudioSink : RtpSink
             default:
                 newPacket.SequenceNumber = ++transportContext.RecieveSequenceNumber;
                 break;
-        }
-
-        //Add the packet to the frame
-        newFrame.Add(newPacket);
-
-        //Loop all samples and put the [i]nput bytes into the encoder and [o]utput byte into the Payload
-
-        if (Codec is ALawCodec)
-        {
-            for (int i = offset, o = 0; i < length; i += 2)
-            {
-                newPacket.Payload[o++] = ALawEncoder.LinearToALawSample(Common.Binary.Read16(data, i, System.BitConverter.IsLittleEndian));
-            }
-        }
-        else
-        {
-            for (int i = offset, o = 0; i < length; i += 2)
-            {
-                newPacket.Payload[o++] = MuLawEncoder.LinearToMuLawSample(Common.Binary.Read16(data, i, System.BitConverter.IsLittleEndian));
-            }
         }
 
         //Return the value indicating if the frame was queued.
