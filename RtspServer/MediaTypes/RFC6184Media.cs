@@ -1019,6 +1019,8 @@ namespace Media.Rtsp.Server.MediaTypes
                     ((System.Drawing.Bitmap)image).UnlockBits(data);
 
                     //SPS and PPS should be included here
+                    newFrame.Packetize(encoder.GetRawSPS());
+                    newFrame.Packetize(encoder.GetRawPPS());
 
                     //Packetize the data with the slice header
                     newFrame.Packetize(encoder.CompressFrame(yuv));

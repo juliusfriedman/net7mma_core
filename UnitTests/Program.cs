@@ -2285,10 +2285,11 @@ namespace Media.UnitTests
                     server.TryAddMedia(mirror);
 
                     //Make a H264 Stream (Not yet working 100%)
-                    Media.Rtsp.Server.MediaTypes.RFC6184Media h264Stream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1088, "h264Stream", null, false);
-                    server.TryAddMedia(h264Stream);
+                    //Media.Rtsp.Server.MediaTypes.RFC6184Media h264Stream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1088, "h264Stream", null, false);
+                    //server.TryAddMedia(h264Stream);
 
-                    Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(192, 128, "TestCard", null, false);
+                    //Make a H264 Stream (Working)
+                    Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(320, 240, "TestCard", null, false);
                     server.TryAddMedia(tinyStream);
 
                     //Make some RtpAudioSink (Not yet working)
@@ -2310,12 +2311,13 @@ namespace Media.UnitTests
                     pcmaStream.Codec = new ALawCodec();
                     pcmuStream.Codec = new MulawCodec();
 
-                    TestCard testCard = new TestCard(192, 128, 25);
+                    TestCard testCard = new TestCard(320, 240, 25);
 
                     //Add the track to the SessionDescription
                     //2 tracks will be setup by the client.
                     //tinyStream.SessionDescription.Add(pcmuStream.SessionDescription.MediaDescriptions.FirstOrDefault());
 
+                    //Convert PCM Data to RTP Packets
                     testCard.ReceivedAudioFrame += (uint timestamp, short[] data) =>
                     {
                         if (!pcmuStream.IsReady) return;
@@ -2323,6 +2325,7 @@ namespace Media.UnitTests
                         pcmuStream.Packetize(encoded, 0, encoded.Length);
                     };
 
+                    //Convert YUV Data to RTP packets
                     testCard.ReceivedYUVFrame += (uint timestamp, int width, int height, byte[] data) =>
                     {
                         if (!tinyStream.IsReady) return;
@@ -2335,9 +2338,6 @@ namespace Media.UnitTests
 
                         var sps = tinyStream.encoder.GetRawSPS();
                         var pps = tinyStream.encoder.GetRawPPS();
-
-                        //File should be viewable in a YUV viewer...
-                        System.IO.File.WriteAllBytes("test.yuv", data);
 
                         var compressedData = tinyStream.encoder.CompressFrame(data);
 
@@ -2431,14 +2431,16 @@ namespace Media.UnitTests
                                         mirror.Packetize(bmpScreenshot);
 
                                         //Convert to H264 and put in packets
-                                        h264Stream.Packetize(bmpScreenshot);
+                                        //h264Stream.Packetize(bmpScreenshot);
 
                                         //Convert audio and put in packets
 
-                                        audio = ALawEncoder.LinearToALaw(generateAudioFrame());
+                                        var samples = generateAudioFrame();
+
+                                        audio = ALawEncoder.LinearToALaw(samples);
                                         pcmaStream.Packetize(audio, 0, audio.Length);
 
-                                        audio = MuLawEncoder.LinearToMuLaw(generateAudioFrame());
+                                        audio = MuLawEncoder.LinearToMuLaw(samples);
                                         pcmuStream.Packetize(audio, 0, audio.Length);
 
                                         //HALT, REST
