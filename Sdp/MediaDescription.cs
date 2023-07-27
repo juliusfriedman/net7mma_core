@@ -176,14 +176,14 @@ namespace Media.Sdp
 
         }
 
-        public MediaDescription(MediaType mediaType, int mediaPort, string mediaProtocol, int mediaFormat)
-            : this(mediaType, mediaPort, mediaProtocol, mediaFormat.ToString())
+        public MediaDescription(MediaType mediaType, string mediaProtocol, int mediaFormat, int mediaPort)
+            : this(mediaType, mediaProtocol, mediaFormat.ToString(), mediaPort)
         {
 
         }
 
-        public MediaDescription(MediaType mediaType, int mediaPort, string mediaProtocol, string mediaFormat, bool shouldDispose = true)
-            :base(shouldDispose)
+        public MediaDescription(MediaType mediaType, string mediaProtocol, string mediaFormat, int mediaPort = 0, bool shouldDispose = true)
+            : base(shouldDispose)
         {
             MediaDescriptionLine = new Sdp.Lines.SessionMediaDescriptionLine();
             MediaType = mediaType;

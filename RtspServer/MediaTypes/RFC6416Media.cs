@@ -215,8 +215,8 @@ namespace Media.Rtsp.Server.MediaTypes
             RtpClient.TransportContexts.Clear();
 
             //Add a MediaDescription to our Sdp on any available port for RTP/AVP Transport using the given payload type         
-            SessionDescription.Add(new Sdp.MediaDescription(Sdp.MediaType.video, 0, Rtp.RtpClient.RtpAvpProfileIdentifier, 96));
-            SessionDescription.Add(new Sdp.MediaDescription(Sdp.MediaType.audio, 0, Rtp.RtpClient.RtpAvpProfileIdentifier, 97));
+            SessionDescription.Add(new Sdp.MediaDescription(Sdp.MediaType.video, Rtp.RtpClient.RtpAvpProfileIdentifier, 96, 0));
+            SessionDescription.Add(new Sdp.MediaDescription(Sdp.MediaType.audio, Rtp.RtpClient.RtpAvpProfileIdentifier, 97, 0));
 
             //Add the control line for video
             SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=control:trackID=1"));
@@ -230,9 +230,9 @@ namespace Media.Rtsp.Server.MediaTypes
             SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("fmtp:96 profile-level-id=1"));
             SessionDescription.MediaDescriptions.Last().Add(new Sdp.SessionDescriptionLine("fmtp:97 profile-level-id=15; profile=1;"));
 
-            RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1, sourceId, SessionDescription.MediaDescriptions.First(), false, sourceId));
+            RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1, SourceId, SessionDescription.MediaDescriptions.First(), false, SourceId));
 
-            RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(2, 3, sourceId, SessionDescription.MediaDescriptions.Last(), false, sourceId));
+            RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(2, 3, SourceId, SessionDescription.MediaDescriptions.Last(), false, SourceId));
         }
 
         /// <summary>

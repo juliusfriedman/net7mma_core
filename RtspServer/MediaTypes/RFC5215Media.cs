@@ -293,13 +293,13 @@ namespace Media.Rtsp.Server.MediaTypes
             RtpClient.TransportContexts.Clear();
 
             //Add a MediaDescription to our Sdp on any available port for RTP/AVP Transport using the given payload type         
-            SessionDescription.Add(new Sdp.MediaDescription(Sdp.MediaType.audio, 0, Rtp.RtpClient.RtpAvpProfileIdentifier, 96));
+            SessionDescription.Add(new Sdp.MediaDescription(Sdp.MediaType.audio, Rtp.RtpClient.RtpAvpProfileIdentifier, 96, 0));
 
             //Add the control line
             SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=control:trackID=1"));
             //Channels should be a field set in constructor.
             SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=rtpmap:" + SessionDescription.MediaDescriptions.First().MediaFormat + " vorbis/" + ClockRate)); // + " /" + channels
-            RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1, sourceId, SessionDescription.MediaDescriptions.First(), false, sourceId));
+            RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1, SourceId, SessionDescription.MediaDescriptions.First(), false, SourceId));
         }
         
         #endregion

@@ -33,6 +33,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * 
  * v//
  */
+using Media.Common.Collections.Generic;
+using System.Linq;
+
 namespace Media.Rtsp.Server.MediaTypes
 {
     /// <summary>
@@ -50,11 +53,13 @@ namespace Media.Rtsp.Server.MediaTypes
         /// </summary>
         public virtual bool Loop { get; set; }
 
+        public int SourceId => RtpClient.TransportContexts.FirstOrDefault()?.SynchronizationSourceIdentifier ?? 0;
+
         /// <summary>
         /// Packets...
         /// </summary>
         /// <remarks>In or Out is a semantic not distinguished here</remarks>
-        protected readonly System.Collections.Generic.Queue<Common.IPacket> Packets = new System.Collections.Generic.Queue<Common.IPacket>();
+        protected readonly ConcurrentLinkedQueueSlim<Common.IPacket> Packets = new ConcurrentLinkedQueueSlim<Common.IPacket>();
 
         //public double MaxSendRate { get; protected set; }
 
@@ -158,9 +163,12 @@ namespace Media.Rtsp.Server.MediaTypes
                     }
 
                     //Dequeue a frame or die
-                     Common.IPacket packet = Packets.Dequeue();
+                    Common.IPacket packet;
 
-                     SendPacket(packet);
+                    if (!Packets.TryDequeue(out packet))
+                        continue;
+
+                    SendPacket(packet);
 
                     //If we are to loop images then add it back at the end
                     if (Loop) Packets.Enqueue(packet);

@@ -799,7 +799,7 @@ r=7d 1h 0 25h";
         for (int mediaFormat = 0; mediaFormat <= 999; ++mediaFormat)
         {
             //Create a MediaDescription
-            using (var mediaDescription = new Media.Sdp.MediaDescription(mediaType, mediaPort, profile, mediaFormat))
+            using (var mediaDescription = new Media.Sdp.MediaDescription(mediaType, profile, mediaFormat, mediaPort))
             {
                 System.Diagnostics.Debug.Assert(mediaDescription.MediaProtocol == profile, "Did not find MediaProtocol '" + profile + "'");
 
@@ -939,7 +939,7 @@ a=control:track1
             System.Diagnostics.Debug.Assert(audioDescription.DocumentVersion == 0, "Did not find Correct SessionVersion");
 
             //Add the MediaDescription
-            audioDescription.Add(new Media.Sdp.MediaDescription(Media.Sdp.MediaType.audio, mediaPort, profile, 0), false);
+            audioDescription.Add(new Media.Sdp.MediaDescription(Media.Sdp.MediaType.audio, profile, 0, mediaPort), false);
 
             //update version was specified false so the verison of the document should not change
             System.Diagnostics.Debug.Assert(audioDescription.DocumentVersion == 0, "Did not find Correct SessionVersion");

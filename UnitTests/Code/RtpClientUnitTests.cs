@@ -72,7 +72,7 @@ namespace Media.UnitTests
                     Rtp.RtpClient.TransportContext tc = new Rtp.RtpClient.TransportContext(0, 1, 0);
 
                     //Needed to resolve packet payload and avoid exception when validating packet... :(
-                    tc.MediaDescription = new Sdp.MediaDescription(Sdp.MediaType.unknown, 0, "RTP", 0);
+                    tc.MediaDescription = new Sdp.MediaDescription(Sdp.MediaType.unknown, "RTP", 0, 0);
 
                     rtpClient.AddContext(tc);
 
@@ -188,7 +188,7 @@ namespace Media.UnitTests
                     _client.OutOfBandData += ProcessInterleaveData;
                     _client.RtpPacketReceieved += ProcessRtpPacket;
 
-                    Media.Sdp.MediaDescription md = new Media.Sdp.MediaDescription(Media.Sdp.MediaType.video, 999, "H.264", 0);
+                    Media.Sdp.MediaDescription md = new Media.Sdp.MediaDescription(Media.Sdp.MediaType.video, "H.264", 0, 999);
 
                     Media.Rtp.RtpClient.TransportContext tc = new Media.Rtp.RtpClient.TransportContext(0, 1,
                         Media.RFC3550.Random32(9876), md, false, _senderSSRC);
@@ -781,7 +781,7 @@ namespace Media.UnitTests
             using (var sdp = new Media.Sdp.SessionDescription(0, originatorAndSession, "sipsorcery"))
             {
                 sdp.Add(new Media.Sdp.SessionDescriptionLine("c=IN IP4 10.1.1.2"), false);
-                var audioAnnouncement = new Media.Sdp.MediaDescription(Media.Sdp.MediaType.audio, 0, "SDP_TRANSPORT", 0);
+                var audioAnnouncement = new Media.Sdp.MediaDescription(Media.Sdp.MediaType.audio, "SDP_TRANSPORT", 0, 0);
                 sdp.Add(audioAnnouncement, false);
 
                 // Set up the RTP channel (Step 2).

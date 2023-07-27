@@ -952,7 +952,7 @@ namespace Media.Rtsp.Server.MediaTypes
             RtpClient.TransportContexts.Clear();
 
             //Add a MediaDescription to our Sdp on any available port for RTP/AVP Transport using the given payload type            
-            SessionDescription.Add(new Sdp.MediaDescription(Sdp.MediaType.video, 0, Rtp.RtpClient.RtpAvpProfileIdentifier, 96)); //This is the payload description, it is defined in the profile
+            SessionDescription.Add(new Sdp.MediaDescription(Sdp.MediaType.video, Rtp.RtpClient.RtpAvpProfileIdentifier, 96, 0)); //This is the payload description, it is defined in the profile
 
             //Add the control line and media attributes to the Media Description
             SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=control:trackID=video")); //<- this is the id for this track which playback control is required, if there is more than 1 video track this should be unique to it
@@ -978,7 +978,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             //Create a context
             RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1,  //data and control channel id's (can be any number and should not overlap but can...)
-                sourceId, //A randomId which was alredy generated 
+                SourceId, //A randomId which was alredy generated 
                 SessionDescription.MediaDescriptions.First(), //This is the media description we just created.
                 false, //Don't enable Rtcp reports because this source doesn't communicate with any clients
                 1, // This context is not in discovery

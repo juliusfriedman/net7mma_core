@@ -104,11 +104,11 @@ namespace Media.Rtsp.Server.MediaTypes
             RtpClient.TransportContexts.Clear();
 
             //Add a MediaDescription to our Sdp on any available port for RTP/AVP Transport using the RtpMpegPayloadType            
-            SessionDescription.Add(new Sdp.MediaDescription(Sdp.MediaType.video, 0, Rtp.RtpClient.RtpAvpProfileIdentifier, RFC2250Frame.RtpMpegPayloadType));
+            SessionDescription.Add(new Sdp.MediaDescription(Sdp.MediaType.video, Rtp.RtpClient.RtpAvpProfileIdentifier, RFC2250Frame.RtpMpegPayloadType, 0));
 
             //Add a Interleave (We are not sending Rtcp Packets becaues the Server is doing that) We would use that if we wanted to use this ImageSteam without the server.            
             //See the notes about having a Generic.Dictionary to support various tracks
-            RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1, sourceId, SessionDescription.MediaDescriptions.First(), false, sourceId));
+            RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1, SourceId, SessionDescription.MediaDescriptions.First(), false, SourceId));
 
             //Add the control line
             SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=control:trackID=1"));
@@ -116,7 +116,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         public override void Packetize(System.Drawing.Image image)
         {
-            lock (m_Frames)
+            lock (Frames)
             {
                 try
                 {
@@ -127,7 +127,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         //Should use RFC2250Frame to properly packetize
                         AddFrame(new Rtp.RtpFrame(32)
                         {
-                            new Rtp.RtpPacket(new Rtp.RtpHeader(2, false, false, true, 32, 0, sourceId, 0, 0), RFC2250Frame.CreateVideoHeader(false, 0, true, true, true, true, true, 1).Concat(WriteMPEGSequence((Bitmap)thumbnail)))
+                            new Rtp.RtpPacket(new Rtp.RtpHeader(2, false, false, true, 32, 0, SourceId, 0, 0), RFC2250Frame.CreateVideoHeader(false, 0, true, true, true, true, true, 1).Concat(WriteMPEGSequence((Bitmap)thumbnail)))
                         });
                     }
                 }

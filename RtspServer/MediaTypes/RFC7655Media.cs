@@ -86,7 +86,7 @@ public class RFC7655Media : RtpAudioSink
     public bool Packetize(byte[] data, int offset, int length)
     {
         //Get the context for the payloadType so we can increment the timestamps and sequence numbers.
-        var transportContext = RtpClient.GetContextBySourceId(sourceId);
+        var transportContext = RtpClient.GetContextBySourceId(SourceId);
 
         //Create a frame
         RtpFrame newFrame = new RtpFrame();
@@ -121,6 +121,6 @@ public class RFC7655Media : RtpAudioSink
         }
 
         //Return the value indicating if the frame was queued.
-        return m_Frames.TryEnqueue(ref newFrame);
+        return Frames.TryEnqueue(ref newFrame);
     }
 }

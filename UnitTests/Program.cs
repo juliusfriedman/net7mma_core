@@ -37,10 +37,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #endregion
 
 using Media;
+using Media.Codecs.Audio.Alaw;
+using Media.Codecs.Audio.Mulaw;
+using Media.Rtp;
+using Media.RtpTools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.PortableExecutable;
 using System.Text;
+using System.Xml;
 //using System.Windows.Forms;
 
 namespace Media.UnitTests
@@ -985,7 +991,7 @@ namespace Media.UnitTests
                     SessionDescription.Add(new Media.Sdp.SessionDescriptionLine("c=IN IP4 " + localIp.ToString()));
 
                     //Add a MediaDescription to our Sdp on any port 17777 for RTP/AVP Transport using the RtpJpegPayloadType
-                    SessionDescription.Add(new Media.Sdp.MediaDescription(Media.Sdp.MediaType.video, 17777, (tcp ? "TCP/" : string.Empty) + Media.Rtp.RtpClient.RtpAvpProfileIdentifier, Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame.RtpJpegPayloadType));
+                    SessionDescription.Add(new Media.Sdp.MediaDescription(Media.Sdp.MediaType.video, (tcp ? "TCP/" : string.Empty) + Media.Rtp.RtpClient.RtpAvpProfileIdentifier, Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame.RtpJpegPayloadType, 17777));
 
                     sender.RtcpPacketSent += (s, p, t) => TryPrintClientPacket(s, false, p);
                     sender.RtcpPacketReceieved += (s, p, t) => TryPrintClientPacket(s, true, p);
@@ -2273,13 +2279,11 @@ namespace Media.UnitTests
 
                     //Make a 1080p MJPEG Stream
                     Media.Rtsp.Server.MediaTypes.RFC2435Media mirror = new Media.Rtsp.Server.MediaTypes.RFC2435Media("Mirror", null, false, 1920, 1080, true, 25);
-
                     server.TryAddMedia(mirror);
 
                     //Make a H264 Stream (Not yet working)
-                    Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1080, "TinyStream", null, false);
-
-                    server.TryAddMedia(tinyStream);
+                    //Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1080, "TinyStream", null, false);
+                    //server.TryAddMedia(tinyStream);
 
                     //Make some RtpAudioSink
                     Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmaStream = new Rtsp.Server.MediaTypes.RtpAudioSink("pcma", null, 8, 1, 8000);
@@ -2288,18 +2292,63 @@ namespace Media.UnitTests
                     server.TryAddMedia(pcmaStream);
                     server.TryAddMedia(pcmuStream);
 
-                    //Make some RFC7655Media (Audio)
-                    Media.Rtsp.Server.MediaTypes.RFC7655Media alawStream = new Rtsp.Server.MediaTypes.RFC7655Media("TestALaw", null, 98, 1, Rtsp.Server.MediaTypes.RFC7655Media.CompandingLaw.ALaw);
-                    Media.Rtsp.Server.MediaTypes.RFC7655Media mulawStream = new Rtsp.Server.MediaTypes.RFC7655Media("TestMuLaw", null, 98, 1, Rtsp.Server.MediaTypes.RFC7655Media.CompandingLaw.Mulaw);
+                    ////Make some RFC7655Media (Audio) (VLC Doesn't support?)
+                    //Media.Rtsp.Server.MediaTypes.RFC7655Media alawStream = new Rtsp.Server.MediaTypes.RFC7655Media("TestALaw", null, 98, 1, Rtsp.Server.MediaTypes.RFC7655Media.CompandingLaw.ALaw);
+                    //Media.Rtsp.Server.MediaTypes.RFC7655Media mulawStream = new Rtsp.Server.MediaTypes.RFC7655Media("TestMuLaw", null, 98, 1, Rtsp.Server.MediaTypes.RFC7655Media.CompandingLaw.Mulaw);
 
-                    server.TryAddMedia(alawStream);
-                    server.TryAddMedia(mulawStream);
+                    //server.TryAddMedia(alawStream);
+                    //server.TryAddMedia(mulawStream);
+
+                    pcmaStream.Codec = new ALawCodec();
+                    pcmuStream.Codec = new MulawCodec();
+
+                    Func<short[]> generateAudioFrame = () =>
+                    {
+                        // Get the current time
+                        DateTime now_utc = DateTime.UtcNow;
+                        DateTime now_local = now_utc.ToLocalTime();
+
+                        long timestamp_ms = ((long)(now_utc.Ticks / TimeSpan.TicksPerMillisecond));
+
+                        // 8 KHz audio / 20ms samples
+                        int frame_size = (8000 * 20) / 1000;  // = 8000 / (1000/audio_duration_ms)
+
+                        short[] audio_frame = new short[frame_size]; // This is an array of 16 bit values
+
+                        // Add beep sounds.
+                        // We add a 0.1 second beep every second
+                        // Every 10 seconds we use a different sound.
+                        // At the start of each new minute we add a 0.3 second beep
+
+                        // Sound 1, 0.3 seconds at 12:00:00, 12:01:00, 12:02:00
+                        // Sound 1, 0.1 seconds at 12:00:10, 12:00:20, 12:00:30 ... 12:00:50
+                        // Sound 2, 0.1 seconds at 12:00:01, 12:00:02, 12:00:03 ... 12:00:09, then 12:00:11, 12:00:12
+
+                        long currentSeconds = (timestamp_ms / 1000);
+                        long currentMilliSeconds = timestamp_ms % 1000;
+
+                        int soundToPlay = 0; // 0 = silence
+                        if (((currentSeconds % 60) == 0) && (currentMilliSeconds < 300)) soundToPlay = 1;
+                        else if (((currentSeconds % 10) == 0) && (currentMilliSeconds < 100)) soundToPlay = 1;
+                        else if (((currentSeconds % 10) != 0) && (currentMilliSeconds < 100)) soundToPlay = 2;
+                        else soundToPlay = 0;
+
+                        // Add the sound
+                        for (int i = 0; i < audio_frame.Length; i++)
+                        {
+                            if (soundToPlay == 1) audio_frame[i] = (short)(i * 30000); // random-ish garbage
+                            else if (soundToPlay == 2) audio_frame[i] = (short)(i * 65000); // random-ish garbage
+                            else audio_frame[i] = 0; // or silence CNG
+                        }
+
+                        return audio_frame;
+                    };
 
                     System.Threading.Thread captureThread = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart((o) =>
                     {
 
                         //Put some audio in the audio stream
-                        var randomAudio = new byte[320];
+                        var audio = new byte[0];
 
                     Start:
 
@@ -2337,21 +2386,21 @@ namespace Media.UnitTests
                                         //tinyStream.Packetize(bmpScreenshot);
                                         //});
 
-                                        Utility.Random.NextBytes(randomAudio);
+                                        //alawStream.Packetize(silence, 0, silence.Length);
+                                        //mulawStream.Packetize(silence, 0, silence.Length);
 
-                                        alawStream.Packetize(randomAudio, 0, randomAudio.Length);
-                                        mulawStream.Packetize(randomAudio, 0, randomAudio.Length);
+                                        audio = ALawEncoder.LinearToALaw(generateAudioFrame());
+                                        pcmaStream.Packetize(audio, 0, audio.Length);
 
-                                        //Should be put through encoder...
-                                        pcmaStream.EnqueData(randomAudio, 0);
-                                        pcmuStream.EnqueData(randomAudio, 0);
+                                        //audio = MuLawEncoder.LinearToMuLaw(generateAudioFrame());
+                                        //pcmuStream.Packetize(audio, 0, audio.Length);
 
                                         //HALT, REST
                                         if (false == System.Threading.Thread.Yield())
                                         {
                                             //System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;
 
-                                            System.Threading.Thread.Sleep(mirror.ClockRate);
+                                            //System.Threading.Thread.Sleep(mirror.ClockRate);
                                         }
                                     }
                                     catch (Exception ex)
@@ -2373,8 +2422,33 @@ namespace Media.UnitTests
                         }
                     }));
 
+                    pcmuStream.Loop = true;
+
+                    System.Threading.Thread rtpToolThread = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart((o) =>
+                    {
+                        string currentPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
+                        using var rtpDumpReader = new RtpTools.RtpDump.DumpReader(System.IO.Path.Combine(currentPath, "Media", "bark.rtp"));
+
+                        while (rtpDumpReader.HasNext)
+                        {
+                            using (RtpToolEntry entry = rtpDumpReader.ReadNext())
+                            {
+                                if (entry.IsRtcp)
+                                    continue;
+                                using (RtpPacket rtp = new RtpPacket(entry.Blob, entry.Pointer + RtpToolEntry.sizeOf_RD_packet_T))
+                                {
+                                    pcmuStream.Frames.Enqueue(new RtpFrame { rtp.Clone() });
+                                }
+                            }
+                        }
+                    }));                    
+
                     //Start the server
                     server.Start();
+
+                    //Start the other thread
+                    rtpToolThread.Start();
 
                     //Wait for the server to start.
                     while (false.Equals(server.IsRunning)) System.Threading.Thread.Sleep(0);

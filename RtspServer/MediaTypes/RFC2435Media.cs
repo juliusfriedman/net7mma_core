@@ -2291,9 +2291,8 @@ namespace Media.Rtsp.Server.MediaTypes
         #region Constructor
 
         public RFC2435Media(string name, string directory = null, bool watch = true)
-            : base(name, new Uri("file://" + System.IO.Path.GetDirectoryName(directory)))
+            : base(name, new Uri(Uri.UriSchemeFile + Uri.SchemeDelimiter + System.IO.Path.GetDirectoryName(directory)))
         {
-
             if (Quality <= 0) Quality = DefaultQuality;
 
             //If we were told to watch and given a directory and the directory exists then make a FileSystemWatcher
@@ -2357,10 +2356,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 },
 
                 //Add a MediaDescription to our Sdp on any available port for RTP/AVP Transport using the RtpJpegPayloadType            
-                new Sdp.MediaDescription(Sdp.MediaType.video,
-                0,  //Any port...
-                Rtp.RtpClient.RtpAvpProfileIdentifier,
-                RFC2435Media.RFC2435Frame.RtpJpegPayloadType),
+                new Sdp.MediaDescription(Sdp.MediaType.video, Rtp.RtpClient.RtpAvpProfileIdentifier, RFC2435Frame.RtpJpegPayloadType, 0),
 
                 //Indicate control to each media description contained
                 new Sdp.SessionDescriptionLine("a=control:*"),
@@ -2369,7 +2365,10 @@ namespace Media.Rtsp.Server.MediaTypes
                 new Sdp.SessionDescriptionLine("a=sendonly"), //recvonly?
 
                 //that this a broadcast.
-                new Sdp.SessionDescriptionLine("a=type:broadcast")
+                new Sdp.SessionDescriptionLine("a=type:broadcast"),
+
+                //Indicate you can control the video track
+                new Sdp.SessionDescriptionLine("a=control:trackID=video")
             };
 
             //Add a Interleave (We are not sending Rtcp Packets becaues the Server is doing that) We would use that if we wanted to use this ImageSteam without the server.            
@@ -2380,7 +2379,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 RFC3550.Random32(RFC2435Frame.RtpJpegPayloadType), //A randomId which was alredy generated 
                 SessionDescription.MediaDescriptions.First(), //This is the media description we just created.
                 false, //Don't enable Rtcp reports because this source doesn't communicate with any clients
-                sourceId, // This context is not in discovery
+                SourceId, // This context is not in discovery
                 0,//Should be 1 when first packet is encoded...
                 true)
             {
@@ -2393,11 +2392,6 @@ namespace Media.Rtsp.Server.MediaTypes
                 //Assign a RemoteRtp so IsActive is true
                 RemoteRtp = Common.Extensions.IPEndPoint.IPEndPointExtensions.Any
             }); //This context is always valid from the first rtp packet received
-
-            //Add the control line, could be anything... this indicates the URI which will appear in the SETUP and PLAY commands
-            SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=control:trackID=video"));
-
-            //Add the line with the clock rate in ms, obtained by TimeSpan.TicksPerMillisecond * clockRate            
 
             //Make the thread
             RtpClient.m_WorkerThread = new System.Threading.Thread(SendPackets);
@@ -2471,7 +2465,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 m_Watcher = null;
             }
 
-            m_Frames.Clear();
+            Frames.Clear();
 
             SessionDescription = null;
         }
@@ -2497,7 +2491,7 @@ namespace Media.Rtsp.Server.MediaTypes
         /// <param name="frame">The frame with packets to send</param>
         public void AddFrame(Rtp.RtpFrame frame)
         {
-            try { m_Frames.Enqueue(frame); }
+            try { Frames.Enqueue(frame); }
             catch { throw; }
         }
 
@@ -2518,14 +2512,14 @@ namespace Media.Rtsp.Server.MediaTypes
 
                     Height = image.Height;
 
-                    m_Frames.Enqueue(RFC2435Media.RFC2435Frame.Packetize(image, Quality, Interlaced, (int)sourceId));
+                    Frames.Enqueue(RFC2435Media.RFC2435Frame.Packetize(image, Quality, Interlaced, (int)SourceId));
                 }
                 else if (image.Width != Width || image.Height != Height)
                 {
                     using (var thumb = image.GetThumbnailImage(Width, Height, null, IntPtr.Zero))
                     {
                         //could give timestamp here
-                        m_Frames.Enqueue(RFC2435Media.RFC2435Frame.Packetize(thumb, Quality, Interlaced, (int)sourceId));
+                        Frames.Enqueue(RFC2435Media.RFC2435Frame.Packetize(thumb, Quality, Interlaced, (int)SourceId));
                     }
                 }
             }
@@ -2545,7 +2539,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 {
                     try
                     {
-                        if (m_Frames.Count == 0 && State == StreamState.Started)
+                        if (Frames.Count == 0 && State == StreamState.Started)
                         {
                             if (RtpClient.IsActive) RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.Lowest;
 
@@ -2559,7 +2553,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         //Dequeue a frame or die
                         Rtp.RtpFrame frame;
 
-                        if (!m_Frames.TryDequeue(out frame) || Common.IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) continue;
+                        if (!Frames.TryDequeue(out frame) || Common.IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) continue;
 
                         //Get the transportChannel for the packet
                         Rtp.RtpClient.TransportContext transportContext = RtpClient.GetContextBySourceId(frame.SynchronizationSourceIdentifier);
@@ -2597,7 +2591,7 @@ namespace Media.Rtsp.Server.MediaTypes
                             {
                                 //Copy the values before we signal the server
                                 //packet.Channel = transportContext.DataChannel;
-                                packet.SynchronizationSourceIdentifier = (int)sourceId;
+                                packet.SynchronizationSourceIdentifier = SourceId;
 
                                 packet.Timestamp = transportContext.RtpTimestamp;
 
@@ -2636,14 +2630,14 @@ namespace Media.Rtsp.Server.MediaTypes
                                 OnFrameDecoded((RFC2435Media.RFC2435Frame)frame);
                             }
 
-                            ++m_FramesPerSecondCounter;
+                            ++FramesPerSecondCounter;
 
                         }
 
                         //If we are to loop images then add it back at the end
                         if (Loop)
                         {
-                            m_Frames.Enqueue(frame);
+                            Frames.Enqueue(frame);
                         }
                         else
                         {

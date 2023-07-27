@@ -43,11 +43,19 @@
             if (sample > cClip)
                 sample = cClip;
             sample = (short)(sample + cBias);
-            int exponent = (int)MuLawCompressTable[(sample >> 7) & 0xFF];
+            int exponent = MuLawCompressTable[(sample >> 7) & 0xFF];
             int mantissa = (sample >> (exponent + 3)) & 0x0F;
             int compressedByte = ~(sign | (exponent << 4) | mantissa);
 
             return (byte)compressedByte;
+        }
+
+        public static byte[] LinearToMuLaw(short[] pcm)
+        {
+            byte[] output = new byte[pcm.Length];
+            for (int i = 0; i < pcm.Length; i++)
+                output[i] = LinearToMuLawSample(pcm[i]);
+            return output;
         }
     }
 }

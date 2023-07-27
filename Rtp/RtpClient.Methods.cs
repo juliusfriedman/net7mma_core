@@ -493,7 +493,7 @@ namespace Media.Rtp
             if (Common.IDisposedExtensions.IsNullOrDisposed(this) || packets == null) return 0;
 
             //If we don't have an transportContext to send on or the transportContext has not been identified or Rtcp is Disabled or there is no remote rtcp end point
-            if (Common.IDisposedExtensions.IsNullOrDisposed(context) | context.SynchronizationSourceIdentifier.Equals(Common.Binary.Zero) | false.Equals(context.IsRtcpEnabled) | context.RemoteRtcp == null)
+            if (Common.IDisposedExtensions.IsNullOrDisposed(context) || context.SynchronizationSourceIdentifier.Equals(Common.Binary.Zero) | false.Equals(context.IsRtcpEnabled) | context.RemoteRtcp == null)
             {
                 //Return
                 return 0;

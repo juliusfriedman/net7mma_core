@@ -14,17 +14,15 @@ public class RtpVideoSink : RtpSink
     //Should then be a TimeSpan or Frequency
     internal protected int ClockRate = 9;//kHz //90 dekahertz
 
-    protected readonly int sourceId;
+    protected ConcurrentLinkedQueueSlim<RtpFrame> Frames = new ConcurrentLinkedQueueSlim<RtpFrame>();
 
-    protected ConcurrentLinkedQueueSlim<RtpFrame> m_Frames = new ConcurrentLinkedQueueSlim<RtpFrame>();
-
-    protected int m_FramesPerSecondCounter = 0;
+    protected int FramesPerSecondCounter = 0;
 
     #endregion
 
     #region Propeties
 
-    public virtual double FramesPerSecond { get { return Math.Max(m_FramesPerSecondCounter, 1) / Math.Abs(Uptime.TotalSeconds); } }
+    public double FramesPerSecond { get { return Math.Max(FramesPerSecondCounter, 1) / Math.Abs(Uptime.TotalSeconds); } }
 
     public virtual int Width { get; protected set; } //EnsureDimensios
 
@@ -38,7 +36,24 @@ public class RtpVideoSink : RtpSink
 
     #endregion
 
-    public RtpVideoSink(string name, Uri source) : base(name, source)
+    #region Constructor
+
+    public RtpVideoSink(string name, Uri source, int width, int height, bool interlaced, int quality)
+            : base(name, source)
+    {
+        Width = width;
+
+        Height = height;
+
+        Interlaced = interlaced;
+
+        Quality = quality;
+    }
+
+    public RtpVideoSink(string name, Uri source) 
+        : base(name, source)
     {
     }
+
+    #endregion
 }

@@ -1,5 +1,7 @@
 ﻿using Media;
 using Media.Codec.Interfaces;
+using Media.Codecs.Audio.Alaw;
+using Media.Codecs.Audio.Mulaw;
 using Media.Common;
 using Media.Common.Collections.Generic;
 using Media.Common.Extensions.IPEndPoint;
@@ -9,14 +11,13 @@ using Media.Sdp;
 using Media.Sdp.Lines;
 using System;
 using System.Collections.Generic;
+using System.Net.Sockets;
 
 namespace Media.Rtsp.Server.MediaTypes;
 
 public class RtpAudioSink : RtpSink
 {
-    protected ConcurrentLinkedQueueSlim<RtpFrame> m_Frames = new ConcurrentLinkedQueueSlim<RtpFrame>();
-
-    protected readonly int sourceId;
+    internal protected readonly ConcurrentLinkedQueueSlim<RtpFrame> Frames = new ConcurrentLinkedQueueSlim<RtpFrame>();
 
     internal protected int m_FramesSentCounter = 0;
 
@@ -38,7 +39,7 @@ public class RtpAudioSink : RtpSink
     /// <summary>
     /// The coded used to encode or decode
     /// </summary>
-    public ICodec Codec { get; protected set; }
+    public ICodec Codec { get; internal protected set; }
 
     /// <summary>
     /// Creates an audio sink and assigns <see cref="PayloadType"/>, <see cref="Channels"/> and <see cref="ClockRate"/>
@@ -50,7 +51,7 @@ public class RtpAudioSink : RtpSink
     /// <param name="clockRate"></param>
     public RtpAudioSink(string name, Uri source, int payloadType, int channels, int clockRate) : base(name, source)
     {
-        sourceId = RFC3550.Random32(PayloadType ^ Channels); //Doesn't really matter what seed was used
+        //SourceId = RFC3550.Random32(PayloadType ^ Channels); //Doesn't really matter what seed was used
 
         Channels = channels;
 
@@ -72,11 +73,11 @@ public class RtpAudioSink : RtpSink
             {
                 try
                 {
-                    if (m_Frames.Count == 0 && State == StreamState.Started)
+                    if (Frames.Count == 0 && State == StreamState.Started)
                     {
                         if (RtpClient.IsActive) RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.Lowest;
 
-                        System.Threading.Thread.Sleep(ClockRate);
+                        System.Threading.Thread.Sleep(ClockRate / 1000);
 
                         continue;
                     }
@@ -86,7 +87,7 @@ public class RtpAudioSink : RtpSink
                     //Dequeue a frame or die
                     RtpFrame frame;
 
-                    if (!m_Frames.TryDequeue(out frame) || IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) continue;
+                    if (!Frames.TryDequeue(out frame) || IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) continue;
 
                     //Get the transportChannel for the packet
                     RtpClient.TransportContext transportContext = RtpClient.GetContextBySourceId(frame.SynchronizationSourceIdentifier);
@@ -99,7 +100,7 @@ public class RtpAudioSink : RtpSink
 
                         transportContext.RtpTimestamp += ClockRate;
 
-                        frame.Timestamp = (int)transportContext.RtpTimestamp;
+                        frame.Timestamp = transportContext.RtpTimestamp;
 
                         //Fire a frame changed event manually
                         if (RtpClient.FrameChangedEventsEnabled) RtpClient.OnRtpFrameChanged(frame, transportContext, true);
@@ -114,7 +115,7 @@ public class RtpAudioSink : RtpSink
                         {
                             //Copy the values before we signal the server
                             //packet.Channel = transportContext.DataChannel;
-                            packet.SynchronizationSourceIdentifier = (int)sourceId;
+                            packet.SynchronizationSourceIdentifier = SourceId;
 
                             packet.Timestamp = transportContext.RtpTimestamp;
 
@@ -154,7 +155,7 @@ public class RtpAudioSink : RtpSink
                     //If we are to loop images then add it back at the end
                     if (Loop)
                     {
-                        m_Frames.Enqueue(frame);
+                        Frames.Enqueue(frame);
                     }
                     else
                     {
@@ -163,7 +164,7 @@ public class RtpAudioSink : RtpSink
 
                     RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.BelowNormal;
 
-                    System.Threading.Thread.Sleep(ClockRate);
+                    System.Threading.Thread.Sleep(ClockRate / 1000);
                 }
                 catch (Exception ex)
                 {
@@ -204,9 +205,9 @@ public class RtpAudioSink : RtpSink
 
         //Add a MediaDescription to our Sdp on any available port for RTP/AVP Transport using the PayloadType            
         var mediaDescription = new MediaDescription(MediaType.audio,
-            0,  //Any port...
-            RtpClient.RtpAvpProfileIdentifier,
-            PayloadType);
+            RtpClient.RtpAvpProfileIdentifier,  //Any port...
+            PayloadType,
+            0);
         SessionDescription.Add(mediaDescription);
 
         //Indicate control to each media description contained
@@ -229,8 +230,8 @@ public class RtpAudioSink : RtpSink
             RFC3550.Random32(PayloadType), //A randomId which was alredy generated 
             mediaDescription, //This is the media description we just created.
             false, //Don't enable Rtcp reports because this source doesn't communicate with any clients
-            sourceId, // This context is not in discovery
-            2,
+            SourceId, // This context is not in discovery
+            0,
             true)
         {
             //Never has to send
@@ -246,6 +247,16 @@ public class RtpAudioSink : RtpSink
         //Add the control line, could be anything... this indicates the URI which will appear in the SETUP and PLAY commands
         mediaDescription.Add(new SessionDescriptionLine("a=control:trackID=audio"));
 
+        //Make the thread
+        RtpClient.m_WorkerThread = new System.Threading.Thread(SendPackets);
+        RtpClient.m_WorkerThread.TrySetApartmentState(System.Threading.ApartmentState.MTA);
+        //m_RtpClient.m_WorkerThread.IsBackground = true;
+        //m_RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.BelowNormal;
+        RtpClient.m_WorkerThread.Name = nameof(RtpAudioSink) + "-" + Id;
+        IsReady = true;
+        State = StreamState.Started;
+        RtpClient.m_WorkerThread.Start();
+
         //Finally the state is set to Started so the stream can be consumed
         base.Start();
     }
@@ -257,8 +268,70 @@ public class RtpAudioSink : RtpSink
     {
         base.Stop();
 
-        m_Frames.Clear();
+        Frames.Clear();
 
         SessionDescription = null;
+    }
+
+    /// <summary>
+    /// Todo, IEncoder and IDecoder need to expose methods for this to work without a bunch of if else statements.
+    /// </summary>
+    /// <param name="data"></param>
+    /// <param name="offset"></param>
+    /// <param name="length"></param>
+    /// <returns></returns>
+    public bool Packetize(byte[] data, int offset, int length)
+    {
+        //Get the context for the payloadType so we can increment the timestamps and sequence numbers.
+        var transportContext = RtpClient.GetContextBySourceId(SourceId);
+
+        transportContext.RtpTimestamp += ClockRate;
+
+        //Create a frame
+        RtpFrame newFrame = new RtpFrame();
+
+        //Create the packet
+        RtpPacket newPacket = new RtpPacket(length / 2 + RtpHeader.Length)
+        {
+            SynchronizationSourceIdentifier = SourceId,
+            Timestamp = transportContext.RtpTimestamp,
+            PayloadType = PayloadType,
+            Marker = true,
+        };
+
+        //Assign next sequence number
+        switch (transportContext.RecieveSequenceNumber)
+        {
+            case ushort.MaxValue:
+                newPacket.SequenceNumber = transportContext.RecieveSequenceNumber = 0;
+                break;
+            //Increment the sequence number on the transportChannel and assign the result to the packet
+            default:
+                newPacket.SequenceNumber = ++transportContext.RecieveSequenceNumber;
+                break;
+        }
+
+        //Add the packet to the frame
+        newFrame.Add(newPacket);
+
+        //Loop all samples and put the [i]nput bytes into the encoder and [o]utput byte into the Payload
+
+        if (Codec is ALawCodec)
+        {
+            for (int i = offset, o = 0; i < length; i += 2)
+            {
+                newPacket.Payload[o++] = ALawEncoder.LinearToALawSample(Common.Binary.Read16(data, i, System.BitConverter.IsLittleEndian));
+            }
+        }
+        else
+        {
+            for (int i = offset, o = 0; i < length; i += 2)
+            {
+                newPacket.Payload[o++] = MuLawEncoder.LinearToMuLawSample(Common.Binary.Read16(data, i, System.BitConverter.IsLittleEndian));
+            }
+        }
+
+        //Return the value indicating if the frame was queued.
+        return Frames.TryEnqueue(ref newFrame);
     }
 }

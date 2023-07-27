@@ -5,7 +5,6 @@
     /// </summary>
     public sealed class ALawEncoder : Media.Codec.Encoder
     {
-        private const int cBias = 0x84;
         private const int cClip = 32635;
         private static readonly byte[] ALawCompressTable = new byte[128]
         {
@@ -56,6 +55,14 @@
             }
             compressedByte ^= (byte)(sign ^ 0x55);
             return compressedByte;
+        }
+
+        public static byte[] LinearToALaw(short[] pcm)
+        {
+            byte[] output = new byte[pcm.Length];
+            for (int i = 0; i < pcm.Length; i++)
+                output[i] = LinearToALawSample(pcm[i]);
+            return output;
         }
     }
 }
