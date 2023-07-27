@@ -2342,7 +2342,7 @@ namespace Media.Rtsp.Server.MediaTypes
             if (RtpClient != null) return;
 
             //Create a RtpClient so events can be sourced from the Server to many clients without this Client knowing about all participants
-            //If this class was used to send directly to one person it would be setup with the recievers address
+            //If this class was used to send directly to one person it would be setup with the receivers address
             RtpClient = new Rtp.RtpClient();
 
             //Create the session description
@@ -2356,7 +2356,11 @@ namespace Media.Rtsp.Server.MediaTypes
                 },
 
                 //Add a MediaDescription to our Sdp on any available port for RTP/AVP Transport using the RtpJpegPayloadType            
-                new Sdp.MediaDescription(Sdp.MediaType.video, Rtp.RtpClient.RtpAvpProfileIdentifier, RFC2435Frame.RtpJpegPayloadType, 0),
+                new Sdp.MediaDescription(Sdp.MediaType.video, Rtp.RtpClient.RtpAvpProfileIdentifier, RFC2435Frame.RtpJpegPayloadType, 0)
+                {
+                    //Indicate you can control the video track
+                    new Sdp.SessionDescriptionLine("a=control:trackID=video")
+                },
 
                 //Indicate control to each media description contained
                 new Sdp.SessionDescriptionLine("a=control:*"),
@@ -2365,10 +2369,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 new Sdp.SessionDescriptionLine("a=sendonly"), //recvonly?
 
                 //that this a broadcast.
-                new Sdp.SessionDescriptionLine("a=type:broadcast"),
-
-                //Indicate you can control the video track
-                new Sdp.SessionDescriptionLine("a=control:trackID=video")
+                new Sdp.SessionDescriptionLine("a=type:broadcast")
             };
 
             //Add a Interleave (We are not sending Rtcp Packets becaues the Server is doing that) We would use that if we wanted to use this ImageSteam without the server.            
@@ -2481,8 +2482,15 @@ namespace Media.Rtsp.Server.MediaTypes
 
             if (false == SupportedImageFormats.Any(ext => path.EndsWith(ext, StringComparison.OrdinalIgnoreCase))) return;
 
-            try { Packetize(System.Drawing.Image.FromFile(path)); }
+            System.Drawing.Image temp = null;
+
+            try
+            {
+                temp = System.Drawing.Image.FromFile(path);
+                Packetize(temp);
+            }
             catch { throw; }
+            finally { if (temp != null) temp.Dispose(); }
         }
 
         /// <summary>

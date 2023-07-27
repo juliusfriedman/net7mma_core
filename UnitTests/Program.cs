@@ -2438,6 +2438,7 @@ namespace Media.UnitTests
                                     continue;
                                 using (RtpPacket rtp = new RtpPacket(entry.Blob, entry.Pointer + RtpToolEntry.sizeOf_RD_packet_T))
                                 {
+                                    rtp.SynchronizationSourceIdentifier = pcmuStream.SourceId;
                                     pcmuStream.Frames.Enqueue(new RtpFrame { rtp.Clone() });
                                 }
                             }

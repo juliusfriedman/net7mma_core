@@ -250,8 +250,8 @@ public class RtpAudioSink : RtpSink
         //Make the thread
         RtpClient.m_WorkerThread = new System.Threading.Thread(SendPackets);
         RtpClient.m_WorkerThread.TrySetApartmentState(System.Threading.ApartmentState.MTA);
-        //m_RtpClient.m_WorkerThread.IsBackground = true;
-        //m_RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.BelowNormal;
+        //RtpClient.m_WorkerThread.IsBackground = true;
+        //RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.BelowNormal;
         RtpClient.m_WorkerThread.Name = nameof(RtpAudioSink) + "-" + Id;
         IsReady = true;
         State = StreamState.Started;

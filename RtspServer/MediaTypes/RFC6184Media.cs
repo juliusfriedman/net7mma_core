@@ -39,9 +39,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Runtime.InteropServices;
 
 namespace Media.Rtsp.Server.MediaTypes
 {
@@ -49,7 +46,7 @@ namespace Media.Rtsp.Server.MediaTypes
     /// <summary>
     /// Provides an implementation of <see href="https://tools.ietf.org/html/rfc6184">RFC6184</see> which is used for H.264 Encoded video.
     /// </summary>
-    public class RFC6184Media : RFC2435Media //Todo use RtpSink not RFC2435Media
+    public class RFC6184Media : RFC2435Media //Todo use RtpVideoSink not RFC2435Media
     {
         //Some MP4 Related stuff
         //https://github.com/fyhertz/libstreaming/blob/master/src/net/majorkernelpanic/streaming/mp4/MP4Parser.java
@@ -971,7 +968,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             //Create a context
             RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1,  //data and control channel id's (can be any number and should not overlap but can...)
-                SourceId, //A randomId which was alredy generated 
+                RFC3550.Random32(96), //A randomId which was alredy generated 
                 SessionDescription.MediaDescriptions.First(), //This is the media description we just created.
                 false, //Don't enable Rtcp reports because this source doesn't communicate with any clients
                 1, // This context is not in discovery
