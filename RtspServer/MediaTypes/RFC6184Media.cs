@@ -913,15 +913,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         //profile_idc, profile_iop, level_idc
 
-        protected byte[] sps = { 0x67, 0x42, 0x00, 0x0a, 0xf8, 0x41, 0xa2 };
-
-        protected byte[] pps = { 0x68, 0xce, 0x38, 0x80 };
-
-        byte[] slice_header = { 0x05, 0x88, 0x84, 0x21, 0xa0 };
-
-        byte[] macroblock_header = { 0x0d, 0x00 };
-
-        byte[] slice_end = { 0x80 };
+        protected readonly SimpleH264Encoder encoder;
 
         #endregion
 
@@ -935,6 +927,7 @@ namespace Media.Rtsp.Server.MediaTypes
             Width += Width % 8;
             Height += Height % 8;
             ClockRate = 90;
+            encoder = new SimpleH264Encoder((uint)width, (uint)height, 60);
         }
 
         #endregion
@@ -974,7 +967,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
 
             //Prepare the profile information which is useful for receivers decoding the data, in this profile the Id, Sps and Pps are given in a base64 string.
-            SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=fmtp:96 profile-level-id=" + profile_level_id_str + ";sprop-parameter-sets=" + Convert.ToBase64String(sps, 4, sps.Length - 4) + ',' + Convert.ToBase64String(pps, 4, pps.Length - 4)));
+            SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=fmtp:96 profile-level-id=" + profile_level_id_str + ";sprop-parameter-sets=" + Convert.ToBase64String(encoder.GetRawPPS()) + ',' + Convert.ToBase64String(encoder.GetRawPPS())));
 
             //Create a context
             RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1,  //data and control channel id's (can be any number and should not overlap but can...)
@@ -1023,70 +1016,16 @@ namespace Media.Rtsp.Server.MediaTypes
 
                     ((System.Drawing.Bitmap)image).UnlockBits(data);
 
-                    data = null;
-
-                    List<IEnumerable<byte>> macroBlocks = new List<IEnumerable<byte>>();
-
-                    //For each h264 Macroblock in the frame
-                    for (int i = 0; i < Height / 16; i++)
-                        for (int j = 0; j < Width / 16; j++)
-                            macroBlocks.Add(EncodeMacroblock(i, j, yuv)); //Add an encoded macroblock to the list
-
-                    macroBlocks.Add(slice_end);//Stop bit (Wasteful by itself)
-
-                    newFrame.MaxPackets = 4096;
-
                     //Packetize the data with the slice header
-                    newFrame.Packetize(slice_header.Concat(macroBlocks.SelectMany(mb => mb)).ToArray());
+                    newFrame.Packetize(encoder.CompressFrame(yuv));
 
                     //Add the frame
                     AddFrame(newFrame);
 
                     yuv = null;
-
-                    macroBlocks.Clear();
-
-                    macroBlocks = null;
                 }
             }
             catch { throw; }
-        }
-
-        IEnumerable<byte> EncodeMacroblock(int i, int j, byte[] yuvData)
-        {
-
-            IEnumerable<byte> result = Media.Common.MemorySegment.EmptyBytes;
-
-            int frameSize = Width * Height;
-            int chromasize = frameSize / 4;
-
-            int yIndex = 0;
-            int uIndex = frameSize;
-            int vIndex = frameSize + chromasize;
-
-            //If not the first macroblock in the slice
-            if (!((i == 0) && (j == 0))) result = macroblock_header;
-            else //There are offsets to the pixel values
-            {
-                int offset = i * Height + j * Width;
-
-                if (offset > 0)
-                {
-                    yIndex += offset;
-                    uIndex += offset;
-                    vIndex += offset;
-                }
-            }
-
-            //Take the Luma Values
-            result = result.Concat(yuvData.Skip(yIndex ).Take(16 * 8));
-
-            //Take the Chroma Values
-            result = result.Concat(yuvData.Skip(uIndex ).Take(8 * 8));
-
-            result = result.Concat(yuvData.Skip(vIndex ).Take(8 * 8));
-
-            return result;
         }
 
         #endregion

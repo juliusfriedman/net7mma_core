@@ -2282,10 +2282,10 @@ namespace Media.UnitTests
                     server.TryAddMedia(mirror);
 
                     //Make a H264 Stream (Not yet working)
-                    //Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1080, "TinyStream", null, false);
-                    //server.TryAddMedia(tinyStream);
+                    Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1088, "TinyStream", null, false);
+                    server.TryAddMedia(tinyStream);
 
-                    //Make some RtpAudioSink
+                    //Make some RtpAudioSink (Not yet working)
                     Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmaStream = new Rtsp.Server.MediaTypes.RtpAudioSink("pcma", null, 8, 1, 8000);
                     Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmuStream = new Rtsp.Server.MediaTypes.RtpAudioSink("pcmu", null, 0, 1, 8000);
 
@@ -2348,7 +2348,7 @@ namespace Media.UnitTests
                     {
 
                         //Put some audio in the audio stream
-                        var audio = new byte[0];
+                        byte[] audio;
 
                     Start:
 
