@@ -39,6 +39,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 using Media;
 using Media.Codecs.Audio.Alaw;
 using Media.Codecs.Audio.Mulaw;
+using Media.Common.Interfaces;
 using Media.Rtp;
 using Media.RtpTools;
 using System;
@@ -47,6 +48,8 @@ using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Text;
 using System.Xml;
+using UnitTests.Code;
+using static Media.Rtsp.Server.MediaTypes.RFC6184Media;
 //using System.Windows.Forms;
 
 namespace Media.UnitTests
@@ -2282,7 +2285,7 @@ namespace Media.UnitTests
                     server.TryAddMedia(mirror);
 
                     //Make a H264 Stream (Not yet working 100%)
-                    Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1088, "TinyStream", null, false);
+                    Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(128, 96, "TinyStream", null, false);
                     server.TryAddMedia(tinyStream);
 
                     //Make some RtpAudioSink (Not yet working)
@@ -2303,6 +2306,30 @@ namespace Media.UnitTests
 
                     pcmaStream.Codec = new ALawCodec();
                     pcmuStream.Codec = new MulawCodec();
+
+                    TestCard testCard = new TestCard(128, 96, 60);
+
+                    testCard.ReceivedAudioFrame += (uint timestamp, short[] data) =>
+                    {
+                        if (!pcmuStream.IsReady) return;
+                        byte[] encoded = MuLawEncoder.LinearToMuLaw(data);
+                        pcmuStream.Packetize(encoded, 0, encoded.Length);
+                    };
+
+                    testCard.ReceivedYUVFrame += (uint timestamp, int width, int height, byte[] data) =>
+                    {
+                        if (!tinyStream.IsReady) return;
+                        //Create a new frame
+                        var newFrame = new RFC6184Frame(96)
+                        {
+                            SynchronizationSourceIdentifier = tinyStream.SourceId,
+                            MaxPackets = 4096,
+                        };
+
+                        newFrame.Packetize(tinyStream.encoder.CompressFrame(data));
+
+                        tinyStream.AddFrame(newFrame);
+                    };
 
                     Func<short[]> generateAudioFrame = () =>
                     {
@@ -2385,7 +2412,7 @@ namespace Media.UnitTests
                                         mirror.Packetize(bmpScreenshot);
 
                                         //Convert to H264 and put in packets
-                                        tinyStream.Packetize(bmpScreenshot);
+                                        //tinyStream.Packetize(bmpScreenshot);
 
                                         //Convert audio and put in packets
 

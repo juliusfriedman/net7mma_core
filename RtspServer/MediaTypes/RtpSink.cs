@@ -53,7 +53,7 @@ namespace Media.Rtsp.Server.MediaTypes
         /// </summary>
         public virtual bool Loop { get; set; }
 
-        public int SourceId => RtpClient.TransportContexts.FirstOrDefault()?.SynchronizationSourceIdentifier ?? 0;
+        public int SourceId => RtpClient?.TransportContexts?.FirstOrDefault()?.SynchronizationSourceIdentifier ?? 0;
 
         /// <summary>
         /// Packets...

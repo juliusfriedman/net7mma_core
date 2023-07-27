@@ -910,7 +910,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         //profile_idc, profile_iop, level_idc
 
-        protected readonly SimpleH264Encoder encoder;
+        internal protected readonly SimpleH264Encoder encoder;
 
         #endregion
 
