@@ -203,9 +203,6 @@ public class TestCard
                 }
             }
 
-
-
-
             // Toggle the pixel value
             byte pixel_value = yuv_frame[(y_position * width) + x_position];
 

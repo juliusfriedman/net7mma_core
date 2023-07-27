@@ -44,6 +44,7 @@ using Media.Common;
 using Media.Rtp;
 using Media.Rtcp;
 using Media.Rtsp.Server.MediaTypes;
+using Media.Rtsp.Server.Loggers;
 
 namespace Media.Rtsp
 {
@@ -557,7 +558,7 @@ namespace Media.Rtsp
         /// <summary>
         /// The <see cref="RtspServerLogger"/> used for logging in the server.
         /// </summary>
-        public Rtsp.Server.RtspServerLogger Logger
+        public RtspServerLogger Logger
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get;
@@ -568,7 +569,7 @@ namespace Media.Rtsp
         /// <summary>
         /// The <see cref="RtspServerLogger"/> used for logging in each ClientSession
         /// </summary>
-        public Rtsp.Server.RtspServerLogger ClientSessionLogger
+        public RtspServerLogger ClientSessionLogger
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get;

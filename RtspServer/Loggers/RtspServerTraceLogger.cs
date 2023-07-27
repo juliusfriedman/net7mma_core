@@ -35,17 +35,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Media.Rtsp.Server
+namespace Media.Rtsp.Server.Loggers
 {
-    public class RtspServerDebugLogger : RtspServerLogger
+    public class RtspServerTraceLogger : RtspServerLogger
     {
         public string Format = "{0} {1} {2} {3} {4}\r\n";
 
-        readonly Common.ILogging Logger = new Common.Loggers.DebugLogger();
+        readonly Media.Common.ILogging Logger = new Media.Common.Loggers.TraceLogger();
 
         internal override void LogRequest(RtspMessage request, ClientSession session)
         {

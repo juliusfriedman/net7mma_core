@@ -34,17 +34,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * v//
  */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Media.Rtsp.Server
+namespace Media.Rtsp.Server.Loggers
 {
     /// <summary>
     /// Provides a base class around the concept of a logger specifically designed for the RtspServer.
     /// </summary>
-    public abstract class RtspServerLogger : Common.Loggers.BaseLogger
+    public abstract class RtspServerLogger : Media.Common.Loggers.BaseLogger
     {
         internal abstract void LogRequest(RtspMessage request, ClientSession session);
 

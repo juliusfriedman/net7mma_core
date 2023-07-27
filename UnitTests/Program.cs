@@ -2144,7 +2144,7 @@ namespace Media.UnitTests
 
 
                 ///555 because 554 may be in use...
-                int serverPort = Media.Rtsp.RtspMessage.UnreliableTransportDefaultPort;
+                int serverPort = 8000 + Media.Rtsp.RtspMessage.ReliableTransportDefaultPort;
 
                 //Find the first IP based on the interface type, should select from input during test.. e.g. Wifi or Ethernet.
 
@@ -2155,8 +2155,8 @@ namespace Media.UnitTests
                 //Setup a Media.RtspServer on serverPort
                 using (Media.Rtsp.RtspServer server = new Media.Rtsp.RtspServer(serverIp, serverPort)
                 {
-                    Logger = new Media.Rtsp.Server.RtspServerConsoleLogger(),
-                    ClientSessionLogger = new Media.Rtsp.Server.RtspServerConsoleLogger()
+                    Logger = new Media.Rtsp.Server.Loggers.RtspServerConsoleLogger(),
+                    ClientSessionLogger = new Media.Rtsp.Server.Loggers.RtspServerConsoleLogger()
                 })
                 {
                     //Should be working also, allows rtsp requests to be handled over UDP port 555 by default
@@ -2285,7 +2285,10 @@ namespace Media.UnitTests
                     server.TryAddMedia(mirror);
 
                     //Make a H264 Stream (Not yet working 100%)
-                    Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(128, 96, "TinyStream", null, false);
+                    Media.Rtsp.Server.MediaTypes.RFC6184Media h264Stream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1088, "h264Stream", null, false);
+                    server.TryAddMedia(h264Stream);
+
+                    Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(192, 128, "TestCard", null, false);
                     server.TryAddMedia(tinyStream);
 
                     //Make some RtpAudioSink (Not yet working)
@@ -2307,7 +2310,11 @@ namespace Media.UnitTests
                     pcmaStream.Codec = new ALawCodec();
                     pcmuStream.Codec = new MulawCodec();
 
-                    TestCard testCard = new TestCard(128, 96, 60);
+                    TestCard testCard = new TestCard(192, 128, 25);
+
+                    //Add the track to the SessionDescription
+                    //2 tracks will be setup by the client.
+                    //tinyStream.SessionDescription.Add(pcmuStream.SessionDescription.MediaDescriptions.FirstOrDefault());
 
                     testCard.ReceivedAudioFrame += (uint timestamp, short[] data) =>
                     {
@@ -2326,7 +2333,19 @@ namespace Media.UnitTests
                             MaxPackets = 4096,
                         };
 
-                        newFrame.Packetize(tinyStream.encoder.CompressFrame(data));
+                        var sps = tinyStream.encoder.GetRawSPS();
+                        var pps = tinyStream.encoder.GetRawPPS();
+
+                        //File should be viewable in a YUV viewer...
+                        System.IO.File.WriteAllBytes("test.yuv", data);
+
+                        var compressedData = tinyStream.encoder.CompressFrame(data);
+
+                        newFrame.Packetize(sps);
+
+                        newFrame.Packetize(pps);
+
+                        newFrame.Packetize(compressedData);
 
                         tinyStream.AddFrame(newFrame);
                     };
@@ -2412,7 +2431,7 @@ namespace Media.UnitTests
                                         mirror.Packetize(bmpScreenshot);
 
                                         //Convert to H264 and put in packets
-                                        //tinyStream.Packetize(bmpScreenshot);
+                                        h264Stream.Packetize(bmpScreenshot);
 
                                         //Convert audio and put in packets
 

@@ -35,11 +35,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
-namespace Media.Rtsp.Server
+namespace Media.Rtsp.Server.Loggers
 {
     public class RtspServerConsoleLogger : RtspServerLogger
     {
@@ -48,7 +45,7 @@ namespace Media.Rtsp.Server
         public ConsoleColor RequestColor = ConsoleColor.Cyan, ResponseColor = ConsoleColor.DarkCyan, ExceptionColor = ConsoleColor.Red, NormalColor = ConsoleColor.Green;
 
         //This could be a DebuggingLogger or something else...
-        readonly Common.ILogging Logger = new Common.Loggers.ConsoleLogger();
+        readonly Media.Common.ILogging Logger = new Media.Common.Loggers.ConsoleLogger();
 
         internal override void LogRequest(RtspMessage request, ClientSession session)
         {
@@ -84,7 +81,7 @@ namespace Media.Rtsp.Server
             }
             catch { throw; }
             finally { Console.ForegroundColor = previous; }
-                
+
         }
 
         public override void Log(string data)
@@ -93,7 +90,7 @@ namespace Media.Rtsp.Server
             try
             {
                 Console.ForegroundColor = NormalColor;
-                System.Console.WriteLine(data);
+                Console.WriteLine(data);
             }
             catch { throw; }
             finally { Console.ForegroundColor = previous; }

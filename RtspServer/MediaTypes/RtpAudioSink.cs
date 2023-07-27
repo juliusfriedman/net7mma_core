@@ -295,13 +295,14 @@ public class RtpAudioSink : RtpSink
         //Create the packet
         RtpPacket newPacket = new RtpPacket(length + RtpHeader.Length)
         {
+            Version = transportContext.Version,
             SynchronizationSourceIdentifier = SourceId,
             Timestamp = transportContext.RtpTimestamp,
             PayloadType = PayloadType,
             Marker = true,
         };
 
-        data.CopyTo(newPacket.Payload.Array, offset);
+        Array.Copy(data, offset, newPacket.Payload.Array, newPacket.Payload.Offset, length);
 
         //Assign next sequence number
         switch (transportContext.RecieveSequenceNumber)
@@ -314,6 +315,8 @@ public class RtpAudioSink : RtpSink
                 newPacket.SequenceNumber = ++transportContext.RecieveSequenceNumber;
                 break;
         }
+
+        newFrame.Add(newPacket);
 
         //Return the value indicating if the frame was queued.
         return Frames.TryEnqueue(ref newFrame);

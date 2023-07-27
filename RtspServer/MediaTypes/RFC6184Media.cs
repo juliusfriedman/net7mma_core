@@ -942,12 +942,13 @@ namespace Media.Rtsp.Server.MediaTypes
             RtpClient.TransportContexts.Clear();
 
             //Add a MediaDescription to our Sdp on any available port for RTP/AVP Transport using the given payload type            
-            SessionDescription.Add(new Sdp.MediaDescription(Sdp.MediaType.video, Rtp.RtpClient.RtpAvpProfileIdentifier, 96, 0)); //This is the payload description, it is defined in the profile
+            var mediaDescription = new Sdp.MediaDescription(Sdp.MediaType.video, Rtp.RtpClient.RtpAvpProfileIdentifier, 96, 0);
+            SessionDescription.Add(mediaDescription); //This is the payload description, it is defined in the profile
 
             //Add the control line and media attributes to the Media Description
-            SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=control:trackID=video")); //<- this is the id for this track which playback control is required, if there is more than 1 video track this should be unique to it
+            mediaDescription.Add(new Sdp.SessionDescriptionLine("a=control:trackID=video")); //<- this is the id for this track which playback control is required, if there is more than 1 video track this should be unique to it
 
-            SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=rtpmap:96 H264/90000")); //<- 96 must match the Payload description given above
+            mediaDescription.Add(new Sdp.SessionDescriptionLine("a=rtpmap:96 H264/90000")); //<- 96 must match the Payload description given above
 
             // Make the profile-level-id
             // Eg a string of profile-level-id=42A01E is
@@ -971,7 +972,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 RFC3550.Random32(96), //A randomId which was alredy generated 
                 SessionDescription.MediaDescriptions.First(), //This is the media description we just created.
                 false, //Don't enable Rtcp reports because this source doesn't communicate with any clients
-                1, // This context is not in discovery
+                SourceId, // This context is not in discovery
                 0)); //This context is always valid from the first rtp packet received
         }
 
@@ -1016,6 +1017,8 @@ namespace Media.Rtsp.Server.MediaTypes
                     byte[] yuv = Media.Codecs.Image.ColorConversions.ABGRA2YUV420Managed(thumb.Width, thumb.Height, data.Scan0);
 
                     ((System.Drawing.Bitmap)image).UnlockBits(data);
+
+                    //SPS and PPS should be included here
 
                     //Packetize the data with the slice header
                     newFrame.Packetize(encoder.CompressFrame(yuv));
