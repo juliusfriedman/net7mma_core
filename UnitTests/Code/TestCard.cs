@@ -36,7 +36,7 @@ public class TestCard
     private long frame_count = 0;
 
     private System.Timers.Timer audio_timer;
-    private int audio_duration_ms = 20; // duration of sound samples for mono PCM audio. Hinted at in origial RTP standard from 1996 that mentions 160 audio samples
+    const int audio_duration_ms = 20; // duration of sound samples for mono PCM audio. Hinted at in origial RTP standard from 1996 that mentions 160 audio samples
     private long audio_count = 0;
 
     // ASCII Font
@@ -233,6 +233,9 @@ public class TestCard
         }
     }
 
+    // 8 KHz audio / 20ms samples
+    const int frame_size = (8000 * audio_duration_ms) / 1000;  // = 8000 / (1000/audio_duration_ms)
+    short[] audio_frame = new short[frame_size]; // This is an array of 16 bit values
 
     private void Send_Audio_Frame()
     {
@@ -243,11 +246,6 @@ public class TestCard
             DateTime now_local = now_utc.ToLocalTime();
 
             long timestamp_ms = ((long)(now_utc.Ticks / TimeSpan.TicksPerMillisecond));
-
-            // 8 KHz audio / 20ms samples
-            int frame_size = (8000 * audio_duration_ms) / 1000;  // = 8000 / (1000/audio_duration_ms)
-
-            short[] audio_frame = new short[frame_size]; // This is an array of 16 bit values
 
             // Add beep sounds.
             // We add a 0.1 second beep every second
