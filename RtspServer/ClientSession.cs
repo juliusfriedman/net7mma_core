@@ -402,7 +402,7 @@ namespace Media.Rtsp//.Server
                 }
                 LastRecieve.RemoteEndPoint = RemoteEndPoint;
                 if (!m_RtspSocket.ReceiveAsync(LastRecieve))
-                    m_Server.ProcessReceive(m_Server, LastRecieve);
+                    ThreadPool.QueueUserWorkItem((o) => m_Server.ProcessReceive(m_Server, LastRecieve));
             }
 
         NotDisconnected:
@@ -449,7 +449,7 @@ namespace Media.Rtsp//.Server
                 LastSend.SocketFlags = flags;
                 LastSend.SetBuffer(m_SendBuffer, offset, length);
                 if (!m_RtspSocket.SendAsync(LastSend))
-                    m_Server.ProcessSendComplete(m_Server, LastSend);
+                    ThreadPool.QueueUserWorkItem((o) => m_Server.ProcessSendComplete(m_Server, LastSend)); 
             }
             catch (Exception ex)
             {

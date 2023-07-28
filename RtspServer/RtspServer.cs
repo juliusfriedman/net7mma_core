@@ -1673,7 +1673,7 @@ namespace Media.Rtsp
                             eventArgs.AcceptSocket = null;
                             //Start a thread acceping with a 0 size buffer
                             if (!m_TcpServerSocket.AcceptAsync(eventArgs))
-                                ProcessAccept(m_TcpServerSocket, eventArgs);
+                                ThreadPool.QueueUserWorkItem((o) => ProcessAccept(m_TcpServerSocket, eventArgs));
 
                             //Sample the clock
                             lastAcceptStarted = DateTime.UtcNow;
@@ -1769,15 +1769,15 @@ namespace Media.Rtsp
         {
             try
             {
-                //Signal to start another thread to accept another client
-                m_AcceptSignal.Set();
-
                 int interframeGap = 0;
                 
                 bool reconfigure = false;
 
                 //The Socket needed to create a ClientSession
-                Socket clientSocket = null;
+                Socket clientSocket = e.AcceptSocket;
+
+                //Signal to start another thread to accept another client
+                m_AcceptSignal.Set();
 
                 //See if there is a socket in the state object
                 Socket server = (Socket)sender;
@@ -1812,17 +1812,15 @@ namespace Media.Rtsp
                     if (m_UdpServerSocket.Handle == server.Handle)
                     {
                         if (!m_UdpServerSocket.ReceiveAsync(e))
-                            ProcessAccept(m_UdpServerSocket, e);
+                            ThreadPool.QueueUserWorkItem((o) => ProcessAccept(m_UdpServerSocket, e));
                     }
                 }
                 else if (server.ProtocolType == ProtocolType.Tcp) //Tcp
                 {
                     //The clientSocket is obtained from the EndAccept call, possibly bytes ready from the accept
                     //They are not discarded just not receieved until the first receive.
-                    if (server.IsBound && IsRunning)
+                    if (server.IsBound && IsRunning && clientSocket != null)
                     {
-                        clientSocket = e.AcceptSocket;
-
                         //Configuring the server?
                         //ConfigureRtspServerSocket(server, out interframeGap, ref reconfigure, clientSocket);
 
@@ -1876,14 +1874,17 @@ namespace Media.Rtsp
                     return;
                 }
 
-                //Allocate a session, copy 12 bytes + into the stack
-                ClientSession session = new ClientSession(this, clientSocket, null, true, interframeGap, true);
+                ThreadPool.QueueUserWorkItem((o) =>
+                {
+                    //Allocate a session, copy 12 bytes + into the stack
+                    ClientSession session = new ClientSession(this, clientSocket, null, true, interframeGap, true);
 
-                //Try to add it now
-                bool added = TryAddSession(session);
+                    //Try to add it now
+                    bool added = TryAddSession(session);
 
-                //If there is a logger log the accept
-                Common.ILoggingExtensions.Log(Logger, "Accepted Client: " + session.Id + " @ " + session.RemoteEndPoint + System.Environment.NewLine + session.Created + " Added =" + added);
+                    //If there is a logger log the accept
+                    Common.ILoggingExtensions.Log(Logger, "Accepted Client: " + session.Id + " @ " + session.RemoteEndPoint + System.Environment.NewLine + session.Created + " Added =" + added);
+                });
 
                 #region Unused Signal
 
