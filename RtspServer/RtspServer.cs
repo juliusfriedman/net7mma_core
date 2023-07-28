@@ -1671,7 +1671,7 @@ namespace Media.Rtsp
                         if (lastAccept == null)
                         {
                             eventArgs.AcceptSocket = null;
-                            //Start a thread acceping with a 0 size buffer
+                            //Start a thread accepting [with a 0 size buffer] or use the thread pool to process the accept.
                             if (!m_TcpServerSocket.AcceptAsync(eventArgs))
                                 ThreadPool.QueueUserWorkItem((o) => ProcessAccept(m_TcpServerSocket, eventArgs));
 
