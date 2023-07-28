@@ -46,7 +46,7 @@ public class SimpleH264Encoder
         /*! Pointer to output file */
         //private FILE m_pOutFile;
         //Byte Array used for output
-        private List<byte> m_pOutFile;
+        readonly private List<byte> m_pOutFile;
 
         //! Clears the buffer
         private void clearbuffer()

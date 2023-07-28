@@ -32,7 +32,7 @@ public class TestCard
     private int fps = 0;
     private int width = 0;
     private int height = 0;
-    private Object generate_lock = new Object();
+    //private Object generate_lock = new Object();
     private long frame_count = 0;
 
     private System.Timers.Timer audio_timer;
@@ -135,7 +135,7 @@ public class TestCard
 
     private void Send_YUV_Frame()
     {
-        lock (generate_lock)
+        //lock (generate_lock)
         {
             // Get the current time
             DateTime now_utc = DateTime.UtcNow;
