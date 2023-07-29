@@ -8,53 +8,114 @@
     public sealed class MuLawDecoder : Media.Codec.Decoder
     {
         /// <summary>
-        /// only 512 bytes required, so just use a lookup
+        /// An array where the index is the mu-law input, and the value is
+        /// the 16-bit PCM result.
         /// </summary>
-        private static readonly short[] MuLawDecompressTable = new short[256]
-        {
-             -32124,-31100,-30076,-29052,-28028,-27004,-25980,-24956,
-             -23932,-22908,-21884,-20860,-19836,-18812,-17788,-16764,
-             -15996,-15484,-14972,-14460,-13948,-13436,-12924,-12412,
-             -11900,-11388,-10876,-10364, -9852, -9340, -8828, -8316,
-              -7932, -7676, -7420, -7164, -6908, -6652, -6396, -6140,
-              -5884, -5628, -5372, -5116, -4860, -4604, -4348, -4092,
-              -3900, -3772, -3644, -3516, -3388, -3260, -3132, -3004,
-              -2876, -2748, -2620, -2492, -2364, -2236, -2108, -1980,
-              -1884, -1820, -1756, -1692, -1628, -1564, -1500, -1436,
-              -1372, -1308, -1244, -1180, -1116, -1052,  -988,  -924,
-               -876,  -844,  -812,  -780,  -748,  -716,  -684,  -652,
-               -620,  -588,  -556,  -524,  -492,  -460,  -428,  -396,
-               -372,  -356,  -340,  -324,  -308,  -292,  -276,  -260,
-               -244,  -228,  -212,  -196,  -180,  -164,  -148,  -132,
-               -120,  -112,  -104,   -96,   -88,   -80,   -72,   -64,
-                -56,   -48,   -40,   -32,   -24,   -16,    -8,     -1,
-              32124, 31100, 30076, 29052, 28028, 27004, 25980, 24956,
-              23932, 22908, 21884, 20860, 19836, 18812, 17788, 16764,
-              15996, 15484, 14972, 14460, 13948, 13436, 12924, 12412,
-              11900, 11388, 10876, 10364,  9852,  9340,  8828,  8316,
-               7932,  7676,  7420,  7164,  6908,  6652,  6396,  6140,
-               5884,  5628,  5372,  5116,  4860,  4604,  4348,  4092,
-               3900,  3772,  3644,  3516,  3388,  3260,  3132,  3004,
-               2876,  2748,  2620,  2492,  2364,  2236,  2108,  1980,
-               1884,  1820,  1756,  1692,  1628,  1564,  1500,  1436,
-               1372,  1308,  1244,  1180,  1116,  1052,   988,   924,
-                876,   844,   812,   780,   748,   716,   684,   652,
-                620,   588,   556,   524,   492,   460,   428,   396,
-                372,   356,   340,   324,   308,   292,   276,   260,
-                244,   228,   212,   196,   180,   164,   148,   132,
-                120,   112,   104,    96,    88,    80,    72,    64,
-                 56,    48,    40,    32,    24,    16,     8,     0
-        };
+        private static short[] muLawToPcmMap;
 
-        /// <summary>
-        /// Converts a mu-law encoded byte to a 16 bit linear sample
-        /// </summary>
-        /// <param name="muLaw">mu-law encoded byte</param>
-        /// <returns>Linear sample</returns>
-        public static short MuLawToLinearSample(byte muLaw)
+        static MuLawDecoder()
         {
-            return MuLawDecompressTable[muLaw];
+            muLawToPcmMap = new short[256];
+            for (byte i = 0; i < byte.MaxValue; i++)
+                muLawToPcmMap[i] = decode(i);
         }
 
+        /// <summary>
+        /// Decode one mu-law byte. For internal use only.
+        /// </summary>
+        /// <param name="mulaw">The encoded mu-law byte</param>
+        /// <returns>A short containing the 16-bit result</returns>
+        private static short decode(byte mulaw)
+        {
+            //Flip all the bits
+            mulaw = (byte)~mulaw;
+
+            //Pull out the value of the sign bit
+            int sign = mulaw & 0x80;
+            //Pull out and shift over the value of the exponent
+            int exponent = (mulaw & 0x70) >> 4;
+            //Pull out the four bits of data
+            int data = mulaw & 0x0f;
+
+            //Add on the implicit fifth bit (we know the four data bits followed a one bit)
+            data |= 0x10;
+            /* Add a 1 to the end of the data by shifting over and adding one.  Why?
+             * Mu-law is not a one-to-one function.  There is a range of values that all
+             * map to the same mu-law byte.  Adding a one to the end essentially adds a
+             * "half byte", which means that the decoding will return the value in the
+             * middle of that range.  Otherwise, the mu-law decoding would always be
+             * less than the original data. */
+            data <<= 1;
+            data += 1;
+            /* Shift the five bits to where they need to be: left (exponent + 2) places
+             * Why (exponent + 2) ?
+             * 1 2 3 4 5 6 7 8 9 A B C D E F G
+             * . 7 6 5 4 3 2 1 0 . . . . . . . <-- starting bit (based on exponent)
+             * . . . . . . . . . . 1 x x x x 1 <-- our data
+             * We need to move the one under the value of the exponent,
+             * which means it must move (exponent + 2) times
+             */
+            data <<= exponent + 2;
+            //Remember, we added to the original, so we need to subtract from the final
+            data -= MuLawEncoder.BIAS;
+            //If the sign bit is 0, the number is positive. Otherwise, negative.
+            return (short)(sign == 0 ? data : -data);
+        }
+
+        /// <summary>
+        /// Decode one mu-law byte
+        /// </summary>
+        /// <param name="mulaw">The encoded mu-law byte</param>
+        /// <returns>A short containing the 16-bit result</returns>
+        public static short MuLawDecode(byte mulaw)
+        {
+            return muLawToPcmMap[mulaw];
+        }
+
+        /// <summary>
+        /// Decode an array of mu-law encoded bytes
+        /// </summary>
+        /// <param name="data">An array of mu-law encoded bytes</param>
+        /// <returns>An array of shorts containing the results</returns>
+        public static short[] MuLawDecode(byte[] data)
+        {
+            int size = data.Length;
+            short[] decoded = new short[size];
+            for (int i = 0; i < size; i++)
+                decoded[i] = muLawToPcmMap[data[i]];
+            return decoded;
+        }
+
+        /// <summary>
+        /// Decode an array of mu-law encoded bytes
+        /// </summary>
+        /// <param name="data">An array of mu-law encoded bytes</param>
+        /// <param name="decoded">An array of shorts containing the results</param>
+        /// <remarks>Same as the other method that returns an array of shorts</remarks>
+        public static void MuLawDecode(byte[] data, out short[] decoded)
+        {
+            int size = data.Length;
+            decoded = new short[size];
+            for (int i = 0; i < size; i++)
+                decoded[i] = muLawToPcmMap[data[i]];
+        }
+
+        /// <summary>
+        /// Decode an array of mu-law encoded bytes
+        /// </summary>
+        /// <param name="data">An array of mu-law encoded bytes</param>
+        /// <param name="decoded">An array of bytes in Little-Endian format containing the results</param>
+        public static void MuLawDecode(byte[] data, out byte[] decoded)
+        {
+            int size = data.Length;
+            decoded = new byte[size * 2];
+            for (int i = 0; i < size; i++)
+            {
+                //First byte is the less significant byte
+                decoded[2 * i] = (byte)(muLawToPcmMap[data[i]] & 0xff);
+                //Second byte is the more significant byte
+                decoded[2 * i + 1] = (byte)(muLawToPcmMap[data[i]] >> 8);
+            }
+        }
     }
 }

@@ -51,13 +51,11 @@ public class RtpAudioSink : RtpSink
     /// <param name="clockRate"></param>
     public RtpAudioSink(string name, Uri source, int payloadType, int channels, int clockRate) : base(name, source)
     {
-        //SourceId = RFC3550.Random32(PayloadType ^ Channels); //Doesn't really matter what seed was used
-
         Channels = channels;
 
         PayloadType = payloadType;
 
-        ClockRate = clockRate;
+        ClockRate = clockRate / 1000;
     }
 
     /// <summary>
@@ -65,8 +63,6 @@ public class RtpAudioSink : RtpSink
     /// </summary>
     internal override void SendPackets()
     {
-        RtpClient.FrameChangedEventsEnabled = false;
-
         unchecked
         {
             while (State == StreamState.Started)
@@ -77,12 +73,10 @@ public class RtpAudioSink : RtpSink
                     {
                         if (RtpClient.IsActive) RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.Lowest;
 
-                        System.Threading.Thread.Sleep(ClockRate / 1000);
+                        System.Threading.Thread.Sleep(ClockRate / 4);
 
                         continue;
                     }
-
-                    //int period = (clockRate * 1000 / m_Frames.Count);
 
                     //Dequeue a frame or die
                     RtpFrame frame;
@@ -98,12 +92,14 @@ public class RtpAudioSink : RtpSink
                         //Increase priority
                         RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.AboveNormal;
 
-                        transportContext.RtpTimestamp += ClockRate;
-
-                        frame.Timestamp = transportContext.RtpTimestamp;
+                        transportContext.RtpTimestamp += ClockRate * 1000;
 
                         //Fire a frame changed event manually
-                        if (RtpClient.FrameChangedEventsEnabled) RtpClient.OnRtpFrameChanged(frame, transportContext, true);
+                        if (RtpClient.FrameChangedEventsEnabled)
+                        {
+                            RtpClient.OnRtpFrameChanged(frame, transportContext, true);
+                            frame.Timestamp = transportContext.RtpTimestamp;
+                        }
 
                         //Take all the packet from the frame                            
                         IEnumerable<RtpPacket> packets = frame;
@@ -164,7 +160,7 @@ public class RtpAudioSink : RtpSink
 
                     RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.BelowNormal;
 
-                    System.Threading.Thread.Sleep(ClockRate / 1000);
+                    System.Threading.Thread.Sleep(ClockRate / 4);
                 }
                 catch (Exception ex)
                 {

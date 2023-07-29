@@ -2284,17 +2284,21 @@ namespace Media.UnitTests
                     Media.Rtsp.Server.MediaTypes.RFC2435Media mirror = new Media.Rtsp.Server.MediaTypes.RFC2435Media("Mirror", null, false, 1920, 1088, true, 25);
                     server.TryAddMedia(mirror);
 
-                    //Make a H264 Stream (Not yet working 100%)
-                    //Media.Rtsp.Server.MediaTypes.RFC6184Media h264Stream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1088, "h264Stream", null, false);
-                    //server.TryAddMedia(h264Stream);
+                    //Make a H264 Stream (Working but transform of data need improvement)
+                    Media.Rtsp.Server.MediaTypes.RFC6184Media h264Stream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1088, "h264Stream", null, false);
+                    server.TryAddMedia(h264Stream);
 
-                    //Make a H264 Stream (Working)
+                    //Make a H264 Stream (Working 100%)
                     Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(320, 240, "TestCard", null, false);
                     server.TryAddMedia(tinyStream);
 
-                    //Make some RtpAudioSink (Not yet working)
+                    //Make some RtpAudioSink (Working but experiences some discontinuity)
                     Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmaStream = new Rtsp.Server.MediaTypes.RtpAudioSink("pcma", null, 8, 1, 8000);
+                    pcmaStream.Codec = new ALawCodec();
+                    
                     Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmuStream = new Rtsp.Server.MediaTypes.RtpAudioSink("pcmu", null, 0, 1, 8000);
+                    pcmuStream.Codec = new MulawCodec();
+                    
                     Media.Rtsp.Server.MediaTypes.RtpAudioSink rtpDumpAudioStream = new Rtsp.Server.MediaTypes.RtpAudioSink("rtpDump", null, 0, 1, 8000);
 
                     server.TryAddMedia(pcmaStream);
@@ -2308,9 +2312,7 @@ namespace Media.UnitTests
                     //server.TryAddMedia(alawStream);
                     //server.TryAddMedia(mulawStream);
 
-                    pcmaStream.Codec = new ALawCodec();
-                    pcmuStream.Codec = new MulawCodec();
-
+                    //Width, Height, FPS
                     TestCard testCard = new TestCard(320, 240, 25);
 
                     //Add the track to the SessionDescription
@@ -2321,8 +2323,13 @@ namespace Media.UnitTests
                     testCard.ReceivedAudioFrame += (uint timestamp, short[] data) =>
                     {
                         if (!pcmuStream.IsReady) return;
-                        byte[] encoded = MuLawEncoder.LinearToMuLaw(data);
+                        //Convert audio and put in packets
+
+                        byte[] encoded = MuLawEncoder.MuLawEncode(data);
                         pcmuStream.Packetize(encoded, 0, encoded.Length);
+
+                        encoded = ALawEncoder.LinearToALaw(data);
+                        pcmaStream.Packetize(encoded, 0, encoded.Length);
                     };
 
                     //Convert YUV Data to RTP packets
@@ -2348,48 +2355,6 @@ namespace Media.UnitTests
                         newFrame.Packetize(compressedData);
 
                         tinyStream.AddFrame(newFrame);
-                    };
-
-                    Func<short[]> generateAudioFrame = () =>
-                    {
-                        // Get the current time
-                        DateTime now_utc = DateTime.UtcNow;
-                        DateTime now_local = now_utc.ToLocalTime();
-
-                        long timestamp_ms = ((long)(now_utc.Ticks / TimeSpan.TicksPerMillisecond));
-
-                        // 8 KHz audio / 20ms samples
-                        int frame_size = (8000 * 20) / 1000;  // = 8000 / (1000/audio_duration_ms)
-
-                        short[] audio_frame = new short[frame_size]; // This is an array of 16 bit values
-
-                        // Add beep sounds.
-                        // We add a 0.1 second beep every second
-                        // Every 10 seconds we use a different sound.
-                        // At the start of each new minute we add a 0.3 second beep
-
-                        // Sound 1, 0.3 seconds at 12:00:00, 12:01:00, 12:02:00
-                        // Sound 1, 0.1 seconds at 12:00:10, 12:00:20, 12:00:30 ... 12:00:50
-                        // Sound 2, 0.1 seconds at 12:00:01, 12:00:02, 12:00:03 ... 12:00:09, then 12:00:11, 12:00:12
-
-                        long currentSeconds = (timestamp_ms / 1000);
-                        long currentMilliSeconds = timestamp_ms % 1000;
-
-                        int soundToPlay = 0; // 0 = silence
-                        if (((currentSeconds % 60) == 0) && (currentMilliSeconds < 300)) soundToPlay = 1;
-                        else if (((currentSeconds % 10) == 0) && (currentMilliSeconds < 100)) soundToPlay = 1;
-                        else if (((currentSeconds % 10) != 0) && (currentMilliSeconds < 100)) soundToPlay = 2;
-                        else soundToPlay = 0;
-
-                        // Add the sound
-                        for (int i = 0; i < audio_frame.Length; i++)
-                        {
-                            if (soundToPlay == 1) audio_frame[i] = (short)(i * 30000); // random-ish garbage
-                            else if (soundToPlay == 2) audio_frame[i] = (short)(i * 65000); // random-ish garbage
-                            else audio_frame[i] = 0; // or silence CNG
-                        }
-
-                        return audio_frame;
                     };
 
                     System.Threading.Thread captureThread = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart((o) =>
@@ -2431,17 +2396,7 @@ namespace Media.UnitTests
                                         mirror.Packetize(bmpScreenshot);
 
                                         //Convert to H264 and put in packets
-                                        //h264Stream.Packetize(bmpScreenshot);
-
-                                        //Convert audio and put in packets
-
-                                        var samples = generateAudioFrame();
-
-                                        audio = ALawEncoder.LinearToALaw(samples);
-                                        pcmaStream.Packetize(audio, 0, audio.Length);
-
-                                        audio = MuLawEncoder.LinearToMuLaw(samples);
-                                        pcmuStream.Packetize(audio, 0, audio.Length);
+                                        h264Stream.Packetize(bmpScreenshot);                                        
 
                                         //HALT, REST
                                         if (false == System.Threading.Thread.Yield())
@@ -2488,7 +2443,7 @@ namespace Media.UnitTests
                                 {
                                     //Streams lookup the packet by the ssrc, this could be changed to use the payload type etc
                                     rtp.SynchronizationSourceIdentifier = rtpDumpAudioStream.SourceId;
-                                    rtpDumpAudioStream.Frames.Enqueue(new RtpFrame { rtp.Clone() });
+                                    rtpDumpAudioStream.Frames.Enqueue(new RtpFrame { rtp });
                                 }
                             }
                         }

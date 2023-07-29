@@ -923,7 +923,7 @@ namespace Media.Rtsp.Server.MediaTypes
             Height = height;
             Width += Width % 8;
             Height += Height % 8;
-            ClockRate = 90;
+            ClockRate = 9;
             encoder = new SimpleH264Encoder((uint)width, (uint)height, 60);
         }
 
@@ -1014,7 +1014,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                     //Todo use Media.Image.Transformations                   
 
-                    byte[] yuv = Media.Codecs.Image.ColorConversions.ABGRA2YUV420Managed(thumb.Width, thumb.Height, data.Scan0);
+                    byte[] yuv = Media.Codecs.Image.ColorConversions.ARGBA2YUV420Managed(thumb.Width, thumb.Height, data.Scan0);
 
                     ((System.Drawing.Bitmap)image).UnlockBits(data);
 

@@ -2148,7 +2148,7 @@ namespace Media.Rtsp
             {
                 if (object.ReferenceEquals(sender, null)) return;
 
-                if (e.SocketError != SocketError.Success) throw new SocketException((int)e.SocketError);
+                if (e.SocketError != SocketError.Success) return;
 
                 ClientSession session = (ClientSession)e.UserToken;
 

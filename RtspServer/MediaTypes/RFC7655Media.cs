@@ -116,7 +116,7 @@ public class RFC7655Media : RtpAudioSink
         {
             for (int i = offset, o = 0; i < length; i += 2)
             {
-                newPacket.Payload[o++] = MuLawEncoder.LinearToMuLawSample(Common.Binary.Read16(data, i, System.BitConverter.IsLittleEndian));
+                newPacket.Payload[o++] = MuLawEncoder.MuLawEncode(Common.Binary.Read16(data, i, System.BitConverter.IsLittleEndian));
             }
         }
 
