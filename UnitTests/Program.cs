@@ -2727,6 +2727,10 @@ namespace Media.UnitTests
 
                                         //Todo need to get the packets from one source to another
                                         pcmuStream.RtpClient.RtpPacketReceieved += (s, p, tc) => tinyStream.RtpClient.OnRtpPacketReceieved(p, tc);
+
+                                        Console.WriteLine("TestCard has Audio...");
+
+                                        //Could all more streams here e.g. pmcaStream etc would display as multiple tracks in the player
                                     }
                                     else
                                     {

@@ -236,7 +236,7 @@ public class RtpAudioSink : RtpSink
             RFC3550.Random32(PayloadType), //A randomId which was alredy generated 
             mediaDescription, //This is the media description we just created.
             false, //Don't enable Rtcp reports because this source doesn't communicate with any clients
-            SourceId, // This context is not in discovery
+            RFC3550.Random32(PayloadType), // This context is not in discovery
             0,
             true)
         {

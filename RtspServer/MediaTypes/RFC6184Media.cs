@@ -972,7 +972,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 RFC3550.Random32(96), //A randomId which was alredy generated 
                 SessionDescription.MediaDescriptions.First(), //This is the media description we just created.
                 false, //Don't enable Rtcp reports because this source doesn't communicate with any clients
-                SourceId, // This context is not in discovery
+                RFC3550.Random32(96), // This context is not in discovery
                 0)); //This context is always valid from the first rtp packet received
         }
 
