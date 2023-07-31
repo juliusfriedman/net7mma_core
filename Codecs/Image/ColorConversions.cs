@@ -308,7 +308,7 @@ namespace Media.Codecs.Image
             }
         }
 
-        public static unsafe byte[] ARGBA2YUV420Managed(int width, int height, System.IntPtr scan0)
+        public static unsafe byte[] ARGB2YUV420Managed(int width, int height, System.IntPtr scan0)
         {
             //Parrallel
             try
@@ -331,10 +331,10 @@ namespace Media.Codecs.Image
                     {
                         for (int i = 0; i < width; i++)
                         {
-                            uint R = (rgbValues[index] & 0xff000000) >> 24;
-                            uint G = (rgbValues[index] & 0xff0000) >> 16;
-                            uint B = (rgbValues[index] & 0xff00) >> 8;
-                            //uint a = (rgbValues[index] & 0xff) >> 0;
+                            //uint A = (rgbValues[index] & 0xff000000) >> 24;
+                            uint R = (rgbValues[index] & 0xff0000) >> 16;
+                            uint G = (rgbValues[index] & 0xff00) >> 8;
+                            uint B = (rgbValues[index] & 0xff) >> 0;
 
                             //int yuvC = Utility.RgbYuv.GetYuv(Common.Binary.ReverseU32(rgbValues[index]));
 

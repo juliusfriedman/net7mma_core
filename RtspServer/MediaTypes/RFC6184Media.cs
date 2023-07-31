@@ -1014,7 +1014,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                     //Todo use Media.Image.Transformations                   
 
-                    byte[] yuv = Media.Codecs.Image.ColorConversions.ARGBA2YUV420Managed(thumb.Width, thumb.Height, data.Scan0);
+                    byte[] yuv = Media.Codecs.Image.ColorConversions.ARGB2YUV420Managed(thumb.Width, thumb.Height, data.Scan0);
 
                     ((System.Drawing.Bitmap)image).UnlockBits(data);
 

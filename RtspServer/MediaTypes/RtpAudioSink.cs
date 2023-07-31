@@ -55,7 +55,8 @@ public class RtpAudioSink : RtpSink
 
         PayloadType = payloadType;
 
-        ClockRate = clockRate / 1000;
+        //Todo a TimeSpan would probably be more useful
+        ClockRate = (int)(clockRate / TimeSpanExtensions.MicrosecondsPerMillisecond);
     }
 
     /// <summary>
@@ -63,6 +64,8 @@ public class RtpAudioSink : RtpSink
     /// </summary>
     internal override void SendPackets()
     {
+        RtpClient.FrameChangedEventsEnabled = false;
+
         unchecked
         {
             while (State == StreamState.Started)
@@ -73,7 +76,7 @@ public class RtpAudioSink : RtpSink
                     {
                         if (RtpClient.IsActive) RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.Lowest;
 
-                        System.Threading.Thread.Sleep(ClockRate / 4);
+                        System.Threading.Thread.Sleep(ClockRate);
 
                         continue;
                     }
@@ -92,14 +95,14 @@ public class RtpAudioSink : RtpSink
                         //Increase priority
                         RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.AboveNormal;
 
-                        transportContext.RtpTimestamp += ClockRate * 1000;
+                        //Set the Timestamp
+                        transportContext.RtpTimestamp += ClockRate;
+
+                        //Set all packets Timestamps
+                        frame.Timestamp = transportContext.RtpTimestamp;
 
                         //Fire a frame changed event manually
-                        if (RtpClient.FrameChangedEventsEnabled)
-                        {
-                            RtpClient.OnRtpFrameChanged(frame, transportContext, true);
-                            frame.Timestamp = transportContext.RtpTimestamp;
-                        }
+                        if (RtpClient.FrameChangedEventsEnabled) RtpClient.OnRtpFrameChanged(frame, transportContext, true);
 
                         //Take all the packet from the frame                            
                         IEnumerable<RtpPacket> packets = frame;
@@ -160,7 +163,7 @@ public class RtpAudioSink : RtpSink
 
                     RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.BelowNormal;
 
-                    System.Threading.Thread.Sleep(ClockRate / 4);
+                    System.Threading.Thread.Sleep(ClockRate);
                 }
                 catch (Exception ex)
                 {
@@ -191,19 +194,27 @@ public class RtpAudioSink : RtpSink
         //If this class was used to send directly to one person it would be setup with the recievers address
         RtpClient = new RtpClient();
 
-        SessionDescription = new SessionDescription(0, "v√ƒ", Name);
-        SessionDescription.Add(new SessionConnectionLine()
+        SessionDescription = new SessionDescription(0, "v√ƒ", Name)
         {
-            ConnectionNetworkType = SessionConnectionLine.InConnectionToken,
-            ConnectionAddressType = SessionDescription.WildcardString,
-            ConnectionAddress = System.Net.IPAddress.Any.ToString()
-        });
+            new SessionConnectionLine()
+            {
+                ConnectionNetworkType = SessionConnectionLine.InConnectionToken,
+                ConnectionAddressType = SessionDescription.WildcardString,
+                ConnectionAddress = System.Net.IPAddress.Any.ToString()
+            }
+        };
 
         //Add a MediaDescription to our Sdp on any available port for RTP/AVP Transport using the PayloadType            
         var mediaDescription = new MediaDescription(MediaType.audio,
             RtpClient.RtpAvpProfileIdentifier,  //Any port...
             PayloadType,
-            0);
+            0)
+        {
+            //Add the control line, could be anything... this indicates the URI which will appear in the SETUP and PLAY commands
+            new SessionDescriptionLine("a=control:trackID=audio")
+        };
+
+        //Add the MediaDescription
         SessionDescription.Add(mediaDescription);
 
         //Indicate control to each media description contained
@@ -214,7 +225,6 @@ public class RtpAudioSink : RtpSink
 
         //that this a broadcast.
         SessionDescription.Add(new SessionDescriptionLine("a=type:broadcast"));
-
 
         //Add a Interleave (We are not sending Rtcp Packets becaues the Server is doing that) We would use that if we wanted to use this AudioStream without the server.            
         //See the notes about having a Generic.Dictionary to support various tracks
@@ -240,9 +250,7 @@ public class RtpAudioSink : RtpSink
             RemoteRtp = IPEndPointExtensions.Any
         }); //This context is always valid from the first rtp packet received
 
-        //Add the control line, could be anything... this indicates the URI which will appear in the SETUP and PLAY commands
-        mediaDescription.Add(new SessionDescriptionLine("a=control:trackID=audio"));
-
+      
         //Make the thread
         RtpClient.m_WorkerThread = new System.Threading.Thread(SendPackets);
         RtpClient.m_WorkerThread.TrySetApartmentState(System.Threading.ApartmentState.MTA);
@@ -301,14 +309,14 @@ public class RtpAudioSink : RtpSink
         Array.Copy(data, offset, newPacket.Payload.Array, newPacket.Payload.Offset, length);
 
         //Assign next sequence number
-        switch (transportContext.RecieveSequenceNumber)
+        switch (transportContext.SendSequenceNumber)
         {
             case ushort.MaxValue:
-                newPacket.SequenceNumber = transportContext.RecieveSequenceNumber = 0;
+                newPacket.SequenceNumber = transportContext.SendSequenceNumber = 0;
                 break;
             //Increment the sequence number on the transportChannel and assign the result to the packet
             default:
-                newPacket.SequenceNumber = ++transportContext.RecieveSequenceNumber;
+                newPacket.SequenceNumber = ++transportContext.SendSequenceNumber;
                 break;
         }
 

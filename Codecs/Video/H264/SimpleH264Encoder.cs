@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using static SimpleH264Encoder;
-
 
 // Simple H264 Encoder
 // Written by Jordi Cenzano (www.jordicenzano.name)

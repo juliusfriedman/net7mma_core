@@ -90,6 +90,13 @@
         /// </summary>
         /// <param name="pcm">A 16-bit pcm value</param>
         /// <returns>A mu-law encoded byte</returns>
+        public static byte MuLawEncode(float pcm) => MuLawEncode((int)pcm);
+
+        /// <summary>
+        /// Encode a pcm value into a mu-law byte
+        /// </summary>
+        /// <param name="pcm">A 16-bit pcm value</param>
+        /// <returns>A mu-law encoded byte</returns>
         public static byte MuLawEncode(int pcm)
         {
             return pcmToMuLawMap[pcm & 0xffff];
@@ -111,6 +118,20 @@
         /// <param name="data">An array of 16-bit pcm values</param>
         /// <returns>An array of mu-law bytes containing the results</returns>
         public static byte[] MuLawEncode(int[] data)
+        {
+            int size = data.Length;
+            byte[] encoded = new byte[size];
+            for (int i = 0; i < size; i++)
+                encoded[i] = MuLawEncode(data[i]);
+            return encoded;
+        }
+
+        /// <summary>
+        /// Encode an array of pcm values
+        /// </summary>
+        /// <param name="data">An array of 16-bit pcm values</param>
+        /// <returns>An array of mu-law bytes containing the results</returns>
+        public static byte[] MuLawEncode(float[] data)
         {
             int size = data.Length;
             byte[] encoded = new byte[size];

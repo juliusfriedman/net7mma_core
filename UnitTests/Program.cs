@@ -36,21 +36,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
-using Media;
 using Media.Codecs.Audio.Alaw;
 using Media.Codecs.Audio.Mulaw;
-using Media.Common.Interfaces;
 using Media.Rtp;
 using Media.RtpTools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.PortableExecutable;
 using System.Text;
-using System.Xml;
 using UnitTests.Code;
-using static Media.Rtsp.Server.MediaTypes.RFC6184Media;
-//using System.Windows.Forms;
 
 namespace Media.UnitTests
 {
@@ -2285,25 +2279,31 @@ namespace Media.UnitTests
                     server.TryAddMedia(mirror);
 
                     //Make a H264 Stream (Working but transform of data need improvement)
-                    Media.Rtsp.Server.MediaTypes.RFC6184Media h264Stream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1088, "h264Stream", null, false);
-                    server.TryAddMedia(h264Stream);
+                    //Media.Rtsp.Server.MediaTypes.RFC6184Media h264Stream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1088, "h264Stream", null, false);
+                    //server.TryAddMedia(h264Stream);
 
                     //Make a H264 Stream (Working 100%)
                     Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(320, 240, "TestCard", null, false);
                     server.TryAddMedia(tinyStream);
 
-                    //Make some RtpAudioSink (Working but experiences some discontinuity)
+                    //Make some RtpAudioSink (mostly working)
                     Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmaStream = new Rtsp.Server.MediaTypes.RtpAudioSink("pcma", null, 8, 1, 8000);
                     pcmaStream.Codec = new ALawCodec();
                     
+                    //Could share codes where initialization is the same.
                     Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmuStream = new Rtsp.Server.MediaTypes.RtpAudioSink("pcmu", null, 0, 1, 8000);
                     pcmuStream.Codec = new MulawCodec();
-                    
+
+                    Media.Rtsp.Server.MediaTypes.RtpAudioSink noiseStream = new Rtsp.Server.MediaTypes.RtpAudioSink("noiseStream", null, 0, 1, 8000);
+                    noiseStream.Codec = new MulawCodec();
+
+                    //(Working 100%)
                     Media.Rtsp.Server.MediaTypes.RtpAudioSink rtpDumpAudioStream = new Rtsp.Server.MediaTypes.RtpAudioSink("rtpDump", null, 0, 1, 8000);
 
                     server.TryAddMedia(pcmaStream);
                     server.TryAddMedia(pcmuStream);
                     server.TryAddMedia(rtpDumpAudioStream);
+                    server.TryAddMedia(noiseStream);
 
                     ////Make some RFC7655Media (Audio) (VLC Doesn't support?)
                     //Media.Rtsp.Server.MediaTypes.RFC7655Media alawStream = new Rtsp.Server.MediaTypes.RFC7655Media("TestALaw", null, 98, 1, Rtsp.Server.MediaTypes.RFC7655Media.CompandingLaw.ALaw);
@@ -2313,7 +2313,7 @@ namespace Media.UnitTests
                     //server.TryAddMedia(mulawStream);
 
                     //Width, Height, FPS
-                    TestCard testCard = new TestCard(320, 240, 25);
+                    TestCard testCard = new TestCard(320, 240, 60);
 
                     //Add the track to the SessionDescription
                     //2 tracks will be setup by the client.
@@ -2337,7 +2337,7 @@ namespace Media.UnitTests
                     {
                         if (!tinyStream.IsReady) return;
                         //Create a new frame
-                        var newFrame = new RFC6184Frame(96)
+                        var newFrame = new Rtsp.Server.MediaTypes.RFC6184Media.RFC6184Frame(96)
                         {
                             SynchronizationSourceIdentifier = tinyStream.SourceId,
                             MaxPackets = 4096,
@@ -2396,7 +2396,10 @@ namespace Media.UnitTests
                                         mirror.Packetize(bmpScreenshot);
 
                                         //Convert to H264 and put in packets
-                                        h264Stream.Packetize(bmpScreenshot);                                        
+                                        //h264Stream.Packetize(bmpScreenshot);
+
+                                        audio = MuLawEncoder.MuLawEncode(DtmfGenerator.Noise(1000).Take(DtmfGenerator.Config.DefaultSampleBlockSize).ToArray());
+                                        noiseStream.Packetize(audio, 0, audio.Length);
 
                                         //HALT, REST
                                         if (false == System.Threading.Thread.Yield())
@@ -2479,7 +2482,8 @@ namespace Media.UnitTests
 
                     System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;
 
-                    bool createdAComposite = false;
+                    //Add an Audio Stream to Mirror
+
 
                     while (true)
                     {
