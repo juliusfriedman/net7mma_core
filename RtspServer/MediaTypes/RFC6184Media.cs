@@ -1005,32 +1005,14 @@ namespace Media.Rtsp.Server.MediaTypes
                     System.Drawing.Imaging.BitmapData data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, thumb.Width, thumb.Height),
                                System.Drawing.Imaging.ImageLockMode.ReadOnly, thumb.PixelFormat);
 
-                    using (Media.Codecs.Image.Image rgbImage = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.ARGB(8), Width, Height))
-                    {
-                        //Copy in the RGB data from the System Image.
-                        System.Runtime.InteropServices.Marshal.Copy(data.Scan0, rgbImage.Data.Array, rgbImage.Data.Offset, rgbImage.Data.Count);
+                    var yuvData = Media.Codecs.Image.ColorConversions.ABGRA2YUV420Managed(thumb.Width, thumb.Height, data.Scan0);
 
-                        //Make a format (Should be static)
-                        Media.Codecs.Image.ImageFormat Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
+                    //SPS and PPS should be included here if key frame only
+                    newFrame.Packetize(encoder.GetRawSPS());
+                    newFrame.Packetize(encoder.GetRawPPS());
 
-                        //Use a YUV image
-                        using (var yuvImage = new Media.Codecs.Image.Image(Yuv420P, Width, Height))
-                        {
-                            //Use a Transform
-                            using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.RGB(rgbImage, yuvImage))
-                            {
-                                //RGB to YUV
-                                it.Transform();
-
-                                //SPS and PPS should be included here if key frame only
-                                newFrame.Packetize(encoder.GetRawSPS());
-                                newFrame.Packetize(encoder.GetRawPPS());
-
-                                //Packetize the data with the slice header
-                                newFrame.Packetize(encoder.CompressFrame(yuvImage.Data.Array));
-                            }
-                        }
-                    }
+                    //Packetize the data with the slice header
+                    newFrame.Packetize(encoder.CompressFrame(yuvData));
 
                     //Done with RGB
                     bmp.UnlockBits(data);

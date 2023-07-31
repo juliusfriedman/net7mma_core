@@ -639,19 +639,19 @@ namespace Media.Codecs.Image.Transformations
             int rS = r + sbyte.MaxValue;
             int gS = g + sbyte.MaxValue;
             int bS = b + sbyte.MaxValue;
-            int y = 66 * rS + 129 * gS + 25 * bS;
-            int u = -38 * rS - 74 * gS + 112 * bS;
-            int v = 112 * rS - 94 * gS - 18 * bS;
-            y = (y + sbyte.MaxValue) >> 8;
-            u = (u + sbyte.MaxValue) >> 8;
-            v = (v + sbyte.MaxValue) >> 8;
+            int yS = 66 * rS + 129 * gS + 25 * bS;
+            int uS = -38 * rS - 74 * gS + 112 * bS;
+            int vS = 112 * rS - 94 * gS - 18 * bS;
+            int y = (yS + sbyte.MaxValue) >> 8;
+            int u = (uS + sbyte.MaxValue) >> 8;
+            int v = (vS + sbyte.MaxValue) >> 8;
+
 
             //res[offset] = (byte)Common.Binary.Clamp(y - 112, sbyte.MinValue, sbyte.MaxValue);
 
-            res[offset] = (byte)Common.Binary.Clamp(y - 112, 0, 255);
-
-            res[offset + 1] = (byte)Common.Binary.Clamp(u, sbyte.MinValue, sbyte.MaxValue);
-            res[offset + 2] = (byte)Common.Binary.Clamp(v, sbyte.MinValue, sbyte.MaxValue);
+            res[offset] = (byte)y;// (byte)Common.Binary.Clamp(y, byte.MinValue, byte.MaxValue);
+            res[offset + 1] = (byte)u;// (byte)Common.Binary.Clamp(u, sbyte.MinValue, sbyte.MaxValue);
+            res[offset + 2] = (byte)v;// (byte)Common.Binary.Clamp(v, sbyte.MinValue, sbyte.MaxValue);
         }
 
     }

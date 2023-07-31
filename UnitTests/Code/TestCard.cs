@@ -70,11 +70,6 @@ public class TestCard
         this.height = height;
         this.fps = fps;
 
-        // YUV size
-        int y_size = width * height;
-        int u_size = (width >> 1) * (height >> 1);
-        int v_size = (width >> 1) * (height >> 1);
-
         yuvImage = new Media.Codecs.Image.Image(Yuv420P, width, height);
 
         yuv_frame = yuvImage.Data.Array;
@@ -147,28 +142,22 @@ public class TestCard
             DateTime now_utc = DateTime.UtcNow;
             DateTime now_local = now_utc.ToLocalTime();
 
-
-            long timestamp_ms = ((long)(now_utc.Ticks / TimeSpan.TicksPerMillisecond));
-
-            // Generate the String to write
-            char[] overlay = null;
+            String overlay;
 
             if (width >= 96)
             {
                 // Need 12 characters of 8x8 pixels. 12*8 = 96
                 // HH:MM:SS.mmm
-                String overlay_str = now_local.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture); // do not replace : or . by local formats
-                overlay = overlay_str.ToCharArray();
+                overlay = now_local.ToString("HH:mm:ss.fff", CultureInfo.InvariantCulture); // do not replace : or . by local formats
             }
             else
             {
                 // Min for most video formats is 16x16, enough for 2 characters
-                String overlay_str = now_local.ToString("ss", CultureInfo.InvariantCulture); // do not replace : or . by local formats
-                overlay = overlay_str.ToCharArray();
+                overlay = now_local.ToString("ss", CultureInfo.InvariantCulture); // do not replace : or . by local formats
             }
 
             // process each character
-            int start_row = ((height / 2) - 4); // start 4 pixels above the centre row (4 is half the font height)
+            int start_row = (height / 2) - 4; // start 4 pixels above the centre row (4 is half the font height)
             for (int c = 0; c < overlay.Length; c++)
             {
                 byte[] font = ascii_space;
@@ -240,7 +229,7 @@ public class TestCard
     }
 
     // 8 KHz audio / 20ms samples
-    const int frame_size = (8000 * audio_duration_ms) / 1000;  // = 8000 / (1000/audio_duration_ms)
+    const int frame_size = 8000 * audio_duration_ms / 1000;  // = 8000 / (1000/audio_duration_ms)
     short[] audio_frame = new short[frame_size]; // This is an array of 16 bit values
 
     private void Send_Audio_Frame()
