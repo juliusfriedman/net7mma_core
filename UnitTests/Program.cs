@@ -2393,7 +2393,7 @@ namespace Media.UnitTests
                                         //Convert to JPEG and put in packets
                                         mirror.Packetize(bmpScreenshot);
 
-                                        //Convert to H264 and put in packets
+                                        //Convert to H264 and put in packets (Color conversions is not 100% correct)
                                         h264Stream.Packetize(bmpScreenshot);
 
                                         audio = MuLawEncoder.MuLawEncode(DtmfGenerator.Noise(1000).Take(DtmfGenerator.Config.DefaultSampleBlockSize).ToArray());
