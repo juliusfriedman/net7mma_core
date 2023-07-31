@@ -1009,6 +1009,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 System.Drawing.Imaging.BitmapData data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, _image.Width, _image.Height),
                            System.Drawing.Imaging.ImageLockMode.ReadOnly, _image.PixelFormat);
 
+                //Convert to YUV
                 var yuvData = !Media.Common.Binary.IsBigEndian ? Media.Codecs.Image.ColorConversions.ARGB2YUV420Managed(_image.Width, _image.Height, data.Scan0) : Media.Codecs.Image.ColorConversions.BGRA2YUV420Managed(_image.Width, _image.Height, data.Scan0);
 
                 //SPS and PPS should be included here if key frame only
