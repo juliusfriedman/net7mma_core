@@ -2286,7 +2286,7 @@ namespace Media.UnitTests
                     Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(320, 240, "TestCard", null, false);
                     server.TryAddMedia(tinyStream);
 
-                    //Make some RtpAudioSink (mostly working)
+                    //Make some RtpAudioSink (working 100%)
                     Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmaStream = new Rtsp.Server.MediaTypes.RtpAudioSink("pcma", null, 8, 1, 8000);
                     pcmaStream.Codec = new ALawCodec();
                     
