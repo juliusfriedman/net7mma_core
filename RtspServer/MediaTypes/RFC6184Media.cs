@@ -992,9 +992,6 @@ namespace Media.Rtsp.Server.MediaTypes
                 //Make the width and height correct (Should not dispoe image if not resized... (https://net7mma.codeplex.com/discussions/652556)
                 using (var thumb = image.Width != Width || image.Height != Height ? image.GetThumbnailImage(Width, Height, null, IntPtr.Zero) : image)
                 {
-                    //Ensure the transformation will work.
-                    if (thumb.PixelFormat != System.Drawing.Imaging.PixelFormat.Format32bppArgb) throw new NotSupportedException("Only ARGB is currently supported.");
-
                     //Create a new frame
                     var newFrame = new RFC6184Frame(96)
                     {
@@ -1002,8 +999,10 @@ namespace Media.Rtsp.Server.MediaTypes
                         MaxPackets = 4096,
                     };
 
+                    var bmp = (System.Drawing.Bitmap)thumb;
+
                     //Get RGB Stride
-                    System.Drawing.Imaging.BitmapData data = ((System.Drawing.Bitmap)thumb).LockBits(new System.Drawing.Rectangle(0, 0, thumb.Width, thumb.Height),
+                    System.Drawing.Imaging.BitmapData data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, thumb.Width, thumb.Height),
                                System.Drawing.Imaging.ImageLockMode.ReadOnly, thumb.PixelFormat);
 
                     using (Media.Codecs.Image.Image rgbImage = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.ARGB(8), Width, Height))
@@ -1023,18 +1022,18 @@ namespace Media.Rtsp.Server.MediaTypes
                                 //RGB to YUV
                                 it.Transform();
 
-                                //SPS and PPS should be included here
+                                //SPS and PPS should be included here if key frame only
                                 newFrame.Packetize(encoder.GetRawSPS());
                                 newFrame.Packetize(encoder.GetRawPPS());
 
                                 //Packetize the data with the slice header
                                 newFrame.Packetize(encoder.CompressFrame(yuvImage.Data.Array));
-
                             }
                         }
                     }
 
-                    ((System.Drawing.Bitmap)image).UnlockBits(data);
+                    //Sometimes unlocking causes error.
+                    bmp.UnlockBits(data);
 
                     //Add the frame
                     AddFrame(newFrame);
