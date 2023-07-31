@@ -265,6 +265,7 @@ namespace Media.Rtsp.Server.MediaTypes
             /// </summary>
             /// <param name="nal">The nal</param>
             /// <param name="mtu">The mtu</param>
+            /// <param name="DON">The Decoder Ordering Number (timestamp)</param>
             public virtual void Packetize(byte[] nal, int mtu = 1500, int? DON = null) //sequenceNumber
             {
                 if (nal == null) return;
@@ -989,38 +990,43 @@ namespace Media.Rtsp.Server.MediaTypes
         {
             try
             {
-                //Make the width and height correct (Should not dispoe image if not resized... (https://net7mma.codeplex.com/discussions/652556)
-                using (var thumb = image.Width != Width || image.Height != Height ? image.GetThumbnailImage(Width, Height, null, IntPtr.Zero) : image)
+                //If the dimensions are different
+                var disposeImage = image.Width != Width || image.Height != Height;
+
+                //Make the width and height correct by getting a resized version
+                var _image = image.Width != Width || image.Height != Height ? image.GetThumbnailImage(Width, Height, null, IntPtr.Zero) : image;
+
+                //Create a new frame
+                var newFrame = new RFC6184Frame(96)
                 {
-                    //Create a new frame
-                    var newFrame = new RFC6184Frame(96)
-                    {
-                        SynchronizationSourceIdentifier = SourceId,
-                        MaxPackets = 4096,
-                    };
+                    SynchronizationSourceIdentifier = SourceId,
+                    MaxPackets = 4096,
+                };
 
-                    var bmp = (System.Drawing.Bitmap)thumb;
+                var bmp = (System.Drawing.Bitmap)_image;
 
-                    //Get RGB Stride
-                    System.Drawing.Imaging.BitmapData data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, thumb.Width, thumb.Height),
-                               System.Drawing.Imaging.ImageLockMode.ReadOnly, thumb.PixelFormat);
+                //Get RGB Stride
+                System.Drawing.Imaging.BitmapData data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, _image.Width, _image.Height),
+                           System.Drawing.Imaging.ImageLockMode.ReadOnly, _image.PixelFormat);
 
+                var yuvData = !Media.Common.Binary.IsBigEndian ? Media.Codecs.Image.ColorConversions.ARGB2YUV420Managed(_image.Width, _image.Height, data.Scan0) : Media.Codecs.Image.ColorConversions.BGRA2YUV420Managed(_image.Width, _image.Height, data.Scan0);
 
-                    var yuvData = Media.Common.Binary.IsBigEndian ? Media.Codecs.Image.ColorConversions.ARGB2YUV420Managed(thumb.Width, thumb.Height, data.Scan0) : Media.Codecs.Image.ColorConversions.BGRA2YUV420Managed(thumb.Width, thumb.Height, data.Scan0);
+                //SPS and PPS should be included here if key frame only
+                newFrame.Packetize(encoder.GetRawSPS());
+                newFrame.Packetize(encoder.GetRawPPS());
 
-                    //SPS and PPS should be included here if key frame only
-                    newFrame.Packetize(encoder.GetRawSPS());
-                    newFrame.Packetize(encoder.GetRawPPS());
+                //Packetize the data with the slice header
+                newFrame.Packetize(encoder.CompressFrame(yuvData));
 
-                    //Packetize the data with the slice header
-                    newFrame.Packetize(encoder.CompressFrame(yuvData));
+                //Done with RGB
+                bmp.UnlockBits(data);
 
-                    //Done with RGB
-                    bmp.UnlockBits(data);
+                //Add the frame
+                AddFrame(newFrame);
 
-                    //Add the frame
-                    AddFrame(newFrame);
-                }
+                //If we need to dispose
+                if (disposeImage)
+                    _image.Dispose();
             }
             catch { throw; }
         }
