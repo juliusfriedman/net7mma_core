@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Media;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -150,7 +151,7 @@ public static class DtmfGenerator
     /// <returns>An infinite noise signal.</returns>
     public static IEnumerable<float> Noise(float amplitude)
     {
-        var rng = new Random();
+        var rng = Utility.Random;
         while (true)
         {
             var n = amplitude * rng.NextDouble();

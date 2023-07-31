@@ -2480,10 +2480,7 @@ namespace Media.UnitTests
                     Console.WriteLine("Press 'C' to See how many clients are connected.");
                     //if (sampleStream != null) Console.WriteLine("Press 'F' to See statistics for " + sampleStream.Name);
 
-                    System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;
-
-                    //Add an Audio Stream to Mirror
-
+                    System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;                    
 
                     while (true)
                     {
@@ -2717,6 +2714,25 @@ namespace Media.UnitTests
                                 }
                             case ConsoleKey.B:
                                 {
+
+                                    break;
+                                }
+                            case ConsoleKey.A:
+                                {
+                                    //If we didn't already add the audio track
+                                    if(tinyStream.SessionDescription.MediaDescriptions.Count() == 1)
+                                    {
+                                        tinyStream.SessionDescription.Add(pcmuStream.SessionDescription.MediaDescriptions.First());
+                                        tinyStream.RtpClient.TransportContexts.Add(pcmuStream.RtpClient.TransportContexts.First());
+
+                                        //Todo need to get the packets from one source to another
+                                        pcmuStream.RtpClient.RtpPacketReceieved += (s, p, tc) => tinyStream.RtpClient.OnRtpPacketReceieved(p, tc);
+                                    }
+                                    else
+                                    {
+                                        //Remove stream
+                                        //This just means detaching the events and also to remove the media description
+                                    }
 
                                     break;
                                 }
