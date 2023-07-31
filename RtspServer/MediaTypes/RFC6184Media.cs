@@ -1006,29 +1006,38 @@ namespace Media.Rtsp.Server.MediaTypes
                     System.Drawing.Imaging.BitmapData data = ((System.Drawing.Bitmap)thumb).LockBits(new System.Drawing.Rectangle(0, 0, thumb.Width, thumb.Height),
                                System.Drawing.Imaging.ImageLockMode.ReadOnly, thumb.PixelFormat);
 
-                    //MUST Convert the bitmap to yuv420
-                    //switch on image.PixelFormat
-                    //Utility.YUV2RGBManaged()
-                    //Utility.ABGRA2YUV420Managed(image.Width, image.Height, data.Scan0);
-                    //etc
+                    using (Media.Codecs.Image.Image rgbImage = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.ARGB(8), Width, Height))
+                    {
+                        //Copy in the RGB data from the System Image.
+                        System.Runtime.InteropServices.Marshal.Copy(data.Scan0, rgbImage.Data.Array, rgbImage.Data.Offset, rgbImage.Data.Count);
 
-                    //Todo use Media.Image.Transformations                   
+                        //Make a format
+                        Media.Codecs.Image.ImageFormat Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
 
-                    byte[] yuv = Media.Codecs.Image.ColorConversions.ARGB2YUV420Managed(thumb.Width, thumb.Height, data.Scan0);
+                        //Use a YUV image
+                        using (var yuvImage = new Media.Codecs.Image.Image(Yuv420P, Width, Height))
+                        {
+                            //Use a Transform
+                            using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.RGB(rgbImage, yuvImage))
+                            {
+                                //RGB to YUV
+                                it.Transform();
+
+                                //SPS and PPS should be included here
+                                newFrame.Packetize(encoder.GetRawSPS());
+                                newFrame.Packetize(encoder.GetRawPPS());
+
+                                //Packetize the data with the slice header
+                                newFrame.Packetize(encoder.CompressFrame(yuvImage.Data.Array));
+
+                            }
+                        }
+                    }
 
                     ((System.Drawing.Bitmap)image).UnlockBits(data);
 
-                    //SPS and PPS should be included here
-                    newFrame.Packetize(encoder.GetRawSPS());
-                    newFrame.Packetize(encoder.GetRawPPS());
-
-                    //Packetize the data with the slice header
-                    newFrame.Packetize(encoder.CompressFrame(yuv));
-
                     //Add the frame
                     AddFrame(newFrame);
-
-                    yuv = null;
                 }
             }
             catch { throw; }

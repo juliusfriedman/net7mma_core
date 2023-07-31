@@ -2279,8 +2279,8 @@ namespace Media.UnitTests
                     server.TryAddMedia(mirror);
 
                     //Make a H264 Stream (Working but transform of data need improvement)
-                    //Media.Rtsp.Server.MediaTypes.RFC6184Media h264Stream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1088, "h264Stream", null, false);
-                    //server.TryAddMedia(h264Stream);
+                    Media.Rtsp.Server.MediaTypes.RFC6184Media h264Stream = new Rtsp.Server.MediaTypes.RFC6184Media(1920, 1088, "h264Stream", null, false);
+                    server.TryAddMedia(h264Stream);
 
                     //Make a H264 Stream (Working 100%)
                     Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(320, 240, "TestCard", null, false);
@@ -2396,7 +2396,7 @@ namespace Media.UnitTests
                                         mirror.Packetize(bmpScreenshot);
 
                                         //Convert to H264 and put in packets
-                                        //h264Stream.Packetize(bmpScreenshot);
+                                        h264Stream.Packetize(bmpScreenshot);
 
                                         audio = MuLawEncoder.MuLawEncode(DtmfGenerator.Noise(1000).Take(DtmfGenerator.Config.DefaultSampleBlockSize).ToArray());
                                         noiseStream.Packetize(audio, 0, audio.Length);

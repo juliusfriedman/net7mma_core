@@ -2,6 +2,7 @@
 using System.Globalization;
 using System;
 using System.Diagnostics;
+using Media.Codec;
 
 namespace UnitTests.Code;
 
@@ -26,6 +27,11 @@ public class TestCard
     // Local variables
     private Stopwatch stopwatch;
     private System.Timers.Timer frame_timer;
+
+    //Create the ImageFormat based on YUV packed but in Planar format with a full height luma plane and half hight chroma planes
+    Media.Codecs.Image.ImageFormat Yuv420P = new Media.Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Media.Common.Binary.ByteOrder.Little, Media.Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
+    Media.Codecs.Image.Image yuvImage;
+
     private byte[] yuv_frame = null;
     private int x_position = 0;
     private int y_position = 0;
@@ -68,14 +74,14 @@ public class TestCard
         int y_size = width * height;
         int u_size = (width >> 1) * (height >> 1);
         int v_size = (width >> 1) * (height >> 1);
-        yuv_frame = new byte[y_size + u_size + v_size];
+
+        yuvImage = new Media.Codecs.Image.Image(Yuv420P, width, height);
+
+        yuv_frame = yuvImage.Data.Array;
 
         // Set all values to 127
-        for (int x = 0; x < yuv_frame.Length; x++)
-        {
-            yuv_frame[x] = 127;
-        }
-
+        Array.Fill<byte>(yuv_frame, 127);
+        
         stopwatch = new Stopwatch();
         stopwatch.Start();
 
