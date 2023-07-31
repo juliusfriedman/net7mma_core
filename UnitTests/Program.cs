@@ -2279,7 +2279,7 @@ namespace Media.UnitTests
                     server.TryAddMedia(mirror);
 
                     //Make a H264 Stream (Working but transform of data need improvement)
-                    Media.Rtsp.Server.MediaTypes.RFC6184Media h264Stream = new Rtsp.Server.MediaTypes.RFC6184Media(1280, 720, "h264Stream", null, false);
+                    Media.Rtsp.Server.MediaTypes.RFC6184Media h264Stream = new Rtsp.Server.MediaTypes.RFC6184Media(720, 480, "h264Stream", null, false);
                     server.TryAddMedia(h264Stream);
 
                     //Make a H264 Stream (Working 100%)

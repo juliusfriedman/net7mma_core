@@ -176,6 +176,8 @@ namespace Media.Codecs.Image
             return Common.Binary.BitsToBytes(PlaneSize(plane));
         }
 
+        //TODO, Should have GetPixel and SetPixel methods. (requires a color type etc)
+
         #endregion
     }
 

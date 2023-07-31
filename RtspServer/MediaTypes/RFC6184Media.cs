@@ -1010,7 +1010,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         //Copy in the RGB data from the System Image.
                         System.Runtime.InteropServices.Marshal.Copy(data.Scan0, rgbImage.Data.Array, rgbImage.Data.Offset, rgbImage.Data.Count);
 
-                        //Make a format
+                        //Make a format (Should be static)
                         Media.Codecs.Image.ImageFormat Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
 
                         //Use a YUV image
@@ -1032,7 +1032,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         }
                     }
 
-                    //Sometimes unlocking causes error.
+                    //Done with RGB
                     bmp.UnlockBits(data);
 
                     //Add the frame
