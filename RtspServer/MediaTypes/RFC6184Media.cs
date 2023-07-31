@@ -1016,7 +1016,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 newFrame.Packetize(encoder.GetRawSPS());
                 newFrame.Packetize(encoder.GetRawPPS());
 
-                //Packetize the data with the slice header
+                //Packetize the data according to the MTU
                 newFrame.Packetize(encoder.CompressFrame(yuvData));
 
                 //Done with RGB
