@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace VIdeo
+namespace Video
 {
     class Program
     {

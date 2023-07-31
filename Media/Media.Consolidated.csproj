@@ -74,7 +74,7 @@
     <ProjectReference Include="..\Codecs\Image\Codecs.Image.csproj" />
     <ProjectReference Include="..\Codecs\Image\Jpeg\Codec.Jpeg.csproj" />
     <ProjectReference Include="..\Codecs\Mpeg\Mpeg.csproj" />
-    <ProjectReference Include="..\Codecs\VIdeo\Codecs.Video.csproj" />
+    <ProjectReference Include="..\Codecs\Video\Codecs.Video.csproj" />
     <ProjectReference Include="..\Codecs\Video\H264\Codec.H264.csproj" />
     <ProjectReference Include="..\Codecs\Video\Mpeg2\Mpeg2.csproj" />
     <ProjectReference Include="..\Codecs\Video\Mpeg4\Mpeg4.csproj" />
