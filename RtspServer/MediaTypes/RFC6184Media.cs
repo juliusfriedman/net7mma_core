@@ -1005,7 +1005,8 @@ namespace Media.Rtsp.Server.MediaTypes
                     System.Drawing.Imaging.BitmapData data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, thumb.Width, thumb.Height),
                                System.Drawing.Imaging.ImageLockMode.ReadOnly, thumb.PixelFormat);
 
-                    var yuvData = Media.Codecs.Image.ColorConversions.ARGB2YUV420Managed(thumb.Width, thumb.Height, data.Scan0);
+
+                    var yuvData = Media.Common.Binary.IsBigEndian ? Media.Codecs.Image.ColorConversions.ARGB2YUV420Managed(thumb.Width, thumb.Height, data.Scan0) : Media.Codecs.Image.ColorConversions.BGRA2YUV420Managed(thumb.Width, thumb.Height, data.Scan0);
 
                     //SPS and PPS should be included here if key frame only
                     newFrame.Packetize(encoder.GetRawSPS());
