@@ -71,7 +71,7 @@ namespace Media.Codecs.Image
 
                 //Loop each component and return the segment which corresponds to the data at the offset for that component
                 for (int c = 0, ce = ImageFormat.Components.Length; c < ce; ++c)
-                    yield return new Common.MemorySegment(Data.Array, Data.Offset + GetComponentDataOffset(x, y, c));
+                    yield return new Common.MemorySegment(Data.Array, Data.Offset + CalculateComponentDataOffset(x, y, c));
             }
             set
             {
@@ -136,27 +136,25 @@ namespace Media.Codecs.Image
         //    }
         //}
 
-        public int GetComponentDataOffset(int x, int y, int componentIndex)
+        public int CalculateComponentDataOffset(int x, int y, int componentIndex)
         {
-            if (componentIndex < 0 || componentIndex > ImageFormat.Components.Length)
+            if (componentIndex < 0 || componentIndex >= ImageFormat.Components.Length)
                 return -1;
 
             int offset = 0;
 
             for (int c = 0; c < componentIndex; c++)
             {
-                // Add the size of the previous component to the offset
-                offset += ImageFormat.Components[c].Length;
+                var component = ImageFormat.Components[c];
+
+                offset += component.Length;
 
                 int widthSampling = ImageFormat.Widths[c];
                 int heightSampling = ImageFormat.Heights[c];
 
-                // If the component has subsampling factors and the data layout is Planar, adjust the offset based on the current position (x, y)
-                if (DataLayout == Media.Codec.DataLayout.Planar && widthSampling > 0 &&  heightSampling > 0)
+                if (DataLayout == Media.Codec.DataLayout.Planar && widthSampling > 0 && heightSampling > 0)
                 {
                     int planeWidth = PlaneWidth(c);
-                    //int planeHeight = PlaneHeight(c);
-
                     int planeX = x >> widthSampling;
                     int planeY = y >> heightSampling;
 
@@ -164,12 +162,10 @@ namespace Media.Codecs.Image
                 }
             }
 
-            // Add the offset for the current component within the plane
+            //Check for sub sampling.
             if (DataLayout == Media.Codec.DataLayout.Planar && ImageFormat.Widths[componentIndex] > 0 && ImageFormat.Heights[componentIndex] > 0)
             {
                 int planeWidth = PlaneWidth(componentIndex);
-                //int planeHeight = PlaneHeight(componentIndex);
-
                 int planeX = x >> ImageFormat.Widths[componentIndex];
                 int planeY = y >> ImageFormat.Heights[componentIndex];
 
@@ -177,24 +173,23 @@ namespace Media.Codecs.Image
             }
             else
             {
-                // If there are no subsampling factors, simply add the offset for the current component
                 offset += (y * Width + x) * ImageFormat.Components[componentIndex].Length;
             }
 
             return offset;
         }
 
-        public MemorySegment GetPixelComponent(int x, int y, MediaComponent component)
+        public MemorySegment GetComponentData(int x, int y, MediaComponent component)
         {
             int componentIndex = GetComponentIndex(component);
 
-            if (componentIndex < 0)
-                throw new ArgumentException("Invalid component specified.");
+            if (componentIndex < 0) return MemorySegment.Empty;
+                //throw new ArgumentException("Invalid component specified.");
 
-            int offset = GetComponentDataOffset(x, y, componentIndex);
+            int offset = CalculateComponentDataOffset(x, y, componentIndex);
 
-            if (offset < 0)
-                throw new IndexOutOfRangeException("Coordinates are outside the bounds of the image.");
+            if (offset < 0) return MemorySegment.Empty;
+                //throw new IndexOutOfRangeException("Coordinates are outside the bounds of the image.");
 
             return new MemorySegment(Data.Array, offset, component.Length);
         }
@@ -220,10 +215,6 @@ namespace Media.Codecs.Image
 
             return -1;
         }
-
-        //http://stackoverflow.com/questions/1881455/why-am-i-getting-strange-results-bit-shifting-by-a-negative-value
-
-
 
         public int PlaneWidth(int plane)
         {
@@ -271,7 +262,7 @@ namespace Media.Codecs.Image
             if (x < 0 || y < 0 || x >= Width || y >= Height)
                 return; // or throw an exception
 
-            int offset = GetComponentDataOffset(x, y, componentIndex);
+            int offset = CalculateComponentDataOffset(x, y, componentIndex);
             if (offset < 0)
                 return; // or throw an exception
 
@@ -285,7 +276,7 @@ namespace Media.Codecs.Image
             if (componentIndex == -1)
                 return;
 
-            int offset = GetComponentDataOffset(x, y, componentIndex);
+            int offset = CalculateComponentDataOffset(x, y, componentIndex);
             if (offset == -1)
             {
                 // Component doesn't exist in this format, return without setting anything.
@@ -311,7 +302,7 @@ namespace Media.Codecs.Image
                 throw new ArgumentException("Invalid component ID.", nameof(componentId));
             }
 
-            int offset = GetComponentDataOffset(x, y, componentIndex);
+            int offset = CalculateComponentDataOffset(x, y, componentIndex);
             if (offset == -1)
             {
                 // Component doesn't exist in this format, return an empty MemorySegment.
