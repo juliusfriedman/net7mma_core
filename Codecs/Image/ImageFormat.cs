@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 
 namespace Media.Codecs.Image
 {
-
     public class ImageFormat : Codec.MediaFormat
     {
         #region Statics
@@ -305,8 +300,12 @@ namespace Media.Codecs.Image
 
         #endregion
 
+        #region Fields
+
         //Used for subsampling.
         public int[] Widths, Heights;
+
+        #endregion
 
         #region Constructors
 
@@ -410,7 +409,6 @@ namespace Media.Codecs.Image
         }
 
         #endregion
-
     }
 
     //Marked for removal

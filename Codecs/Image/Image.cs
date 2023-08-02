@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using Media.Codec;
+using Media.Common;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Media.Codecs.Image
@@ -38,6 +41,7 @@ namespace Media.Codecs.Image
         #region Constructor
 
         //Needs a subsampling...
+
         public Image(ImageFormat format, int width, int height)
             : base(format, CalculateSize(format, width, height))
         {
@@ -62,69 +66,22 @@ namespace Media.Codecs.Image
         {
             get
             {
-                if (x < 0 || y < 0 || x > Width || y > Height) yield return Common.MemorySegment.Empty;
+                if (x < 0 || y < 0 || x > Width || y > Height)
+                    yield break;
 
-                switch (DataLayout)
-                {
-                    default:
-                    case Media.Codec.DataLayout.Unknown:
-                        {
-                            throw new System.ArgumentException("Invalid DataLayout");
-                        }
-                    case Media.Codec.DataLayout.Packed: //Tiled?
-                        {
-                            //Packed has all samples next to each other... could return all data in 1 shot...
-                            //yield return new Common.MemorySegment(Data.Array, y * Width + x, ImageFormat.Length);
+                //Loop each component and return the segment which corresponds to the data at the offset for that component
+                for (int c = 0, ce = ImageFormat.Components.Length; c < ce; ++c)
+                    yield return new Common.MemorySegment(Data.Array, Data.Offset + GetComponentDataOffset(x, y, c));
+            }
+            set
+            {
+                if (x < 0 || y < 0 || x > Width || y > Height)
+                    return;
 
-                            int offset = 0, cache = y * Width + x;
+                int componentIndex = 0;
 
-                            //Loop each component
-                            for (int c = 0, ce = ImageFormat.Components.Length; c < ce; ++c)
-                            {
-                                //Sub sampled with no values in the plane
-                                if (ImageFormat.Widths[c] < 0 || ImageFormat.Heights[c] < 0) continue;
-
-                                //Probably Needs a BinarySegment, same as MemorySegment but with a BitOffset...
-
-                                //Return the data which belongs to just the component being iterated
-                                yield return new Common.MemorySegment(Data.Array, Data.Offset + offset + cache, ImageFormat[c].Length);
-
-                                //Move the offset the size of the component.
-                                offset += ImageFormat[c].Length;
-
-                                //If the Length == 1 and Size <= 8 this is not correct logic... can't move offset to the next byte.
-                            }
-
-                            yield break;
-                        }
-                    case Media.Codec.DataLayout.Planar:
-                        {
-                            int offset = 0;
-
-                            for (int c = 0, ce = ImageFormat.Components.Length; c < ce; ++c)
-                            {
-                                //Sub sampled with no values in the plane
-                                if (ImageFormat.Widths[c] < 0 || ImageFormat.Heights[c] < 0) continue;
-
-                                //Return the data which belongs to only the component being iterated
-                                yield return new Common.MemorySegment(Data.Array, Data.Offset + offset + (y >> ImageFormat.Widths[c] * PlaneWidth(c)) + x >> ImageFormat.Heights[c], ImageFormat[c].Length);
-
-                                //Move to the next plane
-                                offset += PlaneLength(c);
-                            }
-
-
-                            yield break;
-                        }
-                    case Media.Codec.DataLayout.SemiPlanar:
-                        {
-                            //Planar of 1st component
-
-                            //Packed for all remaining components?
-
-                            yield break;
-                        }
-                }
+                foreach(var componentData in value)
+                    SetComponentData(x, y, componentIndex++, componentData);
             }
         }
 
@@ -136,7 +93,137 @@ namespace Media.Codecs.Image
 
         #region Methods
 
+        //private int GetComponentDataOffset(int x, int y, int componentIndex)
+        //{
+        //    if (x < 0 || y < 0 || x >= Width || y >= Height || componentIndex >= ImageFormat.Components.Length)
+        //        return -1;
+
+        //    switch (DataLayout)
+        //    {
+        //        default:
+        //        case Media.Codec.DataLayout.Unknown:
+        //            throw new System.ArgumentException("Invalid DataLayout");
+
+        //        case Media.Codec.DataLayout.Packed:
+        //            return (y * Width + x) * ImageFormat.Size;
+
+        //        case Media.Codec.DataLayout.Planar:
+        //            int planeOffset = 0;
+        //            for (int c = 0; c < componentIndex; c++)
+        //            {
+        //                if (ImageFormat.Widths[c] < 0 || ImageFormat.Heights[c] < 0)
+        //                    continue;
+
+        //                planeOffset += PlaneLength(c);
+        //            }
+
+        //            int xOffset = x >> ImageFormat.Widths[componentIndex];
+        //            int yOffset = y >> ImageFormat.Heights[componentIndex];
+        //            return planeOffset + yOffset * PlaneWidth(componentIndex) + xOffset;
+
+        //        case Media.Codec.DataLayout.SemiPlanar:
+        //            // SemiPlanar is similar to Planar, but all planes are packed together in the order of YUV.
+        //            int semiPlanarOffset = 0;
+        //            for (int c = 0; c < componentIndex; c++)
+        //            {
+        //                int componentSize = Common.Binary.BitsToBytes(ImageFormat.Components[c].Size);
+        //                semiPlanarOffset += componentSize * Width * Height;
+        //            }
+
+        //            int semiPlanarXOffset = x >> ImageFormat.Widths[componentIndex];
+        //            int semiPlanarYOffset = y >> ImageFormat.Heights[componentIndex];
+        //            return semiPlanarOffset + semiPlanarYOffset * PlaneWidth(componentIndex) + semiPlanarXOffset;
+        //    }
+        //}
+
+        public int GetComponentDataOffset(int x, int y, int componentIndex)
+        {
+            if (componentIndex < 0 || componentIndex > ImageFormat.Components.Length)
+                return -1;
+
+            int offset = 0;
+
+            for (int c = 0; c < componentIndex; c++)
+            {
+                // Add the size of the previous component to the offset
+                offset += ImageFormat.Components[c].Length;
+
+                int widthSampling = ImageFormat.Widths[c];
+                int heightSampling = ImageFormat.Heights[c];
+
+                // If the component has subsampling factors and the data layout is Planar, adjust the offset based on the current position (x, y)
+                if (DataLayout == Media.Codec.DataLayout.Planar && widthSampling > 0 &&  heightSampling > 0)
+                {
+                    int planeWidth = PlaneWidth(c);
+                    //int planeHeight = PlaneHeight(c);
+
+                    int planeX = x >> widthSampling;
+                    int planeY = y >> heightSampling;
+
+                    offset += (planeY * planeWidth + planeX) * ImageFormat.Components[c].Length;
+                }
+            }
+
+            // Add the offset for the current component within the plane
+            if (DataLayout == Media.Codec.DataLayout.Planar && ImageFormat.Widths[componentIndex] > 0 && ImageFormat.Heights[componentIndex] > 0)
+            {
+                int planeWidth = PlaneWidth(componentIndex);
+                //int planeHeight = PlaneHeight(componentIndex);
+
+                int planeX = x >> ImageFormat.Widths[componentIndex];
+                int planeY = y >> ImageFormat.Heights[componentIndex];
+
+                offset += (planeY * planeWidth + planeX) * ImageFormat.Components[componentIndex].Length;
+            }
+            else
+            {
+                // If there are no subsampling factors, simply add the offset for the current component
+                offset += (y * Width + x) * ImageFormat.Components[componentIndex].Length;
+            }
+
+            return offset;
+        }
+
+        public MemorySegment GetPixelComponent(int x, int y, MediaComponent component)
+        {
+            int componentIndex = GetComponentIndex(component);
+
+            if (componentIndex < 0)
+                throw new ArgumentException("Invalid component specified.");
+
+            int offset = GetComponentDataOffset(x, y, componentIndex);
+
+            if (offset < 0)
+                throw new IndexOutOfRangeException("Coordinates are outside the bounds of the image.");
+
+            return new MemorySegment(Data.Array, offset, component.Length);
+        }
+
+        public int GetComponentIndex(MediaComponent component)
+        {
+            for (int i = 0; i < ImageFormat.Components.Length; i++)
+            {
+                if (ImageFormat.Components[i].Id == component.Id)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        public int GetComponentIndex(byte componentId)
+        {
+            for (int i = 0; i < ImageFormat.Components.Length; i++)
+            {
+                if (ImageFormat.Components[i].Id == componentId)
+                    return i;
+            }
+
+            return -1;
+        }
+
         //http://stackoverflow.com/questions/1881455/why-am-i-getting-strange-results-bit-shifting-by-a-negative-value
+
+
 
         public int PlaneWidth(int plane)
         {
@@ -176,7 +263,65 @@ namespace Media.Codecs.Image
             return Common.Binary.BitsToBytes(PlaneSize(plane));
         }
 
-        //TODO, Should have GetPixel and SetPixel methods. (requires a color type etc)
+        public void SetComponentData(int x, int y, int componentIndex, MemorySegment data)
+        {
+            if (componentIndex < 0 || componentIndex >= ImageFormat.Components.Length)
+                return; // or throw an exception
+
+            if (x < 0 || y < 0 || x >= Width || y >= Height)
+                return; // or throw an exception
+
+            int offset = GetComponentDataOffset(x, y, componentIndex);
+            if (offset < 0)
+                return; // or throw an exception
+
+            Buffer.BlockCopy(data.Array, data.Offset, Data.Array, Data.Offset + offset, data.Count);
+        }
+
+        // Set the value of a specific component at the given (x, y) coordinates
+        public void SetComponentData(int x, int y, byte componentId, MemorySegment data)
+        {
+            int componentIndex = GetComponentIndex(componentId);
+            if (componentIndex == -1)
+                return;
+
+            int offset = GetComponentDataOffset(x, y, componentIndex);
+            if (offset == -1)
+            {
+                // Component doesn't exist in this format, return without setting anything.
+                return;
+            }
+
+            // Make sure the data has the correct length for the component.
+            int componentLength = ImageFormat.Components[componentIndex].Length;
+            if (data.Count != componentLength)
+            {
+                throw new ArgumentException($"Invalid data length for component {componentId}. Expected length: {componentLength} bytes.", nameof(data));
+            }
+
+            // Copy the data into the image's memory buffer at the correct offset.
+            Buffer.BlockCopy(data.Array, data.Offset, Data.Array, Data.Offset + offset, data.Count);
+        }
+
+        public MemorySegment GetPixelComponent(int x, int y, byte componentId)
+        {
+            int componentIndex = GetComponentIndex(componentId);
+            if (componentIndex == -1)
+            {
+                throw new ArgumentException("Invalid component ID.", nameof(componentId));
+            }
+
+            int offset = GetComponentDataOffset(x, y, componentIndex);
+            if (offset == -1)
+            {
+                // Component doesn't exist in this format, return an empty MemorySegment.
+                return MemorySegment.Empty;
+            }
+
+            // Now, you have the offset, so you can return a MemorySegment representing the component data.
+            return new MemorySegment(Data.Array, Data.Offset + offset, ImageFormat.Components[componentIndex].Length);
+        }
+
 
         #endregion
     }
@@ -235,7 +380,7 @@ namespace Media.UnitTests
 
                     //Transform RGB to YUV
 
-                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.RGB(rgbImage, yuvImage))
+                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.RgbToYuvImageTransformation(rgbImage, yuvImage))
                     {
                         start = System.DateTime.UtcNow;
 
@@ -251,7 +396,7 @@ namespace Media.UnitTests
 
                     //Transform YUV to RGB
 
-                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.YUV(yuvImage, rgbImage))
+                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.YuvToRgbTransformation(yuvImage, rgbImage))
                     {
                         start = System.DateTime.UtcNow;
 
@@ -367,7 +512,7 @@ namespace Media.UnitTests
 
                     //Transform RGB to YUV
 
-                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.RGB(rgbImage, yuvImage))
+                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.RgbToYuvImageTransformation(rgbImage, yuvImage))
                     {
                         it.Transform();
 
@@ -377,7 +522,7 @@ namespace Media.UnitTests
 
                     //Transform YUV to RGB
 
-                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.YUV(yuvImage, rgbImage))
+                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.YuvToRgbTransformation(yuvImage, rgbImage))
                     {
                         it.Transform();
 
@@ -419,7 +564,7 @@ namespace Media.UnitTests
 
                     //Transform RGB to YUV
 
-                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.RGB(rgbImage, yuvImage))
+                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.RgbToYuvImageTransformation(rgbImage, yuvImage))
                     {
                         it.Transform();
 
@@ -429,7 +574,7 @@ namespace Media.UnitTests
 
                     //Transform YUV to RGB
 
-                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.YUV(yuvImage, rgbImage))
+                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.YuvToRgbTransformation(yuvImage, rgbImage))
                     {
                         it.Transform();
 
@@ -483,7 +628,7 @@ namespace Media.UnitTests
 
                     //Transform RGB to YUV
 
-                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.RGB(rgbImage, yuvImage))
+                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.RgbToYuvImageTransformation(rgbImage, yuvImage))
                     {
                         it.Transform();
 
@@ -493,7 +638,7 @@ namespace Media.UnitTests
 
                     //Transform YUV to RGB
 
-                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.YUV(yuvImage, rgbImage))
+                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.YuvToRgbTransformation(yuvImage, rgbImage))
                     {
                         it.Transform();
 
