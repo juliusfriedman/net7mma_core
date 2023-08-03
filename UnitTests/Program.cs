@@ -112,6 +112,7 @@ namespace Media.UnitTests
             //Tools 
             TestRtpTools, 
             //Containers
+            TestRiffWriter,
             TestContainerImplementations, 
             //Codec
             TestCodec,
@@ -3995,6 +3996,11 @@ a=appversion:1.0");
                 }
 
             #endregion
+        }
+
+        static void TestRiffWriter()
+        {
+            Media.Containers.Riff.Program.Main(null);
         }
 
         #endregion

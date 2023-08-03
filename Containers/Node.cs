@@ -141,7 +141,7 @@ namespace Media.Container
         /// <summary>
         /// The Offset in which the <see cref="Data"/> occurs in the <see cref="Master"/>
         /// </summary>
-        public readonly long DataOffset;
+        public long DataOffset;
             
         /// <summary>
         /// The amount of bytes contained in the Node's <see cref="Data" />
