@@ -1,222 +1,241 @@
 ﻿using Media.Common;
+using Media.Common.Interfaces;
 using Media.Container;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Numerics;
 using static Media.Containers.Riff.RiffReader;
 
 public class RiffWriter : MediaFileWriter
 {
-    private long videoFrameIndex;
-    private readonly int width;
-    private readonly int height;
-    private readonly int framesPerSecond;
-    private readonly uint dataRate;
-    private readonly uint bufferSize;
+    #region Nested Types
 
-    public override Node Root => throw new NotImplementedException();
-
-    public override Node TableOfContents => throw new NotImplementedException();
-
-    public RiffWriter(Uri location, int width, int height, int framesPerSecond)
-        : base(location, FileAccess.Write)
+    public abstract class Chunk : Media.Container.Node
     {
-        // Set AVI-specific properties
-        this.width = width;
-        this.height = height;
-        this.framesPerSecond = framesPerSecond;
-        this.dataRate = 1000000 / (uint)framesPerSecond; // 1 second in microseconds
-        this.bufferSize = (uint)(width * height * 3); // RGB24 format
+        public FourCharacterCode ChunkId => (FourCharacterCode)Binary.Read32(Identifier, 0, false);
+        public Chunk(IMediaContainer master, FourCharacterCode chunkId)
+            :base(master, BitConverter.GetBytes((long)chunkId), 0, 0, 0, true)
+        {
+        }
 
-        // Write AVI file header
-        WriteHeader();
+        protected abstract int GetChunkDataSize();
+        protected abstract void WriteChunkData(MediaFileWriter writer);
     }
 
-    // Helper method to write a 4-byte integer value to the stream
-    private void WriteInt32(int value)
+    public class DataChunk : Chunk
     {
-        WriteByte((byte)(value & 0xFF));
-        WriteByte((byte)((value >> 8) & 0xFF));
-        WriteByte((byte)((value >> 16) & 0xFF));
-        WriteByte((byte)((value >> 24) & 0xFF));
+        private byte[] data;
+
+        public DataChunk(IMediaContainer master, FourCharacterCode chunkId) : base(master, chunkId)
+        {
+        }
+
+        public void SetData(byte[] data)
+        {
+            this.data = data;
+        }
+
+        protected override int GetChunkDataSize()
+        {
+            return data?.Length ?? 0;
+        }
+
+        protected override void WriteChunkData(MediaFileWriter writer)
+        {
+            writer.Write(data);
+        }
     }
 
-    protected void WriteInt16(short value)
+    public class WaveFormatChunk : DataChunk
     {
-        WriteByte((byte)value);
-        WriteByte((byte)(value >> 8));
+        public WaveFormatChunk(IMediaContainer master, int sampleRate, int channels, int bitDepth, int audioFormat = 1)
+            : base(master, FourCharacterCode.fmt)
+        {
+            SampleRate = sampleRate;
+            Channels = (short)channels;
+            BitDepth = (short)bitDepth;
+            AudioFormat = (short)audioFormat; // 1 represents PCM, which is the most common audio format
+            BlockAlign = (short)(channels * (bitDepth / 8));
+            ByteRate = SampleRate * BlockAlign;
+        }
+
+        public int SampleRate { get; private set; }
+        public short AudioFormat { get; private set; }
+        public short Channels { get; private set; }
+        public int ByteRate { get; private set; }
+        public short BlockAlign { get; private set; }
+        public short BitDepth { get; private set; }
+
+        protected override void WriteChunkData(MediaFileWriter writer)
+        {
+            // Write the format chunk data in little-endian format
+            writer.WriteInt16LittleEndian(AudioFormat);
+            writer.WriteInt16LittleEndian(Channels);
+            writer.WriteInt32LittleEndian(SampleRate);
+            writer.WriteInt32LittleEndian(ByteRate);
+            writer.WriteInt16LittleEndian(BlockAlign);
+            writer.WriteInt16LittleEndian(BitDepth);
+        }
     }
+
+    public class AviStreamHeader : Chunk
+    {
+        public AviStreamHeader(IMediaContainer master, FourCharacterCode streamType)
+            : base(master, FourCharacterCode.strh)
+        {
+            StreamType = streamType;
+        }
+
+        public FourCharacterCode StreamType { get; private set; }
+
+        public ushort Handler { get; set; }
+
+        public ushort Flags { get; set; }
+
+        public ushort Priority { get; set; }
+
+        public ushort Language { get; set; }
+
+        public uint InitialFrames { get; set; }
+
+        public uint Scale { get; set; }
+
+        public uint Rate { get; set; }
+
+        public uint Start { get; set; }
+
+        public uint Length { get; set; }
+
+        public uint SuggestedBufferSize { get; set; }
+
+        public uint Quality { get; set; }
+
+        public uint SampleSize { get; set; }
+
+        public Complex FrameRate
+        {
+            get { return new Complex((int)Rate, (int)Scale); }
+            set
+            {
+                Rate = (uint)value.Real;
+                Scale = (uint)value.Imaginary;
+            }
+        }
+
+        protected override int GetChunkDataSize()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void WriteChunkData(MediaFileWriter writer)
+        {
+            writer.WriteInt32LittleEndian((int)StreamType);
+            writer.WriteInt16LittleEndian((short)Handler);
+            writer.WriteInt16LittleEndian((short)Flags);
+            writer.WriteInt16LittleEndian((short)Priority);
+            writer.WriteInt16LittleEndian((short)Language);
+            writer.WriteInt32LittleEndian((int)InitialFrames);
+            writer.WriteInt32LittleEndian((int)Scale);
+            writer.WriteInt32LittleEndian((int)Rate);
+            writer.WriteInt32LittleEndian((int)Start);
+            writer.WriteInt32LittleEndian((int)Length);
+            writer.WriteInt32LittleEndian((int)SuggestedBufferSize);
+            writer.WriteInt32LittleEndian((int)Quality);
+            writer.WriteInt32LittleEndian((int)SampleSize);
+        }
+    }
+
+    #endregion
+
+    private List<Chunk> chunks;
+
+    private FourCharacterCode riffType;
+    private FourCharacterCode fileType;
+
+    public override Node Root => chunks[0];
+
+    public override Node TableOfContents => chunks.FirstOrDefault(c => c.ChunkId == FourCharacterCode.avih);
+
+    public RiffWriter(Uri filename, FourCharacterCode riffType, FourCharacterCode fileType)
+        : base(filename)
+    {
+        if (!Enum.IsDefined(typeof(FourCharacterCode), fileType))
+            throw new ArgumentException("Invalid file type.", nameof(fileType));
+
+        this.riffType = riffType;
+        this.fileType = fileType;
+    }
+
+    //public void WriteSineWave(int frequency, int sampleRate, int bitDepth, int numChannels, int numSamples)
+    //{
+    //    double amplitude = (1 << (bitDepth - 1)) - 1;
+    //    double angularFrequency = 2.0 * Math.PI * frequency;
+    //    double timeStep = 1.0 / sampleRate;
+
+    //    for (int sample = 0; sample < numSamples; sample++)
+    //    {
+    //        double time = sample * timeStep;
+    //        double sampleValue = amplitude * Math.Sin(angularFrequency * time);
+
+    //        // Write the sample value to the WAV file for each channel
+    //        for (int channel = 0; channel < numChannels; channel++)
+    //        {
+    //            WriteSample(BitConverter.GetBytes(sampleValue));
+    //        }
+    //    }
+    //}
+
+    public void WriteSample(byte[] data)
+    {
+        if (data == null)
+            throw new ArgumentNullException(nameof(data));
+
+        Write(data, 0, data.Length);
+    }
+
+    protected void WriteFourCC(FourCharacterCode fourCC) => WriteInt32LittleEndian((int)fourCC);
 
     public override void WriteHeader()
     {
-        // Ensure the file stream is open
-        if (BaseStream == null || !BaseStream.CanWrite)
-            throw new InvalidOperationException("The file stream is not open for writing.");
+        // Write RIFF chunk
+        WriteFourCC(riffType);
+        WriteInt32LittleEndian(0); // Placeholder for chunk size
+        WriteFourCC(fileType);
 
-        // Write the RIFF header
-        WriteRiffHeader();
-
-        // Write the AVI header
-        WriteAviHeader();
-
-        // Write the video stream header
-        WriteVideoStreamHeader(width, height, framesPerSecond, FourCharacterCode.MJPG);
-
-        // Write the audio stream header (if audio is supported)
-        WriteAudioStreamHeader();
-    }
-
-    private void WriteRiffHeader()
-    {
-        // Write the 'RIFF' chunk ID
-        WriteInt32((int)FourCharacterCode.RIFF);
-
-        // Placeholder for the RIFF chunk size (will be updated later)
-        long riffSizePos = BaseStream.Position;
-        WriteInt32(0); // 0 size for now
-
-        // Write the 'AVI ' chunk type
-        WriteInt32((int)FourCharacterCode.AVI);
-    }
-
-    private void WriteAviHeader()
-    {
-        // Write the 'LIST' chunk ID
-        WriteInt32((int)FourCharacterCode.LIST);
-
-        // Placeholder for the 'LIST' chunk size (will be updated later)
-        long listSizePos = BaseStream.Position;
-        WriteInt32(0); // 0 size for now
-
-        // Write the 'hdlr' chunk type
-        WriteInt32((int)FourCharacterCode.hdlr);
-    }
-
-    private void WriteVideoStreamHeader(int width, int height, double frameRate, FourCharacterCode codecCode)
-    {
-        // Write the 'strh' chunk ID
-        WriteInt32((int)FourCharacterCode.strh);
-
-        // Write the 'strh' chunk size (set to 56 for video stream header)
-        WriteInt32(56);
-
-        // Write the 'vids' four character code (video stream type)
-        WriteInt32((int)FourCharacterCode.vids);
-
-        // Write the 'fccHandler' (four character code) for MJPEG codec
-        WriteInt32((int)codecCode);
-
-        // Write the flags (set to 0 for uncompressed video)
-        WriteInt32(0);
-
-        // Write the priority, language, and initial frames (all set to 0)
-        WriteInt32(0);
-        WriteInt32(0);
-        WriteInt32(0);
-
-        // Write the scale and rate (frame rate in frames per second)
-        int scale = 1;
-        int rate = (int)(frameRate * scale);
-        WriteInt32(scale);
-        WriteInt32(rate);
-
-        // Write the start time and length (both set to 0)
-        WriteInt32(0);
-        WriteInt32(0);
-
-        // Write the suggested buffer size and quality (both set to 0)
-        WriteInt32(0);
-        WriteInt32(0);
-
-        // Write the rectangle (video dimensions)
-        WriteInt32(0);
-        WriteInt32(0);
-        WriteInt32(width);
-        WriteInt32(height);
-
-        // Write the 'strf' chunk ID
-        WriteInt32((int)FourCharacterCode.strf);
-
-        // Write the 'strf' chunk size (set to 40 for MJPEG video stream format)
-        WriteInt32(40);
-
-        // Write the biSize (size of BITMAPINFOHEADER structure, set to 40 for MJPEG)
-        WriteInt32(40);
-
-        // Write the biWidth and biHeight (video dimensions)
-        WriteInt32(width);
-        WriteInt32(height);
-
-        // Write the biPlanes (set to 1)
-        WriteInt16(1);
-
-        // Write the biBitCount (bits per pixel, set to 24 for MJPEG)
-        WriteInt16(24);
-
-        // Write the biCompression (four character code, set to MJPG for MJPEG)
-        WriteInt32((int)FourCharacterCode.MJPG);
-
-        // Write the biSizeImage (set to 0 for MJPEG)
-        WriteInt32(0);
-
-        // Write the biXPelsPerMeter and biYPelsPerMeter (both set to 0)
-        WriteInt32(0);
-        WriteInt32(0);
-
-        // Write the biClrUsed and biClrImportant (both set to 0)
-        WriteInt32(0);
-        WriteInt32(0);
-    }
-
-    private void WriteAudioStreamHeader()
-    {
-        // Write the 'strl' chunk ID
-        WriteInt32((int)FourCharacterCode.strl);
-
-        // Placeholder for the 'strl' chunk size (will be updated later)
-        long strlSizePos = BaseStream.Position;
-        WriteInt32(0); // 0 size for now
-
-        // Write the 'strh' chunk ID
-        WriteInt32((int)FourCharacterCode.strh);
-
-        // Write the 'strh' chunk size (always 56 for audio stream)
-        WriteInt32(56);
-
-        // Write the audio stream header data (AVIStreamHeader structure)
-        // (Not implemented in this example)
-        // You need to write the AVIStreamHeader structure based on the audio codec you're using.
-
-        // Update the size of the 'strl' chunk
-        long endPos = BaseStream.Position;
-        int strlSize = (int)(endPos - strlSizePos - 4);
-        BaseStream.Position = strlSizePos;
-        WriteInt32(strlSize);
-        BaseStream.Position = endPos;
-    }
-
-    public override void WriteVideoFrame(byte[] frameData)
-    {
-        // Write video frame data
-        // (Not implemented in this example)
-        // This method will handle writing video frame data in the AVI format
-        // It may involve writing chunk data, video stream data, frame headers, etc.
-    }
-
-    public override void WriteAudioSamples(byte[] audioData)
-    {
-        // Write audio samples
-        // (Not implemented in this example)
-        // This method will handle writing audio samples in the AVI format
-        // It may involve writing chunk data, audio stream data, sample headers, etc.
+        // Write data sub-chunk header (placeholder for data size)
+        WriteFourCC(FourCharacterCode.data);
+        WriteInt32LittleEndian(0); // Placeholder for data size
+        WriteFourCC(fileType); // Write the fileType (e.g., AVI, WAV, etc.)
     }
 
     public override void Close()
     {
-        // Write AVI file footer and cleanup
-        // (Not implemented in this example)
+        // Update data chunk size
+        long dataChunkSize = Position - 4;
+        Seek(4, SeekOrigin.Begin);
+        WriteInt32LittleEndian((int)dataChunkSize);
+    }
+    public void AddChunk(Chunk chunk)
+    {
+        if (chunk == null)
+            throw new ArgumentNullException(nameof(chunk));
 
-        base.Close();
+        if (chunks == null)
+            chunks = new List<Chunk>();
+
+        chunks.Add(chunk);
+    }
+
+    public override void WriteVideoFrame(byte[] frameData)
+    {
+        throw new NotImplementedException();
+    }
+
+    public override void WriteAudioSamples(byte[] audioData)
+    {
+        throw new NotImplementedException();
     }
 
     public override IEnumerator<Node> GetEnumerator()
@@ -224,15 +243,10 @@ public class RiffWriter : MediaFileWriter
         throw new NotImplementedException();
     }
 
-    public override IEnumerable<Track> GetTracks()
-    {
-        throw new NotImplementedException();
-        //yield return new Track(Root, "", 1, create)
-    }
+    public override IEnumerable<Track> GetTracks() => Tracks;
 
     public override SegmentStream GetSample(Track track, out TimeSpan duration)
     {
-        //Should use the reader?
         throw new NotImplementedException();
     }
 }
