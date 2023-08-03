@@ -36,6 +36,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
+using System.Linq;
+
 namespace Media.Codec
 {
     /// <summary>
@@ -297,6 +299,11 @@ namespace Media.Codec
                 return result;
             }
         }
+
+        /// <summary>
+        /// Gets the size in bits of a single sample.
+        /// </summary>
+        public int SampleSize => Components.Sum(c => c.Size);
 
         #endregion
 

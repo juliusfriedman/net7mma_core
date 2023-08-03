@@ -3,6 +3,7 @@ using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Media.Codecs.Image
 {
@@ -194,28 +195,6 @@ namespace Media.Codecs.Image
             return new MemorySegment(Data.Array, offset, component.Length);
         }
 
-        public int GetComponentIndex(MediaComponent component)
-        {
-            for (int i = 0; i < ImageFormat.Components.Length; i++)
-            {
-                if (ImageFormat.Components[i].Id == component.Id)
-                    return i;
-            }
-
-            return -1;
-        }
-
-        public int GetComponentIndex(byte componentId)
-        {
-            for (int i = 0; i < ImageFormat.Components.Length; i++)
-            {
-                if (ImageFormat.Components[i].Id == componentId)
-                    return i;
-            }
-
-            return -1;
-        }
-
         public int PlaneWidth(int plane)
         {
             if (plane >= MediaFormat.Components.Length) return -1;
@@ -256,9 +235,6 @@ namespace Media.Codecs.Image
 
         public void SetComponentData(int x, int y, int componentIndex, MemorySegment data)
         {
-            if (componentIndex < 0 || componentIndex >= ImageFormat.Components.Length)
-                return; // or throw an exception
-
             if (x < 0 || y < 0 || x >= Width || y >= Height)
                 return; // or throw an exception
 
@@ -268,6 +244,20 @@ namespace Media.Codecs.Image
 
             Buffer.BlockCopy(data.Array, data.Offset, Data.Array, Data.Offset + offset, data.Count);
         }
+
+        public void SetComponentData(int x, int y, int componentIndex, Vector<byte> componentData)
+        {
+            int offset = CalculateComponentDataOffset(x, y, componentIndex);
+            int vectorSize = Vector<byte>.Count;
+
+            if (offset < 0 || offset + vectorSize > Data.Count)
+            {
+                throw new ArgumentOutOfRangeException("componentData", "ComponentData doesn't fit in the image buffer.");
+            }
+
+            componentData.CopyTo(new Span<byte>(Data.Array, offset, vectorSize));
+        }
+
 
         // Set the value of a specific component at the given (x, y) coordinates
         public void SetComponentData(int x, int y, byte componentId, MemorySegment data)
@@ -294,7 +284,7 @@ namespace Media.Codecs.Image
             Buffer.BlockCopy(data.Array, data.Offset, Data.Array, Data.Offset + offset, data.Count);
         }
 
-        public MemorySegment GetPixelComponent(int x, int y, byte componentId)
+        public MemorySegment GetComponentData(int x, int y, byte componentId)
         {
             int componentIndex = GetComponentIndex(componentId);
             if (componentIndex == -1)
@@ -311,6 +301,19 @@ namespace Media.Codecs.Image
 
             // Now, you have the offset, so you can return a MemorySegment representing the component data.
             return new MemorySegment(Data.Array, Data.Offset + offset, ImageFormat.Components[componentIndex].Length);
+        }
+
+        public Vector<byte> GetComponentData(int x, int y, int componentIndex)
+        {
+            int offset = CalculateComponentDataOffset(x, y, componentIndex);
+            int vectorSize = Vector<byte>.Count;
+
+            if (offset < 0 || offset + vectorSize > Data.Count)
+            {
+                throw new ArgumentOutOfRangeException("componentIndex", "Invalid component index or component data does not fit in the image buffer.");
+            }
+
+            return new Vector<byte>(Data.Array, offset);
         }
 
 
@@ -337,6 +340,31 @@ namespace Media.UnitTests
                 if (image.SampleCount != 1) throw new System.InvalidOperationException();
 
                 if (image.Data.Count != image.Width * image.Height * image.MediaFormat.Length) throw new System.InvalidOperationException();
+            }
+        }
+
+        public static void TestGetComponentData()
+        {
+            using (Media.Codecs.Image.Image image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 10, 10))
+            {
+                for(int x = 0; x < image.Width; x++)
+                {
+                    for(int y = 0; y < image.Height; y++)
+                    {
+                        for(int c = 0; c < image.ImageFormat.Length; c++)
+                        {
+                            var component = image.ImageFormat[c];
+                            var data = image.GetComponentData(x, y, component);
+                            Array.Fill(data.Array, byte.MaxValue);
+                            image.SetComponentData(x, y, c, data);
+                            
+                            data = image.GetComponentData(x, y, component);
+                            if (data.Array.Any(b => b != byte.MaxValue)) throw new Exception("Did not set Component data");
+                        }
+                    }
+                }
+
+                if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new Exception("Did not set Component data");
             }
         }
 

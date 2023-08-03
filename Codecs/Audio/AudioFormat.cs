@@ -146,27 +146,12 @@ namespace Media.Codecs.Audio
         /// <summary>
         /// Gets the amount of channels.
         /// </summary>
-        //public int Channels { get { return m_Channels; } }
+        public int Channels => Components.Length;        
 
         /// <summary>
-        /// Gets the size in bits of a single sample.
+        /// Gets the number of bits per sample.
         /// </summary>
-        //public int SampleSize { get { return m_SampleSize; } }
-
-        /// <summary>
-        /// Gets the sample rate.
-        /// </summary>
-        //public int SampleRate { get { return m_SampleRate; } }
-
-        /// <summary>
-        /// Gets the <see cref="Media.Common.Binary.ByteOrder"/> of the format.
-        /// </summary>
-        //public Common.Binary.ByteOrder ByteOrder { get { return m_ByteOrder; } }
-
-        /// <summary>
-        /// Indicates if the sample data is signed, useful for determining the mid point.
-        /// </summary>
-        //public bool IsSigned { get { return m_Signed; } }
+        public int BitsPerSample => SampleSize / Channels;
 
         #endregion
 

@@ -474,22 +474,22 @@ namespace Media.Common
     /// </summary>
     public class BitSegment : MemorySegment
     {
-        long m_BitOffset, m_BitCount;
+        ulong m_BitOffset, m_BitCount;
 
         public int BitCount
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return (int)m_BitCount; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            protected set { m_BitCount = value; }
+            protected set { m_BitCount = (ulong)value; }
         }
 
         public long LongBitCount
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return m_BitCount; }
+            get { return (long)m_BitCount; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            protected set { m_BitCount = value; }
+            protected set { m_BitCount = (ulong)value; }
         }
 
         public int BitOffset
@@ -497,19 +497,19 @@ namespace Media.Common
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return (int)m_BitOffset; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            protected set { m_BitOffset = value; }
+            protected set { m_BitOffset = (ulong)value; }
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public BitSegment(int bitSize, bool shouldDispose = true) : base(Common.Binary.BitsToBytes(ref bitSize), shouldDispose) { m_BitCount = bitSize; }
+        public BitSegment(int bitSize, bool shouldDispose = true) : base(Common.Binary.BitsToBytes(ref bitSize), shouldDispose) { m_BitCount = (ulong)bitSize; }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public BitSegment(byte[] reference, int bitOffset, int bitCount, bool shouldDispose = true)
             : base(reference, Common.Binary.BitsToBytes(ref bitOffset), Common.Binary.BitsToBytes(ref bitCount), shouldDispose)
         {
-            m_BitOffset = bitOffset;
+            m_BitOffset = (ulong)bitOffset;
 
-            m_BitCount = bitCount;
+            m_BitCount = (ulong)bitCount;
         }
 
         //reference may be null
@@ -529,7 +529,19 @@ namespace Media.Common
     /// </summary>
     public static class MemorySegmentExtensions
     {
-        //public static System.IO.MemoryStream ToMemoryStream() readable, writeable, publicablyVisible...
+        public static void Clear(this MemorySegment segment) => Array.Clear(segment.Array, segment.Offset, segment.Count);
+
+        public static void Fill(this MemorySegment segment, byte value) => Array.Fill(segment.Array, value);
+
+        public static MemorySegment Slice(this MemorySegment segment, int offset) => Slice(segment, offset, segment.Count - offset);
+
+        public static MemorySegment Slice(this MemorySegment segment, int offset, int count) => new MemorySegment(segment.Array, segment.Offset + offset, count);
+
+        public static void CopyTo(this MemorySegment segment, MemorySegment other) => Buffer.BlockCopy(segment.Array, segment.Offset, other.Array, other.Offset, segment.Count);
+
+        public static void CopyFrom(this MemorySegment segment, MemorySegment other) => Buffer.BlockCopy(other.Array, other.Offset, segment.Array, segment.Offset, other.Count);
+
+        public static System.IO.MemoryStream ToMemoryStream(this MemorySegment segment) => new System.IO.MemoryStream(segment.Array, segment.Offset, segment.Count, true);
 
         public static Span<byte> ToSpan(this MemorySegment segment) => new Span<byte>(segment.Array, segment.Offset, segment.Count);
 
@@ -556,7 +568,7 @@ namespace Media.Common
         {
             return new ArraySegment<byte>(segment.Array, segment.Offset, segment.Count);
         }
-        
+
         /// <summary>
         /// Copies all bytes from the segment to dest
         /// </summary>

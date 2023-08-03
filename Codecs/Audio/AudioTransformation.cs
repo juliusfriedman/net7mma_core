@@ -124,4 +124,87 @@ namespace Media.Codecs.Audio
 
         #endregion
     }
+
+    /// <summary>
+    /// Defines a class which can upsample or downsample data.
+    /// </summary>
+    public class AudioTransformer : AudioTransformation
+    {
+        // The upsampling or downsampling factor
+        private int sampleRateFactor;
+
+        public AudioTransformer(AudioBuffer source, AudioBuffer destination, int sampleRateFactor, Codec.TransformationQuality quality = Codec.TransformationQuality.Unspecified, bool shouldDispose = true)
+            : base(source, destination, quality, shouldDispose)
+        {
+            this.sampleRateFactor = sampleRateFactor;
+        }
+
+        public override void Transform()
+        {
+            if (sampleRateFactor == 1)
+            {
+                // No change in sample rate, just copy the data
+                Destination.Data.Array.CopyTo(Source.Data.Array, Source.Data.Offset);
+                return;
+            }
+
+            if (sampleRateFactor > 0)
+            {
+                // Upsample the audio data
+                int destSampleCount = Source.SampleCount * sampleRateFactor;
+                var format = new AudioFormat(Source.AudioFormat.SampleRate * sampleRateFactor, Source.AudioFormat.IsSigned, Source.AudioFormat.ByteOrder, Source.DataLayout, Source.AudioFormat.Components);
+                var destBuffer = new AudioBuffer(format, destSampleCount);
+
+                for (int channel = 0; channel < Source.Channels; channel++)
+                {
+                    for (int i = 0; i < Source.SampleCount; i++)
+                    {
+                        int destIndex = i * sampleRateFactor;
+                        for (int j = 0; j < sampleRateFactor; j++)
+                        {
+                            destBuffer.SetSampleData(destIndex + j, channel, Source.GetSampleData(i, channel));
+                        }
+                    }
+                }
+
+                destBuffer.Data.Array.CopyTo(Destination.Data.Array, Destination.Data.Offset);
+            }
+            else if (sampleRateFactor < 0)
+            {
+                // Downsampling by dropping samples
+                int destSampleCount = Source.SampleCount / System.Math.Abs(sampleRateFactor);
+                var format = new AudioFormat(Source.AudioFormat.SampleRate / System.Math.Abs(sampleRateFactor), Source.AudioFormat.IsSigned, Source.AudioFormat.ByteOrder, Source.DataLayout, Source.AudioFormat.Components);
+                var destBuffer = new AudioBuffer(format, destSampleCount);
+
+                for (int channel = 0; channel < Source.Channels; channel++)
+                {
+                    for (int i = 0; i < destSampleCount; i++)
+                    {
+                        int sourceIndex = i * System.Math.Abs(sampleRateFactor);
+                        destBuffer.SetSampleData(i, channel, Source.GetSampleData(sourceIndex, channel));
+                    }
+                }
+
+                destBuffer.Data.Array.CopyTo(Destination.Data.Array, Destination.Data.Offset);
+            }
+        }
+    }
+
+    //// Example for upsampling by a factor of 2
+    //int upsampleFactor = 2;
+    //AudioBuffer sourceBuffer = ... // Initialize the source buffer
+    //AudioBuffer destinationBuffer = new AudioBuffer(new AudioFormat(sourceBuffer.SampleRate * upsampleFactor, 16, Common.Binary.ByteOrder.Little, sourceBuffer.AudioFormat.Components), sourceBuffer.SampleCount * upsampleFactor);
+    //AudioTransformer upsampleTransform = new AudioTransformer(upsampleFactor);
+    //upsampleTransform.Source = sourceBuffer;
+    //upsampleTransform.Destination = destinationBuffer;
+    //upsampleTransform.Transform();
+
+    //// Example for downsampling by a factor of 2
+    //int downsampleFactor = -2;
+    //AudioBuffer sourceBuffer = ... // Initialize the source buffer
+    //AudioBuffer destinationBuffer = new AudioBuffer(new AudioFormat(sourceBuffer.SampleRate / Math.Abs(downsampleFactor), 16, Common.Binary.ByteOrder.Little, sourceBuffer.AudioFormat.Components), sourceBuffer.SampleCount / Math.Abs(downsampleFactor));
+    //AudioTransformer downsampleTransform = new AudioTransformer(downsampleFactor);
+    //downsampleTransform.Source = sourceBuffer;
+    //downsampleTransform.Destination = destinationBuffer;
+    //downsampleTransform.Transform();
 }

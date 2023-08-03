@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Media.Codec;
+using Media.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -104,6 +106,140 @@ namespace Media.Codecs.Audio
         /// Gets the sample rate
         /// </summary>
         public int SampleRate { get { return AudioFormat.SampleRate; } }
+
+        #endregion
+
+        #region Methods
+
+        public MemorySegment GetComponentData(int sampleOffset, MediaComponent component)
+        {
+            if (sampleOffset < 0 || sampleOffset >= SampleCount)
+                throw new ArgumentOutOfRangeException(nameof(sampleOffset), "Sample offset is out of range.");
+
+            if (component == null)
+                throw new ArgumentNullException(nameof(component));
+
+            int componentIndex = Array.IndexOf(MediaFormat.Components, component);
+
+            if (componentIndex < 0)
+                throw new ArgumentException("The specified component is not part of the media format.", nameof(component));
+
+            if (DataLayout == DataLayout.Packed)
+            {
+                int offset = sampleOffset * SampleLength * Channels;
+
+                for (int i = 0; i < componentIndex; i++)
+                    offset += MediaFormat.Components[i].Size / Binary.BitsPerByte;
+
+                int byteOffset = offset / Binary.BitsPerByte;
+
+                return new MemorySegment(Data.Array, Data.Offset + byteOffset, Data.Count - byteOffset);
+            }
+            else if (DataLayout == DataLayout.Planar)
+            {
+                int componentOffset = 0;
+
+                for (int i = 0; i < componentIndex; i++)
+                    componentOffset += MediaFormat.Components[i].Size;
+
+                int offset = sampleOffset * MediaFormat.Components[componentIndex].Length + componentOffset / Binary.BitsPerByte;
+                int byteOffset = offset / Binary.BitsPerByte;
+
+                return new MemorySegment(Data.Array, Data.Offset + byteOffset, Data.Count - byteOffset);
+            }
+            else if (DataLayout == DataLayout.SemiPlanar)
+            {
+                int offset = sampleOffset * SampleLength * Channels;
+
+                int componentOffset = 0;
+                for (int i = 0; i < componentIndex; i++)
+                    componentOffset += MediaFormat.Components[i].Size;
+
+                int packedSize = 0;
+                for (int i = 0; i < Channels; i++)
+                    packedSize += MediaFormat.Components[i].Size / Binary.BitsPerByte;
+
+                if (componentIndex == Channels - 1)
+                {
+                    // Last component (the packed one)
+                    offset += componentOffset / Binary.BitsPerByte;
+                }
+                else
+                {
+                    // Planar component
+                    offset += packedSize + (sampleOffset * MediaFormat.Components[componentIndex].Length);
+                }
+
+                int byteOffset = offset / 8;
+                return new MemorySegment(Data.Array, Data.Offset + byteOffset, Data.Count - byteOffset);
+            }
+            else
+            {
+                throw new InvalidOperationException("Unsupported data layout.");
+            }
+        }
+
+        public int CalculateSampleDataOffset(int sampleIndex, int channel)
+        {
+            if (sampleIndex < 0 || sampleIndex >= SampleCount)
+                throw new ArgumentOutOfRangeException(nameof(sampleIndex), "Invalid sample index");
+
+            if (channel < 0 || channel >= Channels)
+                throw new ArgumentOutOfRangeException(nameof(channel), "Invalid channel index");
+
+            int sampleSizeInBytes = Binary.BitsToBytes(AudioFormat.SampleSize);
+            int channelSizeInBytes = Binary.BitsToBytes(AudioFormat.Components[channel].Size);
+
+            return sampleIndex * sampleSizeInBytes + channel * channelSizeInBytes;
+        }
+
+        /// <summary>
+        /// Sets the sample data for the given sample index, channel, and component.
+        /// </summary>
+        /// <param name="sampleIndex">The index of the sample in the buffer.</param>
+        /// <param name="channel">The channel index. Must be within the range of available channels.</param>
+        /// <param name="componentData">The data to be set for the given sample, channel, and component.</param>
+        public void SetSampleData(int sampleIndex, int channel, MemorySegment data)
+        {
+            if (sampleIndex < 0 || sampleIndex >= SampleCount)
+                throw new ArgumentOutOfRangeException(nameof(sampleIndex), "Invalid sample index");
+
+            if (channel < 0 || channel >= Channels)
+                throw new ArgumentOutOfRangeException(nameof(channel), "Invalid channel index");
+
+            int offset = CalculateSampleDataOffset(sampleIndex, channel);
+
+            if (data.Count + offset > Data.Count)
+                throw new ArgumentException("The provided data segment is too large for the buffer.", nameof(data));
+
+            data.CopyTo(Data.Array, offset);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sampleIndex"></param>
+        /// <param name="channel"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        /// <exception cref="ArgumentException"></exception>
+        public MemorySegment GetSampleData(int sampleIndex, int channel)
+        {
+            if (sampleIndex < 0 || sampleIndex >= SampleCount)
+                throw new ArgumentOutOfRangeException(nameof(sampleIndex), "Invalid sample index");
+
+            if (channel < 0 || channel >= Channels)
+                throw new ArgumentOutOfRangeException(nameof(channel), "Invalid channel index");
+
+            int sampleSizeInBits = AudioFormat.SampleSize;
+            int bytesPerSample = sampleSizeInBits / Binary.BitsPerByte;
+            int offset = CalculateSampleDataOffset(sampleIndex, channel);
+
+            if (offset + bytesPerSample > Data.Count)
+                throw new ArgumentException("The requested sample data is outside the bounds of the buffer.");
+
+            return new MemorySegment(Data.Array, offset, bytesPerSample);
+        }
 
         #endregion
     }

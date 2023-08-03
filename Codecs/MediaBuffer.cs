@@ -36,6 +36,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
+using Media.Common;
+
 namespace Media.Codec
 {
     /// <summary>
@@ -120,16 +122,38 @@ namespace Media.Codec
         //    if (capacity > Data.Count)
         //    {
         //        Common.MemorySegment newData = new Common.MemorySegment(capacity), oldData = Data;
-                
+
         //        oldData.Array.CopyTo(newData.Array, 0);
-                
+
         //        Data = newData;
-                
+
         //        oldData.Dispose();
-                
+
         //        oldData = null;
         //    }
         //}
+
+        public int GetComponentIndex(MediaComponent component)
+        {
+            for (int i = 0; i < MediaFormat.Components.Length; i++)
+            {
+                if (MediaFormat.Components[i].Id == component.Id)
+                    return i;
+            }
+
+            return -1;
+        }
+
+        public int GetComponentIndex(byte componentId)
+        {
+            for (int i = 0; i < MediaFormat.Components.Length; i++)
+            {
+                if (MediaFormat.Components[i].Id == componentId)
+                    return i;
+            }
+
+            return -1;
+        }
 
         /// <summary>
         /// Indicates the amount of Bits used by a single sample in the buffer.
