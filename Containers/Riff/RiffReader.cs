@@ -133,6 +133,8 @@ namespace Media.Containers.Riff
             txts = 1937012852,
             //WAVE
             fmt = 544501094,
+            // Video Codecs
+            MJPG = 1196444237,
         }
 
         #endregion
