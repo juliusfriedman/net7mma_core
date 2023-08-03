@@ -169,18 +169,7 @@ public class RiffWriter : MediaFileWriter
     public override void Close()
     {
         foreach (var chunk in chunks)
-        {
             Write(chunk);
-
-            if (chunk is RiffChunk)
-                riffChunkSizeOffset = chunk.Offset;
-
-            if (chunk is FormatChunk)
-                fmtChunkSizeOffset = chunk.Offset;
-
-            if (chunk is DataChunk)
-                dataChunkSizeOffset = chunk.Offset;
-        }
 
         // Update data chunk size
         long dataSize = Position - dataChunkSizeOffset - 4;

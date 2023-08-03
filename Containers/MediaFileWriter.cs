@@ -1,7 +1,6 @@
 ﻿using Media.Container;
 using System;
 using System.Collections.Generic;
-using System.IO;
 
 public abstract class MediaFileWriter : MediaFileStream
 {
@@ -12,15 +11,10 @@ public abstract class MediaFileWriter : MediaFileStream
 
     public IList<Track> Tracks { get; protected set; }
 
-    // Implement methods for writing video frames and audio samples
-
-    //public abstract Node CreateHeader();
-    //public abstract void WriteNode(Node node);
-
     public void Write(Node node)
     {
-        node.DataOffset = Position;
-        WriteAt(node.DataOffset, node.Data, 0, (int)node.DataSize);
+        WriteAt(Position, node.Identifier, 0, node.Identifier.Length);
+        WriteAt(Position, node.Data, 0, (int)node.DataSize);
     }
 
     public void WriteInt16BigEndian(short value)
