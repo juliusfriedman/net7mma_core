@@ -4000,7 +4000,8 @@ a=appversion:1.0");
 
         static void TestRiffWriter()
         {
-            Media.Containers.Riff.Program.Main(null);
+            Media.Containers.Riff.UnitTests.WriteManaged();
+            Media.Containers.Riff.UnitTests.WriteRaw();
         }
 
         #endregion

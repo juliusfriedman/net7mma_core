@@ -240,6 +240,20 @@ namespace Media.Container
 
         #region Constructor / Destructor
 
+        public Node(IMediaContainer master, byte[] identifier, int lengthSize, long offset, byte[] data, bool shouldDispose = true)
+            : base(shouldDispose)
+        {
+            if (master == null) throw new ArgumentNullException("master");
+            if (identifier == null) throw new ArgumentNullException("identifier");
+            Master = master;
+            DataOffset = offset;
+            Identifier = identifier;
+            IdentifierPointer = new Common.MemorySegment(identifier);
+            IdentifierSize = identifier.Length;
+            LengthSize = lengthSize;
+            DataSize = data.Length;
+            m_Data = data;
+        }
 
         /// <summary>
         /// Constucts a Node instance from the given parameters
