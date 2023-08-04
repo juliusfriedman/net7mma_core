@@ -3,9 +3,6 @@ using Media.Container;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Numerics;
-using System.Reflection.PortableExecutable;
 using static Media.Containers.Riff.RiffReader;
 
 namespace Media.Containers.Riff;
@@ -14,41 +11,110 @@ namespace Media.Containers.Riff;
 
 public class Chunk : Node
 {
-    public FourCharacterCode ChunkId => (FourCharacterCode)Binary.Read32(Identifier, 0, Binary.IsBigEndian);
+    public FourCharacterCode ChunkId
+    {
+        get => (FourCharacterCode)Binary.Read32(Identifier, 0, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, 0, Binary.IsBigEndian, (int)value);
+    }
+
+    public bool HasSubType => Identifier.Length > RiffReader.TWODWORDSSIZE;
+
+    public FourCharacterCode SubType
+    {
+        get => (FourCharacterCode)Binary.Read32(Identifier, RiffReader.IdentifierSize, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, RiffReader.IdentifierSize, Binary.IsBigEndian, (int)value);
+    }
 
     public Chunk(RiffWriter writer, FourCharacterCode chunkId, long dataSize)
-        : base(writer, Binary.GetBytes((long)chunkId, Binary.IsBigEndian), RiffReader.LengthSize, 0, dataSize, true)
+        : base(writer, Binary.GetBytes((long)chunkId, Binary.IsBigEndian), RiffReader.LengthSize, -1, dataSize, true)
     {
+        ChunkId = chunkId;
     }
 
     public Chunk(RiffWriter writer, FourCharacterCode chunkId, byte[] data)
-        : base(writer, Binary.GetBytes((long)chunkId, Binary.IsBigEndian), RiffReader.LengthSize, 0, data)
+        : base(writer, Binary.GetBytes((long)chunkId, Binary.IsBigEndian), RiffReader.LengthSize, -1, data)
     {
+        ChunkId = chunkId;
     }
 }
 
 public class DataChunk : Chunk
 {
-    public DataChunk(RiffWriter writer, long dataSize)
-        : base(writer, FourCharacterCode.data, dataSize)
+    public DataChunk(RiffWriter writer, byte[] data)
+        : base(writer, FourCharacterCode.data, data)
     {
     }
 }
 
 public class RiffChunk : Chunk
 {
-    public RiffChunk(RiffWriter writer, FourCharacterCode type, long dataSize)
+    public RiffChunk(RiffWriter writer, FourCharacterCode type, FourCharacterCode subType, long dataSize)
         : base(writer, type, dataSize)
-    {
+    {        
+        SubType = subType;
     }
 }
 
-public class FormatChunk : Chunk
+public class FmtChunk : Chunk
 {
-    public FormatChunk(RiffWriter writer, byte[] data)
-        : base(writer, FourCharacterCode.fmt, data.Length)
+    public ushort AudioFormat
     {
-        data.CopyTo(Data, 0);
+        get => Binary.ReadU16(Data, 0, Binary.IsBigEndian);
+        set => Binary.Write16(Data, 0, Binary.IsBigEndian, value);
+    }
+
+    public ushort NumChannels
+    {
+        get => Binary.ReadU16(Data, 2, Binary.IsBigEndian);
+        set => Binary.Write16(Data, 2, Binary.IsBigEndian, value);
+    }
+
+    public uint SampleRate
+    {
+        get => Binary.ReadU32(Data, 4, Binary.IsBigEndian);
+        set => Binary.Write32(Data, 4, Binary.IsBigEndian, value);
+    }
+
+    public uint ByteRate
+    {
+        get => Binary.ReadU32(Data, 8, Binary.IsBigEndian);
+        set => Binary.Write32(Data, 8, Binary.IsBigEndian, value);
+    }
+
+    public ushort BlockAlign
+    {
+        get => Binary.ReadU16(Data, 12, Binary.IsBigEndian);
+        set => Binary.Write16(Data, 12, Binary.IsBigEndian, value);
+    }
+
+    public ushort BitsPerSample
+    {
+        get => Binary.ReadU16(Data, 14, Binary.IsBigEndian);
+        set => Binary.Write16(Data, 14, Binary.IsBigEndian, value);
+    }
+
+    public FmtChunk(RiffWriter writer, ushort audioFormat, ushort numChannels, uint sampleRate, ushort bitsPerSample)
+        : base(writer, FourCharacterCode.fmt, new byte[16])
+    {
+        // Set the audio format
+        AudioFormat = audioFormat;
+
+        // Set the number of channels
+        NumChannels = numChannels;
+
+        // Set the sample rate
+        SampleRate = sampleRate;
+
+        // Calculate and set the byte rate
+        uint byteRate = sampleRate * numChannels * (uint)(bitsPerSample / 8);
+        ByteRate = byteRate;
+
+        // Calculate and set the block align
+        ushort blockAlign = (ushort)(numChannels * (bitsPerSample / 8));
+        BlockAlign = blockAlign;
+
+        // Set the bits per sample
+        BitsPerSample = bitsPerSample;
     }
 }
 
@@ -213,17 +279,21 @@ public class AviStreamHeader : Chunk
 public class RiffWriter : MediaFileWriter
 {
     private readonly FourCharacterCode Type;
+    private readonly FourCharacterCode SubType;
     private readonly List<Chunk> chunks = new List<Chunk>();
 
     public override Node Root => chunks[0];
 
     public override Node TableOfContents => chunks[1];
 
-    public RiffWriter(Uri filename, FourCharacterCode type)
+    public RiffWriter(Uri filename, FourCharacterCode type, FourCharacterCode subType)
         : base(filename, FileAccess.ReadWrite)
     {
         Type = type;
-        AddChunk(new RiffChunk(this, Type, 0));
+        SubType = subType;
+
+        AddChunk(new RiffChunk(this, Type, SubType, 0));
+        //AddChunk(new Chunk(this, FourCharacterCode.LIST, 0));
     }
 
     internal protected void WriteFourCC(FourCharacterCode fourCC) => WriteInt32LittleEndian((int)fourCC);
@@ -234,6 +304,7 @@ public class RiffWriter : MediaFileWriter
             throw new ArgumentNullException(nameof(chunk));
 
         chunks.Add(chunk);
+        chunk.DataOffset = Position;
 
         Write(chunk);
     }
@@ -250,7 +321,95 @@ public class RiffWriter : MediaFileWriter
 
 public class UnitTests
 {
+    // Function to generate a simple sine wave sound
+    internal static short[] GenerateSineWave(int durationInSeconds, int sampleRate, double frequency)
+    {
+        int numSamples = durationInSeconds * sampleRate;
+        double amplitude = 32760.0; // Max amplitude for 16-bit signed PCM
+        double twoPiF = 2.0 * Math.PI * frequency;
+        short[] samples = new short[numSamples];
+
+        for (int i = 0; i < numSamples; i++)
+        {
+            double t = (double)i / sampleRate;
+            samples[i] = (short)(amplitude * Math.Sin(twoPiF * t));
+        }
+
+        return samples;
+    }
+
+    // Convert the short[] audio data to a byte[] for the DataChunk
+    internal static byte[] ConvertAudioDataToBytes(short[] audioData)
+    {
+        byte[] bytes = new byte[audioData.Length * sizeof(short)];
+        Buffer.BlockCopy(audioData, 0, bytes, 0, bytes.Length);
+        return bytes;
+    }
+
+    public static void TestChunks()
+    {
+        var riffChunk = new RiffChunk(null, FourCharacterCode.RIFF, FourCharacterCode.WAVE, 0);
+        if (riffChunk.ChunkId != FourCharacterCode.RIFF) throw new InvalidOperationException();
+        if (!riffChunk.HasSubType) throw new InvalidOperationException();
+        if (riffChunk.SubType != FourCharacterCode.WAVE) throw new InvalidOperationException();
+    }
+
     public static void WriteManaged()
+    {
+        int durationInSeconds = 5;
+        int sampleRate = 44100;
+        double frequency = 440.0; // A4 note frequency (440 Hz)
+
+        // Generate the audio data (sine wave)
+        short[] audioData = GenerateSineWave(durationInSeconds, sampleRate, frequency);
+
+        // Put in Media/Audio/wav so we can read it.
+        string localPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "/Media/Audio/wav/";
+
+        // Replace with your desired output file path
+        string outputFilePath = Path.GetFullPath(localPath + "twinkle_twinkle_little_star_managed.wav");
+
+        System.IO.File.WriteAllBytes(outputFilePath, Common.MemorySegment.Empty.Array);
+
+        // Create the RiffWriter with the appropriate type and subtype for Wave files.
+        using (RiffWriter writer = new RiffWriter(new Uri("file://" + outputFilePath), FourCharacterCode.RIFF, FourCharacterCode.WAVE))
+        {
+            // Create the necessary chunks for the Wave file.
+            // Note: We will use default values for FmtChunk since they are not important for this example.
+            FmtChunk fmtChunk = new FmtChunk(writer, 1, 1, (uint)sampleRate, 16); // 1 channel, 16 bits per sample
+
+            // Add the audio data (samples) to the DataChunk.
+            using (DataChunk dataChunk = new DataChunk(writer, ConvertAudioDataToBytes(audioData)))
+            {
+                // Add the chunks to the RiffWriter.
+                writer.AddChunk(fmtChunk);
+                writer.AddChunk(dataChunk);
+            }
+        }
+
+        Console.WriteLine("Wave file written successfully!");
+    }
+
+    // Sample method to generate audio data (Twinkle Twinkle Little Star).
+    public static byte[] GenerateTwinkleTwinkleLittleStar()
+    {
+        // Sample audio data for Twinkle Twinkle Little Star
+        byte[] audioData = new byte[]
+        {
+                52, 52, 59, 59, 66, 66, 59, 52,
+                52, 59, 59, 66, 66, 59, 52,
+                66, 66, 78, 78, 88, 88, 78, 66,
+                78, 78, 88, 88, 78, 66, 66, 59,
+                59, 52, 52, 59, 59, 66, 66, 59, 52,
+                66, 66, 78, 78, 88, 88, 78, 66,
+                78, 78, 88, 88, 78, 66, 59, 59,
+                52, 52, 59, 59, 66, 66, 59, 52
+        };
+
+        return audioData;
+    }
+
+    public static void WriteRaw()
     {
         var audioData = GenerateTwinkleTwinkleLittleStar();
 
@@ -258,111 +417,19 @@ public class UnitTests
         string localPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "/Media/Audio/wav/";
 
         // Replace with your desired output file path
-        string outputFilePath = Path.GetFullPath(localPath + "twinkle_twinkle_little_star.wav");
-
-        System.IO.File.WriteAllBytes(outputFilePath, Common.MemorySegment.Empty.Array);
-
-
-        // Create the RiffWriter with the appropriate type and subtype for Wave files.
-        using (RiffWriter writer = new RiffWriter(new Uri("file://" + outputFilePath), FourCharacterCode.RIFF))
-        {
-            // Create the necessary chunks for the Wave file.
-            // Note: We will use default values for AviStreamHeader since they are not important for this example.
-            AviStreamHeader streamHeader = new AviStreamHeader(writer)
-            {
-                StreamType = FourCharacterCode.WAVE,
-                HandlerType = FourCharacterCode.data,
-                SampleRate = 44100,
-                Start = 0,
-                Length = audioData.Length * sizeof(short),
-                SuggestedBufferSize = 0,
-                Quality = -1,
-                SampleSize = 16,
-                FrameRate = 0,
-                Scale = 1,
-                Rate = 0,
-                StartInitialFrames = 0,
-                ExtraDataSize = 0
-            };
-
-            // Add the audio data (samples) to the DataChunk.
-            using (DataChunk dataChunk = new DataChunk(writer, audioData.Length * sizeof(short)))
-            {
-                using (BinaryWriter dataWriter = new BinaryWriter(dataChunk.DataStream))
-                {
-                    foreach (short sample in audioData)
-                    {
-                        dataWriter.Write(sample);
-                    }
-                }
-
-                // Add the chunks to the RiffWriter.
-                writer.AddChunk(streamHeader);
-                writer.AddChunk(dataChunk);
-            }
-        }
-
-        Console.WriteLine("Wave file 'output.wav' written successfully!");
-    }
-
-    // Sample audio data for "Twinkle Twinkle Little Star"
-    public static short[] GenerateTwinkleTwinkleLittleStar()
-    {
-        double amplitude = 0.3; // Adjust the amplitude to control the volume
-        int sampleRate = 44100;
-        int durationMs = 500;
-        int numSamples = (durationMs * sampleRate) / 1000;
-        double frequency = 261.63; // Frequency of C4 note (middle C)
-
-        short[] audioData = new short[numSamples];
-
-        for (int i = 0; i < numSamples; i++)
-        {
-            double time = i / (double)sampleRate;
-            double sineWave = amplitude * Math.Sin(2 * Math.PI * frequency * time);
-
-            // Convert the double sample value to a 16-bit PCM value (-32768 to 32767)
-            audioData[i] = (short)(sineWave * short.MaxValue);
-        }
-
-        return audioData;
-    }
-
-    public static void WriteRaw()
-    {
-        // Put in Media/Audio/wav so we can read it.
-        string localPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "/Media/Audio/wav/";
-
-        // Replace with your desired output file path
-        string outputFilePath = Path.GetFullPath(localPath + "row_row_row_your_boat.wav");
+        string outputFilePath = Path.GetFullPath(localPath + "twinkle_twinkle_little_star_raw.wav");
 
         System.IO.File.WriteAllBytes(outputFilePath, Common.MemorySegment.Empty.Array);
 
         // Create the RiffFileWriter and WaveFileHeader
-        using (var riffFileWriter = new RiffWriter(new Uri("file://" + outputFilePath), FourCharacterCode.RIFF))
+        using (var writer = new RiffWriter(new Uri("file://" + outputFilePath), FourCharacterCode.RIFF, FourCharacterCode.WAVE))
         {
-            WaveFormat waveFormat = new WaveFormat(AudioEncoding.PCM, numChannels: 1, sampleRate: 44100, bitsPerSample: 16);
-            FormatChunk waveFormatChunk = new FormatChunk(riffFileWriter, waveFormat.Array);
-            riffFileWriter.AddChunk(waveFormatChunk);
+            // Create the necessary chunks for the Wave file
+            FmtChunk fmtChunk = new FmtChunk(writer, 1, 1, 44100, 16); // 1 channel, 16 bits per sample
+            DataChunk dataChunk = new DataChunk(writer, audioData);
 
-            // Audio data for "Row, Row, Row Your Boat"
-            short[] audioData = GenerateRowYourBoat();
-
-            // Calculate the data size for the audio samples
-            int dataChunkDataSize = audioData.Length * sizeof(short);
-
-            // Write the DataChunk identifier
-            riffFileWriter.WriteFourCC(FourCharacterCode.data);
-
-            // Write the data size
-            riffFileWriter.WriteInt32LittleEndian(dataChunkDataSize);
-
-            // Write the audio samples
-            foreach (var sampleValue in audioData)
-            {
-                // Write the 16-bit PCM value to the RiffFileWriter
-                riffFileWriter.WriteInt16LittleEndian(sampleValue);
-            }
+            writer.AddChunk(fmtChunk);
+            writer.AddChunk(dataChunk);
         }
 
         Console.WriteLine("Wave file written successfully!");

@@ -37,6 +37,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #endregion
 
 #region Using Statements
+using Media.Common;
 using System;
 using System.Linq;
 #endregion
@@ -139,16 +140,6 @@ namespace Media.Container
         public readonly IMediaContainer Master;
 
         /// <summary>
-        /// The Offset in which the <see cref="Data"/> occurs in the <see cref="Master"/>
-        /// </summary>
-        public long DataOffset;
-            
-        /// <summary>
-        /// The amount of bytes contained in the Node's <see cref="Data" />
-        /// </summary>
-        public long DataSize;
-
-        /// <summary>
         /// The amount of bytes used to describe the <see cref="Identifer"/> of the Node.
         /// </summary>
         public readonly int IdentifierSize;
@@ -175,6 +166,16 @@ namespace Media.Container
         #region Computed Properties
 
         /// <summary>
+        /// The data in <see cref="Identifier"/> which corresponds to the <see cref="Identifier"/>.
+        /// </summary>
+        public MemorySegment IdentifierSegment => new MemorySegment(Identifier, 0, IdentifierSize);
+
+        /// <summary>
+        /// The data in <see cref="Identifier"/> which corresponds to the <see cref="DataSize"/>
+        /// </summary>
+        public MemorySegment LengthSegment => new MemorySegment(Identifier, IdentifierSize, LengthSize);
+
+        /// <summary>
         /// The Total amount of bytes in the Node including the <see cref="Identifer"/> and <see cref="LengthSize"/>
         /// </summary>
         public long TotalSize { get { return DataSize + IdentifierSize + LengthSize; } }
@@ -193,6 +194,16 @@ namespace Media.Container
 
         #region Data
 
+        /// <summary>
+        /// The Offset in which the <see cref="Data"/> occurs in the <see cref="Master"/> or -1 to indicate not written
+        /// </summary>
+        public long DataOffset;
+
+        /// <summary>
+        /// The amount of bytes contained in the Node's <see cref="Data" />
+        /// </summary>
+        public long DataSize;
+
         byte[] m_Data;
 
         /// <summary>
@@ -208,14 +219,11 @@ namespace Media.Container
                 //If data is larger then a certain amount then it may just make sense to return the data itself?
                 m_Data = new byte[DataSize];
 
-                Master.ReadAt(DataOffset, m_Data, 0, (int)DataSize);
+                if (DataOffset >= 0)
+                    Master.ReadAt(DataOffset, m_Data, 0, (int)DataSize);
 
                 return m_Data;
             }
-            //set
-            //{
-            //    if (DataSize > 0 && value != null) Array.Copy(value, 0, RawData, 0, Math.Min(value.Length, (int)DataSize));
-            //}
             set
             {
                 m_Data = value;
@@ -258,6 +266,7 @@ namespace Media.Container
             LengthSize = lengthSize;
             DataSize = data.Length;
             m_Data = data;
+            IsComplete = true;
         }
 
         /// <summary>
@@ -342,12 +351,20 @@ namespace Media.Container
 
         #region Methods
 
+        public void WriteToMaster()
+        {
+            Master.WriteAt(DataOffset, Identifier, 0, Identifier.Length);
+
+            if (DataAssigned)
+                Master.WriteAt(DataOffset + Identifier.Length, m_Data, 0, m_Data.Length);
+        }
+
         /// <summary>
         /// Writes all <see cref="Data"/> if <see cref="DataSize"/> is > 0.
         /// </summary>
         public void UpdateData()
         {
-            if (!IsDisposed && DataSize > 0 && m_Data != null)
+            if (!IsDisposed && DataSize > 0 && m_Data != null && DataOffset >= 0)
             {
                 Master.WriteAt(DataOffset, m_Data, 0, (int)DataSize);
                 return;

@@ -10,25 +10,18 @@ namespace Container.BaseMedia;
 
 public class Mp4Box : Node
 {
-    public byte[] BoxType => Identifier;
-
     // Header size for a box (4 bytes for size + 4 bytes for type)
     private const int HeaderSize = 8;
+
+    public int Length
+    {
+        get => Binary.Read32(LengthSegment, 4, Binary.IsBigEndian);
+        set => Binary.Write32(LengthSegment.Array, LengthSegment.Offset, Binary.IsBigEndian, value);
+    }
 
     public Mp4Box(BaseMediaWriter writer, byte[] boxType, long dataSize)
         : base(writer, boxType, 4, HeaderSize, dataSize, false)
     {
-    }
-
-    public virtual void PrepareForWriting()
-    {
-        // Update the dataSize to reflect the actual size of the box after writing its body.
-        DataSize = DataSize - HeaderSize + GetBodySize();
-    }
-
-    protected virtual uint GetBodySize()
-    {
-        return (uint)DataSize;
     }
 
     protected virtual void WriteBody(BaseMediaWriter writer)
@@ -97,12 +90,6 @@ public class TrakBox : Mp4Box
         //MdhdBox.Write(writer);
         //HdlrBox.Write(writer);
         //MinfBox.Write(writer);
-    }
-
-    public override void PrepareForWriting()
-    {
-        // Update the dataSize to reflect the actual size of the box after writing its body.
-        //DataSize = GetChildrenSize();
     }
 }
 

@@ -1,5 +1,6 @@
 ﻿using Media.Container;
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 
 public abstract class MediaFileWriter : MediaFileStream
@@ -9,63 +10,57 @@ public abstract class MediaFileWriter : MediaFileStream
     {
     }
 
-    public IList<Track> Tracks { get; protected set; }
+    public IList<Track> Tracks { get; protected set; } = new List<Track>();
 
     public void Write(Node node)
     {
-        WriteAt(Position, node.Identifier, 0, node.Identifier.Length);
-        WriteAt(Position, node.Data, 0, (int)node.DataSize);
+        Write(node.Identifier);
+        Write(node.Data);
     }
+    
+    #region Big Endian
 
     public void WriteInt16BigEndian(short value)
     {
-        WriteByte((byte)((value >> 8) & 0xFF));
-        WriteByte((byte)(value & 0xFF));
+        Span<byte> temp = stackalloc byte[Media.Common.Binary.BytesPerShort];
+        BinaryPrimitives.WriteInt16BigEndian(temp, value);
+        Write(temp);
     }
 
     public void WriteInt32BigEndian(int value)
     {
-        WriteByte((byte)((value >> 24) & 0xFF));
-        WriteByte((byte)((value >> 16) & 0xFF));
-        WriteByte((byte)((value >> 8) & 0xFF));
-        WriteByte((byte)(value & 0xFF));
+        Span<byte> temp = stackalloc byte[Media.Common.Binary.BytesPerInteger];
+        BinaryPrimitives.WriteInt32BigEndian(temp, value);
+        Write(temp);
     }
 
     public void WriteInt64BigEndian(long value)
     {
-        WriteByte((byte)((value >> 56) & 0xFF));
-        WriteByte((byte)((value >> 48) & 0xFF));
-        WriteByte((byte)((value >> 40) & 0xFF));
-        WriteByte((byte)((value >> 32) & 0xFF));
-        WriteByte((byte)((value >> 24) & 0xFF));
-        WriteByte((byte)((value >> 16) & 0xFF));
-        WriteByte((byte)((value >> 8) & 0xFF));
-        WriteByte((byte)(value & 0xFF));
+        Span<byte> temp = stackalloc byte[Media.Common.Binary.BytesPerLong];
+        BinaryPrimitives.WriteInt64BigEndian(temp, value);
+        Write(temp);
     }
+
+    #endregion
 
     public void WriteInt16LittleEndian(short value)
     {
-        WriteByte((byte)(value & 0xFF));
-        WriteByte((byte)((value >> 8) & 0xFF));
+        Span<byte> temp = stackalloc byte[Media.Common.Binary.BytesPerShort];
+        BinaryPrimitives.WriteInt16LittleEndian(temp, value);
+        Write(temp);
     }
 
     public void WriteInt32LittleEndian(int value)
     {
-        WriteByte((byte)(value & 0xFF));
-        WriteByte((byte)((value >> 8) & 0xFF));
-        WriteByte((byte)((value >> 16) & 0xFF));
-        WriteByte((byte)((value >> 24) & 0xFF));
+        Span<byte> temp = stackalloc byte[Media.Common.Binary.BytesPerInteger];
+        BinaryPrimitives.WriteInt32LittleEndian(temp, value);
+        Write(temp);
     }
 
     public void WriteInt64LittleEndian(long value)
     {
-        WriteByte((byte)(value & 0xFF));
-        WriteByte((byte)((value >> 8) & 0xFF));
-        WriteByte((byte)((value >> 16) & 0xFF));
-        WriteByte((byte)((value >> 24) & 0xFF));
-        WriteByte((byte)((value >> 32) & 0xFF));
-        WriteByte((byte)((value >> 40) & 0xFF));
-        WriteByte((byte)((value >> 48) & 0xFF));
-        WriteByte((byte)((value >> 56) & 0xFF));
+        Span<byte> temp = stackalloc byte[Media.Common.Binary.BytesPerLong];
+        BinaryPrimitives.WriteInt64LittleEndian(temp, value);
+        Write(temp);
     }
 }
