@@ -141,12 +141,12 @@ namespace Media.Container
         /// <summary>
         /// The Offset in which the <see cref="Data"/> occurs in the <see cref="Master"/>
         /// </summary>
-        public readonly long DataOffset;
+        public long DataOffset;
             
         /// <summary>
         /// The amount of bytes contained in the Node's <see cref="Data" />
         /// </summary>
-        public readonly long DataSize;
+        public long DataSize;
 
         /// <summary>
         /// The amount of bytes used to describe the <see cref="Identifer"/> of the Node.
@@ -216,6 +216,11 @@ namespace Media.Container
             //{
             //    if (DataSize > 0 && value != null) Array.Copy(value, 0, RawData, 0, Math.Min(value.Length, (int)DataSize));
             //}
+            set
+            {
+                m_Data = value;
+                DataSize = value.Length;
+            }
         }
 
         /// <summary>
