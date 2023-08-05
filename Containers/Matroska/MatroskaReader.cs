@@ -1121,6 +1121,15 @@ namespace Media.Containers.Matroska
             }
         }
 
+        public string Title
+        {
+            get
+            {
+                if (m_Title == null) ParseSegmentInfo();
+                return m_Title;
+            }
+        }
+
         /// <summary>
         /// Returns the SeekHead element.
         /// </summary>

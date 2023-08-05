@@ -3369,7 +3369,13 @@ a=appversion:1.0");
 
                         Console.WriteLine("Track Information:");
 
-                        foreach (var track in reader.GetTracks()) DumpTrack(track);
+                        foreach (var track in reader.GetTracks())
+                        {
+                            DumpTrack(track);
+
+                            while (track.Position < track.Duration)
+                                reader.GetSample(track, out var pts);
+                        }
                     }
 
                 }
@@ -3568,6 +3574,8 @@ a=appversion:1.0");
                         Console.WriteLine("Modified:" + reader.Modified);
 
                         Console.WriteLine("Movie Duration:" + reader.Duration);
+
+                        Console.WriteLine("Document Title:" + reader.Title);
 
                         Console.WriteLine("Track Information:");
 

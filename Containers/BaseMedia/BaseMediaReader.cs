@@ -1028,6 +1028,10 @@ namespace Media.Containers.BaseMedia
                                             stSizes.Add(Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian));
                                         }
                                     }
+                                    else
+                                    {
+                                        stSizes.Add(defaultSize);
+                                    }
 
                                     offset = (int)length;
 
@@ -1225,7 +1229,7 @@ namespace Media.Containers.BaseMedia
             sampleDuration = TimeSpan.FromSeconds(1.0 * currentTimescale / timescale);
 
             // Get the sample data based on the sample size and position
-            int sampleSize = sampleSizes[sampleIndex];
+            int sampleSize = sampleSizes.Count < sampleIndex ?  sampleSizes[sampleIndex] : sampleSizes[0];
             long position = sampleIndex > 0 ? sampleOffsets[sampleIndex] : 0;
 
             // Seek to the sample data position in the input stream
