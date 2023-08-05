@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System;
 using System.Text;
-using Media.Containers.BaseMedia;
 
 namespace Container.BaseMedia;
 
@@ -58,7 +57,7 @@ public class FtypBox : Mp4Box
         DataSize = 8 + (uint)(CompatibleBrands.Length * 4);
     }
 
-    protected override void WriteBody(BaseMediaWriter writer)
+    protected void WriteBody(BaseMediaWriter writer)
     {
         // Write the MajorBrand and MinorVersion in big-endian format
         writer.WriteInt32BigEndian((int)MajorBrand);
@@ -89,7 +88,7 @@ public class TrakBox : Mp4Box
     //public HdlrBox HdlrBox { get; set; }
     //public MinfBox MinfBox { get; set; }
 
-    protected override void WriteBody(BaseMediaWriter writer)
+    protected void WriteBody(BaseMediaWriter writer)
     {
         // Write the child boxes in the appropriate order.
         //TkhdBox.Write(writer);
