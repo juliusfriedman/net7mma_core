@@ -144,7 +144,7 @@ namespace Media.Rtp
             //get { return IsDisposed ? ushort.MinValue : (ushort)(MinimumSize + Binary.MachineWordsToBytes(LengthInWords)); }//LengthInWords * 4
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Binary.Min(MinimumSize + LengthInWords * 4, m_MemorySegment.Count); } // << 2
+            get { return Binary.Min(MinimumSize + Binary.MachineWordsToBytes(LengthInWords), m_MemorySegment.Count); } // << 2
         }
 
         #endregion

@@ -4300,6 +4300,8 @@ a=appversion:1.0");
         {           
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RtpHeaderUnitTests), TypeOfVoid);
 
+            CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RtpExtensionUnitTests), TypeOfVoid);
+
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RtpPacketUnitTests), TypeOfVoid);
 
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RtcpHeaderUnitTests), TypeOfVoid);
