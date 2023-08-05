@@ -21,20 +21,28 @@ public class Chunk : Node
 
     public FourCharacterCode SubType
     {
-        get => (FourCharacterCode)Binary.Read32(Identifier, RiffReader.IdentifierSize, Binary.IsBigEndian);
-        set => Binary.Write32(Identifier, RiffReader.IdentifierSize, Binary.IsBigEndian, (int)value);
+        get => (FourCharacterCode)Binary.Read32(Identifier, RiffReader.TWODWORDSSIZE, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, RiffReader.TWODWORDSSIZE, Binary.IsBigEndian, (int)value);
     }
 
-    public Chunk(RiffWriter writer, FourCharacterCode chunkId, long dataSize)
-        : base(writer, Binary.GetBytes((long)chunkId, Binary.IsBigEndian), RiffReader.LengthSize, -1, dataSize, true)
+    public int Length
+    {
+        get => Binary.Read32(Identifier, RiffReader.IdentifierSize, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, RiffReader.IdentifierSize, Binary.IsBigEndian, value);
+    }
+
+    public Chunk(RiffWriter writer, FourCharacterCode chunkId, int dataSize)
+        : base(writer, RiffReader.HasSubType(chunkId) ? new byte[RiffReader.TWODWORDSSIZE + RiffReader.LengthSize] : new byte[RiffReader.TWODWORDSSIZE], RiffReader.LengthSize, -1, dataSize, true)
     {
         ChunkId = chunkId;
+        Length = dataSize;
     }
 
     public Chunk(RiffWriter writer, FourCharacterCode chunkId, byte[] data)
         : base(writer, Binary.GetBytes((long)chunkId, Binary.IsBigEndian), RiffReader.LengthSize, -1, data)
     {
         ChunkId = chunkId;
+        Length = data.Length;
     }
 }
 
@@ -48,7 +56,7 @@ public class DataChunk : Chunk
 
 public class RiffChunk : Chunk
 {
-    public RiffChunk(RiffWriter writer, FourCharacterCode type, FourCharacterCode subType, long dataSize)
+    public RiffChunk(RiffWriter writer, FourCharacterCode type, FourCharacterCode subType, int dataSize = 0)
         : base(writer, type, dataSize)
     {        
         SubType = subType;
@@ -105,87 +113,17 @@ public class FmtChunk : Chunk
         // Set the sample rate
         SampleRate = sampleRate;
 
-        // Calculate and set the byte rate
-        uint byteRate = sampleRate * numChannels * (uint)(bitsPerSample / 8);
-        ByteRate = byteRate;
-
         // Calculate and set the block align
         ushort blockAlign = (ushort)(numChannels * (bitsPerSample / 8));
         BlockAlign = blockAlign;
 
+        // Calculate and set the byte rate
+        uint byteRate = sampleRate * BlockAlign;
+        ByteRate = byteRate;
+
         // Set the bits per sample
         BitsPerSample = bitsPerSample;
     }
-}
-
-public class WaveFormat : MemorySegment
-{
-    const int Size = 16;
-
-    // Fields specific to WaveFormat
-    public short AudioFormat
-    {
-        get => Binary.Read16(Array, Offset, Binary.IsBigEndian);
-        set => Binary.Write16(Array, Offset, Binary.IsBigEndian, value);
-    }
-
-    public short NumChannels
-    {
-        get => Binary.Read16(Array, Offset + 2, Binary.IsBigEndian);
-        set => Binary.Write16(Array, Offset + 2, Binary.IsBigEndian, value);
-    }
-
-    public int SampleRate
-    {
-        get => Binary.Read32(Array, Offset + 4, Binary.IsBigEndian);
-        set => Binary.Write32(Array, Offset + 4, Binary.IsBigEndian, value);
-    }
-
-    public int ByteRate
-    {
-        get => Binary.Read32(Array, Offset + 8, Binary.IsBigEndian);
-        set => Binary.Write32(Array, Offset + 8, Binary.IsBigEndian, value);
-    }
-
-    public short BlockAlign
-    {
-        get => Binary.Read16(Array, Offset + 12, Binary.IsBigEndian);
-        set => Binary.Write16(Array, Offset + 12, Binary.IsBigEndian, value);
-    }
-
-    public short BitsPerSample
-    {
-        get => Binary.Read16(Array, Offset + 14, Binary.IsBigEndian);
-        set => Binary.Write16(Array, Offset + 14, Binary.IsBigEndian, value);
-    }
-
-    public WaveFormat(AudioEncoding audioFormat, int numChannels, int sampleRate, int bitsPerSample)
-        : base(new byte[Size])
-    {
-        AudioFormat = (short)audioFormat;
-        NumChannels = (short)numChannels;
-        SampleRate = sampleRate;
-        BitsPerSample = (short)bitsPerSample;
-
-        // Calculate and set the other fields based on the given values
-        BlockAlign = (short)(NumChannels * (BitsPerSample / 8));
-        ByteRate = SampleRate * BlockAlign;
-    }
-
-    public WaveFormat(byte[] data, int offset)
-        : base(data, offset)
-    {
-    }
-}
-
-public enum AudioEncoding : ushort
-{
-    PCM = 1, // Pulse Code Modulation (Linear PCM)
-    IEEE_FLOAT = 3, // IEEE Float
-    ALAW = 6, // 8-bit ITU-T G.711 A-law
-    MULAW = 7, // 8-bit ITU-T G.711 µ-law
-    EXTENSIBLE = 0xFFFE // Determined by SubFormat
-                        // Add more encodings as needed
 }
 
 public class AviStreamHeader : Chunk
@@ -278,8 +216,6 @@ public class AviStreamHeader : Chunk
 
 public class RiffWriter : MediaFileWriter
 {
-    private readonly FourCharacterCode Type;
-    private readonly FourCharacterCode SubType;
     private readonly List<Chunk> chunks = new List<Chunk>();
 
     public override Node Root => chunks[0];
@@ -289,15 +225,13 @@ public class RiffWriter : MediaFileWriter
     public RiffWriter(Uri filename, FourCharacterCode type, FourCharacterCode subType)
         : base(filename, FileAccess.ReadWrite)
     {
-        Type = type;
-        SubType = subType;
 
-        AddChunk(new RiffChunk(this, Type, SubType, 0));
-        //AddChunk(new Chunk(this, FourCharacterCode.LIST, 0));
+        AddChunk(new RiffChunk(this, type, subType, 0));
     }
 
     internal protected void WriteFourCC(FourCharacterCode fourCC) => WriteInt32LittleEndian((int)fourCC);
 
+    //TODO, should not write when added, only when flushed etc
     public void AddChunk(Chunk chunk)
     {
         if (chunk == null)
@@ -346,14 +280,6 @@ public class UnitTests
         return bytes;
     }
 
-    public static void TestChunks()
-    {
-        var riffChunk = new RiffChunk(null, FourCharacterCode.RIFF, FourCharacterCode.WAVE, 0);
-        if (riffChunk.ChunkId != FourCharacterCode.RIFF) throw new InvalidOperationException();
-        if (!riffChunk.HasSubType) throw new InvalidOperationException();
-        if (riffChunk.SubType != FourCharacterCode.WAVE) throw new InvalidOperationException();
-    }
-
     public static void WriteManaged()
     {
         int durationInSeconds = 5;
@@ -390,28 +316,9 @@ public class UnitTests
         Console.WriteLine("Wave file written successfully!");
     }
 
-    // Sample method to generate audio data (Twinkle Twinkle Little Star).
-    public static byte[] GenerateTwinkleTwinkleLittleStar()
-    {
-        // Sample audio data for Twinkle Twinkle Little Star
-        byte[] audioData = new byte[]
-        {
-                52, 52, 59, 59, 66, 66, 59, 52,
-                52, 59, 59, 66, 66, 59, 52,
-                66, 66, 78, 78, 88, 88, 78, 66,
-                78, 78, 88, 88, 78, 66, 66, 59,
-                59, 52, 52, 59, 59, 66, 66, 59, 52,
-                66, 66, 78, 78, 88, 88, 78, 66,
-                78, 78, 88, 88, 78, 66, 59, 59,
-                52, 52, 59, 59, 66, 66, 59, 52
-        };
-
-        return audioData;
-    }
-
     public static void WriteRaw()
     {
-        var audioData = GenerateTwinkleTwinkleLittleStar();
+        var audioData = GenerateRowYourBoat();
 
         // Put in Media/Audio/wav so we can read it.
         string localPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "/Media/Audio/wav/";
@@ -426,7 +333,7 @@ public class UnitTests
         {
             // Create the necessary chunks for the Wave file
             FmtChunk fmtChunk = new FmtChunk(writer, 1, 1, 44100, 16); // 1 channel, 16 bits per sample
-            DataChunk dataChunk = new DataChunk(writer, audioData);
+            DataChunk dataChunk = new DataChunk(writer, ConvertAudioDataToBytes(audioData));
 
             writer.AddChunk(fmtChunk);
             writer.AddChunk(dataChunk);

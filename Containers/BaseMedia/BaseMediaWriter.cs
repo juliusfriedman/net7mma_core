@@ -3,8 +3,8 @@ using Media.Container;
 using System.Collections.Generic;
 using System.IO;
 using System;
-using Media.Containers.BaseMedia;
 using System.Text;
+using Media.Containers.BaseMedia;
 
 namespace Container.BaseMedia;
 
@@ -15,18 +15,24 @@ public class Mp4Box : Node
 
     public int Length
     {
-        get => Binary.Read32(LengthSegment, 4, Binary.IsBigEndian);
-        set => Binary.Write32(LengthSegment.Array, LengthSegment.Offset, Binary.IsBigEndian, value);
+        get => Binary.Read32(Identifier, 0, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, 0, Binary.IsBigEndian, value);
+    }
+
+    public int AtomCode
+    {
+        get => Binary.Read32(Identifier, 4, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, 4, Binary.IsBigEndian, value);
+    }
+
+    public string BoxType
+    {
+        get => Encoding.UTF8.GetString(Identifier, 4, 4);
     }
 
     public Mp4Box(BaseMediaWriter writer, byte[] boxType, long dataSize)
         : base(writer, boxType, 4, HeaderSize, dataSize, false)
     {
-    }
-
-    protected virtual void WriteBody(BaseMediaWriter writer)
-    {
-        // Default implementation does nothing. Subclasses should override this method to write the box body.
     }
 }
 

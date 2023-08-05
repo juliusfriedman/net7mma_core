@@ -166,16 +166,6 @@ namespace Media.Container
         #region Computed Properties
 
         /// <summary>
-        /// The data in <see cref="Identifier"/> which corresponds to the <see cref="Identifier"/>.
-        /// </summary>
-        public MemorySegment IdentifierSegment => new MemorySegment(Identifier, 0, IdentifierSize);
-
-        /// <summary>
-        /// The data in <see cref="Identifier"/> which corresponds to the <see cref="DataSize"/>
-        /// </summary>
-        public MemorySegment LengthSegment => new MemorySegment(Identifier, IdentifierSize, LengthSize);
-
-        /// <summary>
         /// The Total amount of bytes in the Node including the <see cref="Identifer"/> and <see cref="LengthSize"/>
         /// </summary>
         public long TotalSize { get { return DataSize + IdentifierSize + LengthSize; } }
