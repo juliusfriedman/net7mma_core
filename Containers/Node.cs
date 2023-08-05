@@ -193,7 +193,7 @@ namespace Media.Container
         /// </summary>
         public long DataSize;
 
-        byte[] m_Data;
+        protected byte[] m_Data;
 
         /// <summary>
         /// The binary data of the contained in the Node (without (<see cref="Identifier"/> and (<see cref="LengthSize"/>))

@@ -339,6 +339,8 @@ public class RiffWriter : MediaFileWriter
     {
         throw new NotImplementedException();
     }
+
+    public override string ToTextualConvention(Node node) => RiffReader.ToFourCharacterCode(node.Identifier);
 }
 
 public class UnitTests

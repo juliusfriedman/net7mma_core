@@ -118,7 +118,7 @@ namespace Media.Rtcp
             get { return Binary.ReadU8(Memory.Array, Memory.Offset + 4, false); }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-            protected set { Binary.WriteU8(Memory.Array, Memory.Offset + 4, false, value); }
+            protected set { Binary.Write8(Memory.Array, Memory.Offset + 4, false, value); }
         }
 
         /// <summary>

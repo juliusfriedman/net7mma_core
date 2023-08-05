@@ -786,9 +786,9 @@ namespace Media.Codecs.Flac
                     
                     m_MaxFrameSize = (int)Common.Binary.ReadU24(node.Data, 7, BitConverter.IsLittleEndian);
 
-                    m_SampleRate = (int)Common.Binary.ReadUInt64MSB(node.Data, 10, 20, 0);
+                    m_SampleRate = (int)Common.Binary.ReadUInt64MSB(node.Data, 10, 20, 0); //e.g. Common.Binary.ReadBitsMSB(node.Data, Common.Binary.BytesToBits(10), 20)
 
-                    m_Channels = 1 + (int)Common.Binary.ReadUInt64MSB(node.Data, 12, 3, 4);
+                    m_Channels = 1 + (int)Common.Binary.ReadUInt64MSB(node.Data, 12, 3, 4); 
 
                     m_BitsPerSample = 1 + (int)Common.Binary.ReadUInt64MSB(node.Data, 12, 5, 7);
 
@@ -935,8 +935,6 @@ namespace Media.Codecs.Flac
             var value = ReadUnary();
             return (int)(value >> 1 ^ -((int)(value & 1)));
         }
-
-       
 
         //Read method for frames and then indexer to use method. Apply from GetSample
 

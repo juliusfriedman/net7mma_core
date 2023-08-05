@@ -1,7 +1,9 @@
-﻿using Media.Container;
+﻿using Media.Common;
 using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
+
+namespace Media.Container;
 
 public abstract class MediaFileWriter : MediaFileStream
 {
@@ -20,14 +22,14 @@ public abstract class MediaFileWriter : MediaFileStream
     
     #region Big Endian
 
-    public void WriteInt16BigEndian(short value)
+    public void WriteInt16BigEndian(short value) //=> Write(Binary.GetBytes(value, Binary.IsLittleEndian));
     {
         Span<byte> temp = stackalloc byte[Media.Common.Binary.BytesPerShort];
         BinaryPrimitives.WriteInt16BigEndian(temp, value);
         Write(temp);
     }
 
-    public void WriteInt32BigEndian(int value)
+    public void WriteInt32BigEndian(int value) //=> Write(Binary.GetBytes(value, Binary.IsLittleEndian));
     {
         Span<byte> temp = stackalloc byte[Media.Common.Binary.BytesPerInteger];
         BinaryPrimitives.WriteInt32BigEndian(temp, value);
@@ -45,14 +47,14 @@ public abstract class MediaFileWriter : MediaFileStream
 
     #region Little Endian
 
-    public void WriteInt16LittleEndian(short value)
+    public void WriteInt16LittleEndian(short value) //=> Write(Binary.GetBytes(value, Binary.IsBigEndian));
     {
         Span<byte> temp = stackalloc byte[Media.Common.Binary.BytesPerShort];
         BinaryPrimitives.WriteInt16LittleEndian(temp, value);
         Write(temp);
     }
 
-    public void WriteInt32LittleEndian(int value)
+    public void WriteInt32LittleEndian(int value) //=> Write(Binary.GetBytes(value, Binary.IsBigEndian));
     {
         Span<byte> temp = stackalloc byte[Media.Common.Binary.BytesPerInteger];
         BinaryPrimitives.WriteInt32LittleEndian(temp, value);
