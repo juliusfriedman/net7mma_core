@@ -8,6 +8,8 @@ using System.Linq;
 
 namespace Container.BaseMedia;
 
+#region Nested Types
+
 public class Mp4Box : Node
 {
     // Header size for a box (4 bytes for size + 4 bytes for type)
@@ -381,6 +383,8 @@ public class MdatBox : Mp4Box
         Data = data;
     }
 }
+
+#endregion
 
 public class BaseMediaWriter : MediaFileWriter
 {

@@ -2309,7 +2309,14 @@ namespace Media.Common
         public static void WriteInteger(byte[] buffer, int index, int count, ulong value, bool reverse)
         {
             if (reverse) WriteReversedInteger(buffer, index, count, value);
-            else WriteInteger(buffer, index, count, (ulong)value);
+            else WriteInteger(buffer, index, count, value);
+        }
+
+        [CLSCompliant(false)]
+        public static void WriteInteger(byte[] buffer, ref int index, int count, ulong value, bool reverse)
+        {
+            WriteInteger(buffer, index, count, value, reverse);
+            index += count;
         }
 
         public static void WriteInteger(byte[] buffer, int index, int count, long value, bool reverse)
@@ -2406,7 +2413,7 @@ namespace Media.Common
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static void WriteU8(byte[] buffer, int index, bool reverse, byte value)
+        public static void Write8(byte[] buffer, int index, bool reverse, byte value)
         {
 #if UNSAFE
             unsafe { *(byte*)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<byte>(buffer, index) = reverse ? ReverseU8(value) : value; }
@@ -2415,6 +2422,14 @@ namespace Media.Common
 #else
             buffer[index] = reverse ? ReverseU8(value) : value;
 #endif
+        }
+
+        [CLSCompliant(false)]
+        public static void Write8(byte[] buffer, ref int index, bool reverse, byte value)
+        {
+            Write8(buffer, index, reverse, value);
+
+            ++index;
         }
 
         [CLSCompliant(false)]
@@ -2430,6 +2445,14 @@ namespace Media.Common
 #endif
         }
 
+        [CLSCompliant(false)]
+        public static void Write8(byte[] buffer, ref int index, bool reverse, sbyte value)
+        {
+            Write8(buffer, index, reverse, value);
+
+            ++index;
+        }
+
         /// <summary>
         /// Writes a the given unsgined 16 bit value to the buffer at the given index.
         /// </summary>
@@ -2443,32 +2466,46 @@ namespace Media.Common
         }
 
         [CLSCompliant(false)]
+        public static void Write16(byte[] buffer, ref int index, bool reverse, short value) => WriteInteger(buffer, ref index, Binary.BytesPerShort, (ulong)value, reverse);
+
+        [CLSCompliant(false)]
         public static void Write16(byte[] buffer, int index, bool reverse, ushort value)
         {
             WriteInteger(buffer, index, Binary.BytesPerShort, (short)value, reverse);
         }
 
         [CLSCompliant(false)]
+        public static void Write16(byte[] buffer, ref int index, bool reverse, ushort value) => WriteInteger(buffer, ref index, Binary.BytesPerShort, value, reverse);
+
+        [CLSCompliant(false)]
         public static void Write24(byte[] buffer, int index, bool reverse, uint value)
         {
-            WriteInteger(buffer, index, Binary.Tres, (int)value, reverse);
+            WriteInteger(buffer, index, Binary.Tres, value, reverse);
         }
+
+        [CLSCompliant(false)]
+        public static void Write24(byte[] buffer, ref int index, bool reverse, uint value) => WriteInteger(buffer, ref index, Binary.Tres, value, reverse);
 
         public static void Write24(byte[] buffer, int index, bool reverse, int value)
         {
-            WriteInteger(buffer, index, Binary.Tres, (int)value, reverse);
+            WriteInteger(buffer, index, Binary.Tres, value, reverse);
         }
+
+        [CLSCompliant(false)]
+        public static void Write24(byte[] buffer, ref int index, bool reverse, int value) => WriteInteger(buffer, ref index, Binary.Tres, (ulong)value, reverse);
 
         [CLSCompliant(false)]
         public static void Write32(byte[] buffer, int index, bool reverse, uint value)
         {
-            WriteInteger(buffer, index, Binary.BytesPerInteger, (int)value, reverse);
+            WriteInteger(buffer, index, Binary.BytesPerInteger, value, reverse);
         }
 
-        //Todo
+        [CLSCompliant(false)]
+        public static void Write32(byte[] buffer, ref int index, bool reverse, int value) => WriteInteger(buffer, ref index, Binary.BytesPerInteger, (ulong)value, reverse);
+
         public static void Write32(byte[] buffer, int index, bool reverse, int value)
         {
-            WriteInteger(buffer, index, Binary.BytesPerInteger, (int)value, reverse);
+            WriteInteger(buffer, index, Binary.BytesPerInteger, value, reverse);
         }
 
         /// <summary>
@@ -2484,11 +2521,17 @@ namespace Media.Common
             WriteInteger(buffer, index, Binary.BytesPerLong, value, reverse);
         }
 
+        [CLSCompliant(false)]
+        public static void Write64(byte[] buffer, ref int index, bool reverse, ulong value) => WriteInteger(buffer, ref index, Binary.BytesPerLong, value, reverse);
+
         //Todo
         public static void Write64(byte[] buffer, int index, bool reverse, long value)
         {
             WriteInteger(buffer, index, Binary.BytesPerLong, value, reverse);
         }
+
+        [CLSCompliant(false)]
+        public static void Write64(byte[] buffer, ref int index, bool reverse, long value) => WriteInteger(buffer, ref index, Binary.BytesPerLong, (ulong)value, reverse);
 
         //double, decimal
 
