@@ -1213,7 +1213,7 @@ namespace Media.Containers.BaseMedia
                 if (track.Position < TimeSpan.FromSeconds(totalSamples * 1.0 / timescale))
                 {
                     currentTimescale = timescale;
-                    break;
+                    break; // Found the correct timescale, break out of the loop.
                 }
                 sampleIndex++;
             }
@@ -1229,7 +1229,7 @@ namespace Media.Containers.BaseMedia
             sampleDuration = TimeSpan.FromSeconds(1.0 * currentTimescale / timescale);
 
             // Get the sample data based on the sample size and position
-            int sampleSize = sampleSizes.Count < sampleIndex ?  sampleSizes[sampleIndex] : sampleSizes[0];
+            int sampleSize = sampleSizes.Count > sampleIndex ?  sampleSizes[0] : sampleSizes[sampleIndex];
             long position = sampleIndex > 0 ? sampleOffsets[sampleIndex] : 0;
 
             // Seek to the sample data position in the input stream

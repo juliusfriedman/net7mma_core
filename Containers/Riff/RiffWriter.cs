@@ -7,7 +7,7 @@ using static Media.Containers.Riff.RiffReader;
 
 namespace Media.Containers.Riff;
 
-#region Nested Types
+#region Chunks
 
 public class Chunk : Node
 {
@@ -60,6 +60,21 @@ public class RiffChunk : Chunk
         : base(writer, type, dataSize)
     {        
         SubType = subType;
+    }
+
+    public RiffChunk(RiffWriter writer, FourCharacterCode chunkId, FourCharacterCode subType, byte[] data) : base(writer, chunkId, data)
+    {
+        SubType = subType;
+    }
+}
+
+public class ListChunk : RiffChunk
+{
+    public ListChunk(RiffWriter writer, FourCharacterCode chunkId, FourCharacterCode subType, int dataSize) : base(writer, chunkId, subType, dataSize)
+    {
+    }
+    public ListChunk(RiffWriter writer, FourCharacterCode chunkId, FourCharacterCode subType, byte[] data) : base(writer, chunkId, subType, data)
+    {
     }
 }
 
@@ -328,6 +343,9 @@ public class RiffWriter : MediaFileWriter
     {
         Seek(IdentifierSize, SeekOrigin.Begin);
         WriteInt32LittleEndian((int)Length - IdentifierSize);
+
+        //Foreach Chunk ensure Length was set and write it?
+
         base.Close();
     }
 
