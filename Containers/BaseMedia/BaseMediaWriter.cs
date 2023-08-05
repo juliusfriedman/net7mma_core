@@ -829,6 +829,7 @@ public class BaseMediaWriter : MediaFileWriter
 
     public override SegmentStream GetSample(Track track, out TimeSpan duration)
     {
+        //Needs sampleOffsets box.
         throw new NotImplementedException();
     }
 
