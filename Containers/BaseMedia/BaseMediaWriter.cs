@@ -369,14 +369,18 @@ public class TrakBox : Mp4Box
     }
 }
 
+public class MdatBox : Mp4Box
+{
+    public MdatBox(BaseMediaWriter writer)
+        : base(writer, Encoding.UTF8.GetBytes("mdat"), 0)
+    {
+    }
 
-//public class MdatBox : Mp4Box
-//{
-//    // Implement the 'mdat' box here.
-//    // Similar to FtypBox, define properties to represent fields inside the 'mdat' box.
-//    // Implement the WriteBody and PrepareForWriting methods as shown in the FtypBox class.
-//    // This box will hold the actual media data (audio, video, etc.).
-//}
+    public void WriteData(byte[] data)
+    {
+        Data = data;
+    }
+}
 
 public class BaseMediaWriter : MediaFileWriter
 {

@@ -38,7 +38,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Container.BaseMedia;
+using Media.Common.Interfaces;
 using Media.Container;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Media.Containers.BaseMedia
 {
@@ -650,11 +653,11 @@ namespace Media.Containers.BaseMedia
 
                 double rate = 0;
 
-                List<Tuple<long, long>> entries = new List<Tuple<long, long>>();
+                List<Tuple<long, long>> sttsEntries = new List<Tuple<long, long>>();
 
-                List<long> offsets = new List<long>();
+                List<long> stOffsets = new List<long>();
 
-                List<int> sampleSizes = new List<int>();
+                List<int> stSizes = new List<int>();
 
                 TimeSpan startTime = TimeSpan.Zero;
 
@@ -997,7 +1000,7 @@ namespace Media.Containers.BaseMedia
                                     for (int i = 0; i < entryCount && offset < length; ++i)
                                     {
                                         //Sample Count Sample Duration
-                                        entries.Add(new Tuple<long, long>(Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian),
+                                        sttsEntries.Add(new Tuple<long, long>(Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian),
                                             Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian)));
                                     }
 
@@ -1022,7 +1025,7 @@ namespace Media.Containers.BaseMedia
                                     {
                                         for (int i = 0; i < count && offset < length; ++i)
                                         {
-                                            sampleSizes.Add(Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian));
+                                            stSizes.Add(Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian));
                                         }
                                     }
 
@@ -1043,7 +1046,7 @@ namespace Media.Containers.BaseMedia
 
                                     for (int i = 0; i < chunkCount && offset < length; ++i)
                                     {
-                                        offsets.Add((long)Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian));
+                                        stOffsets.Add((long)Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian));
                                     }
 
                                     offset = (int)length;
@@ -1072,7 +1075,7 @@ namespace Media.Containers.BaseMedia
 
                                     for (int i = 0; i < chunkCount && offset < length; ++i)
                                     {
-                                        offsets.Add(Common.Binary.Read64(rawData, ref offset, Common.Binary.IsLittleEndian));
+                                        stOffsets.Add(Common.Binary.Read64(rawData, ref offset, Common.Binary.IsLittleEndian));
                                     }
 
                                     //should asserte///
@@ -1134,16 +1137,16 @@ namespace Media.Containers.BaseMedia
 
                 TimeSpan calculatedDuration = TimeSpan.FromSeconds(trackDuration / (double)trackTimeScale);                
 
-                ulong sampleCount = (ulong)sampleSizes.Count();
+                ulong sampleCount = (ulong)stSizes.Count;
 
                 //If there are no samples defined and there are entries in the sample to time atom
-                if (sampleCount == 0 && entries.Count > 0)
+                if (sampleCount == 0 && sttsEntries.Count > 0)
                 {
                     //Use the count of entries from the sample to time atom as the count of samples.
-                    sampleCount = (ulong)entries.Count;
+                    sampleCount = (ulong)sttsEntries.Count;
 
                     //If there is only one entry use the value in the entry
-                    if (sampleCount == 1) sampleCount = (ulong)entries[0].Item1;
+                    if (sampleCount == 1) sampleCount = (ulong)sttsEntries[0].Item1;
                 }
 
                 //TOdo calc methods in BaseMedia class with base times etc.. (will help with writers)
@@ -1151,6 +1154,17 @@ namespace Media.Containers.BaseMedia
                 rate = mediaType == Sdp.MediaType.audio ? trackTimeScale : (double)((double)sampleCount / ((double)trackDuration / trackTimeScale));
 
                 Track createdTrack = new Track(trakBox, name, trackId, trackCreated, trackModified, (long)sampleCount, width, height, startTime, calculatedDuration, rate, mediaType, codecIndication, channels, bitDepth, enabled);
+
+                //Useful to support GetSample
+                var dataDictionary = new Dictionary<string, object>();
+
+                createdTrack.UserData = dataDictionary;
+
+                dataDictionary.Add("StOffsets", stOffsets);
+
+                dataDictionary.Add("StSizes", stSizes);
+
+                dataDictionary.Add("SttsEntries", sttsEntries);
 
                 createdTrack.Volume = volume;
 
@@ -1164,14 +1178,68 @@ namespace Media.Containers.BaseMedia
             Position = position;
         }
 
-        public override Common.SegmentStream GetSample(Track track, out TimeSpan duration)
+        public override Common.SegmentStream GetSample(Track track, out TimeSpan sampleDuration)
         {
-            //Could be moved to track.
+            if (track == null)
+                throw new ArgumentNullException(nameof(track));
 
-            //Track has sample count.
+            if (track.SampleCount == 0)
+            {
+                sampleDuration = TimeSpan.Zero;
+                return null;
+            }
 
-            //Could make a SampleEnumerator which takes the list of sampleSizes and the list of offsets
-            throw new NotImplementedException();
+            var dataDictionary = track.UserData as Dictionary<string, object>;
+
+            // Get the sample sizes and offsets for the track
+            IList<int> sampleSizes = dataDictionary["StSizes"] as List<int>;
+            IList<long> sampleOffsets = dataDictionary["StOffsets"] as List<long>;
+            IList<Tuple<long, long>> entries = dataDictionary["SttsEntries"] as List<Tuple<long, long>>;
+
+            // Find the sample at the current position
+            int sampleIndex = 0;
+            long totalSamples = 0;
+            long timescale = 0;
+            long currentTimescale = 0;
+
+            foreach (var entry in entries)
+            {
+                totalSamples += entry.Item1;
+                timescale = entry.Item2;
+                if (track.Position < TimeSpan.FromSeconds(totalSamples * 1.0 / timescale))
+                {
+                    currentTimescale = timescale;
+                    break;
+                }
+                sampleIndex++;
+            }
+
+            if (currentTimescale == 0)
+            {
+                // Track has reached the end, set duration to zero and return null
+                sampleDuration = TimeSpan.Zero;
+                return null;
+            }
+
+            // Calculate the sample duration based on the timescale
+            sampleDuration = TimeSpan.FromSeconds(1.0 * currentTimescale / timescale);
+
+            // Get the sample data based on the sample size and position
+            int sampleSize = sampleSizes[sampleIndex];
+            long position = sampleIndex > 0 ? sampleOffsets[sampleIndex] : 0;
+
+            // Seek to the sample data position in the input stream
+            Seek(position, SeekOrigin.Begin);
+
+            // Read the sample data into a byte array
+            byte[] sampleData = new byte[sampleSize];
+            Read(sampleData, 0, sampleSize);
+
+            // Advance the track position to the end of the current sample
+            track.Position += sampleDuration;
+
+            // Return the SegmentStream to the sample data
+            return new Common.SegmentStream(new Common.MemorySegment(sampleData));
         }
     }
 }
