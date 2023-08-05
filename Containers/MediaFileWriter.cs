@@ -43,6 +43,8 @@ public abstract class MediaFileWriter : MediaFileStream
 
     #endregion
 
+    #region Little Endian
+
     public void WriteInt16LittleEndian(short value)
     {
         Span<byte> temp = stackalloc byte[Media.Common.Binary.BytesPerShort];
@@ -63,4 +65,6 @@ public abstract class MediaFileWriter : MediaFileStream
         BinaryPrimitives.WriteInt64LittleEndian(temp, value);
         Write(temp);
     }
+
+    #endregion
 }

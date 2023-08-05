@@ -126,6 +126,87 @@ public class FmtChunk : Chunk
     }
 }
 
+public class AviMainHeader : Chunk
+{
+    public int MicroSecPerFrame
+    {
+        get => Binary.Read32(Identifier, IdentifierSize, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, IdentifierSize, Binary.IsBigEndian, value);
+    }
+
+    public int MaxBytesPerSec
+    {
+        get => Binary.Read32(Identifier, IdentifierSize + 4, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, IdentifierSize + 4, Binary.IsBigEndian, value);
+    }
+
+    public int PaddingGranularity
+    {
+        get => Binary.Read32(Identifier, IdentifierSize + 8, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, IdentifierSize + 8, Binary.IsBigEndian, value);
+    }
+
+    public AviMainHeaderFlags Flags
+    {
+        get => (AviMainHeaderFlags)Binary.Read32(Identifier, IdentifierSize + 12, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, IdentifierSize + 12, Binary.IsBigEndian, (int)value);
+    }
+
+    public int TotalFrames
+    {
+        get => Binary.Read32(Identifier, IdentifierSize + 16, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, IdentifierSize + 16, Binary.IsBigEndian, value);
+    }
+
+    public int InitialFrames
+    {
+        get => Binary.Read32(Identifier, IdentifierSize + 20, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, IdentifierSize + 20, Binary.IsBigEndian, value);
+    }
+
+    public int Streams
+    {
+        get => Binary.Read32(Identifier, IdentifierSize + 24, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, IdentifierSize + 24, Binary.IsBigEndian, value);
+    }
+
+    public int SuggestedBufferSize
+    {
+        get => Binary.Read32(Identifier, IdentifierSize + 28, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, IdentifierSize + 28, Binary.IsBigEndian, value);
+    }
+
+    public int Width
+    {
+        get => Binary.Read32(Identifier, IdentifierSize + 32, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, IdentifierSize + 32, Binary.IsBigEndian, value);
+    }
+
+    public int Height
+    {
+        get => Binary.Read32(Identifier, IdentifierSize + 36, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, IdentifierSize + 36, Binary.IsBigEndian, value);
+    }
+
+    public AviMainHeader(RiffWriter writer)
+        : base(writer, FourCharacterCode.avih, 56)
+    {
+        SubType = FourCharacterCode.avih;
+    }
+}
+
+[Flags]
+public enum AviMainHeaderFlags
+{
+    None = 0,
+    HasIndex = 0x00000010,
+    MustUseIndex = 0x00000020,
+    IsInterleaved = 0x00000100,
+    TrustCkType = 0x00000800,
+    WasCaptureFile = 0x00010000,
+    CopyRighted = 0x00020000
+}
+
 public class AviStreamHeader : Chunk
 {
     public FourCharacterCode StreamType
@@ -241,6 +322,13 @@ public class RiffWriter : MediaFileWriter
         chunk.DataOffset = Position;
 
         Write(chunk);
+    }
+
+    public override void Close()
+    {
+        Seek(IdentifierSize, SeekOrigin.Begin);
+        WriteInt32LittleEndian((int)Length - IdentifierSize);
+        base.Close();
     }
 
     public override IEnumerator<Node> GetEnumerator() => chunks.GetEnumerator();
