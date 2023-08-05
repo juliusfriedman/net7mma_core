@@ -6,6 +6,8 @@ public class WaveFormat : MemorySegment
 {
     const int Size = 18;
 
+    public WaveFormatId WaveFormatId => (WaveFormatId)AudioFormat;
+
     public short AudioFormat
     {
         get => Binary.Read16(Array, Offset, Binary.IsBigEndian);
