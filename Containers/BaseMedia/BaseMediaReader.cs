@@ -202,9 +202,12 @@ namespace Media.Containers.BaseMedia
 
         public BaseMediaReader(System.IO.FileStream source, System.IO.FileAccess access = System.IO.FileAccess.Read) : base(source, access) { }
 
-        public BaseMediaReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { }        
+        public BaseMediaReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { }
 
         //int[] names?
+
+        public IEnumerable<Node> ReadBoxes(Node node, params string[] names) => ReadBoxes(node.DataOffset, names);
+
         public IEnumerable<Node> ReadBoxes(long offset, long count, params string[] names)
         {
             long positionStart = Position;

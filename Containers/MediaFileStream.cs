@@ -497,6 +497,34 @@ namespace Media.Container
 
         #region Methods
 
+        /// <summary>
+        /// Given a <see cref="Node"/>, will move to the <see cref="Node.DataOffset"/> and proceed to enumerate all nodes contained within <paramref name="node"/> by using <see cref="Node.DataSize"/>.
+        /// <see cref="Position"/> will be restored afterwards.
+        /// </summary>
+        /// <param name="node">The <see cref="Node"/> to enumerate.</param>
+        /// <returns>The enumerator which will consume all contained nodes.</returns>
+        public IEnumerable<Node> GetChildren(Node node)
+        {
+            var position = Position;
+
+            Position = node.DataOffset;
+
+            var remains = node.DataSize;
+
+            var enumerator = GetEnumerator();
+
+            while (remains > 0 && enumerator.MoveNext())
+            {
+                var next = enumerator.Current;
+
+                yield return next;
+
+                remains -= next.TotalSize;
+            }
+
+            Position = position;
+        }
+
         public virtual void RefreshFileInfo(bool updateLength = true)
         {            
             //If the FileInfo is not null
@@ -519,7 +547,7 @@ namespace Media.Container
             if (count <= 0) return Media.Common.MemorySegment.EmptyBytes; 
             byte[] result = new byte[count]; 
             long i = 0; 
-            /*do*/while ((count -= (i += Read(result, (int)i, (int)count))) > 0) ; 
+            /*do*/while ((count -= i += Read(result, (int)i, (int)count)) > 0) ; 
             return result;
         }
 
@@ -551,7 +579,7 @@ namespace Media.Container
             {
                 if (position != stream.Seek(position, System.IO.SeekOrigin.Begin)) throw new InvalidOperationException("Unable to obtain the given position");
 
-                int read = 0; while ((count -= (read += stream.Read(buffer, read, count))) > 0) ;                
+                int read = 0; while ((count -= read += stream.Read(buffer, read, count)) > 0) ;                
 
                 RefreshFileInfo(refreshFileInfo);
 

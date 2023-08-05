@@ -37,7 +37,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #endregion
 
 #region Using Statements
-using Media.Common;
 using System;
 using System.Linq;
 #endregion
@@ -339,7 +338,7 @@ namespace Media.Container
 
         #endregion
 
-        #region Methods
+        #region Methods        
 
         public void WriteToMaster()
         {
