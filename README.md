@@ -17,4 +17,4 @@ You can read version media files using the various Container projects
 
 A lot of the classes are still in development mode so please let me know if you see a feature missing or a gap in the API.
 
-Contibutions welcome!
+Contributions welcome!
