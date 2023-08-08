@@ -225,7 +225,7 @@ namespace Media.Codecs.Audio
         /// <param name="format">The existing AudioFormat</param>
         /// <param name="newByteOrder">The new byte order</param>
         public AudioFormat(AudioFormat format, Common.Binary.ByteOrder newByteOrder)
-            : this(format.SampleRate, format.IsSigned, format.ByteOrder, format.DataLayout)
+            : this(format.SampleRate, format.IsSigned, newByteOrder, format.DataLayout)
         {
 
         }

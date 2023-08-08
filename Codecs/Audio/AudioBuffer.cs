@@ -3,6 +3,7 @@ using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -124,73 +125,66 @@ namespace Media.Codecs.Audio
             if (componentIndex < 0)
                 throw new ArgumentException("The specified component is not part of the media format.", nameof(component));
 
+            int offset = CalculateSampleDataOffset(sampleOffset, componentIndex);
+            int byteOffset = offset / Binary.BitsPerByte;
+
+            return new MemorySegment(Data.Array, Data.Offset + byteOffset, Data.Count - byteOffset);
+        }
+
+        public Vector<byte> GetComponentVector(int sampleIndex, int channelIndex)
+        {
+            int offset = CalculateSampleDataOffset(sampleIndex, channelIndex);
+
+            if (offset < 0 || offset + Vector<byte>.Count > Data.Count)
+            {
+                throw new ArgumentOutOfRangeException(nameof(sampleIndex), "Invalid sample index or component data does not fit in the audio buffer.");
+            }
+
+            // Since the AudioBuffer contains audio data as bytes, we can use Vector<byte>.Count to get the vector size
+            // and directly return the vector for the specified component at the given offset.
+            return new Vector<byte>(Data.Array, offset);
+        }
+
+        public int CalculateSampleDataOffset(int sampleIndex, int channelIndex)
+        {
+            if (sampleIndex < 0 || sampleIndex >= SampleCount)
+                throw new ArgumentOutOfRangeException(nameof(sampleIndex), "Invalid sample index");
+
+            if (channelIndex < 0 || channelIndex >= Channels)
+                throw new ArgumentOutOfRangeException(nameof(channelIndex), "Invalid channel index");
+
             if (DataLayout == DataLayout.Packed)
             {
-                int offset = sampleOffset * SampleLength * Channels;
-
-                for (int i = 0; i < componentIndex; i++)
-                    offset += MediaFormat.Components[i].Size / Binary.BitsPerByte;
-
-                int byteOffset = offset / Binary.BitsPerByte;
-
-                return new MemorySegment(Data.Array, Data.Offset + byteOffset, Data.Count - byteOffset);
+                // Packed layout
+                return sampleIndex * SampleLength + channelIndex * MediaFormat.Components[channelIndex].Size / Binary.BitsPerByte;
             }
             else if (DataLayout == DataLayout.Planar)
             {
-                int componentOffset = 0;
-
-                for (int i = 0; i < componentIndex; i++)
-                    componentOffset += MediaFormat.Components[i].Size;
-
-                int offset = sampleOffset * MediaFormat.Components[componentIndex].Length + componentOffset / Binary.BitsPerByte;
-                int byteOffset = offset / Binary.BitsPerByte;
-
-                return new MemorySegment(Data.Array, Data.Offset + byteOffset, Data.Count - byteOffset);
+                // Planar layout
+                return sampleIndex * SampleLength * Channels + channelIndex * MediaFormat.Components[channelIndex].Size / Binary.BitsPerByte;
             }
             else if (DataLayout == DataLayout.SemiPlanar)
             {
-                int offset = sampleOffset * SampleLength * Channels;
-
-                int componentOffset = 0;
-                for (int i = 0; i < componentIndex; i++)
-                    componentOffset += MediaFormat.Components[i].Size;
-
+                // SemiPlanar layout
                 int packedSize = 0;
-                for (int i = 0; i < Channels; i++)
+                for (int i = 0; i < Channels - 1; i++)
                     packedSize += MediaFormat.Components[i].Size / Binary.BitsPerByte;
 
-                if (componentIndex == Channels - 1)
+                if (channelIndex == Channels - 1)
                 {
                     // Last component (the packed one)
-                    offset += componentOffset / Binary.BitsPerByte;
+                    return sampleIndex * SampleLength + packedSize;
                 }
                 else
                 {
                     // Planar component
-                    offset += packedSize + (sampleOffset * MediaFormat.Components[componentIndex].Length);
+                    return sampleIndex * SampleLength * Channels + channelIndex * MediaFormat.Components[channelIndex].Size / Binary.BitsPerByte;
                 }
-
-                int byteOffset = offset / 8;
-                return new MemorySegment(Data.Array, Data.Offset + byteOffset, Data.Count - byteOffset);
             }
             else
             {
                 throw new InvalidOperationException("Unsupported data layout.");
             }
-        }
-
-        public int CalculateSampleDataOffset(int sampleIndex, int channel)
-        {
-            if (sampleIndex < 0 || sampleIndex >= SampleCount)
-                throw new ArgumentOutOfRangeException(nameof(sampleIndex), "Invalid sample index");
-
-            if (channel < 0 || channel >= Channels)
-                throw new ArgumentOutOfRangeException(nameof(channel), "Invalid channel index");
-
-            int sampleSizeInBytes = Binary.BitsToBytes(AudioFormat.SampleSize);
-            int channelSizeInBytes = Binary.BitsToBytes(AudioFormat.Components[channel].Size);
-
-            return sampleIndex * sampleSizeInBytes + channel * channelSizeInBytes;
         }
 
         /// <summary>
