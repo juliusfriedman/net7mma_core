@@ -36,14 +36,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
-using Media.Common;
-
 namespace Media.Codec
 {
     /// <summary>
     /// Represents a base class for common types of media
     /// </summary>
-    public class MediaBuffer : Common.CommonDisposable, Media.Codec.Interfaces.IMediaBuffer
+    public class MediaBuffer : Common.SuppressedFinalizerDisposable, Media.Codec.Interfaces.IMediaBuffer
     {
         //What codec is this sample relevent to
         public readonly Media.Codec.Interfaces.ICodec Codec;
@@ -54,8 +52,7 @@ namespace Media.Codec
         //Needs to come from format.
         public readonly MediaFormat MediaFormat;
 
-        //
-
+        //The data of the buffer
         public readonly Common.MemorySegment Data = Common.MemorySegment.Empty;
 
         public MediaBuffer(MediaFormat mediaFormat, Common.MemorySegment data, Media.Codec.Interfaces.ICodec codec = null, long timestamp = 0, bool shouldDispose = true)
@@ -169,16 +166,9 @@ namespace Media.Codec
 
         public virtual int SampleCount { get { return Data.Count / SampleLength; } }
 
-        Media.Codec.Interfaces.ICodec Media.Codec.Interfaces.IMediaBuffer.Codec
-        {
-            get { return Codec; }
-        }
+        Media.Codec.Interfaces.ICodec Media.Codec.Interfaces.IMediaBuffer.Codec => Codec;
 
-
-        Common.MemorySegment Interfaces.IMediaBuffer.Data
-        {
-            get { return Data; }
-        }
+        Common.MemorySegment Interfaces.IMediaBuffer.Data => Data;
     }
 }
 

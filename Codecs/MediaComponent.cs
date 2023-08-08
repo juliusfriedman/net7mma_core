@@ -36,47 +36,44 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
-namespace Media.Codec
+namespace Media.Codec;
+
+/// <summary>
+/// Defines the base class of all components
+/// </summary>
+public class MediaComponent : Common.SuppressedFinalizerDisposable
 {
     /// <summary>
-    /// Defines the base class of all components
+    /// The identifier assigned to the component
     /// </summary>
-    public class MediaComponent : Common.SuppressedFinalizerDisposable
+    public readonly byte Id;
+
+    /// <summary>
+    /// The size of the component in bits
+    /// </summary>
+    public readonly int Size;
+
+    /// <summary>
+    /// Constructs a new MediaComponent with the given configuration
+    /// </summary>
+    /// <param name="id">The identifier assigned to the component</param>
+    /// <param name="size">The size of the component in bits</param>
+    /// <param name="shouldDispose">Optionally indicates if the component should not dispose</param>
+    public MediaComponent(byte id, int size, bool shouldDispose = true)
+        : base(shouldDispose)
     {
-        /// <summary>
-        /// The identifier assigned to the component
-        /// </summary>
-        public readonly byte Id;
+        //Validate the size in bits
+        if (size < 1) throw new System.ArgumentException("size", "Must be greater than 0.");
+        
+        //Assign the size in bits
+        Size = size;
 
-        /// <summary>
-        /// The size of the component in bits
-        /// </summary>
-        public readonly int Size;
-
-        //Really also needs a Plane or atleast there should be a derivative for ImageComponent which decribes if a component is on a plane.
-        //Useful for SemiPlanar, without it theres no way to know what component appear in the Plane without assuming.
-
-        /// <summary>
-        /// Constructs a new MediaComponent with the given configuration
-        /// </summary>
-        /// <param name="id">The identifier assigned to the component</param>
-        /// <param name="size">The size of the component in bits</param>
-        public MediaComponent(byte id, int size, bool shouldDispose = true)
-            : base(shouldDispose)
-        {
-            //Validate the size in bits
-            if (size < 1) throw new System.ArgumentException("size", "Must be greater than 0.");
-            
-            //Assign the size in bits
-            Size = size;
-
-            //assign the id
-            Id = id;
-        }
-
-        /// <summary>
-        /// The size of the component in bytes
-        /// </summary>
-        public int Length { get { return Common.Binary.BitsToBytes(Size); } }
+        //assign the id
+        Id = id;
     }
+
+    /// <summary>
+    /// The size of the component in bytes
+    /// </summary>
+    public int Length { get { return Common.Binary.BitsToBytes(Size); } }
 }
