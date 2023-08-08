@@ -109,8 +109,9 @@ namespace Media.Codecs.Audio
         public static AudioFormat SemiPlanar(AudioFormat other)
         {
             return new AudioFormat(Codec.MediaFormat.SemiPlanar(other));
-            //return new ImageFormat(other.ByteOrder, Codec.DataLayout.SemiPlanar, other.Components);
         }
+
+        public static AudioFormat WithSampleRate(int sampleRate, AudioFormat other) => new AudioFormat(sampleRate, other.IsSigned, other.IsBigEndian, other.DataLayout);
 
         #endregion
 
@@ -183,8 +184,6 @@ namespace Media.Codecs.Audio
             IsSigned = signed;
         }
 
-
-
         /// <summary>
         /// Constructs a new AudioFormat with the given configuration
         /// </summary>
@@ -238,7 +237,6 @@ namespace Media.Codecs.Audio
 
             if (format.MediaType != Codec.MediaType.Audio) throw new System.ArgumentException("format.MediaType", "Must be Codec.MediaType.Audio.");
         }
-       
 
         #endregion
     }

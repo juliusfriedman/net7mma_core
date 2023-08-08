@@ -2,7 +2,6 @@
 using Media.Common;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -68,6 +67,8 @@ namespace Media.Codecs.Image
         #region Properties
 
         //Should be Vector<byte>?
+
+        //Assumes component order
         public IEnumerable<Common.MemorySegment> this[int x, int y]
         {
             get
@@ -144,98 +145,7 @@ namespace Media.Codecs.Image
             stream.Write(fileHeader, 0, fileHeader.Length);
             stream.Write(header.Array, header.Offset, header.Count);
             stream.Write(Data.Array, Data.Offset, Data.Count);
-        }
-
-        //private int GetComponentDataOffset(int x, int y, int componentIndex)
-        //{
-        //    if (x < 0 || y < 0 || x >= Width || y >= Height || componentIndex >= ImageFormat.Components.Length)
-        //        return -1;
-
-        //    switch (DataLayout)
-        //    {
-        //        default:
-        //        case Media.Codec.DataLayout.Unknown:
-        //            throw new System.ArgumentException("Invalid DataLayout");
-
-        //        case Media.Codec.DataLayout.Packed:
-        //            return (y * Width + x) * ImageFormat.Size;
-
-        //        case Media.Codec.DataLayout.Planar:
-        //            int planeOffset = 0;
-        //            for (int c = 0; c < componentIndex; c++)
-        //            {
-        //                if (ImageFormat.Widths[c] < 0 || ImageFormat.Heights[c] < 0)
-        //                    continue;
-
-        //                planeOffset += PlaneLength(c);
-        //            }
-
-        //            int xOffset = x >> ImageFormat.Widths[componentIndex];
-        //            int yOffset = y >> ImageFormat.Heights[componentIndex];
-        //            return planeOffset + yOffset * PlaneWidth(componentIndex) + xOffset;
-
-        //        case Media.Codec.DataLayout.SemiPlanar:
-        //            // SemiPlanar is similar to Planar, but all planes are packed together in the order of YUV.
-        //            int semiPlanarOffset = 0;
-        //            for (int c = 0; c < componentIndex; c++)
-        //            {
-        //                int componentSize = Common.Binary.BitsToBytes(ImageFormat.Components[c].Size);
-        //                semiPlanarOffset += componentSize * Width * Height;
-        //            }
-
-        //            int semiPlanarXOffset = x >> ImageFormat.Widths[componentIndex];
-        //            int semiPlanarYOffset = y >> ImageFormat.Heights[componentIndex];
-        //            return semiPlanarOffset + semiPlanarYOffset * PlaneWidth(componentIndex) + semiPlanarXOffset;
-        //    }
-        //}
-
-        public int CalculateComponentDataOffset(int x, int y, int componentIndex)
-        {
-            if (componentIndex < 0 || componentIndex >= ImageFormat.Components.Length)
-                return -1;
-
-            int offset = 0;
-
-            var component = ImageFormat.Components[componentIndex];
-            offset += component.Length;
-
-            int widthSampling = ImageFormat.Widths[componentIndex];
-            int heightSampling = ImageFormat.Heights[componentIndex];
-
-            if (DataLayout == Media.Codec.DataLayout.Planar && widthSampling > 0 && heightSampling > 0)
-            {
-                int planeWidth = Width >> widthSampling;
-                int planeX = x >> widthSampling;
-                int planeY = y >> heightSampling;
-
-                offset += (planeY * planeWidth + planeX) * ImageFormat.Components[componentIndex].Length;
-            }
-
-            return offset;
-        }
-
-        public SegmentStream GetSampleData(int x, int y)
-        {
-            var result = new SegmentStream();
-            foreach(var component in ImageFormat.Components)
-                result.AddMemory(GetComponentData(x, y, component));
-            return result;
-        }
-
-        public MemorySegment GetComponentData(int x, int y, MediaComponent component)
-        {
-            int componentIndex = GetComponentIndex(component);
-
-            if (componentIndex < 0) return MemorySegment.Empty;
-                //throw new ArgumentException("Invalid component specified.");
-
-            int offset = CalculateComponentDataOffset(x, y, componentIndex);
-
-            if (offset < 0) return MemorySegment.Empty;
-                //throw new IndexOutOfRangeException("Coordinates are outside the bounds of the image.");
-
-            return new MemorySegment(Data.Array, offset, component.Length);
-        }
+        }       
 
         public int PlaneWidth(int plane)
         {
@@ -275,55 +185,57 @@ namespace Media.Codecs.Image
             return Common.Binary.BitsToBytes(PlaneSize(plane));
         }
 
-        public void SetComponentData(int x, int y, int componentIndex, MemorySegment data)
+        public int CalculateComponentDataOffset(int x, int y, int componentIndex)
         {
-            if (x < 0 || y < 0 || x >= Width || y >= Height)
-                return; // or throw an exception
+            if (componentIndex < 0 || componentIndex >= ImageFormat.Components.Length)
+                return -1;
 
-            int offset = CalculateComponentDataOffset(x, y, componentIndex);
-            if (offset < 0)
-                return; // or throw an exception
+            int offset = 0;
 
-            Buffer.BlockCopy(data.Array, data.Offset, Data.Array, Data.Offset + offset, data.Count);
-        }
+            var component = ImageFormat.Components[componentIndex];
+            offset += component.Length;
 
-        public void SetComponentData(int x, int y, int componentIndex, Vector<byte> componentData)
-        {
-            int offset = CalculateComponentDataOffset(x, y, componentIndex);
-            int vectorSize = Vector<byte>.Count;
+            int widthSampling = ImageFormat.Widths[componentIndex];
+            int heightSampling = ImageFormat.Heights[componentIndex];
 
-            if (offset < 0 || offset + vectorSize > Data.Count)
+            if (DataLayout == Media.Codec.DataLayout.Planar && widthSampling > 0 && heightSampling > 0)
             {
-                throw new ArgumentOutOfRangeException("componentData", "ComponentData doesn't fit in the image buffer.");
+                int planeWidth = Width >> widthSampling;
+                int planeX = x >> widthSampling;
+                int planeY = y >> heightSampling;
+
+                offset += (planeY * planeWidth + planeX) * ImageFormat.Components[componentIndex].Length;
             }
 
-            componentData.CopyTo(new Span<byte>(Data.Array, offset, vectorSize));
+            return offset;
         }
 
-        // Set the value of a specific component at the given (x, y) coordinates
-        public void SetComponentData(int x, int y, byte componentId, MemorySegment data)
+        //Gets all component samples for the given coordinate into a SegmentStream (not really useful besides saving on some allocation)
+
+        public SegmentStream GetSampleData(int x, int y)
         {
-            int componentIndex = GetComponentIndex(componentId);
-            if (componentIndex == -1)
-                return;
+            var result = new SegmentStream();
+            foreach (var component in ImageFormat.Components)
+                result.AddMemory(GetComponentData(x, y, component));
+            return result;
+        }
+
+        // Get the value of a specific component at the given (x, y) coordinates
+
+        public MemorySegment GetComponentData(int x, int y, MediaComponent component)
+        {
+            int componentIndex = GetComponentIndex(component);
+
+            if (componentIndex < 0) return MemorySegment.Empty;
+            //throw new ArgumentException("Invalid component specified.");
 
             int offset = CalculateComponentDataOffset(x, y, componentIndex);
-            if (offset == -1)
-            {
-                // Component doesn't exist in this format, return without setting anything.
-                return;
-            }
 
-            // Make sure the data has the correct length for the component.
-            int componentLength = ImageFormat.Components[componentIndex].Length;
-            if (data.Count != componentLength)
-            {
-                throw new ArgumentException($"Invalid data length for component {componentId}. Expected length: {componentLength} bytes.", nameof(data));
-            }
+            if (offset < 0) return MemorySegment.Empty;
+            //throw new IndexOutOfRangeException("Coordinates are outside the bounds of the image.");
 
-            // Copy the data into the image's memory buffer at the correct offset.
-            Buffer.BlockCopy(data.Array, data.Offset, Data.Array, Data.Offset + offset, data.Count);
-        }
+            return new MemorySegment(Data.Array, offset, component.Length);
+        }        
 
         public MemorySegment GetComponentData(int x, int y, byte componentId)
         {
@@ -363,6 +275,56 @@ namespace Media.Codecs.Image
             return new Vector<byte>(Data.Array, offset);
         }
 
+        // Set the value of a specific component at the given (x, y) coordinates
+
+        public void SetComponentData(int x, int y, int componentIndex, MemorySegment data)
+        {
+            if (x < 0 || y < 0 || x >= Width || y >= Height)
+                return; // or throw an exception
+
+            int offset = CalculateComponentDataOffset(x, y, componentIndex);
+            if (offset < 0)
+                return; // or throw an exception
+
+            Buffer.BlockCopy(data.Array, data.Offset, Data.Array, Data.Offset + offset, data.Count);
+        }
+
+        public void SetComponentData(int x, int y, int componentIndex, Vector<byte> componentData)
+        {
+            int offset = CalculateComponentDataOffset(x, y, componentIndex);
+            int vectorSize = Vector<byte>.Count;
+
+            if (offset < 0 || offset + vectorSize > Data.Count)
+            {
+                throw new ArgumentOutOfRangeException("componentData", "ComponentData doesn't fit in the image buffer.");
+            }
+
+            componentData.CopyTo(new Span<byte>(Data.Array, offset, vectorSize));
+        }
+
+        public void SetComponentData(int x, int y, byte componentId, MemorySegment data)
+        {
+            int componentIndex = GetComponentIndex(componentId);
+            if (componentIndex == -1)
+                return;
+
+            int offset = CalculateComponentDataOffset(x, y, componentIndex);
+            if (offset == -1)
+            {
+                // Component doesn't exist in this format, return without setting anything.
+                return;
+            }
+
+            // Make sure the data has the correct length for the component.
+            int componentLength = ImageFormat.Components[componentIndex].Length;
+            if (data.Count != componentLength)
+            {
+                throw new ArgumentException($"Invalid data length for component {componentId}. Expected length: {componentLength} bytes.", nameof(data));
+            }
+
+            // Copy the data into the image's memory buffer at the correct offset.
+            Buffer.BlockCopy(data.Array, data.Offset, Data.Array, Data.Offset + offset, data.Count);
+        }
 
         #endregion
     }

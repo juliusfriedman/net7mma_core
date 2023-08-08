@@ -76,13 +76,13 @@ namespace Media.Codecs.Audio
         /// <param name="quality"></param>
         /// <param name="shouldDispose"></param>
         public AudioTransformation(AudioBuffer source, AudioBuffer dest, Codec.TransformationQuality quality = Codec.TransformationQuality.Unspecified, bool shouldDispose = true)
-            :this(quality, shouldDispose)
+            : this(quality, shouldDispose)
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(source)) throw new System.ArgumentNullException("source");
             m_Source = source;
 
             if (Common.IDisposedExtensions.IsNullOrDisposed(dest)) throw new System.ArgumentNullException("dest");
-            m_Dest = dest;  
+            m_Dest = dest;
         }
 
         #endregion
@@ -189,22 +189,4 @@ namespace Media.Codecs.Audio
             }
         }
     }
-
-    //// Example for upsampling by a factor of 2
-    //int upsampleFactor = 2;
-    //AudioBuffer sourceBuffer = ... // Initialize the source buffer
-    //AudioBuffer destinationBuffer = new AudioBuffer(new AudioFormat(sourceBuffer.SampleRate * upsampleFactor, 16, Common.Binary.ByteOrder.Little, sourceBuffer.AudioFormat.Components), sourceBuffer.SampleCount * upsampleFactor);
-    //AudioTransformer upsampleTransform = new AudioTransformer(upsampleFactor);
-    //upsampleTransform.Source = sourceBuffer;
-    //upsampleTransform.Destination = destinationBuffer;
-    //upsampleTransform.Transform();
-
-    //// Example for downsampling by a factor of 2
-    //int downsampleFactor = -2;
-    //AudioBuffer sourceBuffer = ... // Initialize the source buffer
-    //AudioBuffer destinationBuffer = new AudioBuffer(new AudioFormat(sourceBuffer.SampleRate / Math.Abs(downsampleFactor), 16, Common.Binary.ByteOrder.Little, sourceBuffer.AudioFormat.Components), sourceBuffer.SampleCount / Math.Abs(downsampleFactor));
-    //AudioTransformer downsampleTransform = new AudioTransformer(downsampleFactor);
-    //downsampleTransform.Source = sourceBuffer;
-    //downsampleTransform.Destination = destinationBuffer;
-    //downsampleTransform.Transform();
 }

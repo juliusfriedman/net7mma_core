@@ -133,16 +133,7 @@ namespace Media.Codec
         //    }
         //}
 
-        public int GetComponentIndex(MediaComponent component)
-        {
-            for (int i = 0; i < MediaFormat.Components.Length; i++)
-            {
-                if (MediaFormat.Components[i].Id == component.Id)
-                    return i;
-            }
-
-            return -1;
-        }
+        public int GetComponentIndex(MediaComponent component) => GetComponentIndex(component.Id);
 
         public int GetComponentIndex(byte componentId)
         {
