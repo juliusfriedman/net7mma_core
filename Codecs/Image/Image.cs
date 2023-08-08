@@ -105,7 +105,8 @@ namespace Media.Codecs.Image
             int width = Width;
             int height = Height;
 
-            var imageFormat = 0;// Binary.Read32(ImageFormat.Components.Select(c => (byte)char.ToUpper((char)c.Id)).ToArray(), 0, Binary.IsBigEndian);
+            //Should be a 4CC indicating the image but...
+            var compressionFormat = 0;// Binary.Read32(ImageFormat.Components.Select(c => (byte)char.ToUpper((char)c.Id)).ToArray(), 0, Binary.IsBigEndian);
 
             // Convert pixels to meters: 1 inch = 0.0254 meters
             float horizontalResolutionMeters = width / DefaultDpi * 0.0254f;
@@ -116,7 +117,7 @@ namespace Media.Codecs.Image
             int ypelsPerMeter = (int)Math.Round(1.0f / verticalResolutionMeters);
 
             // Create a new BitmapInfoHeader based on the ImageFormat
-            BitmapInfoHeader header = new BitmapInfoHeader(width, height, (short)ImageFormat.Components.Length, (short)ImageFormat.Size, imageFormat, Data.Array.Length, xpelsPerMeter, ypelsPerMeter, 0, 0);
+            BitmapInfoHeader header = new BitmapInfoHeader(width, height, (short)ImageFormat.Components.Length, (short)ImageFormat.Size, compressionFormat, Data.Array.Length, xpelsPerMeter, ypelsPerMeter, 0, 0);
             SaveBitmap(header, stream);
         }
 
@@ -204,7 +205,7 @@ namespace Media.Codecs.Image
 
                 if (DataLayout == Media.Codec.DataLayout.Planar && widthSampling > 0 && heightSampling > 0)
                 {
-                    int planeWidth = PlaneWidth(c);
+                    int planeWidth = Width >> widthSampling;
                     int planeX = x >> widthSampling;
                     int planeY = y >> heightSampling;
 
@@ -212,10 +213,10 @@ namespace Media.Codecs.Image
                 }
             }
 
-            //Check for sub sampling.
+            // Check for sub-sampling.
             if (DataLayout == Media.Codec.DataLayout.Planar && ImageFormat.Widths[componentIndex] > 0 && ImageFormat.Heights[componentIndex] > 0)
             {
-                int planeWidth = PlaneWidth(componentIndex);
+                int planeWidth = Width >> ImageFormat.Widths[componentIndex];
                 int planeX = x >> ImageFormat.Widths[componentIndex];
                 int planeY = y >> ImageFormat.Heights[componentIndex];
 
@@ -227,6 +228,14 @@ namespace Media.Codecs.Image
             }
 
             return offset;
+        }
+
+        public SegmentStream GetSampleData(int x, int y)
+        {
+            var result = new SegmentStream();
+            foreach(var component in ImageFormat.Components)
+                result.AddMemory(GetComponentData(x, y, component));
+            return result;
         }
 
         public MemorySegment GetComponentData(int x, int y, MediaComponent component)
@@ -394,20 +403,26 @@ namespace Media.UnitTests
 
         public static void TestGetComponentData()
         {
-            using (Media.Codecs.Image.Image image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 10, 10))
+            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 100, 100))
             {
                 for(int x = 0; x < image.Width; x++)
                 {
                     for(int y = 0; y < image.Height; y++)
                     {
-                        for(int c = 0; c < image.ImageFormat.Length; c++)
+                        for (int c = 0; c < image.ImageFormat.Length; c++)
                         {
                             var component = image.ImageFormat[c];
+
                             var data = image.GetComponentData(x, y, component);
+
+                            if (data.Count != component.Length) throw new InvalidOperationException();
+
                             Array.Fill(data.Array, byte.MaxValue);
+
                             image.SetComponentData(x, y, c, data);
                             
                             data = image.GetComponentData(x, y, component);
+
                             if (data.Array.Any(b => b != byte.MaxValue)) throw new Exception("Did not set Component data");
                         }
                     }
@@ -423,7 +438,18 @@ namespace Media.UnitTests
             {
                 Array.Fill(image.Data.Array, byte.MaxValue);
 
-                using (var outputBmpStream = new System.IO.FileStream("output.bmp", FileMode.OpenOrCreate))
+                using (var outputBmpStream = new System.IO.FileStream("output_rgb.bmp", FileMode.OpenOrCreate))
+                {
+                    image.SaveBitmap(outputBmpStream);
+                }
+            }
+
+
+            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGBA(8), 696, 564))
+            {
+                Array.Fill(image.Data.Array, byte.MaxValue);
+
+                using (var outputBmpStream = new System.IO.FileStream("output_rgba.bmp", FileMode.OpenOrCreate))
                 {
                     image.SaveBitmap(outputBmpStream);
                 }
