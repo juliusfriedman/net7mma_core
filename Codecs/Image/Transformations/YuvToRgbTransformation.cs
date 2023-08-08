@@ -38,23 +38,36 @@ public class YuvToRgbTransformation : ImageTransformation
 
     public override void Transform()
     {
+        var rComponent = Destination.ImageFormat.GetComponentById(ImageFormat.RedChannelId);
+        var rComponentIndex = Destination.GetComponentIndex(ImageFormat.RedChannelId);
+        var rComponentData = new Common.MemorySegment(rComponent.Length);
+
+        var gComponent = Destination.ImageFormat.GetComponentById(ImageFormat.GreenChannelId);
+        var gComponentIndex = Destination.GetComponentIndex(ImageFormat.GreenChannelId);
+        var gComponentData = new Common.MemorySegment(gComponent.Length);
+
+        var bComponent = Destination.ImageFormat.GetComponentById(ImageFormat.BlueChannelId);
+        var bComponentIndex = Destination.GetComponentIndex(ImageFormat.BlueChannelId);
+        var bComponentData = new Common.MemorySegment(bComponent.Length);
+
+        var yComponent = Source.ImageFormat.GetComponentById(ImageFormat.LumaChannelId);
+        var uComponent = Source.ImageFormat.GetComponentById(ImageFormat.ChromaMajorChannelId);
+        var vComponent = Source.ImageFormat.GetComponentById(ImageFormat.ChromaMinorChannelId);
+
         // Loop through each pixel in the source image
         for (int y = 0; y < Source.Height; y++)
         {
             for (int x = 0; x < Source.Width; x++)
             {
                 // Read the YUV components for the current pixel
-                var component = Source.ImageFormat.GetComponentById(ImageFormat.LumaChannelId);
-                var data = Source.GetComponentData(x, y, component);
-                var yValue = Binary.ReadBits(data.Array, data.Offset, component.Size, false);
+                var data = Source.GetComponentData(x, y, yComponent);
+                var yValue = Binary.ReadBits(data.Array, data.Offset, yComponent.Size, false);
 
-                component = Source.ImageFormat.GetComponentById(ImageFormat.ChromaMajorChannelId);
-                data = Source.GetComponentData(x, y, component);
-                var uValue = Binary.ReadBits(data.Array, data.Offset, component.Size, false);
+                data = Source.GetComponentData(x, y, uComponent);
+                var uValue = Binary.ReadBits(data.Array, data.Offset, uComponent.Size, false);
 
-                component = Source.ImageFormat.GetComponentById(ImageFormat.ChromaMinorChannelId);
-                data = Source.GetComponentData(x, y, component);
-                var vValue = Binary.ReadBits(data.Array, data.Offset, component.Size, false);
+                data = Source.GetComponentData(x, y, vComponent);
+                var vValue = Binary.ReadBits(data.Array, data.Offset, vComponent.Size, false);
 
                 // Convert YUV to RGB values
                 double r = yValue + 1.13983 * (vValue - 128);
@@ -67,20 +80,14 @@ public class YuvToRgbTransformation : ImageTransformation
                 byte bByte = (byte)Math.Max(0, Math.Min(255, b));
 
                 // Write the RGB components to the destination image
-                component = Destination.ImageFormat.GetComponentById(ImageFormat.RedChannelId);
-                data = new Common.MemorySegment(component.Length);
-                Binary.WriteBits(data.Array, data.Offset, component.Length, rByte, false);
-                Destination.SetComponentData(x, y, ImageFormat.RedChannelId, data);
+                Binary.WriteBits(rComponentData.Array, rComponentData.Offset, rComponent.Length, rByte, false);
+                Destination.SetComponentData(x, y, rComponentIndex, rComponentData);
 
-                component = Destination.ImageFormat.GetComponentById(ImageFormat.GreenChannelId);
-                data = new Common.MemorySegment(component.Length);
-                Binary.WriteBits(data.Array, data.Offset, component.Length, gByte, false);
-                Destination.SetComponentData(x, y, ImageFormat.GreenChannelId, data);
+                Binary.WriteBits(gComponentData.Array, gComponentData.Offset, gComponent.Length, gByte, false);
+                Destination.SetComponentData(x, y, gComponentIndex, gComponentData);
 
-                component = Destination.ImageFormat.GetComponentById(ImageFormat.BlueChannelId);
-                data = new Common.MemorySegment(component.Length);
-                Binary.WriteBits(data.Array, data.Offset, component.Length, bByte, false);
-                Destination.SetComponentData(x, y, ImageFormat.BlueChannelId, data);
+                Binary.WriteBits(bComponentData.Array, bComponentData.Offset, bComponent.Length, bByte, false);
+                Destination.SetComponentData(x, y, bComponentIndex, bComponentData);
             }
         }
     }
@@ -134,17 +141,34 @@ public class VectorizedYuvToRgbTransformation : ImageTransformation
         int blockWidth = width / blockSize * blockSize;
 
         var rComponentIndex = Destination.GetComponentIndex(ImageFormat.RedChannelId);
+        var rComponent = Destination.ImageFormat.GetComponentById(ImageFormat.RedChannelId);
+        var rComponentData = new Common.MemorySegment(rComponent.Length);
+
         var gComponentIndex = Destination.GetComponentIndex(ImageFormat.GreenChannelId);
+        var gComponent = Destination.ImageFormat.GetComponentById(ImageFormat.GreenChannelId);
+        var gComponentData = new Common.MemorySegment(gComponent.Length);
+
         var bComponentIndex = Destination.GetComponentIndex(ImageFormat.BlueChannelId);
+        var bComponent = Destination.ImageFormat.GetComponentById(ImageFormat.BlueChannelId);
+        var bComponentData = new Common.MemorySegment(bComponent.Length);
+
+        var yComponent = Source.ImageFormat.GetComponentById(ImageFormat.LumaChannelId);
+        var yComponentIndex = Source.GetComponentIndex(ImageFormat.LumaChannelId);
+        
+        var uComponent = Source.ImageFormat.GetComponentById(ImageFormat.ChromaMajorChannelId);
+        var uComponentIndex = Source.GetComponentIndex(ImageFormat.ChromaMajorChannelId);
+
+        var vComponent = Source.ImageFormat.GetComponentById(ImageFormat.ChromaMinorChannelId);
+        var vComponentIndex = Source.GetComponentIndex(ImageFormat.ChromaMinorChannelId);
 
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < blockWidth; x += blockSize)
             {
                 // Load the pixel data into Vector<float> arrays
-                Vector<byte> yVector = Source.GetComponentVector(x + 0, y, ImageFormat.LumaChannelId); //new Vector<byte>(Source.GetComponentData(x + 0, y, ImageFormat.LumaChannelId).ToSpan());
-                Vector<byte> uVector = Source.GetComponentVector(x + 1, y, ImageFormat.ChromaMajorChannelId);//new Vector<byte>(Source.GetComponentData(x + 1, y, ImageFormat.ChromaMajorChannelId).ToSpan());
-                Vector<byte> vVector = Source.GetComponentVector(x + 2, y, ImageFormat.ChromaMinorChannelId);//new Vector<byte>(Source.GetComponentData(x + 2, y, ImageFormat.ChromaMinorChannelId).ToSpan());
+                Vector<byte> yVector = Source.GetComponentVector(x + 0, y, yComponentIndex); //new Vector<byte>(Source.GetComponentData(x + 0, y, ImageFormat.LumaChannelId).ToSpan());
+                Vector<byte> uVector = Source.GetComponentVector(x + 1, y, uComponentIndex);//new Vector<byte>(Source.GetComponentData(x + 1, y, ImageFormat.ChromaMajorChannelId).ToSpan());
+                Vector<byte> vVector = Source.GetComponentVector(x + 2, y, vComponentIndex);//new Vector<byte>(Source.GetComponentData(x + 2, y, ImageFormat.ChromaMinorChannelId).ToSpan());
 
                 // Convert YUV to RGB using vectorized calculations
                 Vector<float> yFloat = (Vector<float>)yVector;
@@ -174,18 +198,15 @@ public class VectorizedYuvToRgbTransformation : ImageTransformation
             // Process any remaining pixels (not in 4-pixel blocks)
             for (int x = blockWidth; x < width; x++)
             {
-                // Read the YUV components for the current pixel
-                var component = Source.ImageFormat.GetComponentById(ImageFormat.LumaChannelId);
-                var data = Source.GetComponentData(x, y, component);
-                var yValue = Binary.ReadBits(data.Array, data.Offset, component.Size, false);
+                // Read the YUV components for the current pixel                
+                var data = Source.GetComponentData(x, y, yComponent);
+                var yValue = Binary.ReadBits(data.Array, data.Offset, yComponent.Size, false);
 
-                component = Source.ImageFormat.GetComponentById(ImageFormat.ChromaMajorChannelId);
-                data = Source.GetComponentData(x, y, component);
-                var uValue = Binary.ReadBits(data.Array, data.Offset, component.Size, false);
+                data = Source.GetComponentData(x, y, uComponent);
+                var uValue = Binary.ReadBits(data.Array, data.Offset, uComponent.Size, false);
 
-                component = Source.ImageFormat.GetComponentById(ImageFormat.ChromaMinorChannelId);
-                data = Source.GetComponentData(x, y, component);
-                var vValue = Binary.ReadBits(data.Array, data.Offset, component.Size, false);
+                data = Source.GetComponentData(x, y, vComponent);
+                var vValue = Binary.ReadBits(data.Array, data.Offset, vComponent.Size, false);
 
                 // Convert YUV to RGB values
                 double r = yValue + 1.13983 * (vValue - 128);
@@ -198,20 +219,14 @@ public class VectorizedYuvToRgbTransformation : ImageTransformation
                 byte bByte = (byte)Math.Max(0, Math.Min(255, b));
 
                 // Write the RGB components to the destination image
-                component = Destination.ImageFormat.GetComponentById(ImageFormat.RedChannelId);
-                data = new Common.MemorySegment(component.Length);
-                Binary.WriteBits(data.Array, data.Offset, component.Length, rByte, false);
-                Destination.SetComponentData(x, y, ImageFormat.RedChannelId, data);
+                Binary.WriteBits(rComponentData.Array, rComponentData.Offset, rComponent.Length, rByte, false);
+                Destination.SetComponentData(x, y, rComponentIndex, data);
 
-                component = Destination.ImageFormat.GetComponentById(ImageFormat.GreenChannelId);
-                data = new Common.MemorySegment(component.Length);
-                Binary.WriteBits(data.Array, data.Offset, component.Length, gByte, false);
-                Destination.SetComponentData(x, y, ImageFormat.GreenChannelId, data);
+                Binary.WriteBits(gComponentData.Array, gComponentData.Offset, gComponent.Length, gByte, false);
+                Destination.SetComponentData(x, y, gComponentIndex, data);
 
-                component = Destination.ImageFormat.GetComponentById(ImageFormat.BlueChannelId);
-                data = new Common.MemorySegment(component.Length);
-                Binary.WriteBits(data.Array, data.Offset, component.Length, bByte, false);
-                Destination.SetComponentData(x, y, ImageFormat.BlueChannelId, data);
+                Binary.WriteBits(bComponentData.Array, bComponentData.Offset, bComponent.Length, bByte, false);
+                Destination.SetComponentData(x, y, bComponentIndex, data);
             }
         }
     }

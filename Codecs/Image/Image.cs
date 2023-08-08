@@ -256,14 +256,10 @@ namespace Media.Codecs.Image
             return new MemorySegment(Data.Array, Data.Offset + offset, ImageFormat.Components[componentIndex].Length);
         }
 
-        public Vector<byte> GetComponentVector(int x, int y, byte componentId)
-        {
-            int componentIndex = GetComponentIndex(componentId);
-            if (componentIndex == -1)
-            {
-                throw new ArgumentException("Invalid component ID.", nameof(componentId));
-            }
+        public Vector<byte> GetComponentVector(int x, int y, byte componentId) => GetComponentVector(x, y, GetComponentIndex(componentId));
 
+        public Vector<byte> GetComponentVector(int x, int y, int componentIndex)
+        {
             int offset = CalculateComponentDataOffset(x, y, componentIndex);
             int vectorSize = Vector<byte>.Count;
 
