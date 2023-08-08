@@ -43,7 +43,7 @@ namespace Media.Codec
     /// <summary>
     /// A representation of information which is relevent to a format
     /// </summary>
-    public class MediaFormat
+    public class MediaFormat : Common.SuppressedFinalizerDisposable
     {
         #region Statics
 
@@ -133,7 +133,8 @@ namespace Media.Codec
         /// <param name="components"></param>
         /// <param name="bitsPerComponent"></param>
         /// <param name="shouldDispose"></param>
-        public MediaFormat(MediaType mediaType, Common.Binary.ByteOrder byteOrder, DataLayout dataLayout, int components, int bitsPerComponent, byte[] componentIds)
+        public MediaFormat(MediaType mediaType, Common.Binary.ByteOrder byteOrder, DataLayout dataLayout, int components, int bitsPerComponent, byte[] componentIds, bool shouldDispose = true)
+            : base(shouldDispose)
         {
             //Assign the media type
             MediaType = mediaType;
@@ -163,7 +164,8 @@ namespace Media.Codec
             for (int i = 0; i < components; ++i) Components[i] = new MediaComponent( componentIds != null ? componentIds[i] : (byte)i, bitsPerComponent);
         }
 
-        public MediaFormat(MediaType mediaType, Common.Binary.ByteOrder byteOrder, DataLayout dataLayout, int components, int[] componentSizes, byte[] componentIds)
+        public MediaFormat(MediaType mediaType, Common.Binary.ByteOrder byteOrder, DataLayout dataLayout, int components, int[] componentSizes, byte[] componentIds, bool shouldDispose = true)
+            : base(shouldDispose)
         {
             //Assign the media type
             MediaType = mediaType;
@@ -202,7 +204,8 @@ namespace Media.Codec
             }
         }
 
-        public MediaFormat(MediaType mediaType, Common.Binary.ByteOrder byteOrder, DataLayout dataLayout, System.Collections.Generic.IEnumerable<MediaComponent> components)
+        public MediaFormat(MediaType mediaType, Common.Binary.ByteOrder byteOrder, DataLayout dataLayout, System.Collections.Generic.IEnumerable<MediaComponent> components, bool shouldDispose = true)
+            : base(shouldDispose)
         {
             //Assign the media type
             MediaType = mediaType;

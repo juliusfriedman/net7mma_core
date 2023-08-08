@@ -241,18 +241,7 @@ namespace Media.Codecs.Image
 
         public Vector<byte> GetComponentVector(int x, int y, byte componentId) => GetComponentVector(x, y, GetComponentIndex(componentId));
 
-        public Vector<byte> GetComponentVector(int x, int y, int componentIndex)
-        {
-            int offset = CalculateComponentDataOffset(x, y, componentIndex);
-            int vectorSize = Vector<byte>.Count;
-
-            if (offset < 0 || offset + vectorSize > Data.Count)
-            {
-                throw new ArgumentOutOfRangeException("componentIndex", "Invalid component index or component data does not fit in the image buffer.");
-            }
-
-            return new Vector<byte>(Data.Array, offset);
-        }
+        public Vector<byte> GetComponentVector(int x, int y, int componentIndex) => new Vector<byte>(Data.Array, CalculateComponentDataOffset(x, y, componentIndex));
 
         // Set the value of a specific component at the given (x, y) coordinates
 
@@ -268,18 +257,7 @@ namespace Media.Codecs.Image
             Buffer.BlockCopy(data.Array, data.Offset, Data.Array, Data.Offset + offset, data.Count);
         }
 
-        public void SetComponentData(int x, int y, int componentIndex, Vector<byte> componentData)
-        {
-            int offset = CalculateComponentDataOffset(x, y, componentIndex);
-            int vectorSize = Vector<byte>.Count;
-
-            if (offset < 0 || offset + vectorSize > Data.Count)
-            {
-                throw new ArgumentOutOfRangeException("componentData", "ComponentData doesn't fit in the image buffer.");
-            }
-
-            componentData.CopyTo(new Span<byte>(Data.Array, offset, vectorSize));
-        }
+        public void SetComponentData(int x, int y, int componentIndex, Vector<byte> componentData) => componentData.CopyTo(new Span<byte>(Data.Array, CalculateComponentDataOffset(x, y, componentIndex), Vector<byte>.Count));
 
         public void SetComponentData(int x, int y, byte componentId, MemorySegment data) => SetComponentData(x, y, GetComponentIndex(componentId), data);
 
@@ -311,7 +289,7 @@ namespace Media.UnitTests
 
             using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 50, 50))
             {
-                for(int x = 0; x < image.Width; x++)
+                for (int x = 0; x < image.Width; x++)
                 {
                     for(int y = 0; y < image.Height; y++)
                     {

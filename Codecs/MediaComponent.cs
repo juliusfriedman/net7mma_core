@@ -41,7 +41,7 @@ namespace Media.Codec
     /// <summary>
     /// Defines the base class of all components
     /// </summary>
-    public class MediaComponent
+    public class MediaComponent : Common.SuppressedFinalizerDisposable
     {
         /// <summary>
         /// The identifier assigned to the component
@@ -61,7 +61,8 @@ namespace Media.Codec
         /// </summary>
         /// <param name="id">The identifier assigned to the component</param>
         /// <param name="size">The size of the component in bits</param>
-        public MediaComponent(byte id, int size)
+        public MediaComponent(byte id, int size, bool shouldDispose = true)
+            : base(shouldDispose)
         {
             //Validate the size in bits
             if (size < 1) throw new System.ArgumentException("size", "Must be greater than 0.");
