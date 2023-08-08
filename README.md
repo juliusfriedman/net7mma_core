@@ -13,7 +13,7 @@ You can use the Audio project to create Audio (See examples for saving to a Riff
 
 Various transforms are supported for the Image and Audio buffers, [using vectorization where possible]
 
-You can read version media files using the various Container projects
+You can read various types of media files using the various Container projects
 
 A lot of the classes are still in development mode so please let me know if you see a feature missing or a gap in the API.
 
