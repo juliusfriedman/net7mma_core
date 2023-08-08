@@ -45,7 +45,7 @@ namespace Media.Codecs.Audio
         /// <returns>The amount of bytes required.</returns>
         static int CalculateSize(int numberOfSamples, int channels, int sampleRate, int bitsPerComponent)
         {
-            return numberOfSamples * (sampleRate / (Common.Binary.BitsToBytes(bitsPerComponent) * channels));
+            return Math.Abs(numberOfSamples * (sampleRate / (Common.Binary.BitsToBytes(bitsPerComponent) * channels)));
         }
 
         #endregion
@@ -277,9 +277,9 @@ namespace Media.UnitTests
                 //Example for upsampling by a factor of 2
                 int sampleFactor = 2;
 
-                using (Media.Codecs.Audio.AudioBuffer destination = new Codecs.Audio.AudioBuffer(new Codecs.Audio.AudioFormat(source.SampleRate * sampleFactor, source.AudioFormat.IsSigned, source.AudioFormat.IsBigEndian, source.DataLayout)))
+                using (Media.Codecs.Audio.AudioBuffer destination = new Codecs.Audio.AudioBuffer(new Codecs.Audio.AudioFormat(source.SampleRate * sampleFactor, source.AudioFormat.IsSigned, source.AudioFormat.ByteOrder, source.DataLayout, audioFormat.Components)))
                 {
-                    using (Media.Codecs.Audio.AudioTransformer audioTransformer = new Codecs.Audio.AudioTransformer(source, destination, sampleFactor))
+                    using (Media.Codecs.Audio.AudioTransformer audioTransformer = new Codecs.Audio.AudioTransformer(source, destination, sampleFactor, TransformationQuality.None))
                     {
                         audioTransformer.Transform();
                     }
@@ -288,9 +288,9 @@ namespace Media.UnitTests
                 //Example for downsample by a factor of 2
                 sampleFactor = -2;
 
-                using (Media.Codecs.Audio.AudioBuffer destination = new Codecs.Audio.AudioBuffer(new Codecs.Audio.AudioFormat(source.SampleRate * sampleFactor, source.AudioFormat.IsSigned, source.AudioFormat.IsBigEndian, source.DataLayout)))
+                using (Media.Codecs.Audio.AudioBuffer destination = new Codecs.Audio.AudioBuffer(new Codecs.Audio.AudioFormat(Math.Abs(source.SampleRate * sampleFactor), source.AudioFormat.IsSigned, source.AudioFormat.ByteOrder, source.DataLayout, audioFormat.Components)))
                 {
-                    using (Media.Codecs.Audio.AudioTransformer audioTransformer = new Codecs.Audio.AudioTransformer(source, destination, sampleFactor))
+                    using (Media.Codecs.Audio.AudioTransformer audioTransformer = new Codecs.Audio.AudioTransformer(source, destination, sampleFactor, TransformationQuality.None))
                     {
                         audioTransformer.Transform();
                     }

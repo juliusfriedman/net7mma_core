@@ -235,26 +235,9 @@ namespace Media.Codecs.Image
             //throw new IndexOutOfRangeException("Coordinates are outside the bounds of the image.");
 
             return new MemorySegment(Data.Array, offset, component.Length);
-        }        
-
-        public MemorySegment GetComponentData(int x, int y, byte componentId)
-        {
-            int componentIndex = GetComponentIndex(componentId);
-            if (componentIndex == -1)
-            {
-                throw new ArgumentException("Invalid component ID.", nameof(componentId));
-            }
-
-            int offset = CalculateComponentDataOffset(x, y, componentIndex);
-            if (offset == -1)
-            {
-                // Component doesn't exist in this format, return an empty MemorySegment.
-                return MemorySegment.Empty;
-            }
-
-            // Now, you have the offset, so you can return a MemorySegment representing the component data.
-            return new MemorySegment(Data.Array, Data.Offset + offset, ImageFormat.Components[componentIndex].Length);
         }
+
+        public MemorySegment GetComponentData(int x, int y, byte componentId) => GetComponentData(x, y, ImageFormat.GetComponentById(componentId));
 
         public Vector<byte> GetComponentVector(int x, int y, byte componentId) => GetComponentVector(x, y, GetComponentIndex(componentId));
 
@@ -298,36 +281,10 @@ namespace Media.Codecs.Image
             componentData.CopyTo(new Span<byte>(Data.Array, offset, vectorSize));
         }
 
-        public void SetComponentData(int x, int y, byte componentId, MemorySegment data)
-        {
-            int componentIndex = GetComponentIndex(componentId);
-            if (componentIndex == -1)
-                return;
-
-            int offset = CalculateComponentDataOffset(x, y, componentIndex);
-            if (offset == -1)
-            {
-                // Component doesn't exist in this format, return without setting anything.
-                return;
-            }
-
-            // Make sure the data has the correct length for the component.
-            int componentLength = ImageFormat.Components[componentIndex].Length;
-            if (data.Count != componentLength)
-            {
-                throw new ArgumentException($"Invalid data length for component {componentId}. Expected length: {componentLength} bytes.", nameof(data));
-            }
-
-            // Copy the data into the image's memory buffer at the correct offset.
-            Buffer.BlockCopy(data.Array, data.Offset, Data.Array, Data.Offset + offset, data.Count);
-        }
+        public void SetComponentData(int x, int y, byte componentId, MemorySegment data) => SetComponentData(x, y, GetComponentIndex(componentId), data);
 
         #endregion
     }
-
-    //Drawing?
-
-    //Will eventually need Font support...
 }
 
 

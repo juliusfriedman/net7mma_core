@@ -144,17 +144,13 @@ namespace Media.Codecs.Audio
             if (sampleRateFactor == 1)
             {
                 // No change in sample rate, just copy the data
-                Destination.Data.Array.CopyTo(Source.Data.Array, Source.Data.Offset);
+                Source.Data.Array.CopyTo(Destination.Data.Array, Destination.Data.Offset);
                 return;
             }
 
             if (sampleRateFactor > 0)
             {
                 // Upsample the audio data
-                int destSampleCount = Source.SampleCount * sampleRateFactor;
-                var format = new AudioFormat(Source.AudioFormat.SampleRate * sampleRateFactor, Source.AudioFormat.IsSigned, Source.AudioFormat.ByteOrder, Source.DataLayout, Source.AudioFormat.Components);
-                var destBuffer = new AudioBuffer(format, destSampleCount);
-
                 for (int channel = 0; channel < Source.Channels; channel++)
                 {
                     for (int i = 0; i < Source.SampleCount; i++)
@@ -162,30 +158,24 @@ namespace Media.Codecs.Audio
                         int destIndex = i * sampleRateFactor;
                         for (int j = 0; j < sampleRateFactor; j++)
                         {
-                            destBuffer.SetSampleData(destIndex + j, channel, Source.GetSampleData(i, channel));
+                            Destination.SetSampleData(destIndex + j, channel, Source.GetSampleData(i, channel));
                         }
                     }
                 }
-
-                destBuffer.Data.Array.CopyTo(Destination.Data.Array, Destination.Data.Offset);
             }
             else if (sampleRateFactor < 0)
             {
                 // Downsampling by dropping samples
                 int destSampleCount = Source.SampleCount / System.Math.Abs(sampleRateFactor);
-                var format = new AudioFormat(Source.AudioFormat.SampleRate / System.Math.Abs(sampleRateFactor), Source.AudioFormat.IsSigned, Source.AudioFormat.ByteOrder, Source.DataLayout, Source.AudioFormat.Components);
-                var destBuffer = new AudioBuffer(format, destSampleCount);
 
                 for (int channel = 0; channel < Source.Channels; channel++)
                 {
                     for (int i = 0; i < destSampleCount; i++)
                     {
                         int sourceIndex = i * System.Math.Abs(sampleRateFactor);
-                        destBuffer.SetSampleData(i, channel, Source.GetSampleData(sourceIndex, channel));
+                        Destination.SetSampleData(i, channel, Source.GetSampleData(sourceIndex, channel));
                     }
                 }
-
-                destBuffer.Data.Array.CopyTo(Destination.Data.Array, Destination.Data.Offset);
             }
         }
     }
