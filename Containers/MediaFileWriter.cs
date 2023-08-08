@@ -14,12 +14,20 @@ public abstract class MediaFileWriter : MediaFileStream
 
     public IList<Track> Tracks { get; protected set; } = new List<Track>();
 
+    #region Abstraction
+
+    public abstract Track CreateTrack();
+
+    public abstract bool TryAddTrack(Track track);
+
+    #endregion
+
     public void Write(Node node)
     {
         Write(node.Identifier);
         Write(node.Data);
     }
-    
+
     #region Big Endian
 
     public void WriteInt16BigEndian(short value) //=> Write(Binary.GetBytes(value, Binary.IsLittleEndian));

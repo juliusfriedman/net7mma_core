@@ -359,6 +359,16 @@ public class RiffWriter : MediaFileWriter
     }
 
     public override string ToTextualConvention(Node node) => RiffReader.ToFourCharacterCode(node.Identifier);
+
+    public override Track CreateTrack()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override bool TryAddTrack(Track track)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public class UnitTests

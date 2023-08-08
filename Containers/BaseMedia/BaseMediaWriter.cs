@@ -834,6 +834,17 @@ public class BaseMediaWriter : MediaFileWriter
     }
 
     public override string ToTextualConvention(Node node) => BaseMediaReader.ToUTF8FourCharacterCode(node.Identifier, node.IdentifierSize);
+
+    //Need overloads with type e.g. CreateFragmentedTrack etc
+    public override Track CreateTrack()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override bool TryAddTrack(Track track)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 /// <summary>
