@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text;
 
 namespace Media.Codecs.Image
 {
@@ -407,6 +408,8 @@ namespace Media.Codecs.Image
                 return alphaComponent!= null && alphaComponent.Id == PreMultipliedAlphaChannelId;
             }
         }
+
+        public string FormatString => Encoding.ASCII.GetString(Components.Select(c => c.Id).ToArray()); 
 
         #endregion
     }

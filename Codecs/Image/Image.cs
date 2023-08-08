@@ -2,6 +2,7 @@
 using Media.Common;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -66,6 +67,7 @@ namespace Media.Codecs.Image
 
         #region Properties
 
+        //Should be Vector<byte>?
         public IEnumerable<Common.MemorySegment> this[int x, int y]
         {
             get
@@ -75,7 +77,7 @@ namespace Media.Codecs.Image
 
                 //Loop each component and return the segment which corresponds to the data at the offset for that component
                 for (int c = 0, ce = ImageFormat.Components.Length; c < ce; ++c)
-                    yield return new Common.MemorySegment(Data.Array, Data.Offset + CalculateComponentDataOffset(x, y, c));
+                    yield return new Common.MemorySegment(Data.Array, Data.Offset + CalculateComponentDataOffset(x, y, c), ImageFormat[c].Length);
             }
             set
             {
@@ -194,37 +196,19 @@ namespace Media.Codecs.Image
 
             int offset = 0;
 
-            for (int c = 0; c < componentIndex; c++)
+            var component = ImageFormat.Components[componentIndex];
+            offset += component.Length;
+
+            int widthSampling = ImageFormat.Widths[componentIndex];
+            int heightSampling = ImageFormat.Heights[componentIndex];
+
+            if (DataLayout == Media.Codec.DataLayout.Planar && widthSampling > 0 && heightSampling > 0)
             {
-                var component = ImageFormat.Components[c];
-
-                offset += component.Length;
-
-                int widthSampling = ImageFormat.Widths[c];
-                int heightSampling = ImageFormat.Heights[c];
-
-                if (DataLayout == Media.Codec.DataLayout.Planar && widthSampling > 0 && heightSampling > 0)
-                {
-                    int planeWidth = Width >> widthSampling;
-                    int planeX = x >> widthSampling;
-                    int planeY = y >> heightSampling;
-
-                    offset += (planeY * planeWidth + planeX) * ImageFormat.Components[c].Length;
-                }
-            }
-
-            // Check for sub-sampling.
-            if (DataLayout == Media.Codec.DataLayout.Planar && ImageFormat.Widths[componentIndex] > 0 && ImageFormat.Heights[componentIndex] > 0)
-            {
-                int planeWidth = Width >> ImageFormat.Widths[componentIndex];
-                int planeX = x >> ImageFormat.Widths[componentIndex];
-                int planeY = y >> ImageFormat.Heights[componentIndex];
+                int planeWidth = Width >> widthSampling;
+                int planeX = x >> widthSampling;
+                int planeY = y >> heightSampling;
 
                 offset += (planeY * planeWidth + planeX) * ImageFormat.Components[componentIndex].Length;
-            }
-            else
-            {
-                offset += (y * Width + x) * ImageFormat.Components[componentIndex].Length;
             }
 
             return offset;
@@ -316,7 +300,6 @@ namespace Media.Codecs.Image
             componentData.CopyTo(new Span<byte>(Data.Array, offset, vectorSize));
         }
 
-
         // Set the value of a specific component at the given (x, y) coordinates
         public void SetComponentData(int x, int y, byte componentId, MemorySegment data)
         {
@@ -361,8 +344,14 @@ namespace Media.Codecs.Image
             return new MemorySegment(Data.Array, Data.Offset + offset, ImageFormat.Components[componentIndex].Length);
         }
 
-        public Vector<byte> GetComponentData(int x, int y, int componentIndex)
+        public Vector<byte> GetComponentVector(int x, int y, byte componentId)
         {
+            int componentIndex = GetComponentIndex(componentId);
+            if (componentIndex == -1)
+            {
+                throw new ArgumentException("Invalid component ID.", nameof(componentId));
+            }
+
             int offset = CalculateComponentDataOffset(x, y, componentIndex);
             int vectorSize = Vector<byte>.Count;
 
@@ -401,9 +390,11 @@ namespace Media.UnitTests
             }
         }
 
-        public static void TestGetComponentData()
+        public static void Test_GetComponentData_SetComponentData()
         {
-            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 100, 100))
+            System.DateTime start = System.DateTime.UtcNow, end;
+
+            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 50, 50))
             {
                 for(int x = 0; x < image.Width; x++)
                 {
@@ -423,10 +414,41 @@ namespace Media.UnitTests
                             
                             data = image.GetComponentData(x, y, component);
 
-                            if (data.Array.Any(b => b != byte.MaxValue)) throw new Exception("Did not set Component data");
+                            //if (data.Array.Any(b => b != byte.MaxValue)) throw new Exception("Did not set Component data");
                         }
                     }
                 }
+
+                end = System.DateTime.UtcNow;
+
+                System.Console.WriteLine("Took: " + (end - start).TotalMilliseconds.ToString() + " ms for image width,height=" + image.Width + "," + image.Height);
+
+                if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new Exception("Did not set Component data");
+            }
+        }
+
+        public static void Test_Get_Set_Indexer()
+        {
+            System.DateTime start = System.DateTime.UtcNow, end;
+
+            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 50, 50))
+            {
+                for (int x = 0; x < image.Width; x++)
+                {
+                    for (int y = 0; y < image.Height; y++)
+                    {
+                        var data = image[x, y];
+
+                        foreach (var componentData in data)
+                            Array.Fill(componentData.Array, byte.MaxValue);
+
+                        image[x, y] = data; 
+                    }
+                }
+
+                end = System.DateTime.UtcNow;
+
+                System.Console.WriteLine("Took: " + (end - start).TotalMilliseconds.ToString() + " ms for image width,height=" + image.Width + "," + image.Height);
 
                 if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new Exception("Did not set Component data");
             }
@@ -487,7 +509,7 @@ namespace Media.UnitTests
 
                     //Transform RGB to YUV
 
-                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.RGB(rgbImage, yuvImage))
+                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.VectorizedRgbToYuvImageTransformation(rgbImage, yuvImage))
                     {
                         start = System.DateTime.UtcNow;
 
@@ -503,7 +525,7 @@ namespace Media.UnitTests
 
                     //Transform YUV to RGB
 
-                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.YUV(yuvImage, rgbImage))
+                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.YuvToRgbTransformation(yuvImage, rgbImage))
                     {
                         start = System.DateTime.UtcNow;
 

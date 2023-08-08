@@ -132,14 +132,18 @@ public class VectorizedRgbToYuvImageTransformation : ImageTransformation
         int blockSize = 4;
         int blockWidth = width / blockSize * blockSize;
 
+        var yComponentIndex = Destination.GetComponentIndex(ImageFormat.LumaChannelId);
+        var uComponentIndex = Destination.GetComponentIndex(ImageFormat.ChromaMajorChannelId);
+        var vComponentIndex = Destination.GetComponentIndex(ImageFormat.ChromaMinorChannelId);
+
         for (int y = 0; y < height; y++)
         {
             for (int x = 0; x < blockWidth; x += blockSize)
             {
                 // Load the pixel data into Vector<float> arrays
-                Vector<byte> r = new Vector<byte>(Source.GetComponentData(x + 0, y, ImageFormat.RedChannelId).ToSpan());
-                Vector<byte> g = new Vector<byte>(Source.GetComponentData(x + 1, y, ImageFormat.GreenChannelId).ToSpan());
-                Vector<byte> b = new Vector<byte>(Source.GetComponentData(x + 2, y, ImageFormat.BlueChannelId).ToSpan());
+                Vector<byte> r = Source.GetComponentVector(x + 0, y, ImageFormat.RedChannelId);  // new Vector<byte>(Source.GetComponentData(x + 0, y, ImageFormat.RedChannelId).ToSpan());
+                Vector<byte> g = Source.GetComponentVector(x + 1, y, ImageFormat.GreenChannelId);// new Vector<byte>(Source.GetComponentData(x + 1, y, ImageFormat.GreenChannelId).ToSpan());
+                Vector<byte> b = Source.GetComponentVector(x + 2, y, ImageFormat.BlueChannelId);// new Vector<byte>(Source.GetComponentData(x + 2, y, ImageFormat.BlueChannelId).ToSpan());
 
                 // Convert RGB to YUV using vectorized calculations
                 Vector<float> rFloat = (Vector<float>)r;
@@ -161,9 +165,9 @@ public class VectorizedRgbToYuvImageTransformation : ImageTransformation
                 Vector<byte> vByte = Vector.AsVectorByte(vValue);
 
                 // Store YUV components in the destination image
-                Destination.SetComponentData(x + 0, y, ImageFormat.LumaChannelId, yByte);
-                Destination.SetComponentData(x + 1, y, ImageFormat.ChromaMajorChannelId, uByte);
-                Destination.SetComponentData(x + 2, y, ImageFormat.ChromaMinorChannelId, vByte);
+                Destination.SetComponentData(x + 0, y, yComponentIndex, yByte);
+                Destination.SetComponentData(x + 1, y, uComponentIndex, uByte);
+                Destination.SetComponentData(x + 2, y, vComponentIndex, vByte);
             }
 
             // Process any remaining pixels (not in 4-pixel blocks)

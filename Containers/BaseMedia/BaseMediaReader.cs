@@ -38,10 +38,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Container.BaseMedia;
-using Media.Common.Interfaces;
 using Media.Container;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Media.Containers.BaseMedia
 {
