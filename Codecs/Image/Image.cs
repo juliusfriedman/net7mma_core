@@ -2,6 +2,7 @@
 using Media.Common;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Numerics;
 
@@ -9,6 +10,8 @@ namespace Media.Codecs.Image
 {
     public class Image : Media.Codec.MediaBuffer
     {
+        const float DefaultDpi = 96.0f;
+
         #region Statics
 
         //static Image Crop(Image source)
@@ -93,6 +96,52 @@ namespace Media.Codecs.Image
         #endregion
 
         #region Methods
+
+        public void SaveBitmap(Stream stream)
+        {
+            if (stream == null)
+                throw new ArgumentNullException(nameof(stream));
+
+            int width = Width;
+            int height = Height;
+
+            var imageFormat = 0;// Binary.Read32(ImageFormat.Components.Select(c => (byte)char.ToUpper((char)c.Id)).ToArray(), 0, Binary.IsBigEndian);
+
+            // Convert pixels to meters: 1 inch = 0.0254 meters
+            float horizontalResolutionMeters = width / DefaultDpi * 0.0254f;
+            float verticalResolutionMeters = height / DefaultDpi * 0.0254f;
+
+            // Convert meters to pixels per meter
+            int xpelsPerMeter = (int)Math.Round(1.0f / horizontalResolutionMeters);
+            int ypelsPerMeter = (int)Math.Round(1.0f / verticalResolutionMeters);
+
+            // Create a new BitmapInfoHeader based on the ImageFormat
+            BitmapInfoHeader header = new BitmapInfoHeader(width, height, (short)ImageFormat.Components.Length, (short)ImageFormat.Size, imageFormat, Data.Array.Length, xpelsPerMeter, ypelsPerMeter, 0, 0);
+            SaveBitmap(header, stream);
+        }
+
+        public void SaveBitmap(BitmapInfoHeader header, Stream stream)
+        {
+            int fileSize = 54 + header.Count + Data.Array.Length;
+
+            // BMP file header
+            byte[] fileHeader = new byte[14]
+            {
+                0x42, 0x4D,                       // "BM" - BMP file identifier
+                (byte)(fileSize & 0xFF),          // File size (low byte)
+                (byte)((fileSize >> 8) & 0xFF),   // File size
+                (byte)((fileSize >> 16) & 0xFF),  // File size
+                (byte)((fileSize >> 24) & 0xFF),  // File size (high byte)
+                0x00, 0x00,                       // Reserved
+                0x00, 0x00,                       // Reserved
+                0x36, 0x00, 0x00, 0x00            // Offset of the image data (54 bytes)
+            };
+
+            // Write the BMP file header to the stream
+            stream.Write(fileHeader, 0, fileHeader.Length);
+            stream.Write(header.Array, header.Offset, header.Count);
+            stream.Write(Data.Array, Data.Offset, Data.Count);
+        }
 
         //private int GetComponentDataOffset(int x, int y, int componentIndex)
         //{
@@ -368,6 +417,19 @@ namespace Media.UnitTests
             }
         }
 
+        public static void TestSave()
+        {
+            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 696, 564))
+            {
+                Array.Fill(image.Data.Array, byte.MaxValue);
+
+                using (var outputBmpStream = new System.IO.FileStream("output.bmp", FileMode.OpenOrCreate))
+                {
+                    image.SaveBitmap(outputBmpStream);
+                }
+            }
+        }
+
         //Averages around 1000 msec or 1 sec, way to slow
         //Even with Parallel its about 200 msec or .24 sec
         public static void TestConversionRGB()
@@ -399,7 +461,7 @@ namespace Media.UnitTests
 
                     //Transform RGB to YUV
 
-                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.RgbToYuvImageTransformation(rgbImage, yuvImage))
+                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.RGB(rgbImage, yuvImage))
                     {
                         start = System.DateTime.UtcNow;
 
@@ -415,7 +477,7 @@ namespace Media.UnitTests
 
                     //Transform YUV to RGB
 
-                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.YuvToRgbTransformation(yuvImage, rgbImage))
+                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.YUV(yuvImage, rgbImage))
                     {
                         start = System.DateTime.UtcNow;
 

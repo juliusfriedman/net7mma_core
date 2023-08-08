@@ -70,15 +70,17 @@ public class BitmapInfoHeader : MemorySegment
         set => Binary.Write32(Array, Offset + 36, Binary.IsBigEndian, value);
     }
 
+    public BitmapInfoHeader() : this(new byte[Length], 0) { }
+
     public BitmapInfoHeader(byte[] array, int offset)
         : base(array, offset, Length)
     {
     }
 
-    public BitmapInfoHeader(int size, int width, int height, short planes, short bitCount, int compression, int imageSize, int xPelsPerMeter, int yPelsPerMeter, int colorsUsed, int colorsImportant)
+    public BitmapInfoHeader(int width, int height, short planes, short bitCount, int compression, int imageSize, int xPelsPerMeter, int yPelsPerMeter, int colorsUsed, int colorsImportant)
         : base(new byte[Length])
     {
-        Size = size;
+        Size = Length;
         Width = width;
         Height = height;
         Planes = planes;

@@ -855,7 +855,7 @@ public class Mp4Writer : BaseMediaWriter
         Write(Encoding.UTF8.GetBytes(boxType));
 
         // Write the box data
-        Write(data, 0, data.Length);
+        Write(data);
     }
 
     public void WriteFtypBox()
