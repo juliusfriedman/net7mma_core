@@ -5,9 +5,8 @@ using System.IO;
 using System;
 using System.Text;
 using System.Linq;
-using Media.Containers.BaseMedia;
 
-namespace Container.BaseMedia;
+namespace Media.Containers.BaseMedia;
 
 #region Boxes
 
@@ -836,7 +835,7 @@ public class BaseMediaWriter : MediaFileWriter
     public override string ToTextualConvention(Node node) => BaseMediaReader.ToUTF8FourCharacterCode(node.Identifier, node.IdentifierSize);
 
     //Need overloads with type e.g. CreateFragmentedTrack etc
-    public override Track CreateTrack()
+    public override Track CreateTrack(Media.Sdp.MediaType mediaType)
     {
         throw new NotImplementedException();
     }

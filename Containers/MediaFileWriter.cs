@@ -16,7 +16,7 @@ public abstract class MediaFileWriter : MediaFileStream
 
     #region Abstraction
 
-    public abstract Track CreateTrack();
+    public abstract Track CreateTrack(Sdp.MediaType mediaType);
 
     public abstract bool TryAddTrack(Track track);
 

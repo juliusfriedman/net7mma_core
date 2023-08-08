@@ -360,14 +360,28 @@ public class RiffWriter : MediaFileWriter
 
     public override string ToTextualConvention(Node node) => RiffReader.ToFourCharacterCode(node.Identifier);
 
-    public override Track CreateTrack()
+    public override Track CreateTrack(Sdp.MediaType mediaType)
     {
-        throw new NotImplementedException();
+        return new Track(new Chunk(this, mediaType == Sdp.MediaType.audio ? FourCharacterCode.auds : mediaType == Sdp.MediaType.text ? FourCharacterCode.txts : mediaType == Sdp.MediaType.video ? FourCharacterCode.vids : FourCharacterCode.JUNK, null), string.Empty, 0, DateTime.UtcNow, DateTime.UtcNow, 0, 0, 0, TimeSpan.Zero, TimeSpan.Zero, 60, mediaType, new byte[4]);
     }
 
     public override bool TryAddTrack(Track track)
     {
-        throw new NotImplementedException();
+        if (track.Header.Master != this) return false;
+        if (Tracks.Contains(track)) return false;
+
+        Tracks.Add(track);
+
+        //Some data in the track... needs to be written
+        track.Header.Data = new byte[track.DataStream.Length];
+
+        //Copy any dataStream in the track to the dataStream in the header.
+        track.DataStream.CopyTo(track.Header.DataStream);
+
+        //Write the header
+        Write(track.Header);
+
+        return true;
     }
 }
 

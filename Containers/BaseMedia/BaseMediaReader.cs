@@ -1242,6 +1242,10 @@ namespace Media.Containers.BaseMedia
             // Advance the track position to the end of the current sample
             track.Position += sampleDuration;
 
+            //Todo , add to DataStream?
+            if (track.DataStream == null)
+                track.DataStream = new Common.SegmentStream();
+
             // Return the SegmentStream to the sample data
             return new Common.SegmentStream(new Common.MemorySegment(sampleData));
         }
