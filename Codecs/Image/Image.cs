@@ -478,9 +478,7 @@ namespace Media.UnitTests
             }
         }
 
-        //Averages around 1000 msec or 1 sec, way to slow
-        //Even with Parallel its about 200 msec or .24 sec
-        public static void TestConversionRGB()
+        public static void TestVectorizedConversionRGB()
         {
             int testHeight = 1920, testWidth = 1080;
 
@@ -510,6 +508,74 @@ namespace Media.UnitTests
                     //Transform RGB to YUV
 
                     using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.VectorizedRgbToYuvImageTransformation(rgbImage, yuvImage))
+                    {
+                        start = System.DateTime.UtcNow;
+
+                        it.Transform();
+
+                        end = System.DateTime.UtcNow;
+
+                        System.Console.WriteLine("Took: " + (end - start).TotalMilliseconds.ToString() + " ms");
+
+                        //Yuv Data
+                        //left = dest.Data.ToArray();
+                    }
+
+                    //Transform YUV to RGB
+
+                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.VectorizedYuvToRgbTransformation(yuvImage, rgbImage))
+                    {
+                        start = System.DateTime.UtcNow;
+
+                        it.Transform();
+
+                        end = System.DateTime.UtcNow;
+
+                        System.Console.WriteLine("Took: " + (end - start).TotalMilliseconds.ToString() + " ms");
+
+                        //Rgb Data
+                        right = rgbImage.Data.ToArray();
+                    }
+
+                    //Compare the two sequences
+                    if (false == left.SequenceEqual(right)) throw new System.InvalidOperationException();
+                }
+
+                //Done with the format.
+                Yuv420P = null;
+            }
+        }
+
+        public static void TestConversionRGB()
+        {
+            int testHeight = 1920, testWidth = 1080;
+
+            System.DateTime start = System.DateTime.UtcNow, end;
+
+            //Create the source image
+            using (Media.Codecs.Image.Image rgbImage = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), testWidth, testHeight))
+            {
+                if (rgbImage.ImageFormat.HasAlphaComponent) throw new System.Exception("HasAlphaComponent should be false");
+
+                //Create the ImageFormat based on YUV packed but in Planar format with a full height luma plane and half hight chroma planes
+                Media.Codecs.Image.ImageFormat Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
+
+                if (Yuv420P.IsInterleaved) throw new System.Exception("IsInterleaved should be false");
+
+                if (Yuv420P.HasAlphaComponent) throw new System.Exception("HasAlphaComponent should be false");
+
+                //ImageFormat could be given directly to constructor here
+
+                //Create the destination image
+                using (Media.Codecs.Image.Image yuvImage = new Codecs.Image.Image(Yuv420P, testWidth, testHeight))
+                {
+
+                    //Cache the data of the source before transformation
+                    byte[] left = rgbImage.Data.ToArray(), right;
+
+                    //Transform RGB to YUV
+
+                    using (Media.Codecs.Image.ImageTransformation it = new Media.Codecs.Image.Transformations.RgbToYuvImageTransformation(rgbImage, yuvImage))
                     {
                         start = System.DateTime.UtcNow;
 
