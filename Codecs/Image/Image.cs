@@ -186,7 +186,7 @@ namespace Media.Codecs.Image
         }
 
         /// <summary>
-        /// Calculates the byte offset to component data
+        /// Calculates the byte offset to component/channel data
         /// </summary>
         /// <param name="x"></param>
         /// <param name="y"></param>
@@ -217,32 +217,29 @@ namespace Media.Codecs.Image
                 case Media.Codec.DataLayout.SemiPlanar:
                     int yPlaneWidth = PlaneWidth(componentIndex);
                     int yPlaneHeight = PlaneHeight(componentIndex);
-
-                    switch (componentIndex)
+                    // Y plane
+                    if (component.Id == ImageFormat.LumaChannelId)
                     {
-                        case 0: // Y plane
-                            offset += (y * yPlaneWidth + x) * component.Length;
-                            break;
-                        case 1: // UV plane (interleaved)
-                        case 2: // UV plane (interleaved)
-                            int uvOffset = yPlaneWidth * yPlaneHeight;
-                            int uvComponentIndex = y / 2 * (yPlaneWidth / 2) + x / 2;
-                            offset += uvOffset + uvComponentIndex * component.Length;
-                            break;
+                        offset += (y * yPlaneWidth + x) * component.Length;
+                        break;
                     }
-                    break;
-
+                    else// UV plane (interleaved
+                    {
+                        int uvOffset = yPlaneWidth * yPlaneHeight;
+                        int uvComponentIndex = y / 2 * (yPlaneWidth / 2) + x / 2;
+                        offset += uvOffset + uvComponentIndex * component.Length;
+                        break;
+                    }
                 case Media.Codec.DataLayout.Packed:
-                default:
-                    // Add position-based offset for the current channel
-                    int componentDataIndex = y * PlaneWidth(componentIndex) + x;
-                    offset += componentDataIndex * component.Length;
+                    int componentDataIndex = y * Width + x;
+                    int bytesPerChannel = ImageFormat.Length; // Number of bytes per channel (e.g., 3 for RGB24)
+                    offset += componentDataIndex * bytesPerChannel;
                     break;
             }
 
             return offset;
         }
-
+        
         //Gets all component samples for the given coordinate into a SegmentStream (not really useful besides saving on some allocation)
 
         public SegmentStream GetSampleData(int x, int y)
@@ -304,8 +301,8 @@ namespace Media.Codecs.Image
             if (offset < 0)
                 return; // or throw an exception
 
-            int vectorOffset = offset - (offset % Vector<byte>.Count);
-            componentVector.CopyTo(new Span<byte>(Data.Array, Data.Offset + vectorOffset, Vector<byte>.Count));
+            //int vectorOffset = offset - (offset % Vector<byte>.Count);
+            componentVector.CopyTo(new Span<byte>(Data.Array, Data.Offset + offset, Vector<byte>.Count));
         }
 
         public void SetComponentData(int x, int y, byte componentId, MemorySegment data) => SetComponentData(x, y, GetComponentIndex(componentId), data);
@@ -493,7 +490,7 @@ namespace Media.UnitTests
                 {
                     for (int componentIndex = 0; componentIndex < imageFormat.Length; componentIndex++)
                     {
-                        int expectedOffset = (y * image.Width + x) * imageFormat.Components[componentIndex].Length;
+                        int expectedOffset = (y * image.Width + x) * imageFormat.Length;
 
                         int calculatedOffset = image.CalculateComponentDataOffset(x, y, componentIndex);
 
@@ -875,36 +872,60 @@ namespace Media.UnitTests
             }
         }
 
-        //Todo figure out why this won't converge.
-        public static void Test_GetComponentVector_SetComponentVector()
+        public static void TestFillVector()
         {
             System.DateTime start = System.DateTime.UtcNow, end;
 
-            var filledVector = new Vector<byte>(byte.MaxValue);
+            Media.Codecs.Image.ImageFormat Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
 
-            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 32, 32))
+            using (var image = new Codecs.Image.Image(Yuv420P, 32, 32))
             {
-                for (int c = 0; c < image.ImageFormat.Length; c++)
-                {
-                    for (int x = 0; x <= image.Width; x += Vector<byte>.Count)
-                    {
-                        for (int y = 0; y < image.Height; ++y)
-                        {
-                            // Set the modified data back to the image
-                            image.SetComponentVector(x, y, c, filledVector);
-
-                            var vector = image.GetComponentVector(x, y, c);
-
-                            if (!vector.Equals(filledVector)) throw new InvalidOperationException();
-                        }
-                    }
-                }
+                image.FillVector(byte.MaxValue);
 
                 end = System.DateTime.UtcNow;
 
                 System.Console.WriteLine("Took: " + (end - start).TotalMilliseconds.ToString() + " ms for image width,height=" + image.Width + "," + image.Height);
 
                 if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new InvalidOperationException("Did not set Component data (Vector)");
+            }
+        }
+
+        //This should work even though its not the correct way to loop for vectors
+        public static void Test_GetComponentVector_SetComponentVector()
+        {
+            System.DateTime start = System.DateTime.UtcNow, end;
+
+            var filledVector = new Vector<byte>(byte.MaxValue);
+
+            using (Media.Codecs.Image.ImageFormat Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 }))
+            {
+                using (var image = new Codecs.Image.Image(Yuv420P, 32, 32))
+                {
+                    for (int c = 0; c < image.ImageFormat.Length; c++)
+                    {
+                        for (int x = 0; x < image.Width; ++x)
+                        {
+                            for (int y = 0; y < image.Height; ++y)
+                            {
+                                var offset = image.CalculateComponentDataOffset(x, y, c);
+                                Console.WriteLine($"{x},{y},{c} = {offset}");
+
+                                // Set the modified data back to the image
+                                image.SetComponentVector(x, y, c, filledVector);
+
+                                var vector = image.GetComponentVector(x, y, c);
+
+                                if (!vector.Equals(filledVector)) throw new InvalidOperationException();
+                            }
+                        }
+                    }
+
+                    end = System.DateTime.UtcNow;
+
+                    System.Console.WriteLine("Took: " + (end - start).TotalMilliseconds.ToString() + " ms for image width,height=" + image.Width + "," + image.Height);
+
+                    if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new InvalidOperationException("Did not set Component data (Vector)");
+                }
             }
         }
     }
