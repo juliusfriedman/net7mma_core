@@ -130,45 +130,20 @@ public class VectorizedYuvToRgbTransformation : ImageTransformation
         int height = Source.Height;
 
         // Prepare Vector<float> constants for conversion formulas
-        Vector<float> vector128 = new Vector<float>(128f);
         Vector<float> vector1_13983 = new Vector<float>(1.13983f);
         Vector<float> vector0_39465 = new Vector<float>(0.39465f);
         Vector<float> vector0_58060 = new Vector<float>(0.58060f);
         Vector<float> vector2_03211 = new Vector<float>(2.03211f);
-
-        // Process the image in 4-pixel blocks (assuming YUV format)
-        int blockSize = 4;
-        int blockWidth = width / blockSize * blockSize;
-
-        var rComponentIndex = Destination.GetComponentIndex(ImageFormat.RedChannelId);
-        var rComponent = Destination.ImageFormat.GetComponentById(ImageFormat.RedChannelId);
-        var rComponentData = new Common.MemorySegment(rComponent.Length);
-
-        var gComponentIndex = Destination.GetComponentIndex(ImageFormat.GreenChannelId);
-        var gComponent = Destination.ImageFormat.GetComponentById(ImageFormat.GreenChannelId);
-        var gComponentData = new Common.MemorySegment(gComponent.Length);
-
-        var bComponentIndex = Destination.GetComponentIndex(ImageFormat.BlueChannelId);
-        var bComponent = Destination.ImageFormat.GetComponentById(ImageFormat.BlueChannelId);
-        var bComponentData = new Common.MemorySegment(bComponent.Length);
-
-        var yComponent = Source.ImageFormat.GetComponentById(ImageFormat.LumaChannelId);
-        var yComponentIndex = Source.GetComponentIndex(ImageFormat.LumaChannelId);
-        
-        var uComponent = Source.ImageFormat.GetComponentById(ImageFormat.ChromaMajorChannelId);
-        var uComponentIndex = Source.GetComponentIndex(ImageFormat.ChromaMajorChannelId);
-
-        var vComponent = Source.ImageFormat.GetComponentById(ImageFormat.ChromaMinorChannelId);
-        var vComponentIndex = Source.GetComponentIndex(ImageFormat.ChromaMinorChannelId);
+        Vector<float> vector128 = new Vector<float>(128f);
 
         for (int y = 0; y < height; y++)
         {
-            for (int x = 0; x < blockWidth; x += blockSize)
+            for (int x = 0; x < width; x += Vector<float>.Count)
             {
-                // Load the pixel data into Vector<float> arrays
-                Vector<byte> yVector = Source.GetComponentVector(x + 0, y, yComponentIndex); //new Vector<byte>(Source.GetComponentData(x + 0, y, ImageFormat.LumaChannelId).ToSpan());
-                Vector<byte> uVector = Source.GetComponentVector(x + 1, y, uComponentIndex);//new Vector<byte>(Source.GetComponentData(x + 1, y, ImageFormat.ChromaMajorChannelId).ToSpan());
-                Vector<byte> vVector = Source.GetComponentVector(x + 2, y, vComponentIndex);//new Vector<byte>(Source.GetComponentData(x + 2, y, ImageFormat.ChromaMinorChannelId).ToSpan());
+                // Read the YUV components for the current block of pixels
+                Vector<byte> yVector = Source.GetComponentVector(x + 0, y, ImageFormat.LumaChannelId);
+                Vector<byte> uVector = Source.GetComponentVector(x + 1, y, ImageFormat.ChromaMajorChannelId);
+                Vector<byte> vVector = Source.GetComponentVector(x + 2, y, ImageFormat.ChromaMinorChannelId);
 
                 // Convert YUV to RGB using vectorized calculations
                 Vector<float> yFloat = (Vector<float>)yVector;
@@ -190,43 +165,9 @@ public class VectorizedYuvToRgbTransformation : ImageTransformation
                 Vector<byte> bByte = Vector.AsVectorByte(bValue);
 
                 // Store RGB components in the destination image
-                Destination.SetComponentData(x + 0, y, rComponentIndex, rByte);
-                Destination.SetComponentData(x + 1, y, gComponentIndex, gByte);
-                Destination.SetComponentData(x + 2, y, bComponentIndex, bByte);
-            }
-
-            // Process any remaining pixels (not in 4-pixel blocks)
-            for (int x = blockWidth; x < width; x++)
-            {
-                // Read the YUV components for the current pixel                
-                var data = Source.GetComponentData(x, y, yComponent);
-                var yValue = Binary.ReadBits(data.Array, data.Offset, yComponent.Size, false);
-
-                data = Source.GetComponentData(x, y, uComponent);
-                var uValue = Binary.ReadBits(data.Array, data.Offset, uComponent.Size, false);
-
-                data = Source.GetComponentData(x, y, vComponent);
-                var vValue = Binary.ReadBits(data.Array, data.Offset, vComponent.Size, false);
-
-                // Convert YUV to RGB values
-                double r = yValue + 1.13983 * (vValue - 128);
-                double g = yValue - 0.39465 * (uValue - 128) - 0.58060 * (vValue - 128);
-                double b = yValue + 2.03211 * (uValue - 128);
-
-                // Clamp the RGB values to the range [0, 255]
-                byte rByte = (byte)Math.Max(0, Math.Min(255, r));
-                byte gByte = (byte)Math.Max(0, Math.Min(255, g));
-                byte bByte = (byte)Math.Max(0, Math.Min(255, b));
-
-                // Write the RGB components to the destination image
-                Binary.WriteBits(rComponentData.Array, rComponentData.Offset, rComponent.Length, rByte, false);
-                Destination.SetComponentData(x, y, rComponentIndex, data);
-
-                Binary.WriteBits(gComponentData.Array, gComponentData.Offset, gComponent.Length, gByte, false);
-                Destination.SetComponentData(x, y, gComponentIndex, data);
-
-                Binary.WriteBits(bComponentData.Array, bComponentData.Offset, bComponent.Length, bByte, false);
-                Destination.SetComponentData(x, y, bComponentIndex, data);
+                Destination.SetComponentVector(x + 0, y, ImageFormat.RedChannelId, rByte);
+                Destination.SetComponentVector(x + 1, y, ImageFormat.GreenChannelId, gByte);
+                Destination.SetComponentVector(x + 2, y, ImageFormat.BlueChannelId, bByte);
             }
         }
     }
