@@ -301,8 +301,8 @@ namespace Media.Codecs.Image
             if (offset < 0)
                 return; // or throw an exception
 
-            //int vectorOffset = offset - (offset % Vector<byte>.Count);
-            componentVector.CopyTo(new Span<byte>(Data.Array, Data.Offset + offset, Vector<byte>.Count));
+            int vectorOffset = offset - (offset % Vector<byte>.Count);
+            componentVector.CopyTo(new Span<byte>(Data.Array, Data.Offset + vectorOffset, Vector<byte>.Count));
         }
 
         public void SetComponentData(int x, int y, byte componentId, MemorySegment data) => SetComponentData(x, y, GetComponentIndex(componentId), data);
@@ -890,16 +890,50 @@ namespace Media.UnitTests
             }
         }
 
-        //This should work even though its not the correct way to loop for vectors
-        public static void Test_GetComponentVector_SetComponentVector()
+        public static void Test_GetComponentVector_SetComponentVector_Packed()
         {
             System.DateTime start = System.DateTime.UtcNow, end;
 
             var filledVector = new Vector<byte>(byte.MaxValue);
 
-            using (Media.Codecs.Image.ImageFormat Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 }))
+            using (Media.Codecs.Image.ImageFormat rgb24 = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.RGB(8)))
             {
-                using (var image = new Codecs.Image.Image(Yuv420P, 32, 32))
+                using (var image = new Codecs.Image.Image(rgb24, 32, 32))
+                {
+                    for (int c = 0; c < image.ImageFormat.Length; c++)
+                    {
+                        for (int x = 0; x < image.Width; ++x)
+                        {
+                            for (int y = 0; y < image.Height; ++y)
+                            {
+                                // Set the modified data back to the image
+                                image.SetComponentVector(x, y, c, filledVector);
+
+                                var vector = image.GetComponentVector(x, y, c);
+
+                                if (!vector.Equals(filledVector)) throw new InvalidOperationException();
+                            }
+                        }
+                    }
+
+                    end = System.DateTime.UtcNow;
+
+                    System.Console.WriteLine("Took: " + (end - start).TotalMilliseconds.ToString() + " ms for image width,height=" + image.Width + "," + image.Height);
+
+                    if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new InvalidOperationException("Did not set Component data (Vector)");
+                }
+            }
+        }
+
+        public static void Test_GetComponentVector_SetComponentVector_Planar()
+        {
+            System.DateTime start = System.DateTime.UtcNow, end;
+
+            var filledVector = new Vector<byte>(byte.MaxValue);
+
+            using (Media.Codecs.Image.ImageFormat planarRgb24 = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.RGB(8, Binary.SystemByteOrder, DataLayout.Planar), new int[] { 0, 1, 1 }))
+            {
+                using (var image = new Codecs.Image.Image(planarRgb24, 32, 32))
                 {
                     for (int c = 0; c < image.ImageFormat.Length; c++)
                     {
@@ -916,6 +950,10 @@ namespace Media.UnitTests
                                 var vector = image.GetComponentVector(x, y, c);
 
                                 if (!vector.Equals(filledVector)) throw new InvalidOperationException();
+
+                                var data = image.GetComponentData(x, y, image.ImageFormat[c]);
+
+                                if (data.All(b => b != byte.MaxValue)) throw new InvalidOperationException("Did not set Component data (Vector)");
                             }
                         }
                     }
