@@ -21,21 +21,40 @@ public class Mp4Box : Node
         set => Binary.Write32(Identifier, 0, Binary.IsBigEndian, value);
     }
 
+    //Indicates 8 more bytes follow
+    public bool IsExtendedLength => Length == 1;
+
+    //Indicates to end of file
+    public bool IndefiniteSize => Length == 0;
+
+    public long ExtendedLength
+    {
+        get => Binary.Read64(Identifier, 4, Binary.IsBigEndian);
+        set => Binary.Write64(Identifier, 4, Binary.IsBigEndian, value);
+    }
+
     public int AtomCode
     {
-        get => Binary.Read32(Identifier, 4, Binary.IsBigEndian);
-        set => Binary.Write32(Identifier, 4, Binary.IsBigEndian, value);
+        get => Binary.Read32(Identifier, IsExtendedLength ? 8 : 4, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, IsExtendedLength ? 8 : 4, Binary.IsBigEndian, value);
     }
 
     public string BoxType
     {
-        get => Encoding.UTF8.GetString(Identifier, 4, 4);
+        get => Encoding.UTF8.GetString(Binary.GetBytes(AtomCode, Binary.IsBigEndian), 4, 4);
     }
 
     public Mp4Box(BaseMediaWriter writer, byte[] boxType, long dataSize)
         : base(writer, new byte[HeaderSize], 4, HeaderSize, dataSize, true)
     {
         boxType.CopyTo(Identifier, 4);
+    }    
+
+    public void UpdateSize()
+    {
+        Master.WriteAt(DataOffset, Identifier, 0, 4);
+        if(IsExtendedLength)
+            Master.WriteAt(DataOffset, Identifier, 4, 8);
     }
 }
 
@@ -837,12 +856,27 @@ public class BaseMediaWriter : MediaFileWriter
     //Need overloads with type e.g. CreateFragmentedTrack etc
     public override Track CreateTrack(Media.Sdp.MediaType mediaType)
     {
-        throw new NotImplementedException();
+        var trakBox = new TrakBox(this, new MdiaBox(this, new MdhdBox(this, 0, 0, 0, 0, "english", 0), new HdlrBox(this, 0), new MinfBox(this, null)));
+        return new Track(trakBox, "track", 1, DateTime.UtcNow, DateTime.UtcNow, 1, 0, 0, TimeSpan.Zero, TimeSpan.Zero, 0, mediaType, new byte[4]);
     }
 
     public override bool TryAddTrack(Track track)
     {
-        throw new NotImplementedException();
+        if (track.Header.Master != this) return false;
+        if (Tracks.Contains(track)) return false;
+
+        Tracks.Add(track);
+
+        //Some data in the track... needs to be written
+        track.Header.Data = new byte[track.DataStream.Length];
+
+        //Copy any dataStream in the track to the dataStream in the header.
+        track.DataStream.CopyTo(track.Header.DataStream);
+
+        //Write the header
+        Write(track.Header);
+
+        return true;
     }
 }
 
@@ -861,7 +895,7 @@ public class Mp4Writer : BaseMediaWriter
     public void WriteBox(string boxType, byte[] data)
     {
         // Write the box header
-        WriteInt32LittleEndian(data.Length + 8);
+        WriteInt32LittleEndian(data.Length + Mp4Box.HeaderSize);
         Write(Encoding.UTF8.GetBytes(boxType));
 
         // Write the box data
@@ -874,7 +908,7 @@ public class Mp4Writer : BaseMediaWriter
         uint minorVersion = 0;
         uint[] compatibleBrands = new uint[] { 0x69736F6D, 0x61766331 }; // "isom", "avc1"
         FtypBox ftypBox = new FtypBox(this, majorBrand, minorVersion, compatibleBrands);
-        WriteBox("ftyp", ftypBox.Data);
+        Write(ftypBox);
     }
 
     public void WriteMoovBox(TimeSpan duration, uint timeScale, int trackId, int sampleCount, int[] sampleSizes, TimeSpan[] sampleTimestamps)

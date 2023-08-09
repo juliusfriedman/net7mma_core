@@ -44,6 +44,11 @@ public class Chunk : Node
         ChunkId = chunkId;
         Length = data.Length;
     }
+
+    public void UpdateSize()
+    {
+        Master.WriteAt(DataOffset, Identifier, RiffReader.IdentifierSize, RiffReader.IdentifierSize);
+    }
 }
 
 public class DataChunk : Chunk
@@ -335,8 +340,18 @@ public class RiffWriter : MediaFileWriter
 
         chunks.Add(chunk);
         chunk.DataOffset = Position;
+        
+        if(chunk.Length == 0)
+            chunk.Length = (int)chunk.DataSize;
+        else if (Binary.IsOdd(chunk.Length))
+            chunk.Length++;
 
         Write(chunk);
+
+        //Write any padding 
+        var paddingBytes = chunk.Length - chunk.DataSize;
+
+        for (int i = 0; i < paddingBytes; ++i) WriteByte(0);
     }
 
     public override void Close()

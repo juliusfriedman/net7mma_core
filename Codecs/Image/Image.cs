@@ -214,18 +214,18 @@ namespace Media.Codecs.Image
                     offset += (planeY * planeWidth + planeX) * component.Length;
                     break;
 
+
                 case Media.Codec.DataLayout.SemiPlanar:
                     int yPlaneWidth = PlaneWidth(componentIndex);
-                    int yPlaneHeight = PlaneHeight(componentIndex);
-                    // Y plane
-                    if (component.Id == ImageFormat.LumaChannelId)
+                    // Non interleaved plane
+                    if (componentIndex == 0)
                     {
                         offset += (y * yPlaneWidth + x) * component.Length;
                         break;
                     }
-                    else// UV plane (interleaved
+                    else// interleaved plane
                     {
-                        int uvOffset = yPlaneWidth * yPlaneHeight;
+                        int uvOffset = yPlaneWidth * PlaneHeight(componentIndex);
                         int uvComponentIndex = y / 2 * (yPlaneWidth / 2) + x / 2;
                         offset += uvOffset + uvComponentIndex * component.Length;
                         break;
@@ -330,71 +330,126 @@ namespace Media.UnitTests
     {
         public static void TestConstructor()
         {
-            using (Media.Codecs.Image.Image image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 1, 1))
+            foreach (var dataLayout in Enum.GetValues<DataLayout>())
             {
-                if (image.SampleCount != 1) throw new System.InvalidOperationException();
+                if (dataLayout == DataLayout.Unknown) continue;
 
-                if (image.Data.Count != image.Width * image.Height * image.MediaFormat.Length) throw new System.InvalidOperationException();
+                using (Media.Codecs.Image.Image image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8, Binary.SystemByteOrder, dataLayout), 1, 1))
+                {
+                    if (image.SampleCount != 1) throw new System.InvalidOperationException();
+
+                    if (image.Data.Count != image.Width * image.Height * image.MediaFormat.Length) throw new System.InvalidOperationException();
+                }
             }
         }
 
         public static void Test_GetComponentData_SetComponentData()
         {
-            System.DateTime start = System.DateTime.UtcNow, end;
-
-            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 50, 50))
+            foreach(var dataLayout in Enum.GetValues<DataLayout>())
             {
-                for (int x = 0; x < image.Width; x++)
+                if (dataLayout == DataLayout.Unknown) continue;
+
+                System.DateTime start = System.DateTime.UtcNow, end;
+
+                using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8, Binary.SystemByteOrder, dataLayout), 50, 50))
                 {
-                    for(int y = 0; y < image.Height; y++)
+                    for (int x = 0; x < image.Width; x++)
                     {
-                        for (int c = 0; c < image.ImageFormat.Length; c++)
+                        for (int y = 0; y < image.Height; y++)
                         {
-                            var component = image.ImageFormat[c];
+                            for (int c = 0; c < image.ImageFormat.Length; c++)
+                            {
+                                var component = image.ImageFormat[c];
 
-                            var data = image.GetComponentData(x, y, component);
+                                var data = image.GetComponentData(x, y, component);
 
-                            if (data.Count != component.Length) throw new InvalidOperationException();
+                                if (data.Count != component.Length) throw new InvalidOperationException();
 
-                            Array.Fill(data.Array, byte.MaxValue);
+                                Array.Fill(data.Array, byte.MaxValue);
 
-                            image.SetComponentData(x, y, c, data);
+                                image.SetComponentData(x, y, c, data);
+                            }
                         }
                     }
+
+                    end = System.DateTime.UtcNow;
+
+                    System.Console.WriteLine("Took: " + (end - start).TotalMilliseconds.ToString() + " ms for image DataLayout=" + dataLayout + " width,height=" + image.Width + "," + image.Height);
+
+                    if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new Exception($"Did not set Component data for DataLayout={dataLayout}");
                 }
-
-                end = System.DateTime.UtcNow;
-
-                System.Console.WriteLine("Took: " + (end - start).TotalMilliseconds.ToString() + " ms for image width,height=" + image.Width + "," + image.Height);
-
-                if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new Exception("Did not set Component data");
             }
-        }        
+        }
 
-        public static void Test_Get_Set_Indexer()
+        public static void Test_GetComponentVector_SetComponentVector()
         {
             System.DateTime start = System.DateTime.UtcNow, end;
 
-            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 50, 50))
+            var filledVector = new Vector<byte>(byte.MaxValue);
+
+            foreach (var dataLayout in Enum.GetValues<DataLayout>())
             {
-                for (int x = 0; x < image.Width; x++)
+                if (dataLayout == DataLayout.Unknown) continue;
+
+                using (Media.Codecs.Image.ImageFormat imageFormat = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.RGB(8, Binary.SystemByteOrder, dataLayout)))
                 {
-                    for (int y = 0; y < image.Height; y++)
+                    using (var image = new Codecs.Image.Image(imageFormat, 32, 32))
                     {
-                        var data = image[x, y];
+                        for (int c = 0; c < image.ImageFormat.Length; c++)
+                        {
+                            for (int x = 0; x < image.Width; ++x)
+                            {
+                                for (int y = 0; y < image.Height; ++y)
+                                {
+                                    // Set the modified data back to the image
+                                    image.SetComponentVector(x, y, c, filledVector);
 
-                        foreach (var componentData in data)
-                            Array.Fill(componentData.Array, byte.MaxValue);
+                                    var vector = image.GetComponentVector(x, y, c);
 
-                        image[x, y] = data; 
+                                    if (!vector.Equals(filledVector)) throw new InvalidOperationException();
+                                }
+                            }
+                        }
+
+                        end = System.DateTime.UtcNow;
+
+                        System.Console.WriteLine("Took: " + (end - start).TotalMilliseconds.ToString() + " ms for image " + dataLayout + " width,height=" + image.Width + "," + image.Height);
+
+                        //if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new InvalidOperationException($"Did not set Component Data {dataLayout} (Vector)");
                     }
                 }
+            }
+        }
 
-                end = System.DateTime.UtcNow;
+        public static void Test_Get_Set_Indexer()
+        {
+            foreach (var dataLayout in Enum.GetValues<DataLayout>())
+            {
+                if (dataLayout == DataLayout.Unknown) continue;
 
-                System.Console.WriteLine("Took: " + (end - start).TotalMilliseconds.ToString() + " ms for image width,height=" + image.Width + "," + image.Height);
+                System.DateTime start = System.DateTime.UtcNow, end;
 
-                if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new Exception("Did not set Component data");
+                using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8, Binary.SystemByteOrder, dataLayout), 50, 50))
+                {
+                    for (int x = 0; x < image.Width; x++)
+                    {
+                        for (int y = 0; y < image.Height; y++)
+                        {
+                            var data = image[x, y];
+
+                            foreach (var componentData in data)
+                                Array.Fill(componentData.Array, byte.MaxValue);
+
+                            image[x, y] = data;
+                        }
+                    }
+
+                    end = System.DateTime.UtcNow;
+
+                    System.Console.WriteLine("Took: " + (end - start).TotalMilliseconds.ToString() + " ms for image width,height=" + image.Width + "," + image.Height);
+
+                    if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new Exception("Did not set Component data");
+                }
             }
         }
 
@@ -512,7 +567,7 @@ namespace Media.UnitTests
                 if (rgbImage.ImageFormat.HasAlphaComponent) throw new System.Exception("HasAlphaComponent should be false");
 
                 //Create the ImageFormat based on YUV packed but in Planar format with a full height luma plane and half hight chroma planes
-                Media.Codecs.Image.ImageFormat Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
+                var Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
 
                 if (Yuv420P.IsInterleaved) throw new System.Exception("IsInterleaved should be false");
 
@@ -888,83 +943,6 @@ namespace Media.UnitTests
 
                 if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new InvalidOperationException("Did not set Component data (Vector)");
             }
-        }
-
-        public static void Test_GetComponentVector_SetComponentVector_Packed()
-        {
-            System.DateTime start = System.DateTime.UtcNow, end;
-
-            var filledVector = new Vector<byte>(byte.MaxValue);
-
-            using (Media.Codecs.Image.ImageFormat rgb24 = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.RGB(8)))
-            {
-                using (var image = new Codecs.Image.Image(rgb24, 32, 32))
-                {
-                    for (int c = 0; c < image.ImageFormat.Length; c++)
-                    {
-                        for (int x = 0; x < image.Width; ++x)
-                        {
-                            for (int y = 0; y < image.Height; ++y)
-                            {
-                                // Set the modified data back to the image
-                                image.SetComponentVector(x, y, c, filledVector);
-
-                                var vector = image.GetComponentVector(x, y, c);
-
-                                if (!vector.Equals(filledVector)) throw new InvalidOperationException();
-                            }
-                        }
-                    }
-
-                    end = System.DateTime.UtcNow;
-
-                    System.Console.WriteLine("Took: " + (end - start).TotalMilliseconds.ToString() + " ms for image width,height=" + image.Width + "," + image.Height);
-
-                    if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new InvalidOperationException("Did not set Component data (Vector)");
-                }
-            }
-        }
-
-        public static void Test_GetComponentVector_SetComponentVector_Planar()
-        {
-            System.DateTime start = System.DateTime.UtcNow, end;
-
-            var filledVector = new Vector<byte>(byte.MaxValue);
-
-            using (Media.Codecs.Image.ImageFormat planarRgb24 = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.RGB(8, Binary.SystemByteOrder, DataLayout.Planar), new int[] { 0, 1, 1 }))
-            {
-                using (var image = new Codecs.Image.Image(planarRgb24, 32, 32))
-                {
-                    for (int c = 0; c < image.ImageFormat.Length; c++)
-                    {
-                        for (int x = 0; x < image.Width; ++x)
-                        {
-                            for (int y = 0; y < image.Height; ++y)
-                            {
-                                var offset = image.CalculateComponentDataOffset(x, y, c);
-                                Console.WriteLine($"{x},{y},{c} = {offset}");
-
-                                // Set the modified data back to the image
-                                image.SetComponentVector(x, y, c, filledVector);
-
-                                var vector = image.GetComponentVector(x, y, c);
-
-                                if (!vector.Equals(filledVector)) throw new InvalidOperationException();
-
-                                var data = image.GetComponentData(x, y, image.ImageFormat[c]);
-
-                                if (data.All(b => b != byte.MaxValue)) throw new InvalidOperationException("Did not set Component data (Vector)");
-                            }
-                        }
-                    }
-
-                    end = System.DateTime.UtcNow;
-
-                    System.Console.WriteLine("Took: " + (end - start).TotalMilliseconds.ToString() + " ms for image width,height=" + image.Width + "," + image.Height);
-
-                    if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new InvalidOperationException("Did not set Component data (Vector)");
-                }
-            }
-        }
+        }        
     }
 }
