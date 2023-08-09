@@ -278,7 +278,7 @@ namespace Media.Codecs.Image
         {
             int offset = CalculateComponentDataOffset(x, y, componentIndex);
             offset -= offset % Vector<byte>.Count; // Align the offset to vector size
-            return new Vector<byte>(Data.Array, offset);
+            return new Vector<byte>(Data.Array, Data.Offset + offset);
         }
 
         // Set the value of a specific component at the given (x, y) coordinates
@@ -305,7 +305,7 @@ namespace Media.Codecs.Image
                 return; // or throw an exception
 
             int vectorOffset = offset - (offset % Vector<byte>.Count);
-            componentVector.CopyTo(new Span<byte>(Data.Array, vectorOffset, Vector<byte>.Count));
+            componentVector.CopyTo(new Span<byte>(Data.Array, Data.Offset + vectorOffset, Vector<byte>.Count));
         }
 
         public void SetComponentData(int x, int y, byte componentId, MemorySegment data) => SetComponentData(x, y, GetComponentIndex(componentId), data);
@@ -886,7 +886,7 @@ namespace Media.UnitTests
             {
                 for (int c = 0; c < image.ImageFormat.Length; c++)
                 {
-                    for (int x = 0; x < image.Width; ++x)
+                    for (int x = 0; x <= image.Width; x += Vector<byte>.Count)
                     {
                         for (int y = 0; y < image.Height; ++y)
                         {
