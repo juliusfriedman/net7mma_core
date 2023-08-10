@@ -35,26 +35,110 @@ public class Mp4Box : Node
 
     public int AtomCode
     {
-        get => Binary.Read32(Identifier, IsExtendedLength ? 8 : 4, Binary.IsBigEndian);
-        set => Binary.Write32(Identifier, IsExtendedLength ? 8 : 4, Binary.IsBigEndian, value);
+        get => Binary.Read32(Identifier, IsExtendedLength ? 12 : 4, Binary.IsBigEndian);
+        set => Binary.Write32(Identifier, IsExtendedLength ? 12 : 4, Binary.IsBigEndian, value);
     }
 
     public string BoxType
     {
-        get => Encoding.UTF8.GetString(Binary.GetBytes(AtomCode, Binary.IsBigEndian), 4, 4);
+        get => Encoding.UTF8.GetString(Identifier, IsExtendedLength ? 12 : 4, 4);
+        set => Encoding.UTF8.GetBytes(value).CopyTo(Identifier, IsExtendedLength ? 12 : 4);
     }
 
     public Mp4Box(BaseMediaWriter writer, byte[] boxType, long dataSize)
-        : base(writer, new byte[HeaderSize], 4, HeaderSize, dataSize, true)
+        : base(writer, new byte[dataSize > int.MaxValue ? HeaderSize * 2 : HeaderSize], dataSize > int.MaxValue ? 12 : 4, -1, dataSize, true)
     {
-        boxType.CopyTo(Identifier, 4);
-    }    
+        if (dataSize > int.MaxValue)
+        {
+            Length = 1;
+            ExtendedLength = dataSize;
+        }
+        else
+        {
+            Length = (int)dataSize;
+        }
+
+        boxType.CopyTo(Identifier, IsExtendedLength ? 12 : 4);
+    }
+
+    public Mp4Box(BaseMediaWriter writer, byte[] identifier)
+        : base(writer, identifier, 4, -1, null)
+    {
+    }
 
     public void UpdateSize()
     {
         Master.WriteAt(DataOffset, Identifier, 0, 4);
-        if(IsExtendedLength)
-            Master.WriteAt(DataOffset, Identifier, 4, 8);
+        Master.WriteAt(DataOffset, Identifier, 4, 4);
+        if (IsExtendedLength)
+            Master.WriteAt(DataOffset, Identifier, 8, 8);
+    }
+
+    public bool TryAddChildBox(Mp4Box box)
+    {
+        if (box == null)
+            throw new ArgumentNullException(nameof(box));
+
+        if (!HasChild(box))
+        {
+            Data = Data.Concat(box.Identifier).Concat(box.Data).ToArray();
+            DataSize += box.IdentifierSize + box.DataSize;
+
+            if (DataSize > int.MaxValue)
+            {
+                Length = 1;
+                ExtendedLength = DataSize;
+            }
+            else
+            {
+                Length = (int)DataSize;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public bool HasChild(Mp4Box box)
+    {
+        if (box == null)
+            throw new ArgumentNullException(nameof(box));
+
+        int offset = 0;
+
+        while (offset + HeaderSize <= Data.Length)
+        {
+            var size = (ulong)Binary.ReadU32(Data, offset, Binary.IsBigEndian);
+            var type = Binary.Read32(Data, offset + 4, Binary.IsBigEndian);
+
+            if (size == 1)
+                size = Binary.ReadU64(Data, offset + 8, Binary.IsBigEndian);
+
+            if (type == box.AtomCode)
+                return true;
+
+            offset += (int)size;
+        }
+
+        return false;
+    }
+
+}
+
+public class UuidBox : Mp4Box
+{
+    Guid Uuid
+    {
+        get => Binary.ReadGuid(Identifier, 8, Binary.IsBigEndian);
+        set => Binary.WriteGuid(Identifier, 8, value, Binary.IsBigEndian);
+    }
+
+    public UuidBox(BaseMediaWriter writer) 
+        : base(writer, new byte[24])
+    {
+        BoxType = "uuid";
+        Length = 24;
     }
 }
 
@@ -361,43 +445,10 @@ public class MinfBox : Mp4Box
         {
             foreach (var child in children)
             {
-                AddChildBox(child);
+                TryAddChildBox(child);
             }
         }
-    }
-
-    public void AddChildBox(Mp4Box box)
-    {
-        if (box == null)
-            throw new ArgumentNullException(nameof(box));
-
-        if (!HasChild(box))
-        {
-            Data = Data.Concat(box.Identifier).Concat(Binary.GetBytes((int)box.DataSize, Binary.IsBigEndian)).Concat(box.Data).ToArray();
-            DataSize += box.IdentifierSize + box.DataSize;
-        }
-    }
-
-    public bool HasChild(Mp4Box box)
-    {
-        if (box == null)
-            throw new ArgumentNullException(nameof(box));
-
-        int offset = HeaderSize;
-
-        while (offset + HeaderSize <= Data.Length)
-        {
-            var type = Binary.Read32(Data, offset + 4, Binary.IsBigEndian);
-            var size = Binary.ReadU32(Data, offset, Binary.IsBigEndian);
-
-            if (type == box.AtomCode)
-                return true;
-
-            offset += (int)size;
-        }
-
-        return false;
-    }
+    }    
 }
 
 public class MdiaBox : Mp4Box
@@ -827,7 +878,7 @@ public class BaseMediaWriter : MediaFileWriter
     public BaseMediaWriter(Uri filename)
         : base(filename, FileAccess.ReadWrite)
     {
-        AddBox(new FtypBox(this, 7, 0, 1, 2, 3, 4, 5, 6));
+        //AddBox(new FtypBox(this, 7, 0, 1, 2, 3, 4, 5, 6));
         //AddBox(new MoovBox(this));
     }
 

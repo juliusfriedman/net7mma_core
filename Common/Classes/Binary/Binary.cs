@@ -2300,7 +2300,7 @@ namespace Media.Common
 
         #region Writing
 
-        static void WriteGuid(byte[] data, int offset, Guid value, bool reverse)
+        public static void WriteGuid(byte[] data, int offset, Guid value, bool reverse)
         {
             GetBytes(value, reverse).CopyTo(data, offset);
         }
