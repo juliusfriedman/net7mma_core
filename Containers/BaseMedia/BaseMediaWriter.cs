@@ -61,43 +61,31 @@ public class Mp4Box : Node
         boxType.CopyTo(Identifier, IsExtendedLength ? 12 : 4);
     }
 
-    public Mp4Box(BaseMediaWriter writer, byte[] identifier)
-        : base(writer, identifier, 4, -1, null)
-    {
-    }
-
     public void UpdateSize()
     {
-        Master.WriteAt(DataOffset, Identifier, 0, 4);
-        Master.WriteAt(DataOffset, Identifier, 4, 4);
+        Master.WriteAt(Offset, Identifier, 0, Binary.BytesPerInteger);
         if (IsExtendedLength)
-            Master.WriteAt(DataOffset, Identifier, 8, 8);
+            Master.WriteAt(Offset, Identifier, Binary.BytesPerInteger, Binary.BytesPerLong);
     }
 
-    public bool TryAddChildBox(Mp4Box box)
+    public void AddChildBox(Mp4Box box)
     {
         if (box == null)
             throw new ArgumentNullException(nameof(box));
 
-        if (!HasChild(box))
+        Data = Data.Concat(box.Identifier).Concat(box.Data).ToArray();
+
+        if (DataSize > int.MaxValue)
         {
-            Data = Data.Concat(box.Identifier).Concat(box.Data).ToArray();
-            DataSize += box.IdentifierSize + box.DataSize;
-
-            if (DataSize > int.MaxValue)
-            {
-                Length = 1;
-                ExtendedLength = DataSize;
-            }
-            else
-            {
-                Length = (int)DataSize;
-            }
-
-            return true;
+            Length = 1;
+            ExtendedLength = DataSize;
+        }
+        else
+        {
+            Length = (int)DataSize;
         }
 
-        return false;
+        return;
     }
 
     public bool HasChild(Mp4Box box)
@@ -122,23 +110,6 @@ public class Mp4Box : Node
         }
 
         return false;
-    }
-
-}
-
-public class UuidBox : Mp4Box
-{
-    Guid Uuid
-    {
-        get => Binary.ReadGuid(Identifier, 8, Binary.IsBigEndian);
-        set => Binary.WriteGuid(Identifier, 8, value, Binary.IsBigEndian);
-    }
-
-    public UuidBox(BaseMediaWriter writer) 
-        : base(writer, new byte[24])
-    {
-        BoxType = "uuid";
-        Length = 24;
     }
 }
 
@@ -194,7 +165,7 @@ public class FtypBox : Mp4Box
     }
 
     public FtypBox(BaseMediaWriter writer, uint majorBrand, uint minorVersion, params uint[] compatibleBrands)
-        : base(writer, Encoding.UTF8.GetBytes("ftyp"), 8 + compatibleBrands.Length * 4)
+        : base(writer, Encoding.UTF8.GetBytes("ftyp"), compatibleBrands.Length * Binary.BytesPerInteger)
     {
         MajorBrand = majorBrand;
         MinorVersion = minorVersion;
@@ -203,18 +174,6 @@ public class FtypBox : Mp4Box
         {
             Binary.Write32(Data, ref offset, Binary.IsBigEndian, brand);
         }
-    }
-
-    //Not useful?
-    public void AddCompatibleBrand(uint brand)
-    {
-        Array.Resize(ref m_Data, (int)(DataSize + 4));
-        int offset = 8 + (int)DataSize;
-        Binary.Write32(Data, ref offset, Binary.IsBigEndian, brand);
-
-        // Update the box size
-        DataSize += 4;
-        Length = (int)DataSize + 8;
     }
 }
 
@@ -445,7 +404,7 @@ public class MinfBox : Mp4Box
         {
             foreach (var child in children)
             {
-                TryAddChildBox(child);
+                AddChildBox(child);
             }
         }
     }    
@@ -908,7 +867,11 @@ public class BaseMediaWriter : MediaFileWriter
     public override Track CreateTrack(Media.Sdp.MediaType mediaType)
     {
         var trakBox = new TrakBox(this, new MdiaBox(this, new MdhdBox(this, 0, 0, 0, 0, "english", 0), new HdlrBox(this, 0), new MinfBox(this, null)));
-        return new Track(trakBox, "track", 1, DateTime.UtcNow, DateTime.UtcNow, 1, 0, 0, TimeSpan.Zero, TimeSpan.Zero, 0, mediaType, new byte[4]);
+        var track = new Track(trakBox, "track", 1, DateTime.UtcNow, DateTime.UtcNow, 1, 0, 0, TimeSpan.Zero, TimeSpan.Zero, 0, mediaType, new byte[4]);
+
+        track.UserData = new Dictionary<string, object>();
+
+        return track;
     }
 
     public override bool TryAddTrack(Track track)

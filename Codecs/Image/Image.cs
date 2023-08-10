@@ -14,6 +14,29 @@ namespace Media.Codecs.Image
 
         #region Statics
 
+        public static Image FromStream(Stream stream)
+        {            
+            BitmapInfoHeader header = new BitmapInfoHeader();
+            if (14 != stream.Read(header.Array, 0, 14))
+                throw new InvalidOperationException("Need 14 Bytes for the Bitmap Header");
+
+            if (header[0] != 0x42 && header[1] != 0x4D)
+                    throw new InvalidOperationException("Need BM File Header.");
+
+            if (header.Count != stream.Read(header.Array, 0, header.Count))
+                throw new InvalidOperationException($"Need {BitmapInfoHeader.Length} Bytes for the Bitmap Header");
+
+            //Need to build components based on header for now just use RGB or use a single component.
+
+            var component = new MediaComponent(0, header.BitCount);
+
+            var image = new Image(new ImageFormat(Binary.SystemByteOrder, DataLayout.Packed, component), header.Width, header.Height);
+
+            stream.Read(image.Data.Array);
+
+            return image;
+        }
+
         //static Image Crop(Image source)
 
         internal static int CalculateSize(ImageFormat format, int width, int height)
@@ -204,6 +227,9 @@ namespace Media.Codecs.Image
             switch (DataLayout)
             {
                 case Media.Codec.DataLayout.Planar:
+                    //for(int c = 0; c < componentIndex; ++c)
+                        //offset += PlaneLength(c);
+
                     int widthSampling = ImageFormat.Widths[componentIndex];
                     int heightSampling = ImageFormat.Heights[componentIndex];
 
@@ -385,7 +411,7 @@ namespace Media.UnitTests
         {
             System.DateTime start = System.DateTime.UtcNow, end;
 
-            var filledVector = new Vector<byte>(byte.MaxValue);
+            var filledVector = (Vector<float>)new Vector<byte>(byte.MaxValue);
 
             foreach (var dataLayout in Enum.GetValues<DataLayout>())
             {
@@ -397,16 +423,14 @@ namespace Media.UnitTests
                     {
                         for (int c = 0; c < image.ImageFormat.Length; c++)
                         {
-                            for (int x = 0; x < image.Width; ++x)
+                            for (int x = 0; x < image.Width; x += Vector<float>.Count)
                             {
                                 for (int y = 0; y < image.Height; ++y)
                                 {
                                     // Set the modified data back to the image
-                                    image.SetComponentVector(x, y, c, filledVector);
-
-                                    var vector = image.GetComponentVector(x, y, c);
-
-                                    if (!vector.Equals(filledVector)) throw new InvalidOperationException();
+                                    image.SetComponentVector(x, y, c, (Vector<byte>)filledVector);
+                                    image.SetComponentVector(x + 1, y, c, (Vector<byte>)filledVector);
+                                    image.SetComponentVector(x + 2, y, c, (Vector<byte>)filledVector);
                                 }
                             }
                         }
@@ -463,6 +487,17 @@ namespace Media.UnitTests
                 {
                     image.SaveBitmap(outputBmpStream);
                 }
+
+                using (var inputBmp = Codecs.Image.Image.FromStream(new System.IO.FileStream("output_rgb.bmp", FileMode.OpenOrCreate)))
+                {
+                    if (inputBmp.Width != 696) throw new Exception();
+
+                    if (inputBmp.Height != 564) throw new Exception();
+
+                    //Todo components
+
+                    if (inputBmp.Data.Array.Any(b => b !=  byte.MaxValue)) throw new Exception();
+                }
             }
 
 
@@ -488,6 +523,10 @@ namespace Media.UnitTests
                 {
                     for (int componentIndex = 0; componentIndex < imageFormat.Length; componentIndex++)
                     {
+                        //int planeOffset = 0;
+                        //for (int i = 0; i < componentIndex; ++i)
+                            //planeOffset += image.PlaneLength(i);
+
                         int widthSampling = imageFormat.Widths[componentIndex];
                         int heightSampling = imageFormat.Heights[componentIndex];
 

@@ -355,7 +355,7 @@ namespace Media.Concepts.Classes
                 uint* d = (uint*)destAdr.ToPointer();
                 *d = *((uint*)srcAdr.ToPointer());
             }
-            if (codeSize > 0) System.Buffer.MemoryCopy((void*)srcAdr, (void*)GetMethodAddress(dest), codeSize, codeSize);
+            if (codeSize > 0) System.Buffer.MemoryCopy((void*)srcAdr, (void*)destAdr, codeSize, codeSize);
         }
 
         /// <summary>

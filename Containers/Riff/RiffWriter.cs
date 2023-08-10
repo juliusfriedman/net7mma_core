@@ -3,6 +3,7 @@ using Media.Container;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using static Media.Containers.Riff.RiffReader;
 
 namespace Media.Containers.Riff;
@@ -47,7 +48,7 @@ public class Chunk : Node
 
     public void UpdateSize()
     {
-        Master.WriteAt(DataOffset, Identifier, RiffReader.IdentifierSize, RiffReader.IdentifierSize);
+        Master.WriteAt(Offset, Identifier, RiffReader.IdentifierSize, RiffReader.IdentifierSize);
     }
 }
 
@@ -59,27 +60,35 @@ public class DataChunk : Chunk
     }
 }
 
-public class RiffChunk : Chunk
+public class HeaderChunk : Chunk
 {
-    public RiffChunk(RiffWriter writer, FourCharacterCode type, FourCharacterCode subType, int dataSize = 0)
+    public HeaderChunk(RiffWriter writer, FourCharacterCode type, FourCharacterCode subType, int dataSize = 0)
         : base(writer, type, dataSize)
     {        
         SubType = subType;
     }
 
-    public RiffChunk(RiffWriter writer, FourCharacterCode chunkId, FourCharacterCode subType, byte[] data) : base(writer, chunkId, data)
+    public HeaderChunk(RiffWriter writer, FourCharacterCode chunkId, FourCharacterCode subType, byte[] data) : base(writer, chunkId, data)
     {
         SubType = subType;
     }
 }
 
-public class ListChunk : RiffChunk
+public class ListChunk : HeaderChunk
 {
-    public ListChunk(RiffWriter writer, FourCharacterCode chunkId, FourCharacterCode subType, int dataSize) : base(writer, chunkId, subType, dataSize)
+    public ListChunk(RiffWriter writer, FourCharacterCode subType, int dataSize) : base(writer, FourCharacterCode.LIST, subType, dataSize)
     {
     }
-    public ListChunk(RiffWriter writer, FourCharacterCode chunkId, FourCharacterCode subType, byte[] data) : base(writer, chunkId, subType, data)
+    public ListChunk(RiffWriter writer, FourCharacterCode subType, byte[] data) : base(writer, FourCharacterCode.LIST, subType, data)
     {
+    }
+
+    public void AddChunk(Chunk chunk)
+    {
+        if (chunk == null)
+            return;
+
+        Data = Data.Concat(chunk.Identifier).Concat(chunk.Data).ToArray();
     }
 }
 
@@ -253,7 +262,7 @@ public class AviStreamHeader : Chunk
         set => Binary.Write32(Data, 12, Binary.IsBigEndian, value);
     }
 
-    public int Length
+    public int SampleLength
     {
         get => Binary.Read32(Data, 16, Binary.IsBigEndian);
         set => Binary.Write32(Data, 16, Binary.IsBigEndian, value);
@@ -327,7 +336,7 @@ public class RiffWriter : MediaFileWriter
         : base(filename, FileAccess.ReadWrite)
     {
 
-        AddChunk(new RiffChunk(this, type, subType, 0));
+        AddChunk(new HeaderChunk(this, type, subType, 0));
     }
 
     internal protected void WriteFourCC(FourCharacterCode fourCC) => WriteInt32LittleEndian((int)fourCC);
