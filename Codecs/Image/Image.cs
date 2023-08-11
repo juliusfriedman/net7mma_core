@@ -501,11 +501,116 @@ namespace Media.UnitTests
             }
 
 
-            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGBA(8), 696, 564))
+            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 696, 564))
             {
-                Array.Fill(image.Data.Array, byte.MaxValue);
+                for(int i = 0; i < image.Width; i += 2)
+                {
+                    for(int j = 0; j < image.Height; j += 2)
+                    {
+                        for(int c = 0; c < image.ImageFormat.Length; ++c)
+                        {
+                            var data = image.GetComponentData(i, j, image.ImageFormat[c]);
 
-                using (var outputBmpStream = new System.IO.FileStream("output_rgba.bmp", FileMode.OpenOrCreate))
+                            Array.Fill(data.Array, byte.MaxValue, data.Offset, data.Count);
+
+                            image.SetComponentData(i, j, c, data);
+                        }
+                    }
+                }
+
+                using (var outputBmpStream = new System.IO.FileStream("output_rgb_check.bmp", FileMode.OpenOrCreate))
+                {
+                    image.SaveBitmap(outputBmpStream);
+                }
+            }
+
+            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 696, 564))
+            {
+                for (int i = 0; i < image.Width; i += 2)
+                {
+                    for (int j = 0; j < image.Height; j += 2)
+                    {
+                        for (int c = 0; c < image.ImageFormat.Length; ++c)
+                        {
+                            var data = image.GetComponentVector(i, j, c);
+
+                            data = Vector<byte>.One * byte.MaxValue;
+
+                            image.SetComponentVector(i, j, c, data);
+                        }
+                    }
+                }
+
+                using (var outputBmpStream = new System.IO.FileStream("output_rgb_line.bmp", FileMode.OpenOrCreate))
+                {
+                    image.SaveBitmap(outputBmpStream);
+                }
+            }
+
+            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 696, 564))
+            {
+                for (int i = 0; i < image.Width; i += 2)
+                {
+                    for (int j = 0; j < image.Height; j += 2)
+                    {
+                        for (int c = 0; c < image.ImageFormat.Length; ++c)
+                        {
+                            var data = image.GetComponentVector(i, j, c);
+
+                            data = Vector<byte>.One * byte.MaxValue;
+
+                            image.SetComponentVector(i, j, c, data);
+                        }
+                    }
+                }
+
+                using (var outputBmpStream = new System.IO.FileStream("output_rgb_line.bmp", FileMode.OpenOrCreate))
+                {
+                    image.SaveBitmap(outputBmpStream);
+                }
+            }
+
+            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 696, 564))
+            {
+                for (int i = 0; i < image.Width; i += 4)
+                {
+                    for (int j = 0; j < image.Height; j += 4)
+                    {
+                        for (int c = 0; c < image.ImageFormat.Length; ++c)
+                        {
+                            var data = image.GetComponentVector(i, j, c);
+
+                            data = Vector<byte>.One * byte.MaxValue;
+
+                            image.SetComponentVector(i, j, c, data);
+                        }
+                    }
+                }
+
+                using (var outputBmpStream = new System.IO.FileStream("output_rgb_line2.bmp", FileMode.OpenOrCreate))
+                {
+                    image.SaveBitmap(outputBmpStream);
+                }
+            }
+
+            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 696, 564))
+            {
+                for (int i = 0; i < image.Width; i += 16)
+                {
+                    for (int j = 0; j < image.Height; j += 16)
+                    {
+                        for (int c = 0; c < image.ImageFormat.Length; ++c)
+                        {
+                            var data = image.GetComponentVector(i, j, c);
+
+                            data = Vector<byte>.One * byte.MaxValue;
+
+                            image.SetComponentVector(i, j, c, data);
+                        }
+                    }
+                }
+
+                using (var outputBmpStream = new System.IO.FileStream("output_rgb_line3.bmp", FileMode.OpenOrCreate))
                 {
                     image.SaveBitmap(outputBmpStream);
                 }

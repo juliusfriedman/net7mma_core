@@ -43,7 +43,6 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using System.Text;
 using Media.Common;
 
 #endregion
@@ -1540,6 +1539,7 @@ namespace Media.Common
             }
         }
 
+        [System.CLSCompliant(false)]
         public static UInt64 ReadUInt64MSB(byte[] data, int byteOffset, int bitCount, byte bitOffset = 0)
         {
             return ReadUInt64MSB(data, byteOffset, bitCount, ref bitOffset);
