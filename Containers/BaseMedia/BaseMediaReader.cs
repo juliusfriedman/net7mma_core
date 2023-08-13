@@ -1167,6 +1167,12 @@ namespace Media.Containers.BaseMedia
 
                 dataDictionary.Add("SttsEntries", sttsEntries);
 
+                //Useful in GetSample
+
+                dataDictionary.Add("Timescale", trackTimeScale);
+
+                dataDictionary.Add("SampleIndex", 0);
+
                 createdTrack.Volume = volume;
 
                 tracks.Add(createdTrack);
