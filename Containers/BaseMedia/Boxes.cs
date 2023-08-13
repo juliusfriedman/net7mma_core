@@ -1,4 +1,5 @@
 ﻿using Media.Common;
+using Media.Common.Extensions.Linq;
 using Media.Container;
 using System;
 using System.Collections.Generic;
@@ -171,13 +172,17 @@ public abstract class FullBox : Mp4Box
 
 public class DataEntryUrlBox : FullBox
 {
+    public int UrlLength => Binary.Read32(Data, OffsetToData, Binary.IsBigEndian);
+
+    public string Url => Encoding.UTF8.GetString(Data, OffsetToData + 4, UrlLength);
+
     public DataEntryUrlBox(BaseMediaWriter writer, string dataUrl)
         : base(writer, Encoding.UTF8.GetBytes("url "), 0, 1)
     {
         //Get the bytes
         byte[] urlData = Encoding.UTF8.GetBytes(dataUrl);
-        // Write the data URL
-        Data = Binary.GetBytes(urlData.Length + 1).Concat(urlData).ToArray();
+        // Write the data URL with a null terminator
+        Data = Binary.GetBytes(urlData.Length).Concat(urlData).Concat(byte.MinValue).ToArray();
     }
 }
 
@@ -885,7 +890,6 @@ public class MvexBox : Mp4Box
     }
 }
 
-
 #endregion
 
 public class TkhdBox : FullBox
@@ -1219,47 +1223,191 @@ public class VmhdBox : FullBox
     }
 }
 
-public class Mp4aBox : FullBox
+public abstract class SampleEntryBox : FullBox
 {
-    public ushort EntryVersion
+    // Common properties for sample entry boxes
+    public ushort DataReferenceIndex
     {
         get => Binary.ReadU16(Data, OffsetToData, Binary.IsBigEndian);
         set => Binary.Write16(Data, OffsetToData, Binary.IsBigEndian, value);
     }
 
-    public ushort ChannelCount
+    public SampleEntryBox(BaseMediaWriter writer, string type)
+        : base(writer, Encoding.UTF8.GetBytes(type), 0, 0, HeaderSize + 6)
     {
-        get => Binary.ReadU16(Data, OffsetToData + 2, Binary.IsBigEndian);
-        set => Binary.Write16(Data, OffsetToData + 2, Binary.IsBigEndian, value);
+        DataReferenceIndex = 1; // Default data reference index
     }
+}
 
-    public ushort SampleSize
-    {
-        get => Binary.ReadU16(Data, OffsetToData + 4, Binary.IsBigEndian);
-        set => Binary.Write16(Data, OffsetToData + 4, Binary.IsBigEndian, value);
-    }
-
-    public ushort CompressionId
+public class Mp4aBox : SampleEntryBox
+{
+    public ushort EntryVersion
     {
         get => Binary.ReadU16(Data, OffsetToData + 6, Binary.IsBigEndian);
         set => Binary.Write16(Data, OffsetToData + 6, Binary.IsBigEndian, value);
     }
 
-    public ushort PacketSize
+    public ushort ChannelCount
     {
         get => Binary.ReadU16(Data, OffsetToData + 8, Binary.IsBigEndian);
         set => Binary.Write16(Data, OffsetToData + 8, Binary.IsBigEndian, value);
     }
 
+    public ushort SampleSize
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 10, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 10, Binary.IsBigEndian, value);
+    }
+
+    public ushort CompressionId
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 12, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 12, Binary.IsBigEndian, value);
+    }
+
+    public ushort PacketSize
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 14, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 14, Binary.IsBigEndian, value);
+    }
+
     public uint SampleRate
     {
-        get => Binary.ReadU32(Data, OffsetToData + 10, Binary.IsBigEndian);
-        set => Binary.Write32(Data, OffsetToData + 10, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData + 16, Binary.IsBigEndian);
+        set => Binary.Write32(Data, OffsetToData + 16, Binary.IsBigEndian, value);
     }
 
     public Mp4aBox(BaseMediaWriter writer)
-        : base(writer, Encoding.UTF8.GetBytes("mp4a"), 0, 0, 28)
+        : base(writer, "mp4a")
     {
+        // Initialize any specific properties for mp4a sample entries
+    }
+}
+
+public class VisualSampleEntryBox : SampleEntryBox
+{
+    public ushort PreDefined1
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 6, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 6, Binary.IsBigEndian, value);
+    }
+
+    public ushort Reserved1
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 8, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 8, Binary.IsBigEndian, value);
+    }
+
+    public uint[] PreDefined2
+    {
+        get
+        {
+            uint[] predefined = new uint[3];
+            for (int i = 0; i < 3; i++)
+            {
+                predefined[i] = Binary.ReadU32(Data, OffsetToData + 10 + i * 4, Binary.IsBigEndian);
+            }
+            return predefined;
+        }
+        set
+        {
+            if (value.Length != 3)
+                throw new ArgumentException("PreDefined2 must contain 3 elements.");
+
+            for (int i = 0; i < 3; i++)
+            {
+                Binary.Write32(Data, OffsetToData + 10 + i * 4, Binary.IsBigEndian, value[i]);
+            }
+        }
+    }
+
+    public ushort Width
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 22, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 22, Binary.IsBigEndian, value);
+    }
+
+    public ushort Height
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 24, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 24, Binary.IsBigEndian, value);
+    }
+
+    public ushort HorizResolution
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 26, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 26, Binary.IsBigEndian, value);
+    }
+
+    public ushort VertResolution
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 28, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 28, Binary.IsBigEndian, value);
+    }
+
+    public uint Reserved2
+    {
+        get => Binary.ReadU32(Data, OffsetToData + 30, Binary.IsBigEndian);
+        set => Binary.Write32(Data, OffsetToData + 30, Binary.IsBigEndian, value);
+    }
+
+    public ushort FrameCount
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 34, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 34, Binary.IsBigEndian, value);
+    }
+
+    // Add more properties specific to visual sample entries if needed
+
+    public VisualSampleEntryBox(BaseMediaWriter writer, string type)
+        : base(writer, type)
+    {
+        // Set default values or initialize properties as needed
+    }
+}
+
+public class AudioSampleEntryBox : SampleEntryBox
+{
+    public ushort EntryVersion
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 6, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 6, Binary.IsBigEndian, value);
+    }
+
+    public ushort ChannelCount
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 8, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 8, Binary.IsBigEndian, value);
+    }
+
+    public ushort SampleSize
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 10, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 10, Binary.IsBigEndian, value);
+    }
+
+    public ushort CompressionId
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 12, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 12, Binary.IsBigEndian, value);
+    }
+
+    public ushort PacketSize
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 14, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 14, Binary.IsBigEndian, value);
+    }
+
+    public uint SampleRate
+    {
+        get => Binary.ReadU32(Data, OffsetToData + 16, Binary.IsBigEndian);
+        set => Binary.Write32(Data, OffsetToData + 16, Binary.IsBigEndian, value);
+    }
+
+    public AudioSampleEntryBox(BaseMediaWriter writer, string format)
+        : base(writer, format)
+    {
+        // Initialize any specific properties for audio sample entries
     }
 }
 

@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System;
+using Media.Container;
 
 namespace Media.Containers.BaseMedia;
 
@@ -150,4 +151,86 @@ public class Mp4Writer : BaseMediaWriter
         // Write "moof" box
         AddBox(moofBox);
     }
+
+    public void AddAudioTrack(uint sampleRate, ushort channelCount, int[] sampleSizes, TimeSpan[] sampleDurations)
+    {
+        if (sampleRate == 0 || channelCount == 0)
+            throw new ArgumentException("Invalid sample rate or channel count");
+
+        var mdhdBox = new MdhdBox(this, 0, sampleRate, 0, 0, "", 0);
+        var hdlrBox = new HdlrBox(this, 0); // Modify handler type as needed
+
+        var minfBox = new MinfBox(this);
+        minfBox.AddChildBox(mdhdBox);
+        minfBox.AddChildBox(hdlrBox);
+
+        var dinfBox = new DinfBox(this);
+        minfBox.AddChildBox(dinfBox);
+
+        var drefBox = new DrefBox(this);
+        dinfBox.AddChildBox(drefBox);
+
+        drefBox.AddDataReference(""); // Add data reference as needed
+
+        var stblBox = new StblBox(this);
+        minfBox.AddChildBox(stblBox);
+
+        var stsdBox = new StsdBox(this);
+        stblBox.AddChildBox(stsdBox);
+
+        // Create the audio sample entry box (e.g., Mp4aBox or other suitable class)
+        var audioSampleEntry = CreateAudioSampleEntry(sampleRate, channelCount);
+
+        stsdBox.AddSampleEntry(audioSampleEntry);
+
+        // Create the sample size box (stsz)
+        var stszBox = new StszBox(this);
+        foreach (int size in sampleSizes)
+        {
+            stszBox.AddSampleSize(size);
+        }
+        stblBox.AddChildBox(stszBox);
+
+        // Create the time-to-sample box (stts)
+        var sttsBox = new SttsBox(this);
+        foreach (TimeSpan duration in sampleDurations)
+        {
+            // Convert duration to appropriate time scale
+            uint timeScale = sampleRate; // Adjust as needed
+            uint durationInTimeScale = (uint)(duration.TotalSeconds * timeScale);
+            sttsBox.AddTimeToSampleEntry(1, (int)durationInTimeScale);
+        }
+        stblBox.AddChildBox(sttsBox);
+
+        // Create the chunk offset box (stco)
+        var stcoBox = new StcoBox(this);
+        uint offset = 0;
+        foreach (int size in sampleSizes)
+        {
+            stcoBox.AddChunkOffset(offset);
+            offset += (uint)size;
+        }
+        stblBox.AddChildBox(stcoBox);
+
+        var trakBox = new TrakBox(this, new MdiaBox(this, mdhdBox, hdlrBox, minfBox));
+        AddBox(trakBox);
+
+        Tracks.Add(new Track(trakBox, "", 1, DateTime.UtcNow, DateTime.UtcNow, 0, 0, 0, TimeSpan.Zero, TimeSpan.Zero, 0, Sdp.MediaType.audio, null, 1, 8, true));
+    }
+
+    private Mp4aBox CreateAudioSampleEntry(uint sampleRate, ushort channelCount)
+    {
+        var audioSampleEntry = new Mp4aBox(this);
+        audioSampleEntry.EntryVersion = 0;
+        audioSampleEntry.ChannelCount = channelCount;
+        audioSampleEntry.SampleSize = 16; // 16-bit samples
+        audioSampleEntry.CompressionId = 0; // No compression
+        audioSampleEntry.PacketSize = 0; // 0 for uncompressed audio
+        audioSampleEntry.SampleRate = sampleRate;
+
+        // Set other audio-specific properties as needed
+
+        return audioSampleEntry;
+    }
+
 }
