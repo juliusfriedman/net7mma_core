@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 //Preview
 //using TimeToEntrySample = (int SampleCount, int SampleDurtation)
 
@@ -692,8 +693,14 @@ public class TfdtBox : FullBox
 {
     public ulong BaseMediaDecodeTime
     {
-        get => Binary.ReadU64(Data, 4, Binary.IsBigEndian);
-        set => Binary.Write64(Data, 4, Binary.IsBigEndian, value);
+        get => (Version == 1) ? Binary.ReadU64(Data, OffsetToData, Binary.IsBigEndian) : Binary.ReadU32(Data, OffsetToData, Binary.IsBigEndian);
+        set
+        {
+            if (Version == 1)
+                Binary.Write64(Data, OffsetToData, Binary.IsBigEndian, value);
+            else
+                Binary.Write32(Data, OffsetToData, Binary.IsBigEndian, (uint)value);
+        }
     }
 
     public TfdtBox(BaseMediaWriter writer, ulong baseMediaDecodeTime)
@@ -707,8 +714,8 @@ public class TrexBox : FullBox
 {
     public uint TrackID
     {
-        get => Binary.ReadU32(Data, 4, Binary.IsBigEndian);
-        set => Binary.Write32(Data, 4, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData, Binary.IsBigEndian);
+        set => Binary.Write32(Data, OffsetToData, Binary.IsBigEndian, value);
     }
 
     public uint DefaultSampleDescriptionIndex
@@ -804,7 +811,6 @@ public class TrunBox : FullBox
     }
 }
 
-
 public class TrafBox : FullBox
 {
     public TrafBox(BaseMediaWriter writer)
@@ -864,6 +870,21 @@ public class MfhdBox : FullBox
         SequenceNumber = sequenceNumber;
     }
 }
+
+public class MvexBox : Mp4Box
+{
+    public MvexBox(BaseMediaWriter writer)
+        : base(writer, Encoding.UTF8.GetBytes("mvex"), 0)
+    {
+    }
+
+    public void AddTrexBox(uint trackId, uint defaultSampleDescriptionIndex, uint defaultSampleDuration, uint defaultSampleSize, uint defaultSampleFlags)
+    {
+        TrexBox trexBox = new TrexBox(Master as BaseMediaWriter, trackId, defaultSampleDescriptionIndex, defaultSampleDuration, defaultSampleSize, defaultSampleFlags);
+        AddChildBox(trexBox);
+    }
+}
+
 
 #endregion
 
@@ -1135,25 +1156,55 @@ public class Avc1Box : Mp4Box
     }
 }
 
+public class BtrtBox : FullBox
+{
+    public uint BufferSizeDB
+    {
+        get => Binary.ReadU32(Data, OffsetToData, Binary.IsBigEndian);
+        set => Binary.Write32(Data, OffsetToData, Binary.IsBigEndian, value);
+    }
+
+    public uint MaxBitrate
+    {
+        get => Binary.ReadU32(Data, 8, Binary.IsBigEndian);
+        set => Binary.Write32(Data, 8, Binary.IsBigEndian, value);
+    }
+
+    public uint AvgBitrate
+    {
+        get => Binary.ReadU32(Data, 12, Binary.IsBigEndian);
+        set => Binary.Write32(Data, 12, Binary.IsBigEndian, value);
+    }
+
+    public BtrtBox(BaseMediaWriter writer, uint bufferSizeDB, uint maxBitrate, uint avgBitrate)
+        : base(writer, Encoding.UTF8.GetBytes("btrt"), 0, 0, 12)
+    {
+        BufferSizeDB = bufferSizeDB;
+        MaxBitrate = maxBitrate;
+        AvgBitrate = avgBitrate;
+    }
+}
+
 public class VmhdBox : FullBox
 {
     public ushort GraphicsMode
     {
-        get => Binary.ReadU16(Data, 0, Binary.IsBigEndian);
-        set => Binary.Write16(Data, 0, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData, Binary.IsBigEndian, value);
     }
 
     public IEnumerable<ushort> OpColor
     {
         get
         {
-            int offset = 2;
-            for (int i = 0; i < 3; i++)
+            int offset = OffsetToData + 2;
+            for (int i = 0; i < 3; i++) //Todo, if more than 3 should return based on offset...
                 yield return Binary.ReadU16(Data, ref offset, Binary.IsBigEndian);
         }
         set
         {
-            int offset = 2;
+            //Todo , verify only 3 in value.Count()
+            int offset = OffsetToData + 2;
             foreach (var identity in value)
                 Binary.Write16(Data, ref offset, Binary.IsBigEndian, identity);
         }
@@ -1165,6 +1216,50 @@ public class VmhdBox : FullBox
         // Initialize graphics mode and opcolor
         //GraphicsMode = 0;
         //OpColor = new ushort[] { 0, 0, 0 };
+    }
+}
+
+public class Mp4aBox : FullBox
+{
+    public ushort EntryVersion
+    {
+        get => Binary.ReadU16(Data, OffsetToData, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData, Binary.IsBigEndian, value);
+    }
+
+    public ushort ChannelCount
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 2, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 2, Binary.IsBigEndian, value);
+    }
+
+    public ushort SampleSize
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 4, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 4, Binary.IsBigEndian, value);
+    }
+
+    public ushort CompressionId
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 6, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 6, Binary.IsBigEndian, value);
+    }
+
+    public ushort PacketSize
+    {
+        get => Binary.ReadU16(Data, OffsetToData + 8, Binary.IsBigEndian);
+        set => Binary.Write16(Data, OffsetToData + 8, Binary.IsBigEndian, value);
+    }
+
+    public uint SampleRate
+    {
+        get => Binary.ReadU32(Data, OffsetToData + 10, Binary.IsBigEndian);
+        set => Binary.Write32(Data, OffsetToData + 10, Binary.IsBigEndian, value);
+    }
+
+    public Mp4aBox(BaseMediaWriter writer)
+        : base(writer, Encoding.UTF8.GetBytes("mp4a"), 0, 0, 28)
+    {
     }
 }
 
