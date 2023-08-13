@@ -134,15 +134,8 @@ namespace Media.Codecs.Audio
         public Vector<byte> GetComponentVector(int sampleIndex, int channelIndex)
         {
             int offset = CalculateSampleDataOffset(sampleIndex, channelIndex);
-
-            if (offset < 0 || offset + Vector<byte>.Count > Data.Count)
-            {
-                throw new ArgumentOutOfRangeException(nameof(sampleIndex), "Invalid sample index or component data does not fit in the audio buffer.");
-            }
-
-            // Since the AudioBuffer contains audio data as bytes, we can use Vector<byte>.Count to get the vector size
-            // and directly return the vector for the specified component at the given offset.
-            return new Vector<byte>(Data.Array, offset);
+            offset -= offset % Vector<byte>.Count; // Align the offset to vector size
+            return new Vector<byte>(Data.Array, Data.Offset + offset);
         }
 
         public int CalculateSampleDataOffset(int sampleIndex, int channelIndex)
@@ -153,37 +146,32 @@ namespace Media.Codecs.Audio
             if (channelIndex < 0 || channelIndex >= Channels)
                 throw new ArgumentOutOfRangeException(nameof(channelIndex), "Invalid channel index");
 
-            if (DataLayout == DataLayout.Packed)
+            switch (DataLayout)
             {
-                // Packed layout
-                return sampleIndex * SampleLength + channelIndex * MediaFormat.Components[channelIndex].Size / Binary.BitsPerByte;
-            }
-            else if (DataLayout == DataLayout.Planar)
-            {
-                // Planar layout
-                return sampleIndex * SampleLength * Channels + channelIndex * MediaFormat.Components[channelIndex].Size / Binary.BitsPerByte;
-            }
-            else if (DataLayout == DataLayout.SemiPlanar)
-            {
-                // SemiPlanar layout
-                int packedSize = 0;
-                for (int i = 0; i < Channels - 1; i++)
-                    packedSize += MediaFormat.Components[i].Size / Binary.BitsPerByte;
+                case DataLayout.Packed:
+                    // Packed layout
+                    return sampleIndex * SampleLength + channelIndex * MediaFormat.Components[channelIndex].Length;
+                case DataLayout.Planar:
+                    // Planar layout
+                    return sampleIndex * SampleLength * Channels + channelIndex * MediaFormat.Components[channelIndex].Length;
+                case DataLayout.SemiPlanar:
+                    // SemiPlanar layout
+                    int packedSize = 0;
+                    for (int i = 0; i < Channels - 1; i++)
+                        packedSize += MediaFormat.Components[i].Size / Binary.BitsPerByte;
 
-                if (channelIndex == Channels - 1)
-                {
-                    // Last component (the packed one)
-                    return sampleIndex * SampleLength + packedSize;
-                }
-                else
-                {
-                    // Planar component
-                    return sampleIndex * SampleLength * Channels + channelIndex * MediaFormat.Components[channelIndex].Size / Binary.BitsPerByte;
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException("Unsupported data layout.");
+                    if (channelIndex == Channels - 1)
+                    {
+                        // Last component (the packed one)
+                        return sampleIndex * SampleLength + packedSize;
+                    }
+                    else
+                    {
+                        // Planar component
+                        return sampleIndex * SampleLength * Channels + channelIndex * MediaFormat.Components[channelIndex].Length;
+                    }
+                default:
+                    throw new InvalidOperationException("Unsupported data layout.");
             }
         }
 
@@ -225,14 +213,13 @@ namespace Media.Codecs.Audio
             if (channel < 0 || channel >= Channels)
                 throw new ArgumentOutOfRangeException(nameof(channel), "Invalid channel index");
 
-            int sampleSizeInBits = AudioFormat.SampleSize;
-            int bytesPerSample = sampleSizeInBits / Binary.BitsPerByte;
+            int bytesPerSample = AudioFormat.Length;
             int offset = CalculateSampleDataOffset(sampleIndex, channel);
 
             if (offset + bytesPerSample > Data.Count)
                 throw new ArgumentException("The requested sample data is outside the bounds of the buffer.");
 
-            return new MemorySegment(Data.Array, offset, bytesPerSample);
+            return new MemorySegment(Data.Array, Data.Offset + offset, bytesPerSample);
         }
 
         #endregion

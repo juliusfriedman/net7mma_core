@@ -4,7 +4,7 @@ namespace Media.Codecs.Audio;
 
 public class WaveFormat : MemorySegment
 {
-    const int Size = 18;
+    public const int Size = 18;
 
     public WaveFormatId WaveFormatId => (WaveFormatId)AudioFormat;
 
@@ -44,6 +44,8 @@ public class WaveFormat : MemorySegment
         set => Binary.Write16(Array, Offset + 14, Binary.IsBigEndian, value);
     }
 
+    public bool IsValid => NumChannels * BitsPerSample / Common.Binary.BitsPerByte == BlockAlign;
+
     public short ExtraSize
     {
         get => Binary.Read16(Array, Offset + 16, Binary.IsBigEndian);
@@ -66,6 +68,12 @@ public class WaveFormat : MemorySegment
     public WaveFormat(byte[] data, int offset)
         : base(data, offset)
     {
+    }
+
+    public WaveFormat()
+        : base(new byte[Size])
+    {
+
     }
 
     /// <summary>

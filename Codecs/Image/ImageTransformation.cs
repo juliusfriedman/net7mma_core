@@ -49,8 +49,6 @@ namespace Media.Codecs.Image
 
         #endregion
 
-        //Todo abstract default or something///
-
         #region Fields
 
         protected Image m_Source, m_Dest;

@@ -5,6 +5,9 @@ using System.IO;
 using System;
 using System.Text;
 using System.Linq;
+using Media.Common.Interfaces;
+using Microsoft.VisualBasic;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Media.Containers.BaseMedia;
 
@@ -88,6 +91,14 @@ public class Mp4Box : Node
         return;
     }
 
+    public void AddChildrenBoxes(params Mp4Box[] boxes) => AddChildrenBoxes((IEnumerable<Mp4Box>)boxes);
+
+    public void AddChildrenBoxes(IEnumerable<Mp4Box> boxes)
+    {
+        foreach(var box in boxes) 
+            AddChildBox(box);
+    }
+
     public bool HasChild(Mp4Box box)
     {
         if (box == null)
@@ -116,8 +127,8 @@ public class Mp4Box : Node
 public abstract class FullBox : Mp4Box
 {
     // Constructor for FullBox, which takes the writer, box type, version, and flags
-    protected FullBox(BaseMediaWriter writer, byte[] type, byte version, uint flags)
-        : base(writer, type, 4)
+    protected FullBox(BaseMediaWriter writer, byte[] type, byte version, uint flags, int dataSize = 0)
+        : base(writer, type, dataSize)
     {
         Version = version;
         Flags = flags;
@@ -135,6 +146,64 @@ public abstract class FullBox : Mp4Box
     {
         get => Binary.ReadU24(Data, 1, Binary.IsBigEndian);
         set => Binary.Write24(Data, 1, Binary.IsBigEndian, value);
+    }
+}
+
+public class DataEntryUrlBox : FullBox
+{
+    public DataEntryUrlBox(BaseMediaWriter writer, string dataUrl)
+        : base(writer, Encoding.UTF8.GetBytes("url "), 0, 1)
+    {
+        //Get the bytes
+        byte[] urlData = Encoding.UTF8.GetBytes(dataUrl);
+        // Write the data URL
+        Data = Binary.GetBytes(urlData.Length + 1).Concat(urlData).ToArray();
+    }
+}
+
+public class DrefBox : Mp4Box
+{
+    private const int EntryCountOffset = 4;
+
+    public int EntryCount
+    {
+        get => Binary.Read32(Data, EntryCountOffset, Binary.IsBigEndian);
+        set => Binary.Write32(Data, EntryCountOffset, Binary.IsBigEndian, value);
+    }
+
+    public DrefBox(BaseMediaWriter writer)
+        : base(writer, Encoding.UTF8.GetBytes("dref"), 0)
+    {
+        // Set the entry count to 0 initially
+        EntryCount = 0;
+    }
+
+    public void AddDataReference(string dataUrl)
+    {
+        // Increment the entry count
+        ++EntryCount;
+
+        // Create a Data Entry Url Box
+        DataEntryUrlBox dataEntryUrlBox = new DataEntryUrlBox(Master as BaseMediaWriter, dataUrl);
+
+        AddChildBox(dataEntryUrlBox);
+    }
+}
+
+public class DinfBox : Mp4Box
+{
+    private DrefBox _drefBox;
+
+    public DinfBox(BaseMediaWriter writer)
+        : base(writer, Encoding.UTF8.GetBytes("dinf"), 0)
+    {
+        _drefBox = new DrefBox(writer);
+
+        AddChildBox(_drefBox);
+    }
+    public void AddDataReference(string dataUrl)
+    {
+        _drefBox.AddDataReference(dataUrl);
     }
 }
 
@@ -177,20 +246,8 @@ public class FtypBox : Mp4Box
     }
 }
 
-public class MvhdBox : Mp4Box
+public class MvhdBox : FullBox
 {
-    public byte Version
-    {
-        get => Data[0];
-        set => Data[0] = value;
-    }
-
-    public uint Flags
-    {
-        get => Binary.ReadU24(Data, 1, Binary.IsBigEndian);
-        set => Binary.Write24(Data, 1, Binary.IsBigEndian, value);
-    }
-
     public uint TimeScale
     {
         get => (uint)Binary.Read32(Data, 4, Binary.IsBigEndian);
@@ -235,29 +292,27 @@ public class MvhdBox : Mp4Box
         {
             var offset = 24;
 
-            //for (int i = 0; i < 9; i++)
             foreach(var identity in value)
             {
-                Binary.Write32(Data, offset, Binary.IsBigEndian, identity);
-                offset += 4;
+                Binary.Write32(Data, ref offset, Binary.IsBigEndian, identity);
             }
         }
     }
 
-    public byte[] PreDefined
+    public IEnumerable<byte> PreDefined
     {
         get
         {
-            byte[] predefined = new byte[52];
-            Array.Copy(Data, 72, predefined, 0, 52);
-            return predefined;
+            return Data.Skip(72).Take(52);
         }
         set
         {
-            if (value.Length != 52)
+            var array = value.ToArray();
+
+            if (array.Length != 52)
                 throw new ArgumentException("PreDefined must contain 52 elements.");
 
-            Array.Copy(value, 0, Data, 72, 52);
+            Array.Copy(array, 0, Data, 72, 52);
         }
     }
 
@@ -268,10 +323,8 @@ public class MvhdBox : Mp4Box
     }
 
     public MvhdBox(BaseMediaWriter writer, uint timeScale, ulong duration, uint preferredRate, ushort preferredVolume, uint[] matrix, byte[] predefined, uint nextTrackID)
-        : base(writer, Encoding.UTF8.GetBytes("mvhd"), 4 + 120)
+        : base(writer, Encoding.UTF8.GetBytes("mvhd"), 0, 1, 4 + 120)
     {
-        Version = 0;
-        Flags = 0;
         TimeScale = timeScale;
         Duration = duration;
         PreferredRate = preferredRate;
@@ -433,6 +486,171 @@ public class TrakBox : Mp4Box
         : base(writer, Encoding.ASCII.GetBytes("trak"), 0)
     {
         MdiaBox = mdiaBox;
+    }
+}
+
+public class StblBox : Mp4Box
+{
+    private StsdBox _stsdBox;
+    private SttsBox _sttsBox;
+    private StszBox _stszBox;
+    private StcoBox _stcoBox;
+
+    public StblBox(BaseMediaWriter writer)
+        : base(writer, Encoding.UTF8.GetBytes("stbl"), 0)
+    {
+        _stsdBox = new StsdBox(writer);
+        _sttsBox = new SttsBox(writer);
+        _stszBox = new StszBox(writer);
+        _stcoBox = new StcoBox(writer);
+
+        AddChildBox(_stsdBox);
+        AddChildBox(_sttsBox);
+        AddChildBox(_stszBox);
+        AddChildBox(_stcoBox);
+    }
+
+    public void AddSampleDescriptionBox(Mp4Box sampleEntry)
+    {
+        _stsdBox.AddSampleEntry(sampleEntry);
+    }
+
+    public void AddTimeToSampleEntry(int sampleCount, int sampleDuration)
+    {
+        _sttsBox.AddTimeToSampleEntry(sampleCount, sampleDuration);
+    }
+
+    public void AddSampleSize(int size)
+    {
+        _stszBox.AddSampleSize(size);
+    }
+
+    public void AddChunkOffset(uint offset)
+    {
+        _stcoBox.AddChunkOffset(offset);
+    }
+}
+
+public class StcoBox : Mp4Box
+{
+    public int OffsetCount => Binary.Read32(Data, 0, Binary.IsBigEndian);
+
+    public IEnumerable<uint> ChunkOffsets
+    {
+        get
+        {
+            var offset = 4;
+            while (offset < DataSize)
+            {
+                yield return (uint)Binary.Read32(Data, offset, Binary.IsBigEndian);
+            }
+        }
+    }
+
+    public StcoBox(BaseMediaWriter writer)
+        : base(writer, Encoding.UTF8.GetBytes("stco"), 0)
+    {
+    }
+
+    public void AddChunkOffset(uint offset)
+    {
+        Data = Data.Concat(Binary.GetBytes(offset, Binary.IsBigEndian)).ToArray();
+    }
+}
+
+public class StsdBox : Mp4Box
+{
+    private const int EntryCountOffset = 4;
+
+    public int EntryCount
+    {
+        get => Binary.Read32(Data, EntryCountOffset, Binary.IsBigEndian);
+        set => Binary.Write32(Data, EntryCountOffset, Binary.IsBigEndian, value);
+    }
+
+    public StsdBox(BaseMediaWriter writer)
+        : base(writer, Encoding.UTF8.GetBytes("stsd"), 0)
+    {
+        // Set the entry count to 0 initially
+        EntryCount = 0;
+    }
+
+    public void AddSampleEntry(Mp4Box sampleEntry)
+    {
+        // Increment the entry count
+        ++EntryCount;
+
+        AddChildBox(sampleEntry);
+    }
+}
+
+public class StszBox : Mp4Box
+{
+    public int SampleSize
+    {
+        get => Binary.Read32(Data, 0, Binary.IsBigEndian);
+        set => Binary.Write32(Data, 4, Binary.IsBigEndian, value);
+    }
+
+    public int SampleCount
+    {
+        get => Binary.Read32(Data, 4, Binary.IsBigEndian); 
+        set => Binary.Write32(Data, 4, Binary.IsBigEndian, value);
+    }
+
+    public IEnumerable<int> SampleSizes
+    {
+        get
+        {
+            var offset = 8;
+            while (offset < DataSize)
+            {
+                yield return Binary.Read32(Data, ref offset, Binary.IsBigEndian);
+            }
+        }
+    }
+
+    public StszBox(BaseMediaWriter writer)
+        : base(writer, Encoding.UTF8.GetBytes("stsz"), 0)
+    {
+    }
+
+    public void AddSampleSize(int size)
+    {
+        ++SampleCount;
+        Data = Data.Concat(Binary.GetBytes(size, Binary.IsBigEndian)).ToArray();
+    }
+}
+
+public class SttsBox : Mp4Box
+{
+    public int EntryCount { get => Binary.Read32(Data, 0, Binary.IsBigEndian); set => Binary.Write32(Data, 0, Binary.IsBigEndian, value); }
+
+    public IEnumerable<(int SampleCount, int SampleDurtation)> TimeToSampleEntries
+    {
+        get
+        {
+            var offset = 4;
+            while (offset + 8 <= DataSize)
+            {
+                var sampleCount = Binary.Read32(Data, ref offset, Binary.IsBigEndian);
+                var sampleDuration = Binary.Read32(Data, ref offset , Binary.IsBigEndian);
+                yield return (sampleCount, sampleDuration);
+            }
+        }
+    }
+
+    public SttsBox(BaseMediaWriter writer)
+        : base(writer, Encoding.UTF8.GetBytes("stts"), 0)
+    {
+    }
+
+    public void AddTimeToSampleEntry(int sampleCount, int sampleDuration)
+    {
+        ++EntryCount;
+        Data = Data.Concat(Binary.GetBytes(sampleCount, Binary.IsBigEndian))
+                   .Concat(Binary.GetBytes(sampleDuration, Binary.IsBigEndian))
+                   .ToArray();
     }
 }
 
@@ -731,30 +949,23 @@ public class TkhdBox : FullBox
         }
     }
 
-    public ushort[] Matrix
+    public IEnumerable<ushort> Matrix
     {
         get
         {
-            ushort[] matrix = new ushort[9];
             int offset = Version == 1 ? 48 : 34;
-
-            for (int i = 0; i < 9; i++)
+            for (int i = 0; i < 9; i++) //Always 9?
             {
-                matrix[i] = Binary.ReadU16(Data, ref offset, Binary.IsBigEndian);
+                yield return Binary.ReadU16(Data, ref offset, Binary.IsBigEndian);
             }
-
-            return matrix;
         }
         set
         {
-            if (value == null || value.Length != 9)
-                throw new ArgumentException("Matrix should contain 9 elements.");
-
             int offset = Version == 1 ? 48 : 34;
 
-            for (int i = 0; i < 9; i++)
+            foreach (var identity in value)
             {
-                Binary.Write16(Data, ref offset, Binary.IsBigEndian, value[i]);
+                Binary.Write16(Data, ref offset, Binary.IsBigEndian, identity);
             }
         }
     }
@@ -821,6 +1032,99 @@ public class MdatBox : Mp4Box
     public void WriteData(byte[] data)
     {
         Data = data;
+    }
+}
+
+public class UdtaBox : Mp4Box
+{
+    public UdtaBox(BaseMediaWriter writer)
+        : base(writer, Encoding.UTF8.GetBytes("udta"), 0)
+    {
+        // Initialize and add any user data related boxes here
+    }
+}
+
+public class MoovBox : Mp4Box
+{
+    public MvhdBox MovieHeaderBox { get; }
+    public List<TrakBox> Tracks { get; }
+    public UdtaBox UserDataBox { get; }
+
+    public MoovBox(BaseMediaWriter writer)
+        : base(writer, Encoding.UTF8.GetBytes("moov"), 0)
+    {
+        MovieHeaderBox = new MvhdBox(writer, 1, 1, 1, 1, null, null, 0);
+        Tracks = new List<TrakBox>();
+        UserDataBox = new UdtaBox(writer);
+
+        AddChildBox(MovieHeaderBox);
+        AddChildrenBoxes(Tracks);
+        AddChildBox(UserDataBox);
+    }
+
+    public void AddTrack(TrakBox trackBox)
+    {
+        Tracks.Add(trackBox);
+        AddChildBox(trackBox);
+    }
+}
+
+public class AvcCBox : Mp4Box
+{
+    public AvcCBox(BaseMediaWriter writer, byte[] avcCData)
+        : base(writer, Encoding.UTF8.GetBytes("avcC"), avcCData.Length)
+    {
+        Data = avcCData;
+    }
+}
+
+public class Avc1Box : Mp4Box
+{
+    public Avc1Box(BaseMediaWriter writer, byte[] avcCData)
+        : base(writer, Encoding.UTF8.GetBytes("avc1"), 0)
+    {
+        // Create the AVC Configuration Box (avcC) using the provided data
+        AvcCBox avcCBox = new AvcCBox(writer, avcCData);
+
+        AddChildBox(avcCBox);
+    }
+}
+
+public class VmhdBox : FullBox
+{
+    public ushort GraphicsMode
+    {
+        get => Binary.ReadU16(Data, 0, Binary.IsBigEndian);
+        set => Binary.Write16(Data, 0, Binary.IsBigEndian, value);
+    }
+
+    public IEnumerable<ushort> OpColor
+    {
+        get
+        {
+            int offset = 2;
+            for (int i = 0; i < 3; i++) 
+            {
+                yield return Binary.ReadU16(Data, ref offset, Binary.IsBigEndian);
+            }
+        }
+        set
+        {
+            int offset = 2;
+
+            foreach (var identity in value)
+            {
+                Binary.Write16(Data, ref offset, Binary.IsBigEndian, identity);
+            }
+        }
+    }
+
+    public VmhdBox(BaseMediaWriter writer)
+        : base(writer, Encoding.UTF8.GetBytes("vmhd"), 0, 1)
+    {
+        // Initialize graphics mode and opcolor
+        GraphicsMode = 0;
+        OpColor = new ushort[] { 0, 0, 0 };
     }
 }
 
@@ -927,86 +1231,87 @@ public class Mp4Writer : BaseMediaWriter
 
     public void WriteMoovBox(TimeSpan duration, uint timeScale, int trackId, int sampleCount, int[] sampleSizes, TimeSpan[] sampleTimestamps)
     {
-        //// Create "moov" box
-        //MoovBox moovBox = new MoovBox(this);
-        //WriteBox("moov", moovBox.Data);
+        // Create the moov box
+        MoovBox moovBox = new MoovBox(this);
 
-        //// Create "mvhd" box
-        //MvhdBox mvhdBox = new MvhdBox(this, duration, timeScale);
-        //WriteBox("mvhd", mvhdBox.Data);
+        // Create the mvhd box
+        MvhdBox mvhdBox = new MvhdBox(this, (uint)duration.Ticks, timeScale, 3, 4, null, null, 5);
+        moovBox.AddChildBox(mvhdBox);
 
-        //// Create "trak" box
-        //TrakBox trakBox = new TrakBox(this);
-        //WriteBox("trak", trakBox.Data);
+        var hdlrBox = new HdlrBox(this, 0);
 
-        //// Create "tkhd" box
-        //TkhdBox tkhdBox = new TkhdBox(this, trackId, duration, timeScale);
-        //WriteBox("tkhd", tkhdBox.Data);
+        var minfBox = new MinfBox(this);
 
-        //// Create "mdia" box
-        //MdiaBox mdiaBox = new MdiaBox(this);
-        //WriteBox("mdia", mdiaBox.Data);
+        MdhdBox mdhdBox = new MdhdBox(this, 0, 1, 2, 3, "", 5);
 
-        //// Create "mdhd" box
-        //MdhdBox mdhdBox = new MdhdBox(this, duration, timeScale);
-        //WriteBox("mdhd", mdhdBox.Data);
+        // Create the trak box
+        TrakBox trakBox = new TrakBox(this, new MdiaBox(this, mdhdBox, hdlrBox, minfBox));
+        moovBox.AddChildBox(trakBox);
 
-        //// Create "hdlr" box
-        //HdlrBox hdlrBox = new HdlrBox(this, "vide");
-        //WriteBox("hdlr", hdlrBox.Data);
+        // Create the tkhd box
+        TkhdBox tkhdBox = new TkhdBox(this, 1, 0);
+        trakBox.AddChildBox(tkhdBox);
 
-        //// Create "minf" box
-        //MinfBox minfBox = new MinfBox(this);
-        //WriteBox("minf", minfBox.Data);
+        // Create the mdia box        
+        MdiaBox mdiaBox = new MdiaBox(this, mdhdBox, new HdlrBox(this, 0), minfBox);
+        trakBox.AddChildBox(mdiaBox);
 
-        //// Create "vmhd" box
-        //VmhdBox vmhdBox = new VmhdBox(this);
-        //WriteBox("vmhd", vmhdBox.Data);
+        // Create the vmhd box
+        VmhdBox vmhdBox = new VmhdBox(this);
+        mdiaBox.MinfBox.AddChildBox(vmhdBox);
 
-        //// Create "dinf" box
-        //DinfBox dinfBox = new DinfBox(this);
-        //WriteBox("dinf", dinfBox.Data);
+        // Create the dinf box
+        DinfBox dinfBox = new DinfBox(this);
+        mdiaBox.MinfBox.AddChildBox(dinfBox);
 
-        //// Create "stbl" box
-        //StblBox stblBox = new StblBox(this);
-        //WriteBox("stbl", stblBox.Data);
+        // Create the dref box
+        DrefBox drefBox = new DrefBox(this);
+        dinfBox.AddChildBox(drefBox);
 
-        //// Create "stsd" box
-        //StsdBox stsdBox = new StsdBox(this);
-        //WriteBox("stsd", stsdBox.Data);
+        // Create the url box
+        DataEntryUrlBox urlBox = new DataEntryUrlBox(this, "");
+        drefBox.AddChildBox(urlBox);
 
-        //// Create "avc1" box
-        //Avc1Box avc1Box = new Avc1Box(this);
-        //WriteBox("avc1", avc1Box.Data);
+        // Create the stbl box
+        StblBox stblBox = new StblBox(this);
+        mdiaBox.MinfBox.AddChildBox(stblBox);
 
-        //// Create "avcC" box
-        //AvcCBox avcCBox = new AvcCBox(this);
-        //WriteBox("avcC", avcCBox.Data);
+        // Create the stsd box
+        StsdBox stsdBox = new StsdBox(this);
+        stblBox.AddChildBox(stsdBox);
 
-        //// Create "stts" box
-        //SttsBox sttsBox = new SttsBox(this, sampleCount, sampleTimestamps);
-        //WriteBox("stts", sttsBox.Data);
+        // Create the avc1 box
+        Avc1Box avc1Box = new Avc1Box(this, new byte[0]); // Replace with actual avcC data
+        stsdBox.AddSampleEntry(avc1Box);
 
-        //// Create "stsz" box
-        //StszBox stszBox = new StszBox(this, sampleSizes);
-        //WriteBox("stsz", stszBox.Data);
+        // Create the stts box
+        SttsBox sttsBox = new SttsBox(this);
+        foreach (TimeSpan timestamp in sampleTimestamps)
+        {
+            sttsBox.AddTimeToSampleEntry(1, (int)timestamp.TotalMilliseconds * (int)timeScale / 1000);
+        }
+        stblBox.AddChildBox(sttsBox);
 
-        //// Create "stco" box
-        //StcoBox stcoBox = new StcoBox(this, sampleCount, sampleSizes);
-        //WriteBox("stco", stcoBox.Data);
+        // Create the stsz box
+        StszBox stszBox = new StszBox(this);
+        foreach (int size in sampleSizes)
+        {
+            stszBox.AddSampleSize(size);
+        }
+        stblBox.AddChildBox(stszBox);
 
-        //// Update "mdhd" duration with total duration
-        //mdhdBox.Duration = duration;
+        // Create the stco box
+        StcoBox stcoBox = new StcoBox(this);
+        uint offset = 0;
+        foreach (int size in sampleSizes)
+        {
+            stcoBox.AddChunkOffset(offset);
+            offset += (uint)size;
+        }
+        stblBox.AddChildBox(stcoBox);
 
-        //// Update "minf" and "mdia" boxes' size with total size
-        //minfBox.UpdateSize();
-        //mdiaBox.UpdateSize();
-
-        //// Update "trak" box's size with total size
-        //trakBox.UpdateSize();
-
-        //// Update "moov" box's size with total size
-        //moovBox.UpdateSize();
+        // Write the moov box to the file
+        AddBox(moovBox);
     }
 
     public void WriteMoofBox(uint sequenceNumber, int trackId, TimeSpan baseMediaDecodeTime, int[] sampleSizes, uint[] sampleFlags)

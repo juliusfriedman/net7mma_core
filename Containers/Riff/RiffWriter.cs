@@ -1,10 +1,10 @@
 ﻿using Media.Common;
+using Media.Common.Extensions.Linq;
 using Media.Container;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using static Media.Containers.Riff.RiffReader;
 
 namespace Media.Containers.Riff;
 
@@ -50,6 +50,16 @@ public class Chunk : Node
     {
         Master.WriteAt(Offset, Identifier, RiffReader.IdentifierSize, RiffReader.IdentifierSize);
     }
+
+    public IEnumerable<byte> Prepare()
+    {
+        var result = Identifier.Concat(Data);
+
+        if ((DataSize & 1) == 1)
+            result.Concat(((byte)0).Yield());
+
+        return result;
+    }
 }
 
 public class DataChunk : Chunk
@@ -76,10 +86,13 @@ public class HeaderChunk : Chunk
 
 public class ListChunk : HeaderChunk
 {
-    public ListChunk(RiffWriter writer, FourCharacterCode subType, int dataSize) : base(writer, FourCharacterCode.LIST, subType, dataSize)
+    public ListChunk(RiffWriter writer, FourCharacterCode subType, int dataSize) 
+        : base(writer, FourCharacterCode.LIST, subType, dataSize)
     {
     }
-    public ListChunk(RiffWriter writer, FourCharacterCode subType, byte[] data) : base(writer, FourCharacterCode.LIST, subType, data)
+
+    public ListChunk(RiffWriter writer, FourCharacterCode subType, byte[] data) 
+        : base(writer, FourCharacterCode.LIST, subType, data)
     {
     }
 
@@ -87,7 +100,6 @@ public class ListChunk : HeaderChunk
     {
         if (chunk == null)
             return;
-
         Data = Data.Concat(chunk.Identifier).Concat(chunk.Data).ToArray();
     }
 }
@@ -238,6 +250,7 @@ public enum AviMainHeaderFlags
 
 public class AviStreamHeader : Chunk
 {
+    public const int Size = 56;
     public FourCharacterCode StreamType
     {
         get => (FourCharacterCode)Binary.Read32(Data, 0, Binary.IsBigEndian);
@@ -317,7 +330,7 @@ public class AviStreamHeader : Chunk
     }
 
     public AviStreamHeader(RiffWriter writer)
-        : base(writer, FourCharacterCode.avih, 56)
+        : base(writer, FourCharacterCode.avih, Size)
     {
     }
 }
@@ -365,8 +378,8 @@ public class RiffWriter : MediaFileWriter
 
     public override void Close()
     {
-        Seek(IdentifierSize, SeekOrigin.Begin);
-        WriteInt32LittleEndian((int)Length - IdentifierSize);
+        Seek(RiffReader.IdentifierSize, SeekOrigin.Begin);
+        WriteInt32LittleEndian((int)Length - RiffReader.IdentifierSize);
 
         //Foreach Chunk ensure Length was set and write it?
 
@@ -503,8 +516,8 @@ public class UnitTests
     {
         double amplitude = 0.3; // Adjust the amplitude to control the volume
         int sampleRate = 44100;
-        int durationMs = 500;
-        int numSamples = (durationMs * sampleRate) / 1000;
+        int durationMs = 5000;
+        int numSamples = durationMs * sampleRate / 1000;
 
         // The musical notes of the song (D, D, E, D, F, E)
         double[] frequencies = { 293.66, 293.66, 329.63, 293.66, 349.23, 329.63 };

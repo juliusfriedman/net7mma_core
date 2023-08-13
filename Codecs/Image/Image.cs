@@ -164,14 +164,13 @@ namespace Media.Codecs.Image
             byte[] fileHeader = new byte[14]
             {
                 0x42, 0x4D,                       // "BM" - BMP file identifier
-                (byte)(fileSize & 0xFF),          // File size (low byte)
-                (byte)((fileSize >> 8) & 0xFF),   // File size
-                (byte)((fileSize >> 16) & 0xFF),  // File size
-                (byte)((fileSize >> 24) & 0xFF),  // File size (high byte)
+                0, 0, 0, 0,                       // FileSize
                 0x00, 0x00,                       // Reserved
                 0x00, 0x00,                       // Reserved
                 0x36, 0x00, 0x00, 0x00            // Offset of the image data (54 bytes)
             };
+
+            Common.Binary.Write32(fileHeader, 2, Binary.IsBigEndian, fileSize);
 
             // Write the BMP file header to the stream
             stream.Write(fileHeader, 0, fileHeader.Length);
@@ -513,12 +512,12 @@ namespace Media.UnitTests
                         }
                     }
 
-                    using (var outputBmpStream = new System.IO.FileStream(Path.Combine(currentPath, "Media", "BmpTest", "output", $"rgb_{dataLayout}.bmp"), FileMode.OpenOrCreate))
+                    using (var outputBmpStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"rgb_{dataLayout}.bmp"), FileMode.OpenOrCreate))
                     {
                         image.SaveBitmap(outputBmpStream);
                     }
 
-                    using (var inputBmp = Codecs.Image.Image.FromStream(new System.IO.FileStream(Path.Combine(currentPath, "Media", "BmpTest", "output", $"rgb_{dataLayout}.bmp"), FileMode.OpenOrCreate)))
+                    using (var inputBmp = Codecs.Image.Image.FromStream(new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"rgb_{dataLayout}.bmp"), FileMode.OpenOrCreate)))
                     {
                         if (inputBmp.Width != 696) throw new Exception();
 
@@ -548,7 +547,7 @@ namespace Media.UnitTests
                         }
                     }
 
-                    using (var outputBmpStream = new System.IO.FileStream(Path.Combine(currentPath, "Media", "BmpTest", "output", $"BGR_Vector_{dataLayout}.bmp"), FileMode.OpenOrCreate))
+                    using (var outputBmpStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"BGR_Vector_{dataLayout}.bmp"), FileMode.OpenOrCreate))
                     {
                         image.SaveBitmap(outputBmpStream);
                     }
@@ -572,7 +571,7 @@ namespace Media.UnitTests
                     }
                 }
 
-                using (var outputBmpStream = new System.IO.FileStream(Path.Combine(currentPath, "Media", "BmpTest", "output", "rgb24_packed_line2.bmp"), FileMode.OpenOrCreate))
+                using (var outputBmpStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, "rgb24_packed_line2.bmp"), FileMode.OpenOrCreate))
                 {
                     image.SaveBitmap(outputBmpStream);
                 }
@@ -595,7 +594,7 @@ namespace Media.UnitTests
                     }
                 }
 
-                using (var outputBmpStream = new System.IO.FileStream(Path.Combine(currentPath, "Media", "BmpTest", "output", "rgb24_packed_line3.bmp"), FileMode.OpenOrCreate))
+                using (var outputBmpStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, "rgb24_packed_line3.bmp"), FileMode.OpenOrCreate))
                 {
                     image.SaveBitmap(outputBmpStream);
                 }
@@ -620,6 +619,12 @@ namespace Media.UnitTests
 
             var outputColor = new FileStream(Path.Combine(currentPath, "Media", "BmpTest", "output", "lena_color_save.bmp"), FileMode.OpenOrCreate, FileAccess.Write);
             colorImage.SaveBitmap(outputColor);
+
+            var newImage = new Codecs.Image.Image(Codecs.Image.ImageFormat.RGB(8), grayImage.Width, grayImage.Height);
+            grayImage.Data.CopyTo(newImage.Data);
+
+            var outputNew = new FileStream(Path.Combine(currentPath, "Media", "BmpTest", "output", "lena_gray_new_save.bmp"), FileMode.OpenOrCreate, FileAccess.Write);
+            newImage.SaveBitmap(outputNew);
         }
 
         public void Test_CalculateComponentDataOffset_PlanarLayout()
