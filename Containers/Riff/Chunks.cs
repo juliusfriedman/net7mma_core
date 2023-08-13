@@ -99,7 +99,9 @@ public class ListChunk : HeaderChunk
     {
         if (chunk == null)
             return;
-        Data = Data.Concat(chunk.Prepare()).ToArray();
+        var data = Data;
+        Data = new(Data.Concat(chunk.Prepare()).ToArray());
+        data.Dispose();
     }
 }
 
@@ -108,37 +110,37 @@ public class FmtChunk : Chunk
     public ushort AudioFormat
     {
         get => Binary.ReadU16(Data, 0, Binary.IsBigEndian);
-        set => Binary.Write16(Data, 0, Binary.IsBigEndian, value);
+        set => Binary.Write16(Data.Array, 0, Binary.IsBigEndian, value);
     }
 
     public ushort NumChannels
     {
         get => Binary.ReadU16(Data, 2, Binary.IsBigEndian);
-        set => Binary.Write16(Data, 2, Binary.IsBigEndian, value);
+        set => Binary.Write16(Data.Array, 2, Binary.IsBigEndian, value);
     }
 
     public uint SampleRate
     {
         get => Binary.ReadU32(Data, 4, Binary.IsBigEndian);
-        set => Binary.Write32(Data, 4, Binary.IsBigEndian, value);
+        set => Binary.Write32(Data.Array, 4, Binary.IsBigEndian, value);
     }
 
     public uint ByteRate
     {
         get => Binary.ReadU32(Data, 8, Binary.IsBigEndian);
-        set => Binary.Write32(Data, 8, Binary.IsBigEndian, value);
+        set => Binary.Write32(Data.Array, 8, Binary.IsBigEndian, value);
     }
 
     public ushort BlockAlign
     {
         get => Binary.ReadU16(Data, 12, Binary.IsBigEndian);
-        set => Binary.Write16(Data, 12, Binary.IsBigEndian, value);
+        set => Binary.Write16(Data.Array, 12, Binary.IsBigEndian, value);
     }
 
     public ushort BitsPerSample
     {
         get => Binary.ReadU16(Data, 14, Binary.IsBigEndian);
-        set => Binary.Write16(Data, 14, Binary.IsBigEndian, value);
+        set => Binary.Write16(Data.Array, 14, Binary.IsBigEndian, value);
     }
 
     public FmtChunk(RiffWriter writer, ushort audioFormat, ushort numChannels, uint sampleRate, ushort bitsPerSample)
@@ -257,79 +259,79 @@ public class AviStreamHeader : Chunk
     public FourCharacterCode StreamType
     {
         get => (FourCharacterCode)Binary.Read32(Data, 0, Binary.IsBigEndian);
-        set => Binary.Write32(Data, 0, Binary.IsBigEndian, (int)value);
+        set => Binary.Write32(Data.Array, 0, Binary.IsBigEndian, (int)value);
     }
 
     public FourCharacterCode HandlerType
     {
         get => (FourCharacterCode)Binary.Read32(Data, 4, Binary.IsBigEndian);
-        set => Binary.Write32(Data, 4, Binary.IsBigEndian, (int)value);
+        set => Binary.Write32(Data.Array, 4, Binary.IsBigEndian, (int)value);
     }
 
     public int SampleRate
     {
         get => Binary.Read32(Data, 8, Binary.IsBigEndian);
-        set => Binary.Write32(Data, 8, Binary.IsBigEndian, value);
+        set => Binary.Write32(Data.Array, 8, Binary.IsBigEndian, value);
     }
 
     public int Start
     {
         get => Binary.Read32(Data, 12, Binary.IsBigEndian);
-        set => Binary.Write32(Data, 12, Binary.IsBigEndian, value);
+        set => Binary.Write32(Data.Array, 12, Binary.IsBigEndian, value);
     }
 
     public int SampleLength
     {
         get => Binary.Read32(Data, 16, Binary.IsBigEndian);
-        set => Binary.Write32(Data, 16, Binary.IsBigEndian, value);
+        set => Binary.Write32(Data.Array, 16, Binary.IsBigEndian, value);
     }
 
     public int SuggestedBufferSize
     {
         get => Binary.Read32(Data, 20, Binary.IsBigEndian);
-        set => Binary.Write32(Data, 20, Binary.IsBigEndian, value);
+        set => Binary.Write32(Data.Array, 20, Binary.IsBigEndian, value);
     }
 
     public int Quality
     {
         get => Binary.Read32(Data, 24, Binary.IsBigEndian);
-        set => Binary.Write32(Data, 24, Binary.IsBigEndian, value);
+        set => Binary.Write32(Data.Array, 24, Binary.IsBigEndian, value);
     }
 
     public int SampleSize
     {
         get => Binary.Read32(Data, 28, Binary.IsBigEndian);
-        set => Binary.Write32(Data, 28, Binary.IsBigEndian, value);
+        set => Binary.Write32(Data.Array, 28, Binary.IsBigEndian, value);
     }
 
     public int FrameRate
     {
         get => Binary.Read32(Data, 32, Binary.IsBigEndian);
-        set => Binary.Write32(Data, 32, Binary.IsBigEndian, value);
+        set => Binary.Write32(Data.Array, 32, Binary.IsBigEndian, value);
     }
 
     public int Scale
     {
         get => Binary.Read32(Data, 36, Binary.IsBigEndian);
-        set => Binary.Write32(Data, 36, Binary.IsBigEndian, value);
+        set => Binary.Write32(Data.Array, 36, Binary.IsBigEndian, value);
     }
 
     public int Rate
     {
         get => Binary.Read32(Data, 40, Binary.IsBigEndian);
-        set => Binary.Write32(Data, 40, Binary.IsBigEndian, value);
+        set => Binary.Write32(Data.Array, 40, Binary.IsBigEndian, value);
     }
 
     public int StartInitialFrames
     {
         get => Binary.Read32(Data, 44, Binary.IsBigEndian);
-        set => Binary.Write32(Data, 44, Binary.IsBigEndian, value);
+        set => Binary.Write32(Data.Array, 44, Binary.IsBigEndian, value);
     }
 
     public int ExtraDataSize
     {
         get => Binary.Read32(Data, 48, Binary.IsBigEndian);
-        set => Binary.Write32(Data, 48, Binary.IsBigEndian, value);
+        set => Binary.Write32(Data.Array, 48, Binary.IsBigEndian, value);
     }
 
     public AviStreamHeader(RiffWriter writer)

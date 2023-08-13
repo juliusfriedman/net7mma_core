@@ -786,15 +786,15 @@ namespace Media.Codecs.Flac
                     
                     m_MaxFrameSize = (int)Common.Binary.ReadU24(node.Data, 7, BitConverter.IsLittleEndian);
 
-                    m_SampleRate = (int)Common.Binary.ReadUInt64MSB(node.Data, 10, 20, 0); //e.g. Common.Binary.ReadBitsMSB(node.Data, Common.Binary.BytesToBits(10), 20)
+                    m_SampleRate = (int)Common.Binary.ReadUInt64MSB(node.Data.Array, 10, 20, 0); //e.g. Common.Binary.ReadBitsMSB(node.Data, Common.Binary.BytesToBits(10), 20)
 
-                    m_Channels = 1 + (int)Common.Binary.ReadUInt64MSB(node.Data, 12, 3, 4); 
+                    m_Channels = 1 + (int)Common.Binary.ReadUInt64MSB(node.Data.Array, 12, 3, 4); 
 
-                    m_BitsPerSample = 1 + (int)Common.Binary.ReadUInt64MSB(node.Data, 12, 5, 7);
+                    m_BitsPerSample = 1 + (int)Common.Binary.ReadUInt64MSB(node.Data.Array, 12, 5, 7);
 
-                    m_TotalSamples = Common.Binary.ReadUInt64MSB(node.Data, 13, 36, 4);
+                    m_TotalSamples = Common.Binary.ReadUInt64MSB(node.Data.Array, 13, 36, 4);
 
-                    m_Md5 = new string(Encoding.ASCII.GetChars(node.Data, 8, 16));
+                    m_Md5 = new string(Encoding.ASCII.GetChars(node.Data.Array, 8, 16));
                 }
             }
         }
@@ -844,7 +844,7 @@ namespace Media.Codecs.Flac
                         if (itemLength < 0 || itemLength + offset > node.DataSize) continue;
 
                         //Get the string
-                        string item = System.Text.Encoding.UTF8.GetString(node.Data, offset, itemLength);
+                        string item = System.Text.Encoding.UTF8.GetString(node.Data.Array, offset, itemLength);
 
                         //Split it
                         string[] parts = item.Split((char)Common.ASCII.EqualsSign);

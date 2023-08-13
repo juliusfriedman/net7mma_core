@@ -1085,7 +1085,7 @@ namespace Media.Containers.Ogg
                 if (m_InfoPages.TryGetValue(serialNumber, out infoPages)) foreach (var infoPage in infoPages)
                 {
                     //Check for vorbis style comments
-                    string vorbis = System.Text.Encoding.UTF8.GetString(infoPage.Data, 1, 6);
+                    string vorbis = System.Text.Encoding.UTF8.GetString(infoPage.Data.Array, 1, 6);
 
                     if (string.Compare(vorbis, "vorbis", false) != 0) continue;
 
@@ -1124,7 +1124,7 @@ namespace Media.Containers.Ogg
                                 if (itemLength < 0 || itemLength + offset > infoPage.DataSize) continue;
 
                                 //Get the string
-                                string item = System.Text.Encoding.UTF8.GetString(infoPage.Data, offset, itemLength);
+                                string item = System.Text.Encoding.UTF8.GetString(infoPage.Data.Array, offset, itemLength);
 
                                 //Split it
                                 string[] parts = item.Split((char)Common.ASCII.EqualsSign);

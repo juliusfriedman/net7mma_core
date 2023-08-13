@@ -25,7 +25,7 @@ public abstract class MediaFileWriter : MediaFileStream
     public void Write(Node node)
     {
         Write(node.Identifier);
-        Write(node.Data);
+        Write(node.Data.Array, node.Data.Offset, node.Data.Count);
     }
 
     #region Big Endian

@@ -62,7 +62,7 @@ public class BaseMediaWriter : MediaFileWriter
         Tracks.Add(track);
 
         //Some data in the track... needs to be written
-        track.Header.Data = new byte[track.DataStream.Length];
+        track.Header.Data = new(new byte[track.DataStream.Length]);
 
         //Copy any dataStream in the track to the dataStream in the header.
         track.DataStream.CopyTo(track.Header.DataStream);

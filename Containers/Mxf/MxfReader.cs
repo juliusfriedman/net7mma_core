@@ -1061,12 +1061,12 @@ namespace Media.Containers.Mxf
                     {
                         case 0x3c01:
                             {
-                                m_CompanyName = Encoding.BigEndianUnicode.GetString(identification.Data, offset, tagLen);
+                                m_CompanyName = Encoding.BigEndianUnicode.GetString(identification.Data.Array, offset, tagLen);
                                 goto default;
                             }
                         case 0x3c02:
                             {
-                                m_ProductName = Encoding.BigEndianUnicode.GetString(identification.Data, offset, tagLen);
+                                m_ProductName = Encoding.BigEndianUnicode.GetString(identification.Data.Array, offset, tagLen);
                                 goto default;
                             }
                         //case 0x3c03:
@@ -1085,7 +1085,7 @@ namespace Media.Containers.Mxf
                         //    }
                         case 0x3c04:
                             {
-                                m_ProductVersion = Encoding.BigEndianUnicode.GetString(identification.Data, offset, tagLen);
+                                m_ProductVersion = Encoding.BigEndianUnicode.GetString(identification.Data.Array, offset, tagLen);
                                 goto default;
                             }
                         case 0x3c05:
@@ -1107,7 +1107,7 @@ namespace Media.Containers.Mxf
                             }
                         case 0x3c08:
                             {
-                                m_Platform = Encoding.BigEndianUnicode.GetString(identification.Data, offset, tagLen);
+                                m_Platform = Encoding.BigEndianUnicode.GetString(identification.Data.Array, offset, tagLen);
                                 goto default;
                             }
                         default: offset += tagLen; continue;
@@ -1511,7 +1511,7 @@ namespace Media.Containers.Mxf
                             case 0x4802: //Track Name
                                 {
                                     //TrackName
-                                    trackName = Encoding.BigEndianUnicode.GetString(descriptor.Data, offset, tagLen);
+                                    trackName = Encoding.BigEndianUnicode.GetString(descriptor.Data.Array, offset, tagLen);
                                     goto default;
                                 }
                             case 0x4b01: //Edit Rate (in hertz)

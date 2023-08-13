@@ -455,7 +455,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
                 TimeSpan time = TimeSpan.Zero;
 
                 //parts of the date in string form
-                var parts = Encoding.UTF8.GetString(iditChunk.Data).Split((char)Common.ASCII.Space);
+                var parts = Encoding.UTF8.GetString(iditChunk.Data.Array).Split((char)Common.ASCII.Space);
 
                 //cache the split length
                 int partsLength = parts.Length;
@@ -1057,7 +1057,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
                 using (var strn = ReadChunk(FourCharacterCode.strn, strhChunk.Offset))
                 {
-                    if (strn != null) trackName = Encoding.UTF8.GetString(strn.Data, 8, (int)(strn.DataSize - 8));
+                    if (strn != null) trackName = Encoding.UTF8.GetString(strn.Data.Array, 8, (int)(strn.DataSize - 8));
 
                     //Variable BitRate must also take into account the size of each chunk / nBlockAlign * duration per frame.
 

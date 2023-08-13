@@ -533,7 +533,7 @@ namespace Media.Containers.Asf
                     if (remaining > 0 && len > 0)
                     {
                         len = Media.Common.Extensions.Math.MathExtensions.Clamp(len, 0, remaining);
-                        m_Title = Encoding.ASCII.GetString(contentDescription.Data, offset, len);
+                        m_Title = Encoding.ASCII.GetString(contentDescription.Data.Array, offset, len);
                         offset += len;
                         remaining -= len;
                     }
@@ -550,7 +550,7 @@ namespace Media.Containers.Asf
                     if (remaining > 0 && len > 0)
                     {
                         len = Media.Common.Extensions.Math.MathExtensions.Clamp(len, 0, (int)(contentDescription.DataSize - offset));
-                        m_Author = Encoding.ASCII.GetString(contentDescription.Data, offset, len);
+                        m_Author = Encoding.ASCII.GetString(contentDescription.Data.Array, offset, len);
                         offset += len;
                         remaining -= len;
                     }
@@ -567,7 +567,7 @@ namespace Media.Containers.Asf
                     if (remaining > 0 && len > 0)
                     {
                         len = Media.Common.Extensions.Math.MathExtensions.Clamp(len, 0, (int)(contentDescription.DataSize - offset));
-                        m_Copyright = Encoding.ASCII.GetString(contentDescription.Data, offset, len);
+                        m_Copyright = Encoding.ASCII.GetString(contentDescription.Data.Array, offset, len);
                         offset += len;
                         remaining -= len;
                     }
@@ -584,7 +584,7 @@ namespace Media.Containers.Asf
                     if (len > 0)
                     {
                         len = Media.Common.Extensions.Math.MathExtensions.Clamp(len, 0, (int)(contentDescription.DataSize - offset));
-                        m_Comment = Encoding.ASCII.GetString(contentDescription.Data, offset, len);
+                        m_Comment = Encoding.ASCII.GetString(contentDescription.Data.Array, offset, len);
                         offset += len;
                         offset += len;
                         remaining -= len;
@@ -602,7 +602,7 @@ namespace Media.Containers.Asf
                     if (remaining > 0 && len > 0)
                     {
                         len = Media.Common.Extensions.Math.MathExtensions.Clamp(len, 0, (int)(contentDescription.DataSize - offset));
-                        m_Rating = Encoding.ASCII.GetString(contentDescription.Data, offset, len);
+                        m_Rating = Encoding.ASCII.GetString(contentDescription.Data.Array, offset, len);
                         offset += len;
                     }
                     else m_Rating = string.Empty;
@@ -649,7 +649,7 @@ namespace Media.Containers.Asf
                 int offset = 0;
 
                 //Would keep as GUID but can't switch on the Guid
-                string mediaTypeName = ToTextualConvention(asfObject.Data, offset);//, noCorrection;
+                string mediaTypeName = ToTextualConvention(asfObject.Data.Array, offset);//, noCorrection;
 
                 offset += IdentifierSize * 2;
 

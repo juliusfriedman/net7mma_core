@@ -102,11 +102,11 @@ namespace Media.Containers.Mpeg
 
         #region AdaptationField
 
-        public static TransportStreamUnit.AdaptationField.AdaptationFieldFlags GetAdaptationFieldFlags(TransportStreamReader reader, Media.Container.Node tsUnit) { return (TransportStreamUnit.AdaptationField.AdaptationFieldFlags)TransportStreamUnit.AdaptationField.GetAdaptationFieldData(tsUnit.Identifier, reader.UnitOverhead, tsUnit.Data, 0).FirstOrDefault(); }
+        public static TransportStreamUnit.AdaptationField.AdaptationFieldFlags GetAdaptationFieldFlags(TransportStreamReader reader, Media.Container.Node tsUnit) { return (TransportStreamUnit.AdaptationField.AdaptationFieldFlags)TransportStreamUnit.AdaptationField.GetAdaptationFieldData(tsUnit.Identifier, reader.UnitOverhead, tsUnit.Data.Array, 0).FirstOrDefault(); }
 
         public static byte[] GetAdaptationFieldData(TransportStreamReader reader, Container.Node tsUnit)
         {
-            return TransportStreamUnit.AdaptationField.GetAdaptationFieldData(tsUnit.Identifier, reader.UnitOverhead, tsUnit.Data, 0);
+            return TransportStreamUnit.AdaptationField.GetAdaptationFieldData(tsUnit.Identifier, reader.UnitOverhead, tsUnit.Data.Array, 0);
         }
 
         #endregion
@@ -406,7 +406,7 @@ namespace Media.Containers.Mpeg
                 //3 bits reserved
 
                 //2 Bytes ProgramID
-                TransportStreamUnit.PacketIdentifier pid = TransportStreamUnit.GetPacketIdentifier(node.Data, offset + 2);
+                TransportStreamUnit.PacketIdentifier pid = TransportStreamUnit.GetPacketIdentifier(node.Data.Array, offset + 2);
 
                 //Add or update the entry
                 m_ProgramAssociations.AddOrUpdate(programNumber, pid, (id, old) => pid);

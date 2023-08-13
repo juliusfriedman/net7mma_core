@@ -37,6 +37,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #endregion
 
 #region Using Statements
+using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,7 +86,7 @@ namespace Media.Container
 
             if (false == to.DataAssigned || to.DataSize < from.DataSize) return false;
 
-            from.m_Data.CopyTo(to.m_Data, offset);
+            from.m_Data.CopyTo(to.m_Data.Array, offset);
 
             return true;
         }
@@ -194,31 +195,40 @@ namespace Media.Container
         /// </summary>
         public long DataSize;
 
-        protected byte[] m_Data;
+        protected MemorySegment m_Data;
 
         /// <summary>
         /// The binary data of the contained in the Node (without (<see cref="Identifier"/> and (<see cref="LengthSize"/>))
         /// </summary>
-        public byte[] Data
+        public MemorySegment Data
         {
             get
             {
                 if (DataAssigned) return m_Data;
-                else if (IsDisposed || DataSize <= 0 || Master.BaseStream == null) return Media.Common.MemorySegment.EmptyBytes;
+                else if (IsDisposed || DataSize <= 0 || Master.BaseStream == null) return Media.Common.MemorySegment.Empty;
 
                 //If data is larger then a certain amount then it may just make sense to return the data itself?
-                m_Data = new byte[DataSize];
+                m_Data = new(new byte[DataSize]);
 
                 if (DataOffset >= 0)
-                    Master.ReadAt(DataOffset, m_Data, 0, (int)DataSize);
+                    Master.ReadAt(DataOffset, m_Data.Array, 0, (int)DataSize);
 
                 return m_Data;
             }
             set
             {
                 m_Data = value;
-                DataSize = value.Length;
+                DataSize = value.Count;
             }
+        }
+
+        /// <summary>
+        /// Facade over <see cref="Data"/> but does not set length when set.
+        /// </summary>
+        public MemorySegment DataSegment
+        {
+            get => new MemorySegment(Data);
+            set => m_Data = value;
         }
 
         /// <summary>
@@ -235,7 +245,7 @@ namespace Media.Container
             {
                 //Should not require the nodes data being read first. 
                 //May need to create a new stream with a fixed length
-                return new System.IO.MemoryStream(Data);
+                return new System.IO.MemoryStream(Data.Array);
             }
         }
 
@@ -255,7 +265,7 @@ namespace Media.Container
             IdentifierSize = identifier.Length;
             LengthSize = lengthSize;
             DataSize = data.Length;
-            m_Data = data;
+            m_Data = new(data);
             IsComplete = true;
         }
 
@@ -330,9 +340,9 @@ namespace Media.Container
                 if (selfReference) m_Data = n.m_Data;
                 else
                 {
-                    m_Data = new byte[DataSize];
+                    m_Data = new(new byte[DataSize]);
 
-                    System.Array.Copy(n.m_Data, offset, m_Data, offset, DataSize - offset);
+                    System.Array.Copy(n.m_Data.Array, offset, m_Data.Array, offset, DataSize - offset);
                 }
             }
         }
@@ -346,7 +356,7 @@ namespace Media.Container
             Master.WriteAt(DataOffset, Identifier, 0, Identifier.Length);
 
             if (DataAssigned)
-                Master.WriteAt(DataOffset + Identifier.Length, m_Data, 0, m_Data.Length);
+                Master.WriteAt(DataOffset + Identifier.Length, m_Data.Array, m_Data.Offset, m_Data.Count);
         }
 
         /// <summary>
@@ -356,7 +366,7 @@ namespace Media.Container
         {
             if (!IsDisposed && DataSize > 0 && m_Data != null && DataOffset >= 0)
             {
-                Master.WriteAt(DataOffset, m_Data, 0, (int)DataSize);
+                Master.WriteAt(DataOffset, m_Data.Array, m_Data.Offset, (int)DataSize);
                 return;
             }
         }
