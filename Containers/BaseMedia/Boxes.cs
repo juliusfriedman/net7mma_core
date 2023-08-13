@@ -19,8 +19,8 @@ public class Mp4Box : Node
 
     public int Length
     {
-        get => Binary.Read32(Identifier, 0, Binary.IsBigEndian);
-        set => Binary.Write32(Identifier, 0, Binary.IsBigEndian, value);
+        get => Binary.Read32(Identifier, 0, Binary.IsLittleEndian);
+        set => Binary.Write32(Identifier, 0, Binary.IsLittleEndian, value);
     }
 
     //Indicates 8 more bytes follow
@@ -31,14 +31,14 @@ public class Mp4Box : Node
 
     public long ExtendedLength
     {
-        get => Binary.Read64(Identifier, 4, Binary.IsBigEndian);
-        set => Binary.Write64(Identifier, 4, Binary.IsBigEndian, value);
+        get => Binary.Read64(Identifier, 4, Binary.IsLittleEndian);
+        set => Binary.Write64(Identifier, 4, Binary.IsLittleEndian, value);
     }
 
     public int AtomCode
     {
-        get => Binary.Read32(Identifier, IsExtendedLength ? 12 : 4, Binary.IsBigEndian);
-        set => Binary.Write32(Identifier, IsExtendedLength ? 12 : 4, Binary.IsBigEndian, value);
+        get => Binary.Read32(Identifier, IsExtendedLength ? 12 : 4, Binary.IsLittleEndian);
+        set => Binary.Write32(Identifier, IsExtendedLength ? 12 : 4, Binary.IsLittleEndian, value);
     }
 
     public string BoxType
@@ -50,17 +50,8 @@ public class Mp4Box : Node
     public Mp4Box(BaseMediaWriter writer, byte[] boxType, long dataSize)
         : base(writer, new byte[dataSize > int.MaxValue ? HeaderSize * 2 : HeaderSize], dataSize > int.MaxValue ? 12 : 4, -1, dataSize, true)
     {
-        if (dataSize > int.MaxValue)
-        {
-            Length = 1;
-            ExtendedLength = dataSize;
-        }
-        else
-        {
-            Length = (int)dataSize;
-        }
-
         boxType.CopyTo(Identifier, IsExtendedLength ? 12 : 4);
+        SetLength();
     }
 
     public void UpdateSize()
@@ -100,7 +91,7 @@ public class Mp4Box : Node
         }
         else
         {
-            Length = (int)DataSize;
+            Length = (int)(IsExtendedLength ? 12 : 8 + DataSize);
         }
     }
 
@@ -121,11 +112,11 @@ public class Mp4Box : Node
 
         while (offset + HeaderSize <= Data.Count)
         {
-            var size = (ulong)Binary.ReadU32(Data, offset, Binary.IsBigEndian);
-            var type = Binary.Read32(Data, offset + 4, Binary.IsBigEndian);
+            var size = (ulong)Binary.ReadU32(Data, ref offset, Binary.IsBigEndian);
+            var type = Binary.Read32(Data, ref offset, Binary.IsBigEndian);
 
             if (size == 1)
-                size = Binary.ReadU64(Data, offset + 8, Binary.IsBigEndian);
+                size = Binary.ReadU64(Data, ref offset, Binary.IsBigEndian);
 
             if (type == box.AtomCode)
                 return true;
@@ -142,11 +133,11 @@ public class Mp4Box : Node
 
         while (offset + HeaderSize <= Data.Count)
         {
-            var size = (ulong)Binary.ReadU32(Data, offset, Binary.IsBigEndian);
-            var type = Binary.Read32(Data, offset + 4, Binary.IsBigEndian);
+            var size = (ulong)Binary.ReadU32(Data, ref offset, Binary.IsBigEndian);
+            var type = Binary.Read32(Data, ref offset, Binary.IsBigEndian);
 
             if (size == 1)
-                size = Binary.ReadU64(Data, offset + 8, Binary.IsBigEndian);
+                size = Binary.ReadU64(Data, ref offset, Binary.IsBigEndian);
 
             yield return new Mp4Box(Master as BaseMediaWriter, Binary.GetBytes(type, Binary.IsBigEndian), (long)size);
 
@@ -245,18 +236,18 @@ public class DinfBox : Mp4Box
     }
 }
 
-public class FtypBox : FullBox
+public class FtypBox : Mp4Box
 {
     public uint MajorBrand
     {
-        get => (uint)Binary.Read32(Data, OffsetToData, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsBigEndian, value);
+        get => (uint)Binary.Read32(Data, 0, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 0, Binary.IsLittleEndian, value);
     }
 
     public uint MinorVersion
     {
-        get => (uint)Binary.Read32(Data, OffsetToData + 4, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData + 4, Binary.IsBigEndian, value);
+        get => (uint)Binary.Read32(Data, 4, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 4, Binary.IsLittleEndian, value);
     }
 
     public IEnumerable<uint> CompatibleBrands
@@ -266,7 +257,7 @@ public class FtypBox : FullBox
             var offset = 8;
             while (offset < DataSize)
             {
-                yield return (uint)Binary.Read32(Data, offset, Binary.IsBigEndian);
+                yield return (uint)Binary.Read32(Data, ref offset, Binary.IsLittleEndian);
             }
         }
         set
@@ -274,15 +265,14 @@ public class FtypBox : FullBox
             int offset = 8;
             foreach (var brand in value)
             {
-                Binary.Write32(Data.Array, ref offset, Binary.IsBigEndian, brand);
+                Binary.Write32(Data.Array, ref offset, Binary.IsLittleEndian, brand);
             }
         }
     }
 
     public FtypBox(BaseMediaWriter writer, uint majorBrand, uint minorVersion, params uint[] compatibleBrands)
-        : base(writer, Encoding.UTF8.GetBytes("ftyp"), 0, 0, OffsetToData + 8 + compatibleBrands.Length * Binary.BytesPerInteger)
+        : base(writer, Encoding.UTF8.GetBytes("ftyp"), 8 + compatibleBrands.Length * Binary.BytesPerInteger)
     {
-        //Data = new(new byte[DataSize]);
         MajorBrand = majorBrand;
         MinorVersion = minorVersion;
         CompatibleBrands = compatibleBrands;
@@ -557,6 +547,10 @@ public class MdiaBox : FullBox
         MdhdBox = mdhdBox;
         HdlrBox = hdlrBox;
         MinfBox = minfBox;
+
+        AddChildBox(MdhdBox);
+        AddChildBox(HdlrBox);
+        AddChildBox(MinfBox);
     }
 }
 
@@ -568,6 +562,7 @@ public class TrakBox : FullBox
         : base(writer, Encoding.ASCII.GetBytes("trak"), 0, 0)
     {
         MdiaBox = mdiaBox;
+        AddChildBox(MdiaBox);
     }
 }
 

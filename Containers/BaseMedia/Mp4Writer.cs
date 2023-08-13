@@ -14,8 +14,6 @@ namespace Media.Containers.BaseMedia
         public Mp4Writer(Uri fileName)
             : base(fileName)
         {
-            // Write the "ftyp" box
-            WriteFtypBox();
         }
 
         public void WriteBox(string boxType, byte[] data)
@@ -34,7 +32,7 @@ namespace Media.Containers.BaseMedia
             uint minorVersion = 0;
             uint[] compatibleBrands = new uint[] { 0x69736F6D, 0x61766331 }; // "isom", "avc1"
             FtypBox ftypBox = new FtypBox(this, majorBrand, minorVersion, compatibleBrands);
-            Write(ftypBox);
+            AddBox(ftypBox);
         }
 
         public void WriteMoovBox(TimeSpan duration, uint timeScale, int trackId, int sampleCount, int[] sampleSizes, TimeSpan[] sampleTimestamps)
@@ -281,7 +279,7 @@ namespace Media.UnitTests
             MdhdBox mdhdBox = new MdhdBox(writer, version, creationTime, modificationTime, timeScale, duration, language);
 
             // Create an instance of HdlrBox
-            HdlrBox hdlrBox = new HdlrBox(writer, 0);//"vide");
+            HdlrBox hdlrBox = new HdlrBox(writer, 1);//"vide");
 
             // Create an instance of MinfBox
             MinfBox minfBox = new MinfBox(writer);
@@ -290,10 +288,7 @@ namespace Media.UnitTests
             MdiaBox mdiaBox = new MdiaBox(writer, mdhdBox, hdlrBox, minfBox);
 
             // Create an instance of TrakBox and link it with MdiaBox
-            TrakBox trakBox = new TrakBox(writer, mdiaBox);
-
-            //Add the trakBox to the MoovBox
-            moovBox.AddTrack(trakBox);
+            TrakBox trakBox = new TrakBox(writer, mdiaBox);            
 
             // Create an instance of AudioSampleEntryBox
             var audioSampleEntryBox = new Mp4aBox(writer);
@@ -313,8 +308,11 @@ namespace Media.UnitTests
             //Link the trackbox and the audioSampleEntryBox
             trakBox.AddChildBox(audioSampleEntryBox);
 
+            //Add the trakBox to the MoovBox
+            moovBox.AddTrack(trakBox);
+
             //Write the moovBox which contains the trackBox
-            writer.Write(moovBox);
+            writer.AddBox(moovBox);
 
             // Write PCM audio data as sample chunks
             WriteAudioData(writer, sampleRate, channels, bitsPerSample);
@@ -345,7 +343,7 @@ namespace Media.UnitTests
                 mdatBox.AddSampleData(buffer);
             }
 
-            writer.Write(mdatBox);
+            writer.AddBox(mdatBox);
         }
     }
 }
