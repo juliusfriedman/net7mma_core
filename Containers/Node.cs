@@ -195,7 +195,7 @@ namespace Media.Container
         /// </summary>
         public long DataSize;
 
-        protected MemorySegment m_Data;
+        internal protected MemorySegment m_Data;
 
         /// <summary>
         /// The binary data of the contained in the Node (without (<see cref="Identifier"/> and (<see cref="LengthSize"/>))
@@ -220,15 +220,6 @@ namespace Media.Container
                 m_Data = value;
                 DataSize = value.Count;
             }
-        }
-
-        /// <summary>
-        /// Facade over <see cref="Data"/> but does not set length when set.
-        /// </summary>
-        public MemorySegment DataSegment
-        {
-            get => new MemorySegment(Data);
-            set => m_Data = value;
         }
 
         /// <summary>

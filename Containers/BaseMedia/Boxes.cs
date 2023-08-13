@@ -768,11 +768,7 @@ public class TfraBox : FullBox
             {
                 var tfra = new TrackFragmentRandomAccessEntryBox(Master as BaseMediaWriter, Version);
 
-                //It sucks to copy here, should allow for a DataSegment...
-                //Array.Copy(Data, offset, tfra.Data, 0, tfra.Data.Length);
-
-                //This sets DataSize...
-                tfra.DataSegment = new MemorySegment(Data.Array, offset, tfra.Length);
+                tfra.Data = new MemorySegment(Data.Array, offset, tfra.Length);
                 
                 yield return tfra;
 
@@ -797,7 +793,6 @@ public class TfraBox : FullBox
         AddChildBox(entry);
     }
 }
-
 
 public class TrackFragmentRandomAccessEntryBox : FullBox
 {
@@ -888,12 +883,10 @@ public class TrexBox : FullBox
 
 public class TrunBox : FullBox
 {
-    private const int SampleCountOffset = 4;
-
     public uint SampleCount
     {
-        get => Binary.ReadU32(Data, SampleCountOffset, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, SampleCountOffset, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData, Binary.IsBigEndian);
+        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsBigEndian, value);
     }
 
     public ulong TrackDataOffset
@@ -1242,6 +1235,56 @@ public class UuidBox : Mp4Box
         Data = new(Data.Concat(uuid.ToByteArray()).Concat(userData).ToArray());
         data.Dispose();
     }
+
+    public void AddUserMetadata(string key, string value)
+    {
+        var userMetadataBox = new UserMetadataBox(Master as BaseMediaWriter, key, value);
+        AddChildBox(userMetadataBox);
+    }
+
+    public void AddUserdata(string key, string value)
+    {
+        var userdataBox = new UserDataBox(Master as BaseMediaWriter, key, value);
+        AddChildBox(userdataBox);
+    }
+}
+
+public abstract class KeyValueBox : FullBox
+{
+    public string Key
+    {
+        get => Encoding.UTF8.GetString(Data.Array, OffsetToData, Length);
+        protected set => Encoding.UTF8.GetBytes(value).CopyTo(Data.Array, OffsetToData);
+    }
+
+    public string Value
+    {
+        get => Encoding.UTF8.GetString(Data.Array, OffsetToData + Key.Length + 1, Length - Key.Length - 1);
+        protected set => Encoding.UTF8.GetBytes(value).CopyTo(Data.Array, OffsetToData + Key.Length + 1);
+    }
+
+    protected KeyValueBox(BaseMediaWriter writer, string type, string key, string value)
+        : base(writer, Encoding.UTF8.GetBytes(type), 0, 0, key.Length + value.Length + 2)
+    {
+        Key = key;
+        Value = value;
+    }
+}
+
+public class UserDataBox : KeyValueBox
+{
+    public UserDataBox(BaseMediaWriter writer, string key, string value)
+        : base(writer, "udta", key, value)
+    {
+    }
+}
+
+public class UserMetadataBox : KeyValueBox
+{
+    public UserMetadataBox(BaseMediaWriter writer, string key, string value)
+        : base(writer, "meta", key, value)
+    {
+    }
 }
 
 public class MoovBox : Mp4Box
@@ -1383,26 +1426,24 @@ public class VisualSampleEntryBox : SampleEntryBox
         set => Binary.Write16(Data.Array, OffsetToData + 8, Binary.IsBigEndian, value);
     }
 
-    //Todo I ENumerable.
-    public uint[] PreDefined2
+    public IEnumerable<uint> PreDefined2
     {
         get
         {
-            uint[] predefined = new uint[3];
             for (int i = 0; i < 3; i++)
             {
-                predefined[i] = Binary.ReadU32(Data, OffsetToData + 10 + i * 4, Binary.IsBigEndian);
+                yield return Binary.ReadU32(Data, OffsetToData + 10 + i * 4, Binary.IsBigEndian);
             }
-            return predefined;
         }
         set
         {
-            if (value.Length != 3)
-                throw new ArgumentException("PreDefined2 must contain 3 elements.");
+            //if (value.Count() != 3)
+                //throw new ArgumentException("PreDefined2 must contain 3 elements.");
 
-            for (int i = 0; i < 3; i++)
+            int i = 0;
+            foreach(var val in value)
             {
-                Binary.Write32(Data.Array, OffsetToData + 10 + i * 4, Binary.IsBigEndian, value[i]);
+                Binary.Write32(Data.Array, OffsetToData + 10 + i++ * 4, Binary.IsBigEndian, val);
             }
         }
     }
@@ -1522,6 +1563,5 @@ public class Mp4aBox : AudioSampleEntryBox
         // Initialize any specific properties for mp4a sample entries
     }
 }
-
 
 #endregion
