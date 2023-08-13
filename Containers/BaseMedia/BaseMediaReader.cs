@@ -514,9 +514,7 @@ namespace Media.Containers.BaseMedia
 
                 int offset = 0;
 
-                int versionAndFlags = Common.Binary.Read32(mediaHeader.Data, offset, Common.Binary.IsLittleEndian), version = versionAndFlags >> 24 & 0xff;
-
-                offset += 4;
+                int versionAndFlags = Common.Binary.Read32(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian), version = versionAndFlags >> 24 & 0xff;
 
                 ulong created = 0, modified = 0;
 
@@ -524,41 +522,26 @@ namespace Media.Containers.BaseMedia
                 {
                     case 0:
                         {
-                            created = Common.Binary.ReadU32(mediaHeader.Data, offset, Common.Binary.IsLittleEndian);
+                            created = Common.Binary.ReadU32(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
 
-                            offset += 4;
+                            modified = Common.Binary.ReadU32(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
+                            
+                            m_TimeScale = Common.Binary.ReadU32(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
 
-                            modified = Common.Binary.ReadU32(mediaHeader.Data, offset, Common.Binary.IsLittleEndian);
-
-                            offset += 4;
-
-                            m_TimeScale = Common.Binary.ReadU32(mediaHeader.Data, offset, Common.Binary.IsLittleEndian);
-
-                            offset += 4;
-
-                            duration = Common.Binary.ReadU32(mediaHeader.Data, offset, Common.Binary.IsLittleEndian);
+                            duration = Common.Binary.ReadU32(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
 
                             break;
                         }
 
                     case 1:
                         {
+                            created = Common.Binary.ReadU64(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
 
-                            created = Common.Binary.ReadU64(mediaHeader.Data, offset, Common.Binary.IsLittleEndian);
+                            modified = Common.Binary.ReadU64(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
 
-                            offset += 4;
+                            m_TimeScale = Common.Binary.ReadU32(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
 
-                            modified = Common.Binary.ReadU64(mediaHeader.Data, offset, Common.Binary.IsLittleEndian);
-
-                            offset += 4;
-
-                            m_TimeScale = Common.Binary.ReadU32(mediaHeader.Data, offset, Common.Binary.IsLittleEndian);
-
-                            offset += 4;
-
-                            duration = Common.Binary.ReadU64(mediaHeader.Data, offset, Common.Binary.IsLittleEndian);
-
-                            offset += 4;
+                            duration = Common.Binary.ReadU64(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
 
                             break;
                         }
@@ -567,13 +550,9 @@ namespace Media.Containers.BaseMedia
 
                 //Rate Volume NextTrack
 
-                m_PlayRate = Common.Binary.Read32(mediaHeader.Data, offset, Common.Binary.IsLittleEndian) / 65536f;
+                m_PlayRate = Common.Binary.Read32(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian) / 65536f;
 
-                offset += 4;
-
-                m_Volume = Common.Binary.ReadU16(mediaHeader.Data, offset, Common.Binary.IsLittleEndian) / 256f;
-
-                offset += 2;
+                m_Volume = Common.Binary.ReadU16(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian) / 256f;
 
                 m_Matrix = mediaHeader.Data.Skip(offset).Take(36).ToArray();
 
@@ -581,9 +560,7 @@ namespace Media.Containers.BaseMedia
 
                 offset += 28;
 
-                m_NextTrackId = Common.Binary.Read32(mediaHeader.Data, offset, Common.Binary.IsLittleEndian);
-
-                offset += 4;
+                m_NextTrackId = Common.Binary.Read32(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
 
                 m_Created = IsoBaseDateUtc.AddMilliseconds(created * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond);
 

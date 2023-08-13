@@ -292,8 +292,6 @@ namespace Media.UnitTests
             // Create an instance of TrakBox and link it with MdiaBox
             TrakBox trakBox = new TrakBox(writer, mdiaBox);
 
-            //TODO MVHD box?
-
             //Add the trakBox to the MoovBox
             moovBox.AddTrack(trakBox);
 

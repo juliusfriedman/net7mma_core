@@ -83,8 +83,11 @@ public class Mp4Box : Node
     public void AddData(IEnumerable<byte> data)
     {
         var oldData = Data;
+
         Data = new(Data.Concat(data).ToArray());
+
         oldData.Dispose();
+
         SetLength();
     }
 
@@ -365,7 +368,7 @@ public class MvhdBox : FullBox
         }
     }
 
-    public IEnumerable<byte> PreDefined
+    public IEnumerable<byte> Predefined
     {
         get
         {
@@ -398,8 +401,27 @@ public class MvhdBox : FullBox
         PreferredRate = preferredRate;
         PreferredVolume = preferredVolume;
         Matrix = matrix;
-        PreDefined = predefined;
+        Predefined = predefined;
         NextTrackId = nextTrackID;
+    }
+
+    public MvhdBox(BaseMediaWriter writer, byte version, ulong creationTime, ulong modificationTime, uint timeScale, ulong duration, ushort preferredVolume)
+        : base(writer, Encoding.UTF8.GetBytes("mvhd"), version, 0)
+    {
+        CreationTime = creationTime;
+        ModificationTime = modificationTime;
+        TimeScale = timeScale;
+        Duration = duration;
+        PreferredRate = 1.0f;
+        PreferredVolume = preferredVolume;
+        Matrix = new ushort[]
+        {
+            0x0001, 0x0000, 0x0000,
+            0x0000, 0x0001, 0x0000,
+            0x0000, 0x0000, 0x4000
+        };
+        Predefined = new byte[24];
+        NextTrackId = 1;
     }
 }
 
