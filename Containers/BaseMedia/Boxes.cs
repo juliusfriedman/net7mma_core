@@ -182,12 +182,13 @@ public class DataEntryUrlBox : FullBox
 
 public class DrefBox : FullBox
 {
-    private const int EntryCountOffset = 4;
-
+    /// <summary>
+    /// The amount of child <see cref="DataEntryUrlBox"/> contained.
+    /// </summary>
     public int EntryCount
     {
-        get => Binary.Read32(Data, EntryCountOffset, Binary.IsBigEndian);
-        set => Binary.Write32(Data, EntryCountOffset, Binary.IsBigEndian, value);
+        get => Binary.Read32(Data, OffsetToData, Binary.IsBigEndian);
+        set => Binary.Write32(Data, OffsetToData, Binary.IsBigEndian, value);
     }
 
     public DrefBox(BaseMediaWriter writer)
