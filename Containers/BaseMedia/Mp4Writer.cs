@@ -50,7 +50,10 @@ namespace Media.Containers.BaseMedia
 
             var minfBox = new MinfBox(this);
 
-            MdhdBox mdhdBox = new MdhdBox(this, 0, 1, timeScale, (ulong)duration.Ticks, "", 5);
+            uint creationTime = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            uint modificationTime = creationTime;
+
+            MdhdBox mdhdBox = new MdhdBox(this, 0, creationTime, modificationTime, timeScale, (ulong)duration.Ticks, 0x55C4);
 
             // Create the trak box
             TrakBox trakBox = new TrakBox(this, new MdiaBox(this, mdhdBox, hdlrBox, minfBox));
@@ -159,7 +162,10 @@ namespace Media.Containers.BaseMedia
             if (sampleRate == 0 || channelCount == 0)
                 throw new ArgumentException("Invalid sample rate or channel count");
 
-            var mdhdBox = new MdhdBox(this, 0, sampleRate, 0, 0, "", 0);
+            uint creationTime = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            uint modificationTime = creationTime;
+
+            MdhdBox mdhdBox = new MdhdBox(this, 0, creationTime, modificationTime, 1000, 1000, 0x55C4);
             var hdlrBox = new HdlrBox(this, 0); // Modify handler type as needed
 
             var minfBox = new MinfBox(this);
@@ -240,20 +246,21 @@ namespace Media.Containers.BaseMedia
 
 namespace Media.UnitTests
 {
-    internal class Mp4WriterUnitTests
+    public class Mp4WriterUnitTests
     {
         public static void WriteMp4AudioTest()
         {
-            int sampleRate = 44100;
+            int sampleRate = 8000;
             int channels = 2;
             int bitsPerSample = 16;
 
             // Put in Media/Audio/wav so we can read it.
-            string localPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);// + "/Media/Audio/mp4/";
+            string localPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "/Media/Video/mp4/";
 
             // Replace with your desired output file path
-            string outputFilePath = Path.GetFullPath(localPath + "tone.mp4");
+            string outputFilePath = Path.Combine(localPath, "tone.mp4");
 
+            //Create empty file for writer. (TODO, write should do this, need to allow passing options)
             System.IO.File.WriteAllBytes(outputFilePath, Common.MemorySegment.Empty.Array);
 
             using var writer = new Mp4Writer(new Uri("file://" + outputFilePath));
@@ -262,7 +269,53 @@ namespace Media.UnitTests
             writer.WriteFtypBox();
 
             // Write the moov box (movie)
-            MoovBox moovBox = new MoovBox(writer, 1, 1, 1, 1, null, null, 1);
+            MoovBox moovBox = new MoovBox(writer, 1000, 5000, 1, 1, null, null, 1);
+            
+            // Create an instance of MdhdBox
+            byte version = 0;  // Use 0 for version 0, or 1 for version 1
+            uint creationTime = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            uint modificationTime = creationTime;
+            uint timeScale = 1000;  // For example, 1000 units per second
+            ulong duration = 0;     // Duration in timeScale units
+            ushort language = 0x55C4;  // Language code, e.g., 0x55C4 for English
+            MdhdBox mdhdBox = new MdhdBox(writer, version, creationTime, modificationTime, timeScale, duration, language);
+
+            // Create an instance of HdlrBox
+            HdlrBox hdlrBox = new HdlrBox(writer, 0);//"vide");
+
+            // Create an instance of MinfBox
+            MinfBox minfBox = new MinfBox(writer);
+
+            // Create an instance of MdiaBox and link it with MdhdBox, HdlrBox, and MinfBox
+            MdiaBox mdiaBox = new MdiaBox(writer, mdhdBox, hdlrBox, minfBox);
+
+            // Create an instance of TrakBox and link it with MdiaBox
+            TrakBox trakBox = new TrakBox(writer, mdiaBox);
+
+            //TODO MVHD box?
+
+            //Add the trakBox to the MoovBox
+            moovBox.AddTrack(trakBox);
+
+            // Create an instance of AudioSampleEntryBox
+            var audioSampleEntryBox = new Mp4aBox(writer);
+
+            // Set the properties for audio sample entry
+            audioSampleEntryBox.EntryVersion = 0;
+            audioSampleEntryBox.ChannelCount = 2;
+            audioSampleEntryBox.SampleSize = 16;
+            audioSampleEntryBox.CompressionId = 0;
+            audioSampleEntryBox.PacketSize = 0;
+            audioSampleEntryBox.SampleRate = (uint)sampleRate;
+
+            // Add AudioChunkBox
+            var audioChunkBox = new StcoBox(writer);
+            audioSampleEntryBox.AddChildBox(audioChunkBox);
+
+            //Link the trackbox and the audioSampleEntryBox
+            trakBox.AddChildBox(audioSampleEntryBox);
+
+            //Write the moovBox which contains the trackBox
             writer.Write(moovBox);
 
             // Write PCM audio data as sample chunks

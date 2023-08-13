@@ -112,6 +112,7 @@ namespace Media.UnitTests
             //Tools 
             TestRtpTools, 
             //Containers
+            TestBaseMediaWriters,
             TestRiffWriter,
             TestContainerImplementations, 
             //Codec
@@ -4004,6 +4005,11 @@ a=appversion:1.0");
                 }
 
             #endregion
+        }
+
+        static void TestBaseMediaWriters()
+        {
+            Media.UnitTests.Mp4WriterUnitTests.WriteMp4AudioTest();
         }
 
         static void TestRiffWriter()

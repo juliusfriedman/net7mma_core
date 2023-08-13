@@ -46,7 +46,7 @@ public class BaseMediaWriter : MediaFileWriter
     //Need overloads with type e.g. CreateFragmentedTrack etc
     public override Track CreateTrack(Media.Sdp.MediaType mediaType)
     {
-        var trakBox = new TrakBox(this, new MdiaBox(this, new MdhdBox(this, 0, 0, 0, 0, "english", 0), new HdlrBox(this, 0), new MinfBox(this, null)));
+        var trakBox = new TrakBox(this, new MdiaBox(this, new MdhdBox(this, 0, 0, 0, 0, 0x55C4, 0), new HdlrBox(this, 0), new MinfBox(this, null)));
         var track = new Track(trakBox, "track", 1, DateTime.UtcNow, DateTime.UtcNow, 1, 0, 0, TimeSpan.Zero, TimeSpan.Zero, 0, mediaType, new byte[4]);
 
         track.UserData = new Dictionary<string, object>();
