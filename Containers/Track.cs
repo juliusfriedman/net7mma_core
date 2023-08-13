@@ -112,7 +112,7 @@ namespace Media.Container
 
         public int Height { get; internal protected set; }
 
-        //Todo, use common type not Sdp
+        //Todo, use common type not Sdp?
 
         public Sdp.MediaType MediaType { get; internal protected set; }
 

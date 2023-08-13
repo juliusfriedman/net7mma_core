@@ -452,7 +452,7 @@ namespace Media.Common
             m_Index = -1;
 
             WorkingSegment = Common.MemorySegment.Empty;
-        }       
+        }
 
         #endregion
 

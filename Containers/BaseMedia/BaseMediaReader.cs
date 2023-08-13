@@ -1195,7 +1195,7 @@ namespace Media.Containers.BaseMedia
             // Get the sample sizes and offsets for the track
             IList<int> sampleSizes = dataDictionary["StSizes"] as List<int>;
             IList<long> sampleOffsets = dataDictionary["StOffsets"] as List<long>;
-            IList<Tuple<long, long>> entries = dataDictionary["SttsEntries"] as List<Tuple<long, long>>;
+            IList<Tuple<long, long>> sttsEntries = dataDictionary["SttsEntries"] as List<Tuple<long, long>>;
 
             // Find the sample at the current position
             int sampleIndex = 0;
@@ -1203,15 +1203,19 @@ namespace Media.Containers.BaseMedia
             long timescale = 0;
             long currentTimescale = 0;
 
-            foreach (var entry in entries)
+            //This could be a bottleneck, should probably add SampleIndex to dictionary or keep on track.
+            foreach (var entry in sttsEntries)
             {
                 totalSamples += entry.Item1;
                 timescale = entry.Item2;
-                if (track.Position < TimeSpan.FromSeconds(totalSamples * 1.0 / timescale))
+                double entryDurationInSeconds = 1.0 * entry.Item2 / timescale;
+
+                if (TimeSpan.FromSeconds(entryDurationInSeconds * totalSamples) > track.Position)
                 {
                     currentTimescale = timescale;
-                    break; // Found the correct timescale, break out of the loop.
+                    break;
                 }
+
                 sampleIndex++;
             }
 
@@ -1226,7 +1230,7 @@ namespace Media.Containers.BaseMedia
             sampleDuration = TimeSpan.FromSeconds(1.0 * currentTimescale / timescale);
 
             // Get the sample data based on the sample size and position
-            int sampleSize = sampleSizes.Count > sampleIndex ?  sampleSizes[0] : sampleSizes[sampleIndex];
+            int sampleSize = sampleIndex >= sampleSizes.Count ? sampleSizes[0] : sampleSizes[sampleIndex];
             long position = sampleIndex > 0 ? sampleOffsets[sampleIndex] : 0;
 
             // Seek to the sample data position in the input stream
@@ -1239,12 +1243,11 @@ namespace Media.Containers.BaseMedia
             // Advance the track position to the end of the current sample
             track.Position += sampleDuration;
 
-            //Todo , add to DataStream?
-            if (track.DataStream == null)
-                track.DataStream = new Common.SegmentStream();
+            //Add the sample to the dataStream (could just return this one segment in a stream)
+            track.DataStream.AddMemory(new Common.MemorySegment(sampleData));
 
-            // Return the SegmentStream to the sample data
-            return new Common.SegmentStream(new Common.MemorySegment(sampleData));
+            // Return the SegmentStream to the sample data which is contained within
+            return track.DataStream;
         }
     }
 }
