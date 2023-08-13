@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-//Preview
+//Preview (still)
 //using TimeToEntrySample = (int SampleCount, int SampleDurtation)
 
 namespace Media.Containers.BaseMedia;
@@ -81,6 +81,13 @@ public class Mp4Box : Node
 
         data.Dispose();
 
+        SetLength();
+
+        return;
+    }
+
+    public void SetLength()
+    {
         if (DataSize > int.MaxValue)
         {
             Length = 1;
@@ -90,8 +97,6 @@ public class Mp4Box : Node
         {
             Length = (int)DataSize;
         }
-
-        return;
     }
 
     public void AddChildrenBoxes(params Mp4Box[] boxes) => AddChildrenBoxes((IEnumerable<Mp4Box>)boxes);
@@ -480,7 +485,7 @@ public class MdiaBox : FullBox
     public MinfBox MinfBox { get; }
 
     public MdiaBox(BaseMediaWriter writer, MdhdBox mdhdBox, HdlrBox hdlrBox, MinfBox minfBox)
-        : base(writer, Encoding.ASCII.GetBytes("mdia"), 0, 0)
+        : base(writer, Encoding.UTF8.GetBytes("mdia"), 0, 0)
     {
         MdhdBox = mdhdBox;
         HdlrBox = hdlrBox;
@@ -1214,6 +1219,15 @@ public class MdatBox : Mp4Box
         : base(writer, Encoding.UTF8.GetBytes("mdat"), 0)
     {
     }
+
+    public void AddSampleData(byte[] data)
+    {
+        var oldData = Data;
+        Data = new(Data.Concat(data).ToArray());
+        oldData.Dispose();
+
+        SetLength();
+    }
 }
 
 public class UdtaBox : Mp4Box
@@ -1254,12 +1268,14 @@ public abstract class KeyValueBox : FullBox
     public string Key
     {
         get => Encoding.UTF8.GetString(Data.Array, OffsetToData, Length);
+        //Todo when setting value may be larger than allocated
         protected set => Encoding.UTF8.GetBytes(value).CopyTo(Data.Array, OffsetToData);
     }
 
     public string Value
     {
         get => Encoding.UTF8.GetString(Data.Array, OffsetToData + Key.Length + 1, Length - Key.Length - 1);
+        //Todo when setting value may be larger than allocated
         protected set => Encoding.UTF8.GetBytes(value).CopyTo(Data.Array, OffsetToData + Key.Length + 1);
     }
 
@@ -1293,10 +1309,10 @@ public class MoovBox : Mp4Box
     public List<TrakBox> Tracks { get; }
     public UdtaBox UserDataBox { get; }
 
-    public MoovBox(BaseMediaWriter writer)
+    public MoovBox(BaseMediaWriter writer, uint timeScale, uint duration, uint preferredRate, ushort preferredVolume, uint[] matrix, byte[] predefined, uint nextTrackId)
         : base(writer, Encoding.UTF8.GetBytes("moov"), 0)
     {
-        MovieHeaderBox = new MvhdBox(writer, 1, 1, 1, 1, null, null, 0);
+        MovieHeaderBox = new MvhdBox(writer, timeScale, duration, preferredRate, preferredVolume, matrix, predefined, nextTrackId);
         Tracks = new List<TrakBox>();
         UserDataBox = new UdtaBox(writer);
 
