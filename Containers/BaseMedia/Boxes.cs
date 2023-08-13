@@ -868,8 +868,10 @@ public class TfraBox : FullBox
             var offset = OffsetToData + 10;
             while(offset < DataSize)
             {
+                //This allocated for the data already
                 var tfra = new TrackFragmentRandomAccessEntryBox(Master as BaseMediaWriter, Version);
 
+                //Reassign rather than copy
                 tfra.Data = new MemorySegment(Data.Array, offset, tfra.Length);
                 
                 yield return tfra;
