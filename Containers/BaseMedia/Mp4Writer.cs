@@ -305,6 +305,16 @@ namespace Media.UnitTests
             var audioChunkBox = new StcoBox(writer);
             audioSampleEntryBox.AddChildBox(audioChunkBox);
 
+            //Add Chunk offsets
+            audioChunkBox.AddChunkOffset((uint)writer.Position);
+
+            //Add Sample sizes.
+            var sampleSizeBox = new StszBox(writer);
+            sampleSizeBox.AddSampleSize(0);
+
+            //Link the audioSampleEntryBox and the sampleSizeBox
+            audioSampleEntryBox.AddChildBox(sampleSizeBox);
+
             //Link the trackbox and the audioSampleEntryBox
             trakBox.AddChildBox(audioSampleEntryBox);
 

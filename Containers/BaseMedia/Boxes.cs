@@ -713,7 +713,7 @@ public class StszBox : FullBox
     }
 
     public StszBox(BaseMediaWriter writer)
-        : base(writer, Encoding.UTF8.GetBytes("stsz"), 0, 0)
+        : base(writer, Encoding.UTF8.GetBytes("stsz"), 0, 0, 4 + 8)
     {
     }
 
@@ -724,6 +724,9 @@ public class StszBox : FullBox
     }
 }
 
+/// <summary>
+/// Sync Sample Box
+/// </summary>
 public class SttsBox : FullBox
 {
     public int EntryCount
@@ -749,7 +752,7 @@ public class SttsBox : FullBox
     }
 
     public SttsBox(BaseMediaWriter writer)
-        : base(writer, Encoding.UTF8.GetBytes("stts"), 0, 0)
+        : base(writer, Encoding.UTF8.GetBytes("stts"), 0, 4 + 4)
     {
     }
 
