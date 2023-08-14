@@ -283,66 +283,68 @@ public class MvhdBox : FullBox
 {
     public ulong CreationTime
     {
-        get => Version == 1 ? Binary.ReadU64(Data, OffsetToData + 12, Binary.IsBigEndian) : Binary.ReadU32(Data, OffsetToData + 12, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU64(Data, OffsetToData + 12, Binary.IsLittleEndian) : Binary.ReadU32(Data, OffsetToData + 12, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write64(Data.Array, OffsetToData + 12, Binary.IsBigEndian, value);
+                Binary.Write64(Data.Array, OffsetToData + 12, Binary.IsLittleEndian, value);
             else
-                Binary.Write32(Data.Array, OffsetToData + 12, Binary.IsBigEndian, (uint)value);
+                Binary.Write32(Data.Array, OffsetToData + 12, Binary.IsLittleEndian, (uint)value);
         }
     }
 
     public ulong ModificationTime
     {
-        get => Version == 1 ? Binary.ReadU64(Data, OffsetToData + 20, Binary.IsBigEndian) : Binary.ReadU32(Data, OffsetToData + 16, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU64(Data, OffsetToData + 20, Binary.IsLittleEndian) : Binary.ReadU32(Data, OffsetToData + 16, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write64(Data.Array, OffsetToData + 20, Binary.IsBigEndian, value);
+                Binary.Write64(Data.Array, OffsetToData + 20, Binary.IsLittleEndian, value);
             else
-                Binary.Write32(Data.Array, OffsetToData + 16, Binary.IsBigEndian, (uint)value);
+                Binary.Write32(Data.Array, OffsetToData + 16, Binary.IsLittleEndian, (uint)value);
         }
     }
 
     public uint TimeScale
     {
-        get => Binary.ReadU32(Data, OffsetToData + (Version == 1 ? 28 : 24), Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData + (Version == 1 ? 28 : 24), Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData + (Version == 1 ? 28 : 24), Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData + (Version == 1 ? 28 : 24), Binary.IsLittleEndian, value);
     }
 
     public ulong Duration
     {
-        get => Version == 1 ? Binary.ReadU64(Data, OffsetToData + 32, Binary.IsBigEndian) : Binary.ReadU32(Data, OffsetToData + 28, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU64(Data, OffsetToData + 32, Binary.IsLittleEndian) : Binary.ReadU32(Data, OffsetToData + 28, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write64(Data.Array, OffsetToData + 32, Binary.IsBigEndian, value);
+                Binary.Write64(Data.Array, OffsetToData + 32, Binary.IsLittleEndian, value);
             else
-                Binary.Write32(Data.Array, OffsetToData + 28, Binary.IsBigEndian, (uint)value);
+                Binary.Write32(Data.Array, OffsetToData + 28, Binary.IsLittleEndian, (uint)value);
         }
     }
 
     public float PreferredRate
     {
-        get => Binary.ReadU32(Data, OffsetToData + 40, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData + 40, Binary.IsBigEndian, (uint)value);
+        get => Binary.ReadU32(Data, OffsetToData + 40, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData + 40, Binary.IsLittleEndian, (uint)value);
     }
 
     public ushort PreferredVolume
     {
-        get => Binary.ReadU16(Data, OffsetToData + 44, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + 44, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + 44, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + 44, Binary.IsLittleEndian, value);
     }
 
-    public IEnumerable<ushort> Matrix
+    //10 bytes Reserved
+
+    public IEnumerable<ushort> Matrix //36 bytes
     {
         get
         {
             var offset = OffsetToData + 46;
             for (int i = 0; i < 9; i++) //Always 9?
             {
-                yield return Binary.ReadU16(Data, ref offset, Binary.IsBigEndian);
+                yield return Binary.ReadU16(Data, ref offset, Binary.IsLittleEndian);
             }
         }
         set
@@ -353,12 +355,12 @@ public class MvhdBox : FullBox
 
             foreach (var identity in value)
             {
-                Binary.Write16(Data.Array, ref offset, Binary.IsBigEndian, identity);
+                Binary.Write16(Data.Array, ref offset, Binary.IsLittleEndian, identity);
             }
         }
     }
 
-    public IEnumerable<byte> Predefined
+    public IEnumerable<byte> Predefined //24 bytes
     {
         get
         {
@@ -379,12 +381,12 @@ public class MvhdBox : FullBox
 
     public uint NextTrackId
     {
-        get => Binary.ReadU32(Data, OffsetToData + 88, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData + 88, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData + 88, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData + 88, Binary.IsLittleEndian, value);
     }
 
     public MvhdBox(BaseMediaWriter writer, uint timeScale, ulong duration, uint preferredRate, ushort preferredVolume, ushort[] matrix, byte[] predefined, uint nextTrackID)
-        : base(writer, Encoding.UTF8.GetBytes("mvhd"), 0, 1, 4 + 120)
+        : base(writer, Encoding.UTF8.GetBytes("mvhd"), 0, 0, 4 + 120)
     {
         TimeScale = timeScale;
         Duration = duration;
@@ -396,7 +398,7 @@ public class MvhdBox : FullBox
     }
 
     public MvhdBox(BaseMediaWriter writer, byte version, ulong creationTime, ulong modificationTime, uint timeScale, ulong duration, ushort preferredVolume)
-        : base(writer, Encoding.UTF8.GetBytes("mvhd"), version, 0)
+        : base(writer, Encoding.UTF8.GetBytes("mvhd"), version, 4 + 120)
     {
         CreationTime = creationTime;
         ModificationTime = modificationTime;
@@ -410,7 +412,7 @@ public class MvhdBox : FullBox
             0x0000, 0x0001, 0x0000,
             0x0000, 0x0000, 0x4000
         };
-        Predefined = new byte[24];
+        //Predefined = new byte[24];
         NextTrackId = 1;
     }
 }
