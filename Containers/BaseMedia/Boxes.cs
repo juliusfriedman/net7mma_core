@@ -112,11 +112,11 @@ public class Mp4Box : Node
 
         while (offset + HeaderSize <= Data.Count)
         {
-            var size = (ulong)Binary.ReadU32(Data, ref offset, Binary.IsBigEndian);
-            var type = Binary.Read32(Data, ref offset, Binary.IsBigEndian);
+            var size = (ulong)Binary.ReadU32(Data, ref offset, Binary.IsLittleEndian);
+            var type = Binary.Read32(Data, ref offset, Binary.IsLittleEndian);
 
             if (size == 1)
-                size = Binary.ReadU64(Data, ref offset, Binary.IsBigEndian);
+                size = Binary.ReadU64(Data, ref offset, Binary.IsLittleEndian);
 
             if (type == box.AtomCode)
                 return true;
@@ -133,13 +133,13 @@ public class Mp4Box : Node
 
         while (offset + HeaderSize <= Data.Count)
         {
-            var size = (ulong)Binary.ReadU32(Data, ref offset, Binary.IsBigEndian);
-            var type = Binary.Read32(Data, ref offset, Binary.IsBigEndian);
+            var size = (ulong)Binary.ReadU32(Data, ref offset, Binary.IsLittleEndian);
+            var type = Binary.Read32(Data, ref offset, Binary.IsLittleEndian);
 
             if (size == 1)
-                size = Binary.ReadU64(Data, ref offset, Binary.IsBigEndian);
+                size = Binary.ReadU64(Data, ref offset, Binary.IsLittleEndian);
 
-            yield return new Mp4Box(Master as BaseMediaWriter, Binary.GetBytes(type, Binary.IsBigEndian), (long)size);
+            yield return new Mp4Box(Master as BaseMediaWriter, Binary.GetBytes(type, Binary.IsLittleEndian), (long)size);
 
             offset += (int)size;
         }
@@ -166,8 +166,8 @@ public abstract class FullBox : Mp4Box
     // Flags property to get or set the 3-byte flags after the version byte
     public uint Flags
     {
-        get => Binary.ReadU24(Data.Array, 1, Binary.IsBigEndian);
-        set => Binary.Write24(Data.Array, 1, Binary.IsBigEndian, value);
+        get => Binary.ReadU24(Data.Array, 1, Binary.IsLittleEndian);
+        set => Binary.Write24(Data.Array, 1, Binary.IsLittleEndian, value);
     }
 
     public const int OffsetToData = 4;
@@ -175,9 +175,10 @@ public abstract class FullBox : Mp4Box
 
 public class DataEntryUrlBox : FullBox
 {
-    public int UrlLength => Binary.Read32(Data, OffsetToData, Binary.IsBigEndian);
+    //Todo check if this is correct, something with flags indicates if data is self contained
+    public string Url => Encoding.UTF8.GetString(Data.Array, OffsetToData + 4, Data.Count - 4);
 
-    public string Url => Encoding.UTF8.GetString(Data.Array, OffsetToData + 4, UrlLength);
+    public bool DataIsSelfContained => Flags == 1;
 
     public DataEntryUrlBox(BaseMediaWriter writer, string dataUrl)
         : base(writer, Encoding.UTF8.GetBytes("url "), 0, 1)
@@ -185,7 +186,7 @@ public class DataEntryUrlBox : FullBox
         //Get the bytes
         byte[] urlData = Encoding.UTF8.GetBytes(dataUrl);
         //Add the data prefixed by length
-        AddData(Binary.GetBytes(urlData.Length, Binary.IsBigEndian).Concat(urlData).Concat(byte.MinValue));
+        AddData(urlData.Concat(byte.MinValue));
     }
 }
 
@@ -196,8 +197,8 @@ public class DrefBox : FullBox
     /// </summary>
     public int EntryCount
     {
-        get => Binary.Read32(Data, OffsetToData, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsBigEndian, value);
+        get => Binary.Read32(Data, OffsetToData, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
     }
 
     public DrefBox(BaseMediaWriter writer)
@@ -421,56 +422,56 @@ public class MdhdBox : FullBox
 {
     public ulong CreationTime
     {
-        get => Version == 1 ? Binary.ReadU64(Data, OffsetToData + 4, Binary.IsBigEndian) : Binary.ReadU32(Data, OffsetToData + 4, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU64(Data, OffsetToData + 4, Binary.IsLittleEndian) : Binary.ReadU32(Data, OffsetToData + 4, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write64(Data.Array, OffsetToData + 4, Binary.IsBigEndian, value);
+                Binary.Write64(Data.Array, OffsetToData + 4, Binary.IsLittleEndian, value);
             else
-                Binary.Write32(Data.Array, OffsetToData + 4, Binary.IsBigEndian, (uint)value);
+                Binary.Write32(Data.Array, OffsetToData + 4, Binary.IsLittleEndian, (uint)value);
         }
     }
 
     public ulong ModificationTime
     {
-        get => Version == 1 ? Binary.ReadU64(Data, OffsetToData + 12, Binary.IsBigEndian) : Binary.ReadU32(Data, OffsetToData + 8, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU64(Data, OffsetToData + 12, Binary.IsLittleEndian) : Binary.ReadU32(Data, OffsetToData + 8, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write64(Data.Array, OffsetToData + 12, Binary.IsBigEndian, value);
+                Binary.Write64(Data.Array, OffsetToData + 12, Binary.IsLittleEndian, value);
             else
-                Binary.Write32(Data.Array, OffsetToData + 8, Binary.IsBigEndian, (uint)value);
+                Binary.Write32(Data.Array, OffsetToData + 8, Binary.IsLittleEndian, (uint)value);
         }
     }
 
     public uint TimeScale
     {
-        get => Binary.ReadU32(Data, OffsetToData + (Version == 1 ? 20 : 12), Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData + (Version == 1 ? 20 : 12), Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData + (Version == 1 ? 20 : 12), Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData + (Version == 1 ? 20 : 12), Binary.IsLittleEndian, value);
     }
 
     public ulong Duration
     {
-        get => Version == 1 ? Binary.ReadU64(Data, OffsetToData + 28, Binary.IsBigEndian) : Binary.ReadU32(Data, OffsetToData + 16, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU64(Data, OffsetToData + 28, Binary.IsLittleEndian) : Binary.ReadU32(Data, OffsetToData + 16, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write64(Data.Array, OffsetToData + 28, Binary.IsBigEndian, value);
+                Binary.Write64(Data.Array, OffsetToData + 28, Binary.IsLittleEndian, value);
             else
-                Binary.Write32(Data.Array, OffsetToData + 16, Binary.IsBigEndian, (uint)value);
+                Binary.Write32(Data.Array, OffsetToData + 16, Binary.IsLittleEndian, (uint)value);
         }
     }
 
     public ushort Language
     {
-        get => Binary.ReadU16(Data, OffsetToData + (Version == 1 ? 36 : 20), Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + (Version == 1 ? 36 : 20), Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + (Version == 1 ? 36 : 20), Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + (Version == 1 ? 36 : 20), Binary.IsLittleEndian, value);
     }
 
     public ushort PreDefined
     {
-        get => Binary.ReadU16(Data, 15, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, 15, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, 15, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, 15, Binary.IsLittleEndian, value);
     }
 
     public MdhdBox(BaseMediaWriter writer, byte version, uint creationTime, uint modificationTime, uint timeScale, ulong duration, ushort language)
@@ -496,14 +497,14 @@ public class HdlrBox : FullBox
 
     public uint PreDefined
     {
-        get => Binary.ReadU32(Data, 4, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, 4, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, 4, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 4, Binary.IsLittleEndian, value);
     }
 
     public uint HandlerType
     {
-        get => Binary.ReadU32(Data, 8, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, 8, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, 8, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 8, Binary.IsLittleEndian, value);
     }
 
     public string Name
@@ -602,8 +603,8 @@ public class StcoBox : FullBox
 {
     public uint EntryCount
     {
-        get => Binary.ReadU32(Data, OffsetToData, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
     }
 
     public IEnumerable<uint> ChunkOffsets
@@ -613,7 +614,7 @@ public class StcoBox : FullBox
             var offset = 8;
             while (offset < DataSize)
             {
-                yield return Binary.ReadU32(Data, ref offset, Binary.IsBigEndian);
+                yield return Binary.ReadU32(Data, ref offset, Binary.IsLittleEndian);
             }
         }
     }
@@ -625,7 +626,7 @@ public class StcoBox : FullBox
 
     public void AddChunkOffset(uint offset)
     {
-        AddData(Binary.GetBytes(offset, Binary.IsBigEndian));
+        AddData(Binary.GetBytes(offset, Binary.IsLittleEndian));
         ++EntryCount;
     }
 }
@@ -634,8 +635,8 @@ public class St64Box : FullBox
 {
     public uint EntryCount
     {
-        get => Binary.ReadU32(Data, OffsetToData, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
     }
 
     public IEnumerable<ulong> ChunkOffsets
@@ -645,7 +646,7 @@ public class St64Box : FullBox
             var offset = 8;
             while (offset < DataSize)
             {
-                yield return Binary.ReadU64(Data, ref offset, Binary.IsBigEndian);
+                yield return Binary.ReadU64(Data, ref offset, Binary.IsLittleEndian);
             }
         }
     }
@@ -657,7 +658,7 @@ public class St64Box : FullBox
 
     public void AddChunkOffset(ulong offset)
     {
-        AddData(Binary.GetBytes(offset, Binary.IsBigEndian));
+        AddData(Binary.GetBytes(offset, Binary.IsLittleEndian));
         ++EntryCount;
     }
 }
@@ -666,8 +667,8 @@ public class StsdBox : FullBox
 {
     public int EntryCount
     {
-        get => Binary.Read32(Data, OffsetToData, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsBigEndian, value);
+        get => Binary.Read32(Data, OffsetToData, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
     }
 
     public StsdBox(BaseMediaWriter writer)
@@ -690,14 +691,14 @@ public class StszBox : FullBox
 {
     public int SampleSize
     {
-        get => Binary.Read32(Data, 4, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, 4, Binary.IsBigEndian, value);
+        get => Binary.Read32(Data, 4, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 4, Binary.IsLittleEndian, value);
     }
 
     public int SampleCount
     {
-        get => Binary.Read32(Data, 8, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, 8, Binary.IsBigEndian, value);
+        get => Binary.Read32(Data, 8, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 8, Binary.IsLittleEndian, value);
     }
 
     public IEnumerable<int> SampleSizes
@@ -707,7 +708,7 @@ public class StszBox : FullBox
             var offset = 12;
             while (offset < DataSize)
             {
-                yield return Binary.Read32(Data, ref offset, Binary.IsBigEndian);
+                yield return Binary.Read32(Data, ref offset, Binary.IsLittleEndian);
             }
         }
     }
@@ -720,7 +721,7 @@ public class StszBox : FullBox
     public void AddSampleSize(int size)
     {
         ++SampleCount;
-        AddData(Binary.GetBytes(size, Binary.IsBigEndian));
+        AddData(Binary.GetBytes(size, Binary.IsLittleEndian));
     }
 }
 
@@ -731,8 +732,8 @@ public class SttsBox : FullBox
 {
     public int EntryCount
     {
-        get => Binary.Read32(Data, OffsetToData, Binary.IsBigEndian); 
-        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsBigEndian, value);
+        get => Binary.Read32(Data, OffsetToData, Binary.IsLittleEndian); 
+        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
     }
 
     public IEnumerable<(int SampleCount, int SampleDurtation)> TimeToSampleEntries
@@ -743,8 +744,8 @@ public class SttsBox : FullBox
             //var index = 0;
             while (offset + 8 <= DataSize /*&& index < EntryCount*/)
             {
-                var sampleCount = Binary.Read32(Data, ref offset, Binary.IsBigEndian);
-                var sampleDuration = Binary.Read32(Data, ref offset, Binary.IsBigEndian);
+                var sampleCount = Binary.Read32(Data, ref offset, Binary.IsLittleEndian);
+                var sampleDuration = Binary.Read32(Data, ref offset, Binary.IsLittleEndian);
                 yield return (sampleCount, sampleDuration);
                 //++index;
             }
@@ -759,8 +760,8 @@ public class SttsBox : FullBox
     public void AddTimeToSampleEntry(int sampleCount, int sampleDuration)
     {
         ++EntryCount;
-        AddData(Binary.GetBytes(sampleCount, Binary.IsBigEndian)
-                   .Concat(Binary.GetBytes(sampleDuration, Binary.IsBigEndian)));
+        AddData(Binary.GetBytes(sampleCount, Binary.IsLittleEndian)
+                   .Concat(Binary.GetBytes(sampleDuration, Binary.IsLittleEndian)));
     }
 }
 
@@ -770,32 +771,32 @@ public class TfhdBox : FullBox
 {
     public uint TrackId
     {
-        get => Binary.ReadU32(Data, OffsetToData, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
     }
 
     public uint SampleDescriptionIndex
     {
-        get => Binary.ReadU32(Data, 8, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, 8, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, 8, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 8, Binary.IsLittleEndian, value);
     }
 
     public uint DefaultSampleDuration
     {
-        get => Binary.ReadU32(Data, 12, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, 12, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, 12, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 12, Binary.IsLittleEndian, value);
     }
 
     public uint DefaultSampleSize
     {
-        get => Binary.ReadU32(Data, 16, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, 16, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, 16, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 16, Binary.IsLittleEndian, value);
     }
 
     public uint DefaultSampleFlags
     {
-        get => Binary.ReadU32(Data, 20, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, 20, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, 20, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 20, Binary.IsLittleEndian, value);
     }
 
     public TfhdBox(BaseMediaWriter writer, uint trackId, uint defaultSampleDuration, uint defaultSampleSize, uint defaultSampleFlags)
@@ -812,13 +813,13 @@ public class TfdtBox : FullBox
 {
     public ulong BaseMediaDecodeTime
     {
-        get => (Version == 1) ? Binary.ReadU64(Data, OffsetToData, Binary.IsBigEndian) : Binary.ReadU32(Data, OffsetToData, Binary.IsBigEndian);
+        get => (Version == 1) ? Binary.ReadU64(Data, OffsetToData, Binary.IsLittleEndian) : Binary.ReadU32(Data, OffsetToData, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write64(Data.Array, OffsetToData, Binary.IsBigEndian, value);
+                Binary.Write64(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
             else
-                Binary.Write32(Data.Array, OffsetToData, Binary.IsBigEndian, (uint)value);
+                Binary.Write32(Data.Array, OffsetToData, Binary.IsLittleEndian, (uint)value);
         }
     }
 
@@ -833,32 +834,32 @@ public class TfraBox : FullBox
 {
     public uint TrackId
     {
-        get => Binary.ReadU32(Data, OffsetToData, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
     }
 
     public ushort LengthSizeOfTrafNum
     {
-        get => (ushort)(Binary.ReadU8(Data, OffsetToData + 4, Binary.IsBigEndian) >> 4);
-        set => Binary.WriteBits(Data.Array, Binary.BytesToBits(OffsetToData + 4), 4, (byte)(value << 4), Binary.IsBigEndian);
+        get => (ushort)(Binary.ReadU8(Data, OffsetToData + 4, Binary.IsLittleEndian) >> 4);
+        set => Binary.WriteBits(Data.Array, Binary.BytesToBits(OffsetToData + 4), 4, (byte)(value << 4), Binary.IsLittleEndian);
     }
 
     public ushort LengthSizeOfTrunNum
     {
-        get => (ushort)((Binary.ReadU8(Data, OffsetToData + 4, Binary.IsBigEndian) >> 2) & 0x03);
-        set => Binary.WriteBits(Data.Array, Binary.BytesToBits(OffsetToData + 4), 2, (byte)(value << 2), Binary.IsBigEndian);
+        get => (ushort)((Binary.ReadU8(Data, OffsetToData + 4, Binary.IsLittleEndian) >> 2) & 0x03);
+        set => Binary.WriteBits(Data.Array, Binary.BytesToBits(OffsetToData + 4), 2, (byte)(value << 2), Binary.IsLittleEndian);
     }
 
     public ushort LengthSizeOfSampleNum
     {
-        get => (ushort)(Binary.ReadU8(Data, OffsetToData + 4, Binary.IsBigEndian) & 0x03);
-        set => Binary.WriteBits(Data.Array, Binary.BytesToBits(OffsetToData + 4), 2, (byte)value, Binary.IsBigEndian);
+        get => (ushort)(Binary.ReadU8(Data, OffsetToData + 4, Binary.IsLittleEndian) & 0x03);
+        set => Binary.WriteBits(Data.Array, Binary.BytesToBits(OffsetToData + 4), 2, (byte)value, Binary.IsLittleEndian);
     }
 
     public uint EntryCount
     {
-        get => Binary.ReadU32(Data, OffsetToData + 6, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData + 6, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData + 6, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData + 6, Binary.IsLittleEndian, value);
     }
 
     public IEnumerable<TrackFragmentRandomAccessEntryBox> Entries
@@ -901,38 +902,38 @@ public class TrackFragmentRandomAccessEntryBox : FullBox
 {
     public ulong Time
     {
-        get => Version == 0 ? Binary.ReadU32(Data, OffsetToData, Binary.IsBigEndian) : Binary.ReadU64(Data, OffsetToData, Binary.IsBigEndian);
+        get => Version == 0 ? Binary.ReadU32(Data, OffsetToData, Binary.IsLittleEndian) : Binary.ReadU64(Data, OffsetToData, Binary.IsLittleEndian);
         set
         {
             if (Version == 0)
-                Binary.Write32(Data.Array, OffsetToData, Binary.IsBigEndian, (uint)value);
+                Binary.Write32(Data.Array, OffsetToData, Binary.IsLittleEndian, (uint)value);
             else
-                Binary.Write64(Data.Array, OffsetToData, Binary.IsBigEndian, value);
+                Binary.Write64(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
         }
     }
 
     public uint MoofOffset
     {
-        get => Binary.ReadU32(Data, OffsetToData + (Version == 0 ? 4 : 8), Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData + (Version == 0 ? 4 : 8), Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData + (Version == 0 ? 4 : 8), Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData + (Version == 0 ? 4 : 8), Binary.IsLittleEndian, value);
     }
 
     public uint TrafNumber
     {
-        get => Binary.ReadU32(Data, OffsetToData + (Version == 0 ? 8 : 12), Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData + (Version == 0 ? 8 : 12), Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData + (Version == 0 ? 8 : 12), Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData + (Version == 0 ? 8 : 12), Binary.IsLittleEndian, value);
     }
 
     public uint TrunNumber
     {
-        get => Binary.ReadU32(Data, OffsetToData + (Version == 0 ? 12 : 16), Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData + (Version == 0 ? 12 : 16), Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData + (Version == 0 ? 12 : 16), Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData + (Version == 0 ? 12 : 16), Binary.IsLittleEndian, value);
     }
 
     public uint SampleNumber
     {
-        get => Binary.ReadU32(Data, OffsetToData + (Version == 0 ? 16 : 20), Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData + (Version == 0 ? 16 : 20), Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData + (Version == 0 ? 16 : 20), Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData + (Version == 0 ? 16 : 20), Binary.IsLittleEndian, value);
     }
 
     public TrackFragmentRandomAccessEntryBox(BaseMediaWriter writer, byte version)
@@ -945,32 +946,32 @@ public class TrexBox : FullBox
 {
     public uint TrackID
     {
-        get => Binary.ReadU32(Data, OffsetToData, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
     }
 
     public uint DefaultSampleDescriptionIndex
     {
-        get => Binary.ReadU32(Data, 8, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, 8, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, 8, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 8, Binary.IsLittleEndian, value);
     }
 
     public uint DefaultSampleDuration
     {
-        get => Binary.ReadU32(Data, 12, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, 12, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, 12, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 12, Binary.IsLittleEndian, value);
     }
 
     public uint DefaultSampleSize
     {
-        get => Binary.ReadU32(Data, 16, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, 16, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, 16, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 16, Binary.IsLittleEndian, value);
     }
 
     public uint DefaultSampleFlags
     {
-        get => Binary.ReadU32(Data, 20, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, 20, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, 20, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 20, Binary.IsLittleEndian, value);
     }
 
     public TrexBox(BaseMediaWriter writer, uint trackID, uint defaultSampleDescriptionIndex, uint defaultSampleDuration, uint defaultSampleSize, uint defaultSampleFlags)
@@ -988,26 +989,26 @@ public class TrunBox : FullBox
 {
     public uint SampleCount
     {
-        get => Binary.ReadU32(Data, OffsetToData, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
     }
 
     public ulong TrackDataOffset
     {
-        get => (Version == 0) ? Binary.ReadU32(Data, 8, Binary.IsBigEndian) : Binary.ReadU64(Data, 8, Binary.IsBigEndian);
+        get => (Version == 0) ? Binary.ReadU32(Data, 8, Binary.IsLittleEndian) : Binary.ReadU64(Data, 8, Binary.IsLittleEndian);
         set
         {
             if (Version == 0)
-                Binary.Write32(Data.Array, 8, Binary.IsBigEndian, (uint)value);
+                Binary.Write32(Data.Array, 8, Binary.IsLittleEndian, (uint)value);
             else
-                Binary.Write64(Data.Array, 8, Binary.IsBigEndian, value);
+                Binary.Write64(Data.Array, 8, Binary.IsLittleEndian, value);
         }
     }
 
     public uint FirstSampleFlags
     {
-        get => (Version == 0) ? 0 : Binary.ReadU32(Data, 16, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, 16, Binary.IsBigEndian, value);
+        get => (Version == 0) ? 0 : Binary.ReadU32(Data, 16, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 16, Binary.IsLittleEndian, value);
     }
 
     public IEnumerable<uint> SampleFlags
@@ -1017,7 +1018,7 @@ public class TrunBox : FullBox
             var offset = (Version == 0) ? 12 : 20;
             for (int i = 0; i < SampleCount; i++)
             {
-                yield return Binary.ReadU32(Data, ref offset, Binary.IsBigEndian);
+                yield return Binary.ReadU32(Data, ref offset, Binary.IsLittleEndian);
             }
         }
         set
@@ -1026,7 +1027,7 @@ public class TrunBox : FullBox
 
             foreach (var flag in value)
             {
-                Binary.Write32(Data.Array, ref offset, Binary.IsBigEndian, flag);
+                Binary.Write32(Data.Array, ref offset, Binary.IsLittleEndian, flag);
             }
         }
     }
@@ -1089,8 +1090,8 @@ public class MfhdBox : FullBox
 {
     public uint SequenceNumber
     {
-        get => Binary.ReadU32(Data, 4, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, 4, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, 4, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 4, Binary.IsLittleEndian, value);
     }
 
     public MfhdBox(BaseMediaWriter writer, uint sequenceNumber)
@@ -1120,121 +1121,121 @@ public class TkhdBox : FullBox
 {
     public ulong CreationTime
     {
-        get => Version == 1 ? Binary.ReadU64(Data, 4, Binary.IsBigEndian) : Binary.ReadU32(Data, 4, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU64(Data, 4, Binary.IsLittleEndian) : Binary.ReadU32(Data, 4, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write64(Data.Array, 4, Binary.IsBigEndian, value);
+                Binary.Write64(Data.Array, 4, Binary.IsLittleEndian, value);
             else
-                Binary.Write32(Data.Array, 4, Binary.IsBigEndian, (uint)value);
+                Binary.Write32(Data.Array, 4, Binary.IsLittleEndian, (uint)value);
         }
     }
 
     public ulong ModificationTime
     {
-        get => Version == 1 ? Binary.ReadU64(Data, 12, Binary.IsBigEndian) : Binary.ReadU32(Data, 8, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU64(Data, 12, Binary.IsLittleEndian) : Binary.ReadU32(Data, 8, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write64(Data.Array, 12, Binary.IsBigEndian, value);
+                Binary.Write64(Data.Array, 12, Binary.IsLittleEndian, value);
             else
-                Binary.Write32(Data.Array, 8, Binary.IsBigEndian, (uint)value);
+                Binary.Write32(Data.Array, 8, Binary.IsLittleEndian, (uint)value);
         }
     }
 
     public uint TrackId
     {
-        get => Version == 1 ? Binary.ReadU32(Data, 20, Binary.IsBigEndian) : Binary.ReadU32(Data, 12, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU32(Data, 20, Binary.IsLittleEndian) : Binary.ReadU32(Data, 12, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write32(Data.Array, 20, Binary.IsBigEndian, value);
+                Binary.Write32(Data.Array, 20, Binary.IsLittleEndian, value);
             else
-                Binary.Write32(Data.Array, 12, Binary.IsBigEndian, value);
+                Binary.Write32(Data.Array, 12, Binary.IsLittleEndian, value);
         }
     }
 
     public uint Reserved1
     {
-        get => Version == 1 ? Binary.ReadU32(Data, 24, Binary.IsBigEndian) : Binary.ReadU32(Data, 16, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU32(Data, 24, Binary.IsLittleEndian) : Binary.ReadU32(Data, 16, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write32(Data.Array, 24, Binary.IsBigEndian, value);
+                Binary.Write32(Data.Array, 24, Binary.IsLittleEndian, value);
             else
-                Binary.Write32(Data.Array, 16, Binary.IsBigEndian, value);
+                Binary.Write32(Data.Array, 16, Binary.IsLittleEndian, value);
         }
     }
 
     public ulong Duration
     {
-        get => Version == 1 ? Binary.ReadU64(Data, 28, Binary.IsBigEndian) : Binary.ReadU32(Data, 20, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU64(Data, 28, Binary.IsLittleEndian) : Binary.ReadU32(Data, 20, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write64(Data.Array, 28, Binary.IsBigEndian, value);
+                Binary.Write64(Data.Array, 28, Binary.IsLittleEndian, value);
             else
-                Binary.Write32(Data.Array, 20, Binary.IsBigEndian, (uint)value);
+                Binary.Write32(Data.Array, 20, Binary.IsLittleEndian, (uint)value);
         }
     }
 
     public uint Reserved2
     {
-        get => Version == 1 ? Binary.ReadU32(Data, 36, Binary.IsBigEndian) : Binary.ReadU32(Data, 24, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU32(Data, 36, Binary.IsLittleEndian) : Binary.ReadU32(Data, 24, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write32(Data.Array, 36, Binary.IsBigEndian, value);
+                Binary.Write32(Data.Array, 36, Binary.IsLittleEndian, value);
             else
-                Binary.Write32(Data.Array, 24, Binary.IsBigEndian, value);
+                Binary.Write32(Data.Array, 24, Binary.IsLittleEndian, value);
         }
     }
 
     public ushort Layer
     {
-        get => Version == 1 ? Binary.ReadU16(Data, 40, Binary.IsBigEndian) : Binary.ReadU16(Data, 26, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU16(Data, 40, Binary.IsLittleEndian) : Binary.ReadU16(Data, 26, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write16(Data.Array, 40, Binary.IsBigEndian, value);
+                Binary.Write16(Data.Array, 40, Binary.IsLittleEndian, value);
             else
-                Binary.Write16(Data.Array, 26, Binary.IsBigEndian, value);
+                Binary.Write16(Data.Array, 26, Binary.IsLittleEndian, value);
         }
     }
 
     public ushort AlternateGroup
     {
-        get => Version == 1 ? Binary.ReadU16(Data, 42, Binary.IsBigEndian) : Binary.ReadU16(Data, 28, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU16(Data, 42, Binary.IsLittleEndian) : Binary.ReadU16(Data, 28, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write16(Data.Array, 42, Binary.IsBigEndian, value);
+                Binary.Write16(Data.Array, 42, Binary.IsLittleEndian, value);
             else
-                Binary.Write16(Data.Array, 28, Binary.IsBigEndian, value);
+                Binary.Write16(Data.Array, 28, Binary.IsLittleEndian, value);
         }
     }
 
     public ushort Volume
     {
-        get => Version == 1 ? Binary.ReadU16(Data, 44, Binary.IsBigEndian) : Binary.ReadU16(Data, 30, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU16(Data, 44, Binary.IsLittleEndian) : Binary.ReadU16(Data, 30, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write16(Data.Array, 44, Binary.IsBigEndian, value);
+                Binary.Write16(Data.Array, 44, Binary.IsLittleEndian, value);
             else
-                Binary.Write16(Data.Array, 30, Binary.IsBigEndian, value);
+                Binary.Write16(Data.Array, 30, Binary.IsLittleEndian, value);
         }
     }
 
     public ushort Reserved3
     {
-        get => Version == 1 ? Binary.ReadU16(Data, 46, Binary.IsBigEndian) : Binary.ReadU16(Data, 32, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU16(Data, 46, Binary.IsLittleEndian) : Binary.ReadU16(Data, 32, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write16(Data.Array, 46, Binary.IsBigEndian, value);
+                Binary.Write16(Data.Array, 46, Binary.IsLittleEndian, value);
             else
-                Binary.Write16(Data.Array, 32, Binary.IsBigEndian, value);
+                Binary.Write16(Data.Array, 32, Binary.IsLittleEndian, value);
         }
     }
 
@@ -1245,7 +1246,7 @@ public class TkhdBox : FullBox
             int offset = Version == 1 ? 48 : 34;
             for (int i = 0; i < 9; i++) //Always 9?
             {
-                yield return Binary.ReadU16(Data, ref offset, Binary.IsBigEndian);
+                yield return Binary.ReadU16(Data, ref offset, Binary.IsLittleEndian);
             }
         }
         set
@@ -1254,32 +1255,32 @@ public class TkhdBox : FullBox
 
             foreach (var identity in value)
             {
-                Binary.Write16(Data.Array, ref offset, Binary.IsBigEndian, identity);
+                Binary.Write16(Data.Array, ref offset, Binary.IsLittleEndian, identity);
             }
         }
     }
 
     public uint Width
     {
-        get => Version == 1 ? Binary.ReadU32(Data, 84, Binary.IsBigEndian) : Binary.ReadU32(Data, 56, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU32(Data, 84, Binary.IsLittleEndian) : Binary.ReadU32(Data, 56, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write32(Data.Array, 84, Binary.IsBigEndian, value);
+                Binary.Write32(Data.Array, 84, Binary.IsLittleEndian, value);
             else
-                Binary.Write32(Data.Array, 56, Binary.IsBigEndian, value);
+                Binary.Write32(Data.Array, 56, Binary.IsLittleEndian, value);
         }
     }
 
     public uint Height
     {
-        get => Version == 1 ? Binary.ReadU32(Data, 88, Binary.IsBigEndian) : Binary.ReadU32(Data, 60, Binary.IsBigEndian);
+        get => Version == 1 ? Binary.ReadU32(Data, 88, Binary.IsLittleEndian) : Binary.ReadU32(Data, 60, Binary.IsLittleEndian);
         set
         {
             if (Version == 1)
-                Binary.Write32(Data.Array, 88, Binary.IsBigEndian, value);
+                Binary.Write32(Data.Array, 88, Binary.IsLittleEndian, value);
             else
-                Binary.Write32(Data.Array, 60, Binary.IsBigEndian, value);
+                Binary.Write32(Data.Array, 60, Binary.IsLittleEndian, value);
         }
     }
 
@@ -1447,20 +1448,20 @@ public class BtrtBox : FullBox
 {
     public uint BufferSizeDB
     {
-        get => Binary.ReadU32(Data, OffsetToData, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
     }
 
     public uint MaxBitrate
     {
-        get => Binary.ReadU32(Data, 8, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, 8, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, 8, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 8, Binary.IsLittleEndian, value);
     }
 
     public uint AvgBitrate
     {
-        get => Binary.ReadU32(Data, 12, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, 12, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, 12, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, 12, Binary.IsLittleEndian, value);
     }
 
     public BtrtBox(BaseMediaWriter writer, uint bufferSizeDB, uint maxBitrate, uint avgBitrate)
@@ -1476,8 +1477,8 @@ public class VmhdBox : FullBox
 {
     public ushort GraphicsMode
     {
-        get => Binary.ReadU16(Data, OffsetToData, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
     }
 
     public IEnumerable<ushort> OpColor
@@ -1486,14 +1487,14 @@ public class VmhdBox : FullBox
         {
             int offset = OffsetToData + 2;
             for (int i = 0; i < 3; i++) //Todo, if more than 3 should return based on offset...
-                yield return Binary.ReadU16(Data, ref offset, Binary.IsBigEndian);
+                yield return Binary.ReadU16(Data, ref offset, Binary.IsLittleEndian);
         }
         set
         {
             //Todo , verify only 3 in value.Count()
             int offset = OffsetToData + 2;
             foreach (var identity in value)
-                Binary.Write16(Data.Array, ref offset, Binary.IsBigEndian, identity);
+                Binary.Write16(Data.Array, ref offset, Binary.IsLittleEndian, identity);
         }
     }
 
@@ -1510,8 +1511,8 @@ public abstract class SampleEntryBox : FullBox
 {
     public ushort DataReferenceIndex
     {
-        get => Binary.ReadU16(Data, OffsetToData, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
     }
 
     public SampleEntryBox(BaseMediaWriter writer, string type, int dataSize)
@@ -1525,14 +1526,14 @@ public class VisualSampleEntryBox : SampleEntryBox
 {
     public ushort PreDefined1
     {
-        get => Binary.ReadU16(Data, OffsetToData + 6, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + 6, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + 6, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + 6, Binary.IsLittleEndian, value);
     }
 
     public ushort Reserved1
     {
-        get => Binary.ReadU16(Data, OffsetToData + 8, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + 8, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + 8, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + 8, Binary.IsLittleEndian, value);
     }
 
     public IEnumerable<uint> PreDefined2
@@ -1541,7 +1542,7 @@ public class VisualSampleEntryBox : SampleEntryBox
         {
             for (int i = 0; i < 3; i++)
             {
-                yield return Binary.ReadU32(Data, OffsetToData + 10 + i * 4, Binary.IsBigEndian);
+                yield return Binary.ReadU32(Data, OffsetToData + 10 + i * 4, Binary.IsLittleEndian);
             }
         }
         set
@@ -1552,45 +1553,45 @@ public class VisualSampleEntryBox : SampleEntryBox
             int i = 0;
             foreach(var val in value)
             {
-                Binary.Write32(Data.Array, OffsetToData + 10 + i++ * 4, Binary.IsBigEndian, val);
+                Binary.Write32(Data.Array, OffsetToData + 10 + i++ * 4, Binary.IsLittleEndian, val);
             }
         }
     }
 
     public ushort Width
     {
-        get => Binary.ReadU16(Data, OffsetToData + 22, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + 22, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + 22, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + 22, Binary.IsLittleEndian, value);
     }
 
     public ushort Height
     {
-        get => Binary.ReadU16(Data, OffsetToData + 24, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + 24, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + 24, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + 24, Binary.IsLittleEndian, value);
     }
 
     public ushort HorizResolution
     {
-        get => Binary.ReadU16(Data, OffsetToData + 26, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + 26, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + 26, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + 26, Binary.IsLittleEndian, value);
     }
 
     public ushort VertResolution
     {
-        get => Binary.ReadU16(Data, OffsetToData + 28, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + 28, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + 28, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + 28, Binary.IsLittleEndian, value);
     }
 
     public uint Reserved2
     {
-        get => Binary.ReadU32(Data, OffsetToData + 30, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData + 30, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData + 30, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData + 30, Binary.IsLittleEndian, value);
     }
 
     public ushort FrameCount
     {
-        get => Binary.ReadU16(Data, OffsetToData + 34, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + 34, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + 34, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + 34, Binary.IsLittleEndian, value);
     }
 
     // Add more properties specific to visual sample entries if needed
@@ -1606,38 +1607,38 @@ public class AudioSampleEntryBox : SampleEntryBox
 {
     public ushort EntryVersion
     {
-        get => Binary.ReadU16(Data, OffsetToData + 6, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + 6, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + 6, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + 6, Binary.IsLittleEndian, value);
     }
 
     public ushort ChannelCount
     {
-        get => Binary.ReadU16(Data, OffsetToData + 8, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + 8, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + 8, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + 8, Binary.IsLittleEndian, value);
     }
 
     public ushort SampleSize
     {
-        get => Binary.ReadU16(Data, OffsetToData + 10, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + 10, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + 10, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + 10, Binary.IsLittleEndian, value);
     }
 
     public ushort CompressionId
     {
-        get => Binary.ReadU16(Data, OffsetToData + 12, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + 12, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + 12, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + 12, Binary.IsLittleEndian, value);
     }
 
     public ushort PacketSize
     {
-        get => Binary.ReadU16(Data, OffsetToData + 14, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + 14, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + 14, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + 14, Binary.IsLittleEndian, value);
     }
 
     public uint SampleRate
     {
-        get => Binary.ReadU32(Data, OffsetToData + 16, Binary.IsBigEndian);
-        set => Binary.Write32(Data.Array, OffsetToData + 16, Binary.IsBigEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData + 16, Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData + 16, Binary.IsLittleEndian, value);
     }
 
     public AudioSampleEntryBox(BaseMediaWriter writer, string format, int dataSize)
@@ -1651,20 +1652,20 @@ public class Mp4aBox : AudioSampleEntryBox
 {
     public ushort AudioCodec
     {
-        get => Binary.ReadU16(Data, OffsetToData + 28, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + 28, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + 28, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + 28, Binary.IsLittleEndian, value);
     }
 
     public ushort AudioChannels
     {
-        get => Binary.ReadU16(Data, OffsetToData + 30, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + 30, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + 30, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + 30, Binary.IsLittleEndian, value);
     }
 
     public ushort AudioSampleSize
     {
-        get => Binary.ReadU16(Data, OffsetToData + 32, Binary.IsBigEndian);
-        set => Binary.Write16(Data.Array, OffsetToData + 32, Binary.IsBigEndian, value);
+        get => Binary.ReadU16(Data, OffsetToData + 32, Binary.IsLittleEndian);
+        set => Binary.Write16(Data.Array, OffsetToData + 32, Binary.IsLittleEndian, value);
     }
     public Mp4aBox(BaseMediaWriter writer)
         : base(writer, "mp4a", 36)
