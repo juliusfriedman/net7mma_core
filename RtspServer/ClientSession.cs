@@ -145,9 +145,6 @@ namespace Media.Rtsp//.Server
         //Counters for authenticate and attempts should use static key names, maybe use a dictionary..
         internal System.Collections.Hashtable Storage = System.Collections.Hashtable.Synchronized(new System.Collections.Hashtable());
 
-        //Keep track of the last send or receive when using Async
-        internal SocketAsyncEventArgs LastRecieve, LastSend;
-
         /// <summary>
         /// The RtpClient.TransportContext instances which provide valid data to this ClientSession.
         /// </summary>
@@ -393,16 +390,15 @@ namespace Media.Rtsp//.Server
 
             if (object.ReferenceEquals(m_RtspSocket, null).Equals(false) && HasRuningServer)
             {
-                if (LastRecieve == null)
+                var receiveArgs = new SocketAsyncEventArgs
                 {
-                    LastRecieve = new SocketAsyncEventArgs();
-                    LastRecieve.SetBuffer(m_Buffer.Array, m_Buffer.Offset, m_Buffer.Count);
-                    LastRecieve.UserToken = this;
-                    LastRecieve.Completed += m_Server.ProcessReceive;
-                }
-                LastRecieve.RemoteEndPoint = RemoteEndPoint;
-                if (!m_RtspSocket.ReceiveAsync(LastRecieve))
-                    ThreadPool.QueueUserWorkItem((o) => m_Server.ProcessReceive(m_Server, LastRecieve));
+                    UserToken = this,
+                    RemoteEndPoint = RemoteEndPoint
+                };
+                receiveArgs.SetBuffer(m_Buffer.Array, m_Buffer.Offset, m_Buffer.Count);
+                receiveArgs.Completed += m_Server.ProcessReceive;
+                if (!m_RtspSocket.ReceiveAsync(receiveArgs))
+                    ThreadPool.QueueUserWorkItem((o) => m_Server.ProcessReceive(m_Server, receiveArgs));
             }
 
         NotDisconnected:
@@ -439,17 +435,16 @@ namespace Media.Rtsp//.Server
                 IsDisconnected = false;
 
                 //The state is this session.
-                if(LastSend == null)
+                var sendArgs = new SocketAsyncEventArgs
                 {
-                    LastSend = new SocketAsyncEventArgs();
-                    LastSend.UserToken = this;
-                    LastSend.Completed += m_Server.ProcessSendComplete;
-                }
-                LastSend.RemoteEndPoint = other ?? RemoteEndPoint;
-                LastSend.SocketFlags = flags;
-                LastSend.SetBuffer(m_SendBuffer, offset, length);
-                if (!m_RtspSocket.SendAsync(LastSend))
-                    ThreadPool.QueueUserWorkItem((o) => m_Server.ProcessSendComplete(m_Server, LastSend)); 
+                    UserToken = this,
+                    SocketFlags = flags,
+                    RemoteEndPoint = other ?? RemoteEndPoint
+                };
+                sendArgs.SetBuffer(m_SendBuffer, offset, length);
+                sendArgs.Completed += m_Server.ProcessSendComplete;
+                if (!m_RtspSocket.SendAsync(sendArgs))
+                    ThreadPool.QueueUserWorkItem((o) => m_Server.ProcessSendComplete(m_Server, sendArgs)); 
             }
             catch (Exception ex)
             {
