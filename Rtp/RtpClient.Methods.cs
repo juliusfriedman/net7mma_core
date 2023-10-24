@@ -358,7 +358,7 @@ namespace Media.Rtp
         internal protected /*virtual*/ int SendReceiversReport(TransportContext context, bool force = false)
         {
             //Determine if the ReceiversReport can be sent.
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) | Common.IDisposedExtensions.IsNullOrDisposed(context)  //If the context is disposed
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || Common.IDisposedExtensions.IsNullOrDisposed(context)  //If the context is disposed
                 && //AND the call has not been forced AND the context IsRtcpEnabled 
                 (false.Equals(force) && context.IsRtcpEnabled)
                 // OR there is no RtcpSocket
@@ -2271,7 +2271,7 @@ namespace Media.Rtp
 
                     System.Net.Sockets.SocketError lastError = System.Net.Sockets.SocketError.SocketError;
 
-                    bool shouldStop = IsUndisposed.Equals(false) | m_StopRequested;
+                    bool shouldStop = IsUndisposed.Equals(false) || m_StopRequested;
 
                     //Should keep error Count and if errorCount == TransportContexts.Count then return otherwise reset.
 
@@ -2373,7 +2373,7 @@ namespace Media.Rtp
                             int usec = (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(tc.m_ReceiveInterval) >> 4;
 
                             //If receiving Rtp and the socket is able to read
-                            if (rtpEnabled && (shouldStop = IsUndisposed.Equals(false) | m_StopRequested).Equals(false)
+                            if (rtpEnabled && (shouldStop = IsUndisposed.Equals(false) || m_StopRequested).Equals(false)
                                 //&& (readSockets.Contains(tc.RtpSocket) || errorSockets.Contains(tc.RtpSocket))
                                 //Check if the socket can read data first or that data needs to be received
                                 && 
