@@ -665,7 +665,7 @@ namespace Media.Common.Extensions.Stream
                 {
                     TransactionBase tb = ((TransactionBase)e);//e as TransactionBase;
 
-                    tb.TransactionCompleted(sender, e);
+                    tb.TransactionCompleted?.Invoke(sender, e);
 
                     tb = null;
                 }
@@ -794,7 +794,7 @@ namespace Media.Common.Extensions.Stream
             public TransactionBase(bool shouldDispose, System.AsyncCallback start, System.IAsyncResult result, object state)
                 : this(shouldDispose)
             {
-                AsyncResult = start.BeginInvoke(result, start, state ?? this);
+                AsyncResult = start?.BeginInvoke(result, start, state ?? this);
             }
 
             //~TransactionBase() { Dispose(); }
@@ -855,7 +855,7 @@ namespace Media.Common.Extensions.Stream
                 {
                     CancelTokenSource.Cancel();
 
-                    if (TransactionCancelled != null) TransactionCancelled(null, this);
+                    TransactionCancelled?.Invoke(null, this);
                 }
             }
 
@@ -1027,6 +1027,17 @@ namespace Media.Common.Extensions.Stream
 
             Dispose:
                 Dispose(ShouldDispose = true);
+            }
+
+            protected internal override void Dispose(bool disposing)
+            {
+                if (disposing && Memory != null)
+                {
+                    Memory.Dispose();
+                    Memory = null;
+                }
+
+                base.Dispose(disposing);
             }
 
             #endregion
