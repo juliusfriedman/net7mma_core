@@ -1912,7 +1912,7 @@ namespace Media.UnitTests
     {
         public static void TestSourceList()
         {
-            Media.RFC3550.SourceList sourceList = new RFC3550.SourceList(0);
+            using Media.RFC3550.SourceList sourceList = new RFC3550.SourceList(0);
 
             if (sourceList.Count != 0) throw new System.Exception("Count");
         }
