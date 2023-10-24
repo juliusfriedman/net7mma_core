@@ -471,6 +471,8 @@ namespace Media.UnitTests
 
             if (LinkedQueue == null) exceptions.Add(new System.Exception("LinkedQueue is null"));
 
+            if (exceptions.Count > 0) throw new System.Exception("Errors Occured", new System.Exception(string.Join(Environment.NewLine, exceptions.Select(e => e.Message))));
+
             if (LinkedQueue.IsEmpty) exceptions.Add(new System.Exception("LinkedQueue IsEmpty"));
 
             if (LinkedQueue.Count != 2) exceptions.Add(new System.Exception("LinkedQueue Count Not 2"));
