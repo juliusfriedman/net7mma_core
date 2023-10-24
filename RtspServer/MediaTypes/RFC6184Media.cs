@@ -911,7 +911,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         //profile_idc, profile_iop, level_idc
 
-        internal protected readonly SimpleH264Encoder encoder;
+        internal protected SimpleH264Encoder encoder;
 
         #endregion
 
@@ -1030,6 +1030,17 @@ namespace Media.Rtsp.Server.MediaTypes
                     _image.Dispose();
             }
             catch { throw; }
+        }
+
+        public override void Dispose()
+        {
+            if (encoder != null)
+            {
+                encoder.Dispose();
+                encoder = null;
+            }
+
+            base.Dispose();
         }
 
         #endregion

@@ -14,7 +14,7 @@ using System.Collections.Generic;
 // SimpleH264Encoder can use any image Width or Height
 
 
-public class SimpleH264Encoder
+public class SimpleH264Encoder : IDisposable
 {
     #region Nested Types
 
@@ -980,6 +980,15 @@ public class SimpleH264Encoder
             data[1] = (byte)((len >> 8) & 0xFF);
             data[2] = (byte)((len >> 16) & 0xFF);
             data[3] = (byte)((len >> 24) & 0xFF);
+        }
+    }
+
+    public void Dispose()
+    {
+        if (h264encoder != null)
+        {
+            h264encoder.Dispose();
+            h264encoder = null;
         }
     }
 }
