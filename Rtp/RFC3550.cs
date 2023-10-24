@@ -438,7 +438,7 @@ namespace Media
         public static IEnumerable<byte> CreatePadding(int amount) //int? codeAmount
         {
             if (amount <= 0) return Enumerable.Empty<byte>();
-            if (amount > byte.MaxValue) Common.Binary.CreateOverflowException("amount", amount, byte.MinValue.ToString(), byte.MaxValue.ToString());
+            if (amount > byte.MaxValue) throw Common.Binary.CreateOverflowException("amount", amount, byte.MinValue.ToString(), byte.MaxValue.ToString());
             return Enumerable.Concat(Enumerable.Repeat(default(byte), amount - 1), Media.Common.Extensions.Linq.LinqExtensions.Yield(((byte)amount)));
         }
 
