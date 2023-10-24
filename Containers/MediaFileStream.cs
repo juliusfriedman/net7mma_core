@@ -475,7 +475,7 @@ namespace Media.Container
             {
                 long total = m_Position + count;
                 base.Write(array, offset, count);
-                if (total > m_Length) m_Length += total - m_Length;
+                if (total > m_Length) m_Length = total;
                 m_Position += count;
             }
             finally { RefreshFileInfo(); }
