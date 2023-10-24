@@ -180,8 +180,8 @@ namespace Media
                     hasSourceDescription = true;
 
                     //if not already checked for a cname check now
-                    if (false == hasCName && packet.BlockCount > 0) using (SourceDescriptionReport asReport = new SourceDescriptionReport(packet, false)) if ((hasCName = asReport.HasCName)) break;
-                }                
+                    if (packet.BlockCount > 0) using (SourceDescriptionReport asReport = new SourceDescriptionReport(packet, false)) if ((hasCName = asReport.HasCName)) break;
+                }
             }
 
             //Verify the SourceDesscription has a CName Item if present
@@ -348,7 +348,7 @@ namespace Media
                     hasSourceDescription = true;
 
                     //if not already checked for a cname check now
-                    if (false == hasCName && currentPacket.BlockCount > 0) using (SourceDescriptionReport asReport = new SourceDescriptionReport(currentPacket, false)) if ((hasCName = asReport.HasCName)) break;
+                    if (currentPacket.BlockCount > 0) using (SourceDescriptionReport asReport = new SourceDescriptionReport(currentPacket, false)) if ((hasCName = asReport.HasCName)) break;
                 }
 
                 if (hasSourceDescription && false == hasCName) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(currentPacket, "Invalid compound data, Source Description report did not have a CName SourceDescriptionItem.");
