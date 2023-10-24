@@ -288,13 +288,13 @@ namespace Media.Common.Structures
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Struct @this, IStruct that)
         {
-            return object.ReferenceEquals(@this, null) ? object.ReferenceEquals(@that, null) : object.ReferenceEquals(@this, that);
+            return @this.Equals(that).Equals(true);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Struct @this, IStruct that)
         {
-            return (object.ReferenceEquals(@this, null) ? object.ReferenceEquals(@that, null) : object.ReferenceEquals(@this, that)).Equals(false);
+            return (@this == that).Equals(false);
         }
 
         #endregion
