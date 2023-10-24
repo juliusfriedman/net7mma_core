@@ -856,7 +856,7 @@ namespace Media.Containers.Asf
 
                 //Parse Index....
 
-                Track created = new Track(asfObject, trackName, trackId, Created, Modified, (int)sampleCount, (int)height, (int)width, TimeSpan.FromMilliseconds(startTime / timeScale), TimeSpan.FromMilliseconds(duration), 
+                Track created = new Track(asfObject, trackName, trackId, Created, Modified, (int)sampleCount, (int)height, (int)width, TimeSpan.FromMilliseconds(startTime / (double)timeScale), TimeSpan.FromMilliseconds(duration), 
                     //Frames Per Seconds
                     // duration is in milliseconds, converted to seconds, scaled
                     mediaType == Sdp.MediaType.video ?
