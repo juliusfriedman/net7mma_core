@@ -1253,7 +1253,7 @@ namespace Media.Rtcp
             foreach (SourceDescriptionChunk currentChunk in GetChunkIterator())
             {
                 //If the chunk yielded in the iterator matches the chunk identifier a match is present.
-                if (contained = chunk.ChunkData == currentChunk.ChunkData)
+                if (contained = (chunk.ChunkData == currentChunk.ChunkData))
                 {
                     break;
                 }
