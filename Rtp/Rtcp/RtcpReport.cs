@@ -323,13 +323,11 @@ namespace Media.Rtcp
 
         public virtual bool Remove(IReportBlock reportBlock)
         {
-            if (reportBlock == null) return false;
+            if (reportBlock == null) throw new ArgumentNullException("reportBlock");
 
             if (IsReadOnly) throw new InvalidOperationException("The RtcpReport can only be modified when IsReadOnly is false.");
 
             if (BlockCount <= 0) throw new ArgumentOutOfRangeException("reportBlock", "The BlockCount property of the RtcpReport is at the lowest value possible.");
-
-            if (reportBlock == null) throw new ArgumentNullException("reportBlock");
 
             //Preserve the state in the enumerator
             using (var enumerator = GetEnumerator())
