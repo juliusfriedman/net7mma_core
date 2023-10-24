@@ -1480,7 +1480,7 @@ namespace Media.Common
         /// <returns></returns>
         public static Int64 ReadInt64MSB(byte[] data, int byteOffset, int bitCount, ref byte bitOffset)
         {
-            return (Int64)ReadInt64MSB(data, byteOffset, bitCount, ref bitOffset);
+            return (Int64)ReadUInt64MSB(data, byteOffset, bitCount, ref bitOffset);
         }
 
         /// <summary>
