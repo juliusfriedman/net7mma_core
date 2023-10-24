@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Media.Codecs.Image.Transformations
@@ -234,7 +235,7 @@ namespace Media.Codecs.Image.Transformations
                                 dest[currentChroma + dstComponentOffset] = AverageCr(cache, quality);
 
                                 //Move the Chroma offset
-                                ++offChr;
+                                Interlocked.Increment(ref offChr);
 
                                 break;
                             }
