@@ -829,7 +829,7 @@ namespace Media.Common
 
                 //Makes two checks in parallel
                 //If the LeastSignificantBit is not set or the MostSignificantBit is set then throw an exception
-                if (GetBit(ref byteOnStack, m_MostSignificantBit) | false == GetBit(ref byteOnStack, m_LeastSignificantBit)) throw new InvalidOperationException("Did not correctly detect BitOrder");
+                if (GetBit(ref byteOnStack, m_MostSignificantBit) || false == GetBit(ref byteOnStack, m_LeastSignificantBit)) throw new InvalidOperationException("Did not correctly detect BitOrder");
 
                 //Verify the ByteOrder probe
 #if false == NATIVE
