@@ -314,9 +314,9 @@ namespace Media.Common.Structures
 
         bool Interfaces.ITrySet.TrySet(object t)
         {
-            if ((t is IStruct).Equals(false)) return false;
+            if (t is not Struct s) return false;
 
-            this = (Struct)(t as IStruct);
+            this = s;
 
             return true;
         }
