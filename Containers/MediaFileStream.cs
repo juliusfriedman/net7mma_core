@@ -405,9 +405,9 @@ namespace Media.Container
 
         protected virtual void CacheNode(Node n, bool useInstance = false, bool keepData = false, bool checkSelf = true)
         {
-            if (checkSelf && n.Master != this) throw new InvalidOperationException("n.Master is not this => [MediaFileStream] instance.");
+            if (n == null) throw new ArgumentNullException("n");
 
-            if(n == null) throw new ArgumentNullException("n");
+            if (checkSelf && n.Master != this) throw new InvalidOperationException("n.Master is not this => [MediaFileStream] instance.");
 
             if (m_NodeCache == null) throw new ArgumentNullException("No Caching Polocy");
 
