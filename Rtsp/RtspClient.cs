@@ -4891,7 +4891,7 @@ namespace Media.Rtsp
                                     goto Describe;
                                 }
 
-                                return describe;
+                                return response;
                             }
                         //Handle NotFound
                         case RtspStatusCode.NotFound:
