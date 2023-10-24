@@ -509,11 +509,6 @@ public class SimpleH264Encoder : IDisposable
             m_frame.nyuv420pframesize = nYsize + nCsize + nCsize;
 
             m_frame.yuv420pframe.pYCbCr = new byte[m_frame.nyuv420pframesize];
-
-            if (m_frame.yuv420pframe.pYCbCr == null)
-            {
-                throw new System.Exception("Error: memory alloc");
-            }
         }
 
         //! Creates SPS NAL and add it to the output
