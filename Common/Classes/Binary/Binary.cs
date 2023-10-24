@@ -2371,7 +2371,7 @@ namespace Media.Common
 
         public static void WriteReversedInteger(byte[] buffer, int index, int count, long value)
         {
-            WriteReversedInteger(buffer, index, count, value);
+            WriteReversedInteger(buffer, index, count, (ulong)value);
         }
 
         [CLSCompliant(false)]
