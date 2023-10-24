@@ -2231,9 +2231,9 @@ namespace Media.Rtsp
         internal protected virtual void ProcessServerSentRequest(RtspMessage toProcess = null)
         {
             if (false == IgnoreServerSentMessages &&
-                toProcess == null ||
+                (toProcess == null ||
                 toProcess.RtspMessageType != RtspMessageType.Request ||
-                false == toProcess.IsComplete) return;
+                false == toProcess.IsComplete)) return;
 
             //Ensure suported methods contains the method requested.
             SupportedMethods.Add(toProcess.MethodString);
