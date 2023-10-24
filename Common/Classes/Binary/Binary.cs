@@ -1581,7 +1581,12 @@ namespace Media.Common
                 // Check if we won't read more bytes than there are available.
                 if (byteCount > (data.Length - byteOffset))
                 {
-                    throw new ArgumentOutOfRangeException("Provided arguments would require reading outside of the data array upper bounds.");
+                    throw new ArgumentOutOfRangeException(nameof(byteCount), byteCount, "Provided arguments would require reading outside of the data array upper bounds.");
+                }
+
+                if (byteCount == 0)
+                {
+                    return 0;
                 }
 
                 // The first byte needs to be masked with the bitOffset, as we might not read the first few bits
@@ -3201,6 +3206,8 @@ namespace Media.UnitTests
                     if (Common.Binary.ReadUInt64MSB(Octets, 0, Media.Common.Binary.BitsPerLong, 0) != Media.Common.Binary.ReadBitsMSB(Octets, 0, Media.Common.Binary.BitsPerLong)) throw new Exception("ReadInt64MSB Does not work.");
 
                     if (Common.Binary.ReadUInt64LSB(Octets, 0, Media.Common.Binary.BitsPerLong, 0) != Media.Common.Binary.ReadBitsLSB(Octets, 0, Media.Common.Binary.BitsPerLong)) throw new Exception("ReadInt64LSB Does not work.");
+
+                    if (Common.Binary.ReadUInt64LSB(Octets, 0, 0, 0) != 0) throw new Exception("ReadUInt64MSB Does not work.");
                 }
 
                 #endregion
