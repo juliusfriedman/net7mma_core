@@ -363,12 +363,13 @@ namespace Media.Common.Extensions.Stream
                 {
                     if (credential != null) webClient.Credentials = credential;
 
-                    using (var d = new DownloadAdapter(location)
+                    var d = new DownloadAdapter(location);
+
+                    try
                     {
-                        Request = webClient,
-                        ResponseOutputStream = webClient.ResponseStream
-                    })
-                    {
+                        d.Request = webClient;
+                        d.ResponseOutputStream = webClient.ResponseStream;
+                        
                         if (webClient.ResponseHeaders != null)
                         {
                             string contentLength = webClient.ResponseHeaders["Content-Length"];
@@ -379,6 +380,11 @@ namespace Media.Common.Extensions.Stream
                         }
 
                         return d;
+                    }
+                    catch (System.Exception ex)
+                    {
+                        d.Dispose();
+                        throw;
                     }
                 }
             }
@@ -453,6 +459,59 @@ namespace Media.Common.Extensions.Stream
 
         }
 
+        /// <summary>
+        /// Wraps <see cref="DownloadAdapter.ResponseOutputStream"/> and ensures it's <see cref="DownloadAdapter"/> alive as
+        /// <see cref="DownloadAdapter.ResponseOutputStream"/> lifecycle bound to <see cref="DownloadAdapter.Dispose(bool)"/>.
+        /// </summary>
+        internal sealed class DownloadStream : System.IO.Stream
+        {
+            private DownloadAdapter adapter;
+
+            public DownloadStream(DownloadAdapter adapter)
+            {
+                System.ArgumentNullException.ThrowIfNull(adapter);
+
+                this.adapter = adapter; 
+            }
+
+            private System.IO.Stream ResponseStream
+            {
+                get
+                {
+                    return adapter is null
+                        ? throw new System.ObjectDisposedException(nameof(adapter))
+                        : adapter.ResponseOutputStream;
+                }
+            }
+
+            public override bool CanRead => ResponseStream.CanRead;
+            public override bool CanSeek => ResponseStream.CanSeek;
+            public override bool CanWrite => ResponseStream.CanWrite;
+            public override long Length => ResponseStream.Length;
+            public override long Position { get => ResponseStream.Position; set => ResponseStream.Position = value; }
+
+            public override void Flush() => ResponseStream.Flush();
+
+            public override int Read(byte[] buffer, int offset, int count) => ResponseStream.Read(buffer, offset, count);
+
+            public override long Seek(long offset, System.IO.SeekOrigin origin) => ResponseStream.Seek(offset, origin);
+
+            public override void SetLength(long value) => ResponseStream.SetLength(value);
+
+            public override void Write(byte[] buffer, int offset, int count) => ResponseStream.Write(buffer, offset, count);
+
+            protected override void Dispose(bool disposing)
+            {
+                if (disposing && adapter != null)
+                {
+                    adapter.Dispose();
+                    adapter = null;
+                }
+
+                base.Dispose(disposing);
+            }
+        }
+
         #endregion
 
         #region Download / TryDownload
@@ -463,8 +522,7 @@ namespace Media.Common.Extensions.Stream
         {
             if (false == location.Scheme.StartsWith(System.Uri.UriSchemeHttp, System.StringComparison.InvariantCultureIgnoreCase)) throw new System.ArgumentException("Must start with System.Uri.UriSchemeHttp", "location.Scheme");
 
-            using (DownloadAdapter d = DownloadAdapter.HttpWebRequestDownload(location, proxy, credential))
-                return d.ResponseOutputStream;
+            return new DownloadStream(DownloadAdapter.HttpWebRequestDownload(location, proxy, credential));
         }
 
         public static bool TryHttpWebRequestDownload(System.Uri location, out System.IO.Stream result, System.Net.WebProxy proxy = null, System.Net.NetworkCredential credential = null)
@@ -489,8 +547,7 @@ namespace Media.Common.Extensions.Stream
         {
             if (false == location.Scheme.StartsWith(System.Uri.UriSchemeFile, System.StringComparison.InvariantCultureIgnoreCase)) throw new System.ArgumentException("Must start with System.Uri.UriSchemeFile", "location.Scheme");
 
-            using (DownloadAdapter d = DownloadAdapter.WebClientDownload(location, credential))
-                return d.ResponseOutputStream;
+            return new DownloadStream(DownloadAdapter.WebClientDownload(location, credential));
         }
 
         public static bool TryFileDownload(System.Uri location, out System.IO.Stream result, System.Net.NetworkCredential credential = null)
@@ -515,8 +572,7 @@ namespace Media.Common.Extensions.Stream
 
         public static System.IO.Stream WebClientDownload(System.Uri location, System.Net.NetworkCredential credential = null)
         {
-            using (DownloadAdapter d = DownloadAdapter.WebClientDownload(location, credential))
-                return d.ResponseOutputStream;
+            return new DownloadStream(DownloadAdapter.WebClientDownload(location, credential));
         }
 
         public static bool TryWebClientDownload(System.Uri location, out System.IO.Stream result, System.Net.NetworkCredential credential = null)
