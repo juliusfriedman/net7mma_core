@@ -41,6 +41,7 @@ namespace Media.Codec
         public Codec(string name, Media.Codec.MediaType mediaType, Common.Binary.ByteOrder defaultByteOrder, int defaultComponentCount, int defaultBitsPerComponent)
         {
             MediaTypes = mediaType;
+            DefaultByteOrder = defaultByteOrder;
 
             if (string.IsNullOrWhiteSpace(name)) throw new System.InvalidOperationException("name cannot be null or consist only of whitespace.");
 
