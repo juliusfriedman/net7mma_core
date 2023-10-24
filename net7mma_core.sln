@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codecs.Audio", "Codecs\Audi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codecs.Image", "Codecs\Image\Codecs.Image.csproj", "{741F515C-B960-4FCD-80B8-845E08D9545E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codecs.Video", "Codecs\VIdeo\Codecs.Video.csproj", "{F585B86C-728E-45E0-BC76-F9FB0384DE99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codecs.Video", "Codecs\Video\Codecs.Video.csproj", "{F585B86C-728E-45E0-BC76-F9FB0384DE99}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codec.H264", "Codecs\Video\H264\Codec.H264.csproj", "{E72BA4A7-E23A-45FA-A967-152D68F80DD3}"
 EndProject
