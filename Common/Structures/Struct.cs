@@ -162,7 +162,7 @@ namespace Media.Common.Structures
 
         public static IStruct GetDefault(out IStruct @this)
         {
-            return @this = @this = default(IStruct);
+            return @this = default(IStruct);
         }
 
         public static bool Get(ref IStruct @this)
