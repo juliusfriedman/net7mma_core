@@ -262,8 +262,6 @@ namespace Media.Rtsp
         //Handles the Restarting of streams which needs to be and disconnects clients which are inactive.
         internal Timer m_Maintainer;
 
-        int m_MaintainerThreadId = 0;
-
         #endregion
 
         #region Propeties
@@ -1476,7 +1474,7 @@ namespace Media.Rtsp
                     }), Common.Extensions.Thread.ThreadExtensions.MinimumStackSize)
                     {
                         Priority =  m_ServerThread.Priority,
-                        Name = "Maintenance-" + Interlocked.Increment(ref m_MaintainerThreadId),
+                        Name = "Maintenance-" + m_ServerThread.Name,
                         ApartmentState = ApartmentState.MTA
                     }.Start();
                 }
