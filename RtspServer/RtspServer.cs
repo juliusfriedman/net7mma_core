@@ -1474,6 +1474,7 @@ namespace Media.Rtsp
                     }), Common.Extensions.Thread.ThreadExtensions.MinimumStackSize)
                     {
                         Priority =  m_ServerThread.Priority,
+                        Name = "Maintenance",
                         ApartmentState = ApartmentState.MTA
                     }.Start();
                 }
