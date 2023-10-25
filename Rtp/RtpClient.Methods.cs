@@ -2117,9 +2117,9 @@ namespace Media.Rtp
 
                 //handle for recieved frames
                 //todo, length may be more valuable than bool, - means in, positive is out
-                if (tuple.Received && tuple.Frame is RtpFrame rtpf)
+                if (tuple.Received && tuple.Frame is RtpFrame frame)
                 {
-                    ParallelRtpFrameChanged(rtpf, tuple.Context, tuple.Final);
+                    ParallelRtpFrameChanged(frame, tuple.Context, tuple.Final);
                 }
                 else
                 {
