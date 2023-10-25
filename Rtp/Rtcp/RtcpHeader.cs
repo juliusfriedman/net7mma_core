@@ -225,7 +225,7 @@ namespace Media.Rtcp
                 /*CheckDisposed();*/
 
                 //Write the value
-                if (value > RtcpHeader.MinimumLengthInWords) throw Binary.CreateOverflowException("LengthInWordsMinusOne", value, ushort.MinValue.ToString(), ushort.MaxValue.ToString());
+                if (value < RtcpHeader.MinimumLengthInWords || value > RtcpHeader.MaximumLengthInWords) throw Binary.CreateOverflowException("LengthInWordsMinusOne", value, RtcpHeader.MinimumLengthInWords.ToString(), RtcpHeader.MaximumLengthInWords.ToString());
 
                 Binary.Write16(SegmentToLast6Bytes.Array, SegmentToLast6Bytes.Offset, Common.Binary.IsLittleEndian, (ushort)value);
             }
