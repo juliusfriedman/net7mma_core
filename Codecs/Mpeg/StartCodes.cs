@@ -35,7 +35,7 @@ namespace Media.Containers.Mpeg
         /// </summary>
         /// <param name="b"></param>
         /// <returns></returns>
-        public static bool IsSystemStartCode(byte b) { return b >= 0xBA && b <= byte.MaxValue; }
+        public static bool IsSystemStartCode(byte b) { return b >= 0xBA; }
 
         //0 - 31
         public const byte Picture = 0x00;
