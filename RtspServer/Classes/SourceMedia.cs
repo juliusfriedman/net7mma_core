@@ -241,7 +241,7 @@ namespace Media.Rtsp.Server
         {
             if (DecodeFrames && decoded != null && FrameDecoded != null)
             {
-                FrameDecoded(this, decoded);
+                FrameDecoded?.Invoke(this, decoded);
             }
         }
 
@@ -249,7 +249,7 @@ namespace Media.Rtsp.Server
         {
             if (DecodeFrames && decoded != null && DataDecoded != null)
             {
-                DataDecoded(this, decoded);
+                DataDecoded?.Invoke(this, decoded);
             }
         }
 
