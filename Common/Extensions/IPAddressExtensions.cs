@@ -164,7 +164,9 @@ namespace Media.Common.Extensions.IPAddress
                         return highIP >= 224 && highIP <= 239;
 #else
 
+#pragma warning disable CS0618 // We expect IPv4 address. Type or member is obsolete
                         byte highIP = (byte)(ipAddress.Address & byte.MaxValue); // ipAddress.GetAddressBytes()[0];
+#pragma warning restore CS0618 // Type or member is obsolete
 
                         return highIP >= 224 && highIP <= 239;
 #endif
