@@ -2109,38 +2109,42 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         void HandleEvent()
         {
-            //Dequeue the event frame
-            System.Tuple<RtpClient.TransportContext, Common.BaseDisposable, bool, bool> tuple;
-
             //handle the event frame
-            if (m_EventData.TryDequeue(out tuple))
+            if (m_EventData.TryDequeue(out (RtpClient.TransportContext Context, Common.BaseDisposable Frame, bool Final, bool Received) tuple))
             {
                 //If the item was already disposed then do nothing
-                if (Common.IDisposedExtensions.IsNullOrDisposed(tuple.Item2)) return;
+                if (Common.IDisposedExtensions.IsNullOrDisposed(tuple.Frame)) return;
 
                 //handle for recieved frames
                 //todo, length may be more valuable than bool, - means in, positive is out
-                if (tuple.Item4 && tuple.Item2 is RtpFrame rtpf)
+                if (tuple.Received && tuple.Frame is RtpFrame rtpf)
                 {
-                    ParallelRtpFrameChanged(rtpf, tuple.Item1, tuple.Item3);
+                    ParallelRtpFrameChanged(rtpf, tuple.Context, tuple.Final);
                 }
                 else
                 {
                     //Determine what type of packet
-                    Common.IPacket what = tuple.Item2 as Common.IPacket;
+                    Common.IPacket what = tuple.Frame as Common.IPacket;
 
                     //handle the packet event
                     if (what is RtpPacket rtp)
                     {
-                        if (tuple.Item4) ParallelRtpPacketRecieved(rtp, tuple.Item1); 
-                        else ParallelRtpPacketSent(rtp, tuple.Item1);
+                        if (tuple.Received)
+                            ParallelRtpPacketRecieved(rtp, tuple.Context);
+                        else
+                            ParallelRtpPacketSent(rtp, tuple.Context);
                     }
                     else if (what is Rtcp.RtcpPacket rtcp)
                     {
-                        if (tuple.Item4) ParallelRtcpPacketRecieved(rtcp, tuple.Item1);
-                        else ParallelRtcpPacketSent(rtcp, tuple.Item1);
+                        if (tuple.Received)
+                            ParallelRtcpPacketRecieved(rtcp, tuple.Context);
+                        else
+                            ParallelRtcpPacketSent(rtcp, tuple.Context);
                     }
-                    else ParallelOutOfBandData(what as Media.Common.Classes.PacketBase);
+                    else
+                    {
+                        ParallelOutOfBandData(what as Media.Common.Classes.PacketBase);
+                    }
 
                     //Free whatever was used now that the event is handled.
                     //if(false == tuple.Item2.ShouldDispose) Common.BaseDisposable.SetShouldDispose(tuple.Item2, true, true);
