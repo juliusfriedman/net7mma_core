@@ -190,46 +190,6 @@ namespace Media.Container
             m_Source = new Uri(stream.Name);
         }
 
-        [Obsolete("This constructor has been deprecated.  Please use new FileStream(SafeFileHandle handle, FileAccess access) instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
-        internal protected MediaFileStream(System.IO.FileStream stream, Uri uri, System.IO.FileAccess access = System.IO.FileAccess.Read, bool ownsHandle = true)
-            : base(stream.Handle, access, ownsHandle)
-        {
-            m_Source = uri ?? new Uri(stream.Name);
-        }
-
-        /// <summary>
-        /// Creates a new FileStream from the given.
-        /// </summary>
-        /// <param name="stream"></param>
-        /// <param name="access"></param>
-        /// <param name="uri"></param>
-        /// <param name="fi"></param>
-        /// <param name="afterClose"></param>
-        public MediaFileStream(System.IO.FileStream stream, System.IO.FileAccess access = System.IO.FileAccess.Read, Uri uri = null, System.IO.FileInfo fi = null, Action afterClose = null)
-            : this(stream, uri, access)
-        {
-            try
-            {
-                AfterClose = afterClose;
-
-                if (m_Source.IsFile)
-                {
-                    FileInfo = new System.IO.FileInfo(m_Source.LocalPath);
-
-                    Position = stream.Position;
-
-                    m_Length = stream.Length;
-                }
-                else if (fi == null)
-                {
-                    //Host?Scheme?GetType()?
-                    FileInfo = new System.IO.FileInfo(GetCurrentWorkingDirectory().Directory.ToString() + m_Source.Segments.Last());
-                }
-                else FileInfo = fi;
-            }
-            catch { throw; }
-        }
-
         //Giving a SocketHere is almost pointless even though it can be done, the problem comes when seeking which is what is desired anyway.
 
         /// <summary>
