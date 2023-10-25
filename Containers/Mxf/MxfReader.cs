@@ -453,7 +453,7 @@ namespace Media.Containers.Mxf
 
         static bool CompareUL(Guid a, Guid b, bool compareRegistry = false, bool compareVersion = false, bool compareKind = false)
         {
-            if (a == null) return b == null;
+            if (a == default) return b == default;
 
             //Use the hash code if exact
             if (compareRegistry && compareVersion && compareKind) return a.GetHashCode() == b.GetHashCode();
