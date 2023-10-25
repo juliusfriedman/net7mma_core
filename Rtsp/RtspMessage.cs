@@ -1462,8 +1462,7 @@ namespace Media.UnitTests
             System.Net.IPAddress sourceIp, destinationIp;
 
             //never give protocol, some weird client or server may have this wonderful datum at random places.
-            string protocol,
-                mode;
+            string mode;
 
             if (false == Media.Rtsp.RtspHeaders.TryParseTransportHeader(testVector, out ssrc, out sourceIp, out rtpServerPort, out rtcpServerPort, out rtpClientPort, out rtcpClientPort, out interleaved, out dataChannel, out controlChannel, out mode, out unicast, out multicast, out destinationIp, out ttl))
             {

@@ -1288,7 +1288,7 @@ namespace Media.Rtsp//.Server
 
             string mode;
 
-            bool unicast, multicast, interleaved, multiplexing;
+            bool unicast, multicast, interleaved;
 
             byte dataChannel = 0, controlChannel = 1;
 
