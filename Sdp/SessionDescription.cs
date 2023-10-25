@@ -1112,7 +1112,7 @@ namespace Media.Sdp
         public void UpdateVersion(System.Threading.CancellationToken token)
         {
 
-            if (object.ReferenceEquals(token , null).Equals(false) && token.Equals(m_UpdateTokenSource.Token).Equals(false)) throw new InvalidOperationException("Must obtain the CancellationToken from a call to BeginUpdate.");
+            if (token.Equals(m_UpdateTokenSource.Token).Equals(false)) throw new InvalidOperationException("Must obtain the CancellationToken from a call to BeginUpdate.");
 
             if(token.IsCancellationRequested.Equals(false)
                 &&
@@ -1158,9 +1158,6 @@ namespace Media.Sdp
         public void EndUpdate(System.Threading.CancellationToken token, bool updateVersion)
         {
             CheckDisposed();
-
-            //Ensure a token
-            if (object.ReferenceEquals(token, null)) return;
 
             //That came from out cancellation source
             if (token.Equals(m_UpdateTokenSource.Token).Equals(false)) throw new InvalidOperationException("Must obtain the CancellationToken from a call to BeginUpdate.");
