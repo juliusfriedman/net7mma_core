@@ -95,5 +95,12 @@ namespace Media.Rtsp.Server.Loggers
             catch { throw; }
             finally { Console.ForegroundColor = previous; }
         }
+
+        public override void Dispose()
+        {
+            Logger.Dispose();
+
+            base.Dispose();
+        }
     }
 }
