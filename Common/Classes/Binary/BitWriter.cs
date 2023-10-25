@@ -117,10 +117,9 @@
         /// <param name="bitOrder"></param>
         /// <param name="bitOffset"></param>
         /// <param name="byteOffset"></param>
-        /// <param name="cacheSize"></param>
         /// <param name="leaveOpen"></param>
-        public BitWriter(byte[] buffer, bool writable, Common.Binary.BitOrder bitOrder, int bitOffset, int byteOffset, int cacheSize = 32, bool leaveOpen = false) 
-            : this(buffer, writable, bitOrder, cacheSize, leaveOpen)
+        public BitWriter(byte[] buffer, bool writable, Common.Binary.BitOrder bitOrder, int bitOffset, int byteOffset, bool leaveOpen = false) 
+            : this(buffer, writable, bitOrder, leaveOpen)
         {
             m_BitIndex = bitOffset;
 
@@ -135,7 +134,7 @@
         /// <param name="bitOrder"></param>
         /// <param name="cacheSize"></param>
         /// <param name="leaveOpen"></param>
-        public BitWriter(byte[] buffer, bool writable, Common.Binary.BitOrder bitOrder, int cacheSize = 32, bool leaveOpen = false) : base(true)
+        public BitWriter(byte[] buffer, bool writable, Common.Binary.BitOrder bitOrder, bool leaveOpen = false) : base(true)
         {
             m_BaseStream = new System.IO.MemoryStream(buffer, writable);
 

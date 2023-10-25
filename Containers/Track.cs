@@ -76,6 +76,8 @@ namespace Media.Container
             this.Width = width;
             this.Height = height;
             this.Id = id;
+            this.Created = created;
+            this.Modified = modified;
             this.Position = position;
             this.Duration = duration;
             this.Rate = frameRate;

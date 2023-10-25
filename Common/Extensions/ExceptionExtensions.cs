@@ -96,12 +96,13 @@ namespace Media.Common.Extensions.Exception
             }
 
 #if DEBUG
-            System.Diagnostics.StackFrame StackFrame;
+            private readonly System.Diagnostics.StackFrame StackFrame;
             
-            public ArgumentNullOrDisposedException(string paramName, IDisposed what, int stackFrameDepth, bool fNeedFileInfo)
+            public ArgumentNullOrDisposedException(string paramName, IDisposed what, int stackFrameDepth, bool fNeedFileInfo) : this(paramName)
             {
                 //Warning, memory consumption...
                 StackFrame = new System.Diagnostics.StackFrame(stackFrameDepth, fNeedFileInfo);
+                Disposed = what;
             }
 #endif
             public ArgumentNullOrDisposedException(IDisposed what) : this(string.Empty, what) { }

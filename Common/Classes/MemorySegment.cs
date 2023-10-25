@@ -605,13 +605,13 @@ namespace Media.Common
             return new MemorySegment(segment.Array, offset, length, shouldDispose);
         }
 
-        public static int Find(byte[] source, int start, int count, MemorySegment first, params MemorySegment[] segments)
+        public static int Find(byte[] source, int start, int count, params MemorySegment[] segments)
         {
             int found = 0;
 
             int needed = count;
 
-            first = null;
+            MemorySegment first = null;
 
             foreach (var segment in segments)
             {

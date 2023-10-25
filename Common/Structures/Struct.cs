@@ -162,7 +162,7 @@ namespace Media.Common.Structures
 
         public static IStruct GetDefault(out IStruct @this)
         {
-            return @this = @this = default(IStruct);
+            return @this = default(IStruct);
         }
 
         public static bool Get(ref IStruct @this)
@@ -288,13 +288,13 @@ namespace Media.Common.Structures
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Struct @this, IStruct that)
         {
-            return object.ReferenceEquals(@this, null) ? object.ReferenceEquals(@that, null) : object.ReferenceEquals(@this, that);
+            return @this.Equals(that).Equals(true);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Struct @this, IStruct that)
         {
-            return (object.ReferenceEquals(@this, null) ? object.ReferenceEquals(@that, null) : object.ReferenceEquals(@this, that)).Equals(false);
+            return (@this == that).Equals(false);
         }
 
         #endregion
@@ -314,9 +314,9 @@ namespace Media.Common.Structures
 
         bool Interfaces.ITrySet.TrySet(object t)
         {
-            if ((t is IStruct).Equals(false)) return false;
+            if (t is not Struct s) return false;
 
-            this = (Struct)(t as IStruct);
+            this = s;
 
             return true;
         }

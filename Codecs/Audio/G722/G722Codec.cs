@@ -376,8 +376,7 @@
             {
                 if (state.ItuTestMode)
                 {
-                    xlow =
-                    xhigh = inputBuffer[j++] >> 1;
+                    xlow = xhigh = inputBuffer[j++] >> 1;
                 }
                 else
                 {

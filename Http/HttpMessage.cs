@@ -2857,7 +2857,7 @@ namespace Media.UnitTests
                     {
                         if (false == (serialized.HttpMethod == request.HttpMethod &&
                         serialized.Location == request.Location &&
-                        serialized.Location == request.Location) ||
+                        serialized.Version == request.Version) ||
                         false == serialized.IsComplete || false == request.IsComplete)
                         {
                             throw new Exception("Request Serialization Testing Failed!");
@@ -2873,7 +2873,7 @@ namespace Media.UnitTests
                     {
                         if (false == (serialized.HttpMethod == request.HttpMethod &&
                         serialized.Location == request.Location &&
-                        serialized.Location == request.Location) ||
+                        serialized.Version == request.Version) ||
                         false == serialized.IsComplete || false == request.IsComplete)
                         {
                             throw new Exception("Request Serialization Testing Failed With Wildcard Location!");

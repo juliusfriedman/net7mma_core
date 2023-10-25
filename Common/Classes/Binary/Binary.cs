@@ -829,7 +829,7 @@ namespace Media.Common
 
                 //Makes two checks in parallel
                 //If the LeastSignificantBit is not set or the MostSignificantBit is set then throw an exception
-                if (GetBit(ref byteOnStack, m_MostSignificantBit) | false == GetBit(ref byteOnStack, m_LeastSignificantBit)) throw new InvalidOperationException("Did not correctly detect BitOrder");
+                if (GetBit(ref byteOnStack, m_MostSignificantBit) || false == GetBit(ref byteOnStack, m_LeastSignificantBit)) throw new InvalidOperationException("Did not correctly detect BitOrder");
 
                 //Verify the ByteOrder probe
 #if false == NATIVE
@@ -1480,7 +1480,7 @@ namespace Media.Common
         /// <returns></returns>
         public static Int64 ReadInt64MSB(byte[] data, int byteOffset, int bitCount, ref byte bitOffset)
         {
-            return (Int64)ReadInt64MSB(data, byteOffset, bitCount, ref bitOffset);
+            return (Int64)ReadUInt64MSB(data, byteOffset, bitCount, ref bitOffset);
         }
 
         /// <summary>
@@ -1581,7 +1581,12 @@ namespace Media.Common
                 // Check if we won't read more bytes than there are available.
                 if (byteCount > (data.Length - byteOffset))
                 {
-                    throw new ArgumentOutOfRangeException("Provided arguments would require reading outside of the data array upper bounds.");
+                    throw new ArgumentOutOfRangeException(nameof(byteCount), byteCount, "Provided arguments would require reading outside of the data array upper bounds.");
+                }
+
+                if (byteCount == 0)
+                {
+                    return 0;
                 }
 
                 // The first byte needs to be masked with the bitOffset, as we might not read the first few bits
@@ -2371,7 +2376,7 @@ namespace Media.Common
 
         public static void WriteReversedInteger(byte[] buffer, int index, int count, long value)
         {
-            WriteReversedInteger(buffer, index, count, value);
+            WriteReversedInteger(buffer, index, count, (ulong)value);
         }
 
         [CLSCompliant(false)]
@@ -3201,6 +3206,8 @@ namespace Media.UnitTests
                     if (Common.Binary.ReadUInt64MSB(Octets, 0, Media.Common.Binary.BitsPerLong, 0) != Media.Common.Binary.ReadBitsMSB(Octets, 0, Media.Common.Binary.BitsPerLong)) throw new Exception("ReadInt64MSB Does not work.");
 
                     if (Common.Binary.ReadUInt64LSB(Octets, 0, Media.Common.Binary.BitsPerLong, 0) != Media.Common.Binary.ReadBitsLSB(Octets, 0, Media.Common.Binary.BitsPerLong)) throw new Exception("ReadInt64LSB Does not work.");
+
+                    if (Common.Binary.ReadUInt64LSB(Octets, 0, 0, 0) != 0) throw new Exception("ReadUInt64MSB Does not work.");
                 }
 
                 #endregion

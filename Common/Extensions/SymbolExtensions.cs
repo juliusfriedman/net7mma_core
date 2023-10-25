@@ -218,7 +218,7 @@ namespace Media.Common.Extensions.ExpressionExtensions
         {
             MemberExpression outermostExpression = ((expression.Body as MethodCallExpression).Object as MemberExpression);
 
-            if (object.ReferenceEquals(expression, null)) throw new ArgumentException("Invalid Expression. Should be a MemberExpression");
+            if (object.ReferenceEquals(outermostExpression, null)) throw new ArgumentException("Invalid Expression. Should be a MemberExpression");
 
             return outermostExpression.Member;
         }

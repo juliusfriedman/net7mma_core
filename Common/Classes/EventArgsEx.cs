@@ -203,7 +203,7 @@ namespace Media.Common
             Signature = signature;
         }
 
-        public EventReferenceInformation(T t, Delegate @event, ref long signature, bool shouldDispose = true)
+        public EventReferenceInformation(T t, ref long signature, bool shouldDispose = true)
         {
             ShouldDispose = shouldDispose;
 
