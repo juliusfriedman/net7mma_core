@@ -786,6 +786,13 @@ namespace Media.UnitTests
                     Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
                     Type = System.Net.AuthenticationSchemes.None
                 },
+                new
+                {
+                    Uri = "rtsp://8.15.251.101:1935/rtplive/R2_059",
+                    Creds = default(System.Net.NetworkCredential),
+                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                    Type = System.Net.AuthenticationSchemes.None
+                },
             })
             {
                 Media.Rtsp.RtspClient.ClientProtocolType? proto = TestObject.Proto;
@@ -2253,6 +2260,9 @@ namespace Media.UnitTests
                     //server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("NVT4", "rtsp://admin:11111111@118.70.125.33:8801/Streaming/channels/201", Media.Rtsp.RtspClient.ClientProtocolType.Tcp));
 
                     //Apollo - 
+
+                    //Traffic
+                    server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("R2_059", "rtsp://8.15.251.101:1935/rtplive/R2_059", Rtsp.RtspClient.ClientProtocolType.Tcp));
 
                     //string localPath = System.IO.Path.GetDirectoryName(executingAssemblyLocation);
 
