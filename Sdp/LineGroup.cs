@@ -79,7 +79,7 @@ namespace Media.Sdp
                 catch (System.Exception ex)
                 {
                     if (ex is System.InvalidOperationException)
-                        throw new Common.TaggedException<SessionDescriptionLine>(toAdd, Common.TaggedException<SessionDescriptionLine>.DefaultExceptionTypeMessage<SessionDescriptionLine>(), ex);
+                        throw new Common.TaggedException<SessionDescriptionLine>(toAdd, Common.TaggedException<SessionDescriptionLine>.DefaultExceptionTypeMessage(), ex);
                     else
                         throw;
                 }
