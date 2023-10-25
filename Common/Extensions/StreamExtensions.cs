@@ -381,7 +381,7 @@ namespace Media.Common.Extensions.Stream
 
                         return d;
                     }
-                    catch (System.Exception ex)
+                    catch (System.Exception)
                     {
                         d.Dispose();
                         throw;
