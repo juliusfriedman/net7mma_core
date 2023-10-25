@@ -928,7 +928,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 for (i = 0; i < 16; i++)
                     for (j = 0; j < 16; j++)
                     {
-                        tempdouble = tempdouble = (219.0 * (0.30 * img.GetPixel((hblock * 16 + j), (vblock * 16 + i)).R +
+                        tempdouble = (219.0 * (0.30 * img.GetPixel((hblock * 16 + j), (vblock * 16 + i)).R +
                             0.59 * img.GetPixel((hblock * 16 + j), (vblock * 16 + i)).G + 
                             0.11 * img.GetPixel((hblock * 16 + j), (vblock * 16 + i)).B) / 255.0) + 16.0;
                         Y[i, j] = (byte)(Math.Round(tempdouble));	// Y is limited from 16 to 235
