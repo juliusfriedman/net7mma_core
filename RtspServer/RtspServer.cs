@@ -141,10 +141,6 @@ namespace Media.Rtsp
 
             if (socket.AddressFamily == AddressFamily.InterNetwork) socket.DontFragment = true;
 
-            //Better performance for 1 core...
-            if (System.Environment.ProcessorCount <= 1) socket.UseOnlyOverlappedIO = true;
-
-
             if (object.ReferenceEquals(prototype, null) || (socket.Handle == prototype.Handle).Equals(false))
             {
                 //Set or reset the recieve timeout
