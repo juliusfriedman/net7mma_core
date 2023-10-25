@@ -2134,10 +2134,6 @@ namespace Media.UnitTests
 
             System.Runtime.GCLatencyMode oldMode = System.Runtime.GCSettings.LatencyMode;
 
-            // Make sure we can always go to the catch block, 
-            // so we can set the latency mode back to `oldMode`
-            System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions();
-
             try
             {
                 System.Runtime.GCSettings.LatencyMode = System.Runtime.GCLatencyMode.LowLatency;

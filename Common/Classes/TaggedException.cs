@@ -183,7 +183,6 @@ namespace Media.Common
         /// </summary>
         /// <param name="info"><see cref="System.Runtime.Serialization.SerializationInfo"/></param>
         /// <param name="context"><see cref="System.Runtime.Serialization.StreamingContext"/></param>
-        [System.Security.Permissions.SecurityPermission(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
         {
             if (object.ReferenceEquals(null, info)) throw new System.ArgumentNullException(nameof(info));
