@@ -1981,8 +1981,6 @@ namespace Media.Rtsp
                     //    received -= session.m_RtpClient.ProcessFrameData(session.m_Buffer.Array, session.m_Buffer.Offset, received, session.m_RtspSocket);
                     //}
 
-                    if (received <= 0) return;
-
                     //using (Common.MemorySegment unprocessedData = new Common.MemorySegment(session.m_Buffer.Array, data.Offset + received, received))
                     //{
                     //Ensure the message is really Rtsp
