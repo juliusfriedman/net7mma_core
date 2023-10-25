@@ -379,7 +379,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         if (quality == byte.MaxValue && qTablesCount == 0) throw new InvalidOperationException("Packets MUST NOT contain Q = 255 and Length = 0.");
 
                         //Check for overflow
-                        if (qTablesCount > ushort.MaxValue) Common.Binary.CreateOverflowException("qTables", qTablesCount, ushort.MinValue.ToString(), ushort.MaxValue.ToString());
+                        if (qTablesCount > ushort.MaxValue) throw Common.Binary.CreateOverflowException("qTables", qTablesCount, ushort.MinValue.ToString(), ushort.MaxValue.ToString());
 
                         RtpJpegHeader.Add(0); //Must Be Zero      
 
@@ -2674,6 +2674,17 @@ namespace Media.Rtsp.Server.MediaTypes
                     }
                 }
             }
+        }
+
+        public override void Dispose()
+        {
+            if (m_Watcher is not null)
+            {
+                m_Watcher.Dispose();
+                m_Watcher = null;
+            }
+
+            base.Dispose();
         }
 
         #endregion

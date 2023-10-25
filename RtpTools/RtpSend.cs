@@ -649,18 +649,20 @@ namespace Media.RtpTools
 
                 using (Media.RFC3550.SourceList sl = new Media.RFC3550.SourceList(packet))
                 {
-
-                    if (sl == null)
+                    if (!sl.IsComplete)
                     {
-                        builder.Append("#Incomplete Source List Not Included");
-                        builder.Append((char)Common.ASCII.LineFeed);
+                        while (sl.MoveNext())
+                        {
+                            builder.Append("#Incomplete Source List Not Included");
+                            builder.Append((char)Common.ASCII.LineFeed);
+                        }
                     }
                     else
                     {
                         //csrc=
                         while (sl.MoveNext())
                         {
-                            builder.Append(string.Format(RtpSend.HexFormat, "csrc", HexSpecifier, sl.CurrentSource.ToString("X"), (char)Common.ASCII.LineFeed));
+                            builder.Append(string.Format(RtpSend.HexFormat, "csrc", HexSpecifier + sl.CurrentSource.ToString("X"), (char)Common.ASCII.LineFeed));
                         }
                     }
                 }

@@ -814,10 +814,8 @@ namespace Media.Rtsp
                 {
                     m_UdpPort = port;
 
-                    EndPoint inBound;
-
                     m_UdpServerSocket = new Socket(addressFamily, SocketType.Dgram, ProtocolType.Udp);
-                    m_UdpServerSocket.Bind(inBound = new IPEndPoint(Media.Common.Extensions.Socket.SocketExtensions.GetFirstUnicastIPAddress(addressFamily), port));
+                    m_UdpServerSocket.Bind(new IPEndPoint(Media.Common.Extensions.Socket.SocketExtensions.GetFirstUnicastIPAddress(addressFamily), port));
 
                     //Include the IP Header
                     m_UdpServerSocket.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.PacketInformation, true);
@@ -1980,8 +1978,6 @@ namespace Media.Rtsp
 
                     //    received -= session.m_RtpClient.ProcessFrameData(session.m_Buffer.Array, session.m_Buffer.Offset, received, session.m_RtspSocket);
                     //}
-
-                    if (received <= 0) return;
 
                     //using (Common.MemorySegment unprocessedData = new Common.MemorySegment(session.m_Buffer.Array, data.Offset + received, received))
                     //{

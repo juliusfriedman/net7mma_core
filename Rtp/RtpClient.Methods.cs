@@ -1499,7 +1499,7 @@ namespace Media.Rtp
             }
             catch (System.Net.Sockets.SocketException se)
             {
-                error = (System.Net.Sockets.SocketError)se.ErrorCode;
+                error = se.SocketErrorCode;
             }
             catch (System.Exception ex)
             {

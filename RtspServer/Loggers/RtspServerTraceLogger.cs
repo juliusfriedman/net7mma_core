@@ -67,5 +67,12 @@ namespace Media.Rtsp.Server.Loggers
             try { Logger.Log(data); }
             catch { throw; }
         }
+
+        public override void Dispose()
+        {
+            Logger.Dispose();
+
+            base.Dispose();
+        }
     }
 }

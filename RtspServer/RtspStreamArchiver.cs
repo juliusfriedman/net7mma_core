@@ -60,7 +60,7 @@ namespace Media.Rtsp.Server
             RtpTools.RtpDump.Program program;
             if (false == Attached.TryGetValue(stream, out program)) return;
 
-            if (packet is Rtp.RtpPacket) program.Writer.WritePacket(packet as Rtp.RtpPacket);
+            if (packet is Rtp.RtpPacket p) program.Writer.WritePacket(p);
             else program.Writer.WritePacket(packet as Rtcp.RtcpPacket);
         }
 

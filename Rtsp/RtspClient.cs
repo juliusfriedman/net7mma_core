@@ -1334,9 +1334,9 @@ namespace Media.Rtsp
         public int SocketReadTimeout
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Common.IDisposedExtensions.IsNullOrDisposed(this) | m_RtspSocket == null ? -1 : m_RtspSocket.ReceiveTimeout; }
+            get { return Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket == null ? -1 : m_RtspSocket.ReceiveTimeout; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            set { if (Common.IDisposedExtensions.IsNullOrDisposed(this) | object.ReferenceEquals(m_RtspSocket, null)) return; m_RtspSocket.ReceiveTimeout = value; }
+            set { if (Common.IDisposedExtensions.IsNullOrDisposed(this) || object.ReferenceEquals(m_RtspSocket, null)) return; m_RtspSocket.ReceiveTimeout = value; }
         }
 
         /// <summary>
@@ -2659,7 +2659,7 @@ namespace Media.Rtsp
                 Common.ILoggingExtensions.LogException(Logger, ex);
             }
 
-            if (IsConnected.Equals(false) | Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
+            if (IsConnected.Equals(false) || Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
 
         Setup:
 
@@ -4132,7 +4132,7 @@ namespace Media.Rtsp
                 NothingToSend:
                     #region NothingToSend
                     //Check for no response.
-                    if (false.Equals(hasResponse) | Common.IDisposedExtensions.IsNullOrDisposed(this)) return null;
+                    if (false.Equals(hasResponse) || Common.IDisposedExtensions.IsNullOrDisposed(this)) return null;
 
                     //If the socket is shared the response will be propagated via an event.
                     if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) && SharesSocket) goto Wait;
@@ -6456,7 +6456,7 @@ namespace Media.Rtsp
             try
             {
                 //Thrown an exception if IsDisposed or add force parameter and check that with keep alive timer, e.g. force == false &&
-                if (Common.IDisposedExtensions.IsNullOrDisposed(this) | object.ReferenceEquals(m_KeepAliveTimer, null)) return;
+                if (Common.IDisposedExtensions.IsNullOrDisposed(this) || object.ReferenceEquals(m_KeepAliveTimer, null)) return;
 
                 wasPlaying = IsPlaying;
 
