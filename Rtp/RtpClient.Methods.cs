@@ -2246,7 +2246,6 @@ namespace Media.Rtp
         /// Entry point of the m_WorkerThread. Handles sending out RtpPackets and RtcpPackets in buffer and handling any incoming RtcpPackets.
         /// Sends a Goodbye and exits if no packets are sent of recieved in a certain amount of time
         /// </summary>
-        //[System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
         //[System.Security.SecurityCritical]
         void SendReceieve()
         {
