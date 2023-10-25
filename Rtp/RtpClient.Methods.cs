@@ -2118,13 +2118,11 @@ namespace Media.Rtp
                 //If the item was already disposed then do nothing
                 if (Common.IDisposedExtensions.IsNullOrDisposed(tuple.Item2)) return;
 
-                //using(tuple.Item2)
-
                 //handle for recieved frames
                 //todo, length may be more valuable than bool, - means in, positive is out
-                if (tuple.Item4 && tuple.Item2 is RtpFrame)
+                if (tuple.Item4 && tuple.Item2 is RtpFrame rtpf)
                 {
-                    ParallelRtpFrameChanged(tuple.Item2 as RtpFrame, tuple.Item1, tuple.Item3);
+                    ParallelRtpFrameChanged(rtpf, tuple.Item1, tuple.Item3);
                 }
                 else
                 {
@@ -2132,15 +2130,15 @@ namespace Media.Rtp
                     Common.IPacket what = tuple.Item2 as Common.IPacket;
 
                     //handle the packet event
-                    if (what is RtpPacket)
+                    if (what is RtpPacket rtp)
                     {
-                        if (tuple.Item4) ParallelRtpPacketRecieved(what as RtpPacket, tuple.Item1); 
-                        else ParallelRtpPacketSent(what as RtpPacket, tuple.Item1);
+                        if (tuple.Item4) ParallelRtpPacketRecieved(rtp, tuple.Item1); 
+                        else ParallelRtpPacketSent(rtp, tuple.Item1);
                     }
-                    else if (what is Rtcp.RtcpPacket)
+                    else if (what is Rtcp.RtcpPacket rtcp)
                     {
-                        if (tuple.Item4) ParallelRtcpPacketRecieved(what as Rtcp.RtcpPacket, tuple.Item1);
-                        else ParallelRtcpPacketSent(what as Rtcp.RtcpPacket, tuple.Item1);
+                        if (tuple.Item4) ParallelRtcpPacketRecieved(rtcp, tuple.Item1);
+                        else ParallelRtcpPacketSent(rtcp, tuple.Item1);
                     }
                     else ParallelOutOfBandData(what as Media.Common.Classes.PacketBase);
 
