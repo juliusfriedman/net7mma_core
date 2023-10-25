@@ -2053,7 +2053,7 @@ namespace Media.Rtp
                     }
 
                     //Setup the receive buffer size for all sockets of this context to use memory defined in excess of the context memory to ensure a high receive rate in udp without dropping packets
-                    if (RecieveBufferSizeMultiplier >= 0 || SendBufferSizeMultiplier >= 0 &&
+                    if ((RecieveBufferSizeMultiplier >= 0 || SendBufferSizeMultiplier >= 0) &&
                         false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(ContextMemory)) &&
                         ContextMemory.Count > 0)
                     {

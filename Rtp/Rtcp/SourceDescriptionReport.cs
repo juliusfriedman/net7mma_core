@@ -316,7 +316,7 @@ namespace Media.Rtcp
                 int octetCount = octets.Count();
 
                 //If the amount of contained octets is greater than the maximum value allowed then throw an overflow exception.
-                if (octetCount > byte.MaxValue) Binary.CreateOverflowException("octets", octetCount, byte.MinValue.ToString(), byte.MaxValue.ToString());
+                if (octetCount > byte.MaxValue) throw Binary.CreateOverflowException("octets", octetCount, byte.MinValue.ToString(), byte.MaxValue.ToString());
 
                 //Could create an array but it would need to be created twice to combine the octets with it
                 //Media.Common.Extensions.Object.ObjectExtensions.ToArray<byte>((byte)itemType, (byte)octetCount);
@@ -1253,7 +1253,7 @@ namespace Media.Rtcp
             foreach (SourceDescriptionChunk currentChunk in GetChunkIterator())
             {
                 //If the chunk yielded in the iterator matches the chunk identifier a match is present.
-                if (contained = chunk.ChunkData == currentChunk.ChunkData)
+                if (contained = (chunk.ChunkData == currentChunk.ChunkData))
                 {
                     break;
                 }

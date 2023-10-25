@@ -339,7 +339,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public /*virtual*/ void SendReceiversReports()
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) | m_StopRequested) return;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || m_StopRequested) return;
             TransportContext tc;
             for (int i = 0; i < TransportContexts.Count; ++i)
             {
@@ -358,7 +358,7 @@ namespace Media.Rtp
         internal protected /*virtual*/ int SendReceiversReport(TransportContext context, bool force = false)
         {
             //Determine if the ReceiversReport can be sent.
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) | Common.IDisposedExtensions.IsNullOrDisposed(context)  //If the context is disposed
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || Common.IDisposedExtensions.IsNullOrDisposed(context)  //If the context is disposed
                 && //AND the call has not been forced AND the context IsRtcpEnabled 
                 (false.Equals(force) && context.IsRtcpEnabled)
                 // OR there is no RtcpSocket
@@ -453,7 +453,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public /*virtual*/ TransportContext GetContextForPacket(Rtcp.RtcpPacket packet)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) | Common.IDisposedExtensions.IsNullOrDisposed(packet)) return null;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || Common.IDisposedExtensions.IsNullOrDisposed(packet)) return null;
             //Determine based on reading the packet this is where a RtcpReport class would be useful to allow reading the Ssrc without knownin the details about the type of report
             try { return GetContextBySourceId(packet.SynchronizationSourceIdentifier); }
             catch (System.InvalidOperationException) { return GetContextForPacket(packet); }
@@ -464,7 +464,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public /*virtual*/ void EnquePacket(Rtcp.RtcpPacket packet)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) | m_StopRequested | Common.IDisposedExtensions.IsNullOrDisposed(packet) | MaximumOutgoingPackets > 0 && m_OutgoingRtpPackets.Count > MaximumOutgoingPackets)
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || m_StopRequested || Common.IDisposedExtensions.IsNullOrDisposed(packet) || MaximumOutgoingPackets > 0 && m_OutgoingRtpPackets.Count > MaximumOutgoingPackets)
             {
                 //Turn threading on.
                 ThreadEvents = true;
@@ -2271,7 +2271,7 @@ namespace Media.Rtp
 
                     System.Net.Sockets.SocketError lastError = System.Net.Sockets.SocketError.SocketError;
 
-                    bool shouldStop = IsUndisposed.Equals(false) | m_StopRequested;
+                    bool shouldStop = IsUndisposed.Equals(false) || m_StopRequested;
 
                     //Should keep error Count and if errorCount == TransportContexts.Count then return otherwise reset.
 
@@ -2280,7 +2280,7 @@ namespace Media.Rtp
                     bool duplexing, rtpEnabled, rtcpEnabled;
 
                     //Until aborted
-                    while (false.Equals(shouldStop = IsUndisposed.Equals(false) | m_StopRequested))
+                    while (false.Equals(shouldStop = IsUndisposed.Equals(false) || m_StopRequested))
                     {
                         //Keep how much time has elapsed thus far
                         System.TimeSpan taken = System.DateTime.UtcNow - lastOperation;
@@ -2305,7 +2305,7 @@ namespace Media.Rtp
                         ////System.Collections.ArrayList errorSockets = new System.Collections.ArrayList();
 
                         //Loop each context, newly added contexts will be seen on each iteration
-                        for (int i = 0; false.Equals(shouldStop = IsUndisposed.Equals(false) | m_StopRequested) && i < TransportContexts.Count; ++i)
+                        for (int i = 0; false.Equals(shouldStop = IsUndisposed.Equals(false) || m_StopRequested) && i < TransportContexts.Count; ++i)
                         {
 
                             //Todo, HandOff
@@ -2323,11 +2323,11 @@ namespace Media.Rtp
                             //Check for a context which is able to receive data
                             if (Common.IDisposedExtensions.IsNullOrDisposed(tc)
                                 //Active must be true
-                                | false.Equals(tc.IsActive)
+                                || false.Equals(tc.IsActive)
                                 //If the context does not have continious media it must only receive data for the duration of the media.
-                                | false.Equals(tc.IsContinious) && tc.TimeRemaining < System.TimeSpan.Zero
+                                || false.Equals(tc.IsContinious) && tc.TimeRemaining < System.TimeSpan.Zero
                                 //There can't be a Goodbye sent or received
-                                | false.Equals(tc.Goodbye == null)) continue;
+                                || false.Equals(tc.Goodbye == null)) continue;
 
                             //Receive Data on the RtpSocket and RtcpSocket, summize the amount of bytes received from each socket.
 
@@ -2373,7 +2373,7 @@ namespace Media.Rtp
                             int usec = (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(tc.m_ReceiveInterval) >> 4;
 
                             //If receiving Rtp and the socket is able to read
-                            if (rtpEnabled && (shouldStop = IsUndisposed.Equals(false) | m_StopRequested).Equals(false)
+                            if (rtpEnabled && (shouldStop = IsUndisposed.Equals(false) || m_StopRequested).Equals(false)
                                 //&& (readSockets.Contains(tc.RtpSocket) || errorSockets.Contains(tc.RtpSocket))
                                 //Check if the socket can read data first or that data needs to be received
                                 && 
@@ -2384,7 +2384,7 @@ namespace Media.Rtp
                                 receivedRtp += ReceiveData(tc.RtpSocket, ref tc.RemoteRtp, out lastError, rtpEnabled, duplexing, tc.ContextMemory);
 
                                 //Check if an error occured
-                                if (receivedRtp.Equals(0) | false.Equals(lastError == System.Net.Sockets.SocketError.Success))
+                                if (receivedRtp.Equals(0) || false.Equals(lastError == System.Net.Sockets.SocketError.Success))
                                 {
                                     //Increment for failed receptions
                                     ++tc.m_FailedRtpReceptions;
@@ -2425,7 +2425,7 @@ namespace Media.Rtp
                             }
                             
                             //if Rtcp is enabled
-                            if (rtcpEnabled && false.Equals(shouldStop = IsUndisposed.Equals(false) | m_StopRequested))
+                            if (rtcpEnabled && false.Equals(shouldStop = IsUndisposed.Equals(false) || m_StopRequested))
                             {
                                 //Check if reports needs to be received (Sometimes data doesn't flow immediately)
                                 bool needsToReceiveReports = tc.LastRtcpReportReceived.Equals(System.TimeSpan.MinValue) || tc.LastRtcpReportReceived >= tc.m_ReceiveInterval;
@@ -2440,7 +2440,7 @@ namespace Media.Rtp
                                     receivedRtcp += ReceiveData(tc.RtcpSocket, ref tc.RemoteRtcp, out lastError, duplexing, rtcpEnabled, tc.ContextMemory);
 
                                     //Check if an error occured
-                                    if (receivedRtcp.Equals(0) | false.Equals(lastError == System.Net.Sockets.SocketError.Success))
+                                    if (receivedRtcp.Equals(0) || false.Equals(lastError == System.Net.Sockets.SocketError.Success))
                                     {
                                         //Increment for failed receptions
                                         ++tc.m_FailedRtcpReceptions;

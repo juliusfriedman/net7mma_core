@@ -307,7 +307,7 @@ namespace Media.Rtcp
             :base(shouldDispose)
         {
             //If the padding is greater than allow throw an overflow exception
-            if (padding < 0 || padding > byte.MaxValue) Binary.CreateOverflowException("padding", padding, byte.MinValue.ToString(), byte.MaxValue.ToString());            
+            if (padding < 0 || padding > byte.MaxValue) throw Binary.CreateOverflowException("padding", padding, byte.MinValue.ToString(), byte.MaxValue.ToString());            
 
             extensionSize = Binary.MachineWordsToBytes(Binary.BytesToMachineWords(extensionSize));
 

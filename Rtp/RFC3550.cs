@@ -180,8 +180,8 @@ namespace Media
                     hasSourceDescription = true;
 
                     //if not already checked for a cname check now
-                    if (false == hasCName && packet.BlockCount > 0) using (SourceDescriptionReport asReport = new SourceDescriptionReport(packet, false)) if ((hasCName = asReport.HasCName)) break;
-                }                
+                    if (packet.BlockCount > 0) using (SourceDescriptionReport asReport = new SourceDescriptionReport(packet, false)) if ((hasCName = asReport.HasCName)) break;
+                }
             }
 
             //Verify the SourceDesscription has a CName Item if present
@@ -348,7 +348,7 @@ namespace Media
                     hasSourceDescription = true;
 
                     //if not already checked for a cname check now
-                    if (false == hasCName && currentPacket.BlockCount > 0) using (SourceDescriptionReport asReport = new SourceDescriptionReport(currentPacket, false)) if ((hasCName = asReport.HasCName)) break;
+                    if (currentPacket.BlockCount > 0) using (SourceDescriptionReport asReport = new SourceDescriptionReport(currentPacket, false)) if ((hasCName = asReport.HasCName)) break;
                 }
 
                 if (hasSourceDescription && false == hasCName) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(currentPacket, "Invalid compound data, Source Description report did not have a CName SourceDescriptionItem.");
@@ -438,7 +438,7 @@ namespace Media
         public static IEnumerable<byte> CreatePadding(int amount) //int? codeAmount
         {
             if (amount <= 0) return Enumerable.Empty<byte>();
-            if (amount > byte.MaxValue) Common.Binary.CreateOverflowException("amount", amount, byte.MinValue.ToString(), byte.MaxValue.ToString());
+            if (amount > byte.MaxValue) throw Common.Binary.CreateOverflowException("amount", amount, byte.MinValue.ToString(), byte.MaxValue.ToString());
             return Enumerable.Concat(Enumerable.Repeat(default(byte), amount - 1), Media.Common.Extensions.Linq.LinqExtensions.Yield(((byte)amount)));
         }
 
@@ -1912,7 +1912,7 @@ namespace Media.UnitTests
     {
         public static void TestSourceList()
         {
-            Media.RFC3550.SourceList sourceList = new RFC3550.SourceList(0);
+            using Media.RFC3550.SourceList sourceList = new RFC3550.SourceList(0);
 
             if (sourceList.Count != 0) throw new System.Exception("Count");
         }

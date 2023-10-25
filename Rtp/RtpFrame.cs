@@ -2336,7 +2336,7 @@ namespace Media.UnitTests
             {
                 using (Media.Rtp.RtpFrame frame = new Media.Rtp.RtpFrame(0))
                 {
-                    //Add 15 packets to the frame
+                    //Add 15 packets to the frame starting at 65530, ending at 9 (Wrapping at 65535)
                     for (ushort i = ushort.MaxValue - 5; i != 10; ++i)
                     {
 
@@ -2505,6 +2505,7 @@ namespace Media.UnitTests
                         }
 
                         //Loop the same values and ensure the packet is at the expected logical index
+                        //Add 15 packets to the frame starting at 65530, ending at 9 (Wrapping at 65535)
                         for (ushort i = ushort.MaxValue - 5, j = 0; i != 10; ++i)
                         {
                             if (reorder.IndexOf(i) != j++) throw new Exception("frame order incorrect.");
