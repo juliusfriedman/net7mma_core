@@ -1330,7 +1330,7 @@ namespace Media.Rtp
             public bool LocalMultiplexing
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled.Equals(false) || object.ReferenceEquals(LocalRtp, null) ? false : LocalRtp.Equals(LocalRtcp); }
+                get { return (IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled.Equals(false) || object.ReferenceEquals(LocalRtp, null)) ? false : LocalRtp.Equals(LocalRtcp); }
             }
 
             /// <summary>
@@ -1339,7 +1339,7 @@ namespace Media.Rtp
             public bool RemoteMultiplexing
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled.Equals(false) || object.ReferenceEquals(RemoteRtp, null) ? false : RemoteRtp.Equals(RemoteRtcp); }
+                get { return (IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled.Equals(false) || object.ReferenceEquals(RemoteRtp, null)) ? false : RemoteRtp.Equals(RemoteRtcp); }
             }
             
             /// <summary>
