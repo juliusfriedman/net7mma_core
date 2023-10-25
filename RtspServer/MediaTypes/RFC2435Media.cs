@@ -2676,6 +2676,17 @@ namespace Media.Rtsp.Server.MediaTypes
             }
         }
 
+        public override void Dispose()
+        {
+            if (m_Watcher is not null)
+            {
+                m_Watcher.Dispose();
+                m_Watcher = null;
+            }
+
+            base.Dispose();
+        }
+
         #endregion
     }
 

@@ -320,6 +320,12 @@ namespace Media.Rtsp.Server
         {
             if (IsDisposed) return;
 
+            if (SessionDescription is not null)
+            {
+                SessionDescription.Dispose();
+                SessionDescription = null;
+            }
+
             base.Dispose();
 
             Stop();
