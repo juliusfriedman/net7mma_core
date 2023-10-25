@@ -259,6 +259,11 @@ namespace Media.Sdp
             return base.Equals(obj);
         }
 
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(this);
+        }
+
         public string ToString(SessionDescription sdp = null)
         {
             StringBuilder builder = new StringBuilder();
