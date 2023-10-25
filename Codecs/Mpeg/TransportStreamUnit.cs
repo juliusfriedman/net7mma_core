@@ -359,7 +359,7 @@ namespace Media.Containers.Mpeg
         public static bool IsDVBMetaData(PacketIdentifier identifier)
         {
             ushort sid = (ushort)identifier;
-            return sid >= 16 || sid <= Common.Binary.FiveBitMaxValue;
+            return sid >= 16 && sid <= Common.Binary.FiveBitMaxValue;
         }
 
         public static bool HasTransportErrorIndicator(byte[] header, int offset = 0) { return (header[offset + 1] & ErrorMask) > 0; }
