@@ -71,7 +71,7 @@ namespace Media.Common
         /// </summary>
         public const string ExceptionFormat = "A System.Exception occured related to the following System.Type: `{0}`. If there is related data it is located in the Tag property.";
 
-        public static string DefaultExceptionTypeMessage<t>() { return string.Format(TaggedException<t>.ExceptionFormat, typeof(T).FullName); }
+        public static string DefaultExceptionTypeMessage() { return string.Format(TaggedException<T>.ExceptionFormat, typeof(T).FullName); }
 
 
         #endregion
@@ -144,7 +144,7 @@ namespace Media.Common
         /// Creates the default for <typeparamref name="T"/> from <paramref name="tag"/> in <see cref="Tag"/> and assigns a default message describing the <typeparamref name="T"/>.
         /// </summary>
         /// <param name="tag">The value to store.</param>
-        public TaggedException(T tag) : this(tag, DefaultExceptionTypeMessage<T>(), null) { }
+        public TaggedException(T tag) : this(tag, DefaultExceptionTypeMessage(), null) { }
 
         /// <summary>
         /// Facilitates the serialization.
@@ -183,7 +183,6 @@ namespace Media.Common
         /// </summary>
         /// <param name="info"><see cref="System.Runtime.Serialization.SerializationInfo"/></param>
         /// <param name="context"><see cref="System.Runtime.Serialization.StreamingContext"/></param>
-        [System.Security.Permissions.SecurityPermission(System.Security.Permissions.SecurityAction.Demand, SerializationFormatter = true)]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
         {
             if (object.ReferenceEquals(null, info)) throw new System.ArgumentNullException(nameof(info));
@@ -282,15 +281,14 @@ namespace Media.Common
         /// <param name="tag">The element related to the exception</param>
         /// <param name="message">The message realted to the exception, if not provided a default message will be used.</param>
         /// <param name="innerException">any <see cref="System.Exception"/> which is related to the exception being thrown</param>
-        public static void RaiseTaggedException<T>(T tag, string message, System.Exception innerException = null) { new TaggedException<T>(tag, message ?? TaggedException<T>.DefaultExceptionTypeMessage<T>(), innerException).Raise(); }
+        public static void RaiseTaggedException<T>(T tag, string message, System.Exception innerException = null) { new TaggedException<T>(tag, message ?? TaggedException<T>.DefaultExceptionTypeMessage(), innerException).Raise(); }
 
         /// <summary>
-        /// Tries to raises an <see cref="Common.Exception"/> on the calling thread and if the exception is not handled it will be discared.
         /// </summary>
         /// <typeparam name="T">The type of the exception to raise.</typeparam>
         /// <param name="tag">The element related to the exception</param>
         /// <param name="message">The message realted to the exception, if not provided a default message will be used.</param>
         /// <param name="innerException">any <see cref="System.Exception"/> which is related to the exception being thrown</param>
-        public static void TryRaiseTaggedException<T>(T tag, string message, System.Exception innerException = null) { new TaggedException<T>(tag, message ?? TaggedException<T>.DefaultExceptionTypeMessage<T>(), innerException).TryRaise(); }
+        public static void TryRaiseTaggedException<T>(T tag, string message, System.Exception innerException = null) { new TaggedException<T>(tag, message ?? TaggedException<T>.DefaultExceptionTypeMessage(), innerException).TryRaise(); }
     }
 }

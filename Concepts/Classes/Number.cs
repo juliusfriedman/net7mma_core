@@ -921,10 +921,8 @@ namespace Media.Concepts.Classes
 
         public override bool Equals(object obj)
         {
-            if (obj is Bits)
+            if (obj is Bits unboxed)
             {
-                Bits unboxed = (Bits)obj;
-                if (unboxed == null) return false;
                 return unboxed == this;
             }
             else return base.Equals(obj);
@@ -1761,7 +1759,7 @@ namespace Media.Concepts.Classes
 
             public BitsEnumerator(Bits bits, int start = 0, int bitSize = Bits.BitSize)
             {
-                if (bits == null) throw new ArgumentNullException(); Bits = bits;
+                Bits = bits;
                 if (start < 0) BitIndex = -1;
                 else BitIndex = start;
             }

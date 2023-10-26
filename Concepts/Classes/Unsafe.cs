@@ -944,14 +944,14 @@ namespace Media.Concepts.Classes
                 return GetEnumerator();
             }
 
-            private class CustomEnumerator<T> : System.Collections.Generic.IEnumerator<T> where T : class
+            private class CustomEnumerator<R> : System.Collections.Generic.IEnumerator<R> where R : class
             {
-                private readonly UnsafeList<T> _list;
+                private readonly UnsafeList<R> _list;
                 private int _index;
-                private T _current;
+                private R _current;
                 private int size;
 
-                public CustomEnumerator(UnsafeList<T> list)
+                public CustomEnumerator(UnsafeList<R> list)
                 {
                     _list = list;
                     _index = -1;
@@ -977,7 +977,7 @@ namespace Media.Concepts.Classes
                     _index = -1;
                 }
 
-                public T Current
+                public R Current
                 {
                     get { return _current; }
                 }

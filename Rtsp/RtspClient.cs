@@ -87,9 +87,6 @@ namespace Media.Rtsp
             //Don't buffer receive.
             Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => socket.ReceiveBufferSize = 0);
 
-            //Better performance for 1 core...
-            if (System.Environment.ProcessorCount <= 1) Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => socket.UseOnlyOverlappedIO = true);
-
             //Dont fragment for ip4, ip6 does ptmud
             if (socket.AddressFamily == AddressFamily.InterNetwork) Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => socket.DontFragment = true);
 

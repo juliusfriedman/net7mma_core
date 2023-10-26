@@ -78,8 +78,10 @@ namespace Media.Sdp
                 }
                 catch (System.Exception ex)
                 {
-                    if (ex is System.InvalidOperationException) throw new Common.TaggedException<SessionDescriptionLine>(toAdd);
-                    else throw ex;
+                    if (ex is System.InvalidOperationException)
+                        throw new Common.TaggedException<SessionDescriptionLine>(toAdd, Common.TaggedException<SessionDescriptionLine>.DefaultExceptionTypeMessage(), ex);
+                    else
+                        throw;
                 }
             }
         }

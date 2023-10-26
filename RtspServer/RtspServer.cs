@@ -142,8 +142,8 @@ namespace Media.Rtsp
             if (socket.AddressFamily == AddressFamily.InterNetwork) socket.DontFragment = true;
 
             //Better performance for 1 core...
-            if (System.Environment.ProcessorCount <= 1) socket.UseOnlyOverlappedIO = true;
-
+            //socket.UseOnlyOverlappedIO is nop in .net core.
+            //if (System.Environment.ProcessorCount <= 1) socket.UseOnlyOverlappedIO = true;
 
             if (object.ReferenceEquals(prototype, null) || (socket.Handle == prototype.Handle).Equals(false))
             {
@@ -1474,6 +1474,7 @@ namespace Media.Rtsp
                     }), Common.Extensions.Thread.ThreadExtensions.MinimumStackSize)
                     {
                         Priority =  m_ServerThread.Priority,
+                        Name = "Maintenance-" + m_ServerThread.Name,
                         ApartmentState = ApartmentState.MTA
                     }.Start();
                 }

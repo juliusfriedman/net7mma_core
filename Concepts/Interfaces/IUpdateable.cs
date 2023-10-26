@@ -78,8 +78,7 @@ namespace Media.Common
 
         public static bool UnderModification(this IUpdateable updateable, System.Threading.CancellationToken token)
         {
-            return object.ReferenceEquals(token, null).Equals(false) && 
-                Common.IDisposedExtensions.IsNullOrDisposed(updateable).Equals(false) &&
+            return Common.IDisposedExtensions.IsNullOrDisposed(updateable).Equals(false) &&
                 token.Equals(updateable.UpdateTokenSource.Token);
         }
 
@@ -115,9 +114,6 @@ namespace Media.Common
         public static void EndUpdate(this IUpdateable updateable, System.Threading.CancellationToken token)
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(updateable)) throw new System.ArgumentNullException(); //return default(System.Threading.CancellationToken);
-
-            //Ensure a token
-            if (object.ReferenceEquals(token, null)) return;
 
             //That came from out cancellation source
             if (token.Equals(updateable.UpdateTokenSource.Token).Equals(false)) throw InvalidStateException;

@@ -259,6 +259,11 @@ namespace Media.Sdp
             return base.Equals(obj);
         }
 
+        public override int GetHashCode()
+        {
+            return NtpStartDateTime.GetHashCode() * 23 ^ NtpStopDateTime.GetHashCode();
+        }
+
         public string ToString(SessionDescription sdp = null)
         {
             StringBuilder builder = new StringBuilder();

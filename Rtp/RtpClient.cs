@@ -1330,7 +1330,7 @@ namespace Media.Rtp
             public bool LocalMultiplexing
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled.Equals(false) || object.ReferenceEquals(LocalRtp, null) ? false : LocalRtp.Equals(LocalRtcp); }
+                get { return (IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled.Equals(false) || object.ReferenceEquals(LocalRtp, null)) ? false : LocalRtp.Equals(LocalRtcp); }
             }
 
             /// <summary>
@@ -1339,7 +1339,7 @@ namespace Media.Rtp
             public bool RemoteMultiplexing
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled.Equals(false) || object.ReferenceEquals(RemoteRtp, null) ? false : RemoteRtp.Equals(RemoteRtcp); }
+                get { return (IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled.Equals(false) || object.ReferenceEquals(RemoteRtp, null)) ? false : RemoteRtp.Equals(RemoteRtcp); }
             }
             
             /// <summary>
@@ -3382,7 +3382,7 @@ namespace Media.Rtp
 
             if (m_ThreadEvents)
             {
-                m_EventData.Enqueue(new Tuple<TransportContext, Common.BaseDisposable, bool, bool>(null, new Common.Classes.PacketBase(data, offset, length, true, true), true, true));
+                m_EventData.Enqueue((Context: null, Packet: new Common.Classes.PacketBase(data, offset, length, true, true), Final: true, Received: true));
 
                 m_EventReady.Set();
 
@@ -3437,7 +3437,7 @@ namespace Media.Rtp
             if (m_ThreadEvents)
             {
                 //Use a clone of the packet and data into a new reference so it can stay alive for the event.
-                m_EventData.Enqueue(new Tuple<TransportContext, Common.BaseDisposable, bool, bool>(tc, packet.Clone(true, true, true, true, false, true), false, true));
+                m_EventData.Enqueue((Context: tc, Packet: packet.Clone(true, true, true, true, false, true), Final: false, Received: true));
 
                 m_EventReady.Set();
 
@@ -3479,7 +3479,7 @@ namespace Media.Rtp
             {
                 //Todo, only clone if ShouldDispose is true.
 
-                m_EventData.Enqueue(new Tuple<TransportContext, Common.BaseDisposable, bool, bool>(tc, packet.Clone(true, true, false), false, true));
+                m_EventData.Enqueue((Context: tc, Packet: packet.Clone(true, true, false), Final: false, Received: true));
 
                 m_EventReady.Set();
 
@@ -3520,7 +3520,7 @@ namespace Media.Rtp
             if (m_ThreadEvents)
             {
                                                                                                 //new RtpFrame(frame)
-                m_EventData.Enqueue(new Tuple<TransportContext, Common.BaseDisposable, bool, bool>(tc, frame, final, true));
+                m_EventData.Enqueue((Context: tc, Packet: frame, Final: final, Received: true));
 
                 m_EventReady.Set();
 
@@ -3671,7 +3671,7 @@ namespace Media.Rtp
 
             if (m_ThreadEvents)
             {
-                m_EventData.Enqueue(new Tuple<TransportContext, Common.BaseDisposable, bool, bool>(tc, packet, false, true));
+                m_EventData.Enqueue((Context: tc, Packet: packet, Final: false, Received: true));
 
                 m_EventReady.Set();
 
@@ -3707,7 +3707,7 @@ namespace Media.Rtp
 
             if (m_ThreadEvents)
             {
-                m_EventData.Enqueue(new Tuple<TransportContext, Common.BaseDisposable, bool, bool>(tc, packet, false, true));
+                m_EventData.Enqueue((Context: tc, Packet: packet, Final: false, Received: true));
 
                 return;
             }

@@ -3226,7 +3226,6 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <returns>1 if the function was not successful, otherwise a random number</returns>
             [System.CLSCompliant(false)]
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]            
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static ulong GetRandom64()
             {
@@ -3240,7 +3239,6 @@ namespace Media.Concepts.Hardware
             /// Invokes the random number generator returning the result.
             /// </summary>
             /// <returns>1 if the function was not successful, otherwise a random number</returns>
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static long GetRandom63()
             {
@@ -3255,7 +3253,6 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <returns>1 if the function was not successful, otherwise a random number</returns>
             [System.CLSCompliant(false)]
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static uint GetRandom32()
             {
@@ -3270,7 +3267,6 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <returns>1 if the function was not successful, otherwise a random number</returns>
             [System.CLSCompliant(false)]
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static int GetRandom31()
             {
@@ -3285,7 +3281,6 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <returns>1 if the function was not successful, otherwise a random number</returns>
             [System.CLSCompliant(false)]
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static ushort GetRandom16()
             {
@@ -3300,7 +3295,6 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <returns>1 if the function was not successful, otherwise a random number</returns>
             [System.CLSCompliant(false)]
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static short GetRandom15()
             {
@@ -3314,7 +3308,6 @@ namespace Media.Concepts.Hardware
             /// Invokes the random number generator returning the result.
             /// </summary>
             /// <returns>1 if the function was not successful, otherwise a random number</returns>
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static byte GetRandom8()
             {
@@ -3329,7 +3322,6 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <returns>1 if the function was not successful, otherwise a random number</returns>
             [System.CLSCompliant(false)]
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static sbyte GetRandom7()
             {
@@ -3403,7 +3395,6 @@ namespace Media.Concepts.Hardware
             /// The first time the function is compiled a special version of byte code is used to ensure that misdetection of the feature is not possible.
             /// </summary>
             /// <param name="machine"></param>
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             internal protected override void Compile(bool machine = true)
             {
@@ -3604,7 +3595,6 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <returns>1 if the function was not successful, otherwise a random number</returns>
             [System.CLSCompliant(false)]
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static ulong GetSeed64()
             {
@@ -3618,7 +3608,6 @@ namespace Media.Concepts.Hardware
             /// Invokes the random number generator returning the result.
             /// </summary>
             /// <returns>1 if the function was not successful, otherwise a random number</returns>
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static long GetSeed63()
             {
@@ -3633,7 +3622,6 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <returns>1 if the function was not successful, otherwise a random number</returns>
             [System.CLSCompliant(false)]
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static uint GetSeed32()
             {
@@ -3648,7 +3636,6 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <returns>1 if the function was not successful, otherwise a random number</returns>
             [System.CLSCompliant(false)]
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static int GetSeed31()
             {
@@ -3663,7 +3650,6 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <returns>1 if the function was not successful, otherwise a random number</returns>
             [System.CLSCompliant(false)]
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static ushort GetSeed16()
             {
@@ -3678,7 +3664,6 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <returns>1 if the function was not successful, otherwise a random number</returns>
             [System.CLSCompliant(false)]
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static short GetSeed15()
             {
@@ -3692,7 +3677,6 @@ namespace Media.Concepts.Hardware
             /// Invokes the random number generator returning the result.
             /// </summary>
             /// <returns>1 if the function was not successful, otherwise a random number</returns>
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static byte GetSeed8()
             {
@@ -3707,7 +3691,6 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <returns>1 if the function was not successful, otherwise a random number</returns>
             [System.CLSCompliant(false)]
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static sbyte GetSeed7()
             {
@@ -3774,7 +3757,6 @@ namespace Media.Concepts.Hardware
             /// The first time the function is compiled a special version of byte code is used to ensure that misdetection of the feature is not possible.
             /// </summary>
             /// <param name="machine"></param>
-            [System.Runtime.ExceptionServices.HandleProcessCorruptedStateExceptions]
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             internal protected override void Compile(bool machine = true)
             {

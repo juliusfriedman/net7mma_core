@@ -510,7 +510,7 @@ namespace Media.Concepts.Classes.Threading
             {
                 UnderlyingThread.Priority = System.Threading.ThreadPriority.Normal; 
 
-                throw ex;
+                throw;
             }
 
             UnderlyingThread.Priority = System.Threading.ThreadPriority.AboveNormal;
