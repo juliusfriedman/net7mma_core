@@ -261,7 +261,7 @@ namespace Media.Sdp
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(this);
+            return NtpStartDateTime.GetHashCode() * 23 ^ NtpStopDateTime.GetHashCode();
         }
 
         public string ToString(SessionDescription sdp = null)
