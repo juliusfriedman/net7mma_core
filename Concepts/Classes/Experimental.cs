@@ -1211,10 +1211,11 @@ namespace Media.Concepts.Experimental
 
         public LinkedStream Unlink(int streamIndex, bool reverse = false)
         {
-            if (streamIndex > m_Streams.Count()) throw new ArgumentOutOfRangeException("index cannot be greater than the amount of contained streams");
+            if (streamIndex > m_Streams.Count())
+                throw new ArgumentOutOfRangeException(nameof(streamIndex), streamIndex, "index cannot be greater than the amount of contained streams");
             IEnumerable<EnumerableByteStream> streams = m_Streams;
-            if (reverse) streams.Reverse();
-            return new LinkedStream(m_Streams.Skip(streamIndex));
+            if (reverse) streams = streams.Reverse();
+            return new LinkedStream(streams.Skip(streamIndex));
         }
 
         [CLSCompliant(false)]
