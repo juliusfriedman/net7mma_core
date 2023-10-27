@@ -1004,7 +1004,7 @@ namespace Media.UnitTests
                         if (false == (serialized.RtspMethod == request.RtspMethod &&
                         serialized.Location == request.Location &&
                         serialized.CSeq == request.CSeq &&
-                        serialized.Location == request.Location) ||
+                        serialized.Version == request.Version) ||
                         false == serialized.IsComplete || false == request.IsComplete)
                         {
                             throw new Exception("Request Serialization Testing Failed!");
@@ -1021,7 +1021,7 @@ namespace Media.UnitTests
                         if (false == (serialized.RtspMethod == request.RtspMethod &&
                         serialized.Location == request.Location &&
                         serialized.CSeq == request.CSeq &&
-                        serialized.Location == request.Location) ||
+                        serialized.Version == request.Version) ||
                         false == serialized.IsComplete || false == request.IsComplete)
                         {
                             throw new Exception("Request Serialization Testing Failed With Wildcard Location!");
