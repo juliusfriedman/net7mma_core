@@ -136,33 +136,30 @@ namespace Media.Common.Extensions.ExpressionExtensions
         {
             Expression body = expression.Body;
 
-            if (body is NewExpression)
+            if (body is NewExpression ne)
             {
-                NewExpression newExpression = expression.Body as NewExpression;
-
-                return IntrospectionExtensions.GetTypeInfo((expression.Body as NewExpression).Constructor.DeclaringType);
+                return IntrospectionExtensions.GetTypeInfo(ne.Constructor.DeclaringType);
             }
-            else if (body is MemberExpression)
-            {
-                MemberExpression memberExpression = body as MemberExpression;
 
-                return IntrospectionExtensions.GetTypeInfo(memberExpression.Member.DeclaringType);
+            if (body is MemberExpression mb)
+            {
+                return IntrospectionExtensions.GetTypeInfo(mb.Member.DeclaringType);
             }
-            else if (body is MethodCallExpression)
-            {
-                MethodCallExpression methodCallExpression = expression.Body as MethodCallExpression;
 
-                if (methodCallExpression.Object is MemberExpression)
+            if (body is MethodCallExpression mc)
+            {
+                if (mc.Object is MemberExpression me)
                 {
-                    return IntrospectionExtensions.GetTypeInfo((methodCallExpression.Object as MemberExpression).Member.DeclaringType);
+                    return IntrospectionExtensions.GetTypeInfo(me.Member.DeclaringType);
                 }
-                else if (methodCallExpression.Object is ConstantExpression)
+
+                if (mc.Object is ConstantExpression ce)
                 {
-                    return IntrospectionExtensions.GetTypeInfo((Type)(methodCallExpression.Object as ConstantExpression).Value);
+                    return IntrospectionExtensions.GetTypeInfo((Type)ce.Value);
                 }
 
                 //Actually a RuntimeType from a TypedConstantExpression...
-                return IntrospectionExtensions.GetTypeInfo((Type)TypedConstantExpressionValueProperty.GetMethod.Invoke(methodCallExpression.Object, null));
+                return IntrospectionExtensions.GetTypeInfo((Type)TypedConstantExpressionValueProperty.GetMethod.Invoke(mc.Object, null));
             }
 
             throw new System.NotSupportedException("Please create an issue for your use case.");
