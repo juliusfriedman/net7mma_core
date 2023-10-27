@@ -517,14 +517,15 @@ namespace Media.Sdp
     public static class MediaDescriptionExtensions
     {
         /// <summary>
-        /// Parses the <see cref="MediaDescription.ControlLine"/> and if present
+        /// Gets absolute control uri from <see cref="MediaDescription.ControlLine"/>.
         /// </summary>
         /// <param name="mediaDescription"></param>
         /// <param name="source"></param>
         /// <returns></returns>
         public static Uri GetAbsoluteControlUri(this MediaDescription mediaDescription, Uri source, SessionDescription sessionDescription = null)
         {
-            if (object.ReferenceEquals(source, null)) throw new ArgumentNullException("source");
+            if (source is null) throw new ArgumentNullException(nameof(source));
+            if (source.IsAbsoluteUri.Equals(false)) throw new InvalidOperationException("source.IsAbsoluteUri must be true.");
 
             if (Common.IDisposedExtensions.IsNullOrDisposed(mediaDescription)) return source;
 
@@ -533,10 +534,10 @@ namespace Media.Sdp
             SessionDescriptionLine controlLine = mediaDescription.ControlLine;
 
             //If there is a control line in the SDP it contains the URI used to setup and control the media
-            if (object.ReferenceEquals(controlLine, null).Equals(false))
-            {  
+            if (controlLine is not null)
+            {
                 //Todo, make typed line for controlLine
-                string controlPart = controlLine.Parts.Last(); //controlLine.Parts.Where(p => p.StartsWith(AttributeFields.Control)).FirstOrDefault();
+                string controlPart = controlLine.Parts.LastOrDefault(); //controlLine.Parts.Where(p => p.StartsWith(AttributeFields.Control)).FirstOrDefault();
 
                 //If there is a controlPart in the controlLine
                 if (string.IsNullOrWhiteSpace(controlPart).Equals(false))
@@ -545,7 +546,7 @@ namespace Media.Sdp
                     controlPart = controlPart.Split(Media.Sdp.SessionDescription.ColonSplit, 2, StringSplitOptions.RemoveEmptyEntries).Last();
 
                     //Create a uri
-                    Uri controlUri = new Uri(controlPart, UriKind.RelativeOrAbsolute);
+                    Uri controlUri = new(controlPart, UriKind.RelativeOrAbsolute);
 
                     //Determine if its a Absolute Uri
                     if (controlUri.IsAbsoluteUri) return controlUri;
@@ -553,13 +554,14 @@ namespace Media.Sdp
                     //Return a new uri using the original string and the controlUri relative path.
                     //Hopefully the direction of the braces matched..
 
-                                                                                                    //string.Join(source.OriginalString, controlUri.OriginalString);
-
-                    return new Uri(source.OriginalString.EndsWith(SessionDescription.ForwardSlashString) ? source.OriginalString + controlUri.OriginalString : string.Join(SessionDescription.ForwardSlashString, source.OriginalString, controlUri.OriginalString));
+                    string raw = source.OriginalString.EndsWith(SessionDescription.ForwardSlashString)
+                        ? source.OriginalString + controlUri.OriginalString
+                        : string.Join(SessionDescription.ForwardSlashString, source.OriginalString, controlUri.OriginalString);
+                    return new Uri(raw);
 
                     //Todo, ensure that any parameters have also been restored...
 
-                    #region Explination
+                    #region Explanation
 
                     //I wonder if Mr./(Dr) Fielding is happy...
                     //Let source = 
@@ -582,10 +584,10 @@ namespace Media.Sdp
             }
 
             //Try to take the session level control uri
-            Uri sessionControlUri;
-
             //If there was a session description given and it supports aggregate media control then return that uri
-            if (Common.IDisposedExtensions.IsNullOrDisposed(sessionDescription).Equals(false) && sessionDescription.SupportsAggregateMediaControl(out sessionControlUri, source)) return sessionControlUri;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(sessionDescription).Equals(false) &&
+                sessionDescription.SupportsAggregateMediaControl(out Uri sessionControlUri, source))
+                return sessionControlUri;
 
             //There is no control line, just return the source.
             return source;
