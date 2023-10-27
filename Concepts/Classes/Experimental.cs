@@ -318,17 +318,17 @@ namespace Media.Concepts.Experimental
 
         object System.Collections.IEnumerator.Current
         {
-            get { return (this as Iterator<T>).Current; }
+            get { return this.Current; }
         }
 
         bool System.Collections.IEnumerator.MoveNext()
         {
-            return (this as Iterator<T>).MoveNext();
+            return this.MoveNext();
         }
 
         void System.Collections.IEnumerator.Reset()
         {
-            (this as Iterator<T>).Reset();
+            this.Reset();
         }
 
         #endregion
@@ -738,7 +738,7 @@ namespace Media.Concepts.Experimental
         {
             IEnumerable<IList<T>> result = Enumerable.Empty<IList<T>>();
             foreach (IList<T> segment in m_Segments as IList<T>)
-                result = result.Concat((segment as IList<T>).Yield());
+                result = result.Concat(segment.Yield());
             (m_CurrentSegment as IList<T>).Yield();
             return result.GetEnumerator();
         }
@@ -748,7 +748,7 @@ namespace Media.Concepts.Experimental
             IEnumerable<List<T>> result = Enumerable.Empty<List<T>>();
             foreach (List<T> segment in m_Segments)
                 result = result.Concat(segment.Yield());
-            (m_CurrentSegment as List<T>).Yield();
+            m_CurrentSegment.Yield();
             return result.GetEnumerator();
         }
     }
