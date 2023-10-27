@@ -980,9 +980,13 @@ namespace Media.Concepts.Experimental
 
         public virtual void CoreCopyTo(byte[] array, int arrayIndex, int length = -1)
         {
-            if (length <= 0) return;
-            if (length == -1) length = array.Length - arrayIndex;
-            else if (length > m_Stream.Length) throw new ArgumentOutOfRangeException("Can't copy more bytes then are availble from the stream");
+            if (length < -1) return;
+
+            if (length == -1)
+                length = array.Length - arrayIndex;
+            else if (length > m_Stream.Length)
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex), arrayIndex, "Can't copy more bytes then are availble from the stream");
+
             m_Stream.Read(array, arrayIndex, length);
         }
 
