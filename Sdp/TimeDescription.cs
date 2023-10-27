@@ -254,15 +254,9 @@ namespace Media.Sdp
             return Media.Common.Extensions.EnumerableExtensions.SequenceEquals(this, other);
         }
 
-        public override bool Equals(object obj)
-        {
-            return base.Equals(obj);
-        }
+        public override bool Equals(object obj) => obj is TimeDescription td && Equals(td);
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(StartTimeToken, StopTimeToken);
-        }
+        public override int GetHashCode() => HashCode.Combine(StartTimeToken, StopTimeToken);
 
         public string ToString(SessionDescription sdp = null)
         {
@@ -278,10 +272,7 @@ namespace Media.Sdp
             return builder.ToString();
         }
 
-        public override string ToString()
-        {
-            return ToString(null);
-        }
+        public override string ToString() => ToString(null);
 
         public IEnumerator<SessionDescriptionLine> GetEnumerator()
         {
