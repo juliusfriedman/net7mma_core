@@ -777,21 +777,21 @@ namespace Media.Rtsp
 
             //Todo, use HttpClient / HttpServer
 
-            if (m_HttpListner == null)
-            {
-                try
-                {
-                    m_HttpListner = new HttpListener();
-                    m_HttpPort = port;
-                    m_HttpListner.Prefixes.Add("http://*:" + port + "/");
-                    m_HttpListner.Start();
-                    m_HttpListner.BeginGetContext(new AsyncCallback(ProcessHttpRtspRequest), this);
-                }
-                catch (Exception ex)
-                {
-                    throw new Exception("Error Enabling Http on Port '" + port + "' : " + ex.Message, ex);
-                }
-            }
+            //if (m_HttpListner == null)
+            //{
+            //    try
+            //    {
+            //        m_HttpListner = new HttpListener();
+            //        m_HttpPort = port;
+            //        m_HttpListner.Prefixes.Add("http://*:" + port + "/");
+            //        m_HttpListner.Start();
+            //        m_HttpListner.BeginGetContext(new AsyncCallback(ProcessHttpRtspRequest), this);
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        throw new Exception("Error Enabling Http on Port '" + port + "' : " + ex.Message, ex);
+            //    }
+            //}
         }
 
         
