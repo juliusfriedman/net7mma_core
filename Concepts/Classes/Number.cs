@@ -1760,8 +1760,8 @@ namespace Media.Concepts.Classes
             public BitsEnumerator(Bits bits, int start = 0, int bitSize = Bits.BitSize)
             {
                 Bits = bits;
-                if (start < 0) BitIndex = -1;
-                else BitIndex = start;
+                BitIndex = start < 0 ? -1 : start;
+                BitSize = bitSize;
             }
 
             public virtual bool Current

@@ -169,7 +169,7 @@ namespace Media.Concepts.Classes
         public Clock(System.TimeSpan timeZoneOffset, System.Globalization.Calendar calendar, bool shouldDispose = true)
             : base(shouldDispose)
         {
-            Calendar = System.Globalization.CultureInfo.CurrentCulture.Calendar;
+            Calendar = calendar;
 
             Created = new System.DateTimeOffset(System.DateTime.Now, timeZoneOffset);
         }
