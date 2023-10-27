@@ -408,13 +408,15 @@ namespace Media.RtpTools.RtpDump
             }
             else
             {
-                //Todo assingn count and use again rather than cal
+                //Todo assign count and use again rather than cal
 
                 //Ensure not Out of Range
-                if (m_Offsets.Count + count > m_Offsets.Count) throw new ArgumentOutOfRangeException("count");
+                int index = m_Offsets.Count + count;
+                if (index < 0 || index > m_Offsets.Count)
+                    throw new ArgumentOutOfRangeException(nameof(count), count, "Count is out of range.");
 
                 //We already know the offsets
-                m_Reader.BaseStream.Seek(m_Offsets[m_Offsets.Count + count], System.IO.SeekOrigin.Begin);
+                m_Reader.BaseStream.Seek(m_Offsets[index], System.IO.SeekOrigin.Begin);
             }
         }
 
