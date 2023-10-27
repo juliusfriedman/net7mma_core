@@ -308,11 +308,11 @@ namespace Media.Container
         //Something like a Node prototype array which is useful for Nodes which have certain identifiers would be useful when encountering nodes,
         //Such nodes would be parsed on a background thread if required for use by others including track reading, it would also reduce IO
 
-        public bool TryApplyCachingPolocy(NodeAction n, bool combine = false, bool eraseCache = true)
+        public bool TryApplyCachingPolicy(NodeAction n, bool combine = false, bool eraseCache = true)
         {
             try
             {
-                ApplyCachingPolocy(n, combine, eraseCache);
+                ApplyCachingPolicy(n, combine, eraseCache);
 
                 return true;
             }
@@ -321,23 +321,22 @@ namespace Media.Container
 
         }
 
-        public void ApplyCachingPolocy(NodeAction n, bool combine = false, bool eraseCache = true)
+        public void ApplyCachingPolicy(NodeAction n, bool combine = false, bool eraseCache = true)
         {
-            if (n == null) throw new ArgumentNullException("n");
+            ArgumentNullException.ThrowIfNull(n);
 
-            Common.IDisposedExtensions.CheckDisposed(this as Media.Common.IDisposed);
+            Common.IDisposedExtensions.CheckDisposed(this);
 
-            if (combine) m_NodeCachingPolicy += n;
-            else m_NodeCachingPolicy = n;
+            if (combine)
+                m_NodeCachingPolicy += n;
+            else
+                m_NodeCachingPolicy = n;
 
-            if (eraseCache) if (m_NodeCache != null) m_NodeCache.Clear();
-                else if (n != null && m_NodeCache == null) m_NodeCache = new SortedDictionary<long, Node>();
-                else if (n == null && m_NodeCache != null)
-                {
+            if (eraseCache)
+                if (m_NodeCache != null)
                     m_NodeCache.Clear();
-
-                    m_NodeCache = null;
-                }
+                else
+                    m_NodeCache = new SortedDictionary<long, Node>();
         }
 
         public void RemoveCachingPolicy() { RemoveCachingPolicy(m_NodeCachingPolicy); }
