@@ -879,7 +879,7 @@ namespace Media.Concepts.Math
         /// <summary>Gets the next higher power of 2, e.g. 4=>8, 13=>16.</summary>
         /// <remarks>For negative values of x, NextPowerOf2((uint)x) is 0.</remarks>
         [System.CLSCompliant(false)]
-        public static uint NextPowerOf2(ref uint x)
+        public static uint NextPowerOf2(uint x)
         {
             x |= (x >> 1);
             x |= (x >> 2);
@@ -891,7 +891,7 @@ namespace Media.Concepts.Math
         /// <summary>Gets the next higher power of 2, e.g. 4=>8, 13=>16.</summary>
         /// <remarks>For negative values of (long)x, NextPowerOf2((ulong)x) is 0.</remarks>
         [System.CLSCompliant(false)]
-        public static ulong NextPowerOf2(ref ulong x)
+        public static ulong NextPowerOf2(ulong x)
         {
             x |= (x >> 1);
             x |= (x >> 2);
