@@ -3805,7 +3805,7 @@ namespace Media.Rtsp
         //Delegate
         public void Timestamp(RtspMessage message)
         {
-            string timestamp = (DateTime.UtcNow - m_EndConnect ?? TimeSpan.Zero).TotalSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            string timestamp = ((DateTime.UtcNow - m_EndConnect) ?? TimeSpan.Zero).TotalSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
             message.SetHeader(RtspHeaders.Timestamp, timestamp);
         }
