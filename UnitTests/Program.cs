@@ -2907,10 +2907,12 @@ namespace Media.UnitTests
                                 if (client.RtpProtocol == System.Net.Sockets.ProtocolType.Udp)
                                 {
                                     //Disconnect the client socket if it was connected to test that that media session persists
-                                    if (client.IsConnected) client.DisconnectSocket();
-                                    else if (Media.Common.Binary.IsEven(client.ClientSequenceNumber)) client.SendKeepAliveRequest(null); //Send a keep alive to test connections and session retrival
-                                    else if (client.IsConnected) SendRandomPartial(client); //If connected send a partial request
-                                    else client.Connect(); //otherwise connect
+                                    if (client.IsConnected)
+                                        client.DisconnectSocket();
+                                    else if (Media.Common.Binary.IsEven(client.ClientSequenceNumber))
+                                        client.SendKeepAliveRequest(null); //Send a keep alive to test connections and session retrival
+                                    else
+                                        client.Connect(); //otherwise connect
                                 }
 
                                 System.Threading.Thread.Yield();
