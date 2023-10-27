@@ -129,7 +129,7 @@ namespace Media.Containers.Mpeg
                 //Pid
                 throw new NotImplementedException();
                 
-                WritePacketAndIncrementClock(nullPacket, false);
+                // WritePacketAndIncrementClock(nullPacket, false);
             }
         }
 
