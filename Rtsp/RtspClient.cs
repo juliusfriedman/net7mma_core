@@ -5253,9 +5253,9 @@ namespace Media.Rtsp
         //Remove unicast... and allow for session based setup
         internal RtspMessage SendSetup(Uri location, MediaDescription mediaDescription, bool unicast = true, string mode = null)//False to use manually set protocol
         {
-            if (object.ReferenceEquals(location, null)) throw new ArgumentNullException("location");
+            if (location is null) throw new ArgumentNullException(nameof(location));
 
-            if (Common.IDisposedExtensions.IsNullOrDisposed(mediaDescription)) throw new ArgumentNullException("mediaDescription");
+            if (Common.IDisposedExtensions.IsNullOrDisposed(mediaDescription)) throw new ArgumentNullException(nameof(mediaDescription));
 
             //Todo Setup should only create a TransportContext which COULD then be given to a RtpClient 
             //This will allow for non RTP transports to be used such as MPEG-TS.
@@ -5350,7 +5350,7 @@ namespace Media.Rtsp
                 using (RtspMessage setup = new RtspMessage(RtspMessageType.Request)
                 {
                     RtspMethod = RtspMethod.SETUP,
-                    Location = location ?? CurrentLocation
+                    Location = location
                 })
                 {
 
