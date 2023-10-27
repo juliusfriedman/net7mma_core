@@ -136,45 +136,45 @@ namespace Media.Http
 
             //Should use MultipartContent...
 
-            multiPartcontent = new MultipartContent(boundary);
+            //multiPartcontent = new MultipartContent(boundary);
 
-            encoding = encoding ?? DefaultEncoding;
+            //encoding = encoding ?? DefaultEncoding;
 
-            HttpMessage result = new HttpMessage();
+            //HttpMessage result = new HttpMessage();
 
-            List<byte> data = new List<byte>();
+            //List<byte> data = new List<byte>();
 
-            result.SetHeader(HttpHeaders.ContentType, "multipart/mixed; boundary=" + encoding.GetString(boundary));
+            //result.SetHeader(HttpHeaders.ContentType, "multipart/mixed; boundary=" + encoding.GetString(boundary));
 
-            byte[] boundaryPrefix = encoding.GetBytes("--");
+            //byte[] boundaryPrefix = encoding.GetBytes("--");
 
-            //Iterate each content item
-            foreach (var content in contents)
-            {
-                //Don't append null items or items without any data
-                if (content == null || Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(content.Item4)) continue;
+            ////Iterate each content item
+            //foreach (var content in contents)
+            //{
+            //    //Don't append null items or items without any data
+            //    if (content == null || Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(content.Item4)) continue;
 
-                //Output Headers of Content part
+            //    //Output Headers of Content part
 
-                //Item1 = Content-Disposition
-                //Disposition
-                if (string.IsNullOrWhiteSpace(content.Item1).Equals(false)) data.AddRange(encoding.GetBytes(HttpHeaders.ContentDisposition + ":" + content.Item1));
+            //    //Item1 = Content-Disposition
+            //    //Disposition
+            //    if (string.IsNullOrWhiteSpace(content.Item1).Equals(false)) data.AddRange(encoding.GetBytes(HttpHeaders.ContentDisposition + ":" + content.Item1));
 
-                //Item2 = Content-Type
-                if (string.IsNullOrWhiteSpace(content.Item1).Equals(false)) data.AddRange(encoding.GetBytes(HttpHeaders.ContentType + ":" + content.Item2));
+            //    //Item2 = Content-Type
+            //    if (string.IsNullOrWhiteSpace(content.Item1).Equals(false)) data.AddRange(encoding.GetBytes(HttpHeaders.ContentType + ":" + content.Item2));
 
-                //The actual data.
-                data.AddRange(content.Item4);
+            //    //The actual data.
+            //    data.AddRange(content.Item4);
 
-                //The boundary
-                data.AddRange(boundaryPrefix);
-                data.AddRange(content.Item3 ?? boundary);
-            }
+            //    //The boundary
+            //    data.AddRange(boundaryPrefix);
+            //    data.AddRange(content.Item3 ?? boundary);
+            //}
 
-            //Set the body
-            result.Body = encoding.GetString(data.ToArray());
+            ////Set the body
+            //result.Body = encoding.GetString(data.ToArray());
 
-            return result;
+            //return result;
         }
 
         /// <summary>
