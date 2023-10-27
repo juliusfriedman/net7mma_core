@@ -2649,11 +2649,11 @@ namespace Media.UnitTests
 
                                         Console.WriteLine("Created: " + client.Created);
 
-                                        Console.WriteLine("LastRequest: " + client.LastRequest ?? string.Empty);
+                                        Console.WriteLine("LastRequest: " + (client.LastRequest?.ToString() ?? string.Empty));
 
-                                        Console.WriteLine("LastRequest: " + client.LastResponse ?? string.Empty);
+                                        Console.WriteLine("LastResponse: " + (client.LastResponse?.ToString() ?? string.Empty));
 
-                                        Console.WriteLine("SessionId: " + client.SessionId ?? string.Empty);
+                                        Console.WriteLine("SessionId: " + (client.SessionId ?? string.Empty));
 
                                         if (false.Equals(Media.Common.IDisposedExtensions.IsNullOrDisposed(client.m_RtpClient)))
                                         {
