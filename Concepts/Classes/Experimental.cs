@@ -89,7 +89,7 @@ namespace Media.Concepts.Experimental
                 Exception ex = null;
                 try
                 {
-                    T current = Current;
+                    T current = base.Current;
                     if(current != null) try { OnCurrentRead(); }
                     catch (Exception _) { ex = _; }
                     return base.Current;
