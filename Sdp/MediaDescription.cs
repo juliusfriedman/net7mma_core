@@ -600,7 +600,7 @@ namespace Media.Sdp
             //Needs a better way to get the index of the media description
             int index = sessionDescription.GetIndexFor(mediaDescription);  //Array.IndexOf(sessionDescription.MediaDescriptions.ToArray(), mediaDescription);
 
-            if (index.Equals(-1)) return null;
+            if (index == -1 || index >= sessionDescription.TimeDescriptionsCount) return null;
 
             return sessionDescription.GetTimeDescription(index);
         }
