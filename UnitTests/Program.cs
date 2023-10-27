@@ -2468,12 +2468,9 @@ namespace Media.UnitTests
                     while (false.Equals(server.IsRunning)) System.Threading.Thread.Sleep(0);
 
                     //Start taking pictures of the desktop and making packets in a seperate thread.
-                    if (false.Equals(object.ReferenceEquals(captureThread, null)))
-                    {
-                        captureThread.Priority = System.Threading.ThreadPriority.BelowNormal;
+                    captureThread.Priority = System.Threading.ThreadPriority.BelowNormal;
 
-                        captureThread.Start();
-                    }
+                    captureThread.Start();
 
                     //If you add more streams they will be started once the server is started
 
