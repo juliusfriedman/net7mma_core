@@ -681,7 +681,7 @@ namespace Media.Concepts.Hardware
         {
             try
             {
-                TryVirtualUnprotect();
+                VirtualUnprotect();
 
                 return true;
             }

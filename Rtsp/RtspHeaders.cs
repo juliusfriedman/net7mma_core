@@ -370,7 +370,7 @@ namespace Media.Rtsp
 
                                 int channelsLength = channels.Length;
 
-                                if (channelsLength > 1)
+                                if (channelsLength > 0)
                                 {
                                     //DataChannel
                                     dataChannel = byte.Parse(channels[0], System.Globalization.CultureInfo.InvariantCulture);

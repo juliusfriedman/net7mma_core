@@ -243,7 +243,7 @@ namespace Media.UnitTests
             using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(times))
             {
                 while (false == System.Console.KeyAvailable) for (int i = 0, e = System.Console.WindowWidth; i < e; ++i)
-                        for (int j = 0, z = System.Console.WindowHeight; i < e; ++i)
+                        for (int j = 0, z = System.Console.WindowHeight; j < z; ++j)
                     {
                         if (System.Console.KeyAvailable) goto Done;
 

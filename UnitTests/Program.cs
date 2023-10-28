@@ -2468,12 +2468,9 @@ namespace Media.UnitTests
                     while (false.Equals(server.IsRunning)) System.Threading.Thread.Sleep(0);
 
                     //Start taking pictures of the desktop and making packets in a seperate thread.
-                    if (false.Equals(object.ReferenceEquals(captureThread, null)))
-                    {
-                        captureThread.Priority = System.Threading.ThreadPriority.BelowNormal;
+                    captureThread.Priority = System.Threading.ThreadPriority.BelowNormal;
 
-                        captureThread.Start();
-                    }
+                    captureThread.Start();
 
                     //If you add more streams they will be started once the server is started
 
@@ -2652,11 +2649,11 @@ namespace Media.UnitTests
 
                                         Console.WriteLine("Created: " + client.Created);
 
-                                        Console.WriteLine("LastRequest: " + client.LastRequest ?? string.Empty);
+                                        Console.WriteLine("LastRequest: " + (client.LastRequest?.ToString() ?? string.Empty));
 
-                                        Console.WriteLine("LastRequest: " + client.LastResponse ?? string.Empty);
+                                        Console.WriteLine("LastResponse: " + (client.LastResponse?.ToString() ?? string.Empty));
 
-                                        Console.WriteLine("SessionId: " + client.SessionId ?? string.Empty);
+                                        Console.WriteLine("SessionId: " + (client.SessionId ?? string.Empty));
 
                                         if (false.Equals(Media.Common.IDisposedExtensions.IsNullOrDisposed(client.m_RtpClient)))
                                         {
@@ -2907,10 +2904,12 @@ namespace Media.UnitTests
                                 if (client.RtpProtocol == System.Net.Sockets.ProtocolType.Udp)
                                 {
                                     //Disconnect the client socket if it was connected to test that that media session persists
-                                    if (client.IsConnected) client.DisconnectSocket();
-                                    else if (Media.Common.Binary.IsEven(client.ClientSequenceNumber)) client.SendKeepAliveRequest(null); //Send a keep alive to test connections and session retrival
-                                    else if (client.IsConnected) SendRandomPartial(client); //If connected send a partial request
-                                    else client.Connect(); //otherwise connect
+                                    if (client.IsConnected)
+                                        client.DisconnectSocket();
+                                    else if (Media.Common.Binary.IsEven(client.ClientSequenceNumber))
+                                        client.SendKeepAliveRequest(null); //Send a keep alive to test connections and session retrival
+                                    else
+                                        client.Connect(); //otherwise connect
                                 }
 
                                 System.Threading.Thread.Yield();

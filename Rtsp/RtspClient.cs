@@ -2389,7 +2389,10 @@ namespace Media.Rtsp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal void ProcessInterleavedData(object sender, byte[] data, int offset, int length)
         {
-            if (length <= 0 | offset + length >= data.Length | Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(data) | Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
+            if (length <= 0 ||
+                offset + length >= data.Length ||
+                Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(data) ||
+                Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
 
             //Todo, it's possible a new varialbe could be passed to indicate this is binary data or a continuation..
 
@@ -3802,7 +3805,7 @@ namespace Media.Rtsp
         //Delegate
         public void Timestamp(RtspMessage message)
         {
-            string timestamp = (DateTime.UtcNow - m_EndConnect ?? TimeSpan.Zero).TotalSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            string timestamp = ((DateTime.UtcNow - m_EndConnect) ?? TimeSpan.Zero).TotalSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
             message.SetHeader(RtspHeaders.Timestamp, timestamp);
         }
@@ -4140,7 +4143,7 @@ namespace Media.Rtsp
                     #region Receive
 
                     //While nothing bad has happened.
-                    if (fatal.Equals(fatal) &&
+                    if (false.Equals(fatal) &&
                         false.Equals(SharesSocket) &&
                         IsConnected &&
                         m_RtspSocket.Poll(m_SocketPollMicroseconds >> 4, SelectMode.SelectRead)/* ||  
@@ -4253,7 +4256,7 @@ namespace Media.Rtsp
                                 {
                                     //Check for non fatal exceptions and continue to wait
                                     if (++attempt <= m_MaximumTransactionAttempts &&
-                                        fatal.Equals(fatal))
+                                        false.Equals(fatal))
                                     {
                                         //We don't share the socket so go to recieve again (note if this is the timer thread this can delay outgoing requests)
                                         goto Wait;
@@ -5250,9 +5253,9 @@ namespace Media.Rtsp
         //Remove unicast... and allow for session based setup
         internal RtspMessage SendSetup(Uri location, MediaDescription mediaDescription, bool unicast = true, string mode = null)//False to use manually set protocol
         {
-            if (object.ReferenceEquals(location, null)) throw new ArgumentNullException("location");
+            if (location is null) throw new ArgumentNullException(nameof(location));
 
-            if (Common.IDisposedExtensions.IsNullOrDisposed(mediaDescription)) throw new ArgumentNullException("mediaDescription");
+            if (Common.IDisposedExtensions.IsNullOrDisposed(mediaDescription)) throw new ArgumentNullException(nameof(mediaDescription));
 
             //Todo Setup should only create a TransportContext which COULD then be given to a RtpClient 
             //This will allow for non RTP transports to be used such as MPEG-TS.
@@ -5347,7 +5350,7 @@ namespace Media.Rtsp
                 using (RtspMessage setup = new RtspMessage(RtspMessageType.Request)
                 {
                     RtspMethod = RtspMethod.SETUP,
-                    Location = location ?? CurrentLocation
+                    Location = location
                 })
                 {
 

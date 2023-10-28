@@ -79,7 +79,7 @@ namespace Media.Concepts.Classes.Threading
             internal T[] Lessee;
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            public Lease(Pool<T> lessor, int id, int emure, T[] lessee, bool shouldDispose = true)                
+            public Lease(Pool<T> lessor, int id, int emure, T[] lessee)                
             {
                 Lessor = lessor;
 

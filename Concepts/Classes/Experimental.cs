@@ -89,7 +89,7 @@ namespace Media.Concepts.Experimental
                 Exception ex = null;
                 try
                 {
-                    T current = Current;
+                    T current = base.Current;
                     if(current != null) try { OnCurrentRead(); }
                     catch (Exception _) { ex = _; }
                     return base.Current;
@@ -318,17 +318,17 @@ namespace Media.Concepts.Experimental
 
         object System.Collections.IEnumerator.Current
         {
-            get { return (this as Iterator<T>).Current; }
+            get { return this.Current; }
         }
 
         bool System.Collections.IEnumerator.MoveNext()
         {
-            return (this as Iterator<T>).MoveNext();
+            return this.MoveNext();
         }
 
         void System.Collections.IEnumerator.Reset()
         {
-            (this as Iterator<T>).Reset();
+            this.Reset();
         }
 
         #endregion
@@ -738,7 +738,7 @@ namespace Media.Concepts.Experimental
         {
             IEnumerable<IList<T>> result = Enumerable.Empty<IList<T>>();
             foreach (IList<T> segment in m_Segments as IList<T>)
-                result = result.Concat((segment as IList<T>).Yield());
+                result = result.Concat(segment.Yield());
             (m_CurrentSegment as IList<T>).Yield();
             return result.GetEnumerator();
         }
@@ -748,7 +748,7 @@ namespace Media.Concepts.Experimental
             IEnumerable<List<T>> result = Enumerable.Empty<List<T>>();
             foreach (List<T> segment in m_Segments)
                 result = result.Concat(segment.Yield());
-            (m_CurrentSegment as List<T>).Yield();
+            m_CurrentSegment.Yield();
             return result.GetEnumerator();
         }
     }
@@ -980,9 +980,13 @@ namespace Media.Concepts.Experimental
 
         public virtual void CoreCopyTo(byte[] array, int arrayIndex, int length = -1)
         {
-            if (length <= 0) return;
-            if (length == -1) length = array.Length - arrayIndex;
-            else if (length > m_Stream.Length) throw new ArgumentOutOfRangeException("Can't copy more bytes then are availble from the stream");
+            if (length < -1) return;
+
+            if (length == -1)
+                length = array.Length - arrayIndex;
+            else if (length > m_Stream.Length)
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex), arrayIndex, "Can't copy more bytes then are availble from the stream");
+
             m_Stream.Read(array, arrayIndex, length);
         }
 
@@ -1211,10 +1215,11 @@ namespace Media.Concepts.Experimental
 
         public LinkedStream Unlink(int streamIndex, bool reverse = false)
         {
-            if (streamIndex > m_Streams.Count()) throw new ArgumentOutOfRangeException("index cannot be greater than the amount of contained streams");
+            if (streamIndex > m_Streams.Count())
+                throw new ArgumentOutOfRangeException(nameof(streamIndex), streamIndex, "index cannot be greater than the amount of contained streams");
             IEnumerable<EnumerableByteStream> streams = m_Streams;
-            if (reverse) streams.Reverse();
-            return new LinkedStream(m_Streams.Skip(streamIndex));
+            if (reverse) streams = streams.Reverse();
+            return new LinkedStream(streams.Skip(streamIndex));
         }
 
         [CLSCompliant(false)]

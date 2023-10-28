@@ -839,7 +839,7 @@ a=sendonly";
                     if (false.Equals(Common.Extensions.Socket.SocketExtensions.GetFirstMulticastIPAddress(localEndPoint.AddressFamily).Equals(localEndPoint.Address))) throw new System.Exception("Unexpected RtpSocket.LocalEndPoint.IPAddress");
 
                     //Verify their address
-                    System.Net.IPEndPoint remoteEndPoint = firstContext.RtpSocket.Connected ? firstContext.RtpSocket.RemoteEndPoint as System.Net.IPEndPoint as System.Net.IPEndPoint : firstContext.RemoteRtp as System.Net.IPEndPoint; 
+                    System.Net.IPEndPoint remoteEndPoint = firstContext.RtpSocket.Connected ? firstContext.RtpSocket.RemoteEndPoint as System.Net.IPEndPoint : firstContext.RemoteRtp as System.Net.IPEndPoint; 
 
                     if (true.Equals(remoteEndPoint == null)) throw new System.Exception("Unexpected RemoteRtp or RtpSocket.RemoteEndPoint");
 

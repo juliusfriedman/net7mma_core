@@ -1146,7 +1146,7 @@ namespace Media.Concepts.Classes
         [System.CLSCompliant(false)]
         public static void CopyBlock(ref byte[] src, ref byte[] dst, int length)
         {
-            CopyBlock(ref src, ref dst, length);
+            CopyBlock(ref src, ref dst, 0, length);
         }
 
         [System.Security.SuppressUnmanagedCodeSecurity]

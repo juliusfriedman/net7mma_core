@@ -55,7 +55,7 @@ public class Chunk : Node
         var result = Identifier.Concat(Data);
 
         if ((DataSize & 1) == 1)
-            result.Concat((byte)0);
+            result = result.Concat((byte)0);
 
         return result;
     }

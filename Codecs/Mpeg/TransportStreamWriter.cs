@@ -59,7 +59,7 @@ namespace Media.Containers.Mpeg
             // In a packet that contains a PCR, the PCR will be a few ticks later than the arrival_time_stamp.
             // The exact difference between the arrival_time_stamp and the PCR (and the number of bits between them)
             // indicates the intended fixed bitrate of the variable rate Transport Stream.
-            byte[] packet = new byte[PacketLength];
+            //byte[] packet = new byte[PacketLength];
 
             //Should not reverse on BigEndian CPU when writing BigEndian... See notes
 
@@ -127,9 +127,9 @@ namespace Media.Containers.Mpeg
                 //nullPacket.Header.PID = Mpeg2TransportStream.NullPacketPID;
 
                 //Pid
-                throw new NotImplementedException();
+                //throw new NotImplementedException();
                 
-                WritePacketAndIncrementClock(nullPacket, false);
+                // WritePacketAndIncrementClock(nullPacket, false);
             }
         }
 

@@ -500,7 +500,7 @@ namespace Media.Containers.Nut
                         tmp_match = DecodeVariableLength(stream, out bytesRead);
                         
                         //Sanity
-                        if (tmp_match <= short.MinValue || tmp_match > short.MaxValue 
+                        if ((tmp_match <= short.MinValue || tmp_match > short.MaxValue)
                             &&
                             tmp_match != 1 - (1 << 62)) throw new InvalidOperationException("absolute delta match time must be less than or equal to short.MaxValue");
                     }

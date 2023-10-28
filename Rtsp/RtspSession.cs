@@ -1175,7 +1175,7 @@ namespace Media.Rtsp
                     #region Receive
 
                     //While nothing bad has happened.
-                    if (fatal.Equals(fatal) &&
+                    if (false.Equals(fatal) &&
                         false.Equals(SharesSocket) &&
                         IsConnected &&
                         m_RtspSocket.Poll(m_SocketPollMicroseconds >> 4, SelectMode.SelectRead)/* ||  
@@ -1288,7 +1288,7 @@ namespace Media.Rtsp
                                 {
                                     //Check for non fatal exceptions and continue to wait
                                     if (++attempt <= m_MaximumTransactionAttempts &&
-                                        fatal.Equals(fatal))
+                                        false.Equals(fatal))
                                     {
                                         //We don't share the socket so go to recieve again (note if this is the timer thread this can delay outgoing requests)
                                         goto Wait;
@@ -2259,7 +2259,7 @@ namespace Media.Rtsp
 
         public void Timestamp(RtspMessage message)
         {
-            string timestamp = (DateTime.UtcNow - m_EndConnect ?? TimeSpan.Zero).TotalSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            string timestamp = ((DateTime.UtcNow - m_EndConnect) ?? TimeSpan.Zero).TotalSeconds.ToString(System.Globalization.CultureInfo.InvariantCulture);
 
             message.SetHeader(RtspHeaders.Timestamp, timestamp);
         }
