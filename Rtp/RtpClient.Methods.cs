@@ -1103,7 +1103,7 @@ namespace Media.Rtp
                 if (m_StopRequested.Equals(false) && IsActive) return;
 
                 //Create the worker thread
-                m_WorkerThread = new System.Threading.Thread(new System.Threading.ThreadStart(SendReceieve), Common.Extensions.Thread.ThreadExtensions.MinimumStackSize);
+                m_WorkerThread = new System.Threading.Thread(new System.Threading.ThreadStart(SendReceieve));
 
                 //Configure
                 ConfigureThread(m_WorkerThread); //name and ILogging

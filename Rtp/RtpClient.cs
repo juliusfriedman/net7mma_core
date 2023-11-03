@@ -725,7 +725,7 @@ namespace Media.Rtp
             /// <summary>
             /// Used to ensure data is quantified as packets which are allowed.
             /// </summary>
-            ushort m_MimumPacketSize = RtpHeader.Length - RtcpHeader.Length, m_MaximumPacketSize = ushort.MaxValue;
+            int m_MimumPacketSize = RtpHeader.Length - RtcpHeader.Length, m_MaximumPacketSize = ushort.MaxValue;
 
             /// <summary>
             /// To allow multiple receivers as set by <see cref="MaximumRemoteIdentities"/>
@@ -837,9 +837,9 @@ namespace Media.Rtp
             public int MinimumPacketSize
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return (int)m_MimumPacketSize; }
+                get { return m_MimumPacketSize; }
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                set { m_MimumPacketSize = (ushort)value; }
+                set { m_MimumPacketSize = value; }
             }
 
             /// <summary>
@@ -848,9 +848,9 @@ namespace Media.Rtp
             public int MaximumPacketSize
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return (int)m_MaximumPacketSize; }
+                get { return m_MaximumPacketSize; }
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                set { m_MaximumPacketSize = (ushort)value; }
+                set { m_MaximumPacketSize = value; }
             }
 
             public bool HasAnyRecentActivity

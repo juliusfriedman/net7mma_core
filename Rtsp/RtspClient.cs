@@ -5378,7 +5378,7 @@ namespace Media.Rtsp
                     int ttl = 255;
 
                     //8? should be determine by rtcp enabled and the type of packets, rtcp 4, rtp 12
-                    int minimumPacketSize = 8, maximumPacketSize = (ushort)m_Buffer.Count;
+                    int minimumPacketSize = 8, maximumPacketSize = m_Buffer.Count;
 
                     //12.7 Blocksize
                     /*

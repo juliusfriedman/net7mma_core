@@ -471,317 +471,324 @@ namespace Media.UnitTests
                     Type = System.Net.AuthenticationSchemes.None
                 },
 
-                //Darwin RTSP (Sorenson Audio) (MPEG 4 Video)
-                new
-                {
-                    Uri = "rtsp://quicktime.uvm.edu:1554/waw/wdi05hs2b.mov",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                //Hexlix RTSP (H264 Video)
-                new
-                {
-                    Uri = "rtsp://46.249.213.93/broadcast/gamerushtv-tablet.3gp", //Continous Stream
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                //Wowza RTSP (H264 Video)
-                new
-                {
-                    Uri = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4", //Single media item
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
+                ////Darwin RTSP (Sorenson Audio) (MPEG 4 Video)
+                //new
+                //{
+                //    Uri = "rtsp://quicktime.uvm.edu:1554/waw/wdi05hs2b.mov",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                ////Hexlix RTSP (H264 Video)
+                //new
+                //{
+                //    Uri = "rtsp://46.249.213.93/broadcast/gamerushtv-tablet.3gp", //Continous Stream
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                ////Wowza RTSP (H264 Video)
+                //new
+                //{
+                //    Uri = "rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4", //Single media item
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
 
-                },
-                //GoogleStreamer (Udp only) IPv6 if available
+                //},
+                ////GoogleStreamer (Udp only) IPv6 if available
+                //new
+                //{
+                //    Uri = "rtsp://v7.cache3.c.youtube.com/CigLENy73wIaHwmddh2T-s8niRMYDSANFEgGUgx1c2VyX3VwbG9hZHMM/0/0/0/video.3gp", //Single media item
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://v4.cache5.c.youtube.com/CjYLENy73wIaLQlg0fcbksoOZBMYDSANFEIJbXYtZ29vZ2xlSARSBXdhdGNoYNWajp7Cv7WoUQw=/0/0/0/video.3gp", //Single media item
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //}, 
+                ////GrandStream
+                //new
+                //{
+                //    Uri = "rtsp://avollmar.dyndns.org:3030/0", //Continious Media
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                ////Unknown 
+                //new
+                //{
+                //    Uri = "rtsp://admin:11111111@118.70.125.33:7801/Streaming/channels/301", //Continious Media
+                //    Creds = new System.Net.NetworkCredential("admin", "admin"),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                // new
+                //{
+                //    Uri = "rtsp://admin:pass@118.70.125.33:9554/rtsph2641080p", //Continious Media
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                ////Sony
+                //new
+                //{
+                //    Uri = "rtsp://admin:11111111@118.70.125.33:7801/Streaming/channels/101",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://admin:11111111@118.70.125.33:7801/Streaming/channels/201",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://admin:11111111@118.70.125.33:7801/Streaming/channels/301",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://admin:11111111@118.70.125.33:8801/Streaming/channels/201",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://admin:pass@118.70.125.33:9554/rtsph2641080p",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://118.70.125.33:15654/mediainput/h264/stream_2", //Continious Media
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},                
+                ////MS-RTSP (MJPEG Video) (WMA2 Audio)
+                //new
+                //{
+                //    Uri = "rtsp://videozones.francetv.fr/france-dom-tom/Autre/Autre/2012/S01/J5/366723_envoyespecial_sujet3_20120105.wmv",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                ////MS-RTSP ASF wma2 wmv1
+                //new
+                //{
+                //    Uri = "rtsp://granton.ucs.ed.ac.uk/domsdemo/v2003-1.wmv",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                ////MS-RTSP ASF wma2 wmv3
+                //new
+                //{
+                //    Uri = "rtsp://www.reelgood.tv/reelgoodtv", // (turned off)
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                ////Real RTSP
+                //new
+                //{
+                //    Uri = "rtsp://164.107.27.156:554/media/medvids/drape_positions.rm", // (turned off)
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://dl.lib.brown.edu:554/areserves/1093545294660883.mp3", // (turned off)
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://rtsp-v3-spbtv.msk.spbtv.com:554/spbtv_v3_1/332_110.sdp", // (h264 aac)
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://rtsp-v3-spbtv.msk.spbtv.com/spbtv_v3_1/85_110.sdp", // (h264 aac)
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://rtsp-v3-spbtv.msk.spbtv.com/spbtv_v3_1/37_110.sdp", // (h264 aac)
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},//rtsp://rtsp-v3-spbtv.msk.spbtv.com/spbtv_v3_1/37_110.sdp
+                ////RtspServer
+                //new
+                //{
+                //    Uri = "rtsp://127.0.0.1/live/Mirror",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                ////VLC
+                //new
+                //{
+                //    Uri = "rtsp://127.0.0.1:8554/stream",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://192.168.1.151:555/live/Mirror",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://192.168.1.151:555/live/Testing",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://118.70.125.33:5854/user=admin&password=&channel=1&stream=0.sdp?real_stream",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://118.70.125.33:19154/user=admin&password=admin12345&channel=1&stream=0.sdp?real_stream",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://50.28.209.206:5080/axis-media/media.amp",
+                //    Creds = new System.Net.NetworkCredential("viewer", "viewer"),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.Digest
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://user1:11111111@76.79.115.83:559/cgi-bin/rtspStreamOvf/1",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://demo:abcd1234@118.70.181.233:2121/Streaming/Channels/102",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://demo:abcd1234@118.70.181.233:2221/Streaming/Channels/102",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://demo:abcd1234@118.70.181.233:2033/Streaming/Channels/102",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://demo:abcd1234@118.70.181.233:6027/Streaming/Channels/102",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://demo:abcd1234@118.70.181.233:2833/Streaming/Channels/102",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                // new
+                //{
+                //    Uri = "rtsp://demo:abcd1234@118.70.181.233:2043/Streaming/Channels/102",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                // new
+                //{
+                //    Uri = "rtsp://demo:abcd1234@118.70.181.233:2415/Streaming/Channels/102",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                // new
+                //{
+                //    Uri = "rtsp://demo:abcd1234@118.70.181.233:2943/Streaming/Channels/102",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                // new
+                //{
+                //    Uri = "rtsp://demo:abcd1234@118.70.181.233:2813/Streaming/Channels/102",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                // new
+                //{
+                //    Uri = "rtsp://demo:abcd1234@118.70.181.233:7175/Streaming/Channels/102",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                // new
+                //{
+                //    Uri = "rtsp://admin:11111111@118.70.125.33:7801/Streaming/channels/201",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                // new
+                //{
+                //    Uri = "rtsp://admin:11111111@118.70.125.33:7801/Streaming/channels/301",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
+                //new
+                //{
+                //    Uri = "rtsp://118.70.125.33:19154/user=admin&password=admin12345&channel=1&stream=0.sdp?real_stream",
+                //    Creds = default(System.Net.NetworkCredential),
+                //    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                //    Type = System.Net.AuthenticationSchemes.None
+                //},
                 new
                 {
-                    Uri = "rtsp://v7.cache3.c.youtube.com/CigLENy73wIaHwmddh2T-s8niRMYDSANFEgGUgx1c2VyX3VwbG9hZHMM/0/0/0/video.3gp", //Single media item
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://v4.cache5.c.youtube.com/CjYLENy73wIaLQlg0fcbksoOZBMYDSANFEIJbXYtZ29vZ2xlSARSBXdhdGNoYNWajp7Cv7WoUQw=/0/0/0/video.3gp", //Single media item
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                }, 
-                //GrandStream
-                new
-                {
-                    Uri = "rtsp://avollmar.dyndns.org:3030/0", //Continious Media
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                //Unknown 
-                new
-                {
-                    Uri = "rtsp://admin:11111111@118.70.125.33:7801/Streaming/channels/301", //Continious Media
-                    Creds = new System.Net.NetworkCredential("admin", "admin"),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                 new
-                {
-                    Uri = "rtsp://admin:pass@118.70.125.33:9554/rtsph2641080p", //Continious Media
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                //Sony
-                new
-                {
-                    Uri = "rtsp://admin:11111111@118.70.125.33:7801/Streaming/channels/101",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://admin:11111111@118.70.125.33:7801/Streaming/channels/201",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://admin:11111111@118.70.125.33:7801/Streaming/channels/301",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://admin:11111111@118.70.125.33:8801/Streaming/channels/201",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://admin:pass@118.70.125.33:9554/rtsph2641080p",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://118.70.125.33:15654/mediainput/h264/stream_2", //Continious Media
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },                
-                //MS-RTSP (MJPEG Video) (WMA2 Audio)
-                new
-                {
-                    Uri = "rtsp://videozones.francetv.fr/france-dom-tom/Autre/Autre/2012/S01/J5/366723_envoyespecial_sujet3_20120105.wmv",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                //MS-RTSP ASF wma2 wmv1
-                new
-                {
-                    Uri = "rtsp://granton.ucs.ed.ac.uk/domsdemo/v2003-1.wmv",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                //MS-RTSP ASF wma2 wmv3
-                new
-                {
-                    Uri = "rtsp://www.reelgood.tv/reelgoodtv", // (turned off)
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                //Real RTSP
-                new
-                {
-                    Uri = "rtsp://164.107.27.156:554/media/medvids/drape_positions.rm", // (turned off)
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://dl.lib.brown.edu:554/areserves/1093545294660883.mp3", // (turned off)
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://rtsp-v3-spbtv.msk.spbtv.com:554/spbtv_v3_1/332_110.sdp", // (h264 aac)
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://rtsp-v3-spbtv.msk.spbtv.com/spbtv_v3_1/85_110.sdp", // (h264 aac)
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://rtsp-v3-spbtv.msk.spbtv.com/spbtv_v3_1/37_110.sdp", // (h264 aac)
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },//rtsp://rtsp-v3-spbtv.msk.spbtv.com/spbtv_v3_1/37_110.sdp
-                //RtspServer
-                new
-                {
-                    Uri = "rtsp://127.0.0.1/live/Mirror",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                //VLC
-                new
-                {
-                    Uri = "rtsp://127.0.0.1:8554/stream",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://192.168.1.151:555/live/Mirror",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://192.168.1.151:555/live/Testing",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://118.70.125.33:5854/user=admin&password=&channel=1&stream=0.sdp?real_stream",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://118.70.125.33:19154/user=admin&password=admin12345&channel=1&stream=0.sdp?real_stream",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://50.28.209.206:5080/axis-media/media.amp",
-                    Creds = new System.Net.NetworkCredential("viewer", "viewer"),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.Digest
-                },
-                new
-                {
-                    Uri = "rtsp://user1:11111111@76.79.115.83:559/cgi-bin/rtspStreamOvf/1",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://demo:abcd1234@118.70.181.233:2121/Streaming/Channels/102",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://demo:abcd1234@118.70.181.233:2221/Streaming/Channels/102",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://demo:abcd1234@118.70.181.233:2033/Streaming/Channels/102",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://demo:abcd1234@118.70.181.233:6027/Streaming/Channels/102",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://demo:abcd1234@118.70.181.233:2833/Streaming/Channels/102",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                 new
-                {
-                    Uri = "rtsp://demo:abcd1234@118.70.181.233:2043/Streaming/Channels/102",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                 new
-                {
-                    Uri = "rtsp://demo:abcd1234@118.70.181.233:2415/Streaming/Channels/102",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                 new
-                {
-                    Uri = "rtsp://demo:abcd1234@118.70.181.233:2943/Streaming/Channels/102",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                 new
-                {
-                    Uri = "rtsp://demo:abcd1234@118.70.181.233:2813/Streaming/Channels/102",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                 new
-                {
-                    Uri = "rtsp://demo:abcd1234@118.70.181.233:7175/Streaming/Channels/102",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                 new
-                {
-                    Uri = "rtsp://admin:11111111@118.70.125.33:7801/Streaming/channels/201",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                 new
-                {
-                    Uri = "rtsp://admin:11111111@118.70.125.33:7801/Streaming/channels/301",
-                    Creds = default(System.Net.NetworkCredential),
-                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
-                    Type = System.Net.AuthenticationSchemes.None
-                },
-                new
-                {
-                    Uri = "rtsp://118.70.125.33:19154/user=admin&password=admin12345&channel=1&stream=0.sdp?real_stream",
+                    Uri = "rtsp://8.15.251.101:1935/rtplive/R2_051",
                     Creds = default(System.Net.NetworkCredential),
                     Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
                     Type = System.Net.AuthenticationSchemes.None
@@ -2258,7 +2265,10 @@ namespace Media.UnitTests
                     //Apollo - 
 
                     //Traffic
-                    server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("R2_059", "rtsp://8.15.251.101:1935/rtplive/R2_059", Rtsp.RtspClient.ClientProtocolType.Tcp));
+                    server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("R2_051", "rtsp://8.15.251.101:1935/rtplive/R2_051", Rtsp.RtspClient.ClientProtocolType.Tcp, 65540));
+                    server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("R2_059", "rtsp://8.15.251.101:1935/rtplive/R2_059", Rtsp.RtspClient.ClientProtocolType.Tcp, 65540));
+
+
 
                     //string localPath = System.IO.Path.GetDirectoryName(executingAssemblyLocation);
 
