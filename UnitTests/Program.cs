@@ -2268,18 +2268,19 @@ namespace Media.UnitTests
                     //Apollo - 
 
                     //Traffic
-                    var sourceOne = new Media.Rtsp.Server.MediaTypes.RtspSource("R2_051", "rtsp://8.15.251.101:1935/rtplive/R2_051", Rtsp.RtspClient.ClientProtocolType.Tcp, 8192);
+                    var sourceOne = new Media.Rtsp.Server.MediaTypes.RtspSource("R2_051", "rtsp://8.15.251.101:1935/rtplive/R2_051", Rtsp.RtspClient.ClientProtocolType.Tcp, 65540);
                     sourceOne.TrySetLogger(sourceOne.RtspClient.Logger = sourceOne.RtpClient.Logger = new NullLogger(true));
                     server.TryAddMedia(sourceOne);
 
                     sourceOne.RtpClient.ThreadEvents = true;
+                    sourceOne.RtpClient.IListSockets = true;
 
-                    var sourceTwo = new Media.Rtsp.Server.MediaTypes.RtspSource("R2_059", "rtsp://8.15.251.101:1935/rtplive/R2_059", Rtsp.RtspClient.ClientProtocolType.Tcp, 8192);
+                    var sourceTwo = new Media.Rtsp.Server.MediaTypes.RtspSource("R2_059", "rtsp://8.15.251.101:1935/rtplive/R2_059", Rtsp.RtspClient.ClientProtocolType.Tcp, 65540);
                     server.TryAddMedia(sourceTwo);
                     sourceTwo.TrySetLogger(sourceTwo.RtspClient.Logger = sourceTwo.RtpClient.Logger = new NullLogger(true));
 
                     sourceTwo.RtpClient.ThreadEvents = true;
-
+                    sourceTwo.RtpClient.IListSockets = true;
 
                     //string localPath = System.IO.Path.GetDirectoryName(executingAssemblyLocation);
 

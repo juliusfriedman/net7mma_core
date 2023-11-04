@@ -1904,7 +1904,7 @@ namespace Media.Rtp
                     offset -= remainingInBuffer;                    
 
                     //Go to the top of the loop to verify the data again.
-                    if (jumbo.Equals(false) && Common.IDisposedExtensions.IsNullOrDisposed(relevent).Equals(false)) goto ContinueParsing;
+                    if (jumbo.Equals(false)) goto ContinueParsing;
                 }
 
                 //If the client is not disposed
