@@ -38,12 +38,16 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 using Media.Codecs.Audio.Alaw;
 using Media.Codecs.Audio.Mulaw;
+using Media.Common.Loggers;
 using Media.Rtp;
 using Media.RtpTools;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Xml.Linq;
 using UnitTests.Code;
 
 namespace Media.UnitTests
@@ -470,7 +474,6 @@ namespace Media.UnitTests
                     Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
                     Type = System.Net.AuthenticationSchemes.None
                 },
-
                 ////Darwin RTSP (Sorenson Audio) (MPEG 4 Video)
                 //new
                 //{
@@ -2265,9 +2268,13 @@ namespace Media.UnitTests
                     //Apollo - 
 
                     //Traffic
-                    server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("R2_051", "rtsp://8.15.251.101:1935/rtplive/R2_051", Rtsp.RtspClient.ClientProtocolType.Tcp, 65540));
-                    server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("R2_059", "rtsp://8.15.251.101:1935/rtplive/R2_059", Rtsp.RtspClient.ClientProtocolType.Tcp, 65540));
+                    var sourceOne = new Media.Rtsp.Server.MediaTypes.RtspSource("R2_051", "rtsp://8.15.251.101:1935/rtplive/R2_051", Rtsp.RtspClient.ClientProtocolType.Tcp, 65540);
+                    sourceOne.RtspClient.Logger = sourceOne.RtpClient.Logger = new NullLogger(true);
+                    server.TryAddMedia(sourceOne);
 
+                    var sourceTwo = new Media.Rtsp.Server.MediaTypes.RtspSource("R2_059", "rtsp://8.15.251.101:1935/rtplive/R2_059", Rtsp.RtspClient.ClientProtocolType.Tcp, 65540);
+                    server.TryAddMedia(sourceTwo);
+                    sourceTwo.RtspClient.Logger = sourceTwo.RtpClient.Logger = new NullLogger(true);
 
 
                     //string localPath = System.IO.Path.GetDirectoryName(executingAssemblyLocation);
@@ -2727,6 +2734,70 @@ namespace Media.UnitTests
                                 }
                             case ConsoleKey.B:
                                 {
+                                    if(!sourceOne.RtspClient.IsPlaying || !sourceTwo.RtspClient.IsPlaying)
+                                    {
+                                        Console.WriteLine("Sources not playing....");
+                                        return;
+                                    }
+
+                                    Sdp.SessionDescription compositeSession = new(0, originatorAndSession: "Test", sessionName: "Composite")
+                                    {
+                                        // Add some required lines.
+                                        new Sdp.Lines.SessionConnectionLine
+                                        {
+                                            ConnectionNetworkType = Sdp.Lines.SessionConnectionLine.InConnectionToken,
+                                            ConnectionAddressType = Sdp.SessionDescription.WildcardString,
+                                            ConnectionAddress = System.Net.IPAddress.Any.ToString()
+                                        },
+                                        sourceOne.SessionDescription.MediaDescriptions.FirstOrDefault(),
+                                        new Sdp.SessionDescriptionLine("a=control:*"),
+                                        new Sdp.SessionDescriptionLine("a=sendonly"),
+                                        new Sdp.SessionDescriptionLine("a=type:broadcast")
+                                    };
+
+                                    var composite = new Media.Rtsp.Server.MediaTypes.RtpSource("Composite", compositeSession);
+
+                                    if (!server.TryAddMedia(composite))
+                                    {
+                                        Console.WriteLine("Already Added the composite stream");
+                                    }
+
+                                    var currentStream = sourceOne;
+
+                                    var compositeContext = composite.RtpClient.TransportContexts.First();
+
+                                    compositeContext.MinimumSequentialValidRtpPackets = 0;
+                                    compositeContext.AllowOutOfOrderPackets = true;
+                                    compositeContext.SynchronizationSourceIdentifier = RFC3550.Random32(0);
+                                    compositeContext.RemoteSynchronizationSourceIdentifier = 0;
+                                    compositeContext.IsRtcpEnabled = true;
+
+                                    RtpClient.RtpPacketHandler sendPacket = (s, p, tc) => composite.RtpClient.OnRtpPacketReceieved(p, tc);
+
+                                    RtpClient.RtpFrameHandler sendFrame = (s, f, tc, final) => composite.RtpClient.OnRtpFrameChanged(f, tc, final);
+
+                                    var switchTimer = new System.Threading.Timer(state =>
+                                    {
+                                        if (!server.IsRunning) return;
+
+                                        if (currentStream.RtpClient.FrameChangedEventsEnabled)
+                                            currentStream.RtpClient.RtpFrameChanged -= sendFrame;
+                                        else
+                                            currentStream.RtpClient.RtpPacketReceieved -= sendPacket;
+
+                                        if (currentStream == sourceOne)
+                                            currentStream = sourceTwo;
+                                        else
+                                            currentStream = sourceOne;
+
+                                        if (currentStream.RtpClient.FrameChangedEventsEnabled)
+                                            currentStream.RtpClient.RtpFrameChanged += sendFrame;
+                                        else
+                                            currentStream.RtpClient.RtpPacketReceieved += sendPacket;
+
+                                    }, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
+
+                                    Console.WriteLine("Created the composite switching stream");
 
                                     break;
                                 }
