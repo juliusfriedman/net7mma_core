@@ -1600,7 +1600,7 @@ namespace Media.Rtp
                         //decrease what remains
                         remainingInBuffer -= frameLength;
 
-                        Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@ProcessFrameData - raisedEvent for frameLength: " + frameLength.ToString() +" remainingInBuffer=" + remainingInBuffer);
+                        Media.Common.ILoggingExtensions.Log(Logger, InternalId + "@ProcessFrameData - raisedEvent for frameLength: " + frameLength.ToString() +" remainingInBuffer=" + remainingInBuffer);
 
                         //Iterate again
                         continue;
@@ -1634,7 +1634,7 @@ namespace Media.Rtp
                                 //mark as incompatible
                                 //incompatible = true;
 
-                                Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@ProcessFrameData - Buffer Exceeded Packet of " + frameLength + " for Channel " + frameChannel + " remainingInBuffer=" + remainingInBuffer);
+                                Media.Common.ILoggingExtensions.Log(Logger, InternalId + "@ProcessFrameData - Buffer Exceeded Packet of " + frameLength + " for Channel " + frameChannel + " remainingInBuffer=" + remainingInBuffer);
 
                                 //BufferExceeded => alow for resize.
 
@@ -1648,7 +1648,7 @@ namespace Media.Rtp
                                 //Remove the context
                                 relevent = null;
 
-                                Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@ProcessFrameData - (" + remainingInBuffer + ")" + ", Needs more data to inspect packet fields, frameLength = " + frameLength + " for Channel " + frameChannel + " remainingInBuffer=" + remainingInBuffer);
+                                Media.Common.ILoggingExtensions.Log(Logger, InternalId + "@ProcessFrameData - (" + remainingInBuffer + ")" + ", Needs more data to inspect packet fields, frameLength = " + frameLength + " for Channel " + frameChannel + " remainingInBuffer=" + remainingInBuffer);
 
                                 goto CheckRemainingData;
 

@@ -2269,12 +2269,12 @@ namespace Media.UnitTests
 
                     //Traffic
                     var sourceOne = new Media.Rtsp.Server.MediaTypes.RtspSource("R2_051", "rtsp://8.15.251.101:1935/rtplive/R2_051", Rtsp.RtspClient.ClientProtocolType.Tcp, 65540);
-                    sourceOne.RtspClient.Logger = sourceOne.RtpClient.Logger = new NullLogger(true);
+                    sourceOne.TrySetLogger(sourceOne.RtspClient.Logger = sourceOne.RtpClient.Logger = new NullLogger(true));
                     server.TryAddMedia(sourceOne);
 
                     var sourceTwo = new Media.Rtsp.Server.MediaTypes.RtspSource("R2_059", "rtsp://8.15.251.101:1935/rtplive/R2_059", Rtsp.RtspClient.ClientProtocolType.Tcp, 65540);
                     server.TryAddMedia(sourceTwo);
-                    sourceTwo.RtspClient.Logger = sourceTwo.RtpClient.Logger = new NullLogger(true);
+                    sourceTwo.TrySetLogger(sourceTwo.RtspClient.Logger = sourceTwo.RtpClient.Logger = new NullLogger(true));
 
 
                     //string localPath = System.IO.Path.GetDirectoryName(executingAssemblyLocation);
