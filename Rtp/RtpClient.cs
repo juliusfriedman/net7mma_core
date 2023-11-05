@@ -184,7 +184,7 @@ namespace Media.Rtp
 
                     //May help if behind a router
                     //Allow Nat Traversal
-                    //RtpSocket.SetIPProtectionLevel(IPProtectionLevel.Unrestricted);
+                    //socket.SetIPProtectionLevel(IPProtectionLevel.Unrestricted);
                 }
 
                 //Todo, set RecieveTimeout.. (done in From methods)

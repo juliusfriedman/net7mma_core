@@ -2268,14 +2268,14 @@ namespace Media.UnitTests
                     //Apollo - 
 
                     //Traffic
-                    var sourceOne = new Media.Rtsp.Server.MediaTypes.RtspSource("R2_051", "rtsp://8.15.251.101:1935/rtplive/R2_051", Rtsp.RtspClient.ClientProtocolType.Tcp, 65540);
+                    var sourceOne = new Media.Rtsp.Server.MediaTypes.RtspSource("R2_051", "rtsp://8.15.251.101:1935/rtplive/R2_051", Rtsp.RtspClient.ClientProtocolType.Tcp, 10 * 1024);
                     sourceOne.TrySetLogger(sourceOne.RtspClient.Logger = sourceOne.RtpClient.Logger = new NullLogger(true));
                     server.TryAddMedia(sourceOne);
 
                     sourceOne.RtpClient.ThreadEvents = true;
                     sourceOne.RtpClient.IListSockets = true;
 
-                    var sourceTwo = new Media.Rtsp.Server.MediaTypes.RtspSource("R2_059", "rtsp://8.15.251.101:1935/rtplive/R2_059", Rtsp.RtspClient.ClientProtocolType.Tcp, 65540);
+                    var sourceTwo = new Media.Rtsp.Server.MediaTypes.RtspSource("R2_059", "rtsp://8.15.251.101:1935/rtplive/R2_059", Rtsp.RtspClient.ClientProtocolType.Tcp, 10 * 1024);
                     server.TryAddMedia(sourceTwo);
                     sourceTwo.TrySetLogger(sourceTwo.RtspClient.Logger = sourceTwo.RtpClient.Logger = new NullLogger(true));
 
@@ -2760,26 +2760,31 @@ namespace Media.UnitTests
                                         new Sdp.SessionDescriptionLine("a=type:broadcast")
                                     };
 
-                                    var composite = new Media.Rtsp.Server.MediaTypes.RtpSource("Composite", compositeSession);
+                                    var compositeSource = new Media.Rtsp.Server.MediaTypes.RtpSource("Composite", compositeSession);
 
-                                    if (!server.TryAddMedia(composite))
+                                    if (!server.TryAddMedia(compositeSource))
                                     {
                                         Console.WriteLine("Already Added the composite stream");
                                     }
 
                                     var currentStream = sourceOne;
 
-                                    var compositeContext = composite.RtpClient.TransportContexts.First();
+                                    var compositeContext = compositeSource.RtpClient.TransportContexts.First();
 
                                     compositeContext.MinimumSequentialValidRtpPackets = 0;
-                                    compositeContext.AllowOutOfOrderPackets = true;
                                     compositeContext.SynchronizationSourceIdentifier = RFC3550.Random32(0);
                                     compositeContext.RemoteSynchronizationSourceIdentifier = 0;
-                                    compositeContext.IsRtcpEnabled = true;
 
-                                    RtpClient.RtpPacketHandler sendPacket = (s, p, tc) => composite.RtpClient.OnRtpPacketReceieved(p, tc);
+                                    RtpClient.RtpPacketHandler sendPacket = (s, p, tc) => compositeSource.RtpClient.OnRtpPacketReceieved(p, tc);
 
-                                    RtpClient.RtpFrameHandler sendFrame = (s, f, tc, final) => composite.RtpClient.OnRtpFrameChanged(f, tc, final);
+                                    RtpClient.RtpFrameHandler sendFrame = (s, f, tc, final) =>
+                                    {
+                                        if (!final) return;
+                                        compositeContext.RtpTimestamp += 9000;
+                                        f.SynchronizationSourceIdentifier = compositeContext.SynchronizationSourceIdentifier;
+                                        f.Timestamp = compositeContext.RtpTimestamp;
+                                        compositeSource.RtpClient.OnRtpFrameChanged(f, tc, final);
+                                    };
 
                                     var switchTimer = new System.Threading.Timer(state =>
                                     {
