@@ -75,7 +75,7 @@ namespace Media.Rtsp.Server
         internal NetworkCredential m_SourceCred;
         internal List<string> m_Aliases = new List<string>();
         //internal bool m_Child = false;
-        public virtual Sdp.SessionDescription SessionDescription { get; protected set; }
+        public virtual Sdp.SessionDescription SessionDescription { get; internal protected set; }
 
         //Maybe should be m_AllowUdp?
         internal bool m_ForceTCP;//= true; // To force clients to utilize TCP, Interleaved in Rtsp or Rtp

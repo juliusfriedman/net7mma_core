@@ -2760,7 +2760,11 @@ namespace Media.UnitTests
                                         new Sdp.SessionDescriptionLine("a=type:broadcast")
                                     };
 
-                                    var compositeSource = new Media.Rtsp.Server.MediaTypes.RtpSource("Composite", compositeSession);
+                                    var compositeSource = new Media.Rtsp.Server.MediaTypes.RtpVideoSink("Composite", null);
+
+                                    compositeSource.Start();
+
+                                    compositeSource.SessionDescription = compositeSession;
 
                                     if (!server.TryAddMedia(compositeSource))
                                     {
@@ -2771,19 +2775,19 @@ namespace Media.UnitTests
 
                                     var compositeContext = compositeSource.RtpClient.TransportContexts.First();
 
+                                    compositeContext.MediaDescription = compositeSession.MediaDescriptions.First();
+
                                     compositeContext.MinimumSequentialValidRtpPackets = 0;
                                     compositeContext.SynchronizationSourceIdentifier = RFC3550.Random32(0);
                                     compositeContext.RemoteSynchronizationSourceIdentifier = 0;
 
-                                    RtpClient.RtpPacketHandler sendPacket = (s, p, tc) => compositeSource.RtpClient.OnRtpPacketReceieved(p, tc);
+                                    RtpClient.RtpPacketHandler sendPacket = (s, p, tc) => compositeSource.EnquePacket(p);
 
                                     RtpClient.RtpFrameHandler sendFrame = (s, f, tc, final) =>
                                     {
                                         if (!final) return;
-                                        compositeContext.RtpTimestamp += 9000;
                                         f.SynchronizationSourceIdentifier = compositeContext.SynchronizationSourceIdentifier;
-                                        f.Timestamp = compositeContext.RtpTimestamp;
-                                        compositeSource.RtpClient.OnRtpFrameChanged(f, tc, final);
+                                        compositeSource.Frames.Enqueue(f);
                                     };
 
                                     var switchTimer = new System.Threading.Timer(state =>
