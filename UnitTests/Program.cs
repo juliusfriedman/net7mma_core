@@ -2810,7 +2810,7 @@ namespace Media.UnitTests
                                         else
                                             currentStream.RtpClient.RtpPacketReceieved += sendPacket;
 
-                                        if (++index > sources.Count)
+                                        if (++index >= sources.Count)
                                             index = 0;
 
                                     }, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
