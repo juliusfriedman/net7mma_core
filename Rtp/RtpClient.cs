@@ -4019,6 +4019,7 @@ namespace Media.Rtp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return TransportContexts.Any(c => c.IsRtcpEnabled); }
+            set { TransportContexts.ForEach(c => c.IsRtcpEnabled = value); }
         }
 
         /// <summary>
@@ -4028,6 +4029,7 @@ namespace Media.Rtp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return TransportContexts.Any(c => c.IsRtpEnabled); }
+            set { TransportContexts.ForEach(c => c.IsRtpEnabled = value); }
         }
 
         /// <summary>
