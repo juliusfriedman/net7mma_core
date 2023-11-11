@@ -336,13 +336,12 @@ namespace Media.Rtp
 
                 //Another hacky way would be to simply leave EndTime null.... 
 
-                var rangeInfo = mediaDescription.RangeLine ?? (Common.IDisposedExtensions.IsNullOrDisposed(sessionDescription).Equals(false) ? sessionDescription.RangeLine : null);
+                var rangeInfo = mediaDescription.RangeLine ??
+                    (Common.IDisposedExtensions.IsNullOrDisposed(sessionDescription) is false ? sessionDescription.RangeLine : null);
 
-                if (object.ReferenceEquals(rangeInfo, null).Equals(false) && rangeInfo.Parts.Count() > 0)
+                if (rangeInfo is not null && rangeInfo.Parts.Any())
                 {
-                    string type;
-
-                    Media.Sdp.SessionDescription.TryParseRange(rangeInfo.Parts.First(), out type, out tc.m_StartTime, out tc.m_EndTime);
+                    Media.Sdp.SessionDescription.TryParseRange(rangeInfo.Parts.First(), out _, out tc.m_StartTime, out tc.m_EndTime);
                 }
 
                 //https://www.ietf.org/rfc/rfc3605.txt
@@ -1018,11 +1017,12 @@ namespace Media.Rtp
 
                     if (IsRtpEnabled)
                     {
-                        return false.Equals(object.ReferenceEquals(RtpSocket, null)) && false.Equals(object.ReferenceEquals(LocalRtp, null));
+                        return RtpSocket is not null && LocalRtp is not null;
                     }
-                    else if (IsRtcpEnabled)
+
+                    if (IsRtcpEnabled)
                     {
-                        return false.Equals(object.ReferenceEquals(RtcpSocket, null)) && false.Equals(object.ReferenceEquals(LocalRtcp, null));
+                        return RtcpSocket is not null && LocalRtcp is not null;
                     }
 
                     return false;
@@ -2189,10 +2189,10 @@ namespace Media.Rtp
                 }
 
                 //If a different socket is used for rtcp configure it also
-                if (object.ReferenceEquals((RtcpSocket = rtcpSocket), null).Equals(false))
+                if ((RtcpSocket = rtcpSocket) is not null)
                 {
                     //If the socket is not the same as the RtcpSocket configure it also
-                    if ((RtpSocket.Handle == RtcpSocket.Handle).Equals(false))
+                    if (RtpSocket.Handle != RtcpSocket.Handle)
                     {
                         RtcpSocket.SendTimeout = RtcpSocket.ReceiveTimeout = (int)(ReceiveInterval.TotalMilliseconds) >> 1;  
 
@@ -2200,9 +2200,13 @@ namespace Media.Rtp
 
                         RemoteRtcp = RtcpSocket.RemoteEndPoint;
 
-                        if (object.ReferenceEquals(LocalRtcp, null).Equals(false) && false.Equals(RtcpSocket.IsBound)) RtcpSocket.Bind(LocalRtcp);
+                        if (LocalRtcp is not null && false.Equals(RtcpSocket.IsBound)) RtcpSocket.Bind(LocalRtcp);
 
-                        if (object.ReferenceEquals(RemoteRtcp, null).Equals(false) && false.Equals(RtcpSocket.Connected)) try { RtcpSocket.Connect(RemoteRtcp); }
+                        if (RemoteRtcp is not null && false.Equals(RtcpSocket.Connected))
+                            try
+                            {
+                                RtcpSocket.Connect(RemoteRtcp);
+                            }
                             catch
                             {
                                 /*Todo, Only tcp must succeed*/
@@ -2302,10 +2306,10 @@ namespace Media.Rtp
                     MulticastGroups.Clear();
 
                     //For Udp the RtcpSocket may be the same socket as the RtpSocket if the sender/reciever is duplexing
-                    if (object.ReferenceEquals(RtcpSocket, null).Equals(false) && RtpSocket.Handle.Equals(RtcpSocket.Handle).Equals(false)) RtcpSocket.Close();
+                    if (RtcpSocket is not null && RtpSocket.Handle.Equals(RtcpSocket.Handle).Equals(false)) RtcpSocket.Close();
 
                     //Close the RtpSocket
-                    if (object.ReferenceEquals(RtpSocket, null).Equals(false)) RtpSocket.Close();
+                    RtpSocket?.Close();
 
                     RtpSocket = RtcpSocket = null;
                 }
@@ -2366,7 +2370,7 @@ namespace Media.Rtp
             {
                 if (IDisposedExtensions.IsNullOrDisposed(this)) yield break;
 
-                if (object.ReferenceEquals(RtpSocket, null).Equals(false))
+                if (RtpSocket is not null)
                 {
                     yield return RtpSocket;
 
@@ -2374,7 +2378,7 @@ namespace Media.Rtp
                 }
 
                 //Todo, these may be the same sockets...
-                if (object.ReferenceEquals(RtcpSocket, null).Equals(false)) yield return RtcpSocket;
+                if (RtcpSocket is not null) yield return RtcpSocket;
             }
         }
 
@@ -4011,7 +4015,7 @@ namespace Media.Rtp
             {
                 return IDisposedExtensions.IsNullOrDisposed(this).Equals(false) &&
                     Started.Equals(DateTime.MinValue).Equals(false) && 
-                    object.ReferenceEquals(m_WorkerThread, null).Equals(false) &&
+                    m_WorkerThread is not null &&
                     (m_WorkerThread.IsAlive || m_StopRequested.Equals(false));
             }
         }
@@ -4291,17 +4295,19 @@ namespace Media.Rtp
 
         #endregion
 
-        IEnumerable<System.Threading.Thread> Common.IThreadReference.GetReferencedThreads()
+        IEnumerable<Thread> Common.IThreadReference.GetReferencedThreads()
         {
-            IEnumerable<System.Threading.Thread> threads = System.Linq.Enumerable.Empty<System.Threading.Thread>();
+            IEnumerable<Thread> threads = Enumerable.Empty<Thread>();
 
             if (IDisposedExtensions.IsNullOrDisposed(this)) return threads;
 
             //Was not returning threads whih may not have been null..
 
-            if (IsActive || object.ReferenceEquals(m_WorkerThread, null) == false) threads = threads.Concat(Media.Common.Extensions.Linq.LinqExtensions.Yield(m_WorkerThread));
+            if (IsActive || m_WorkerThread is not null)
+                threads = threads.Concat(Media.Common.Extensions.Linq.LinqExtensions.Yield(m_WorkerThread));
 
-            if (m_ThreadEvents || object.ReferenceEquals(m_EventThread, null) == false) threads = threads.Concat(Media.Common.Extensions.Linq.LinqExtensions.Yield(m_EventThread));
+            if (m_ThreadEvents || m_EventThread is not null)
+                threads = threads.Concat(Media.Common.Extensions.Linq.LinqExtensions.Yield(m_EventThread));
 
             return threads;
         }

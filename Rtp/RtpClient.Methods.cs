@@ -262,7 +262,7 @@ namespace Media.Rtp
                 || //OR the call has not been forced AND the context IsRtcpEnabled AND the context is active
                 (false.Equals(force) && context.IsRtcpEnabled && context.IsActive
                 && //AND the final Goodbye was sent already
-                object.ReferenceEquals(context.Goodbye, null).Equals(false) && 
+                context.Goodbye is not null &&
                 context.Goodbye.Transferred.HasValue))
             {
                 //Indicate nothing was sent
@@ -361,7 +361,7 @@ namespace Media.Rtp
                 && //AND the call has not been forced AND the context IsRtcpEnabled 
                 (false.Equals(force) && context.IsRtcpEnabled)
                 // OR there is no RtcpSocket
-                || object.ReferenceEquals(context.RtcpSocket, null))
+                || context.RtcpSocket is null)
             {
                 //Indicate nothing was sent
                 return 0;
@@ -674,13 +674,11 @@ namespace Media.Rtp
 
         public /*virtual*/ int SendRtcpPackets(System.Collections.Generic.IEnumerable<Rtcp.RtcpPacket> packets)
         {
-            if (object.ReferenceEquals(packets, null)) return 0;
-
-            System.Net.Sockets.SocketError error;
+            if (packets is null) return 0;
 
             TransportContext context = GetContextForPacket(System.Linq.Enumerable.FirstOrDefault(packets));
 
-            return SendRtcpPackets(packets, context, out error);
+            return SendRtcpPackets(packets, context, out _);
         }
 
         internal /*virtual*/ bool SendReports(TransportContext context, bool force = false)
@@ -751,7 +749,7 @@ namespace Media.Rtp
             }
 
             //Calulcate for the currently inactive time period
-            if (object.ReferenceEquals(context.Goodbye, null) &&
+            if (context.Goodbye is null &&
                 false.Equals(context.HasAnyRecentActivity))
             {
                 //Set the amount of time inactive
@@ -801,7 +799,7 @@ namespace Media.Rtp
                 if (c.MediaDescription.MediaType == mediaDescription.MediaType &&
                     c.MediaDescription.MediaFormat.Equals(mediaDescription.MediaFormat, System.StringComparison.InvariantCultureIgnoreCase)
                     ||
-                    object.ReferenceEquals(c.MediaDescription.ControlLine, null).Equals(false) &&
+                    c.MediaDescription.ControlLine is not null &&
                     c.MediaDescription.ControlLine.Equals(mediaDescription.ControlLine)) break;
 
                 c = null;
@@ -878,7 +876,10 @@ namespace Media.Rtp
             {
                 c = TransportContexts[i];
 
-                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(c)) && c.IsActive && object.ReferenceEquals(c.RtpSocket, null).Equals(false) && c.RtpSocket.Handle == socketHandle || object.ReferenceEquals(c.RtcpSocket, null).Equals(false) && c.RtcpSocket.Handle == socketHandle) break;
+                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(c)) &&
+                    c.IsActive &&
+                    c.RtpSocket is not null &&
+                    c.RtpSocket.Handle == socketHandle) break;
 
                 c = null;
             }
@@ -1442,7 +1443,7 @@ namespace Media.Rtp
             if (Common.IDisposedExtensions.IsNullOrDisposed(buffer)) buffer = m_Buffer;
 
             //Ensure the socket can poll, should measure against parallel checks with OR
-            if (buffer.Count <= 0 | m_StopRequested | object.ReferenceEquals(socket, null) | object.ReferenceEquals(remote, null) | Common.IDisposedExtensions.IsNullOrDisposed(buffer) | Common.IDisposedExtensions.IsNullOrDisposed(this)) return 0;
+            if (buffer.Count <= 0 | m_StopRequested | socket is null | remote is null | Common.IDisposedExtensions.IsNullOrDisposed(buffer) | Common.IDisposedExtensions.IsNullOrDisposed(this)) return 0;
 
             bool tcp = socket.ProtocolType == System.Net.Sockets.ProtocolType.Tcp;
 
@@ -1840,7 +1841,7 @@ namespace Media.Rtp
                     frameLength > remainingInBuffer ? frameLength - remainingInBuffer : 0;
 
                 //If there is anymore data remaining on the wire
-                if (remainingOnSocket > 0 && false.Equals(object.ReferenceEquals(socket, null)) && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)))
+                if (remainingOnSocket > 0 && socket is not null && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)))
                 {
                     //Align the buffer if anything remains on the socket.
                     if (remainingOnSocket + offset + remainingInBuffer > bufferLength)
