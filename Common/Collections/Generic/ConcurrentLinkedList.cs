@@ -140,7 +140,7 @@ namespace Media.Common.Collections.Generic
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected LinkedNode<T> AddFirst(ref T value)
         {
-            if (object.ReferenceEquals(Head, LinkedNode<T>.Null))
+            if (Head is null)
             {
                 Head = new LinkedNode<T>(ref value);
             }
@@ -162,7 +162,7 @@ namespace Media.Common.Collections.Generic
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected LinkedNode<T> AddLast(ref T value)
         {
-            if (object.ReferenceEquals(Head, LinkedNode<T>.Null))
+            if (Head is null)
             {
                 Tail = new LinkedNode<T>(ref value);
             }
@@ -209,7 +209,7 @@ namespace Media.Common.Collections.Generic
         {
             LinkedNode<T> Current = Head;
 
-            while (false.Equals(object.ReferenceEquals(Current, LinkedNode<T>.Null)))
+            while (Current is not null)
             {
                 yield return Current.Value;
 

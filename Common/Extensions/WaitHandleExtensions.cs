@@ -45,7 +45,7 @@ namespace Media.Common.Extensions.WaitHandle
 
         public static void TryWaitOnHandleAndDispose(ref System.Threading.WaitHandle handle)
         {
-            if (object.ReferenceEquals(handle, NilWaitHandle)) return;
+            if (handle is null) return;
             
             try
             {
@@ -62,7 +62,7 @@ namespace Media.Common.Extensions.WaitHandle
             }
             finally
             {
-                if (object.ReferenceEquals(handle, NilWaitHandle).Equals(false)) handle.Dispose();
+                handle.Dispose();
             }
 
             handle = null;

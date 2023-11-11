@@ -311,7 +311,7 @@ namespace Media.Common.Collections.Generic
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool TryPeek(ref T t)
         {
-            if (Object.ReferenceEquals(First, Node.Null)) return false;
+            if (First is null) return false;
 
             t = First.Value;
 
@@ -341,7 +341,7 @@ namespace Media.Common.Collections.Generic
             //Node pnew = new Node(ref t);
             //First = System.Threading.Interlocked.Exchange<Node>(ref Last, pnew).Next = pnew;
 
-            //if (/*Count.Equals(Common.Binary.LongZero) ||*/ Object.ReferenceEquals(First, Node.Null)) 
+            //if (/*Count.Equals(Common.Binary.LongZero) ||*/ First is null)) 
             //else Last = Last.Next = new Node(ref t);
 
             switch (System.Threading.Interlocked.Read(ref m_Count))
@@ -400,11 +400,11 @@ namespace Media.Common.Collections.Generic
         {
             Node Current = First ?? Last;
 
-            while (false.Equals(Object.ReferenceEquals(Current, Node.Null)))
+            while (Current is not null)
             {
                 yield return Current.Value;
 
-                if (Object.ReferenceEquals(System.Threading.Interlocked.Exchange(ref Current, Current.Next), Node.Null)) yield break;
+                if (System.Threading.Interlocked.Exchange(ref Current, Current.Next) is null) yield break;
             }
         }
 
