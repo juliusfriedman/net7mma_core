@@ -204,21 +204,24 @@ namespace Media.Rtp
                 Action<Socket> configure = null)
             {
                 //Must have a mediaDescription
-                if (Common.IDisposedExtensions.IsNullOrDisposed(mediaDescription)) throw new ArgumentNullException("mediaDescription");
+                if (Common.IDisposedExtensions.IsNullOrDisposed(mediaDescription))
+                    throw new ArgumentNullException(nameof(mediaDescription));
 
                 //If there is no sdp there must be a local and remoteIp
-                if (Common.IDisposedExtensions.IsNullOrDisposed(sessionDescription) && (object.ReferenceEquals(localIp, null) || object.ReferenceEquals(remoteIp, null))) throw new InvalidOperationException("Must have a sessionDescription or the localIp and remoteIp cannot be established.");
+                if (Common.IDisposedExtensions.IsNullOrDisposed(sessionDescription) &&
+                    (localIp is null || remoteIp is null))
+                    throw new InvalidOperationException("Must have a sessionDescription or the localIp and remoteIp cannot be established.");
 
                 //If no remoteIp was given attempt to parse it from the sdp
-                if (object.ReferenceEquals(remoteIp, null))
+                if (remoteIp is null)
                 {
                     Sdp.SessionDescriptionLine cLine = mediaDescription.ConnectionLine;
 
                     //Try the sesion level if the media level doesn't have one
-                    if (object.ReferenceEquals(cLine, null)) cLine = sessionDescription.ConnectionLine;
+                    cLine ??= sessionDescription.ConnectionLine;
 
                     //Attempt to parse the IP, if failed then throw an exception.
-                    if (object.ReferenceEquals(cLine, null)
+                    if (cLine is null
                         ||
                         false.Equals(IPAddress.TryParse(new Sdp.Lines.SessionConnectionLine(cLine).Host, out remoteIp))) throw new InvalidOperationException("Cannot determine remoteIp from ConnectionLine");
                 }                
@@ -228,7 +231,7 @@ namespace Media.Rtp
 
                 //If no localIp was given determine based on the remoteIp
                 //--When there is no remoteIp this should be done first to determine if the sender is multicasting.
-                if (object.ReferenceEquals(localIp, null)) localIp = multiCast ? Media.Common.Extensions.Socket.SocketExtensions.GetFirstMulticastIPAddress(remoteIp.AddressFamily) : Media.Common.Extensions.Socket.SocketExtensions.GetFirstUnicastIPAddress(remoteIp.AddressFamily);
+                localIp ??= multiCast ? Media.Common.Extensions.Socket.SocketExtensions.GetFirstMulticastIPAddress(remoteIp.AddressFamily) : Media.Common.Extensions.Socket.SocketExtensions.GetFirstUnicastIPAddress(remoteIp.AddressFamily);
 
                 //The localIp and remoteIp should be on the same network otherwise they will need to be mapped or routed.
                 //In most cases this can be mapped.
@@ -251,7 +254,7 @@ namespace Media.Rtp
 
                     //To use typed line
 
-                    if (object.ReferenceEquals(ssrcLine,null).Equals(false))
+                    if (ssrcLine is not null)
                     {
                         string part = ssrcLine.GetPart(1);
 
@@ -365,7 +368,7 @@ namespace Media.Rtp
 
                 Sdp.SessionDescriptionLine rtcpLine = mediaDescription.RtcpLine;
 
-                if (object.ReferenceEquals(rtcpLine,null).Equals(false))
+                if (rtcpLine is not null)
                 {
                     //Todo...
                     //parts are already present just needs a type to parse out the relevent parts into managed fields..
@@ -389,10 +392,10 @@ namespace Media.Rtp
                 if (connect)
                 {
                     //Determine if a socket was given or if it will be created.
-                    bool hasSocket = object.ReferenceEquals(existingSocket, null).Equals(false);
+                    bool hasSocket = existingSocket is not null;
 
                     //If a configuration has been given then set that configuration in the TransportContext.
-                    if (object.ReferenceEquals(configure, null).Equals(false)) tc.ConfigureSocket = configure;
+                    if (configure is not null) tc.ConfigureSocket = configure;
 
                     //Check for udp if no existing socket was given
                     if (hasSocket.Equals(false) && string.Compare(mediaDescription.MediaProtocol, Media.Rtp.RtpClient.RtpAvpProfileIdentifier, true).Equals(0))
@@ -1330,7 +1333,7 @@ namespace Media.Rtp
             public bool LocalMultiplexing
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return (IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled.Equals(false) || object.ReferenceEquals(LocalRtp, null)) ? false : LocalRtp.Equals(LocalRtcp); }
+                get { return (IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled.Equals(false) || LocalRtp is null) ? false : LocalRtp.Equals(LocalRtcp); }
             }
 
             /// <summary>
@@ -1339,7 +1342,7 @@ namespace Media.Rtp
             public bool RemoteMultiplexing
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return (IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled.Equals(false) || object.ReferenceEquals(RemoteRtp, null)) ? false : RemoteRtp.Equals(RemoteRtcp); }
+                get { return (IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled.Equals(false) || RemoteRtp is null) ? false : RemoteRtp.Equals(RemoteRtcp); }
             }
             
             /// <summary>
@@ -2148,10 +2151,10 @@ namespace Media.Rtp
             {
                 if (IDisposedExtensions.IsNullOrDisposed(this) || IsActive) return;
 
-                if (object.ReferenceEquals(rtpSocket, null)) throw new ArgumentNullException(nameof(rtpSocket));
+                if (rtpSocket is null) throw new ArgumentNullException(nameof(rtpSocket));
 
                 //Maybe should just be set to the rtpSocket?
-                if (object.ReferenceEquals(rtcpSocket, null)) throw new ArgumentNullException(nameof(rtcpSocket));
+                if (rtcpSocket is null) throw new ArgumentNullException(nameof(rtcpSocket));
 
                 //RtpBytesRecieved = RtpBytesSent = RtcpBytesRecieved = RtcpBytesSent = 0;
 
@@ -2163,9 +2166,9 @@ namespace Media.Rtp
 
                 bool punchHole = false.Equals(RtpSocket.ProtocolType == ProtocolType.Tcp) && false.Equals(Media.Common.Extensions.IPAddress.IPAddressExtensions.IsOnIntranet(((IPEndPoint)RtpSocket.RemoteEndPoint).Address)); //Only punch a hole if the remoteIp is not on the LAN by default.
 
-                if (object.ReferenceEquals(RemoteRtp, null)) RemoteRtp = RtpSocket.RemoteEndPoint;
+                RemoteRtp ??= RtpSocket.RemoteEndPoint;
 
-                if (object.ReferenceEquals(LocalRtp, null))
+                if (LocalRtp is null)
                 {
                     LocalRtp = RtpSocket.LocalEndPoint;
 
@@ -2210,9 +2213,9 @@ namespace Media.Rtp
                     {
                         //Just assign the same end points from the rtp socket.
 
-                        if (object.ReferenceEquals(LocalRtcp, null)) LocalRtcp = LocalRtp;
+                        LocalRtcp ??= LocalRtp;
 
-                        if (object.ReferenceEquals(RemoteRtcp, null)) RemoteRtcp = RemoteRtp;
+                        RemoteRtcp ??= RemoteRtp;
                     }
                 }
                 else RtcpSocket = RtpSocket;
@@ -3378,7 +3381,7 @@ namespace Media.Rtp
 
             InterleavedDataHandler action = OutOfBandData;
 
-            if (object.ReferenceEquals(action, null) || data == null || length.Equals(Common.Binary.Zero)) return;
+            if (action is null || data == null || length.Equals(Common.Binary.Zero)) return;
 
             if (m_ThreadEvents)
             {
@@ -3403,7 +3406,7 @@ namespace Media.Rtp
 
             InterleavedDataHandler action = OutOfBandData;
 
-            if (object.ReferenceEquals(action, null) || IDisposedExtensions.IsNullOrDisposed(packet) || packet.Length.Equals(Common.Binary.LongZero)) return;
+            if (action is null || IDisposedExtensions.IsNullOrDisposed(packet) || packet.Length.Equals(Common.Binary.LongZero)) return;
 
             ParallelEnumerable.ForAll(action.GetInvocationList().AsParallel(), (d) =>
             {
@@ -3428,7 +3431,7 @@ namespace Media.Rtp
 
             RtpPacketHandler action = RtpPacketReceieved;
 
-            if (object.ReferenceEquals(action, null) || IDisposedExtensions.IsNullOrDisposed(packet)) return;
+            if (action is null || IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
             bool shouldDispose = packet.ShouldDispose;
 
@@ -3469,7 +3472,7 @@ namespace Media.Rtp
 
             RtcpPacketHandler action = RtcpPacketReceieved;
 
-            if (object.ReferenceEquals(action, null) || IDisposedExtensions.IsNullOrDisposed(packet)) return;
+            if (action is null || IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
             bool shouldDispose = packet.ShouldDispose;
 
@@ -3511,7 +3514,7 @@ namespace Media.Rtp
 
             RtpFrameHandler action = RtpFrameChanged;
 
-            if (object.ReferenceEquals(action, null) || IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) return;
+            if (action is null || IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) return;
 
             bool shouldDispose = frame.ShouldDispose;
 
@@ -3545,7 +3548,7 @@ namespace Media.Rtp
 
             RtpFrameHandler action = RtpFrameChanged;
 
-            if (object.ReferenceEquals(action, null) || IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) return;
+            if (action is null || IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) return;
 
             bool shouldDispose = frame.ShouldDispose;
 
@@ -3572,7 +3575,7 @@ namespace Media.Rtp
 
             RtpPacketHandler action = RtpPacketReceieved;
 
-            if (object.ReferenceEquals(action, null) || IDisposedExtensions.IsNullOrDisposed(packet)) return;
+            if (action is null || IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
             //RtpFrameHandler would need the cast up front.
             ParallelEnumerable.ForAll(action.GetInvocationList().AsParallel(), (d) =>
@@ -3593,7 +3596,7 @@ namespace Media.Rtp
 
             RtpPacketHandler action = RtpPacketSent;
 
-            if (object.ReferenceEquals(action, null) || IDisposedExtensions.IsNullOrDisposed(packet)) return;
+            if (action is null || IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
             //RtpFrameHandler would need the cast up front.
             ParallelEnumerable.ForAll(action.GetInvocationList().AsParallel(), (d) =>
@@ -3614,7 +3617,7 @@ namespace Media.Rtp
 
             RtcpPacketHandler action = RtcpPacketReceieved;
 
-            if (object.ReferenceEquals(action, null) || IDisposedExtensions.IsNullOrDisposed(packet)) return;
+            if (action is null || IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
             //RtpFrameHandler would need the cast up front.
             ParallelEnumerable.ForAll(action.GetInvocationList().AsParallel(), (d) =>
@@ -3636,7 +3639,7 @@ namespace Media.Rtp
 
             RtcpPacketHandler action = RtcpPacketSent;
 
-            if (object.ReferenceEquals(action, null) || IDisposedExtensions.IsNullOrDisposed(packet)) return;
+            if (action is null || IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
             //RtpFrameHandler would need the cast up front.
             ParallelEnumerable.ForAll(action.GetInvocationList().AsParallel(), (d) =>
@@ -3663,7 +3666,7 @@ namespace Media.Rtp
 
             RtpPacketHandler action = RtpPacketSent;
 
-            if (object.ReferenceEquals(action, null) || IDisposedExtensions.IsNullOrDisposed(packet) || Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
+            if (action is null || IDisposedExtensions.IsNullOrDisposed(packet) || Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
 
             //bool shouldDispose = packet.ShouldDispose;
 
@@ -3699,7 +3702,7 @@ namespace Media.Rtp
 
             RtcpPacketHandler action = RtcpPacketSent;
 
-            if (object.ReferenceEquals(action, null) || IDisposedExtensions.IsNullOrDisposed(packet)) return;
+            if (action is null || IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
             //bool shouldDispose = packet.ShouldDispose;
 

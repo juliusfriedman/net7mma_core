@@ -613,7 +613,7 @@ namespace Media.Rtcp
 
         public static bool operator ==(RtcpHeader a, RtcpHeader b)
         {
-            return object.ReferenceEquals(b, null) ? object.ReferenceEquals(a, null) : a.Equals(b);
+            return b is null ? a is null : a.Equals(b);
         }
 
         public static bool operator !=(RtcpHeader a, RtcpHeader b) { return (a == b).Equals(false); }
