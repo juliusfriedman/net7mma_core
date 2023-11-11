@@ -438,7 +438,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(MemorySegment a, MemorySegment b)
         {
-            return object.ReferenceEquals(b, null) ? object.ReferenceEquals(a, null) : a.Equals(b);
+            return b is null ? a is null : a.Equals(b);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -622,7 +622,7 @@ namespace Media.Common
                 if (found >= 0)
                 {
                     //If not already set then set it
-                    if(object.ReferenceEquals(first, null)) first = segment;
+                    first ??= segment;
 
                     //Subtract from needed and if 0 remains break
                     if ((needed -= found) == 0) break;

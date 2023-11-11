@@ -84,18 +84,17 @@ namespace Media.Common
     {
         public static bool HasSource(IEvent @event)
         {
-            return Object.ReferenceEquals(@event, null).Equals(false) &&
-                Object.ReferenceEquals(@event.Source, null).Equals(false);
+            return @event is not null && @event.Source is not null;
         }
 
         public static bool IsEnabled(IEvent @event)
         {
-            return Object.ReferenceEquals(@event, null).Equals(false) && @event.Enabled;
+            return @event is not null && @event.Enabled;
         }
 
         public static bool IsNull(IEvent @event)
         {
-            return object.ReferenceEquals(@event, null);
+            return @event is null;
         }
     }
 
@@ -110,7 +109,7 @@ namespace Media.Common
     {
         public Eventbase(Delegate @event, bool enabled = true)
         {
-            if (object.ReferenceEquals(@event, null)) throw new ArgumentNullException("@event");
+            if (@event is null) throw new ArgumentNullException("@event");
 
             Source = @event;
 

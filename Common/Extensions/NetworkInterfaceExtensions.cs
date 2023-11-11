@@ -125,15 +125,15 @@ namespace Media.Common.Extensions.NetworkInterface
 
         public static System.Net.NetworkInformation.NetworkInterface GetNetworkInterface(System.Net.IPEndPoint localEndPoint)
         {
-            if (object.ReferenceEquals(localEndPoint, null)) throw new System.ArgumentNullException("localEndPoint");
+            if (localEndPoint is null) throw new System.ArgumentNullException(nameof(localEndPoint));
 
             return GetNetworkInterface(localEndPoint.Address);
         }
 
         public static System.Net.NetworkInformation.NetworkInterface GetNetworkInterface(System.Net.Sockets.Socket socket)
         {
-            if (object.ReferenceEquals(socket, null)) throw new System.ArgumentNullException("socket");
-            else if (socket.Handle == System.IntPtr.Zero) return null;
+            if (socket is null) throw new System.ArgumentNullException(nameof(socket));
+            else if (socket.Handle == nint.Zero) return null;
             
             System.Net.IPEndPoint localEndPoint = socket.IsBound.Equals(false) ? Common.Extensions.IPEndPoint.IPEndPointExtensions.Any : (System.Net.IPEndPoint)socket.LocalEndPoint;
 
@@ -148,7 +148,7 @@ namespace Media.Common.Extensions.NetworkInterface
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static double GetSpeedInMBytesPerSecond(this System.Net.NetworkInformation.NetworkInterface networkInterface)
         {
-            if (object.ReferenceEquals(networkInterface, null)) return 0;
+            if (networkInterface is null) return 0;
 
             long speed = networkInterface.Speed;
 

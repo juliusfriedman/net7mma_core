@@ -164,7 +164,7 @@ namespace Media.Common.Extensions.Socket
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         public static int ProbeForOpenPort(System.Net.Sockets.ProtocolType type, int start = 30000, bool even = true, System.Net.IPAddress localIp = null)
         {
-            if (object.ReferenceEquals(localIp, null)) localIp = GetFirstUnicastIPAddress(System.Net.Sockets.AddressFamily.InterNetwork); // System.Net.IPAddress.Any should give unused ports across all IP's?
+            localIp ??= GetFirstUnicastIPAddress(System.Net.Sockets.AddressFamily.InterNetwork); // System.Net.IPAddress.Any should give unused ports across all IP's?
 
             System.Net.Sockets.Socket working = null;
 
@@ -283,7 +283,7 @@ namespace Media.Common.Extensions.Socket
                             System.Net.IPAddress result = Common.Extensions.NetworkInterface.NetworkInterfaceExtensions.GetFirstUnicastIPAddress(foundInterface, addressFamily);
 
                             //If the result is not null and the result is not System.Net.IPAddress.None
-                            if (false.Equals(object.ReferenceEquals(result, null)) && false.Equals(Equals(result, System.Net.IPAddress.None)))
+                            if (result is not null && false.Equals(Equals(result, System.Net.IPAddress.None)))
                             {
                                 networkInterface = foundInterface;
 

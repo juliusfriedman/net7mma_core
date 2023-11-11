@@ -72,7 +72,7 @@ namespace Media.Common
 
         public static void LogException(this ILogging log, System.Exception exception)
         {
-            if (object.ReferenceEquals(exception, null) || IDisposedExtensions.IsNullOrDisposed(log)) return;
+            if (exception is null || IDisposedExtensions.IsNullOrDisposed(log)) return;
 
             log.LogException(exception);
         }

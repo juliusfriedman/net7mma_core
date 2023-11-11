@@ -185,7 +185,8 @@ namespace Media.Common
         /// <param name="context"><see cref="System.Runtime.Serialization.StreamingContext"/></param>
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
         {
-            if (object.ReferenceEquals(null, info)) throw new System.ArgumentNullException(nameof(info));
+            if (info is null) throw new System.ArgumentNullException(nameof(info));
+
             //Add the Tag to the info
             info.AddValue(TagPropertyString, Tag);
             //Get all other exception data from base.
@@ -232,7 +233,11 @@ namespace Media.Common
         /// </summary>
         /// <typeparam name="T">The type related to the exception.</typeparam>
         /// <param name="exception">The <see cref="System.Exception"/> which occured.</param>
-        public static void Raise<T>(this TaggedException<T> exception) { if (object.ReferenceEquals(exception, null).Equals(false)) throw exception; }
+        public static void Raise<T>(this TaggedException<T> exception)
+        {
+            if (exception is not null)
+                throw exception;
+        }
 
         /// <summary>
         /// Tries to <see cref="Raise"/> the given <see cref="TaggedException"/>
