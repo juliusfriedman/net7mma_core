@@ -288,8 +288,12 @@ public class RtpAudioSink : RtpSink
     /// <returns></returns>
     public bool Packetize(byte[] data, int offset, int length)
     {
+        if (RtpClient == null) return false;
+
         //Get the context for the payloadType so we can increment the timestamps and sequence numbers.
         var transportContext = RtpClient.GetContextBySourceId(SourceId);
+
+        if (transportContext == null) return false;
 
         transportContext.RtpTimestamp += ClockRate;
 

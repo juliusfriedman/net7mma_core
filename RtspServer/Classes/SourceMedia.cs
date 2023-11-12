@@ -73,7 +73,7 @@ namespace Media.Rtsp.Server
         internal string m_Name;
         internal Uri m_Source;
         internal NetworkCredential m_SourceCred;
-        internal List<string> m_Aliases = new List<string>();
+        internal HashSet<string> m_Aliases = new ();
         //internal bool m_Child = false;
         public virtual Sdp.SessionDescription SessionDescription { get; internal protected set; }
 
@@ -241,7 +241,7 @@ namespace Media.Rtsp.Server
         {
             if (DecodeFrames && decoded != null && FrameDecoded != null)
             {
-                FrameDecoded?.Invoke(this, decoded);
+                FrameDecoded.Invoke(this, decoded);
             }
         }
 
@@ -249,7 +249,7 @@ namespace Media.Rtsp.Server
         {
             if (DecodeFrames && decoded != null && DataDecoded != null)
             {
-                DataDecoded?.Invoke(this, decoded);
+                DataDecoded.Invoke(this, decoded);
             }
         }
 

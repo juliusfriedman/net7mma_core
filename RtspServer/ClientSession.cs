@@ -375,34 +375,41 @@ namespace Media.Rtsp//.Server
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void StartReceive()
         {
-            //while the socket cannot read in m_SocketPollMicroseconds or less 
-            while (false.Equals(IsDisposed) && 
-                false.Equals(IsDisconnected) && 
-                HasRuningServer && 
-                false.Equals(m_RtspSocket.Poll(m_SocketPollMicroseconds, SelectMode.SelectRead)))
+            try
             {
-                //Wait for the last recieve to complete
-                //If session is disposed or the socket is shared then jump
-                if (SharesSocket) goto NotDisconnected;
-            }
-
-            //Ensure not disposed or marked disconnected
-            if (IsDisposed) return;
-
-            if(SharesSocket) goto NotDisconnected;
-
-            if (object.ReferenceEquals(m_RtspSocket, null).Equals(false) && HasRuningServer)
-            {
-                if (LastRecieve == null)
+                //while the socket cannot read in m_SocketPollMicroseconds or less 
+                while (false.Equals(IsDisposed) &&
+                    false.Equals(IsDisconnected) &&
+                    HasRuningServer &&
+                    false.Equals(m_RtspSocket.Poll(m_SocketPollMicroseconds, SelectMode.SelectRead)))
                 {
-                    LastRecieve = new SocketAsyncEventArgs();
-                    LastRecieve.SetBuffer(m_Buffer.Array, m_Buffer.Offset, m_Buffer.Count);
-                    LastRecieve.UserToken = this;
-                    LastRecieve.Completed += m_Server.ProcessReceive;
+                    //Wait for the last recieve to complete
+                    //If session is disposed or the socket is shared then jump
+                    if (SharesSocket) goto NotDisconnected;
                 }
-                LastRecieve.RemoteEndPoint = RemoteEndPoint;
-                if (!m_RtspSocket.ReceiveAsync(LastRecieve))
-                    ThreadPool.QueueUserWorkItem((o) => m_Server.ProcessReceive(m_Server, LastRecieve));
+
+                //Ensure not disposed or marked disconnected
+                if (IsDisposed) return;
+
+                if (SharesSocket) goto NotDisconnected;
+
+                if (object.ReferenceEquals(m_RtspSocket, null).Equals(false) && HasRuningServer)
+                {
+                    if (LastRecieve == null)
+                    {
+                        LastRecieve = new SocketAsyncEventArgs();
+                        LastRecieve.SetBuffer(m_Buffer.Array, m_Buffer.Offset, m_Buffer.Count);
+                        LastRecieve.UserToken = this;
+                        LastRecieve.Completed += m_Server.ProcessReceive;
+                    }
+                    LastRecieve.RemoteEndPoint = RemoteEndPoint;
+                    if (!m_RtspSocket.ReceiveAsync(LastRecieve))
+                        ThreadPool.QueueUserWorkItem((o) => m_Server.ProcessReceive(m_Server, LastRecieve));
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                goto NotDisconnected;
             }
 
         NotDisconnected:
