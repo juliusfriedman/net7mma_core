@@ -5691,7 +5691,7 @@ namespace Media.Rtsp
                                 //Care should be taken that the SDP is not directing us to connect to some unknown resource....
 
                                 //Just incase the source datum was not given, only for unicast connections.
-                                if (false.Equals(multicast) && sourceIp.Equals(IPAddress.Any) || sourceIp.Equals(IPAddress.IPv6Any)) sourceIp = ((IPEndPoint)m_RtspSocket.RemoteEndPoint).Address;
+                                if ((false.Equals(multicast) && sourceIp.Equals(IPAddress.Any) || sourceIp.Equals(IPAddress.IPv6Any)) && m_RtspSocket.RemoteEndPoint is IPEndPoint rep) sourceIp = rep.Address;
 
                                 //If multicast was given check the destination address and if was not specified use the sourceIp.
                                 if (multicast && (destinationIp.Equals(IPAddress.Any) || destinationIp.Equals(IPAddress.IPv6Any))) destinationIp = sourceIp;
