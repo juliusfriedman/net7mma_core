@@ -425,7 +425,9 @@
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (object.ReferenceEquals(Completer, null)) return StaticCompleteFrom(null, null).Equals(int.MinValue);
+                if (Completer is null)
+                    return StaticCompleteFrom(null, null).Equals(int.MinValue);
+
                 return Completer(null, null).Equals(int.MinValue);
             }
         }

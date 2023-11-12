@@ -43,10 +43,9 @@ namespace Media.Common.Extensions
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool SequenceEquals(this System.Collections.IEnumerable left, System.Collections.IEnumerable right)
         {
-            if (object.ReferenceEquals(left, null)) return object.ReferenceEquals(right, null);
+            if (left is null) return right is null;
 
             System.Collections.IEnumerator one, two;
-
             System.IDisposable weird = null, strnage = null;
 
             try
@@ -71,9 +70,8 @@ namespace Media.Common.Extensions
             }
             finally
             {
-                if (object.ReferenceEquals(strnage, null).Equals(false)) strnage.Dispose();
-
-                if (object.ReferenceEquals(weird, null).Equals(false)) weird.Dispose();
+                strnage?.Dispose();
+                weird?.Dispose();
             }
         }
 
@@ -81,28 +79,18 @@ namespace Media.Common.Extensions
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool SequenceEquals<T>(this System.Collections.Generic.IEnumerable<T> left, System.Collections.Generic.IEnumerable<T> right)
         {
-            if (object.ReferenceEquals(left, null)) return object.ReferenceEquals(right, null);
+            if (left is null) return right is null;
 
-            try
-            {
-                using (var weird = left.GetEnumerator())
-                {
-                    using (var strnage = right.GetEnumerator())
-                    {
-                        while (weird.MoveNext())
-                        {
-                            if (strnage.MoveNext().Equals(false) ||
-                                     weird.Current.Equals(strnage.Current).Equals(false)) return false;
-                        }
+            using var weird = left.GetEnumerator();
+            using var strnage = right.GetEnumerator();
 
-                        return true;
-                    }
-                }
-            }
-            catch
+            while (weird.MoveNext())
             {
-                throw;
+                if (strnage.MoveNext().Equals(false) ||
+                    weird.Current.Equals(strnage.Current).Equals(false)) return false;
             }
+
+            return true;
         }
     }
 }

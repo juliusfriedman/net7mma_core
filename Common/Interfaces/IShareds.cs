@@ -58,7 +58,7 @@ namespace Media.Common.Interfaces
         /// <returns></returns>
         public static bool IsOwned(this IShared shared)
         {
-            return object.ReferenceEquals(shared, null).Equals(false) && shared.IsShared.Equals(false);
+            return shared is not null && shared.IsShared.Equals(false);
         }
     }
 

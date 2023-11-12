@@ -949,15 +949,20 @@ namespace Media.Rtcp
         /// <returns>The result of adding the implemention to the InstanceMap</returns>
         internal static bool TryMapImplementation(byte payloadType, Type implementation)
         {
-            Exception any;
             return payloadType > default(byte) &&
-            object.ReferenceEquals(implementation, null).Equals(false) &&
-            implementation.IsAbstract.Equals(false) &&
-            implementation.IsSubclassOf(RtcpPacketType)
-                ? Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryAdd(ImplementationMap, payloadType, implementation, out any) : false;
+                implementation is not null &&
+                implementation.IsAbstract.Equals(false) &&
+                implementation.IsSubclassOf(RtcpPacketType)
+                    ? Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryAdd(ImplementationMap, payloadType, implementation, out _)
+                    : false;
         }
 
-        internal static bool TryUnMapImplementation(byte payloadType, out Type implementation) { implementation = null; Exception any; return payloadType > default(byte) && Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryRemove(ImplementationMap, payloadType, out implementation, out any); }
+        internal static bool TryUnMapImplementation(byte payloadType, out Type implementation)
+        {
+            implementation = null;
+            return payloadType > default(byte) &&
+                Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryRemove(ImplementationMap, payloadType, out implementation, out _);
+        }
 
         #endregion
 
@@ -1025,7 +1030,7 @@ namespace Media.Rtcp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(RtcpPacket a, RtcpPacket b)
         {
-            return object.ReferenceEquals(b, null) ? object.ReferenceEquals(a, null) : a.Equals(b);
+            return b is null ? a is null : a.Equals(b);
         }
         
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

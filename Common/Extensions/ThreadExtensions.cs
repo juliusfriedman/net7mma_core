@@ -53,7 +53,7 @@ namespace Media.Common.Extensions.Thread
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool IsRunning(System.Threading.Thread thread)
         {
-            return false.Equals(object.ReferenceEquals(thread, null)) && 
+            return thread is not null &&
                 (thread.ThreadState & (System.Threading.ThreadState.Stopped | System.Threading.ThreadState.Unstarted)) == System.Threading.ThreadState.Running;
         }
 
@@ -96,7 +96,7 @@ namespace Media.Common.Extensions.Thread
         public static void AbortAndFree(ref System.Threading.Thread thread, System.TimeSpan timeout, System.Threading.ThreadState state = System.Threading.ThreadState.Stopped)
         {
             //If the worker IsAlive and has doesn't have the requested state.
-            if (false.Equals(object.ReferenceEquals(thread, null)) &&
+            if (thread is not null &&
                 false.Equals(thread.ThreadState.HasFlag(state)))
             {
                 //Attempt to join if not already, todo check flags are compatible in all implementations.
@@ -120,7 +120,7 @@ namespace Media.Common.Extensions.Thread
             try { AbortAndFree(ref thread, state, timeout); }
             catch { return false; }
 
-            return object.ReferenceEquals(thread, null);
+            return thread is null;
         }
 
         public static bool TryAbortAndFree(ref System.Threading.Thread thread, System.TimeSpan timeout, System.Threading.ThreadState state = System.Threading.ThreadState.Stopped)
@@ -128,8 +128,7 @@ namespace Media.Common.Extensions.Thread
             try { AbortAndFree(ref thread, timeout, state); }
             catch { return false; }
 
-            return object.ReferenceEquals(thread, null);
-        }   
-     
+            return thread is null;
+        }
     }
 }
