@@ -38,7 +38,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
-using Media.Common.Extensions.Generic.Dictionary;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -85,8 +84,6 @@ namespace Media.Common.Collections.Generic
         //Todo, allow the IList type to be specified or changed internally.
 
         ConcurrentDictionary<TKey, IList<TValue>> Dictionary;
-
-        System.Collections.ICollection Collection { get { return ((System.Collections.ICollection)Dictionary); } }
 
         public int Count { get { return Dictionary.Count; } }
 
@@ -336,7 +333,7 @@ namespace Media.Common.Collections.Generic
 
         int ICollection<TKey>.Count
         {
-            get { return Collection.Count; }
+            get { return Dictionary.Count; }
         }
 
         bool ICollection<TKey>.IsReadOnly
