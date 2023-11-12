@@ -97,7 +97,7 @@ namespace Media.Common.Interfaces
             {
                 case Zero:
                     {
-                        ((ICompletable)this).OnCompletion(object.ReferenceEquals(OnRealization, null).Equals(false));
+                        ((ICompletable)this).OnCompletion(OnRealization is not null);
 
                         break;
                     }

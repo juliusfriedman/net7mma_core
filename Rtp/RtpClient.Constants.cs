@@ -211,7 +211,7 @@ namespace Media.Rtp
             System.Net.NetworkInformation.NetworkInterface localInterface;
 
             //If the socket is NOT null and IS BOUND use the localIp of the same address family
-            if (object.ReferenceEquals(existingSocket, null).Equals(false) && existingSocket.IsBound)
+            if (existingSocket is not null && existingSocket.IsBound)
             {
                 //If the socket is IP based
                 if (existingSocket.LocalEndPoint is System.Net.IPEndPoint)

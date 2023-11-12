@@ -74,9 +74,9 @@ namespace Media.Common.Extensions.ExpressionExtensions
         static SymbolExtensions()
         {
             //Ensure not already ran.
-            if (false.Equals(object.ReferenceEquals(TypedConstantExpressionType, null))
-                | false.Equals(object.ReferenceEquals(InstanceMethodCallExpressionNType, null))
-                | false.Equals(object.ReferenceEquals(TypedConstantExpressionValueProperty, null))) return;
+            if (false.Equals(TypedConstantExpressionType is null)
+                | false.Equals(InstanceMethodCallExpressionNType is null)
+                | false.Equals(TypedConstantExpressionValueProperty is null)) return;
 
             //For example
             //Expression<Action> ConstantExpression = () => Common.Binary.Nihil.Equals(null);
@@ -112,9 +112,9 @@ namespace Media.Common.Extensions.ExpressionExtensions
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static MethodCallExpression CreateMethodCallExpression(MethodInfo method)
         {
-            if (object.ReferenceEquals(method,null))
+            if (method is null)
             {
-                throw new ArgumentNullException("method");
+                throw new ArgumentNullException(nameof(method));
             }
 
             //Return the MethodCallExpression (parameters are included)
@@ -215,9 +215,9 @@ namespace Media.Common.Extensions.ExpressionExtensions
         {
             MemberExpression outermostExpression = ((expression.Body as MethodCallExpression).Object as MemberExpression);
 
-            if (object.ReferenceEquals(outermostExpression, null)) throw new ArgumentException("Invalid Expression. Should be a MemberExpression");
-
-            return outermostExpression.Member;
+            return outermostExpression is null
+                ? throw new ArgumentException("Invalid Expression. Should be a MemberExpression", nameof(expression))
+                : outermostExpression.Member;
         }
 
         /// <summary>
@@ -261,9 +261,8 @@ namespace Media.Common.Extensions.ExpressionExtensions
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static MethodInfo GetMethodInfo(LambdaExpression expression)
         {
-            MethodCallExpression outermostExpression = expression.Body as MethodCallExpression;
-
-            if (object.ReferenceEquals(outermostExpression, null)) throw new ArgumentException("Invalid Expression. Expression should consist of a Method call only.");
+            if (expression.Body is not MethodCallExpression outermostExpression)
+                throw new ArgumentException("Invalid Expression. Expression should consist of a Method call only.", nameof(expression));
 
             return outermostExpression.Method;
         }

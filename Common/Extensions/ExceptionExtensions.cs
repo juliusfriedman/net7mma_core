@@ -92,7 +92,7 @@ namespace Media.Common.Extensions.Exception
             public bool HasDisposed
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return object.ReferenceEquals(null, Disposed).Equals(false); }
+                get { return Disposed is not null; }
             }
 
 #if DEBUG

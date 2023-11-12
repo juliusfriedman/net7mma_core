@@ -68,19 +68,19 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool IsNullOrDisposed(this IDisposed dispose)
         {
-            return object.ReferenceEquals(dispose, null) || dispose.IsDisposed;
+            return dispose is null || dispose.IsDisposed;
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool ShouldDisposed(this IDisposed dispose)
         {
-            return false.Equals(object.ReferenceEquals(dispose, null)) && dispose.ShouldDispose;
+            return dispose is not null && dispose.ShouldDispose;
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void CheckDisposed(this IDisposed dispose)
         {
-            if (false.Equals(object.ReferenceEquals(dispose, null)) && dispose.IsDisposed) throw new System.ObjectDisposedException("IDisposedExtensions.CheckDisposed,true");
+            if (dispose is not null && dispose.IsDisposed) throw new System.ObjectDisposedException("IDisposedExtensions.CheckDisposed,true");
         }
 
         //public static void SetShouldDispose(this IDisposed dispose, bool value, bool callDispose = false)

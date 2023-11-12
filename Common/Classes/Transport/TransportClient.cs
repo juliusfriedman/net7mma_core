@@ -137,7 +137,7 @@ namespace Media.Common
         public TransportClient(System.Net.NetworkInformation.NetworkInterface networkInterface, bool shouldDispose = true)
             : base(shouldDispose)
         {
-            if (object.ReferenceEquals(networkInterface, null)) throw new System.ArgumentNullException();
+            if (networkInterface is null) throw new System.ArgumentNullException(nameof(networkInterface));
 
             NetworkInterface = networkInterface;
         }
