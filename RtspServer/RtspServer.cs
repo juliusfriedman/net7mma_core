@@ -282,7 +282,7 @@ namespace Media.Rtsp
             {
                 try
                 {
-                    return m_Sessions.Values.ToList();
+                    return m_Sessions.Values;
                 }
                 catch
                 {
@@ -480,7 +480,7 @@ namespace Media.Rtsp
             {
                 try
                 {
-                    return m_MediaStreams.Values.ToList();
+                    return m_MediaStreams.Values;
                 }
                 catch
                 {
@@ -3611,7 +3611,7 @@ namespace Media.Rtsp
 
             Stop(m_LeaveOpen);
 
-            foreach (var stream in m_MediaStreams.ToList())
+            foreach (var stream in m_MediaStreams)
             {
                 stream.Value.Dispose();
 
