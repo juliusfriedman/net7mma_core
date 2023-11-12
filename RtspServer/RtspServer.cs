@@ -45,6 +45,7 @@ using Media.Rtp;
 using Media.Rtcp;
 using Media.Rtsp.Server.MediaTypes;
 using Media.Rtsp.Server.Loggers;
+using System.Collections.Concurrent;
 
 namespace Media.Rtsp
 {
@@ -240,12 +241,12 @@ namespace Media.Rtsp
         /// <summary>
         /// The dictionary containing all streams the server is aggregrating
         /// </summary>
-        Dictionary<Guid, Media.Rtsp.Server.IMedia> m_MediaStreams = new Dictionary<Guid, Media.Rtsp.Server.IMedia>();
+        ConcurrentDictionary<Guid, Media.Rtsp.Server.IMedia> m_MediaStreams = new();
 
         /// <summary>
         /// The dictionary containing all the clients the server has sessions assocaited with
         /// </summary>
-        readonly Dictionary<Guid, ClientSession> m_Sessions = new Dictionary<Guid, ClientSession>(short.MaxValue);
+        readonly ConcurrentDictionary<Guid, ClientSession> m_Sessions = new();
 
         readonly ManualResetEventSlim m_AcceptSignal = new ManualResetEventSlim(false, DefaultReceiveTimeout);
 
@@ -860,32 +861,32 @@ namespace Media.Rtsp
         #region Session Collection
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal bool TryAddSession(ClientSession session)
-        {
-            Exception any = null;
+        internal bool TryAddSession(ClientSession session) => m_Sessions.TryAdd(session.Id, session);
+        //{
+        //    Exception any = null;
 
-            try
-            {
-                Common.ILoggingExtensions.Log(Logger, "Adding Client: " + session.Id);
+        //    try
+        //    {
+        //        Common.ILoggingExtensions.Log(Logger, "Adding Client: " + session.Id);
 
-                if (Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryAdd(m_Sessions, session.Id, session, out any))
-                {
-                    session.m_Contained = this;
-                }
+        //        if (Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryAdd(m_Sessions, session.Id, session, out any))
+        //        {
+        //            session.m_Contained = this;
+        //        }
 
-                return Object.ReferenceEquals(session.m_Contained, this);
-            }
-            catch(Exception ex)
-            {
-                any = ex;
+        //        return Object.ReferenceEquals(session.m_Contained, this);
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        any = ex;
 
-                return false;
-            }
-            finally
-            {
-                Common.ILoggingExtensions.LogException(Logger, any);
-            }
-        }
+        //        return false;
+        //    }
+        //    finally
+        //    {
+        //        Common.ILoggingExtensions.LogException(Logger, any);
+        //    }
+        //}
 
         /// <summary>
         /// Disposes and tries to remove the session from the Clients Collection.
@@ -894,45 +895,47 @@ namespace Media.Rtsp
         /// <returns>True if the session was disposed</returns>
         internal bool TryDisposeAndRemoveSession(ClientSession session)
         {
-            if (session == null) return false;
-
-            Exception any = null;
-            try
-            {
-                //If the session was not disposed
-                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(session)))
-                {
-                    //indicate the session is disposing
-                    Common.ILoggingExtensions.Log(Logger, "Disposing Client: " + session.Id + " @ " + DateTime.UtcNow);
-
-                    //Dispose the session
-                    session.Dispose();
-                }
-
-                //If the client was already removed indicate this in the logs
-                if (false.Equals(Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryRemove(m_Sessions, session.Id, out any))) Common.ILoggingExtensions.Log(Logger, "Client Already Removed(" + session.Id + ")");
-
-                //Indicate success
-                return true;
-            }
-            catch (Exception ex)
-            {
-                any = ex;
-
-                //Indicate if a failure occured
-                return Common.IDisposedExtensions.IsNullOrDisposed(session);
-            }
-            finally
-            {
-                Common.ILoggingExtensions.LogException(Logger, any);
-            }
+            var result = m_Sessions.TryRemove(session.Id, out var localSession);
+            if (result) localSession.Dispose();
+            return result;
         }
+        //{
+        //    if (session == null) return false;
+
+        //    Exception any = null;
+        //    try
+        //    {
+        //        //If the session was not disposed
+        //        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(session)))
+        //        {
+        //            //indicate the session is disposing
+        //            Common.ILoggingExtensions.Log(Logger, "Disposing Client: " + session.Id + " @ " + DateTime.UtcNow);
+
+        //            //Dispose the session
+        //            session.Dispose();
+        //        }
+
+        //        //If the client was already removed indicate this in the logs
+        //        if (false.Equals(Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryRemove(m_Sessions, session.Id, out any))) Common.ILoggingExtensions.Log(Logger, "Client Already Removed(" + session.Id + ")");
+
+        //        //Indicate success
+        //        return true;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        any = ex;
+
+        //        //Indicate if a failure occured
+        //        return Common.IDisposedExtensions.IsNullOrDisposed(session);
+        //    }
+        //    finally
+        //    {
+        //        Common.ILoggingExtensions.LogException(Logger, any);
+        //    }
+        //}
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal bool ContainsSession(ClientSession session)
-        {
-            return m_Sessions.ContainsKey(session.Id);
-        }
+        internal bool ContainsSession(ClientSession session) => m_Sessions.ContainsKey(session.Id);
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal ClientSession GetSession(Guid id)
@@ -989,7 +992,7 @@ namespace Media.Rtsp
             try
             {
                 //Try to add the stream to the dictionary of contained streams.
-                bool result = Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryAdd(m_MediaStreams, stream.Id, stream, out any);
+                bool result = m_MediaStreams.TryAdd(stream.Id, stream);
 
                 if (result && IsRunning) stream.Start();
 
@@ -1049,7 +1052,7 @@ namespace Media.Rtsp
                     RemoveCredential(source, "Digest");
                 }
 
-                return Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryRemove(m_MediaStreams, streamId, out any);
+                return m_MediaStreams.TryRemove(streamId, out var removed);
             }
             catch(Exception ex)
             {
@@ -1392,7 +1395,7 @@ namespace Media.Rtsp
             if (allowPortReuse) Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableUnicastPortReuse(m_TcpServerSocket));
 
             //Create a thread to handle client connections
-            m_ServerThread = new Thread(new ThreadStart(AcceptLoop), Common.Extensions.Thread.ThreadExtensions.MinimumStackSize);
+            m_ServerThread = new Thread(new ThreadStart(AcceptLoop));// Common.Extensions.Thread.ThreadExtensions.MinimumStackSize);
             
             //Configure the thread
             m_ServerThread.Name = ServerName + "@" + m_ServerPort;
@@ -1434,7 +1437,7 @@ namespace Media.Rtsp
 
                 try
                 {
-                    new Thread(new ThreadStart(() =>
+                    var thread = new Thread(new ThreadStart(() =>
                     {
 
                         try
@@ -1471,12 +1474,14 @@ namespace Media.Rtsp
 
                         if (IsRunning && m_Maintainer != null) m_Maintainer.Change(TimeSpan.FromTicks(RtspClientInactivityTimeout.Ticks >> 2), Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan);
 
-                    }), Common.Extensions.Thread.ThreadExtensions.MinimumStackSize)
+                    }))//, Common.Extensions.Thread.ThreadExtensions.MinimumStackSize)
                     {
-                        Priority =  m_ServerThread.Priority,
+                        Priority = m_ServerThread.Priority,
                         Name = "Maintenance-" + m_ServerThread.Name,
-                        ApartmentState = ApartmentState.MTA
-                    }.Start();
+                        //ApartmentState = ApartmentState.MTA
+                    };
+                    thread.TrySetApartmentState(ApartmentState.MTA);
+                    thread.Start();
                 }
                 catch (Exception ex)
                 {
@@ -3610,7 +3615,7 @@ namespace Media.Rtsp
             {
                 stream.Value.Dispose();
 
-                m_MediaStreams.Remove(stream.Key);
+                if (m_MediaStreams.Remove(stream.Key, out var removed)) removed.Dispose();
             }
 
             //Clear streams

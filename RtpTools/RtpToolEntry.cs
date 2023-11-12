@@ -125,7 +125,7 @@ namespace Media.RtpTools
         public const int sizeOf_RD_hdr_t = 16, //Columbia RtpTools don't include this for every packet, only the first.
             sizeOf_RD_packet_T = 8;
 
-        internal static RtpToolEntry CreateShortEntry(DateTime timeBase, System.Net.IPEndPoint source, byte[] memory, int offset = 0, long? fileOffset = null)
+        internal static RtpToolEntry CreateShortEntry(DateTime timeBase, System.Net.IPEndPoint source, Common.MemorySegment memory, int offset = 0, long? fileOffset = null)
         {
             /* Only the header can be restored / represented and indicates a VAT or RTP Packet
                RTP or vat data in tabular form: [-]time ts [seq], where a - indicates a set marker bit. The sequence number seq is only used for RTP packets.
@@ -139,7 +139,7 @@ namespace Media.RtpTools
             if (source == null) source = new System.Net.IPEndPoint(0, 0);
 
             //Tokenize the entry
-            string [] entryParts = Encoding.ASCII.GetString(memory, 0, memory.Length - 1).Split((char)Common.ASCII.Space);
+            string [] entryParts = Encoding.ASCII.GetString(memory.Array, memory.Offset, memory.Count - 1).Split((char)Common.ASCII.Space);
 
             int partCount = entryParts.Length;
 

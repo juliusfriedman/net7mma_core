@@ -714,7 +714,7 @@ namespace Media.RtpTools
         /// <param name="format">The format found while parsing the description.</param>
         /// <param name="unexpected">Will only contain data if format was unknown, and contains the data encountered in the stream while attempting to parse.</param>
         /// <returns>The item which was created as a result of reading from the stream.</returns>
-        internal static RtpToolEntry ParseText(System.IO.BinaryReader reader, System.Net.IPEndPoint source, ref FileFormat format, out byte[] unexpected)
+        internal static RtpToolEntry ParseText(System.IO.BinaryReader reader, System.Net.IPEndPoint source, ref FileFormat format, out Common.MemorySegment unexpected)
         {
             unexpected = null;
 
@@ -754,9 +754,6 @@ namespace Media.RtpTools
             //Indicates if in a comment
             bool parsingCommentOrWhitespace = false;
 
-            //Contains the data read from the stream until '\n' occurs.
-            byte[] lineBytes;
-
             //Indicates if the parsing of the entry is complete
             bool doneParsing = false, formatUnknown = format == FileFormat.Unknown, needAnyToken = true;
 
@@ -789,11 +786,11 @@ namespace Media.RtpTools
                     break;
                 }
 
-                //Read until '\n' occurs
-                Common.Extensions.Stream.StreamExtensions.ReadLineFeed(reader.BaseStream, out lineBytes);
+                //Read until '\n' occurs, //Contains the data read from the stream until '\n' occurs.
+                Common.Extensions.Stream.StreamExtensions.ReadLineFeed(reader.BaseStream, out var lineBytes);
 
                 //Keep track of the amount of bytes read
-                lineBytesLength = lineBytes.Length;
+                lineBytesLength = lineBytes.Count;
 
                 //If nothing was read return
                 if (lineBytesLength == 0) return null;
@@ -821,7 +818,7 @@ namespace Media.RtpTools
 
                     //Search for '='
 
-                    tokenIndex = Array.IndexOf<byte>(lineBytes, Common.ASCII.EqualsSign);
+                    tokenIndex = Array.IndexOf<byte>(lineBytes.Array, Common.ASCII.EqualsSign);
 
                     //If not found then this must be a Short entry.
                     if (tokenIndex == -1)
@@ -856,7 +853,7 @@ namespace Media.RtpTools
                 {
 
                     //Extract all tokens from the lineBytes
-                    string[] tokens = Encoding.ASCII.GetString(lineBytes).Split((char)Common.ASCII.Space, (char)Common.ASCII.EqualsSign, '(', ')');
+                    string[] tokens = Encoding.ASCII.GetString(lineBytes.Array, lineBytes.Offset, lineBytesLength).Split((char)Common.ASCII.Space, (char)Common.ASCII.EqualsSign, '(', ')');
 
                     //Any hex data will need a length, and we start at offset 0.
                     int dataLen = 0, tokenOffset = 0;

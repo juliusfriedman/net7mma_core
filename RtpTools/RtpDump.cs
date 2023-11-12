@@ -70,7 +70,7 @@ namespace Media.RtpTools.RtpDump
         /// <summary>
         /// Used in non Text format parsing.
         /// </summary>
-        internal byte[] m_FileIdentifier, m_FileHeader;
+        internal Common.MemorySegment m_FileIdentifier, m_FileHeader;
 
         #endregion
 
@@ -176,7 +176,7 @@ namespace Media.RtpTools.RtpDump
             m_FileIdentifier = Common.Extensions.Stream.StreamExtensions.ReadDelimitedValue(m_Reader.BaseStream);
 
             //Get the length of the file header
-            int length = m_FileIdentifier.Length;
+            int length = m_FileIdentifier.Count;
 
             //strict /..
             //Check for Hash, Bang? someone might have wrote something else...                  
@@ -196,7 +196,7 @@ namespace Media.RtpTools.RtpDump
             //rtpplay is not present or if the format was unknown then
             if (!m_FileIdentifier.Skip(start).Take(count).SequenceEqual(Encoding.ASCII.GetBytes(RtpPlay.RtpPlayFormat))
                 ||
-                Array.IndexOf<byte>(m_FileIdentifier, 0x2f, start + count, m_FileIdentifier.Length - (start + count)) == -1) // start == -1
+                Array.IndexOf<byte>(m_FileIdentifier.Array, 0x2f, start + count, m_FileIdentifier.Count - (start + count)) == -1) // start == -1
             {
                 goto Invalid;
             }
@@ -224,10 +224,10 @@ namespace Media.RtpTools.RtpDump
             //Read the 16 byte binary header here which contains data redundant of the firstLine.
             //This will be the last RD_hdr_t in the file.
 
-            m_FileHeader = new byte[RtpToolEntry.sizeOf_RD_hdr_t];
+            m_FileHeader = new Common.MemorySegment(RtpToolEntry.sizeOf_RD_hdr_t);
 
             //Read the 8 byte timeval, 4 byte ip and 2 byte port, if there is padding the next bytes will be 0 otherwise the RD_packet_t starts there.
-            m_Reader.Read(m_FileHeader, 0, 14);
+            m_Reader.Read(m_FileHeader.Array, 0, 14);
 
             m_StartTime = Media.Ntp.NetworkTimeProtocol.UtcEpoch1970.AddSeconds(BitConverter.Int64BitsToDouble(Common.Binary.Read64(m_FileHeader, 0, Common.Binary.IsLittleEndian)));
 
@@ -237,7 +237,7 @@ namespace Media.RtpTools.RtpDump
             if (m_Reader.PeekChar() != 0) return;
 
             //Read the padding out
-            m_Reader.Read(m_FileHeader, 14, 2);
+            m_Reader.Read(m_FileHeader.Array, 14, 2);
         }
 
         /// <summary>
@@ -277,7 +277,7 @@ namespace Media.RtpTools.RtpDump
 
                 //Only contains data if something goes wrong during parsing,
                 //And would then contain the data consumed while attempting to parse.
-                byte[] unexpectedData = null;
+                Common.MemorySegment unexpectedData = null;
 
                 //This allows certain text items to have a data= token and others to not.
                 //It also allows reading of Rtp in Rtcp only mode
@@ -320,7 +320,7 @@ namespace Media.RtpTools.RtpDump
                         if (m_FileIdentifier == null)
                         {
                             //Assign it
-                            m_FileIdentifier = unexpectedData;
+                            m_FileIdentifier = new (unexpectedData);
 
                             //Read the following Binary File Header
                             ReadBinaryFileHeader();
@@ -336,7 +336,7 @@ namespace Media.RtpTools.RtpDump
                         }
                         else Media.Common.TaggedExceptionExtensions.RaiseTaggedException(unexpectedData, "Encountered a Binary file header when already parsed the header. The Tag property contains the data unexpected.");
                     }
-                    else if (unexpectedData != null) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(entry, "Unexpected data found while parsing a Text format. See the Tag property of the InnerException", new Common.TaggedException<byte[]>(unexpectedData));
+                    else if (unexpectedData != null) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(entry, "Unexpected data found while parsing a Text format. See the Tag property of the InnerException", new Common.TaggedException<Common.MemorySegment>(unexpectedData));
                 }                    
 
                 //Call determine format so item has the correct format (Header [or Payload])
@@ -578,7 +578,7 @@ namespace Media.RtpTools.RtpDump
         FileFormat m_Format;
 
         //The file header of the Dump being written
-        byte[] m_FileIdentifier, m_FileHeader;
+        Common.MemorySegment m_FileIdentifier, m_FileHeader;
 
         System.IO.BinaryWriter m_Writer;
 
@@ -738,12 +738,12 @@ namespace Media.RtpTools.RtpDump
                if(m_FileIdentifier == null) m_FileIdentifier = RtpDumpExtensions.CreateFileIdentifier(m_Source);
 
                 //Write the file header
-               m_Writer.Write(m_FileIdentifier, 0, m_FileIdentifier.Length);
+               m_Writer.Write(m_FileIdentifier.Array, m_FileIdentifier.Offset, m_FileIdentifier.Count);
 
                 if (m_FileHeader == null) m_FileHeader = RtpDumpExtensions.CreateFileHeader(m_Start, m_Source);
 
                 //Write the RD_hdr_t
-                m_Writer.Write(m_FileHeader, 0, m_FileHeader.Length);
+                m_Writer.Write(m_FileHeader.Array, m_FileHeader.Offset, m_FileHeader.Count);
             }
 
             //We wrote the header...
@@ -1010,13 +1010,13 @@ namespace Media.RtpTools.RtpDump
         /// </summary>
         /// <param name="source">The <see cref="IPEndPoint"/> which will be indicated in the header.</param>
         /// <returns>The bytes created</returns>
-        internal static byte[] CreateFileIdentifier(System.Net.IPEndPoint source)
+        internal static Common.MemorySegment CreateFileIdentifier(System.Net.IPEndPoint source)
         {
             //All files must indicate a source address and port
             if (source == null) throw new ArgumentNullException("source");
 
             //Strings in .Net are encoded in Unicode encoding unless otherwise specified, e.g. in the MicroFramework UTF-8
-            return System.Text.Encoding.ASCII.GetBytes(string.Format(FileHeaderFormat, source.Address.ToString(), source.Port.ToString()));
+            return new(System.Text.Encoding.ASCII.GetBytes(string.Format(FileHeaderFormat, source.Address.ToString(), source.Port.ToString())));
         }
 
         /// <summary>
@@ -1024,7 +1024,7 @@ namespace Media.RtpTools.RtpDump
         /// </summary>
         /// <param name="source"></param>
         /// <returns></returns>
-        internal static byte[] CreateFileHeader(DateTime timeBase, System.Net.IPEndPoint source)
+        internal static Common.MemorySegment CreateFileHeader(DateTime timeBase, System.Net.IPEndPoint source)
         {
             //All files must indicate a source address and port
             if (source == null) throw new ArgumentNullException("source");
@@ -1040,7 +1040,7 @@ namespace Media.RtpTools.RtpDump
 
             Common.Binary.Write16(result, 0, Common.Binary.IsLittleEndian, (short)source.Port);
 
-            return result;
+            return new(result);
         }
     }
 }

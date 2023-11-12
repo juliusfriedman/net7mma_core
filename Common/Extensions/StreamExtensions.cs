@@ -1052,21 +1052,18 @@ namespace Media.Common.Extensions.Stream
         /// <param name="delimit">The byte to read for</param>
         /// <param name="includeDelimit">An optional value indicating if delimit should be present in the result</param>
         /// <returns>The bytes read from the reader</returns>
-        public static byte[] ReadDelimitedValue(this System.IO.Stream stream, byte delimit = Common.ASCII.LineFeed, bool includeDelimit = false)
+        public static Common.MemorySegment ReadDelimitedValue(this System.IO.Stream stream, byte delimit = Common.ASCII.LineFeed, bool includeDelimit = false)
         {
-            //The result of reading from the stream
-            byte[] result = null;
-
             try
             {
                 //Declare a value which will end up in a register on the stack
-                int register = -1;
+                int register = -1, count = 0;
 
                 //Indicate when to terminate reading.
                 bool terminate = false;
 
                 //Use a MemoryStream as to not lock the reader
-                using (var buffer = new System.IO.MemoryStream())
+                using (var buffer = new System.IO.MemoryStream(128))
                 {
                     //While data can be read from the stream
                     while (false == terminate)
@@ -1082,15 +1079,18 @@ namespace Media.Common.Extensions.Stream
 
                         //Write the value read from the reader to the MemoryStream
                         buffer.WriteByte((byte)register);
+
+                        //Store count
+                        ++count;
                     }
                     //If terminating then return the array contained in the MemoryStream.
-                    result = buffer.ToArray();
+                    var result = buffer.ToArray();
+
+                    //Return the bytes read from the stream
+                    return new Common.MemorySegment(result, 0, count);
                 }
             }
-            catch { throw; }
-
-            //Return the bytes read from the stream
-            return result;
+            catch { throw; }            
         }
 
         /// <summary>
@@ -1099,7 +1099,7 @@ namespace Media.Common.Extensions.Stream
         /// </summary>
         /// <param name="stream"></param>
         /// <param name="result"></param>
-        public static void ReadLineFeed(this System.IO.Stream stream, out byte[] result)
+        public static void ReadLineFeed(this System.IO.Stream stream, out Common.MemorySegment result)
         {
             //The length of the array allocated is known and should also be returned...
             result = Common.Extensions.Stream.StreamExtensions.ReadDelimitedValue(stream, Common.ASCII.LineFeed, true);
