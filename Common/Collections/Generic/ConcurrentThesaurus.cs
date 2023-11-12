@@ -40,6 +40,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 using Media.Common.Extensions.Generic.Dictionary;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;//ILookup
 
@@ -83,7 +84,7 @@ namespace Media.Common.Collections.Generic
 
         //Todo, allow the IList type to be specified or changed internally.
 
-        Dictionary<TKey, IList<TValue>> Dictionary;
+        ConcurrentDictionary<TKey, IList<TValue>> Dictionary;
 
         System.Collections.ICollection Collection { get { return ((System.Collections.ICollection)Dictionary); } }
 
@@ -193,11 +194,9 @@ namespace Media.Common.Collections.Generic
         [CLSCompliant(false)]
         public bool Remove(ref TKey key, out IEnumerable<TValue> values)
         {
-            Exception any;
-
             IList<TValue> list;
 
-            bool result = Dictionary.TryRemove(ref key, out list, out any);
+            bool result = Dictionary.TryRemove(key, out list);
 
             values = list;
 
@@ -264,7 +263,7 @@ namespace Media.Common.Collections.Generic
             Exception any;
 
             //Add the value if not already in the dictionary
-            return false == inDictionary ? Dictionary.TryAdd(ref key, ref predicates, out any) : true;
+            return false == inDictionary ? Dictionary.TryAdd(key, predicates) : true;
         }
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
@@ -361,17 +360,17 @@ namespace Media.Common.Collections.Generic
 
         public ConcurrentThesaurus(IDictionary<TKey, IList<TValue>> values, IEqualityComparer<TKey> equalityComparer)
         {
-            Dictionary = new Dictionary<TKey, IList<TValue>>(values, equalityComparer);
+            Dictionary = new (values, equalityComparer);
         }
 
         public ConcurrentThesaurus(int capacity, IEqualityComparer<TKey> equalityComparer)
         {
-            Dictionary = new Dictionary<TKey, IList<TValue>>(capacity, equalityComparer);
+            Dictionary = new (Environment.ProcessorCount, capacity, equalityComparer);
         }
 
         public ConcurrentThesaurus(IEqualityComparer<TKey> equalityComparer)
         {
-            Dictionary = new Dictionary<TKey, IList<TValue>>(equalityComparer);
+            Dictionary = new (equalityComparer);
         }
 
         public ConcurrentThesaurus(IDictionary<TKey, IList<TValue>> values) : this(values, EqualityComparer<TKey>.Default) { }        
