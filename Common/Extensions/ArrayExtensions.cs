@@ -49,11 +49,7 @@ namespace Media.Common.Extensions.Array
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool IsNullOrEmpty(this System.Array a, out int length) { return (length = (a ?? EmptyArray).Length) == 0; }
 
-        //ThreadLocal<long>
-        //[System.ThreadStatic]
-        static long longLength;
-
-        public static bool IsNullOrEmpty(this System.Array a) { return IsNullOrEmpty(a, out ArrayExtensions.longLength); }
+        public static bool IsNullOrEmpty(this System.Array a) { return IsNullOrEmpty(a, out int _); }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool Contains<T>(this System.Array a, T t, out int index) { return (index = System.Array.IndexOf(a, t)) >= 0; }
