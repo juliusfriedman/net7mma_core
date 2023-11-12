@@ -572,7 +572,7 @@ namespace Media.Sdp
 
         public static bool operator ==(SessionDescriptionLine a, SessionDescriptionLine b)
         {
-            return object.ReferenceEquals(b, null) ? object.ReferenceEquals(a, null) : a.Equals(b);
+            return b is null ? a is null : a.Equals(b);
         }
 
         public static bool operator !=(SessionDescriptionLine a, SessionDescriptionLine b) { return (a == b).Equals(false); }

@@ -294,20 +294,20 @@ namespace Media.Sdp
 
         public static bool operator ==(MediaDescription a, SessionDescriptionLine b)
         {
-            return object.ReferenceEquals(b, null) ? object.ReferenceEquals(a, null) : a.Contains(b);
+            return b is null ? a is null : a.Contains(b);
         }
 
         public static bool operator !=(MediaDescription a, SessionDescriptionLine b) { return (a == b).Equals(false); }
         public static bool operator ==(MediaDescription a, MediaDescription b)
         {
-            return object.ReferenceEquals(b, null) ? object.ReferenceEquals(a, null) : a.Equals(b);
+            return b is null ? a is null : a.Equals(b);
         }
 
         public static bool operator !=(MediaDescription a, MediaDescription b) { return (a == b).Equals(false); }
 
         public static bool operator ==(MediaDescription a, Sdp.Lines.SessionMediaDescriptionLine b)
         {
-            return object.ReferenceEquals(b, null) ? object.ReferenceEquals(a, null) : a.MediaDescriptionLine.Equals(b);
+            return b is null ? a is null : a.MediaDescriptionLine.Equals(b);
         }
 
         public static bool operator !=(MediaDescription a, Sdp.Lines.SessionMediaDescriptionLine b) { return (a == b).Equals(false); }
@@ -500,7 +500,7 @@ namespace Media.Sdp
 
             foreach (var line in m_Lines)
             {
-                if (object.ReferenceEquals(line, null)) continue;
+                if (line is null) continue;
 
                 yield return line;
             }
