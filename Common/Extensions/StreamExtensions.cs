@@ -1054,43 +1054,37 @@ namespace Media.Common.Extensions.Stream
         /// <returns>The bytes read from the reader</returns>
         public static Common.MemorySegment ReadDelimitedValue(this System.IO.Stream stream, byte delimit = Common.ASCII.LineFeed, bool includeDelimit = false)
         {
-            try
+            //Declare a value which will end up in a register on the stack
+            int register = -1;
+
+            //Indicate when to terminate reading.
+            bool terminate = false;
+
+            //Use a MemoryStream as to not lock the reader
+            using (var buffer = new System.IO.MemoryStream())
             {
-                //Declare a value which will end up in a register on the stack
-                int register = -1, count = 0;
-
-                //Indicate when to terminate reading.
-                bool terminate = false;
-
-                //Use a MemoryStream as to not lock the reader
-                using (var buffer = new System.IO.MemoryStream(128))
+                //While data can be read from the stream
+                while (false == terminate)
                 {
-                    //While data can be read from the stream
-                    while (false == terminate)
-                    {
-                        //Read a byte from the stream
-                        register = stream.ReadByte();
+                    //Read a byte from the stream
+                    register = stream.ReadByte();
 
-                        //Check for termination
-                        terminate = register == -1 || register == delimit;
+                    //Check for termination
+                    terminate = register == -1 || register == delimit;
 
-                        //If the byte read is equal to the delimit and the delimit byte is not included then return the array contained in the MemoryStream.
-                        if (terminate && false == includeDelimit) break;
+                    //If the byte read is equal to the delimit and the delimit byte is not included then return the array contained in the MemoryStream.
+                    if (terminate && false == includeDelimit) break;
 
-                        //Write the value read from the reader to the MemoryStream
-                        buffer.WriteByte((byte)register);
-
-                        //Store count
-                        ++count;
-                    }
-                    //If terminating then return the array contained in the MemoryStream.
-                    var result = buffer.ToArray();
-
-                    //Return the bytes read from the stream
-                    return new Common.MemorySegment(result, 0, count);
+                    //Write the value read from the reader to the MemoryStream
+                    buffer.WriteByte((byte)register);
                 }
+
+                //If terminating then return the array contained in the MemoryStream.
+                buffer.TryGetBuffer(out var bufferSegment);
+
+                //Return the bytes read from the stream
+                return new Common.MemorySegment(bufferSegment.Array, bufferSegment.Offset, bufferSegment.Count);
             }
-            catch { throw; }            
         }
 
         /// <summary>
