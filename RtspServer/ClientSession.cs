@@ -494,7 +494,6 @@ namespace Media.Rtsp//.Server
             {
                 return GetSourceContext(ssrc);
             }
-            catch { }
             return null;
         }
 
@@ -510,7 +509,6 @@ namespace Media.Rtsp//.Server
             {
                 return GetSourceContext(packet);
             }
-            catch { }
             return null;
         }
 
@@ -526,7 +524,6 @@ namespace Media.Rtsp//.Server
             {
                 return GetSourceContext(md);
             }
-            catch { }
             return null;
         }
 
@@ -728,11 +725,11 @@ namespace Media.Rtsp//.Server
 
                 //Ensure nothing is playing
                 Playing.Clear();
-
             }
-            catch
+            catch (Exception ex)
             {
                 // The list was being cleared already.
+                Common.ILoggingExtensions.LogException(m_Server.Logger, ex);
             }
         }
 
@@ -760,20 +757,15 @@ namespace Media.Rtsp//.Server
                 m_RtpClient.RtpPacketReceieved -= m_RtpClient_RecievedRtp;
 
 #if DEBUG
-
                 //m_RtpClient.RtcpPacketReceieved -= m_RtpClient_RecievedRtcp;
-
                 //m_RtpClient.RtcpPacketSent -= m_RtpClient_SentRtcp;
-
                 //m_RtpClient.RtpPacketSent -= m_RtpClient_SentRtp;
-
 #endif
+
                 try
                 {
                     m_RtpClient.OutOfBandData -= ProcessClientSessionBuffer;
-
                     m_RtpClient.Dispose();
-
                     m_RtpClient = null;
                 }
                 catch { }
@@ -786,7 +778,6 @@ namespace Media.Rtsp//.Server
                 try
                 {
                     m_Buffer.Dispose();
-
                     m_Buffer = null;
                 }
                 catch { }
@@ -808,7 +799,6 @@ namespace Media.Rtsp//.Server
                 try
                 {
                     LastRequest.Dispose();
-
                     LastRequest = null;
                 }
                 catch { }
@@ -819,7 +809,6 @@ namespace Media.Rtsp//.Server
                 try
                 {
                     LastResponse.Dispose();
-
                     LastResponse = null;
                 }
                 catch { }
