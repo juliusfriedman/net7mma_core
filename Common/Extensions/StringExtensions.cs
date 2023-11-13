@@ -392,5 +392,8 @@ namespace Media.Common.Extensions.String
             return value.SplitLazy(count, System.StringSplitOptions.None, separator);
         }
 
+        public static bool IsNotNullOrEmpty(this string value) => string.IsNullOrEmpty(value) is false;
+
+        public static bool IsNotNullOrWhitespace(this string value) => string.IsNullOrWhiteSpace(value) is false;
     }
 }
