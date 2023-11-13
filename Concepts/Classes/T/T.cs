@@ -363,7 +363,6 @@ namespace Media.Concepts.Classes.T
 
                 return true;
             }
-            catch { throw; }
             finally { Probe(Type); }
         }
 

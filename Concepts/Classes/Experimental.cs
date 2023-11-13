@@ -1047,17 +1047,13 @@ namespace Media.Concepts.Experimental
 
         internal void EnsureCache(int index)
         {
-            try
+            //Read Ahead
+            if (index > m_ReadCache.Count)
             {
-                //Read Ahead
-                if (index > m_ReadCache.Count)
-                {
-                    byte[] buffer = new byte[index - m_Stream.Position];
-                    CopyTo(buffer, 0);
-                    m_ReadCache.AddRange(buffer);
-                }
+                byte[] buffer = new byte[index - m_Stream.Position];
+                CopyTo(buffer, 0);
+                m_ReadCache.AddRange(buffer);
             }
-            catch { throw; }
         }
 
         public override byte this[int index]
