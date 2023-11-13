@@ -507,11 +507,9 @@ namespace Media.Http
         #region Constructor / Destructor
 
         /// <summary>
-        /// Creates a RtspClient on a non standard Rtsp Port
+        /// Creates a HttpClient
         /// </summary>
-        /// <param name="location">The absolute location of the media</param>
-        /// <param name="rtspPort">The port to the RtspServer is listening on</param>
-        /// <param name="rtpProtocolType">The type of protocol the underlying RtpClient will utilize and will not deviate from the protocol is no data is received, if null it will be determined from the location Scheme</param>
+        /// <param name="location">The absolute location</param>
         /// <param name="existing">An existing Socket</param>
         /// <param name="leaveOpen"><see cref="LeaveOpen"/></param>
         public HttpClient(Uri location, int bufferSize = DefaultBufferSize, Socket existing = null, bool leaveOpen = false, int responseTimeoutInterval = (int)Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond, bool shouldDispose = true)
@@ -535,7 +533,7 @@ namespace Media.Http
             CurrentLocation = location;
 
             //If there is an existing socket
-            if (object.ReferenceEquals(existing, null).Equals(false))
+            if (existing is not null)
             {
                 //Use it
                 HttpSocket = existing;
@@ -545,7 +543,7 @@ namespace Media.Http
 
             //Check for a bufferSize of specified - unspecified value
             //Cases of anything less than or equal to 0 mean use the existing ReceiveBufferSize if possible.
-            if (bufferSize <= 0) bufferSize = object.ReferenceEquals(m_HttpSocket, null) ? 0 : m_HttpSocket.ReceiveBufferSize;
+            if (bufferSize <= 0) bufferSize = m_HttpSocket is null ? 0 : m_HttpSocket.ReceiveBufferSize;
 
             //Create the segment given the amount of memory required if possible
             if (bufferSize > 0) m_Buffer = new Common.MemorySegment(bufferSize);
@@ -642,7 +640,7 @@ namespace Media.Http
         {
             try
             {
-                if (object.ReferenceEquals(m_RemoteHttp, null)) throw new InvalidOperationException("A remote end point must be assigned");
+                if (m_RemoteHttp is null) throw new InvalidOperationException("A remote end point must be assigned");
 
                 //Try to connect
                 m_HttpSocket.Connect(m_RemoteHttp);
