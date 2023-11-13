@@ -1103,18 +1103,19 @@ namespace Media.Rtp
                 if (m_StopRequested.Equals(false) && IsActive) return;
 
                 //Create the worker thread
-                m_WorkerThread = new System.Threading.Thread(new System.Threading.ThreadStart(SendReceieve));
+                m_WorkerThread = new System.Threading.Thread(new System.Threading.ThreadStart(SendReceieve))
+                {
+                    Name = "RtpClient-" + InternalId,
+
+                    //Start highest.
+                    Priority = System.Threading.ThreadPriority.Highest
+                };
 
                 //Configure
                 ConfigureThread(m_WorkerThread); //name and ILogging
 
-                m_WorkerThread.Name = "RtpClient-" + InternalId;
-
                 //Reset stop signal
                 m_StopRequested = false;
-
-                //Start highest.
-                m_WorkerThread.Priority = System.Threading.ThreadPriority.Highest;
 
                 //Start thread
                 m_WorkerThread.Start();

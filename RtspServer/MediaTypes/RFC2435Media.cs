@@ -2394,11 +2394,13 @@ namespace Media.Rtsp.Server.MediaTypes
             }); //This context is always valid from the first rtp packet received
 
             //Make the thread
-            RtpClient.m_WorkerThread = new System.Threading.Thread(SendPackets);
+            RtpClient.m_WorkerThread = new System.Threading.Thread(SendPackets)
+            {
+                //IsBackground = true;
+                //Priority = System.Threading.ThreadPriority.BelowNormal;
+                Name = "SourceStream-" + Id
+            };
             RtpClient.m_WorkerThread.TrySetApartmentState(System.Threading.ApartmentState.MTA);
-            //m_RtpClient.m_WorkerThread.IsBackground = true;
-            //m_RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.BelowNormal;
-            RtpClient.m_WorkerThread.Name = "SourceStream-" + Id;
 
             //If we are watching and there are already files in the directory then add them to the Queue
             if (m_Watcher != null && false == string.IsNullOrWhiteSpace(base.Source.LocalPath) && System.IO.Directory.Exists(base.Source.LocalPath))
