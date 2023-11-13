@@ -973,7 +973,6 @@ namespace Media.Rtsp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool TryAddMedia(Media.Rtsp.Server.IMedia stream)
         {
-            Exception any = null;
             try
             {
                 //Try to add the stream to the dictionary of contained streams.
@@ -983,10 +982,9 @@ namespace Media.Rtsp
 
                 return result;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                any = ex;
-                //Possibly already added.
+                Common.ILoggingExtensions.LogException(Logger, ex);
 
                 //If we are listening start the stram
                 if (IsRunning && ContainsMedia(stream.Id))
@@ -997,10 +995,6 @@ namespace Media.Rtsp
                 }
 
                 return false;
-            }
-            finally
-            {
-                Common.ILoggingExtensions.LogException(Logger, any);
             }
         }
 
@@ -1024,7 +1018,6 @@ namespace Media.Rtsp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool TryRemoveMedia(Guid streamId, bool stop = true)
         {
-            Exception any = null;
             try
             {
                 Media.Rtsp.Server.IMedia source = GetStream(streamId);
@@ -1037,17 +1030,13 @@ namespace Media.Rtsp
                     RemoveCredential(source, "Digest");
                 }
 
-                return m_MediaStreams.TryRemove(streamId, out var removed);
+                return m_MediaStreams.TryRemove(streamId, out _);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                any = ex;
+                Common.ILoggingExtensions.LogException(Logger, ex);
 
                 return false;
-            }
-            finally
-            {
-                Common.ILoggingExtensions.LogException(Logger, any);
             }
         }
 
@@ -3588,9 +3577,8 @@ namespace Media.Rtsp
 
             foreach (var stream in m_MediaStreams)
             {
-                stream.Value.Dispose();
-
-                if (m_MediaStreams.Remove(stream.Key, out var removed)) removed.Dispose();
+                if (m_MediaStreams.TryRemove(stream.Key, out var removed))
+                    removed.Dispose();
             }
 
             //Clear streams
