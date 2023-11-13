@@ -405,7 +405,7 @@ namespace Media.Codecs.Image
             get
             {
                 Codec.MediaComponent alphaComponent = AlphaComponent;
-                return alphaComponentis not null && alphaComponent.Id == PreMultipliedAlphaChannelId;
+                return alphaComponent is not null && alphaComponent.Id == PreMultipliedAlphaChannelId;
             }
         }
 

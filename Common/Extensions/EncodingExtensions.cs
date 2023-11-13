@@ -39,14 +39,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //http://stackoverflow.com/questions/1804433/issue-with-binaryreader-readchars
 
 using System;
-using System.Linq;
 
 namespace Media.Common.Extensions.Encoding
 {
     [CLSCompliant(true)]
     public static class EncodingExtensions
     {
-        public static readonly char[] EmptyChar = new char[0];
+        public static readonly char[] EmptyChar = System.Array.Empty<char>();
 
         #region GetByteCount
 
@@ -85,9 +84,7 @@ namespace Media.Common.Extensions.Encoding
         {
             int intCount = (int)count, intOffset = (int)offset, intRead = 0;
 
-            System.Exception any;
-
-            bool readResult = ReadDelimitedDataFrom(encoding, buffer, delimits, intOffset, intCount, out result, out intRead, out any, includeDelimits);
+            bool readResult = ReadDelimitedDataFrom(encoding, buffer, delimits, intOffset, intCount, out result, out intRead, out System.Exception any, includeDelimits);
 
             read = intRead;
 
@@ -121,15 +118,15 @@ namespace Media.Common.Extensions.Encoding
             max -= offset;
 
             //The smaller of the two, max and count
-            if ((count = Common.Binary.Min(ref max, ref count)).Equals(0)) return false;
+            if ((count = Common.Binary.Min(ref max, ref count)) is 0) return false;
 
             bool sawDelimit = false;
 
             //Make the builder
-            System.Text.StringBuilder builder = new System.Text.StringBuilder();
+            System.Text.StringBuilder builder = new();
 
             //Use default..
-            if (encoding == null) encoding = System.Text.Encoding.Default;
+            encoding ??= System.Text.Encoding.Default;
 
             System.Text.Decoder decoder = encoding.GetDecoder();
 

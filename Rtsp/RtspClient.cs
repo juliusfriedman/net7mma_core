@@ -1940,7 +1940,7 @@ namespace Media.Rtsp
 
             //Check that only the rtx media is playing and then remove session if so
 
-            if (effectedMedia && m_Playing.Count.Equals(1) && m_Playing.Keys.First().GetAbsoluteControlUri(CurrentLocation, SessionDescription).AbsoluteUri.EndsWith("rtx", StringComparison.OrdinalIgnoreCase))
+            if (effectedMedia && m_Playing.Count is 1 && m_Playing.Keys.First().GetAbsoluteControlUri(CurrentLocation, SessionDescription).AbsoluteUri.EndsWith("rtx", StringComparison.OrdinalIgnoreCase))
             {
                 //RemoveSession(m_SessionId);
 
@@ -2454,7 +2454,7 @@ namespace Media.Rtsp
                                     //Take in some bytes from the socket
                                     int justReceived = interleaved.CompleteFrom(m_RtspSocket, m_Buffer);
 
-                                    if (justReceived.Equals(0)) break;
+                                    if (justReceived is 0) break;
 
                                     //Incrment for justReceived
                                     received += justReceived;
@@ -2616,7 +2616,7 @@ namespace Media.Rtsp
             if (IsConnected is false) Connect();
 
             //Send the options if nothing was received before
-            if (m_ReceivedMessages.Equals(0)) using (RtspMessage optionsResponse = SendOptions())
+            if (m_ReceivedMessages is 0) using (RtspMessage optionsResponse = SendOptions())
                 {
                     if (Common.IDisposedExtensions.IsNullOrDisposed(optionsResponse) ||
                         optionsResponse.ParsedProtocol.Equals(RtspMessage.MessageIdentifier) && // Fake protection from GStreamer
@@ -2629,7 +2629,7 @@ namespace Media.Rtsp
 
             //Check if Describe is allowed or that a SessionDescription is present.
             if (SupportedMethods.Count > 0 && false.Equals(SupportedMethods.Contains(RtspMethod.DESCRIBE.ToString())) &&
-                Common.IDisposedExtensions.IsNullOrDisposed(SessionDescription) && SupportedFeatures.Count.Equals(0))
+                Common.IDisposedExtensions.IsNullOrDisposed(SessionDescription) && SupportedFeatures.Count is 0)
             {
                 Media.Common.TaggedExceptionExtensions.RaiseTaggedException(SupportedMethods, "SupportedMethods does not allow Describe and SessionDescription is null. See Tag with SupportedMessages.");
             }
@@ -2788,7 +2788,7 @@ namespace Media.Rtsp
                                 //As such it's importan't to keep this socket as busy as possible for the first few attempts and until the response or packets are received as required.
 
                                 if (m_RtpProtocol == ProtocolType.Udp) m_RtpProtocol = ProtocolType.Tcp;
-                                else if (m_RtspSocket.Connected && m_RtspSocket.Poll(0, SelectMode.SelectRead) && m_RtspSocket.Available.Equals(0))
+                                else if (m_RtspSocket.Connected && m_RtspSocket.Poll(0, SelectMode.SelectRead) && m_RtspSocket.Available is 0)
                                 {
                                     Reconnect();
 
@@ -3025,7 +3025,7 @@ namespace Media.Rtsp
                             (currentStatusCode = m_LastTransmitted.RtspStatusCode) <= RtspStatusCode.OK && currentStatusCode >= RtspStatusCode.Unknown) break;
                     }
 
-                } while (IsConnected && m_RtpClient.TotalBytesReceieved.Equals(0));
+                } while (IsConnected && m_RtpClient.TotalBytesReceieved is 0);
 
             //Ensure the RtpClient is still active.
             if(Common.IDisposedExtensions.IsNullOrDisposed(this) is false) m_RtpClient.Activate();
@@ -3679,10 +3679,10 @@ namespace Media.Rtsp
             string[] baseParts = authenticateHeader.Split(RtspMessage.SpaceSplit, 2, StringSplitOptions.RemoveEmptyEntries);
 
             //If nothing was in the header then return the response given.
-            if (baseParts.Length.Equals(0)) return response;
+            if (baseParts.Length is 0) return response;
             else if (baseParts.Length > 1) baseParts = Media.Common.Extensions.Linq.LinqExtensions.Yield(baseParts[0]).Concat(baseParts[1].Split(RtspHeaders.Comma).Select(s => s.Trim())).ToArray();
 
-            if (string.Compare(baseParts[0].Trim(), RtspHeaderFields.Authorization.Basic, true).Equals(0) || m_AuthenticationScheme == AuthenticationSchemes.Basic)
+            if (string.Compare(baseParts[0].Trim(), RtspHeaderFields.Authorization.Basic, true) is 0 || m_AuthenticationScheme == AuthenticationSchemes.Basic)
             {
                 AuthenticationScheme = AuthenticationSchemes.Basic;
 
@@ -3697,7 +3697,7 @@ namespace Media.Rtsp
                 //Recurse the call with the info from then authenticate header
                 return SendRtspMessage(request);
             }
-            else if (string.Compare(baseParts[0].Trim(), RtspHeaderFields.Authorization.Digest, true).Equals(0) || m_AuthenticationScheme == AuthenticationSchemes.Digest)
+            else if (string.Compare(baseParts[0].Trim(), RtspHeaderFields.Authorization.Digest, true) is 0 || m_AuthenticationScheme == AuthenticationSchemes.Digest)
             {
                 AuthenticationScheme = AuthenticationSchemes.Digest;
 
@@ -3841,7 +3841,7 @@ namespace Media.Rtsp
 
             //Check for illegal feeding of turtles
             if (IDisposedExtensions.IsNullOrDisposed(message) is false &&
-                string.Compare("REGISTER", message.MethodString, true).Equals(0) &&
+                string.Compare("REGISTER", message.MethodString, true) is 0 &&
                 string.IsNullOrWhiteSpace(UserAgent) is false) throw new InvalidOperationException("Please don't feed the turtles.");
 
             //Todo, add jump detection and if forbidden string is found then execute OOPS en los advertenica
@@ -4496,7 +4496,6 @@ namespace Media.Rtsp
                                         case RtspStatusCode.OK:
                                             if (message is not null)
                                             {
-
                                                 //Ensure message is added to supported methods.
                                                 SupportedMethods.Add(message.MethodString);
                                             }
@@ -4600,7 +4599,7 @@ namespace Media.Rtsp
                                                 string value = sessionHeaderParts.LastOrDefault(p => false.Equals(string.IsNullOrWhiteSpace(p)));
 
                                                 //If we dont have an exiting id then this is valid if the header was completely recieved only.
-                                                if (false.Equals(string.IsNullOrWhiteSpace(value)) &&
+                                                if (string.IsNullOrWhiteSpace(value) is false &&
                                                     string.IsNullOrWhiteSpace(m_SessionId) ||
                                                     false.Equals(string.Compare(value, m_SessionId).Equals(Common.Binary.Zero)))
                                                 {
@@ -4611,7 +4610,7 @@ namespace Media.Rtsp
                                                     if (sessionHeaderParts.Length > 1)
                                                     {
                                                         int timeoutStart = 1 + sessionHeaderParts[1].IndexOf(Media.Sdp.SessionDescription.EqualsSign);
-                                                        if (timeoutStart >= Common.Binary.Zero && int.TryParse(sessionHeaderParts[1].Substring(timeoutStart), out timeoutStart))
+                                                        if (timeoutStart >= Common.Binary.Zero && int.TryParse(sessionHeaderParts[1].AsSpan(timeoutStart), out timeoutStart))
                                                         {
                                                             //Should already be set...
                                                             if (timeoutStart <= Common.Binary.Zero)
@@ -4911,7 +4910,7 @@ namespace Media.Rtsp
                                 //Handle MultipleChoice for Moved or ContentType...
                                 if (response.RtspStatusCode >= RtspStatusCode.MultipleChoices &&
                                     false.Equals(string.IsNullOrEmpty(contentType)) &&
-                                    string.Compare(contentType.TrimStart(), Sdp.SessionDescription.MimeType, true).Equals(0) is false)
+                                    string.Compare(contentType.TrimStart(), Sdp.SessionDescription.MimeType, true) is 0 is false)
                                 {
                                     Media.Common.TaggedExceptionExtensions.RaiseTaggedException(response.RtspStatusCode, "Unable to describe media. The StatusCode is in the Tag property.");
                                 }
@@ -5459,7 +5458,7 @@ namespace Media.Rtsp
                             }
                         }
                     }
-                    else if (string.Compare(mediaDescription.MediaProtocol, RtpClient.RtpAvpProfileIdentifier, true).Equals(0)) // We need to find an open Udp Port
+                    else if (string.Compare(mediaDescription.MediaProtocol, RtpClient.RtpAvpProfileIdentifier, true) is 0) // We need to find an open Udp Port
                     {
 
                         //Revise
@@ -5819,8 +5818,8 @@ namespace Media.Rtsp
                                     else if (Common.IDisposedExtensions.IsNullOrDisposed(created))
                                     {
                                         //Obtain the context via the given local or remote id
-                                        created = localSsrc.Equals(0) is false ? m_RtpClient.GetContextBySourceId(localSsrc) :
-                                                remoteSsrc.Equals(0) is false ? m_RtpClient.GetContextBySourceId(remoteSsrc) : null;
+                                        created = localSsrc is 0 is false ? m_RtpClient.GetContextBySourceId(localSsrc) :
+                                                remoteSsrc is 0 is false ? m_RtpClient.GetContextBySourceId(remoteSsrc) : null;
 
                                         //If the control channel is the same then just update the client and ensure connected.
                                         if (Common.IDisposedExtensions.IsNullOrDisposed(created) is false &&

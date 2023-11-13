@@ -793,7 +793,7 @@ namespace Media.Common.Extensions.Socket
             if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(value, out len) || len < Common.Binary.BytesPerInteger) return false;
 
             //Read the 32 bits of the buffer in network byte order, return true if the value != 0
-            return false.Equals(Common.Binary.Read32(value, Common.Binary.BytesPerInteger, Media.Common.Binary.IsLittleEndian).Equals(0));
+            return false.Equals(Common.Binary.Read32(value, Common.Binary.BytesPerInteger, Media.Common.Binary.IsLittleEndian) is 0);
         }
 
         /// <summary>
@@ -816,7 +816,7 @@ namespace Media.Common.Extensions.Socket
             if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(value, out len) || len < Common.Binary.BytesPerInteger) return false;
 
             //Read the 32 bits of the buffer in network byte order, return true if the value != 0
-            return false.Equals(Common.Binary.Read32(value, Common.Binary.BytesPerInteger, Media.Common.Binary.IsLittleEndian).Equals(0));
+            return false.Equals(Common.Binary.Read32(value, Common.Binary.BytesPerInteger, Media.Common.Binary.IsLittleEndian) is 0);
         }
 
         public static int GetTcpExpedited(System.Net.Sockets.Socket socket)
@@ -901,7 +901,7 @@ namespace Media.Common.Extensions.Socket
             if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(value, out len) || len < Common.Binary.BytesPerInteger) return false;
 
             //Read the 32 bits of the buffer in network byte order, return true if the value != 0
-            return false.Equals(Common.Binary.Read32(value, Common.Binary.BytesPerInteger, Media.Common.Binary.IsLittleEndian).Equals(0));
+            return false.Equals(Common.Binary.Read32(value, Common.Binary.BytesPerInteger, Media.Common.Binary.IsLittleEndian) is 0);
         }
 
         #endregion

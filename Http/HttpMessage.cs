@@ -1300,7 +1300,7 @@ namespace Media.Http
                     sawDelemit = Media.Common.Extensions.Encoding.EncodingExtensions.ReadDelimitedDataFrom(HeaderEncoding, buffer, m_EncodedLineEnds, position, remains, out rawLine, out justRead, true);
 
                     //There is not enough data in the buffer
-                    if(justRead.Equals(0)) break;
+                    if(justRead is 0) break;
 
                     //Check for the empty line
                     if (string.IsNullOrWhiteSpace(rawLine))
@@ -1629,7 +1629,7 @@ namespace Media.Http
             //Todo, should only check this after determining whats available...
 
             //Empty body or no ContentLength
-            if (m_ContentLength.Equals(0))
+            if (m_ContentLength is 0)
             {
                 //m_Body = string.Empty;
 
@@ -1642,7 +1642,7 @@ namespace Media.Http
             //Calculate how much data remains based on the ContentLength
             //remaining = m_ContentLength - m_Body.Length;
 
-            if (available.Equals(0)) return false;
+            if (available is 0) return false;
 
             //Get the decoder to use for the body
             Encoding decoder = ParseContentEncoding(false, FallbackToDefaultEncoding);
@@ -1655,7 +1655,7 @@ namespace Media.Http
 
             remaining = ParseContentLength() ? m_ContentLength - existingBodySize : available;
 
-            if (remaining.Equals(0)) return true;
+            if (remaining is 0) return true;
 
             //Get the array of the memory stream
             byte[] buffer = m_Buffer.GetBuffer();
@@ -1735,7 +1735,7 @@ namespace Media.Http
                         m_Buffer.Seek(m_HeaderOffset = (int)lastPos, System.IO.SeekOrigin.Begin);
                         return true;
                     }
-                    else if (chunkSize.Equals(0))
+                    else if (chunkSize is 0)
                     {
                         //Trailer
 
@@ -1855,7 +1855,7 @@ namespace Media.Http
             actualName = null;
             if (IsDisposed && false == IsPersistent || string.IsNullOrWhiteSpace(name)) return null;
             foreach (string headerName in GetHeaders())
-                if (string.Compare(name, headerName, true).Equals(0)) //headerName.Equals(name, StringComparison.OrdinalIgnoreCase);
+                if (string.Compare(name, headerName, true) is 0) //headerName.Equals(name, StringComparison.OrdinalIgnoreCase);
                 {
                     actualName = headerName;
 
@@ -1871,7 +1871,7 @@ namespace Media.Http
             actualName = null;
             if (IsDisposed && false == IsPersistent || string.IsNullOrWhiteSpace(name)) return null;
             foreach (string headerName in GetEntityHeaders())
-                if (string.Compare(name, headerName, true).Equals(0)) //headerName.Equals(name, StringComparison.OrdinalIgnoreCase);
+                if (string.Compare(name, headerName, true) is 0) //headerName.Equals(name, StringComparison.OrdinalIgnoreCase);
                 {
                     actualName = headerName;
                     
@@ -2589,7 +2589,7 @@ namespace Media.Http
                 &&
                 other.GetHeaders().All(ContainsHeader)
                 &&
-                string.Compare(other.m_Body, m_Body, false).Equals(0);
+                string.Compare(other.m_Body, m_Body, false) is 0;
             //&&               
             //other.Length == Length;
         }
@@ -2796,7 +2796,7 @@ namespace Media.Http
             }
 
             // /r or /n by itself, if there is another byte consume it.
-            if (read.Equals(1) && sawDelemit && length > 1)
+            if (read is 1 && sawDelemit && length > 1)
             {
                 ++offset;
                 

@@ -301,7 +301,7 @@ namespace Media.Rtsp
             if (message.RtspMessageType == RtspMessageType.Invalid) return null;
 
             //Our result in a List
-            List<byte> result = new List<byte>();
+            List<byte> result = new();
 
             //Our RtspMessage base64 encoded
             byte[] messageBytes;
@@ -357,6 +357,8 @@ namespace Media.Rtsp
 
             if (offset > message.Length) throw new ArgumentOutOfRangeException(nameof(offset));
 
+            if (offset > message.Length) throw new ArgumentOutOfRangeException(nameof(offset));
+
             //Use a default encoding if none was given
             if (encoding is null) encoding = RtspMessage.DefaultEncoding;
 
@@ -382,7 +384,7 @@ namespace Media.Rtsp
         {
             if (string.IsNullOrWhiteSpace(data)) throw new InvalidOperationException("data cannot be null or whitespace.");
 
-            if (encoding == null) encoding = RtspMessage.DefaultEncoding;
+            encoding ??= RtspMessage.DefaultEncoding;
 
             return new RtspMessage(encoding.GetBytes(data), 0, encoding);
         }
@@ -665,7 +667,7 @@ namespace Media.Rtsp
             //Empty body or no ContentLength
             //If the message cannot have a body it is parsed.
             //If the content length was set to 0 on purpose than this logic needs to be changed to continue parsing.
-            if (false.Equals(CanHaveBody) || m_ContentLength.Equals(0)) return true;
+            if (false.Equals(CanHaveBody) || m_ContentLength is 0) return true;
 
             //Get the decoder to use for the body
             Encoding decoder = ParseContentEncoding(false, FallbackToDefaultEncoding);
@@ -708,7 +710,7 @@ namespace Media.Rtsp
             {
                 //Todo, copy or annotate, DO NOT ALLOCATE TO STRING...
 
-                if (existingBodySize.Equals(0))
+                if (existingBodySize is 0)
                     m_Body = decoder.GetString(buffer, position, Media.Common.Binary.Min(ref available, ref remaining));
                 else                     //Append to the existing body
                     m_Body += decoder.GetString(buffer, position, Media.Common.Binary.Min(ref available, ref remaining));

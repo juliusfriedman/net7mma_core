@@ -514,7 +514,7 @@ namespace Media.Rtp
         public bool IsEmpty
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Count.Equals(0); }
+            get { return Count is 0; }
         }
         
         /// <summary>
@@ -753,7 +753,7 @@ namespace Media.Rtp
             int count = Count, ssrc = packet.SynchronizationSourceIdentifier, seq = packet.SequenceNumber, ts = packet.Timestamp, pt = packet.PayloadType;
 
             //No packets contained yet
-            if (count.Equals(0))
+            if (count is 0)
             {
                 if (m_Ssrc.Equals(-1)) m_Ssrc = ssrc;
                 else if (false.Equals(ssrc.Equals(m_Ssrc))) throw new ArgumentException("packet.SynchronizationSourceIdentifier must match frame SynchronizationSourceIdentifier", "packet");
@@ -796,7 +796,7 @@ namespace Media.Rtp
                     goto Timestamp;
                 }
                 //If the packet has a source list
-                else if (false.Equals(packet.ContributingSourceCount.Equals(0)))
+                else if (false.Equals(packet.ContributingSourceCount is 0))
                 {
                     using (RFC3550.SourceList sl = packet.GetSourceList())
                     {
@@ -873,7 +873,7 @@ namespace Media.Rtp
             }
 
             //Handle prepend
-            if (insert.Equals(0))
+            if (insert is 0)
             {
                 Packets.Insert(0, packet);
 
@@ -1092,7 +1092,7 @@ namespace Media.Rtp
                 default:
                     {
                         //Skip the access of the array for all cases but when the sequence was == to the m_LowestSequenceNumber (i == 0)
-                        if(i.Equals(0)) //(sequenceNumber == m_LowestSequenceNumber)
+                        if(i is 0) //(sequenceNumber == m_LowestSequenceNumber)
                         {
                             m_LowestSequenceNumber = Packets[0].SequenceNumber; //First
                         }

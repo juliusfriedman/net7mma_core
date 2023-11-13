@@ -1637,7 +1637,7 @@ namespace Media.Rtsp
                                                 string value = sessionHeaderParts.LastOrDefault(p => false.Equals(string.IsNullOrWhiteSpace(p)));
 
                                                 //If we dont have an exiting id then this is valid if the header was completely recieved only.
-                                                if (false.Equals(string.IsNullOrWhiteSpace(value)) &&
+                                                if (string.IsNullOrWhiteSpace(value) is false &&
                                                     string.IsNullOrWhiteSpace(SessionId) ||
                                                     false.Equals(string.Compare(value, SessionId).Equals(Common.Binary.Zero)))
                                                 {
@@ -1811,10 +1811,10 @@ namespace Media.Rtsp
             string[] baseParts = authenticateHeader.Split(Media.Common.Extensions.Linq.LinqExtensions.Yield(((char)Common.ASCII.Space)).ToArray(), 2, StringSplitOptions.RemoveEmptyEntries);
 
             //If nothing was in the header then return the response given.
-            if (baseParts.Length.Equals(0)) return response;
+            if (baseParts.Length is 0) return response;
             else if (baseParts.Length > 1) baseParts = Media.Common.Extensions.Linq.LinqExtensions.Yield(baseParts[0]).Concat(baseParts[1].Split(RtspHeaders.Comma).Select(s => s.Trim())).ToArray();
 
-            if (string.Compare(baseParts[0].Trim(), RtspHeaderFields.Authorization.Basic, true).Equals(0) || m_AuthenticationScheme == AuthenticationSchemes.Basic)
+            if (string.Compare(baseParts[0].Trim(), RtspHeaderFields.Authorization.Basic, true) is 0 || m_AuthenticationScheme == AuthenticationSchemes.Basic)
             {
                 AuthenticationScheme = AuthenticationSchemes.Basic;
 
@@ -1829,7 +1829,7 @@ namespace Media.Rtsp
                 //Recurse the call with the info from then authenticate header
                 return SendRtspMessage(request);
             }
-            else if (string.Compare(baseParts[0].Trim(), RtspHeaderFields.Authorization.Digest, true).Equals(0) || m_AuthenticationScheme == AuthenticationSchemes.Digest)
+            else if (string.Compare(baseParts[0].Trim(), RtspHeaderFields.Authorization.Digest, true) is 0 || m_AuthenticationScheme == AuthenticationSchemes.Digest)
             {
                 AuthenticationScheme = AuthenticationSchemes.Digest;
 

@@ -400,7 +400,7 @@ namespace Media.Rtsp//.Server
                         LastRecieve = new SocketAsyncEventArgs
                         {
                             UserToken = this
-                        }
+                        };
                         LastRecieve.SetBuffer(m_Buffer.Array, m_Buffer.Offset, m_Buffer.Count);
                         LastRecieve.Completed += m_Server.ProcessReceive;
                     }
@@ -1016,7 +1016,7 @@ namespace Media.Rtsp//.Server
             Sdp.MediaType mediaType;            
 
             //If the mediaType was specified there will be /audio or video and that will compare to the lastSegment, 3 previously would be parsed as text etc.
-            if (Enum.TryParse(lastSegment, true, out mediaType) && string.Compare(lastSegment, mediaType.ToString(), true).Equals(0))
+            if (Enum.TryParse(lastSegment, true, out mediaType) && string.Compare(lastSegment, mediaType.ToString(), true) is 0)
             {
                 var sourceContext = sourceAvailable.FirstOrDefault(tc => tc.MediaDescription.MediaType == mediaType);
 
@@ -1382,13 +1382,13 @@ namespace Media.Rtsp//.Server
 
                 //QuickTime debug
 
-                if (clientRtpPort.Equals(0)) clientRtpPort = Media.Common.Extensions.Socket.SocketExtensions.ProbeForOpenPort(ProtocolType.Udp, 30000, true);
+                if (clientRtpPort is 0) clientRtpPort = Media.Common.Extensions.Socket.SocketExtensions.ProbeForOpenPort(ProtocolType.Udp, 30000, true);
 
-                if (clientRtcpPort.Equals(0)) clientRtcpPort = clientRtpPort + 1;
+                if (clientRtcpPort is 0) clientRtcpPort = clientRtpPort + 1;
 
-                if (serverRtpPort.Equals(0)) serverRtpPort = Media.Common.Extensions.Socket.SocketExtensions.ProbeForOpenPort(ProtocolType.Udp, 30000, true);
+                if (serverRtpPort is 0) serverRtpPort = Media.Common.Extensions.Socket.SocketExtensions.ProbeForOpenPort(ProtocolType.Udp, 30000, true);
 
-                if (serverRtcpPort.Equals(0)) serverRtcpPort = serverRtpPort + 1;
+                if (serverRtcpPort is 0) serverRtcpPort = serverRtpPort + 1;
 
                 //Ensure the ports are allowed to be used.
                 if (m_Server.MaximumUdpPort.HasValue && 
@@ -1620,7 +1620,7 @@ namespace Media.Rtsp//.Server
             if(false.Equals(IsDisconnected)) m_Server.ProcessClientBuffer(this, length);
 
             //Handle high usage when client disconnects.
-            if (length.Equals(0) && m_RtpClient.IsActive)
+            if (length is 0 && m_RtpClient.IsActive)
             {
                 //should also check activity on each context to properly determine :)
 
@@ -1928,7 +1928,7 @@ namespace Media.Rtsp//.Server
                             released = true;
                         }
 
-                        if (m_RtpClient.TransportContexts.Count.Equals(0))
+                        if (m_RtpClient.TransportContexts.Count is 0)
                         {
                             Common.ILoggingExtensions.Log(m_Server.Logger, "Session Deactivated - " + SessionId);
 
@@ -2052,7 +2052,7 @@ namespace Media.Rtsp//.Server
                 //            released = true;
                 //        }
 
-                //        if (m_RtpClient.TransportContexts.Count.Equals(0))
+                //        if (m_RtpClient.TransportContexts.Count is 0)
                 //        {
                 //            m_RtpClient.Deactivate();
 
@@ -2157,7 +2157,7 @@ namespace Media.Rtsp//.Server
             //Remove rtp theads
             if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient)) && m_RtpClient.IsActive)
             {
-                if (Playing.Count.Equals(0))
+                if (Playing.Count is 0)
                 {
                     released = true;
 

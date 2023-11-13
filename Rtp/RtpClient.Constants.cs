@@ -248,7 +248,7 @@ namespace Media.Rtp
             byte lastChannel = 0;
 
             //Todo, check for session level ssrc 
-            //if (remoteSsrc.Equals(0))
+            //if (remoteSsrc is 0)
             //{
             //    //Sdp.SessionDescriptionLine ssrcLine = sessionDescription.SsrcGroupLine; // SsrcLine @ the session level could imply Group
             //}

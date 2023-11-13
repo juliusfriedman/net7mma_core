@@ -96,7 +96,7 @@ namespace Media.Rtp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-            get { if (IsDisposed || Payload.Count.Equals(0)) return 0; return Binary.Clamp(Header.ContributingSourceCount * 4, 0, 60)/* Math.Min(60, Math.Max(0, Header.ContributingSourceCount * 4))*/; }
+            get { if (IsDisposed || Payload.Count is 0) return 0; return Binary.Clamp(Header.ContributingSourceCount * 4, 0, 60)/* Math.Min(60, Math.Max(0, Header.ContributingSourceCount * 4))*/; }
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace Media.Rtp
 
             get
             {
-                if (IsDisposed || Payload.Count.Equals(0) || false.Equals(Header.Extension)) return 0;
+                if (IsDisposed || Payload.Count is 0 || false.Equals(Header.Extension)) return 0;
 
                 using (RtpExtension extension = GetExtension()) return false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(extension)) ? extension.Size : 0;
             }
@@ -124,7 +124,7 @@ namespace Media.Rtp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-            get { if (IsDisposed || Payload.Count.Equals(0)) return 0; return ContributingSourceListOctets + ExtensionOctets; }
+            get { if (IsDisposed || Payload.Count is 0) return 0; return ContributingSourceListOctets + ExtensionOctets; }
         }
 
         /// <summary>
@@ -202,7 +202,7 @@ namespace Media.Rtp
             get
             {
                 //Proably don't have to check...
-                if (IsDisposed || Payload.Count.Equals(0)) return Media.Common.MemorySegment.Empty;
+                if (IsDisposed || Payload.Count is 0) return Media.Common.MemorySegment.Empty;
 
                 int nonPayloadOctets = HeaderOctets, padding = PaddingOctets;
 
@@ -236,7 +236,7 @@ namespace Media.Rtp
 
                 int padding = PaddingOctets;
 
-                if (padding.Equals(0)) return Common.MemorySegment.Empty;
+                if (padding is 0) return Common.MemorySegment.Empty;
 
                 return new Common.MemorySegment(Payload.Array, (Payload.Offset + Payload.Count) - padding, padding);
 

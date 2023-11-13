@@ -686,7 +686,7 @@ namespace Media.Rtcp
          {
              get
              {
-                 if (IsDisposed || Payload.Count.Equals(0)) return Media.Common.MemorySegment.Empty;
+                 if (IsDisposed || Payload.Count is 0) return Media.Common.MemorySegment.Empty;
 
                  //return Payload.Take(Payload.Count - PaddingOctets);
 
@@ -701,7 +701,7 @@ namespace Media.Rtcp
         {
             get
             {
-                if (IsDisposed || false.Equals(Padding) || false.Equals(IsComplete) || Payload.Count.Equals(0)) return Media.Common.MemorySegment.Empty;
+                if (IsDisposed || false.Equals(Padding) || false.Equals(IsComplete) || Payload.Count is 0) return Media.Common.MemorySegment.Empty;
 
                 //return Payload.Skip(Payload.Count - PaddingOctets);
 

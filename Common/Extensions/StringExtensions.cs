@@ -320,7 +320,7 @@ namespace Media.Common.Extensions.String
                 yield break;
             }
 
-            if (string.IsNullOrEmpty(value) || count == 1 || value.IndexOfAny(separator) is false)
+            if (string.IsNullOrEmpty(value) || count == 1 || value.IndexOfAny(separator) is 0)
             {
                 yield return value;
                 yield break;
