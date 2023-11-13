@@ -158,11 +158,11 @@ namespace Media.Concepts.Classes.B
         /// <returns>True if <see cref="Bias"/> equals <see cref="true"/>, otherwise false</returns>
         public bool Good()
         {
-            if (object.ReferenceEquals(Iudex, null)) return false;
+            if (Iudex is null) return false;
 
             Iudex(ConsciousBias());
 
-            return Bias.Equals(true);
+            return Bias;
         }
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace Media.Concepts.Classes.B
         /// <returns>True if <see cref="Bias"/> equals <see cref="false"/>, otherwise true</returns>
         public bool Bad()
         {
-            if (object.ReferenceEquals(Iudex, null)) return false;
+            if (Iudex is null) return false;
 
             Iudex(ConsciousBias());
 

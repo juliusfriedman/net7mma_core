@@ -288,7 +288,7 @@ namespace Media.Common.Structures
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Struct @this, IStruct that)
         {
-            return @this.Equals(that).Equals(true);
+            return @this.Equals(that);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
