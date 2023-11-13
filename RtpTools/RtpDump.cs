@@ -247,68 +247,66 @@ namespace Media.RtpTools.RtpDump
         /// <returns>The DumpItem read</returns>
         internal RtpToolEntry ReadToolEntry()
         {
-            try
-            {
-                //Create an item with the format guessed by reading the header.
-                RtpToolEntry entry = null;
+            //Create an item with the format guessed by reading the header.
+            RtpToolEntry entry = null;
 
-                if (!HasNext) return entry;
+            if (!HasNext) return entry;
 
-                //Read the file header if no other data has been read yet and the format possibly has header (Determines Binary or Text FileFormat)
-                if (m_Reader.BaseStream.Position == 0) ReadFileHeader();
+            //Read the file header if no other data has been read yet and the format possibly has header (Determines Binary or Text FileFormat)
+            if (m_Reader.BaseStream.Position == 0) ReadFileHeader();
                 
-                //If no format can be determined then raise a DumpReader type exception with the following message.
-                if (m_Format == FileFormat.Unknown) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Unable to determine format!");
+            //If no format can be determined then raise a DumpReader type exception with the following message.
+            if (m_Format == FileFormat.Unknown) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Unable to determine format!");
 
-                int offsetsCount = m_Offsets.Count;
+            int offsetsCount = m_Offsets.Count;
 
-                //Take the position now.
-                long position = m_Reader.BaseStream.Position;
+            //Take the position now.
+            long position = m_Reader.BaseStream.Position;
 
-                //Add the offset if we didn't already know about it
-                if (offsetsCount == 0 || m_Reader.BaseStream.Position > m_Offsets[offsetsCount - 1])
-                {
-                    //Which is the position in the stream
-                    m_Offsets.Add(position);
+            //Add the offset if we didn't already know about it
+            if (offsetsCount == 0 || m_Reader.BaseStream.Position > m_Offsets[offsetsCount - 1])
+            {
+                //Which is the position in the stream
+                m_Offsets.Add(position);
                     
-                    //Indicate something was added.
-                    ++offsetsCount;
-                }
+                //Indicate something was added.
+                ++offsetsCount;
+            }
 
                 //Only contains data if something goes wrong during parsing,
                 //And would then contain the data consumed while attempting to parse.
                 Common.MemorySegment unexpectedData = null;
 
-                //This allows certain text items to have a data= token and others to not.
-                //It also allows reading of Rtp in Rtcp only mode
-                FileFormat foundFormat = m_Format;
+            //This allows certain text items to have a data= token and others to not.
+            //It also allows reading of Rtp in Rtcp only mode
+            FileFormat foundFormat = m_Format;
 
-                //If the format is not text then 
-                //This is followed by one binary header (RD_hdr_t) and one RD_packet_t structure for each received packet. All fields are in network byte order. The RTP and RTCP packets are recorded as-is.
-                if (m_Format < FileFormat.Text)
+            //If the format is not text then 
+            //This is followed by one binary header (RD_hdr_t) and one RD_packet_t structure for each received packet. All fields are in network byte order. The RTP and RTCP packets are recorded as-is.
+            if (m_Format < FileFormat.Text)
+            {
+                //Create an entry using the size of the RD_packet_T (8 bytes)
+                entry = new RtpToolEntry(m_StartTime, m_Source, foundFormat, new byte[RtpToolEntry.sizeOf_RD_packet_T], null, position);
+
+                //Read that many bytes from the stream into the enty.
+                m_Reader.Read(entry.Blob, 0, RtpToolEntry.sizeOf_RD_packet_T);                   
+
+                //Determine how many more bytes follow.
+                int itemLength = entry.Length - RtpToolEntry.sizeOf_RD_packet_T;
+
+                //If there are any more bytes related to the item itemLength will be > 0
+                if (itemLength > 0)
                 {
-                    //Create an entry using the size of the RD_packet_T (8 bytes)
-                    entry = new RtpToolEntry(m_StartTime, m_Source, foundFormat, new byte[RtpToolEntry.sizeOf_RD_packet_T], null, position);
-
-                    //Read that many bytes from the stream into the enty.
-                    m_Reader.Read(entry.Blob, 0, RtpToolEntry.sizeOf_RD_packet_T);                   
-
-                    //Determine how many more bytes follow.
-                    int itemLength = entry.Length - RtpToolEntry.sizeOf_RD_packet_T;
-
-                    //If there are any more bytes related to the item itemLength will be > 0
-                    if (itemLength > 0)
-                    {
-                        //Read the data and increase MaxSize
-                        entry.Concat(m_Reader.ReadBytes(itemLength));
-                    }
+                    //Read the data and increase MaxSize
+                    entry.Concat(m_Reader.ReadBytes(itemLength));
                 }
-                else
-                {
-                    //Parse data and build packet from the textual data,
-                    //If a Binary format is found m_FileHeader will contain any data which was unexpected by the ParseTextEntry process which should consists of the `#!rtpplay1.0 ...\n`                       
-                    entry = RtpSend.ParseText(m_Reader, m_Source, ref foundFormat, out unexpectedData);
-                }
+            }
+            else
+            {
+                //Parse data and build packet from the textual data,
+                //If a Binary format is found m_FileHeader will contain any data which was unexpected by the ParseTextEntry process which should consists of the `#!rtpplay1.0 ...\n`                       
+                entry = RtpSend.ParseText(m_Reader, m_Source, ref foundFormat, out unexpectedData);
+            }
 
                 //The format of the item does not match the reader(which would only happen if given an unknown format)
                 if (foundFormat != m_Format)
@@ -322,14 +320,14 @@ namespace Media.RtpTools.RtpDump
                             //Assign it
                             m_FileIdentifier = new (unexpectedData);
 
-                            //Read the following Binary File Header
-                            ReadBinaryFileHeader();
+                        //Read the following Binary File Header
+                        ReadBinaryFileHeader();
 
-                            //no more data is unexpected.
-                            unexpectedData = null;
+                        //no more data is unexpected.
+                        unexpectedData = null;
 
-                            //Remove the offset which was not related to an entry.
-                            m_Offsets.RemoveAt(offsetsCount - 1);
+                        //Remove the offset which was not related to an entry.
+                        m_Offsets.RemoveAt(offsetsCount - 1);
 
                             //Read the entry.
                             return ReadToolEntry();
@@ -339,15 +337,13 @@ namespace Media.RtpTools.RtpDump
                     else if (unexpectedData != null) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(entry, "Unexpected data found while parsing a Text format. See the Tag property of the InnerException", new Common.TaggedException<Common.MemorySegment>(unexpectedData));
                 }                    
 
-                //Call determine format so item has the correct format (Header [or Payload])
-                if (foundFormat == FileFormat.Unknown)
-                {
-                    Media.Common.TaggedExceptionExtensions.RaiseTaggedException(entry, "Unknown format");
-                }
-
-                return entry;
+            //Call determine format so item has the correct format (Header [or Payload])
+            if (foundFormat == FileFormat.Unknown)
+            {
+                Media.Common.TaggedExceptionExtensions.RaiseTaggedException(entry, "Unknown format");
             }
-            catch { throw; } //Should handle the exception where unexpectedData is assigned.
+
+            return entry;
         }
 
         /// <summary>

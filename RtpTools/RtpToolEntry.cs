@@ -325,24 +325,25 @@ namespace Media.RtpTools
             format = format ?? Format;
 
             //If the item was read in as Text it should have m_Format == Text just return the bytes as they were as to not waste memory
-            if (format == FileFormat.Text && Format >= FileFormat.Text) return Encoding.ASCII.GetString(Blob);
-            else return ToTextualConvention(format);
+            if (format == FileFormat.Text && Format >= FileFormat.Text)
+                return Encoding.ASCII.GetString(Blob);
+            else
+                return ToTextualConvention(format);
         }
 
         public string ToTextualConvention(FileFormat? format = null)
         {
-            try
-            {
-                StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
 
-                var ts = Timebase.TimeOfDay.Add(TimeSpan.FromMilliseconds(Offset));
+            var ts = Timebase.TimeOfDay.Add(TimeSpan.FromMilliseconds(Offset));
 
-                if (IsRtcp) sb.Append(RtpSend.ToTextualConvention(format ?? Format, Media.Rtcp.RtcpPacket.GetPackets(Blob, Pointer + sizeOf_RD_packet_T, BlobLength - sizeOf_RD_packet_T), ts, Source));
-                else using (var rtp = new Rtp.RtpPacket(Blob, Pointer + sizeOf_RD_packet_T)) sb.Append(RtpSend.ToTextualConvention(format ?? Format, rtp, ts, Source));
+            if (IsRtcp)
+                sb.Append(RtpSend.ToTextualConvention(format ?? Format, Media.Rtcp.RtcpPacket.GetPackets(Blob, Pointer + sizeOf_RD_packet_T, BlobLength - sizeOf_RD_packet_T), ts, Source));
+            else
+                using (var rtp = new Rtp.RtpPacket(Blob, Pointer + sizeOf_RD_packet_T))
+                    sb.Append(RtpSend.ToTextualConvention(format ?? Format, rtp, ts, Source));
 
-                return sb.ToString();    
-            }
-            catch { throw; }
+            return sb.ToString();
         }
 
         public override string ToString()
