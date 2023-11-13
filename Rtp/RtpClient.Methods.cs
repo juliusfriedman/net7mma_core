@@ -148,7 +148,6 @@ namespace Media.Rtp
                 //May duplicate objects already projected, store index or use for construct.
                 return GetTransportContexts();
             }
-            catch { throw; }
         }
 
         #region Rtcp

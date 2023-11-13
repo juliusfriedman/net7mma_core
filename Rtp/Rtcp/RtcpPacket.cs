@@ -740,9 +740,7 @@ namespace Media.Rtcp
                 {
                     Transferred = Transferred
                 };
-                
             }
-            catch { throw; } //If anything goes wrong deliver the exception
             finally { binarySequence = null; } //When the stack is cleaned up remove the reference to the binarySequence
         }
 
