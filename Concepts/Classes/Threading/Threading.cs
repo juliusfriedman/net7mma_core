@@ -173,7 +173,6 @@ namespace Media.Concepts.Classes.Threading
             thread.Priority = priority;
 
             try { return thread.Join(timeout); }
-            catch { throw; }
             finally { thread.Priority = previous; }
         }
 
@@ -472,7 +471,6 @@ namespace Media.Concepts.Classes.Threading
                         //Todo, execution time will require Timer or Clock.
 
                         try { Item.Item1.Invoke(); }
-                        catch { throw; }
                         finally { UnderlyingThread.Priority = System.Threading.ThreadPriority.Highest; }
                     }
                 }

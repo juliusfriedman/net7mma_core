@@ -250,13 +250,15 @@ public class RtpAudioSink : RtpSink
             RemoteRtp = IPEndPointExtensions.Any
         }); //This context is always valid from the first rtp packet received
 
-      
+
         //Make the thread
-        RtpClient.m_WorkerThread = new System.Threading.Thread(SendPackets);
+        RtpClient.m_WorkerThread = new System.Threading.Thread(SendPackets)
+        {
+            //IsBackground = true;
+            //Priority = System.Threading.ThreadPriority.BelowNormal;
+            Name = nameof(RtpAudioSink) + "-" + Id
+        };
         RtpClient.m_WorkerThread.TrySetApartmentState(System.Threading.ApartmentState.MTA);
-        //RtpClient.m_WorkerThread.IsBackground = true;
-        //RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.BelowNormal;
-        RtpClient.m_WorkerThread.Name = nameof(RtpAudioSink) + "-" + Id;
         IsReady = true;
         State = StreamState.Started;
         RtpClient.m_WorkerThread.Start();

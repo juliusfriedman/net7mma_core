@@ -280,14 +280,7 @@ namespace Media.Rtsp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                try
-                {
-                    return m_Sessions.Values;
-                }
-                catch
-                {
-                    throw;
-                }
+                return m_Sessions.Values;
             }
         }
 
@@ -478,14 +471,7 @@ namespace Media.Rtsp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                try
-                {
-                    return m_MediaStreams.Values;
-                }
-                catch
-                {
-                    throw;
-                }
+                return m_MediaStreams.Values;
             }
         }
 
@@ -940,8 +926,7 @@ namespace Media.Rtsp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal ClientSession GetSession(Guid id)
         {
-            ClientSession result;
-            m_Sessions.TryGetValue(id, out result);
+            m_Sessions.TryGetValue(id, out ClientSession result);
             return result;
         }
 
@@ -988,7 +973,6 @@ namespace Media.Rtsp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool TryAddMedia(Media.Rtsp.Server.IMedia stream)
         {
-            Exception any = null;
             try
             {
                 //Try to add the stream to the dictionary of contained streams.
@@ -998,10 +982,9 @@ namespace Media.Rtsp
 
                 return result;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                any = ex;
-                //Possibly already added.
+                Common.ILoggingExtensions.LogException(Logger, ex);
 
                 //If we are listening start the stram
                 if (IsRunning && ContainsMedia(stream.Id))
@@ -1012,10 +995,6 @@ namespace Media.Rtsp
                 }
 
                 return false;
-            }
-            finally
-            {
-                Common.ILoggingExtensions.LogException(Logger, any);
             }
         }
 
@@ -1039,7 +1018,6 @@ namespace Media.Rtsp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool TryRemoveMedia(Guid streamId, bool stop = true)
         {
-            Exception any = null;
             try
             {
                 Media.Rtsp.Server.IMedia source = GetStream(streamId);
@@ -1052,17 +1030,13 @@ namespace Media.Rtsp
                     RemoveCredential(source, "Digest");
                 }
 
-                return m_MediaStreams.TryRemove(streamId, out var removed);
+                return m_MediaStreams.TryRemove(streamId, out _);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                any = ex;
+                Common.ILoggingExtensions.LogException(Logger, ex);
 
                 return false;
-            }
-            finally
-            {
-                Common.ILoggingExtensions.LogException(Logger, any);
             }
         }
 
@@ -1395,10 +1369,11 @@ namespace Media.Rtsp
             if (allowPortReuse) Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableUnicastPortReuse(m_TcpServerSocket));
 
             //Create a thread to handle client connections
-            m_ServerThread = new Thread(new ThreadStart(AcceptLoop));// Common.Extensions.Thread.ThreadExtensions.MinimumStackSize);
-            
-            //Configure the thread
-            m_ServerThread.Name = ServerName + "@" + m_ServerPort;
+            m_ServerThread = new Thread(new ThreadStart(AcceptLoop))
+            {
+                //Configure the thread
+                Name = ServerName + "@" + m_ServerPort
+            };
 
             ConfigureThread(m_ServerThread);
 
@@ -1439,23 +1414,12 @@ namespace Media.Rtsp
                 {
                     var thread = new Thread(new ThreadStart(() =>
                     {
-
                         try
                         {
                             Common.ILoggingExtensions.Log(Logger, "RestartFaultedStreams");
-
                             RestartFaultedStreams(state);
-                        }
-                        catch (Exception ex)
-                        {
-                            //if (Logger != null) Logger.LogException(ex);
-                            Common.ILoggingExtensions.LogException(Logger, ex);
-                        }
 
-                        try
-                        {
                             Common.ILoggingExtensions.Log(Logger, "DisconnectAndRemoveInactiveSessions");
-
                             DisconnectAndRemoveInactiveSessions(state);
                         }
                         catch (Exception ex)
@@ -1465,21 +1429,20 @@ namespace Media.Rtsp
 
                         MediaStreams.AsParallel().ForAll(s => s.TrySetLogger(Logger));
 
-                        //foreach (Media.Rtsp.Server.IMedia readyStream in MediaStreams)
-                        //{
-                        //    readyStream.TrySetLogger(Logger);
-                        //}
-
                         m_Maintaining = false;
 
-                        if (IsRunning && m_Maintainer != null) m_Maintainer.Change(TimeSpan.FromTicks(RtspClientInactivityTimeout.Ticks >> 2), Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan);
-
-                    }))//, Common.Extensions.Thread.ThreadExtensions.MinimumStackSize)
+                        if (IsRunning && m_Maintainer != null)
+                        {
+                            TimeSpan dueTime = TimeSpan.FromTicks(RtspClientInactivityTimeout.Ticks >> 2);
+                            TimeSpan period = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan;
+                            m_Maintainer.Change(dueTime, period);
+                        }
+                    }))
                     {
                         Priority = m_ServerThread.Priority,
-                        Name = "Maintenance-" + m_ServerThread.Name,
-                        //ApartmentState = ApartmentState.MTA
+                        Name = "Maintenance-" + m_ServerThread.Name
                     };
+
                     thread.TrySetApartmentState(ApartmentState.MTA);
                     thread.Start();
                 }
@@ -3613,9 +3576,8 @@ namespace Media.Rtsp
 
             foreach (var stream in m_MediaStreams)
             {
-                stream.Value.Dispose();
-
-                if (m_MediaStreams.Remove(stream.Key, out var removed)) removed.Dispose();
+                if (m_MediaStreams.TryRemove(stream.Key, out var removed))
+                    removed.Dispose();
             }
 
             //Clear streams

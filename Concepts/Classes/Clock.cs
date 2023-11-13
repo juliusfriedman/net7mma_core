@@ -138,7 +138,6 @@ namespace Media.Concepts.Classes
             : this(System.DateTimeOffset.Now.Offset, System.Globalization.CultureInfo.CurrentCulture.Calendar, shouldDispose)
         {
             try { if (false == GC && System.Runtime.GCSettings.LatencyMode != System.Runtime.GCLatencyMode.NoGCRegion) GC = System.GC.TryStartNoGCRegion(Binary.BitsPerDecimal); }
-            catch { }
             finally
             {
                 System.Threading.Thread.BeginCriticalRegion();
@@ -186,7 +185,6 @@ namespace Media.Concepts.Classes
             {
                 base.Dispose(disposing);
             }
-            catch { }
             finally
             {
 

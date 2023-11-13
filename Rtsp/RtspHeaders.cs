@@ -565,7 +565,6 @@ namespace Media.Rtsp
 
                 return builder.ToString();
             }
-            catch { throw; }
             finally { builder = null; }
         }        
 

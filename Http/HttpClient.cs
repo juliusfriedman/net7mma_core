@@ -638,31 +638,27 @@ namespace Media.Http
         /// <param name="state">Ununsed.</param>
         protected virtual void ProcessEndConnect(object state, int multiplier = 2)//should be vaarible in class
         {
-            try
-            {
-                if (m_RemoteHttp is null) throw new InvalidOperationException("A remote end point must be assigned");
+            if (m_RemoteHttp is null) throw new InvalidOperationException("A remote end point must be assigned");
 
-                //Try to connect
-                m_HttpSocket.Connect(m_RemoteHttp);
+            //Try to connect
+            m_HttpSocket.Connect(m_RemoteHttp);
 
-                //Sample the clock after connecting
-                m_EndConnect = DateTime.UtcNow;
+            //Sample the clock after connecting
+            m_EndConnect = DateTime.UtcNow;
 
-                //Calculate the connection time.
-                m_ConnectionTime = m_EndConnect.Value - m_BeginConnect.Value;
+            //Calculate the connection time.
+            m_ConnectionTime = m_EndConnect.Value - m_BeginConnect.Value;
 
-                int multipliedConnectionTime = (int)(m_ConnectionTime.TotalMilliseconds * multiplier);
+            int multipliedConnectionTime = (int)(m_ConnectionTime.TotalMilliseconds * multiplier);
 
-                //Set the read and write timeouts based upon such a time but only if the connection time took longer than 50 ms
-                if (m_ConnectionTime > TimeSpan.Zero && multipliedConnectionTime > 100) SocketWriteTimeout = SocketReadTimeout += (int)(m_ConnectionTime.TotalMilliseconds * multiplier);
+            //Set the read and write timeouts based upon such a time but only if the connection time took longer than 50 ms
+            if (m_ConnectionTime > TimeSpan.Zero && multipliedConnectionTime > 100) SocketWriteTimeout = SocketReadTimeout += (int)(m_ConnectionTime.TotalMilliseconds * multiplier);
 
-                //Don't block
-                //m_RtspSocket.Blocking = false;
+            //Don't block
+            //m_RtspSocket.Blocking = false;
 
-                //Raise the Connected event.
-                OnConnected();
-            }
-            catch { throw; }
+            //Raise the Connected event.
+            OnConnected();
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]

@@ -83,7 +83,7 @@ namespace Media.Common.Collections.Generic
 
         //Todo, allow the IList type to be specified or changed internally.
 
-        ConcurrentDictionary<TKey, IList<TValue>> Dictionary;
+        readonly ConcurrentDictionary<TKey, IList<TValue>> Dictionary;
 
         public int Count { get { return Dictionary.Count; } }
 
@@ -232,12 +232,8 @@ namespace Media.Common.Collections.Generic
         [CLSCompliant(false)]
         public bool TryGetValue(ref TKey key, out IEnumerable<TValue> results)
         {
-            IList<TValue> values;
-
-            bool result = TryGetValueList(ref key, out values);
-
+            bool result = TryGetValueList(ref key, out IList<TValue> values);
             results = values;
-
             return result;
         }
 
@@ -256,8 +252,6 @@ namespace Media.Common.Collections.Generic
             if (allocateOnly) predicates = new List<TValue>();
             else if (predicates == null) predicates = new List<TValue>() { value }; //value may be DefaultValue which maybe null
             else predicates.Add(value);//Othewise add the value to the predicates which is a reference to the key
-
-            Exception any;
 
             //Add the value if not already in the dictionary
             return false == inDictionary ? Dictionary.TryAdd(key, predicates) : true;

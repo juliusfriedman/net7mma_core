@@ -66,7 +66,7 @@ namespace Media.Rtp
         //Most routers / firewalls will let traffic back through if the person from behind initiated the traffic.
         //Send some bytes to ensure the reciever is awake and ready... (SIP / RELOAD / ICE / STUN / TURN may have something specific and better)
         //e.g Port mapping request http://tools.ietf.org/html/rfc6284#section-4.2 
-        static byte[] WakeUpBytes = new byte[] { 0x70, 0x70, 0x70, 0x70 };
+        static readonly byte[] WakeUpBytes = new byte[] { 0x70, 0x70, 0x70, 0x70 };
 
         //Choose better name,,, 
         //And depending on how memory is aligned 36 may be a palindrome
@@ -104,7 +104,7 @@ namespace Media.Rtp
         internal static int TryReadFrameHeader(byte[] buffer, int offset, out byte channel, byte? frameByte = BigEndianFrameControl, bool readChannel = true)
         {
             //Must be assigned
-            channel = default(byte);
+            channel = default;
 
             if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer)) return -1;
 
@@ -202,9 +202,10 @@ namespace Media.Rtp
         /// <returns></returns>
         public static RtpClient FromSessionDescription(Sdp.SessionDescription sessionDescription, Common.MemorySegment sharedMemory = null, bool incomingEvents = true, bool rtcpEnabled = true, System.Net.Sockets.Socket existingSocket = null, int? rtpPort = null, int? rtcpPort = null, int remoteSsrc = 0, int minimumSequentialRtpPackets = 2, bool connect = true, System.Action<System.Net.Sockets.Socket> configure = null)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(sessionDescription)) throw new System.ArgumentNullException("sessionDescription");
+            if (Common.IDisposedExtensions.IsNullOrDisposed(sessionDescription))
+                throw new System.ArgumentNullException(nameof(sessionDescription));
 
-            Sdp.Lines.SessionConnectionLine connectionLine = new Sdp.Lines.SessionConnectionLine(sessionDescription.ConnectionLine);
+            Sdp.Lines.SessionConnectionLine connectionLine = new(sessionDescription.ConnectionLine);
 
             System.Net.IPAddress remoteIp = System.Net.IPAddress.Parse(connectionLine.Host), localIp;
 
@@ -214,10 +215,10 @@ namespace Media.Rtp
             if (existingSocket is not null && existingSocket.IsBound)
             {
                 //If the socket is IP based
-                if (existingSocket.LocalEndPoint is System.Net.IPEndPoint)
+                if (existingSocket.LocalEndPoint is System.Net.IPEndPoint e)
                 {
                     //Take the localIp from the LocalEndPoint
-                    localIp = (existingSocket.LocalEndPoint as System.Net.IPEndPoint).Address;
+                    localIp = e.Address;
                 }
                 else
                 {
@@ -227,19 +228,22 @@ namespace Media.Rtp
             else // There is no socket existing.
             {
                 //If the remote address is the broadcast address or the remote address is multicast
-                if (System.Net.IPAddress.Broadcast.Equals(remoteIp) || Common.Extensions.IPAddress.IPAddressExtensions.IsMulticast(remoteIp))
+                if (System.Net.IPAddress.Broadcast.Equals(remoteIp) ||
+                    Common.Extensions.IPAddress.IPAddressExtensions.IsMulticast(remoteIp))
                 {
                     //This interface should be the interface you plan on using for the Rtp communication
-                    localIp = Media.Common.Extensions.Socket.SocketExtensions.GetFirstMulticastIPAddress(remoteIp.AddressFamily, out  localInterface);
+                    localIp = Media.Common.Extensions.Socket.SocketExtensions
+                        .GetFirstMulticastIPAddress(remoteIp.AddressFamily, out localInterface);
                 }
                 else
                 {
                     //This interface should be the interface you plan on using for the Rtp communication
-                    localIp = Media.Common.Extensions.Socket.SocketExtensions.GetFirstUnicastIPAddress(remoteIp.AddressFamily, out  localInterface);
+                    localIp = Media.Common.Extensions.Socket.SocketExtensions
+                        .GetFirstUnicastIPAddress(remoteIp.AddressFamily, out localInterface);
                 }
             }
 
-            RtpClient client = new RtpClient(sharedMemory, incomingEvents);
+            RtpClient client = new(sharedMemory, incomingEvents);
 
             byte lastChannel = 0;
 

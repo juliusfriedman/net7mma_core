@@ -148,10 +148,6 @@ namespace Media.Rtsp.Server.MediaTypes
             {
                 return false;
             }
-            finally
-            {
-                //
-            }
         }
 
         public override bool TryGetLogger(out Common.ILogging logger)
@@ -173,10 +169,6 @@ namespace Media.Rtsp.Server.MediaTypes
                 logger = null; 
                 
                 return false;
-            }
-            finally
-            {
-                //
             }
         }
 

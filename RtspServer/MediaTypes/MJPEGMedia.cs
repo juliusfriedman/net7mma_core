@@ -253,8 +253,10 @@ namespace Media.Rtsp.Server.MediaTypes
                 reloadEvent = new ManualResetEvent(false);
 
                 // create and start new thread
-                thread = new Thread(new ThreadStart(WorkerThread));
-                thread.Name = m_Source.ToString();
+                thread = new Thread(new ThreadStart(WorkerThread))
+                {
+                    Name = m_Source.ToString()
+                };
                 thread.Start();
 
                 base.Start();

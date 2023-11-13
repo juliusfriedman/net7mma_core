@@ -46,26 +46,25 @@ namespace Media.Rtsp.Server.Loggers
 
         internal override void LogRequest(RtspMessage request, ClientSession session)
         {
-            try { Logger.Log(string.Format(Format, request.RtspMessageType, request.RtspMethod, request.Location, session.Id, null)); }
-            catch { throw; }
+            Logger.Log(
+                string.Format(Format, request.RtspMessageType, request.RtspMethod, request.Location, session.Id, null));
         }
 
         internal override void LogResponse(RtspMessage response, ClientSession session)
         {
-            try { Logger.Log(string.Format(Format, response.RtspMessageType, response.CSeq, response.RtspStatusCode, session.Id, null)); }
-            catch { throw; }
+            Logger.Log(
+                string.Format(Format, response.RtspMessageType, response.CSeq, response.RtspStatusCode, session.Id, null));
         }
 
         public override void LogException(Exception ex)
         {
-            try { Logger.Log(string.Format(Format, ex.Message, Environment.NewLine, ex.StackTrace, Environment.NewLine, ex.InnerException != null ? ex.InnerException.ToString() : string.Empty)); }
-            catch { throw; }
+            Logger.Log(
+                string.Format(Format, ex.Message, Environment.NewLine, ex.StackTrace, Environment.NewLine, ex.InnerException != null ? ex.InnerException.ToString() : string.Empty));
         }
 
         public override void Log(string data)
         {
-            try { Logger.Log(data); }
-            catch { throw; }
+            Logger.Log(data);
         }
 
         public override void Dispose()

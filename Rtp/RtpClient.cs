@@ -3805,16 +3805,17 @@ namespace Media.Rtp
                     if (m_EventThread == null || EventsStarted.Equals(DateTime.MinValue))
                     {
                         //Create the event thread
-                        m_EventThread = new Thread(new ThreadStart(HandleEvents));//, Common.Extensions.Thread.ThreadExtensions.MinimumStackSize);
+                        m_EventThread = new Thread(new ThreadStart(HandleEvents))
+                        {
+                            //Assign name
+                            Name = "RtpClient-Events-" + InternalId,
+
+                            //Start highest
+                            Priority = ThreadPriority.Highest
+                        };
 
                         //Configure
                         ConfigureThread(m_EventThread); //should pass name and logging.
-
-                        //Assign name
-                        m_EventThread.Name = "RtpClient-Events-" + InternalId;
-
-                        //Start highest
-                        m_EventThread.Priority = ThreadPriority.Highest;
 
                         //Start thread
                         m_EventThread.Start();

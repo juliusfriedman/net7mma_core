@@ -466,7 +466,7 @@ namespace Media.Rtsp//.Server
                     Media.Common.ILoggingExtensions.LogException(m_Server.Logger, ex);
 
                     //if a socket exception occured then handle it.
-                    if (ex is SocketException) m_Server.HandleClientSocketException((SocketException)ex, this);
+                    if (ex is SocketException se) m_Server.HandleClientSocketException(se, this);
 
                     //if not disposed mark disconnected
                     IsDisconnected = object.ReferenceEquals(m_RtspSocket, null) || IsDisposed || HasRuningServer.Equals(false);
@@ -494,7 +494,6 @@ namespace Media.Rtsp//.Server
             {
                 return GetSourceContext(ssrc);
             }
-            catch { }
             return null;
         }
 
@@ -510,7 +509,6 @@ namespace Media.Rtsp//.Server
             {
                 return GetSourceContext(packet);
             }
-            catch { }
             return null;
         }
 
@@ -526,7 +524,6 @@ namespace Media.Rtsp//.Server
             {
                 return GetSourceContext(md);
             }
-            catch { }
             return null;
         }
 
@@ -728,11 +725,11 @@ namespace Media.Rtsp//.Server
 
                 //Ensure nothing is playing
                 Playing.Clear();
-
             }
-            catch
+            catch (Exception ex)
             {
                 // The list was being cleared already.
+                Common.ILoggingExtensions.LogException(m_Server.Logger, ex);
             }
         }
 
@@ -742,11 +739,11 @@ namespace Media.Rtsp//.Server
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected override void Dispose(bool disposing)
         {
-            if (false.Equals(disposing)) return;
+            if (disposing is false) return;
 
             base.Dispose(ShouldDispose);
 
-            if (false.Equals(IsDisposed)) return;
+            if (IsDisposed is false) return;
 
             RemoveAllAttachmentsAndClearPlaying();
 
@@ -754,76 +751,45 @@ namespace Media.Rtsp//.Server
             IsDisconnected = true;
 
             //Deactivate the RtpClient so it's not hanging around wasting resources for nothing
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient)))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient) is false)
             {
-
                 m_RtpClient.RtpPacketReceieved -= m_RtpClient_RecievedRtp;
 
 #if DEBUG
-
                 //m_RtpClient.RtcpPacketReceieved -= m_RtpClient_RecievedRtcp;
-
                 //m_RtpClient.RtcpPacketSent -= m_RtpClient_SentRtcp;
-
                 //m_RtpClient.RtpPacketSent -= m_RtpClient_SentRtp;
-
 #endif
-                try
-                {
-                    m_RtpClient.OutOfBandData -= ProcessClientSessionBuffer;
 
-                    m_RtpClient.Dispose();
-
-                    m_RtpClient = null;
-                }
-                catch { }
+                m_RtpClient.OutOfBandData -= ProcessClientSessionBuffer;
+                m_RtpClient.Dispose();
+                m_RtpClient = null;
             }
 
-
-
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_Buffer)))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(m_Buffer) is false)
             {
-                try
-                {
-                    m_Buffer.Dispose();
-
-                    m_Buffer = null;
-                }
-                catch { }
+                m_Buffer.Dispose();
+                m_Buffer = null;
             }
 
-            if (object.ReferenceEquals(m_RtspSocket, null).Equals(false))
+            if (m_RtspSocket is not null)
             {
-                try
-                {
-                    if (false.Equals(LeaveOpen)) m_RtspSocket.Dispose();
+                if (LeaveOpen is false) m_RtspSocket.Dispose();
 
-                    m_RtspSocket = null;
-                }
-                catch { }
+                m_RtspSocket = null;
             }
 
-            if (object.ReferenceEquals(LastRequest, null).Equals(false))
+            if (LastRequest is not null)
             {
-                try
-                {
-                    LastRequest.Dispose();
-
-                    LastRequest = null;
-                }
-                catch { }
+                LastRequest.Dispose();
+                LastRequest = null;
             }
 
-            if (object.ReferenceEquals(LastResponse, null).Equals(false))
+            if (LastResponse is not null)
             {
-                try
-                {
-                    LastResponse.Dispose();
-
-                    LastResponse = null;
-                }
-                catch { }
-            }            
+                LastResponse.Dispose();
+                LastResponse = null;
+            }
 
             m_Server = m_Contained = null;
         }

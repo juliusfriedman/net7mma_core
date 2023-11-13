@@ -50,9 +50,11 @@ namespace Media.Rtsp.Server
         internal SourceMedia m_Parent;
 
         public ChildMedia(SourceMedia source)
-            :base(source.Name, source.Source)
+            : base(source.Name, source.Source)
         {
-            if (false == source.IsParent) throw new ArgumentException("Cannot make a Child of a Child.");
+            if (source.IsParent is false)
+                throw new ArgumentException("Cannot make a Child of a Child.", nameof(source));
+
             m_Parent = source;
             //m_Child = true;
             IsReady = m_Parent.IsReady;
