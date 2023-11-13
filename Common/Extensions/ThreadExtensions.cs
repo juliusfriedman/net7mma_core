@@ -68,7 +68,6 @@ namespace Media.Common.Extensions.Thread
             if (thread == null) return false;
             try { thread.Interrupt(); return false; }
             catch (System.Threading.ThreadInterruptedException) { return true; }
-            catch { throw; }
         }
 
         public static void AbortAndFree(ref System.Threading.Thread thread, System.Threading.ThreadState state = System.Threading.ThreadState.Stopped, int timeout = (int)Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond)

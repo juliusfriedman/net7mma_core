@@ -24,7 +24,6 @@ namespace Media.Common.Loggers
                 Console.ForegroundColor = NormalColor;
                 System.Console.WriteLine(message);
             }
-            catch { throw; }
             finally { Console.ForegroundColor = previous; }
         }
 
@@ -36,7 +35,6 @@ namespace Media.Common.Loggers
                 Console.ForegroundColor = ExceptionColor;
                 System.Console.WriteLine(ex.Message);
             }
-            catch { throw; }
             finally { Console.ForegroundColor = previous; }
         }
     }
