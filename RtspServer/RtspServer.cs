@@ -280,14 +280,7 @@ namespace Media.Rtsp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                try
-                {
-                    return m_Sessions.Values;
-                }
-                catch
-                {
-                    throw;
-                }
+                return m_Sessions.Values.ToList();
             }
         }
 
@@ -478,14 +471,7 @@ namespace Media.Rtsp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                try
-                {
-                    return m_MediaStreams.Values;
-                }
-                catch
-                {
-                    throw;
-                }
+                return m_MediaStreams.Values.ToList();
             }
         }
 

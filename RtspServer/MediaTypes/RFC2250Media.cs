@@ -118,20 +118,15 @@ namespace Media.Rtsp.Server.MediaTypes
         {
             lock (Frames)
             {
-                try
+                //Make the width and height correct
+                using (var thumbnail = image.GetThumbnailImage(Width, Height, null, IntPtr.Zero))
                 {
-                    //Make the width and height correct
-                    using (var thumbnail = image.GetThumbnailImage(Width, Height, null, IntPtr.Zero))
+                    //Should use RFC2250Frame to properly packetize
+                    AddFrame(new Rtp.RtpFrame(32)
                     {
-
-                        //Should use RFC2250Frame to properly packetize
-                        AddFrame(new Rtp.RtpFrame(32)
-                        {
-                            new Rtp.RtpPacket(new Rtp.RtpHeader(2, false, false, true, 32, 0, SourceId, 0, 0), RFC2250Frame.CreateVideoHeader(false, 0, true, true, true, true, true, 1).Concat(WriteMPEGSequence((Bitmap)thumbnail)))
-                        });
-                    }
+                        new Rtp.RtpPacket(new Rtp.RtpHeader(2, false, false, true, 32, 0, SourceId, 0, 0), RFC2250Frame.CreateVideoHeader(false, 0, true, true, true, true, true, 1).Concat(WriteMPEGSequence((Bitmap)thumbnail)))
+                    });
                 }
-                catch { throw; }
             }
         }
 

@@ -988,48 +988,44 @@ namespace Media.Rtsp.Server.MediaTypes
         /// <param name="image">The Image to Encode and Send</param>
         public override void Packetize(System.Drawing.Image image)
         {
-            try
+            //If the dimensions are different
+            var disposeImage = image.Width != Width || image.Height != Height;
+
+            //Make the width and height correct by getting a resized version
+            var _image = image.Width != Width || image.Height != Height ? image.GetThumbnailImage(Width, Height, null, IntPtr.Zero) : image;
+
+            //Create a new frame
+            var newFrame = new RFC6184Frame(96)
             {
-                //If the dimensions are different
-                var disposeImage = image.Width != Width || image.Height != Height;
+                SynchronizationSourceIdentifier = SourceId,
+                MaxPackets = 4096,
+            };
 
-                //Make the width and height correct by getting a resized version
-                var _image = image.Width != Width || image.Height != Height ? image.GetThumbnailImage(Width, Height, null, IntPtr.Zero) : image;
+            var bmp = (System.Drawing.Bitmap)_image;
 
-                //Create a new frame
-                var newFrame = new RFC6184Frame(96)
-                {
-                    SynchronizationSourceIdentifier = SourceId,
-                    MaxPackets = 4096,
-                };
+            //Get RGB Stride
+            System.Drawing.Imaging.BitmapData data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, _image.Width, _image.Height),
+                        System.Drawing.Imaging.ImageLockMode.ReadOnly, _image.PixelFormat);
 
-                var bmp = (System.Drawing.Bitmap)_image;
+            //Convert to YUV
+            var yuvData = !Media.Common.Binary.IsBigEndian ? Media.Codecs.Image.ColorConversions.ARGB2YUV420Managed(_image.Width, _image.Height, data.Scan0) : Media.Codecs.Image.ColorConversions.BGRA2YUV420Managed(_image.Width, _image.Height, data.Scan0);
 
-                //Get RGB Stride
-                System.Drawing.Imaging.BitmapData data = bmp.LockBits(new System.Drawing.Rectangle(0, 0, _image.Width, _image.Height),
-                           System.Drawing.Imaging.ImageLockMode.ReadOnly, _image.PixelFormat);
+            //SPS and PPS should be included here if key frame only
+            newFrame.Packetize(encoder.GetRawSPS());
+            newFrame.Packetize(encoder.GetRawPPS());
 
-                //Convert to YUV
-                var yuvData = !Media.Common.Binary.IsBigEndian ? Media.Codecs.Image.ColorConversions.ARGB2YUV420Managed(_image.Width, _image.Height, data.Scan0) : Media.Codecs.Image.ColorConversions.BGRA2YUV420Managed(_image.Width, _image.Height, data.Scan0);
+            //Packetize the data according to the MTU
+            newFrame.Packetize(encoder.CompressFrame(yuvData));
 
-                //SPS and PPS should be included here if key frame only
-                newFrame.Packetize(encoder.GetRawSPS());
-                newFrame.Packetize(encoder.GetRawPPS());
+            //Done with RGB
+            bmp.UnlockBits(data);
 
-                //Packetize the data according to the MTU
-                newFrame.Packetize(encoder.CompressFrame(yuvData));
+            //Add the frame
+            AddFrame(newFrame);
 
-                //Done with RGB
-                bmp.UnlockBits(data);
-
-                //Add the frame
-                AddFrame(newFrame);
-
-                //If we need to dispose
-                if (disposeImage)
-                    _image.Dispose();
-            }
-            catch { throw; }
+            //If we need to dispose
+            if (disposeImage)
+                _image.Dispose();
         }
 
         public override void Dispose()

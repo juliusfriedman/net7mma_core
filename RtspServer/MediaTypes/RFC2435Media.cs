@@ -2245,16 +2245,9 @@ namespace Media.Rtsp.Server.MediaTypes
             {
                 if (IsDisposed) return null;
 
-                try
-                {
-                    if (false == HasDepacketized || false == HasBuffer) PrepareBuffer();
+                if (false == HasDepacketized || false == HasBuffer) PrepareBuffer();
 
-                    return System.Drawing.Image.FromStream(m_Buffer, useEmbeddedColorManagement, validateImageData);
-                }
-                catch
-                {
-                    throw;
-                }
+                return System.Drawing.Image.FromStream(m_Buffer, useEmbeddedColorManagement, validateImageData);
             }
 
             //Todo, design see the base class notes
@@ -2490,8 +2483,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 temp = System.Drawing.Image.FromFile(path);
                 Packetize(temp);
             }
-            catch { throw; }
-            finally { if (temp != null) temp.Dispose(); }
+            finally { temp?.Dispose(); }
         }
 
         /// <summary>
@@ -2500,8 +2492,7 @@ namespace Media.Rtsp.Server.MediaTypes
         /// <param name="frame">The frame with packets to send</param>
         public void AddFrame(Rtp.RtpFrame frame)
         {
-            try { Frames.Enqueue(frame); }
-            catch { throw; }
+            Frames.Enqueue(frame);
         }
 
         /// <summary>
@@ -2513,26 +2504,22 @@ namespace Media.Rtsp.Server.MediaTypes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         public virtual void Packetize(System.Drawing.Image image)
         {
-            try
+            if (Width == 0 && Height == 0 || Width == image.Width && Height == image.Height)
             {
-                if (Width == 0 && Height == 0 || Width == image.Width && Height == image.Height)
-                {
-                    Width = image.Width;
+                Width = image.Width;
 
-                    Height = image.Height;
+                Height = image.Height;
 
-                    Frames.Enqueue(RFC2435Media.RFC2435Frame.Packetize(image, Quality, Interlaced, (int)SourceId));
-                }
-                else if (image.Width != Width || image.Height != Height)
+                Frames.Enqueue(RFC2435Media.RFC2435Frame.Packetize(image, Quality, Interlaced, (int)SourceId));
+            }
+            else if (image.Width != Width || image.Height != Height)
+            {
+                using (var thumb = image.GetThumbnailImage(Width, Height, null, IntPtr.Zero))
                 {
-                    using (var thumb = image.GetThumbnailImage(Width, Height, null, IntPtr.Zero))
-                    {
-                        //could give timestamp here
-                        Frames.Enqueue(RFC2435Media.RFC2435Frame.Packetize(thumb, Quality, Interlaced, (int)SourceId));
-                    }
+                    //could give timestamp here
+                    Frames.Enqueue(RFC2435Media.RFC2435Frame.Packetize(thumb, Quality, Interlaced, (int)SourceId));
                 }
             }
-            catch { throw; }
         }
 
         //Needs to only send packets and not worry about updating the frame, that should be done by ImageSource
