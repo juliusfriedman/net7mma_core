@@ -66,6 +66,9 @@ namespace Media.Common
     public static class IDisposedExtensions
     {
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static bool IsNotNullOrDisposed(this IDisposed dispose) => IsNullOrDisposed(dispose) is false;
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool IsNullOrDisposed(this IDisposed dispose)
         {
             return dispose is null || dispose.IsDisposed;
