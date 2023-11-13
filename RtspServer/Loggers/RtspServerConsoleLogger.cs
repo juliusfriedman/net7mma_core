@@ -55,7 +55,6 @@ namespace Media.Rtsp.Server.Loggers
                 Console.ForegroundColor = RequestColor;
                 Logger.Log(string.Format(Format, "Request=>", request, "Session=>", session.Id, null));
             }
-            catch { throw; }
             finally { Console.ForegroundColor = previous; }
         }
 
@@ -67,7 +66,6 @@ namespace Media.Rtsp.Server.Loggers
                 Console.ForegroundColor = ResponseColor;
                 Logger.Log(string.Format(Format, "Response=>", response, "Session=>", session.Id, null));
             }
-            catch { throw; }
             finally { Console.ForegroundColor = previous; }
         }
 
@@ -79,9 +77,7 @@ namespace Media.Rtsp.Server.Loggers
                 Console.ForegroundColor = ExceptionColor;
                 Logger.Log(string.Format(Format, ex.Message, Environment.NewLine, ex.StackTrace, Environment.NewLine, ex.InnerException != null ? ex.InnerException.ToString() : string.Empty));
             }
-            catch { throw; }
             finally { Console.ForegroundColor = previous; }
-
         }
 
         public override void Log(string data)
@@ -92,7 +88,6 @@ namespace Media.Rtsp.Server.Loggers
                 Console.ForegroundColor = NormalColor;
                 Console.WriteLine(data);
             }
-            catch { throw; }
             finally { Console.ForegroundColor = previous; }
         }
 
