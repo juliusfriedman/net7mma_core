@@ -2212,15 +2212,15 @@ namespace Media.Rtp
 
         internal int DoSignalWork(/*ref out*/)
         {
+            System.Threading.ThreadPriority existingPriority = System.Threading.Thread.CurrentThread.Priority;
+
+            System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.AboveNormal;
+
             int recv = 0;
 
             //Todo, HandOff, process one receive
             while (m_SignalOffset > 0 && Common.IDisposedExtensions.IsNullOrDisposed(this).Equals(false))
             {
-                System.Threading.ThreadPriority existingPriority = System.Threading.Thread.CurrentThread.Priority;
-
-                System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.AboveNormal;
-
                 recv = ProcessFrameData(m_Buffer.Array, m_SignalOffset, m_SignalCount, m_SignalSocket);
 
                 m_SignalOffset += recv;
@@ -2233,11 +2233,11 @@ namespace Media.Rtp
 
                     m_SignalSocket = null;
 
-                    System.Threading.Thread.CurrentThread.Priority = existingPriority;
-
                     break;
                 }
             }
+
+            System.Threading.Thread.CurrentThread.Priority = existingPriority;
 
             return recv;
         }
