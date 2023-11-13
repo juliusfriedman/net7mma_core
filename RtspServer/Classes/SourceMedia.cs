@@ -86,8 +86,6 @@ namespace Media.Rtsp.Server
 
         #region Properties
 
-        //public Media.Common.ILogging Logger { get; set; }
-
         /// <summary>
         /// Gets or sets a value which indicates if Start can be called.
         /// </summary>
@@ -213,14 +211,15 @@ namespace Media.Rtsp.Server
             :base(shouldDispose)
         {
             //The stream name cannot be null or consist only of whitespace
-            if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("The stream name cannot be null or consist only of whitespace", "name");
-            m_Name = name;
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("The stream name cannot be null or consist only of whitespace", nameof(name));
 
+            m_Name = name;
             m_Source = source;
         }
 
         public SourceMedia(string name, Uri source, NetworkCredential sourceCredential, bool shouldDispose = true)
-            :this(name, source, shouldDispose)
+            : this(name, source, shouldDispose)
         {
             m_SourceCred = sourceCredential;
         }
@@ -239,7 +238,7 @@ namespace Media.Rtsp.Server
 
         internal void OnFrameDecoded(System.Drawing.Image decoded)
         {
-            if (DecodeFrames && decoded != null && FrameDecoded != null)
+            if (DecodeFrames && decoded != null)
             {
                 FrameDecoded.Invoke(this, decoded);
             }
@@ -247,7 +246,7 @@ namespace Media.Rtsp.Server
 
         internal void OnFrameDecoded(byte[] decoded)
         {
-            if (DecodeFrames && decoded != null && DataDecoded != null)
+            if (DecodeFrames && decoded != null)
             {
                 DataDecoded.Invoke(this, decoded);
             }
