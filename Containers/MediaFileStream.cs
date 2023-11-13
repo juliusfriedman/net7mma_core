@@ -254,7 +254,7 @@ namespace Media.Container
             
             //Wait for the end of the transaction or the root to be valid
             //Buffering && Root == null
-            while (result.IsTransactionDone.Equals(false) && Object.ReferenceEquals(Root, null)) result.AsyncWaitHandle.WaitOne(0);
+            while (result.IsTransactionDone is false && Object.ReferenceEquals(Root, null)) result.AsyncWaitHandle.WaitOne(0);
         }
 
         public MediaFileStream(Uri source, System.IO.Stream stream, DateTime? quantifier = null, int size = 8192, Action afterClose = null)

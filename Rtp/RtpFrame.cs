@@ -70,7 +70,7 @@ namespace Media.Rtp
                 using (RtpExtension extension = packet.GetExtension())
                 {
                     //If present and complete
-                    if (Common.IDisposedExtensions.IsNullOrDisposed(extension).Equals(false) && extension.IsComplete)
+                    if (Common.IDisposedExtensions.IsNullOrDisposed(extension) is false && extension.IsComplete)
                     {
                         //If the data should be included then include it
                         if (useExtensions)
@@ -762,7 +762,7 @@ namespace Media.Rtp
                 else if (false.Equals(ts.Equals(m_Timestamp))) throw new ArgumentException("packet.Timestamp must match frame Timestamp", "packet");
 
                 if (m_PayloadType.Equals(-1)) m_PayloadType = pt;
-                else if (AllowsMultiplePayloadTypes.Equals(false) && false.Equals(pt.Equals(PayloadType))) throw new ArgumentException("packet.PayloadType must match frame PayloadType", "packet");
+                else if (AllowsMultiplePayloadTypes is false && false.Equals(pt.Equals(PayloadType))) throw new ArgumentException("packet.PayloadType must match frame PayloadType", "packet");
 
                 m_LowestSequenceNumber = m_HighestSequenceNumber = seq;
 
@@ -784,7 +784,7 @@ namespace Media.Rtp
 
             //At least 1 packet is contained
             //Check payload type if indicated
-            if (AllowsMultiplePayloadTypes.Equals(false) && false.Equals(pt.Equals(PayloadType))) throw new ArgumentException("packet.PayloadType must match frame PayloadType", "packet");
+            if (AllowsMultiplePayloadTypes is false && false.Equals(pt.Equals(PayloadType))) throw new ArgumentException("packet.PayloadType must match frame PayloadType", "packet");
 
             //If the identity is not the same
             if (false.Equals(ssrc.Equals(m_Ssrc)))
@@ -1532,7 +1532,7 @@ namespace Media.Rtp
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(RtpFrame a, RtpFrame b) { return (a == b).Equals(false); }
+        public static bool operator !=(RtpFrame a, RtpFrame b) { return (a == b) is false; }
 
         #endregion
 
@@ -1942,7 +1942,7 @@ namespace Media.UnitTests
             using (Media.Rtp.RtpFrame frame = new Media.Rtp.RtpFrame())
             {
 
-                if (frame.SpecifiedPayloadType) throw new Exception("Frame must have SpecifiedPayloadType == false when not set in constructor.");
+                if (frame.SpecifiedPayloadType) throw new Exception("Frame must have SpecifiedPayloadType is false when not set in constructor.");
 
                 if (frame.HasMarker) throw new Exception("Frame must not have marker when empty");
 

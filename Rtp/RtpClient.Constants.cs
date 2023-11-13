@@ -114,7 +114,7 @@ namespace Media.Rtp
 
             //Todo, Native, Unsafe
             //If the buffer does not start with the magic byte this is not a RFC2326 frame, it could be a RFC4571 frame
-            if (frameByte.HasValue && buffer[offset++].Equals(frameByte.Value).Equals(false)) return -1; //goto ReadLengthOnly;
+            if (frameByte.HasValue && buffer[offset++] != frameByte.Value) return -1; //goto ReadLengthOnly;
 
             /*
              Stream data such as RTP packets is encapsulated by an ASCII dollar

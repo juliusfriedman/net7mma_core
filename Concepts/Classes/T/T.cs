@@ -122,7 +122,7 @@ namespace Media.Concepts.Classes.T
             {
                 unsafe
                 {
-                    return object.ReferenceEquals(__refvalue(*(System.TypedReference*)(Reference.Reference), System.Type), null).Equals(false);
+                    return object.ReferenceEquals(__refvalue(*(System.TypedReference*)(Reference.Reference), System.Type), null) is false;
                 }
             }
         }
@@ -140,7 +140,7 @@ namespace Media.Concepts.Classes.T
 
         bool TryGetString(out string value)
         {
-            if (IsStringType.Equals(false))
+            if (IsStringType is false)
             {
                 value = null;
 
@@ -161,7 +161,7 @@ namespace Media.Concepts.Classes.T
             {
                 string typeName;
 
-                if (TryGetString(out typeName).Equals(false))
+                if (TryGetString(out typeName) is false)
                 {
                     value = null;
 
@@ -264,8 +264,8 @@ namespace Media.Concepts.Classes.T
         /// <param name="type"></param>
         public void EnsureIsAssignableType(System.Type type)
         {
-            if (ElementType.IsAssignableFrom(type).Equals(false) &&
-               type.IsAssignableFrom(ElementType).Equals(false))
+            if (ElementType.IsAssignableFrom(type) is false &&
+               type.IsAssignableFrom(ElementType) is false)
             {
 
                 //Todo, delegate additional check here if desired.
@@ -338,7 +338,7 @@ namespace Media.Concepts.Classes.T
 
             var probe = new System.Tuple<System.Reflection.ConstructorInfo[], System.Reflection.ParameterInfo[][]>(constructors, parameters);
 
-            if (Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryAdd(m_SupportedTypes, ref type, ref probe, out any).Equals(false))
+            if (Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryAdd(m_SupportedTypes, ref type, ref probe, out any) is false)
             {
                 //The type was already probed
             }
@@ -395,7 +395,7 @@ namespace Media.Concepts.Classes.T
 
                         if ((++register).Equals(supportedTypeIndex))
                         {
-                            if (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(reference.Value.Item2, out register).Equals(false) ||
+                            if (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(reference.Value.Item2, out register) is false ||
                                 version > register) break;
 
                             return reference.Value.Item1[version].Invoke(parameters);
@@ -418,7 +418,7 @@ namespace Media.Concepts.Classes.T
 
             object untyped = Create(ref supportedTypeIndex, ref version, paramerters);
 
-            if ((untyped is T).Equals(false)) Common.TaggedExceptionExtensions.RaiseTaggedException(this as IConstraint, "IConstraint Violation, allocation available in InnerException.Tag.", new Common.TaggedException<object>(untyped));
+            if ((untyped is T) is false) Common.TaggedExceptionExtensions.RaiseTaggedException(this as IConstraint, "IConstraint Violation, allocation available in InnerException.Tag.", new Common.TaggedException<object>(untyped));
 
             //typed = Unsafe.ReinterpretCast<object, T>(untyped);
 

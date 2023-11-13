@@ -409,9 +409,9 @@ namespace Media.Concepts.Classes.Threading
 
         readonly static System.DateTimeOffset DefaultDateTimeOffset = default(System.DateTimeOffset);
 
-        public bool IsStarted { get { return Started.Equals(DefaultDateTimeOffset).Equals(false); } }
+        public bool IsStarted { get { return Started.Equals(DefaultDateTimeOffset) is false; } }
 
-        public bool HasUnderlyingCompressedStack { get { return object.ReferenceEquals(UnderlyingCompressedStack, null).Equals(false); } }
+        public bool HasUnderlyingCompressedStack { get { return object.ReferenceEquals(UnderlyingCompressedStack, null) is false; } }
 
         //-- IUpdateable
 
@@ -433,8 +433,8 @@ namespace Media.Concepts.Classes.Threading
 
             System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan> Item = new System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan>(action, UnderlyingThreadsPriorityInformation, System.Threading.Timeout.InfiniteTimeSpan);
 
-            while (Itinerarius.TryEnqueue(ref Item).Equals(false) &&
-                UpdateTokenSource.IsCancellationRequested.Equals(false))
+            while (Itinerarius.TryEnqueue(ref Item) is false &&
+                UpdateTokenSource.IsCancellationRequested is false)
             {
                 while (System.Threading.Thread.Yield()) System.Threading.Thread.CurrentThread.Join();
             }
@@ -460,9 +460,9 @@ namespace Media.Concepts.Classes.Threading
         {
             try
             {
-                while (Common.IDisposedExtensions.IsNullOrDisposed(this).Equals(false) &&
+                while (Common.IDisposedExtensions.IsNullOrDisposed(this) is false &&
                     Itinerarius.Count > 0 && 
-                    UpdateTokenSource.IsCancellationRequested.Equals(false))
+                    UpdateTokenSource.IsCancellationRequested is false)
                 {
                     if (Itinerarius.TryDequeue(out Item))
                     {
@@ -482,13 +482,13 @@ namespace Media.Concepts.Classes.Threading
             {
                 UnderlyingThread.Priority = System.Threading.ThreadPriority.Normal;
 
-                if (object.ReferenceEquals(ExceptionHandler, null).Equals(false))
+                if (object.ReferenceEquals(ExceptionHandler, null) is false)
                 {
                     UnderlyingCompressedStack = System.Threading.CompressedStack.Capture();
 
                     using (var enumerator = Exceptions.GetExceptions())
                     {
-                        while (enumerator.MoveNext() && UpdateTokenSource.IsCancellationRequested.Equals(false))
+                        while (enumerator.MoveNext() && UpdateTokenSource.IsCancellationRequested is false)
                         {
                             UnderlyingThread.Priority = System.Threading.ThreadPriority.BelowNormal; 
 
@@ -504,7 +504,7 @@ namespace Media.Concepts.Classes.Threading
         {
             UnderlyingThread.Priority = System.Threading.ThreadPriority.BelowNormal; 
 
-            if (Exceptions.Handle(ex).Equals(false))
+            if (Exceptions.Handle(ex) is false)
             {
                 UnderlyingThread.Priority = System.Threading.ThreadPriority.Normal; 
 
@@ -548,7 +548,7 @@ namespace Media.Concepts.Classes.Threading
             try
             {
                 while (Itinerarius.Count > 0 &&
-                    UpdateTokenSource.IsCancellationRequested.Equals(false))
+                    UpdateTokenSource.IsCancellationRequested is false)
                 {
                     if (Itinerarius.TryDequeue(out Item))
                     {
@@ -577,7 +577,7 @@ namespace Media.Concepts.Classes.Threading
             }
             catch (System.Exception)
             {
-                if (object.ReferenceEquals(ExceptionHandler, null).Equals(false))
+                if (object.ReferenceEquals(ExceptionHandler, null) is false)
                 {
                     AggregateExceptions.Handle(ExceptionHandler);
 
@@ -586,7 +586,7 @@ namespace Media.Concepts.Classes.Threading
             }
             finally
             {
-                if (object.ReferenceEquals(ExceptionHandler, null).Equals(false) &&
+                if (object.ReferenceEquals(ExceptionHandler, null) is false &&
                     AggregateExceptions.Data.Count > 0) throw AggregateExceptions;
             }
             
@@ -621,7 +621,7 @@ namespace Media.Concepts.Classes.Threading
 
             UnderlyingThreadsPriorityInformation = new ThreadPriorityInformation();
 
-            if (object.ReferenceEquals(ConfigureThread, Nil).Equals(false))
+            if (object.ReferenceEquals(ConfigureThread, Nil) is false)
             {
                 ConfigureThread(UnderlyingThread);
             }

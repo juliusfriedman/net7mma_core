@@ -397,7 +397,7 @@ namespace Media.Rtp
                     if (configure is not null) tc.ConfigureSocket = configure;
 
                     //Check for udp if no existing socket was given
-                    if (hasSocket.Equals(false) && string.Compare(mediaDescription.MediaProtocol, Media.Rtp.RtpClient.RtpAvpProfileIdentifier, true).Equals(0))
+                    if (hasSocket is false && string.Compare(mediaDescription.MediaProtocol, Media.Rtp.RtpClient.RtpAvpProfileIdentifier, true).Equals(0))
                     {
                         //Registers must be stored, it might make more sense to leave the defaults as is and change the parameters of this function to then
                         //- allow for sockets to be given to the Initialize e.g. a Initializer delegate.
@@ -1333,7 +1333,7 @@ namespace Media.Rtp
             public bool LocalMultiplexing
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return (IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled.Equals(false) || LocalRtp is null) ? false : LocalRtp.Equals(LocalRtcp); }
+                get { return (IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled is false || LocalRtp is null) ? false : LocalRtp.Equals(LocalRtcp); }
             }
 
             /// <summary>
@@ -1342,7 +1342,7 @@ namespace Media.Rtp
             public bool RemoteMultiplexing
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return (IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled.Equals(false) || RemoteRtp is null) ? false : RemoteRtp.Equals(RemoteRtcp); }
+                get { return (IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled is false || RemoteRtp is null) ? false : RemoteRtp.Equals(RemoteRtcp); }
             }
             
             /// <summary>
@@ -1935,8 +1935,8 @@ namespace Media.Rtp
                 m_Initialized = DateTime.UtcNow;
 
                 //Should be AddressFamily but then u couldn't padd the state in, may be should pass tuple of ip addressess?
-                if (localRtp.Address.AddressFamily.Equals(remoteRtp.Address.AddressFamily).Equals(false)) Media.Common.TaggedExceptionExtensions.RaiseTaggedException<TransportContext>(this, "localIp and remoteIp AddressFamily must match.");
-                else if (punchHole) punchHole = Media.Common.Extensions.IPAddress.IPAddressExtensions.IsOnIntranet(remoteRtp.Address).Equals(false); //Only punch a hole if the remoteIp is not on the LAN by default.
+                if (localRtp.Address.AddressFamily.Equals(remoteRtp.Address.AddressFamily) is false) Media.Common.TaggedExceptionExtensions.RaiseTaggedException<TransportContext>(this, "localIp and remoteIp AddressFamily must match.");
+                else if (punchHole) punchHole = Media.Common.Extensions.IPAddress.IPAddressExtensions.IsOnIntranet(remoteRtp.Address) is false; //Only punch a hole if the remoteIp is not on the LAN by default.
                 
                 //Erase previously set values on the TransportContext.
                 //RtpBytesRecieved = RtpBytesSent = RtcpBytesRecieved = RtcpBytesSent = 0;
@@ -2128,7 +2128,7 @@ namespace Media.Rtp
                     Initialize(duplexed, rtcpSocket);
 
                     //Should log, can't initialize
-                    if (IsActive.Equals(false)) rtcpSocket.Dispose();
+                    if (IsActive is false) rtcpSocket.Dispose();
 
                     //This reference is no longer needed.
                     rtcpSocket = null;
@@ -2287,7 +2287,7 @@ namespace Media.Rtp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public void DisconnectSockets()
             {
-                if (IsActive.Equals(false) || IDisposedExtensions.IsNullOrDisposed(this)) return;
+                if (IsActive is false || IDisposedExtensions.IsNullOrDisposed(this)) return;
 
                 if (LeaveOpen)
                 {
@@ -2306,7 +2306,7 @@ namespace Media.Rtp
                     MulticastGroups.Clear();
 
                     //For Udp the RtcpSocket may be the same socket as the RtpSocket if the sender/reciever is duplexing
-                    if (RtcpSocket is not null && RtpSocket.Handle.Equals(RtcpSocket.Handle).Equals(false)) RtcpSocket.Close();
+                    if (RtcpSocket is not null && RtpSocket.Handle.Equals(RtcpSocket.Handle) is false) RtcpSocket.Close();
 
                     //Close the RtpSocket
                     RtpSocket?.Close();
@@ -2510,7 +2510,7 @@ namespace Media.Rtp
             OnRtcpPacketReceieved(packet, transportContext);
 
             //Compressed or no ssrc Return
-            if (HandleIncomingRtcpPackets.Equals(false)) return;
+            if (HandleIncomingRtcpPackets is false) return;
             else if (packet.IsCompressed || packetLength < Common.Binary.BytesPerLong)
             {
                 Media.Common.ILoggingExtensions.Log(Logger, InternalId + "HandleIncomingRtcpPacket Compression or Length @ Version, Found =>" + packetVersion + ", Pt =>" + packet.PayloadType + " , Bc => " + packet.BlockCount);
@@ -3081,19 +3081,19 @@ namespace Media.Rtp
                 {
                     //Todo, should also check for CName with matching ssrc
 
-                    if (Common.IDisposedExtensions.IsNullOrDisposed(transportContext.ReceiversReport).Equals(false) &&
+                    if (Common.IDisposedExtensions.IsNullOrDisposed(transportContext.ReceiversReport) is false &&
                         transportContext.ReceiversReport.SynchronizationSourceIdentifier.Equals(partyId))
                     {
                         transportContext.RemoteSynchronizationSourceIdentifier = partyId;
                     }
-                    else if (Common.IDisposedExtensions.IsNullOrDisposed(transportContext.SendersReport).Equals(false) &&
+                    else if (Common.IDisposedExtensions.IsNullOrDisposed(transportContext.SendersReport) is false &&
                         transportContext.SendersReport.SynchronizationSourceIdentifier.Equals(partyId))
                     {
                         transportContext.RemoteSynchronizationSourceIdentifier = partyId;
                     }
                 }
                 else if (transportContext.IsValid &&
-                    transportContext.RemoteSynchronizationSourceIdentifier.Equals(partyId).Equals(false))
+                    transportContext.RemoteSynchronizationSourceIdentifier.Equals(partyId) is false)
                 {
                     transportContext.RemoteSynchronizationSourceIdentifier = partyId;
                 }
@@ -3462,7 +3462,7 @@ namespace Media.Rtp
             }
 
             //Allow the packet to be destroyed if an event did not already change this.
-            if (shouldDispose && packet.ShouldDispose.Equals(false) && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(packet))) Common.BaseDisposable.SetShouldDispose(packet, true, false);
+            if (shouldDispose && packet.ShouldDispose is false && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(packet))) Common.BaseDisposable.SetShouldDispose(packet, true, false);
         }
 
         /// <summary>
@@ -3504,7 +3504,7 @@ namespace Media.Rtp
             }
 
             //Allow the packet to be destroyed if an event did not already change this.
-            if (shouldDispose && packet.ShouldDispose.Equals(false) && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(packet))) Common.BaseDisposable.SetShouldDispose(packet, true, false);
+            if (shouldDispose && packet.ShouldDispose is false && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(packet))) Common.BaseDisposable.SetShouldDispose(packet, true, false);
         }
 
         /// <summary>
@@ -3542,7 +3542,7 @@ namespace Media.Rtp
             }
 
             //On final events set ShouldDispose to true, do not call Dispose
-            if (final && shouldDispose && Common.IDisposedExtensions.IsNullOrDisposed(frame).Equals(false) && frame.ShouldDispose.Equals(false)) SetShouldDispose(frame, true, false);
+            if (final && shouldDispose && Common.IDisposedExtensions.IsNullOrDisposed(frame) is false && frame.ShouldDispose is false) SetShouldDispose(frame, true, false);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -3567,7 +3567,7 @@ namespace Media.Rtp
             });
 
             //On final events set ShouldDispose to true, do not call Dispose
-            if (final && shouldDispose && Common.IDisposedExtensions.IsNullOrDisposed(frame).Equals(false) && frame.ShouldDispose.Equals(false)) SetShouldDispose(frame, true, false);
+            if (final && shouldDispose && Common.IDisposedExtensions.IsNullOrDisposed(frame) is false && frame.ShouldDispose is false) SetShouldDispose(frame, true, false);
         }
 
         //IPacket overload could reduce code but would cost time to check type.
@@ -3840,7 +3840,7 @@ namespace Media.Rtp
                     Common.Extensions.Thread.ThreadExtensions.AbortAndFree(ref m_EventThread);
 
                     //Handle any remaining events so the packets in Queue don't get disposed...
-                    //while (m_ThreadEvents == false && EventsStarted == DateTime.MinValue && false == m_EventData.IsEmpty)
+                    //while (m_ThreadEvents is false && EventsStarted == DateTime.MinValue && false == m_EventData.IsEmpty)
                     //{
                     //    HandleEvent();
 
@@ -3848,7 +3848,7 @@ namespace Media.Rtp
                     //}
 
                     //Ensure Cleared
-                    //if (m_ThreadEvents == false && EventsStarted == DateTime.MinValue) m_EventData.Clear();
+                    //if (m_ThreadEvents is false && EventsStarted == DateTime.MinValue) m_EventData.Clear();
                 }
             }
         }
@@ -4013,10 +4013,10 @@ namespace Media.Rtp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return IDisposedExtensions.IsNullOrDisposed(this).Equals(false) &&
-                    Started.Equals(DateTime.MinValue).Equals(false) && 
+                return IDisposedExtensions.IsNullOrDisposed(this) is false &&
+                    Started.Equals(DateTime.MinValue) is false && 
                     m_WorkerThread is not null &&
-                    (m_WorkerThread.IsAlive || m_StopRequested.Equals(false));
+                    (m_WorkerThread.IsAlive || m_StopRequested is false);
             }
         }
 

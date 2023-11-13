@@ -430,7 +430,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool Equals(MemorySegment other)
         {
-            return Common.IDisposedExtensions.IsNullOrDisposed(other).Equals(false) && Common.IDisposedExtensions.IsNullOrDisposed(this).Equals(false) && other.GetHashCode().Equals(GetHashCode());
+            return Common.IDisposedExtensions.IsNullOrDisposed(other) is false && Common.IDisposedExtensions.IsNullOrDisposed(this) is false && other.GetHashCode().Equals(GetHashCode());
         }
 
         #region Operators
@@ -442,8 +442,8 @@ namespace Media.Common
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(MemorySegment a, MemorySegment b) { return (a == b).Equals(false); }
-        //public static bool operator !=(MemorySegment a, MemorySegment b) { return a.Equals(b).Equals(false); }
+        public static bool operator !=(MemorySegment a, MemorySegment b) { return (a == b) is false; }
+        //public static bool operator !=(MemorySegment a, MemorySegment b) { return a.Equals(b) is false; }
 
         //>> , << etc
 

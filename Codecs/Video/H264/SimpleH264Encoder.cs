@@ -217,7 +217,7 @@ public class SimpleH264Encoder : IDisposable
                 }
             }
 
-            if (bemulationpreventionexecuted == false)
+            if (bemulationpreventionexecuted is false)
             {
                 //No emulation prevention was used
 

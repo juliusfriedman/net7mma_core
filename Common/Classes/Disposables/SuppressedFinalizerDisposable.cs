@@ -62,7 +62,7 @@ namespace Media.Common
             long state = 0;
 
             //Not already disposed or destructing?
-            if (IsUndisposed.Equals(false) | BaseDisposable.IsDestructing(this, ref state).Equals(false)) return;
+            if (IsUndisposed is false | BaseDisposable.IsDestructing(this, ref state) is false) return;
 
             //Check for a race condition or otherwise...
             if (managedThreadId.Equals(state >> 32))

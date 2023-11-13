@@ -1670,7 +1670,7 @@ namespace Media.Concepts.Classes
 
         public static bool operator !=(Bitable a, Bitable b)
         {
-            return (a == b).Equals(false);
+            return (a == b) is false;
         }
 
         public static Bitable operator +(Bitable a, Bitable b)

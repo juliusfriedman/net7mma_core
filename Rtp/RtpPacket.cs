@@ -966,7 +966,7 @@ namespace Media.Rtp
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(RtpPacket a, RtpPacket b) { return (a == b).Equals(false); }
+        public static bool operator !=(RtpPacket a, RtpPacket b) { return (a == b) is false; }
 
         #endregion
 

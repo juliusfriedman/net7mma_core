@@ -82,7 +82,7 @@ namespace Media.Concepts.Classes
 
         void Clock_Tick(ref long ticks)
         {
-            if (ShouldDispose == false && false == IsDisposed)
+            if (ShouldDispose is false && false == IsDisposed)
             {
                 //Console.WriteLine("@ops=>" + Clock.m_Ops + " @ticks=>" + Clock.m_Ticks + " @Lticks=>" + ticks + "@=>" + Clock.m_Clock.Now.TimeOfDay + "@=>" + (Clock.m_Clock.Now - Clock.m_Clock.Created));
 

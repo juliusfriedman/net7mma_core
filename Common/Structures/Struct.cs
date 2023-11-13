@@ -260,7 +260,7 @@ namespace Media.Common.Structures
 
         public override bool Equals(object obj)
         {
-            if ((obj is IStruct).Equals(false)) return false;
+            if ((obj is IStruct) is false) return false;
 
             IStruct @this = this, that = obj as IStruct;
 
@@ -294,7 +294,7 @@ namespace Media.Common.Structures
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Struct @this, IStruct that)
         {
-            return (@this == that).Equals(false);
+            return (@this == that) is false;
         }
 
         #endregion

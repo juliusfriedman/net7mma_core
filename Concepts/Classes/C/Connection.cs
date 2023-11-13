@@ -145,7 +145,7 @@ namespace Media.Concepts.Classes.C
 
         public bool IsPersistent
         {
-            get { return ShouldDispose.Equals(false); }
+            get { return ShouldDispose is false; }
         }
 
         #endregion

@@ -371,7 +371,7 @@ namespace Media.UnitTests
                 System.Threading.Thread.Yield();
 
                 //Wait for the call to be completed a few times
-                while (callInvocation.IsCompleted.Equals(false))
+                while (callInvocation.IsCompleted is false)
                 {
 
                     System.Threading.Thread.Yield();
@@ -859,7 +859,7 @@ namespace Media.UnitTests
 
                 System.Uri uri;
 
-                if (System.Uri.TryCreate(input, UriKind.RelativeOrAbsolute, out uri).Equals(false))
+                if (System.Uri.TryCreate(input, UriKind.RelativeOrAbsolute, out uri) is false)
                 {
                     cl.LogException(new System.InvalidOperationException("uri"));
 
@@ -940,7 +940,7 @@ namespace Media.UnitTests
                             }
 
                             //
-                            //if (useClientProtocolVersion.Equals(false))
+                            //if (useClientProtocolVersion is false)
                             //{
                             //    httpMessage.Version = 1.2;
                             //}
@@ -1087,7 +1087,7 @@ namespace Media.UnitTests
 
                             //acceptedSocket is now rr
 
-                            while (acceptResult.IsCompleted.Equals(false)) { }
+                            while (acceptResult.IsCompleted is false) { }
                         }
                         else //For Udp a port should be found unless the MediaDescription indicates a specific port.
                         {
@@ -1131,7 +1131,7 @@ namespace Media.UnitTests
                                 sendersContext.Goodbye is null &&
                                 //There is a SendersReport which was transferrred
                                 sendersContext.SendersReport is not null &&
-                                sendersContext.SendersReport.Transferred.HasValue.Equals(false)) continue;
+                                sendersContext.SendersReport.Transferred.HasValue is false) continue;
 
                             break;
                         }
@@ -1160,7 +1160,7 @@ namespace Media.UnitTests
                                 receiversContext.Goodbye is null &&
                                 //There is a SendersReport which was transferrred
                                 receiversContext.ReceiversReport is not null &&
-                                receiversContext.ReceiversReport.Transferred.HasValue.Equals(false)) continue;
+                                receiversContext.ReceiversReport.Transferred.HasValue is false) continue;
 
                             break;
                         }
@@ -1868,7 +1868,7 @@ namespace Media.UnitTests
                                     case ConsoleKey.A:
                                         {
 
-                                            if (packetEvents == false)
+                                            if (packetEvents is false)
                                             {
 
                                                 //Attach events
@@ -1923,7 +1923,7 @@ namespace Media.UnitTests
                                     case ConsoleKey.I:
                                         {
 
-                                            if (interleaveEvents == false)
+                                            if (interleaveEvents is false)
                                             {
                                                 client.Client.OutOfBandData += rtpInterleave;
 
@@ -4753,7 +4753,7 @@ a=appversion:1.0");
                         if (Media.Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
                         Console.WriteLine("****Unknown RtpPacket context: " + Media.RtpTools.RtpSendExtensions.PayloadDescription(rtpPacket) + '-' + rtpPacket.PayloadType + " Length = " + rtpPacket.Length + (rtpPacket.Header.IsCompressed ? string.Empty : "Ssrc " + rtpPacket.SynchronizationSourceIdentifier.ToString()) + " \nAvailables Contexts:", "*******\n\t***********");
-                        if (Common.IDisposedExtensions.IsNullOrDisposed(client).Equals(false)) foreach (Media.Rtp.RtpClient.TransportContext tc in client.GetTransportContexts())
+                        if (Common.IDisposedExtensions.IsNullOrDisposed(client) is false) foreach (Media.Rtp.RtpClient.TransportContext tc in client.GetTransportContexts())
                             {
                                 Console.WriteLine(string.Format(TestingFormat, "\tDataChannel", tc.DataChannel));
                                 Console.WriteLine(string.Format(TestingFormat, "\tControlChannel", tc.ControlChannel));
@@ -4763,7 +4763,7 @@ a=appversion:1.0");
                     }
                     else
                     {
-                        Media.Sdp.MediaType mediaType = Common.IDisposedExtensions.IsNullOrDisposed(matched).Equals(false) ? matched.MediaDescription.MediaType : Sdp.MediaType.unknown;
+                        Media.Sdp.MediaType mediaType = Common.IDisposedExtensions.IsNullOrDisposed(matched) is false ? matched.MediaDescription.MediaType : Sdp.MediaType.unknown;
 
                         Console.WriteLine(string.Format(TestingFormat, "Matches Context (" + mediaType + ") (By PayloadType):", "*******\n\t***********Local Id: " + matched.SynchronizationSourceIdentifier + " Remote Id:" + matched.RemoteSynchronizationSourceIdentifier));
 
@@ -4774,7 +4774,7 @@ a=appversion:1.0");
                             + "\n Version = " + rtpPacket.Version + "\tSynchronizationSourceIdentifier = " + rtpPacket.SynchronizationSourceIdentifier);
                     }
 
-                    if (Media.Common.IDisposedExtensions.IsNullOrDisposed(packet).Equals(false) && rtpPacket.Payload.Count > 0 && writePayload) Console.WriteLine(string.Format(TestingFormat, "Payload", BitConverter.ToString(rtpPacket.Payload.Array, rtpPacket.Payload.Offset, rtpPacket.Payload.Count)));
+                    if (Media.Common.IDisposedExtensions.IsNullOrDisposed(packet) is false && rtpPacket.Payload.Count > 0 && writePayload) Console.WriteLine(string.Format(TestingFormat, "Payload", BitConverter.ToString(rtpPacket.Payload.Array, rtpPacket.Payload.Offset, rtpPacket.Payload.Count)));
                 }
             }
             else
@@ -4793,7 +4793,7 @@ a=appversion:1.0");
 
                     Media.Rtp.RtpClient.TransportContext matched = null;
 
-                    if (Common.IDisposedExtensions.IsNullOrDisposed(client).Equals(false)) matched = client.GetContextForPacket(rtcpPacket);
+                    if (Common.IDisposedExtensions.IsNullOrDisposed(client) is false) matched = client.GetContextForPacket(rtcpPacket);
 
                     Type implemented = Media.Rtcp.RtcpPacket.GetImplementationForPayloadType(rtcpPacket.PayloadType);
 
@@ -4803,7 +4803,7 @@ a=appversion:1.0");
 
                     if (rtcpPacket.Payload.Count > 0 && writePayload) Console.WriteLine(string.Format(TestingFormat, "Payload", BitConverter.ToString(rtcpPacket.Payload.Array, rtcpPacket.Payload.Offset, rtcpPacket.Payload.Count)));
 
-                    if (Common.IDisposedExtensions.IsNullOrDisposed(matched).Equals(false))
+                    if (Common.IDisposedExtensions.IsNullOrDisposed(matched) is false)
                     {
                         Console.WriteLine(string.Format(TestingFormat, "Context:", "*******\n\t*********** Local Id: " + matched.SynchronizationSourceIdentifier + " Remote Id:" + matched.RemoteSynchronizationSourceIdentifier + " - Channel = " + matched.ControlChannel));
 
@@ -4829,7 +4829,7 @@ a=appversion:1.0");
 
                         Console.WriteLine(string.Format(TestingFormat, "Unknown RTCP Packet context -> " + new Rtp.RtpHeader(rtcpPacket.Header.ToArray()).PayloadType + " = " + rtcpPacket.PayloadType + "@" + rtcpPacket.Version + ":" + rtcpPacket.SynchronizationSourceIdentifier, "*******\n\t***********"));
 
-                        //if (Common.IDisposedExtensions.IsNullOrDisposed(client).Equals(false)) foreach (Media.Rtp.RtpClient.TransportContext tc in client.GetTransportContexts())
+                        //if (Common.IDisposedExtensions.IsNullOrDisposed(client) is false) foreach (Media.Rtp.RtpClient.TransportContext tc in client.GetTransportContexts())
                         //    {
                         //        Console.WriteLine(string.Format(TestingFormat, "\tDataChannel", tc.DataChannel));
                         //        Console.WriteLine(string.Format(TestingFormat, "\tControlChannel", tc.ControlChannel));

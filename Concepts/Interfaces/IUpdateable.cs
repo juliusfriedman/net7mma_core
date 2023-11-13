@@ -73,12 +73,12 @@ namespace Media.Common
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(updateable)) return false;
 
-            return updateable.ManualResetEvent.IsSet.Equals(false) && updateable.UpdateTokenSource.IsCancellationRequested.Equals(false);
+            return updateable.ManualResetEvent.IsSet is false && updateable.UpdateTokenSource.IsCancellationRequested is false;
         }
 
         public static bool UnderModification(this IUpdateable updateable, System.Threading.CancellationToken token)
         {
-            return Common.IDisposedExtensions.IsNullOrDisposed(updateable).Equals(false) &&
+            return Common.IDisposedExtensions.IsNullOrDisposed(updateable) is false &&
                 token.Equals(updateable.UpdateTokenSource.Token);
         }
 
@@ -116,7 +116,7 @@ namespace Media.Common
             if (Common.IDisposedExtensions.IsNullOrDisposed(updateable)) throw new System.ArgumentNullException(); //return default(System.Threading.CancellationToken);
 
             //That came from out cancellation source
-            if (token.Equals(updateable.UpdateTokenSource.Token).Equals(false)) throw InvalidStateException;
+            if (token.Equals(updateable.UpdateTokenSource.Token) is false) throw InvalidStateException;
 
             // check for manually removed state or a call without an update..
             //if(m_Update.Wait(1, token)) { would check that the event was manually cleared... }

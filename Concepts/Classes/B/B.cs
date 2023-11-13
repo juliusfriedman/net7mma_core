@@ -94,7 +94,7 @@ namespace Media.Concepts.Classes.B
         /// <param name="b"></param>
         static void ExceptIfTrue(bool b)
         {
-            if (b.Equals(false)) return;
+            if (b is false) return;
 
             throw new System.Exception();
         }
@@ -175,7 +175,7 @@ namespace Media.Concepts.Classes.B
 
             Iudex(ConsciousBias());
 
-            return Bias.Equals(false);
+            return Bias is false;
         }
 
         #endregion

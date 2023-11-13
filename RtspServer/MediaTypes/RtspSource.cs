@@ -139,7 +139,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 base.Source = value;
 
-                if (Common.IDisposedExtensions.IsNullOrDisposed(RtspClient).Equals(false))
+                if (Common.IDisposedExtensions.IsNullOrDisposed(RtspClient) is false)
                 {
                     bool wasConnected = RtspClient.IsConnected;
 
@@ -272,7 +272,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             if ((base.IsReady = RtspClient.IsPlaying)) //  && RtspClient.PlayingMedia.Count is equal to what is supposed to be playing
             {
-                RtspClient.Client.ThreadEvents = RtspClient.Client.FrameChangedEventsEnabled = PerPacket == false;
+                RtspClient.Client.ThreadEvents = RtspClient.Client.FrameChangedEventsEnabled = PerPacket is false;
 
                 //RtspClient.Client.IListSockets = true;
 
@@ -292,7 +292,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         void RtspClient_OnConnect(RtspClient sender, object args)
         {
-            if (RtspClient.IsConnected.Equals(false) || State == StreamState.StartRequested) return;
+            if (RtspClient.IsConnected is false || State == StreamState.StartRequested) return;
 
             //Not quite ready yet.
             State = StreamState.StartRequested;
@@ -334,7 +334,7 @@ namespace Media.Rtsp.Server.MediaTypes
         {
             if (IsDisposed || State < StreamState.Started) return;
 
-            if (Common.IDisposedExtensions.IsNullOrDisposed(RtspClient).Equals(false))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(RtspClient) is false)
             {
                 if (RtspClient.IsPlaying) RtspClient.StopPlaying();
                 else if (RtspClient.IsConnected) RtspClient.Disconnect();
@@ -354,7 +354,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             base.Dispose();
 
-            if (Common.IDisposedExtensions.IsNullOrDisposed(RtspClient).Equals(false))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(RtspClient) is false)
             {
                 RtspClient.OnConnect -= RtspClient_OnConnect;
 

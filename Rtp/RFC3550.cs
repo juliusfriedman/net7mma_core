@@ -1340,7 +1340,7 @@ namespace Media
             }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(CommonHeaderBits a, CommonHeaderBits b) { return (a == b).Equals(false); }
+            public static bool operator !=(CommonHeaderBits a, CommonHeaderBits b) { return (a == b) is false; }
 
             #endregion
         }

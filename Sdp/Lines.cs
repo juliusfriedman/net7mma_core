@@ -146,14 +146,14 @@ namespace Media.Sdp
                 : base(AttributeType, seperator, partCount)
             {
                 //If any parts are expected
-                if (partCount > 0 && string.IsNullOrWhiteSpace(attributeName).Equals(false))
+                if (partCount > 0 && string.IsNullOrWhiteSpace(attributeName) is false)
                 {
                     //(AttributeName)
                     //SetPart(0, attributeName);
                     SetPart(0, string.Concat(attributeName, SessionDescription.ColonString));
 
                     //If there is any value
-                    if (partCount > 1 && string.IsNullOrWhiteSpace(attributeValue).Equals(false))
+                    if (partCount > 1 && string.IsNullOrWhiteSpace(attributeValue) is false)
                     {
                         int reduce = 0;
 
@@ -676,7 +676,7 @@ namespace Media.Sdp
             public SessionConnectionLine(SessionDescriptionLine line)
                 : this()
             {
-                if (line.m_Type.Equals(ConnectionType).Equals(false)) throw new InvalidOperationException("Not a SessionConnectionLine");
+                if (line.m_Type.Equals(ConnectionType) is false) throw new InvalidOperationException("Not a SessionConnectionLine");
 
                 m_Parts.Clear();
 
@@ -710,7 +710,7 @@ namespace Media.Sdp
             public SessionConnectionLine(string line) 
                 : base(line, SessionDescription.SpaceString, 3)
             {
-                if (m_Type.Equals(ConnectionType).Equals(false)) throw new InvalidOperationException("Not a SessionConnectionLine line");
+                if (m_Type.Equals(ConnectionType) is false) throw new InvalidOperationException("Not a SessionConnectionLine line");
             }
 
             #endregion

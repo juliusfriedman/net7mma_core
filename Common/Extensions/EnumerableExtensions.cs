@@ -56,8 +56,8 @@ namespace Media.Common.Extensions
                     {
                         while (one.MoveNext())
                         {
-                            if (two.MoveNext().Equals(false) ||
-                                one.Current.Equals(two.Current).Equals(false)) return false;
+                            if (two.MoveNext() is false ||
+                                one.Current.Equals(two.Current) is false) return false;
                         }
 
                         return true;
@@ -86,8 +86,8 @@ namespace Media.Common.Extensions
 
             while (weird.MoveNext())
             {
-                if (strnage.MoveNext().Equals(false) ||
-                    weird.Current.Equals(strnage.Current).Equals(false)) return false;
+                if (strnage.MoveNext() is false ||
+                    weird.Current.Equals(strnage.Current) is false) return false;
             }
 
             return true;

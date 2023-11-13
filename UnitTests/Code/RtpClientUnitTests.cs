@@ -791,7 +791,7 @@ namespace Media.UnitTests
 
                     System.Diagnostics.Debug.Assert(_audioRTPTransportContext != null, "Cannot find the context");
 
-                    //System.Diagnostics.Debug.Assert(_audioRTPTransportContext.IsActive == false, "Found a active context");
+                    //System.Diagnostics.Debug.Assert(_audioRTPTransportContext.IsActive is false, "Found a active context");
 
                     //_rtpAudioClient.Activate();
 

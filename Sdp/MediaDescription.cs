@@ -297,20 +297,20 @@ namespace Media.Sdp
             return b is null ? a is null : a.Contains(b);
         }
 
-        public static bool operator !=(MediaDescription a, SessionDescriptionLine b) { return (a == b).Equals(false); }
+        public static bool operator !=(MediaDescription a, SessionDescriptionLine b) { return (a == b) is false; }
         public static bool operator ==(MediaDescription a, MediaDescription b)
         {
             return b is null ? a is null : a.Equals(b);
         }
 
-        public static bool operator !=(MediaDescription a, MediaDescription b) { return (a == b).Equals(false); }
+        public static bool operator !=(MediaDescription a, MediaDescription b) { return (a == b) is false; }
 
         public static bool operator ==(MediaDescription a, Sdp.Lines.SessionMediaDescriptionLine b)
         {
             return b is null ? a is null : a.MediaDescriptionLine.Equals(b);
         }
 
-        public static bool operator !=(MediaDescription a, Sdp.Lines.SessionMediaDescriptionLine b) { return (a == b).Equals(false); }
+        public static bool operator !=(MediaDescription a, Sdp.Lines.SessionMediaDescriptionLine b) { return (a == b) is false; }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool Equals(Sdp.Lines.SessionMediaDescriptionLine other) { return this.MediaDescriptionLine.Equals(other); }
@@ -326,7 +326,7 @@ namespace Media.Sdp
             //    {
             //        while (one.MoveNext() && two.MoveNext())
             //        {
-            //            if (one.Current.Equals(two.Current).Equals(false)) return false;
+            //            if (one.Current.Equals(two.Current) is false) return false;
             //        }
 
             //        return true;
@@ -525,11 +525,11 @@ namespace Media.Sdp
         public static Uri GetAbsoluteControlUri(this MediaDescription mediaDescription, Uri source, SessionDescription sessionDescription = null)
         {
             if (source is null) throw new ArgumentNullException(nameof(source));
-            if (source.IsAbsoluteUri.Equals(false)) throw new InvalidOperationException("source.IsAbsoluteUri must be true.");
+            if (source.IsAbsoluteUri is false) throw new InvalidOperationException("source.IsAbsoluteUri must be true.");
 
             if (Common.IDisposedExtensions.IsNullOrDisposed(mediaDescription)) return source;
 
-            if (source.IsAbsoluteUri.Equals(false)) throw new InvalidOperationException("source.IsAbsoluteUri must be true.");
+            if (source.IsAbsoluteUri is false) throw new InvalidOperationException("source.IsAbsoluteUri must be true.");
 
             SessionDescriptionLine controlLine = mediaDescription.ControlLine;
 
@@ -540,7 +540,7 @@ namespace Media.Sdp
                 string controlPart = controlLine.Parts.LastOrDefault(); //controlLine.Parts.Where(p => p.StartsWith(AttributeFields.Control)).FirstOrDefault();
 
                 //If there is a controlPart in the controlLine
-                if (string.IsNullOrWhiteSpace(controlPart).Equals(false))
+                if (string.IsNullOrWhiteSpace(controlPart) is false)
                 {
                     //Prepare the part
                     controlPart = controlPart.Split(Media.Sdp.SessionDescription.ColonSplit, 2, StringSplitOptions.RemoveEmptyEntries).Last();
@@ -585,7 +585,7 @@ namespace Media.Sdp
 
             //Try to take the session level control uri
             //If there was a session description given and it supports aggregate media control then return that uri
-            if (Common.IDisposedExtensions.IsNullOrDisposed(sessionDescription).Equals(false) &&
+            if (Common.IDisposedExtensions.IsNullOrDisposed(sessionDescription) is false &&
                 sessionDescription.SupportsAggregateMediaControl(out Uri sessionControlUri, source))
                 return sessionControlUri;
 

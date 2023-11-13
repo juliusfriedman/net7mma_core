@@ -319,7 +319,7 @@ namespace Media.Common
             GC.SuppressFinalize(this);
 
             //May already be finalized....
-            if (System.Threading.Interlocked.CompareExchange(ref State, Disposed, Undisposed) != Disposed && IsFinalized.Equals(false)) return;
+            if (System.Threading.Interlocked.CompareExchange(ref State, Disposed, Undisposed) != Disposed && IsFinalized is false) return;
 
             //Virtual
             IsDisposed = true;

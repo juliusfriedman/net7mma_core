@@ -129,7 +129,7 @@ namespace Media.Common.Interfaces
             get { return m_IsWriteOnly; }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            protected set { if (m_Mutable && m_IsReadOnly.Equals(false) && m_IsWriteOnly.Equals(false)) m_IsWriteOnly = value; }
+            protected set { if (m_Mutable && m_IsReadOnly is false && m_IsWriteOnly is false) m_IsWriteOnly = value; }
         }
 
         /// <summary>

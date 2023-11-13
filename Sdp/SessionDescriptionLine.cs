@@ -428,7 +428,7 @@ namespace Media.Sdp
             //System.Object
             if (object.ReferenceEquals(this, obj)) return true;
 
-            if ((obj is SessionDescriptionLine).Equals(false)) return false;
+            if ((obj is SessionDescriptionLine) is false) return false;
 
             return Equals(obj as SessionDescriptionLine);
         }
@@ -575,7 +575,7 @@ namespace Media.Sdp
             return b is null ? a is null : a.Equals(b);
         }
 
-        public static bool operator !=(SessionDescriptionLine a, SessionDescriptionLine b) { return (a == b).Equals(false); }
+        public static bool operator !=(SessionDescriptionLine a, SessionDescriptionLine b) { return (a == b) is false; }
 
         #endregion
 
@@ -592,7 +592,7 @@ namespace Media.Sdp
         //Jumpz
         //ToString =>{
         //IsBandwidth or AttributeLine{
-        //l.m_Type.Equals(Sdp.Lines.SessionBandwidthLine.BandwidthType).Equals(false) && l.m_Type.Equals(Sdp.Lines.SessionAttributeLine.AttributeType).Equals(false)
+        //l.m_Type.Equals(Sdp.Lines.SessionBandwidthLine.BandwidthType) is false && l.m_Type.Equals(Sdp.Lines.SessionAttributeLine.AttributeType) is false
         //}Then By
         //l.m_Type.Equals(Sdp.Lines.SessionBandwidthLine.BandwidthType)
         //Then By

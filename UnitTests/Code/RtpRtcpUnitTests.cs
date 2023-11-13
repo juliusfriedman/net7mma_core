@@ -551,13 +551,13 @@ namespace Media.UnitTests
             if (rtcpPacket.PaddingOctets > 0) throw invalidPadding;
 
             //Ensure the packet is complete
-            if (rtcpPacket.IsComplete == false) throw incompleteFalse;
+            if (rtcpPacket.IsComplete is false) throw incompleteFalse;
 
             //Add nothing to the payload
             rtcpPacket.AddBytesToPayload(Media.RFC3550.CreatePadding(0), 0, 0);
 
             //Ensure the packet is complete
-            if (rtcpPacket.IsComplete == false) throw incompleteFalse;
+            if (rtcpPacket.IsComplete is false) throw incompleteFalse;
 
             //Check for some invalid value
             if (rtcpPacket.PaddingOctets > 0) throw invalidPadding;
@@ -585,7 +585,7 @@ namespace Media.UnitTests
                 if (rtcpPacket.PaddingOctets != paddingAmount) throw invalidPadding;
 
                 //Ensure the packet is complete
-                if (rtcpPacket.IsComplete == false) throw incompleteFalse;
+                if (rtcpPacket.IsComplete is false) throw incompleteFalse;
 
                 //Write information for the test to the console
                 Console.WriteLine(string.Format(TestingFormat, "Packet Length", rtcpPacket.Length));

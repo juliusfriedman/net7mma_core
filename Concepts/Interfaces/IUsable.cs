@@ -40,14 +40,14 @@ namespace Media.Concepts.Interfaces
     /// </summary>
     public interface IUsable : Common.IDisposed, Common.IUpdateable
     {
-        //Extensions > InUse() => Common.IUpdateableExtensions.UnderModification(this).Equals(false)
+        //Extensions > InUse() => Common.IUpdateableExtensions.UnderModification(this) is false
     }
 
     public static class IUsableExtensions
     {
         public static bool InUse(this IUsable usable)
         {
-            return Common.IUpdateableExtensions.UnderModification(usable).Equals(false);
+            return Common.IUpdateableExtensions.UnderModification(usable) is false;
         }
     }
 

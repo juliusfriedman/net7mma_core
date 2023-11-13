@@ -855,7 +855,7 @@ a=control:track1
 
                 System.Diagnostics.Debug.Assert(Media.Common.Extensions.IPAddress.IPAddressExtensions.IsMulticast(System.Net.IPAddress.Parse(cLine.Host)), "Must be a IsMulticast");
 
-                System.Diagnostics.Debug.Assert(cLine.HasMultipleAddresses == false, "Unexpected HasMultipleAddresses");
+                System.Diagnostics.Debug.Assert(cLine.HasMultipleAddresses is false, "Unexpected HasMultipleAddresses");
 
                 System.Diagnostics.Debug.Assert(cLine.HasTimeToLive, "Unexpected HasTimeToLive");
 
@@ -1309,7 +1309,7 @@ a=rtpmap:102 H264/90000";
 
             var md = sd.MediaDescriptions.First();
 
-            System.Diagnostics.Debug.Assert(Media.Common.IDisposedExtensions.IsNullOrDisposed(md).Equals(false), "Cannot find MediaDescription");
+            System.Diagnostics.Debug.Assert(Media.Common.IDisposedExtensions.IsNullOrDisposed(md) is false, "Cannot find MediaDescription");
 
             //Count the line in the media description (including itself)
             System.Diagnostics.Debug.Assert(md.Lines.Count() == 6, "Cannot find corrent amount of lines in MediaDescription");
@@ -1386,7 +1386,7 @@ a=rtcp-fb:96 nack";
 
             var md = sd.MediaDescriptions.First();
 
-            System.Diagnostics.Debug.Assert(Media.Common.IDisposedExtensions.IsNullOrDisposed(md).Equals(false), "Cannot find MediaDescription");
+            System.Diagnostics.Debug.Assert(Media.Common.IDisposedExtensions.IsNullOrDisposed(md) is false, "Cannot find MediaDescription");
 
             //Count the line in the media description (including itself)
             System.Diagnostics.Debug.Assert(md.Lines.Count() == 5, "Cannot find corrent amount of lines in MediaDescription");

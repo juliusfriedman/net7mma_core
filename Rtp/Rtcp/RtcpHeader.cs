@@ -616,7 +616,7 @@ namespace Media.Rtcp
             return b is null ? a is null : a.Equals(b);
         }
 
-        public static bool operator !=(RtcpHeader a, RtcpHeader b) { return (a == b).Equals(false); }
+        public static bool operator !=(RtcpHeader a, RtcpHeader b) { return (a == b) is false; }
 
         #endregion
     }

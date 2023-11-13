@@ -151,7 +151,7 @@ namespace Media.Rtsp.Server.MediaTypes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal virtual void SendPackets()
         {
-            while (Common.IDisposedExtensions.IsNullOrDisposed(this).Equals(false) && State == StreamState.Started)
+            while (Common.IDisposedExtensions.IsNullOrDisposed(this) is false && State == StreamState.Started)
             {
                 try
                 {

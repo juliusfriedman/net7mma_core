@@ -375,7 +375,7 @@ namespace Media.Sdp
 
                 if (string.IsNullOrWhiteSpace(value)) throw new InvalidOperationException("The SessionOriginatorLine is required to have a non-null and non-empty value.");
 
-                bool hadValueWithSetVersion = m_OriginatorLine is not null && m_OriginatorLine.SessionVersion.Equals(Common.Binary.LongZero).Equals(false);
+                bool hadValueWithSetVersion = m_OriginatorLine is not null && m_OriginatorLine.SessionVersion.Equals(Common.Binary.LongZero) is false;
 
                 if (hadValueWithSetVersion &&
                     string.Compare(value, m_OriginatorLine.ToString(), StringComparison.InvariantCultureIgnoreCase).Equals(0)) return;
@@ -408,7 +408,7 @@ namespace Media.Sdp
 
                 m_NameLine = new Lines.SessionNameLine(value);
 
-                EndUpdate(token, DocumentVersion.Equals(Common.Binary.LongZero).Equals(false));
+                EndUpdate(token, DocumentVersion.Equals(Common.Binary.LongZero) is false);
             }
         }
 
@@ -633,7 +633,7 @@ namespace Media.Sdp
         public bool UnderModification
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return m_Update.IsSet.Equals(false) || m_UpdateTokenSource.IsCancellationRequested; } //When requested may already be cancelled and no longer under modification...
+            get { return m_Update.IsSet is false || m_UpdateTokenSource.IsCancellationRequested; } //When requested may already be cancelled and no longer under modification...
         }
 
         public SessionDescriptionLine ConnectionLine
@@ -646,7 +646,7 @@ namespace Media.Sdp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set
             {
-                if (value is not null && value.m_Type.Equals(Sdp.Lines.SessionConnectionLine.ConnectionType).Equals(false))
+                if (value is not null && value.m_Type.Equals(Sdp.Lines.SessionConnectionLine.ConnectionType) is false)
                 {
                     throw new InvalidOperationException("The ConnectionList must be a ConnectionLine");
                 }
@@ -1039,12 +1039,12 @@ namespace Media.Sdp
                 ////    break;
             }
 
-            if (result.Equals(false))
+            if (result is false)
             {
                 result = m_Lines.Remove(line);
             }
 
-            if (result.Equals(false))
+            if (result is false)
             {
                 foreach (MediaDescription md in MediaDescriptions) if (result = md.Remove(line)) break;
             }
@@ -1117,10 +1117,10 @@ namespace Media.Sdp
 
         public void UpdateVersion(System.Threading.CancellationToken token)
         {
-            if (token.Equals(m_UpdateTokenSource.Token).Equals(false))
+            if (token.Equals(m_UpdateTokenSource.Token) is false)
                 throw new InvalidOperationException("Must obtain the CancellationToken from a call to BeginUpdate.");
 
-            if (token.IsCancellationRequested.Equals(false) && m_OriginatorLine is not null)
+            if (token.IsCancellationRequested is false && m_OriginatorLine is not null)
             {
                 ++m_OriginatorLine.SessionVersion;
             }
@@ -1164,7 +1164,7 @@ namespace Media.Sdp
             CheckDisposed();
 
             //That came from out cancellation source
-            if (token.Equals(m_UpdateTokenSource.Token).Equals(false)) throw new InvalidOperationException("Must obtain the CancellationToken from a call to BeginUpdate.");
+            if (token.Equals(m_UpdateTokenSource.Token) is false) throw new InvalidOperationException("Must obtain the CancellationToken from a call to BeginUpdate.");
 
             // check for manually removed state or a call without an update..
             //if(m_Update.Wait(1, token)) { would check that the event was manually cleared... }
@@ -1219,7 +1219,7 @@ namespace Media.Sdp
 
             if (m_NameLine is not null) buffer.Append(m_NameLine.ToString());
 
-            foreach (SessionDescriptionLine l in m_Lines.Where(l => l.m_Type.Equals(Sdp.Lines.SessionBandwidthLine.BandwidthType).Equals(false) && l.m_Type.Equals(Sdp.Lines.SessionAttributeLine.AttributeType).Equals(false)))
+            foreach (SessionDescriptionLine l in m_Lines.Where(l => l.m_Type.Equals(Sdp.Lines.SessionBandwidthLine.BandwidthType) is false && l.m_Type.Equals(Sdp.Lines.SessionAttributeLine.AttributeType) is false))
             {
                 buffer.Append(l.ToString());
             }
@@ -1249,7 +1249,7 @@ namespace Media.Sdp
 
             base.Dispose(ShouldDispose);
 
-            if (IsDisposed.Equals(false)) return;
+            if (IsDisposed is false) return;
 
             m_SessionVersionLine = null;
 
@@ -1344,7 +1344,7 @@ namespace Media.Sdp
             return b is null ? a is null : a.Equals(b);
         }
 
-        public static bool operator !=(SessionDescription a, SessionDescription b) { return (a == b).Equals(false); }
+        public static bool operator !=(SessionDescription a, SessionDescription b) { return (a == b) is false; }
 
         //Possibly 
 
@@ -1353,7 +1353,7 @@ namespace Media.Sdp
             return b is null ? a is null : a.Contains(b);
         }
 
-        public static bool operator !=(SessionDescription a, SessionDescriptionLine b) { return (a == b).Equals(false); }
+        public static bool operator !=(SessionDescription a, SessionDescriptionLine b) { return (a == b) is false; }
 
         public override int GetHashCode()
         {
@@ -1398,7 +1398,7 @@ namespace Media.Sdp
             string controlPart = controlLine.Parts.Where(p => p.Contains(AttributeFields.Control)).FirstOrDefault();
 
             //If there is a controlPart in the controlLine
-            if (string.IsNullOrWhiteSpace(controlPart).Equals(false))
+            if (string.IsNullOrWhiteSpace(controlPart) is false)
             {
                 /*
                     If this attribute contains only an asterisk (*), then the URL is

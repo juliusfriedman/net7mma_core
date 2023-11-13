@@ -949,7 +949,7 @@ namespace Media.Rtcp
         {
             return payloadType > default(byte) &&
                 implementation is not null &&
-                implementation.IsAbstract.Equals(false) &&
+                implementation.IsAbstract is false &&
                 implementation.IsSubclassOf(RtcpPacketType)
                     ? Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryAdd(ImplementationMap, payloadType, implementation, out _)
                     : false;
@@ -1011,7 +1011,7 @@ namespace Media.Rtcp
         {
             if (System.Object.ReferenceEquals(this, obj)) return true;
 
-            if ((obj is RtcpPacket).Equals(false)) return false;
+            if ((obj is RtcpPacket) is false) return false;
 
             return Equals(obj as RtcpPacket);
         }
@@ -1032,7 +1032,7 @@ namespace Media.Rtcp
         }
         
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(RtcpPacket a, RtcpPacket b) { return (a == b).Equals(false); }
+        public static bool operator !=(RtcpPacket a, RtcpPacket b) { return (a == b) is false; }
 
         #endregion
 

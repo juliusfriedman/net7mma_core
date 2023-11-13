@@ -204,7 +204,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 if (thread != null)
                 {
                     // check thread status
-                    if (thread.Join(0) == false)
+                    if (thread.Join(0) is false)
                         return true;
 
                     // the thread is not running, free resources

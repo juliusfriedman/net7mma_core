@@ -446,10 +446,10 @@ namespace Media.Rtsp
             get
             {
                 //Disposed is complete 
-                if (IsDisposed && IsPersistent.Equals(false)) return false;
+                if (IsDisposed && IsPersistent is false) return false;
 
                 //If the status line was not parsed
-                if (m_StatusLineParsed.Equals(false) || //All requests must have a StatusLine OR
+                if (m_StatusLineParsed is false || //All requests must have a StatusLine OR
                     m_Buffer is not null &&  // Be parsing the StatusLine
                     m_Buffer.Length <= MinimumStatusLineSize) return false;
 
@@ -478,7 +478,7 @@ namespace Media.Rtsp
                     //Messages with ContentLength AND no Body are not complete.
                     //Determine if the count of the octets in the body is greater than or equal to the supposed amount
 
-                    return ParseContentLength(hasNullBody).Equals(false) && hasNullBody && m_ContentLength > 0 ? m_HeadersParsed : ContentEncoding.GetByteCount(m_Body) >= m_ContentLength;
+                    return ParseContentLength(hasNullBody) is false && hasNullBody && m_ContentLength > 0 ? m_HeadersParsed : ContentEncoding.GetByteCount(m_Body) >= m_ContentLength;
 
                     //return hasNullBody && m_ContentLength > 0 ? false : false == hasNullBody && m_ContentLength <= 0 || (ContentEncoding.GetByteCount(m_Body) >= m_ContentLength);
 
@@ -647,19 +647,19 @@ namespace Media.Rtsp
             remaining = 0;//-1 unable to determine yet
 
             //If the message is disposed then the body is parsed.
-            if (IsDisposed && IsPersistent.Equals(false)) return false;
+            if (IsDisposed && IsPersistent is false) return false;
 
             //If the message is invalid or
-            if (force.Equals(false) && (RtspMessageType == RtspMessageType.Invalid ||
+            if (force is false && (RtspMessageType == RtspMessageType.Invalid ||
                 //false == string.IsNullOrWhiteSpace(m_Body) || //or body was already started parsing
                 IsComplete)) return true; //or the message is complete then return true
 
             //If no headers could be parsed then don't parse the body, should pass force?
-            if (ParseHeaders().Equals(false)) return false;
+            if (ParseHeaders() is false) return false;
 
             //If there is no ContentLength then do not parse the body, this could be allowed to parse further...
             //requireContentLength && 
-            if (m_ContentLength < 0 && ParseContentLength().Equals(false)) return false;
+            if (m_ContentLength < 0 && ParseContentLength() is false) return false;
 
             //Empty body or no ContentLength
             //If the message cannot have a body it is parsed.
@@ -679,7 +679,7 @@ namespace Media.Rtsp
             if (remaining <= 0) return true;
 
             //If there was no buffer or an unreadable buffer then no parsing can occur
-            if (m_Buffer is null || m_Buffer.CanRead.Equals(false)) return false;
+            if (m_Buffer is null || m_Buffer.CanRead is false) return false;
 
             //Quite possibly should be long
             int max = (int)m_Buffer.Length;
@@ -735,7 +735,7 @@ namespace Media.Rtsp
         //    if (IsDisposed && false.Equals(IsPersistent)) return 0;
 
         //    bool hasSocket = socket is not null,
-        //         hasBuffer = buffer.IsDisposed.Equals(false) && buffer.Count > 0;
+        //         hasBuffer = buffer.IsDisposed is false && buffer.Count > 0;
 
         //    //If there is no socket or no data available in the buffer nothing can be done
         //    if (false.Equals(hasSocket) && false.Equals(hasBuffer))
@@ -966,7 +966,7 @@ namespace Media.Rtsp
             return b is null ? a is null : a.Equals(b);
         }
 
-        public static bool operator !=(RtspMessage a, RtspMessage b) { return (a == b).Equals(false); }
+        public static bool operator !=(RtspMessage a, RtspMessage b) { return (a == b) is false; }
 
         #endregion
     }

@@ -63,7 +63,7 @@ namespace Media.Common.Classes.Loggers
 
             base.Dispose(disposing);
 
-            if (IsDisposed.Equals(false)) return;
+            if (IsDisposed is false) return;
 
             LastLog = LastException = Media.Common.Extensions.Exception.ExceptionExtensions.NilException;
         }

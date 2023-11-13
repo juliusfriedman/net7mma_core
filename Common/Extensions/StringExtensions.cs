@@ -91,7 +91,7 @@ namespace Media.Common.Extensions.String
                 for (int i = start, e = length; i < e; i += 2)
                 {
                     //to reduce string manipulations pre call
-                    if (onlyLettersOrDigits && char.IsLetterOrDigit(str[i]).Equals(false))
+                    if (onlyLettersOrDigits && char.IsLetterOrDigit(str[i]) is false)
                     {
                         //Back up 1
                         --i;
@@ -320,7 +320,7 @@ namespace Media.Common.Extensions.String
                 yield break;
             }
 
-            if (string.IsNullOrEmpty(value) || count == 1 || value.IndexOfAny(separator).Equals(false))
+            if (string.IsNullOrEmpty(value) || count == 1 || value.IndexOfAny(separator) is false)
             {
                 yield return value;
                 yield break;
