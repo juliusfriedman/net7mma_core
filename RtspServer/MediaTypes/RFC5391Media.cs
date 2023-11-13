@@ -255,7 +255,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             //internal void DisposeBuffer()
             //{
-            //    if (object.ReferenceEquals(Buffer, null).Equals(false))
+            //    if (Buffer is not null)
             //    {
             //        Buffer.Dispose();
 

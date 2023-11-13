@@ -85,7 +85,7 @@ namespace Media.Rtsp
 
         internal static void ConfigureRtspServerSocket(Socket socket, out int interFrameGap, ref bool reconfigure, Socket prototype = null)
         {
-            if (object.ReferenceEquals(socket, null)) throw new ArgumentNullException("socket");
+            if (socket is null) throw new ArgumentNullException(nameof(socket));
 
             if (reconfigure.Equals(false))
             {
@@ -146,7 +146,7 @@ namespace Media.Rtsp
             //socket.UseOnlyOverlappedIO is nop in .net core.
             //if (System.Environment.ProcessorCount <= 1) socket.UseOnlyOverlappedIO = true;
 
-            if (object.ReferenceEquals(prototype, null) || (socket.Handle == prototype.Handle).Equals(false))
+            if (prototype is null || (socket.Handle == prototype.Handle).Equals(false))
             {
                 //Set or reset the recieve timeout
                 socket.ReceiveTimeout = DefaultReceiveTimeout;
@@ -695,14 +695,13 @@ namespace Media.Rtsp
         //Testing with external requests... could also be used for in bound requests but state would be needed to seperate the logic
         protected virtual void ProcessHttpRtspRequest(IAsyncResult iar)
         {
-
-            if (object.ReferenceEquals(iar,null).Equals(false)) return;
+            if (iar is null) return;
 
             var context = m_HttpListner.EndGetContext(iar);
 
             m_HttpListner.BeginGetContext(new AsyncCallback(ProcessHttpRtspRequest), null);
 
-            if (object.ReferenceEquals(context, null)) return;
+            if (context is null) return;
 
             if (context.Request.AcceptTypes.Any(t => string.Compare(t, "application/x-rtsp-tunnelled") == 0))
             {
@@ -722,7 +721,7 @@ namespace Media.Rtsp
                         }
 
                         //Ensure the message is really Rtsp
-                        RtspMessage request = new RtspMessage(System.Convert.FromBase64String(context.Request.ContentEncoding.GetString(buffer)));
+                        RtspMessage request = new(System.Convert.FromBase64String(context.Request.ContentEncoding.GetString(buffer)));
 
                         //Check for validity
                         if (request.RtspMessageType != RtspMessageType.Invalid)
@@ -740,7 +739,7 @@ namespace Media.Rtsp
                 }
                 else //No body
                 {
-                    RtspMessage request = new RtspMessage(RtspMessageType.Request)
+                    RtspMessage request = new(RtspMessageType.Request)
                     {
                         Location = new Uri(RtspMessage.ReliableTransportScheme + "://" + context.Request.LocalEndPoint.Address.ToString() +  context.Request.RawUrl),
                         RtspMethod = RtspMethod.DESCRIBE
@@ -959,7 +958,7 @@ namespace Media.Rtsp
         internal IEnumerable<ClientSession> GetSessions(System.IntPtr handle)
         {
             //Return all clients which match the given handle.
-            return Clients.Where(c => false.Equals(c.IsDisconnected) && object.ReferenceEquals(c.m_RtspSocket, null).Equals(false) && c.m_RtspSocket.Handle == handle);
+            return Clients.Where(c => false.Equals(c.IsDisconnected) && (c.m_RtspSocket is not null) && c.m_RtspSocket.Handle == handle);
         }     
 
         #endregion
@@ -1344,7 +1343,7 @@ namespace Media.Rtsp
             //Create the server Socket
             m_TcpServerSocket = new Socket(m_ServerIP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-            if(object.ReferenceEquals(ConfigureSocket, null)) ConfigureSocket = (Socket server) =>
+            ConfigureSocket ??= (Socket server) =>
             {
                 bool reconfigureSocket = false;
 
@@ -1507,7 +1506,7 @@ namespace Media.Rtsp
             Media.Common.Extensions.Thread.ThreadExtensions.TryAbortAndFree(ref m_ServerThread);
 
             //Dispose the server socket
-            if (object.ReferenceEquals(m_TcpServerSocket, null).Equals(false))                
+            if (m_TcpServerSocket is not null)                
             {
                 //Dispose the socket if not leaving it open...
                 if (leaveOpen.Equals(false)) m_TcpServerSocket.Dispose();
@@ -1750,7 +1749,7 @@ namespace Media.Rtsp
                 Socket server = (Socket)sender;
 
                 //If there is no socket then an accept has cannot be performed
-                if (object.ReferenceEquals(server, null)) return;
+                if (server is null) return;
 
                 //If this is the inital receive for a Udp or the server given is UDP
                 if (server.ProtocolType == ProtocolType.Udp)
@@ -1802,7 +1801,7 @@ namespace Media.Rtsp
                 }
 
                 //there must be a client socket.
-                if (object.ReferenceEquals(clientSocket, null)) return;                
+                if (clientSocket is null) return;                
 
                 //If the server is not runing dispose any connected socket
                 if (m_Sessions.Count >= m_MaximumSessions || false.Equals(IsRunning))
@@ -1897,7 +1896,7 @@ namespace Media.Rtsp
                 {
 
                     //If there is no session return or the session was just disposed
-                    if (IDisposedExtensions.IsNullOrDisposed(session) || object.ReferenceEquals(session.m_RtspSocket, null)) return;
+                    if (IDisposedExtensions.IsNullOrDisposed(session) || session.m_RtspSocket is null) return;
 
                     //Let the client propagate the message if the socket is shared
                     if (session.SharesSocket)
@@ -2040,7 +2039,7 @@ namespace Media.Rtsp
 
         internal void HandleClientSocketException(SocketException se, ClientSession cs)
         {
-            if (object.ReferenceEquals(se, null) || Common.IDisposedExtensions.IsNullOrDisposed(cs)) return;
+            if (se is null || Common.IDisposedExtensions.IsNullOrDisposed(cs)) return;
 
             Common.ILoggingExtensions.Log(Logger, "HandleClientSocketException@Client:" + cs.Id + "=" + se.SocketErrorCode.ToString());
 
@@ -2049,7 +2048,7 @@ namespace Media.Rtsp
                 case SocketError.TimedOut:
                     {
                         //If there is still a socket
-                        if (object.ReferenceEquals(cs.m_RtspSocket, null).Equals(false))
+                        if (cs.m_RtspSocket is not null)
                         {
                             //Clients interleaving shouldn't time out ever
                             if (cs.m_RtspSocket.ProtocolType == ProtocolType.Tcp)
@@ -2088,7 +2087,7 @@ namespace Media.Rtsp
                 default:
                     {                        
                         if (cs.IsDisposed.Equals(false) &&
-                            object.ReferenceEquals(cs.m_RtspSocket, null).Equals(false))
+                            cs.m_RtspSocket is not null)
                         {
                             if (cs.IsDisconnected = cs.m_RtspSocket.Poll(cs.m_SocketPollMicroseconds, SelectMode.SelectWrite) && cs.m_RtspSocket.Poll(cs.m_SocketPollMicroseconds, SelectMode.SelectRead))
                             {
@@ -2111,7 +2110,7 @@ namespace Media.Rtsp
         {
             unchecked
             {
-                if (object.ReferenceEquals(sender, null)) return;
+                if (sender is null) return;
 
                 if (e.SocketError != SocketError.Success) return;
 
@@ -2191,8 +2190,10 @@ namespace Media.Rtsp
                 if (IDisposedExtensions.IsNullOrDisposed(request) || IDisposedExtensions.IsNullOrDisposed(session))
                 {
                     return;
-                }//Ensure the session is added to the connected clients if it has not been already.
-                else if (object.ReferenceEquals(session.m_Contained, null)) TryAddSession(session);
+                }
+
+                //Ensure the session is added to the connected clients if it has not been already.
+                if (session.m_Contained is null) TryAddSession(session);
                 
                 //Check for session moved from another process.
                 //else if (session.m_Contained != null && session.m_Contained != this) return;
@@ -2822,15 +2823,15 @@ namespace Media.Rtsp
                 string authenticateHeader = null;
 
                 //Check for Digest first - Todo Finish implementation
-                if (object.ReferenceEquals(requiredCredential = RequiredCredentials.GetCredential(sourceLocation, RtspHeaderFields.Authorization.Digest), null).Equals(false))
+                if ((requiredCredential = RequiredCredentials.GetCredential(sourceLocation, RtspHeaderFields.Authorization.Digest)) is not null)
                 {
-                    //Might need to store values qop nc, cnonce and nonce in session storage for later retrival                    
+                    //Might need to store values qop nc, cnonce and nonce in session storage for later retrival
 
                     //Should use auth-int and qop
 
                     authenticateHeader = string.Format(System.Globalization.CultureInfo.InvariantCulture, "Digest username={0},realm={1},nonce={2},cnonce={3}", requiredCredential.UserName, (string.IsNullOrWhiteSpace(requiredCredential.Domain) ? ServerName : requiredCredential.Domain), ((long)(Utility.Random.Next(int.MaxValue) << 32 | (Utility.Random.Next(int.MaxValue)))).ToString("X"), Utility.Random.Next(int.MaxValue).ToString("X"));
                 }
-                else if (object.ReferenceEquals(requiredCredential = RequiredCredentials.GetCredential(sourceLocation, RtspHeaderFields.Authorization.Basic), null).Equals(false))
+                else if ((requiredCredential = RequiredCredentials.GetCredential(sourceLocation, RtspHeaderFields.Authorization.Basic)) is not null)
                 {
                     authenticateHeader = "Basic realm=\"" + (string.IsNullOrWhiteSpace(requiredCredential.Domain) ? ServerName : requiredCredential.Domain + '"');
                 }
@@ -3331,10 +3332,10 @@ namespace Media.Rtsp
 
             if (Common.IDisposedExtensions.IsNullOrDisposed(request)) return false; //throw new ArgumentNullException("request");
 
-            if (object.ReferenceEquals(sourceLocation, null)) return false;
+            if (sourceLocation is null) return false;
 
             //There are no rules to validate
-            if (object.ReferenceEquals(RequiredCredentials, null)) return true;
+            if (RequiredCredentials is null) return true;
 
             string authHeader = request.GetHeader(RtspHeaders.Authorization);
 
@@ -3360,7 +3361,7 @@ namespace Media.Rtsp
                 requiredCredential = RequiredCredentials.GetCredential(sourceLocation, authType);
 
                 //If there was nothing for basic then try digest
-                if (object.ReferenceEquals(requiredCredential, null)) requiredCredential = RequiredCredentials.GetCredential(sourceLocation, authType = "digest");
+                requiredCredential ??= RequiredCredentials.GetCredential(sourceLocation, authType = "digest");
             }
             else
             {
@@ -3381,7 +3382,7 @@ namespace Media.Rtsp
             //A CredentialCacheEx with a NetworkCredentialEx may help API wise
 
             //If there is no rule to validate
-            if (object.ReferenceEquals(requiredCredential, null)) return true;
+            if (requiredCredential is null) return true;
             else
             {
                 //Verify against credential

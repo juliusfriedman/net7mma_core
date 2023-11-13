@@ -304,7 +304,7 @@ namespace Media.Rtsp//.Server
             {
                 m_RtspSocket = value;
 
-                if (object.ReferenceEquals(m_RtspSocket, null).Equals(false)) RemoteEndPoint = m_RtspSocket.RemoteEndPoint;
+                if (m_RtspSocket is not null) RemoteEndPoint = m_RtspSocket.RemoteEndPoint;
             }
         }
 
@@ -343,10 +343,10 @@ namespace Media.Rtsp//.Server
             RtspSocket = rtspSocket;
 
             //If there is no socket
-            if (object.ReferenceEquals(m_RtspSocket, null))
+            if (m_RtspSocket is null)
             {
                 //If receive should start then throw an exception, otherwise return
-                if (startReceive) throw new ArgumentNullException("rtspSocket");
+                if (startReceive) throw new ArgumentNullException(nameof(rtspSocket));
                 
                 return;
             }           
@@ -393,13 +393,15 @@ namespace Media.Rtsp//.Server
 
                 if (SharesSocket) goto NotDisconnected;
 
-                if (object.ReferenceEquals(m_RtspSocket, null).Equals(false) && HasRuningServer)
+                if (m_RtspSocket is not null && HasRuningServer)
                 {
-                    if (LastRecieve == null)
+                    if (LastRecieve is null)
                     {
-                        LastRecieve = new SocketAsyncEventArgs();
+                        LastRecieve = new SocketAsyncEventArgs
+                        {
+                            UserToken = this
+                        }
                         LastRecieve.SetBuffer(m_Buffer.Array, m_Buffer.Offset, m_Buffer.Count);
-                        LastRecieve.UserToken = this;
                         LastRecieve.Completed += m_Server.ProcessReceive;
                     }
                     LastRecieve.RemoteEndPoint = RemoteEndPoint;
@@ -469,7 +471,7 @@ namespace Media.Rtsp//.Server
                     if (ex is SocketException se) m_Server.HandleClientSocketException(se, this);
 
                     //if not disposed mark disconnected
-                    IsDisconnected = object.ReferenceEquals(m_RtspSocket, null) || IsDisposed || HasRuningServer.Equals(false);
+                    IsDisconnected = m_RtspSocket is null || IsDisposed || HasRuningServer.Equals(false);
                 }
             }
         }
@@ -683,7 +685,7 @@ namespace Media.Rtsp//.Server
                     {
                         Rtcp.IReportBlock reportBlock = sr.FirstOrDefault(rb => rb.BlockIdentifier == tc.RemoteSynchronizationSourceIdentifier);
 
-                        if (object.ReferenceEquals(reportBlock, null).Equals(false))
+                        if (reportBlock is not null)
                         {
                             ReportBlock block = (ReportBlock)reportBlock;
 
@@ -1660,7 +1662,7 @@ namespace Media.Rtsp//.Server
             //Get an implementation for the packet recieved
             var implementation = Rtcp.RtcpPacket.GetImplementationForPayloadType((byte)packet.PayloadType);
 
-            if (object.ReferenceEquals(implementation, null)) Common.ILoggingExtensions.LogException(m_Server.ClientSessionLogger, new Exception("Recieved Unknown PacketType: " + packet.PayloadType + " Packet Ssrc = " + packet.SynchronizationSourceIdentifier));
+            if (implementation is null) Common.ILoggingExtensions.LogException(m_Server.ClientSessionLogger, new Exception("Recieved Unknown PacketType: " + packet.PayloadType + " Packet Ssrc = " + packet.SynchronizationSourceIdentifier));
             else Common.ILoggingExtensions.LogException(m_Server.ClientSessionLogger, new Exception("Recieved Rtcp PacketType: " + packet.PayloadType + " - " + implementation.Name + " Packet Ssrc = " + packet.SynchronizationSourceIdentifier));
 
             var context = tc ?? m_RtpClient.GetContextForPacket(packet);
@@ -1680,7 +1682,7 @@ namespace Media.Rtsp//.Server
             //Get an implementation for the packet recieved
             var implementation = Rtcp.RtcpPacket.GetImplementationForPayloadType((byte)packet.PayloadType);
 
-            if (object.ReferenceEquals(implementation, null)) Common.ILoggingExtensions.LogException(m_Server.ClientSessionLogger, new Exception("Sent Unknown PacketType: " + packet.PayloadType + " Packet Ssrc = " + packet.SynchronizationSourceIdentifier));
+            if (implementation is null) Common.ILoggingExtensions.LogException(m_Server.ClientSessionLogger, new Exception("Sent Unknown PacketType: " + packet.PayloadType + " Packet Ssrc = " + packet.SynchronizationSourceIdentifier));
             else Common.ILoggingExtensions.LogException(m_Server.ClientSessionLogger, new Exception("Sent Rtcp PacketType: " + packet.PayloadType + " - " + implementation.Name + " Packet Ssrc = " + packet.SynchronizationSourceIdentifier));
 
             //If the context should have been synchronized then determine if a context can be found
@@ -2320,7 +2322,7 @@ namespace Media.Rtsp//.Server
 
             //Add the new line if needed
 
-            if (object.ReferenceEquals(connectionLine, null)) sdp.ConnectionLine = connectionLine = new Sdp.Lines.SessionConnectionLine()
+            if (connectionLine is null) sdp.ConnectionLine = connectionLine = new Sdp.Lines.SessionConnectionLine()
             {
                 ConnectionAddress = addressString,
                 ConnectionAddressType = m_RtspSocket.AddressFamily == AddressFamily.InterNetworkV6 ? Media.Sdp.Lines.SessionConnectionLine.IP6 : Media.Sdp.Lines.SessionConnectionLine.IP4,

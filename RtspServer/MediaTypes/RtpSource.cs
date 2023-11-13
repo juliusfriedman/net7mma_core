@@ -182,7 +182,7 @@ namespace Media.Rtsp.Server.MediaTypes
             if (State >= StreamState.StopRequested) return;
             
             //If there is a RtpClient call Activate.
-            if (object.ReferenceEquals(RtpClient, null).Equals(false)) RtpClient.Activate();
+            if (RtpClient is not null) RtpClient.Activate();
 
             //Should be done in first packet recieved...
             base.IsReady = true;

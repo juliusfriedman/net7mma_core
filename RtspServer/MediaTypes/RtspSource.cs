@@ -218,7 +218,7 @@ namespace Media.Rtsp.Server.MediaTypes
             }
             //else it is already assigned via the child
 
-            if (object.ReferenceEquals(credential, null).Equals(false))
+            if (credential is not null)
             {
                 RtspClient.Credential = SourceCredential = credential;
 
@@ -226,7 +226,7 @@ namespace Media.Rtsp.Server.MediaTypes
             }
             
             //If only certain media should be setup 
-            if (object.ReferenceEquals(specificMedia ,null).Equals(false)) SpecificMediaTypes = specificMedia;
+            if (specificMedia is not null) SpecificMediaTypes = specificMedia;
 
             //If there was a start time given
             if (startTime.HasValue) MediaStartTime = startTime;

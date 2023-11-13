@@ -1127,9 +1127,10 @@ namespace Media.UnitTests
                             System.Threading.Thread.Yield();
 
                             //Wait the TestFrame to be transferred while there is not a Goodbye waiting to be sent by the sender or the sender has already sent one and here is a SendersReport which was transferrred
-                            if (testFrame.Transferred && object.ReferenceEquals(sendersContext.Goodbye, null) &&
+                            if (testFrame.Transferred &&
+                                sendersContext.Goodbye is null &&
                                 //There is a SendersReport which was transferrred
-                                object.ReferenceEquals(sendersContext.SendersReport, null).Equals(false) &&
+                                sendersContext.SendersReport is not null &&
                                 sendersContext.SendersReport.Transferred.HasValue.Equals(false)) continue;
 
                             break;
@@ -1142,8 +1143,7 @@ namespace Media.UnitTests
                             consoleWriter.WriteLine("\t Since : " + sendersContext.SendersReport.Transferred);
                             consoleWriter.WriteLine("\t -----------------------");
                             consoleWriter.WriteLine("\t Sender Sent : " + sendersContext.SendersReport.SendersPacketCount + " Packets");
-
-                        }                        
+                        }
 
                         consoleWriter.WriteLine(System.Threading.Thread.CurrentThread.ManagedThreadId + "\t *** Sent RtpFrame, Sending Reports and Goodbye ***");
 
@@ -1156,9 +1156,10 @@ namespace Media.UnitTests
                             System.Threading.Thread.Yield();
 
                             //Wait the TestFrame to be transferred while there is not a Goodbye waiting to be sent by the sender or the sender has already sent one and here is a ReceiversReport which was transferrred
-                            if (testFrame.Transferred && object.ReferenceEquals(receiversContext.Goodbye, null) &&
+                            if (testFrame.Transferred &&
+                                receiversContext.Goodbye is null &&
                                 //There is a SendersReport which was transferrred
-                                object.ReferenceEquals(receiversContext.ReceiversReport, null).Equals(false) &&
+                                receiversContext.ReceiversReport is not null &&
                                 receiversContext.ReceiversReport.Transferred.HasValue.Equals(false)) continue;
 
                             break;
@@ -4798,7 +4799,7 @@ a=appversion:1.0");
 
                     if (Media.Common.IDisposedExtensions.IsNullOrDisposed(rtcpPacket)) return;
 
-                    Console.WriteLine(string.Format(format, incomingFlag ? "\tReceieved" : "\tSent", (complete ? "Complete" : "Incomplete"), (object.ReferenceEquals(implemented, null) ? packet.ToString() : implemented.Name)) + "\tSynchronizationSourceIdentifier=" + rtcpPacket.SynchronizationSourceIdentifier + "\nType=" + rtcpPacket.PayloadType + " Length=" + rtcpPacket.Length + "\n Bytes = " + rtcpPacket.Payload.Count + " BlockCount = " + rtcpPacket.BlockCount + "\n Version = " + rtcpPacket.Version);
+                    Console.WriteLine(string.Format(format, incomingFlag ? "\tReceieved" : "\tSent", (complete ? "Complete" : "Incomplete"), (implemented is null ? packet.ToString() : implemented.Name)) + "\tSynchronizationSourceIdentifier=" + rtcpPacket.SynchronizationSourceIdentifier + "\nType=" + rtcpPacket.PayloadType + " Length=" + rtcpPacket.Length + "\n Bytes = " + rtcpPacket.Payload.Count + " BlockCount = " + rtcpPacket.BlockCount + "\n Version = " + rtcpPacket.Version);
 
                     if (rtcpPacket.Payload.Count > 0 && writePayload) Console.WriteLine(string.Format(TestingFormat, "Payload", BitConverter.ToString(rtcpPacket.Payload.Array, rtcpPacket.Payload.Offset, rtcpPacket.Payload.Count)));
 
@@ -4837,7 +4838,7 @@ a=appversion:1.0");
                         //    }
                     }
 
-                    if (object.ReferenceEquals(implemented, null).Equals(false))
+                    if (implemented is not null)
                     {
                         //Could dump the packet contents here.
                         Console.WriteLine(Media.RtpTools.RtpSend.ToTextualConvention(Media.RtpTools.FileFormat.Ascii, rtcpPacket));
