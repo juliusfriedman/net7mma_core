@@ -750,7 +750,7 @@ namespace Media.Concepts.Classes.Threading
 
                 ReadWriteLock.ExitReadLock();
 
-                while (Cursor != null)
+                while (Cursor is not null)
                 {
                     // get its value and a next node
                     ReadWriteLock.EnterReadLock();
@@ -788,7 +788,7 @@ namespace Media.Concepts.Classes.Threading
 
                 if (ReadWriteLock.IsWriteLockHeld) ReadWriteLock.ExitWriteLock();
 
-                if (Holder != null && System.Threading.Monitor.IsEntered(Holder)) System.Threading.Monitor.Exit(Holder);
+                if (Holder is not null && System.Threading.Monitor.IsEntered(Holder)) System.Threading.Monitor.Exit(Holder);
 
                 throw;
             }

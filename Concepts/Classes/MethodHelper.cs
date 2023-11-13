@@ -229,7 +229,7 @@ namespace Media.Concepts.Classes
         {
             MethodInfo methodInfo = method as MethodInfo;
 
-            if (methodInfo == null)
+            if (methodInfo is null)
             {
                 // Constructor info.
                 throw new ArgumentException("Unsupported MethodBase : " + method.GetType().Name, "method");
@@ -365,9 +365,9 @@ namespace Media.Concepts.Classes
         /// <param name="destination"></param>
         public static void Redirect(MethodInfo source, MethodInfo destination, bool debug = false)
         {
-            if (source == null) throw new InvalidOperationException("source must be specified");
+            if (source is null) throw new InvalidOperationException("source must be specified");
 
-            if (destination == null) throw new InvalidOperationException("destination must be specified");
+            if (destination is null) throw new InvalidOperationException("destination must be specified");
 
             RuntimeHelpers.PrepareMethod(source.MethodHandle);
 
@@ -392,16 +392,16 @@ namespace Media.Concepts.Classes
         /// <param name="destinationBindingFlags"></param>
         public static void Redirect(System.Type sourceType, string sourceTypeMethodName, BindingFlags sourceBindingFlags, System.Type destinationType, string destinationTypeMethodName, BindingFlags destinationBindingFlags)
         {
-            if (sourceType == null) throw new ArgumentNullException("sourceType");
-            else if (destinationType == null) throw new ArgumentNullException("destinationType");
+            if (sourceType is null) throw new ArgumentNullException("sourceType");
+            else if (destinationType is null) throw new ArgumentNullException("destinationType");
 
             MethodInfo methodToReplace = sourceType.GetMethod(sourceTypeMethodName, sourceBindingFlags);
 
-            if (methodToReplace == null) throw new InvalidOperationException("Cannot find sourceTypeMethodName on sourceType");
+            if (methodToReplace is null) throw new InvalidOperationException("Cannot find sourceTypeMethodName on sourceType");
 
             MethodInfo methodToInject = destinationType.GetMethod(destinationTypeMethodName, destinationBindingFlags);
 
-            if (methodToInject == null) throw new InvalidOperationException("Cannot find destinationTypeMethodName on destinationType");
+            if (methodToInject is null) throw new InvalidOperationException("Cannot find destinationTypeMethodName on destinationType");
 
             Redirect(methodToReplace, methodToInject);
         }

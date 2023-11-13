@@ -186,7 +186,7 @@ namespace Media.Http
 
                         string usernamePart = credential.UserName,
                            realmPart = credential.Domain ?? "//",
-                           uriPart = location != null && location.IsAbsoluteUri ? location.AbsoluteUri : new String((char)Common.ASCII.BackSlash, 1);
+                           uriPart = location is not null && location.IsAbsoluteUri ? location.AbsoluteUri : new String((char)Common.ASCII.BackSlash, 1);
 
                         if (string.IsNullOrWhiteSpace(nOncePart))
                         {
@@ -214,7 +214,7 @@ namespace Media.Http
                         byte[] ResponseHash;
 
                         //If there is a Quality of Protection
-                        if (qopPart != null)
+                        if (qopPart is not null)
                         {
                             if (qopPart .Equals(Http.HeaderFields.Authorization.Attributes.qop, StringComparison.OrdinalIgnoreCase))
                             {

@@ -26,9 +26,9 @@ namespace Media.Codecs.Image.Transformations
         {
             //Should be exceptions.
             //Should have a utility method which checks for all required components in one shot.
-            if (source.MediaFormat.GetComponentById(Media.Codecs.Image.ImageFormat.RedChannelId) == null) return;
-            if (source.MediaFormat.GetComponentById(Media.Codecs.Image.ImageFormat.BlueChannelId) == null) return;
-            if (source.MediaFormat.GetComponentById(Media.Codecs.Image.ImageFormat.GreenChannelId) == null) return;
+            if (source.MediaFormat.GetComponentById(Media.Codecs.Image.ImageFormat.RedChannelId) is null) return;
+            if (source.MediaFormat.GetComponentById(Media.Codecs.Image.ImageFormat.BlueChannelId) is null) return;
+            if (source.MediaFormat.GetComponentById(Media.Codecs.Image.ImageFormat.GreenChannelId) is null) return;
 
             //Only can convert to YUV right now, not AYUV or YUVA or any other type.
             if (dest.ImageFormat.Components.Length > 3) return;
@@ -37,19 +37,19 @@ namespace Media.Codecs.Image.Transformations
             Media.Codec.MediaComponent component = source.MediaFormat.GetComponentById(Media.Codecs.Image.ImageFormat.LumaChannelId);
 
             //Ensure it at the first component
-            if (component == null || source.MediaFormat.IndexOf(component) != 0) return;
+            if (component is null || source.MediaFormat.IndexOf(component) != 0) return;
 
             //Check for the chroma major component
             component = source.MediaFormat.GetComponentById(Media.Codecs.Image.ImageFormat.ChromaMajorChannelId);
 
             //Ensure it at the second component
-            if (component == null || source.MediaFormat.IndexOf(component) != 1) return;
+            if (component is null || source.MediaFormat.IndexOf(component) != 1) return;
 
             //Check for the chroma minor component
             component = source.MediaFormat.GetComponentById(Media.Codecs.Image.ImageFormat.ChromaMinorChannelId);
 
             //Ensure it at the last component
-            if (component == null || source.MediaFormat.IndexOf(component) != 2) return;
+            if (component is null || source.MediaFormat.IndexOf(component) != 2) return;
 
             //Ensure the destination image has been configured for sub sampling
             if (false == dest.ImageFormat.IsSubSampled) return;

@@ -60,7 +60,7 @@ namespace Media.Common.Extensions.Encoding
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int GetByteCount(this System.Text.Encoding encoding, params char[] chars)
         {
-            if (encoding == null) encoding = System.Text.Encoding.Default;
+            if (encoding is null) encoding = System.Text.Encoding.Default;
 
             return encoding.GetByteCount(chars);
         }
@@ -106,7 +106,7 @@ namespace Media.Common.Extensions.Encoding
             //Todo, check for large delemits and use a hash or always use a hash.
             //System.Collections.Generic.HashSet<char> delimitsC = new System.Collections.Generic.HashSet<char>(delimits);
 
-            if (delimits == null) delimits = EmptyChar;
+            if (delimits is null) delimits = EmptyChar;
 
             int max;
 
@@ -192,7 +192,7 @@ namespace Media.Common.Extensions.Encoding
                 if (charsUsed > 0) builder.Append(results, 0, charsUsed);
             } while (count > 0 && false.Equals(sawDelimit));
 
-            if (builder == null)
+            if (builder is null)
             {
                 result = null;
 
@@ -233,9 +233,9 @@ namespace Media.Common.Extensions.Encoding
             //Todo, check for large delemits and use a hash or always use a hash.
             //System.Collections.Generic.HashSet<char> delimitsC = new System.Collections.Generic.HashSet<char>(delimits);
 
-            if (delimits == null) delimits = EmptyChar;
+            if (delimits is null) delimits = EmptyChar;
 
-            if (stream == null || false.Equals(stream.CanRead) || count.Equals(Common.Binary.Zero))
+            if (stream is null || false.Equals(stream.CanRead) || count.Equals(Common.Binary.Zero))
             {
                 result = null;
 
@@ -248,7 +248,7 @@ namespace Media.Common.Extensions.Encoding
             if (at >= stream.Length) return false;
 
             //Use default..
-            if (encoding == null) encoding = System.Text.Encoding.Default;
+            if (encoding is null) encoding = System.Text.Encoding.Default;
 
             System.Text.StringBuilder builder = null;
 
@@ -305,7 +305,7 @@ namespace Media.Common.Extensions.Encoding
 
         Done:
 
-            if (builder == null)
+            if (builder is null)
             {
                 result = null;
 
@@ -382,7 +382,7 @@ namespace Media.Common.Extensions.Encoding
         /// <returns>The encoded data.</returns>
         public static char[] GetChars(this System.Text.Encoding encoding, params byte[] toEncode)
         {
-            if(toEncode == null) throw new ArgumentNullException("toEncode");
+            if(toEncode is null) throw new ArgumentNullException("toEncode");
 
             //int firstDimension = toEncode.Rank -1;
 
@@ -408,7 +408,7 @@ namespace Media.Common.Extensions.Encoding
         public static char[] GetChars(this System.Text.Encoding encoding, byte[] toEncode, int offset, int count)
         {
             //Use default..
-            if (encoding == null) encoding = System.Text.Encoding.Default;
+            if (encoding is null) encoding = System.Text.Encoding.Default;
 
             return encoding.GetChars(toEncode, offset, count);
         }
@@ -421,7 +421,7 @@ namespace Media.Common.Extensions.Encoding
         /// <returns>The encoded data.</returns>
         public static char[] GetChars(this System.Text.Decoder decoder, params byte[] toEncode)
         {
-            if (toEncode == null) throw new ArgumentNullException("toEncode");
+            if (toEncode is null) throw new ArgumentNullException("toEncode");
 
             //int firstDimension = toEncode.Rank -1;
 
@@ -447,7 +447,7 @@ namespace Media.Common.Extensions.Encoding
         public static char[] GetChars(this System.Text.Decoder decoder, byte[] toEncode, int offset, int count)
         {
             //Use default..
-            if (decoder == null) decoder = System.Text.Encoding.Default.GetDecoder();
+            if (decoder is null) decoder = System.Text.Encoding.Default.GetDecoder();
 
             return decoder.GetChars(toEncode, offset, count);
         }

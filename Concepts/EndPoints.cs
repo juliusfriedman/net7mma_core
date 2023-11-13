@@ -97,7 +97,7 @@ namespace Concepts.Classes.Sockets
 
             InternetEndPoint iNetComparand = obj as InternetEndPoint;
 
-            if (iNetComparand == null)
+            if (iNetComparand is null)
                 return false;
 
             return (ProtocolType == iNetComparand.ProtocolType &&
@@ -178,7 +178,7 @@ namespace Concepts.Classes.Sockets
             System.Net.Sockets.ProtocolType protocolType, System.Net.Sockets.ProtocolFamily protocolFamily)
             : this(port, addressFamily, protocolType, protocolFamily)
         {
-            if (socketAddress == null) throw new System.ArgumentNullException("socketAddress");
+            if (socketAddress is null) throw new System.ArgumentNullException("socketAddress");
 
             if (false.Equals(socketAddress.Family == AddressFamily)) throw new System.InvalidOperationException("AddressFamily must match the socketAddress.Family");
 
@@ -206,7 +206,7 @@ namespace Concepts.Classes.Sockets
         public override string ToString()
         {
             return string.Concat(m_Family, "/", ProtocolType, "\\", ProtocolType, "\\",
-                string.Join(Media.Common.Extensions.IPEndPoint.IPEndPointExtensions.SchemeSeperator, ProtocolType.ToString().ToLowerInvariant(), SocketAddress == null ? string.Empty : SocketAddress.ToString()),
+                string.Join(Media.Common.Extensions.IPEndPoint.IPEndPointExtensions.SchemeSeperator, ProtocolType.ToString().ToLowerInvariant(), SocketAddress is null ? string.Empty : SocketAddress.ToString()),
                 Media.Common.Extensions.IPEndPoint.IPEndPointExtensions.PortSeperator, m_Port);
         }
 
@@ -221,7 +221,7 @@ namespace Concepts.Classes.Sockets
 
             InternetEndPoint iNetComparand = comparand as InternetEndPoint;
 
-            if (iNetComparand == null)
+            if (iNetComparand is null)
                 return false;
 
             return (m_Family == iNetComparand.m_Family &&
@@ -272,7 +272,7 @@ namespace Concepts.Classes.Sockets
 
             DnsEndPoint dnsComparand = comparand as DnsEndPoint;
 
-            if (dnsComparand == null)
+            if (dnsComparand is null)
                 return false;
 
             return (m_Family == dnsComparand.m_Family &&

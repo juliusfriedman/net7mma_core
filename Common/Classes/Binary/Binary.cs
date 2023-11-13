@@ -777,8 +777,8 @@ namespace Media.Common
             //ensure not already called.
             if (m_SystemBitOrder != BitOrder.Unknown |
                 m_SystemByteOrder != ByteOrder.Unknown | 
-                BitsSetTable != null | 
-                BitsReverseTable != null) return;
+                BitsSetTable is not null | 
+                BitsReverseTable is not null) return;
 
             //Todo, Determine MaxBits (BitSize)              
 
@@ -1352,7 +1352,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ulong ReadBitsMSB(byte[] bytes, int bitOffset, int bitCount) //ref/out byteOffset
         {
-            if (bytes == null || bitCount <= 0) return Binary.Nihil;
+            if (bytes is null || bitCount <= 0) return Binary.Nihil;
 
             ulong result = 0;
 
@@ -1411,7 +1411,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ulong ReadBitsLSB(byte[] bytes, int bitOffset, int bitCount) //ref byteOffset
         {
-            if (bytes == null || bitCount <= 0) return Binary.Nihil;
+            if (bytes is null || bitCount <= 0) return Binary.Nihil;
 
             ulong result = 0;
 
@@ -1648,7 +1648,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void WriteBitsLSB(byte[] bytes, int bitOffset, ulong value, int bitCount)
         {
-            if (bytes == null || bitCount <= 0) return;
+            if (bytes is null || bitCount <= 0) return;
 
             int position, byteOffset, bitIndex;
 
@@ -1721,7 +1721,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void WriteBitsMSB(byte[] bytes, int bitOffset, ulong value, int bitCount)
         {
-            if (bytes == null || bitCount <= 0) return;
+            if (bytes is null || bitCount <= 0) return;
 
             int position, byteOffset, bitIndex, bitCountMinusOne = (bitCount - Binary.Ūnus);
 
@@ -1798,7 +1798,7 @@ namespace Media.Common
 
         public static byte[] CopyBits(byte[] data)
         {
-            if (data == null) throw new ArgumentNullException("data");
+            if (data is null) throw new ArgumentNullException("data");
 
             int byteOffset = 0, bitOffset = 0;
 
@@ -1807,7 +1807,7 @@ namespace Media.Common
 
         public static byte[] CopyBits(byte[] data, int count)
         {
-            if (data == null) throw new ArgumentNullException("data");
+            if (data is null) throw new ArgumentNullException("data");
 
             int byteOffset = 0, bitOffset = 0;
 
@@ -1816,7 +1816,7 @@ namespace Media.Common
 
         public static byte[] CopyBits(byte[] data, int byteOffset, int count)
         {
-            if (data == null) throw new ArgumentNullException("data");
+            if (data is null) throw new ArgumentNullException("data");
 
             int bitOffset = 0;
 
@@ -1825,7 +1825,7 @@ namespace Media.Common
 
         public static byte[] CopyBits(byte[] data, int byteOffset, int bitOffset, int count)
         {
-            if (data == null) throw new ArgumentNullException("data");
+            if (data is null) throw new ArgumentNullException("data");
 
             return CopyBits(data, ref byteOffset, ref bitOffset, count);
         }
@@ -1878,7 +1878,7 @@ namespace Media.Common
 
         public static byte[] CopyBitsReverse(byte[] data)
         {
-            if (data == null) throw new ArgumentNullException("data");
+            if (data is null) throw new ArgumentNullException("data");
 
             int byteOffset = 0, bitOffset = 0;
 
@@ -1887,7 +1887,7 @@ namespace Media.Common
 
         public static byte[] CopyBitsReverse(byte[] data, int count)
         {
-            if (data == null) throw new ArgumentNullException("data");
+            if (data is null) throw new ArgumentNullException("data");
 
             int byteOffset = 0, bitOffset = 0;
 
@@ -1896,7 +1896,7 @@ namespace Media.Common
 
         public static byte[] CopyBitsReverse(byte[] data, int byteOffset, int count)
         {
-            if (data == null) throw new ArgumentNullException("data");
+            if (data is null) throw new ArgumentNullException("data");
 
             int bitOffset = 0;
 
@@ -1905,7 +1905,7 @@ namespace Media.Common
 
         public static byte[] CopyBitsReverse(byte[] data, int byteOffset, int bitOffset, int count)
         {
-            if (data == null) throw new ArgumentNullException("data");
+            if (data is null) throw new ArgumentNullException("data");
 
             return CopyBitsReverse(data, ref byteOffset, ref bitOffset, count);
         }
@@ -2335,7 +2335,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void WriteInteger(byte[] buffer, int index, int count, ulong value, int shift = Binary.BitsPerByte)
         {
-            if (buffer == null || count == 0) return;
+            if (buffer is null || count == 0) return;
 
             unchecked
             {
@@ -2383,7 +2383,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void WriteReversedInteger(byte[] buffer, int index, int count, ulong value, int shift = Binary.BitsPerByte)
         {
-            if (buffer == null || count == 0) return;
+            if (buffer is null || count == 0) return;
 
             unchecked
             {

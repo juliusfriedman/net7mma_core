@@ -44,7 +44,7 @@ namespace Media.Common.Extensions.Uri
 
         public static System.Net.NetworkCredential ParseUserInfo(System.Uri uri)
         {
-            if (uri == null || string.IsNullOrWhiteSpace(uri.UserInfo)) return null;
+            if (uri is null || string.IsNullOrWhiteSpace(uri.UserInfo)) return null;
 
             System.Net.NetworkCredential result = null;
 
@@ -71,7 +71,7 @@ namespace Media.Common.Extensions.Uri
             return result;
         }
 
-        public static bool TryParseUserInfo(System.Uri uri, out System.Net.NetworkCredential result) { return (result = ParseUserInfo(uri)) != null; }
+        public static bool TryParseUserInfo(System.Uri uri, out System.Net.NetworkCredential result) { return (result = ParseUserInfo(uri)) is not null; }
 
         //Would take source and all segment but not file and change to part.
         //MakeRelativeTo

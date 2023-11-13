@@ -353,11 +353,12 @@ namespace Media.Rtsp
         public static RtspMessage FromHttpBytes(byte[] message, int offset, Encoding encoding = null, bool bodyOnly = false)
         {
             //Sanity
-            if (message == null) return null;
-            if (offset > message.Length) throw new ArgumentOutOfRangeException("offset");
+            if (message is null) return null;
+
+            if (offset > message.Length) throw new ArgumentOutOfRangeException(nameof(offset));
 
             //Use a default encoding if none was given
-            if (encoding == null) encoding = RtspMessage.DefaultEncoding;
+            if (encoding is null) encoding = RtspMessage.DefaultEncoding;
 
             //Parse the HTTP 
             string Message = encoding.GetString(message, offset, message.Length - offset);
@@ -632,7 +633,7 @@ namespace Media.Rtsp
 
             }
 
-            if (includeEmptyLine && m_EncodedLineEnds != null)
+            if (includeEmptyLine && m_EncodedLineEnds is not null)
             {
                 //foreach (byte b in m_HeaderEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
 

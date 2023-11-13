@@ -313,7 +313,7 @@ namespace Media.Rtcp
             :base(shouldDispose)
         {
             //If the octets reference is null throw an exception
-            if (octets == null) throw new ArgumentNullException("octets");
+            if (octets is null) throw new ArgumentNullException("octets");
 
             //Determine the length of the array
             int octetsLength = octets.Length, availableOctets = octetsLength - offset;
@@ -368,7 +368,7 @@ namespace Media.Rtcp
 
                 SegmentToLast6Bytes = new Common.MemorySegment(Last6Bytes, 0, 6, shouldDispose);
 
-                if (other.Last6Bytes != null)
+                if (other.Last6Bytes is not null)
                 {
                     other.Last6Bytes.CopyTo(Last6Bytes, 0);
                 }

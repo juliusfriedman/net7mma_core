@@ -157,7 +157,7 @@ namespace Media.Rtcp
         }
 
         public GoodbyeReport(int version, int ssrc, Media.RFC3550.SourceList sourcesLeaving, byte[] reasonForLeaving)
-            : this(version, 0, ssrc, sourcesLeaving == null ? Media.RFC3550.SourceList.Empty : sourcesLeaving, reasonForLeaving)
+            : this(version, 0, ssrc, sourcesLeaving is null ? Media.RFC3550.SourceList.Empty : sourcesLeaving, reasonForLeaving)
         {
 
         }
@@ -325,7 +325,7 @@ namespace Media.Rtcp
         /// <param name="count"></param>
         internal virtual protected void Add(RFC3550.SourceList sourceList, int offset, int count)
         {
-            if (sourceList == null) return;
+            if (sourceList is null) return;
 
             if (IsReadOnly) throw new InvalidOperationException("A RFC3550.SourceList cannot be added when IsReadOnly is true.");
 

@@ -64,7 +64,7 @@ namespace Media.Containers.Gxf
 
         public static string ToTextualConvention(byte[] identifier)
         {
-            if (identifier == null) return Media.Common.Extensions.String.StringExtensions.UnknownString;
+            if (identifier is null) return Media.Common.Extensions.String.StringExtensions.UnknownString;
             return ((Identifier)identifier[0]).ToString();
         }
 
@@ -84,11 +84,11 @@ namespace Media.Containers.Gxf
 
             foreach (var element in this)
             {
-                if (identifiers == null || identifiers.Count() == 0 || identifiers.Contains((Identifier)element.Identifier[0])) yield return element;
+                if (identifiers is null || identifiers.Count() == 0 || identifiers.Contains((Identifier)element.Identifier[0])) yield return element;
 
                 count -= element.DataSize;
 
-                if (element == null || count <= 0) break;
+                if (element is null || count <= 0) break;
             }
 
             Position = position;
@@ -148,7 +148,7 @@ namespace Media.Containers.Gxf
             {
                 Node next = ReadNext();
 
-                if (next == null) yield break;
+                if (next is null) yield break;
 
                 yield return next;
 
@@ -163,7 +163,7 @@ namespace Media.Containers.Gxf
         public override IEnumerable<Track> GetTracks()
         {
 
-            if (m_Tracks != null)
+            if (m_Tracks is not null)
             {
                 foreach (Track track in m_Tracks) yield return track;
                 yield break;

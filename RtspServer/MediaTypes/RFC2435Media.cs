@@ -363,7 +363,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 if (fragmentOffset == 0)
                 {
                     //http://tools.ietf.org/search/rfc2435#section-3.1.7 (Restart Marker header)
-                    if (jpegType >= 63 && dri != null)
+                    if (jpegType >= 63 && dri is not null)
                     {
                         //Create a Rtp Restart Marker, Set first and last
                         RtpJpegHeader.AddRange(CreateRtpJpegDataRestartIntervalMarker(Common.Binary.ReadU16(dri, 0, Common.Binary.IsLittleEndian)));
@@ -1070,7 +1070,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             #region Constructor
 
-            static RFC2435Frame() { if (JpegCodecInfo == null) throw new NotSupportedException("The system must have a Jpeg Codec installed."); }
+            static RFC2435Frame() { if (JpegCodecInfo is null) throw new NotSupportedException("The system must have a Jpeg Codec installed."); }
 
             /// <summary>
             /// Creates an empty JpegFrame
@@ -1178,7 +1178,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     throw Common.Binary.CreateOverflowException("qualityFactor", qualityFactor, 1.ToString(), byte.MaxValue.ToString());
 
                 //Store the constant size of the RtpHeader (12) and sourceList
-                int sourceListSize = sourceList != null ? sourceList.Size : 0, protocolOverhead = Rtp.RtpHeader.Length + sourceListSize,
+                int sourceListSize = sourceList is not null ? sourceList.Size : 0, protocolOverhead = Rtp.RtpHeader.Length + sourceListSize,
                     precisionTableIndex = 0; //The index of the precision table.
 
                 //Ensure some data will fit
@@ -1678,7 +1678,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                             //8 for the RtpJpegHeader and this will cause the Marker be to set in the next packet created
                                             bytesPerPacket = (int)streamRemains + Rtp.RtpHeader.Length + profileHeaderSize;
 
-                                            if (sourceList != null) bytesPerPacket += sourceList.Size;
+                                            if (sourceList is not null) bytesPerPacket += sourceList.Size;
 
                                             lastPacket = true;
 
@@ -1699,7 +1699,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                         };
 
                                         //Apply source list
-                                        if (sourceList != null)
+                                        if (sourceList is not null)
                                         {
                                             currentPacket.ContributingSourceCount = sourceList.Count;
                                             sourceList.TryCopyTo(currentPacket.Payload.Array, currentPacket.Payload.Offset);
@@ -2193,7 +2193,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 if (/*packet.SequenceNumber == m_HighestSequenceNumber &&*/ packet.Marker)
                 {
                     //Get the last value added if depacketized was not already assigned.
-                    if (depacketized == null) depacketized = Depacketized.Values.Last();
+                    if (depacketized is null) depacketized = Depacketized.Values.Last();
 
                     //Check for EOI and if note present Add it at the FragmentOffset + 1
                     if (depacketized.Array[depacketized.Count - 2] != Media.Codecs.Image.Jpeg.Markers.EndOfInformation)
@@ -2331,7 +2331,7 @@ namespace Media.Rtsp.Server.MediaTypes
         //SourceStream Implementation
         public override void Start()
         {
-            if (RtpClient != null) return;
+            if (RtpClient is not null) return;
 
             //Create a RtpClient so events can be sourced from the Server to many clients without this Client knowing about all participants
             //If this class was used to send directly to one person it would be setup with the receivers address
@@ -2396,7 +2396,7 @@ namespace Media.Rtsp.Server.MediaTypes
             RtpClient.m_WorkerThread.TrySetApartmentState(System.Threading.ApartmentState.MTA);
 
             //If we are watching and there are already files in the directory then add them to the Queue
-            if (m_Watcher != null && false == string.IsNullOrWhiteSpace(base.Source.LocalPath) && System.IO.Directory.Exists(base.Source.LocalPath))
+            if (m_Watcher is not null && false == string.IsNullOrWhiteSpace(base.Source.LocalPath) && System.IO.Directory.Exists(base.Source.LocalPath))
             {
                 //Get all files in the path
                 foreach (string file in System.IO.Directory.GetFiles(base.Source.LocalPath))
@@ -2422,7 +2422,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 }
 
                 //If we have not been stopped already
-                if (/*State != StreamState.Started && */ RtpClient.m_WorkerThread != null)
+                if (/*State != StreamState.Started && */ RtpClient.m_WorkerThread is not null)
                 {
                     //Only ready after all pictures are in the queue
                     IsReady = true;
@@ -2452,7 +2452,7 @@ namespace Media.Rtsp.Server.MediaTypes
 #endif
             base.Stop();
 
-            if (m_Watcher != null)
+            if (m_Watcher is not null)
             {
                 m_Watcher.EnableRaisingEvents = false;
                 m_Watcher.Created -= FileCreated;
@@ -2555,7 +2555,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         Rtp.RtpClient.TransportContext transportContext = RtpClient.GetContextBySourceId(frame.SynchronizationSourceIdentifier);
 
                         //If there is a context
-                        if (transportContext != null)
+                        if (transportContext is not null)
                         {
                             //Increase priority
                             RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.AboveNormal;
@@ -2942,7 +2942,7 @@ namespace Media.UnitTests
                 using (var jpegStream = new System.IO.FileStream(fileName, System.IO.FileMode.Open))
                 {
 
-                    if (f != null) if (!f.IsDisposed) f.Dispose();
+                    if (f is not null) if (!f.IsDisposed) f.Dispose();
 
                     f = null;
 

@@ -1280,7 +1280,7 @@ namespace Media.Concepts.Classes
         {
             //Todo, align size with Machine
 
-            if (other.Memory != null)
+            if (other.Memory is not null)
             {
                 Memory = new byte[other.Count];
 

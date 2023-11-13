@@ -10,7 +10,7 @@ namespace Media.Rtcp.Feedback
 
         public RtcpFeedbackReport(int version, int type, int format, int padding, int ssrc, int mssrc, byte[] feedbackControlInformation, bool shouldDispose = true)
             : base(version, type, padding, ssrc, /*format*/0, 0,
-            feedbackControlInformation != null ? Common.Binary.BytesPerInteger + feedbackControlInformation.Length : Common.Binary.BytesPerInteger, shouldDispose)
+            feedbackControlInformation is not null ? Common.Binary.BytesPerInteger + feedbackControlInformation.Length : Common.Binary.BytesPerInteger, shouldDispose)
         {
             //Set the FMT field
             BlockCount = format;
@@ -19,7 +19,7 @@ namespace Media.Rtcp.Feedback
             Common.Binary.Write32(Payload.Array, Payload.Offset, Common.Binary.IsLittleEndian, (uint)mssrc);
 
             //Copy the FCI Data
-            if (feedbackControlInformation != null)
+            if (feedbackControlInformation is not null)
                 feedbackControlInformation.CopyTo(Payload.Array, Payload.Offset + Common.Binary.BytesPerInteger);
         }
 

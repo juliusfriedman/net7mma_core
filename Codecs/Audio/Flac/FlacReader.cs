@@ -290,39 +290,39 @@ namespace Media.Codecs.Flac
 
         public static void VerifyBlockType(Node node, BlockType expected)
         {
-            if (node == null) throw new ArgumentNullException(nameof(node));
+            if (node is null) throw new ArgumentNullException(nameof(node));
             BlockType found = GetBlockType(node);
             if (found != expected) throw new InvalidOperationException(string.Format("GetBlockType must indicate {0}. Found {1}", expected, found));
         }
 
         public static BlockType GetBlockType(Node node)
         {
-            if (node == null) throw new ArgumentNullException(nameof(node));
+            if (node is null) throw new ArgumentNullException(nameof(node));
             //return (BlockType)Media.Common.Binary.ReadBitsMSB(node.Identifier, 1, 7);
             return GetBlockType(ref node.Identifier[0]);
         }
 
         public static bool IsLastBlock(Node node)
         {
-            if (node == null) throw new ArgumentNullException(nameof(node));
+            if (node is null) throw new ArgumentNullException(nameof(node));
             return IsLastBlock(ref node.Identifier[0]);
         }
 
         public static bool IsReservedBlock(Node node)
         {
-            if (node == null) throw new ArgumentNullException(nameof(node));
+            if (node is null) throw new ArgumentNullException(nameof(node));
             return IsReservedBlock(GetBlockType(ref node.Identifier[0]));
         }
 
         public static bool IsInvalid(Node node)
         {
-            if (node == null) throw new ArgumentNullException(nameof(node));
+            if (node is null) throw new ArgumentNullException(nameof(node));
             return IsInvalid(ref node.Identifier[0]);
         }
 
         public static bool IsFrameHeader(Node node)
         {
-            if (node == null) throw new ArgumentNullException(nameof(node));
+            if (node is null) throw new ArgumentNullException(nameof(node));
             return IsFrameHeader(node.Identifier);
         }
 
@@ -342,7 +342,7 @@ namespace Media.Codecs.Flac
 
         public static bool IsFrameHeader(byte[] identifier)
         {
-            if (identifier == null) throw new ArgumentNullException(nameof(identifier));
+            if (identifier is null) throw new ArgumentNullException(nameof(identifier));
             if (identifier.Length < 2) throw new ArgumentOutOfRangeException(nameof(identifier));
             return Media.Common.Binary.ReadBitsMSB(identifier, 0, 14) == FrameSync;
         }
@@ -351,7 +351,7 @@ namespace Media.Codecs.Flac
 
         public static int GetBlockSize(Node node)
         {
-            if (node == null) throw new ArgumentNullException(nameof(node));
+            if (node is null) throw new ArgumentNullException(nameof(node));
             return GetBlockSize(node.Identifier);
         }
 
@@ -386,7 +386,7 @@ namespace Media.Codecs.Flac
 
         public static int GetSampleRate(Node node)
         {
-            if (node == null) throw new ArgumentNullException(nameof(node));
+            if (node is null) throw new ArgumentNullException(nameof(node));
             return GetSampleRate(node.Identifier);
         }
 
@@ -408,7 +408,7 @@ namespace Media.Codecs.Flac
 
         public static int GetChannels(Node node, out ChannelAssignment channelAssignment)
         {
-            if (node == null) throw new ArgumentNullException(nameof(node));
+            if (node is null) throw new ArgumentNullException(nameof(node));
             return GetChannels(node.Identifier, out channelAssignment);
         }
 
@@ -443,7 +443,7 @@ namespace Media.Codecs.Flac
         /// <param name=nameof(node)></param>
         /// <returns></returns>
         public static int GetBitsPerSample(Node node) {
-            if (node == null) throw new ArgumentNullException(nameof(node));
+            if (node is null) throw new ArgumentNullException(nameof(node));
             return GetBitsPerSample(node.Identifier);
         }
 
@@ -624,7 +624,7 @@ namespace Media.Codecs.Flac
                 BlockType found = GetBlockType(block);
 
                 //Determine if we can filter by the BlockType
-                if (types != null && false == types.Contains(found)) goto Continue;
+                if (types is not null && false == types.Contains(found)) goto Continue;
 
                 //If contained the found or the unmasked found then return the page
                 yield return block;
@@ -894,8 +894,8 @@ namespace Media.Codecs.Flac
             VerifyBlockType(node, BlockType.SeekTable);
             ///	NOTE
             /// The number of seek points is implied by the metadata header 'length' field, i.e.equal to length / 18.
-            List <Tuple<long, long, short>> seekPoints = new List<Tuple<long, long, short>>((int)(node == null ? 0 : node.DataSize / 18));
-            if (node != null) for (int i = 0, e = (int)node.DataSize; i < e; i+=18)
+            List <Tuple<long, long, short>> seekPoints = new List<Tuple<long, long, short>>((int)(node is null ? 0 : node.DataSize / 18));
+            if (node is not null) for (int i = 0, e = (int)node.DataSize; i < e; i+=18)
             {
                 //Add the decoded seekpoint
                 seekPoints.Add(new Tuple<long, long, short>(Common.Binary.Read64(node.Data, i, BitConverter.IsLittleEndian),
@@ -959,7 +959,7 @@ namespace Media.Codecs.Flac
             {
                 Node next = ReadNext();
 
-                if (next == null) yield break;
+                if (next is null) yield break;
 
                 yield return next;
 
@@ -978,7 +978,7 @@ namespace Media.Codecs.Flac
 
         public override IEnumerable<Track> GetTracks()
         {
-            if (m_Tracks != null)
+            if (m_Tracks is not null)
             {
                 foreach (Track track in m_Tracks) yield return track;
                 yield break;
@@ -1008,7 +1008,7 @@ namespace Media.Codecs.Flac
                     case BlockType.StreamInfo:
                         {
                             //If there was a previous track then yield it now.
-                            if (lastTrack != null)
+                            if (lastTrack is not null)
                             {
                                 m_Tracks.Add(lastTrack);
 

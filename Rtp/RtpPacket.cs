@@ -167,7 +167,7 @@ namespace Media.Rtp
                 //Check the Extension bit in the header, if set the RtpExtension must be complete
                 if (Header.Extension) using (RtpExtension extension = GetExtension())
                     {
-                        if (extension == null || false.Equals(extension.IsComplete)) return false;
+                        if (extension is null || false.Equals(extension.IsComplete)) return false;
 
                         //Reduce the number of octets in the payload by the number of octets which make up the extension
                         octetsContained -= extension.Size;
@@ -268,7 +268,7 @@ namespace Media.Rtp
 
             if (newBytes <= 0) return;
 
-            if (m_OwnedOctets == null)
+            if (m_OwnedOctets is null)
             {
                 m_OwnedOctets = octets.Skip(offset).Take(newBytes).ToArray();
 
@@ -331,7 +331,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public RtpPacket(RtpHeader header, IEnumerable<byte> octets, bool shouldDispose = true) : base(shouldDispose)
         {
-            if (header == null) throw new ArgumentNullException("header");
+            if (header is null) throw new ArgumentNullException("header");
 
             //Assign the header (maybe referenced elsewhere, when dispose is called the given header will be disposed.)
             Header = header;
@@ -354,7 +354,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public RtpPacket(RtpHeader header, MemorySegment payload, bool shouldDispose = true) : base(shouldDispose)
         {
-            if (header == null) throw new ArgumentNullException("header");
+            if (header is null) throw new ArgumentNullException("header");
 
             Header = header;
 
@@ -371,7 +371,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public RtpPacket(byte[] buffer, int offset, int count, bool shouldDispose = true) : base(shouldDispose)
         {
-            if (buffer == null || buffer.Length == 0 || count <= 0) throw new ArgumentException("Must have data in a RtpPacket");
+            if (buffer is null || buffer.Length == 0 || count <= 0) throw new ArgumentException("Must have data in a RtpPacket");
 
             m_OwnedOctets = new byte[count];
 
@@ -542,7 +542,7 @@ namespace Media.Rtp
         public bool IsReadOnly
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return false == m_OwnsHeader || m_OwnedOctets == null; }
+            get { return false == m_OwnsHeader || m_OwnedOctets is null; }
         }
 
         #endregion
@@ -702,7 +702,7 @@ namespace Media.Rtp
                 //octetsRemaining = Binary.Min(payloadCount, sourceListOctets);
 
                 //Allocte the memory for the required data
-                if (m_OwnedOctets == null) m_OwnedOctets = new byte[octetsRemaining];
+                if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
                 else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
 
                 System.Net.Sockets.SocketError error;
@@ -738,7 +738,7 @@ namespace Media.Rtp
                 if (octetsRemaining > 0) 
                 {
                     //Allocte the memory for the extension header
-                    if (m_OwnedOctets == null) m_OwnedOctets = new byte[octetsRemaining];
+                    if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
                     else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
 
                     System.Net.Sockets.SocketError error;
@@ -764,7 +764,7 @@ namespace Media.Rtp
                 //Use a RtpExtension instance to read the Extension Header and data.
                 using (RtpExtension extension = GetExtension())
                 {
-                    if (extension != null && false == extension.IsComplete)
+                    if (extension is not null && false == extension.IsComplete)
                     {
                         //Cache the size of the RtpExtension (not including the Flags and LengthInWords [The Extension Header])
                         extensionSize = extension.Size - RtpExtension.MinimumSize;
@@ -776,7 +776,7 @@ namespace Media.Rtp
                         if (octetsRemaining > 0 && octetsRemaining < extensionSize)
                         {
                             //Allocte the memory for the required data
-                            if (m_OwnedOctets == null) m_OwnedOctets = new byte[octetsRemaining];
+                            if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
                             else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
 
                             System.Net.Sockets.SocketError error;
@@ -811,7 +811,7 @@ namespace Media.Rtp
                 if (octetsRemaining > 0)
                 {
                     //Allocte the memory for the required data
-                    if (m_OwnedOctets == null) m_OwnedOctets = new byte[octetsRemaining];
+                    if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
                     else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
 
                     offset = payloadCount;

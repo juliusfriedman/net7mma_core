@@ -71,7 +71,7 @@ namespace Media.Common
         {
             MemorySegment result = new MemorySegment(count, shouldDispose);
 
-            if(source != null) System.Array.Copy(source, offset, result.m_Array, 0, count);
+            if(source is not null) System.Array.Copy(source, offset, result.m_Array, 0, count);
 
             return result;
         }
@@ -181,7 +181,7 @@ namespace Media.Common
         public MemorySegment(byte[] reference, bool shouldDispose = true)
             : base(shouldDispose)
         {
-            if (reference == null) throw new ArgumentNullException("reference");
+            if (reference is null) throw new ArgumentNullException("reference");
             
             m_Array = reference;
 
@@ -667,7 +667,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public FourBytes(byte* b, int offset, int length, bool reverse = false)
         {
-            if (b == null) throw new System.ArgumentNullException();
+            if (b is null) throw new System.ArgumentNullException();
 
             if(reverse) fixed (byte* B = ByteArray) for (int i = length - 1; i <= 0; --i) *((byte*)(B + i)) = *((byte*)(b + i + offset));
             else fixed (byte* B = ByteArray) for (int i = 0; i < length; ++i) *((byte*)(B + i)) = *((byte*)(b + i + offset));
@@ -677,7 +677,7 @@ namespace Media.Common
         public unsafe FourBytes(byte[] bytes, int offset, int length, bool reverse = false)
             :this()
         {
-            if (bytes == null) throw new System.ArgumentNullException();
+            if (bytes is null) throw new System.ArgumentNullException();
 
             fixed (byte* b = bytes)
             {
@@ -727,7 +727,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public unsafe EightBytes(byte* b, int offset, int length, bool reverse = false)
         {
-            if (b == null) throw new System.ArgumentNullException();
+            if (b is null) throw new System.ArgumentNullException();
 
             if (reverse) fixed (byte* B = ByteArray) for (int i = length - 1; i <= 0; --i) *((byte*)(B + i)) = *((byte*)(b + i + offset));
             else fixed (byte* B = ByteArray) for (int i = 0; i < length; ++i) *((byte*)(B + i)) = *((byte*)(b + i + offset));
@@ -805,7 +805,7 @@ namespace Media.Common
         public Word(byte[] value, int offset, int length)
             : this()
         {
-            if (value == null) throw new System.ArgumentNullException();
+            if (value is null) throw new System.ArgumentNullException();
 
             Bytes = new FourBytes(value, offset, length);
         }

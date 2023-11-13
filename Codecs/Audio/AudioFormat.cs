@@ -233,7 +233,7 @@ namespace Media.Codecs.Audio
         public AudioFormat(Codec.MediaFormat format)
             : base(format)
         {
-            if (format == null) throw new System.ArgumentNullException("format");
+            if (format is null) throw new System.ArgumentNullException("format");
 
             if (format.MediaType != Codec.MediaType.Audio) throw new System.ArgumentException("format.MediaType", "Must be Codec.MediaType.Audio.");
         }

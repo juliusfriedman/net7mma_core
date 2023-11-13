@@ -219,7 +219,7 @@ namespace Media.UnitTests
                     {
                         Media.Rtsp.RtspMessage interleaved = new Media.Rtsp.RtspMessage(data, offset, length);
 
-                        if (interleaved.RtspMessageType == Media.Rtsp.RtspMessageType.Invalid && lastInterleaved != null)
+                        if (interleaved.RtspMessageType == Media.Rtsp.RtspMessageType.Invalid && lastInterleaved is not null)
                         {
 
                             interleaved.Dispose();
@@ -542,7 +542,7 @@ namespace Media.UnitTests
                 GetMessage:
                     Media.Rtsp.RtspMessage interleaved = new Media.Rtsp.RtspMessage(data, offset, count);
 
-                    if (interleaved.RtspMessageType == Media.Rtsp.RtspMessageType.Invalid && lastInterleaved != null)
+                    if (interleaved.RtspMessageType == Media.Rtsp.RtspMessageType.Invalid && lastInterleaved is not null)
                     {
 
                         interleaved.Dispose();
@@ -744,7 +744,7 @@ namespace Media.UnitTests
             try { rtpClient = Media.Rtp.RtpClient.FromSessionDescription(default(Media.Sdp.SessionDescription)); }
             catch { }
 
-            System.Diagnostics.Debug.Assert(rtpClient == null, "Must not have created a RtpClient from a null SessionDescription");
+            System.Diagnostics.Debug.Assert(rtpClient is null, "Must not have created a RtpClient from a null SessionDescription");
 
 
             //Create a client
@@ -753,7 +753,7 @@ namespace Media.UnitTests
                 //Attempt to find a context
                 Media.Rtp.RtpClient.TransportContext contextAvailable = rtpClient.GetTransportContexts().FirstOrDefault();
 
-                System.Diagnostics.Debug.Assert(contextAvailable == null, "Found a Context when there was no Session or Media Description");
+                System.Diagnostics.Debug.Assert(contextAvailable is null, "Found a Context when there was no Session or Media Description");
 
                 using (contextAvailable = new Media.Rtp.RtpClient.TransportContext(0, 1, 0))
                 {
@@ -789,7 +789,7 @@ namespace Media.UnitTests
                 {
                     var _audioRTPTransportContext = _rtpAudioClient.GetTransportContexts().FirstOrDefault(); // The tranpsort context is null at this point.
 
-                    System.Diagnostics.Debug.Assert(_audioRTPTransportContext != null, "Cannot find the context");
+                    System.Diagnostics.Debug.Assert(_audioRTPTransportContext is not null, "Cannot find the context");
 
                     //System.Diagnostics.Debug.Assert(_audioRTPTransportContext.IsActive is false, "Found a active context");
 
@@ -829,7 +829,7 @@ a=sendonly";
                     System.Net.IPEndPoint localEndPoint = firstContext.RtpSocket.Connected ? firstContext.RtpSocket.LocalEndPoint as System.Net.IPEndPoint : firstContext.LocalRtp as System.Net.IPEndPoint;
 
                     //Verify our address addresses
-                    if (true.Equals(localEndPoint == null)) throw new System.Exception("Unexpected LocalRtp or RtpSocket.LocalEndPoint");
+                    if (true.Equals(localEndPoint is null)) throw new System.Exception("Unexpected LocalRtp or RtpSocket.LocalEndPoint");
 
                     if (false.Equals(Common.Extensions.IPAddress.IPAddressExtensions.IsMulticast(localEndPoint.Address))) throw new System.Exception("Unexpected IPAddress type for LocalEndPoint");
 
@@ -841,7 +841,7 @@ a=sendonly";
                     //Verify their address
                     System.Net.IPEndPoint remoteEndPoint = firstContext.RtpSocket.Connected ? firstContext.RtpSocket.RemoteEndPoint as System.Net.IPEndPoint : firstContext.RemoteRtp as System.Net.IPEndPoint; 
 
-                    if (true.Equals(remoteEndPoint == null)) throw new System.Exception("Unexpected RemoteRtp or RtpSocket.RemoteEndPoint");
+                    if (true.Equals(remoteEndPoint is null)) throw new System.Exception("Unexpected RemoteRtp or RtpSocket.RemoteEndPoint");
 
                     if (false.Equals(System.Net.IPAddress.Broadcast.Equals(remoteEndPoint.Address)) && false.Equals(Common.Extensions.IPAddress.IPAddressExtensions.IsMulticast(remoteEndPoint.Address))) throw new System.Exception("Unexpected IPAddress for RemoteEndPoint");
                 }

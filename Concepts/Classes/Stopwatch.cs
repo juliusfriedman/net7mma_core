@@ -50,7 +50,7 @@ namespace Media.Concepts.Classes
         public bool Enabled
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Timer != null && Timer.Enabled; }
+            get { return Timer is not null && Timer.Enabled; }
         }
 
         public double ElapsedTicks

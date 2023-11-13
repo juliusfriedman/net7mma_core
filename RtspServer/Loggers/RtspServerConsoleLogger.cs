@@ -75,7 +75,7 @@ namespace Media.Rtsp.Server.Loggers
             try
             {
                 Console.ForegroundColor = ExceptionColor;
-                Logger.Log(string.Format(Format, ex.Message, Environment.NewLine, ex.StackTrace, Environment.NewLine, ex.InnerException != null ? ex.InnerException.ToString() : string.Empty));
+                Logger.Log(string.Format(Format, ex.Message, Environment.NewLine, ex.StackTrace, Environment.NewLine, ex.InnerException is not null ? ex.InnerException.ToString() : string.Empty));
             }
             finally { Console.ForegroundColor = previous; }
         }

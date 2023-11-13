@@ -278,7 +278,7 @@ namespace Media.Common
 
             public ReverseShift(Shift actualShift)
             {
-                if (actualShift == null) throw new System.ArgumentNullException("actualShift");
+                if (actualShift is null) throw new System.ArgumentNullException("actualShift");
 
                 this.ShiftClass = actualShift;
             }

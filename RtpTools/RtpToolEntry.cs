@@ -135,7 +135,7 @@ namespace Media.RtpTools
            */
 
 
-            if (source == null) source = new System.Net.IPEndPoint(0, 0);
+            if (source is null) source = new System.Net.IPEndPoint(0, 0);
 
             //Tokenize the entry
             string [] entryParts = Encoding.ASCII.GetString(memory.Array, memory.Offset, memory.Count - 1).Split((char)Common.ASCII.Space);

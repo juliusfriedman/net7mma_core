@@ -352,7 +352,7 @@ namespace Media.UnitTests
 
             if (LinkedStack.Count != 1) throw new System.Exception("Count Not 1");
 
-            if (LinkedStack.Last == null) throw new System.Exception("Last is null");
+            if (LinkedStack.Last is null) throw new System.Exception("Last is null");
 
             if (false == LinkedStack.TryPush(ref LastInputOutput)) throw new System.Exception("TryEnqueue Not True");
 
@@ -360,13 +360,13 @@ namespace Media.UnitTests
 
             if (LinkedStack.Count != 2) throw new System.Exception("Count Not 2");
 
-            if (LinkedStack.Last == null) throw new System.Exception("Last is null");
+            if (LinkedStack.Last is null) throw new System.Exception("Last is null");
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void TestsPop()
         {
-            if (LinkedStack == null) throw new System.Exception("LinkedStack is null");
+            if (LinkedStack is null) throw new System.Exception("LinkedStack is null");
 
             if (LinkedStack.IsEmpty) throw new System.Exception("LinkedStack IsEmpty");
 
@@ -374,7 +374,7 @@ namespace Media.UnitTests
 
             if (false == LinkedStack.TryPop(out LastInputOutput)) throw new System.Exception("TryPop Not True");
 
-            if (LinkedStack.Last == null) throw new System.Exception("Last is null");
+            if (LinkedStack.Last is null) throw new System.Exception("Last is null");
 
             if (LinkedStack.IsEmpty) throw new System.Exception("LinkedStack IsEmpty");
 
@@ -385,7 +385,7 @@ namespace Media.UnitTests
             if (false == LinkedStack.TryPop(out LastInputOutput)) throw new System.Exception("TryPop Not True");
 
             //The Last node is always left in place to prevent NRE
-            //if (LinkedStack.Last != null) throw new System.Exception("Last is null");
+            //if (LinkedStack.Last is not null) throw new System.Exception("Last is null");
 
             if (false == LinkedStack.IsEmpty) throw new System.Exception("LinkedStack Not IsEmpty");
 

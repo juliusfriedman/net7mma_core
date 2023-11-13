@@ -92,7 +92,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public SegmentStream(IList<Common.MemorySegment> existing)
         {
-            if (existing == null) throw new ArgumentNullException();
+            if (existing is null) throw new ArgumentNullException();
 
             //Use the existing list
             Segments = existing;
@@ -342,7 +342,7 @@ namespace Media.Common
         {
             if (IsDisposed) return;
 
-            if (destination == null) throw new ArgumentNullException();
+            if (destination is null) throw new ArgumentNullException();
 
             int toCopy = 0;
 
@@ -627,7 +627,7 @@ namespace Media.Common
 
             if (count <= 0 || m_Position >= m_Count) return 0;
 
-            //if (WorkingSegment == null) WorkingSegment = Segments[m_Index];
+            //if (WorkingSegment is null) WorkingSegment = Segments[m_Index];
 
             int total = 0, toCopy;
 

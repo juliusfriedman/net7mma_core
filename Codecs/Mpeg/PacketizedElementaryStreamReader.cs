@@ -138,7 +138,7 @@ namespace Media.Containers.Mpeg
             {
                 Container.Node next = ReadNext();
 
-                if (next == null) yield break;
+                if (next is null) yield break;
 
                 yield return next;
 

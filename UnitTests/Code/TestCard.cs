@@ -221,7 +221,7 @@ public class TestCard
             }
 
             // fire the Event
-            if (ReceivedYUVFrame != null)
+            if (ReceivedYUVFrame is not null)
             {
                 ReceivedYUVFrame((uint)stopwatch.ElapsedMilliseconds, width, height, yuv_frame);
             }
@@ -269,7 +269,7 @@ public class TestCard
             }
 
             // Fire the Event
-            if (ReceivedAudioFrame != null)
+            if (ReceivedAudioFrame is not null)
             {
                 ReceivedAudioFrame((uint)stopwatch.ElapsedMilliseconds, audio_frame);
             }

@@ -327,7 +327,7 @@ namespace Media.Common.Extensions.String
             }
 
             System.Func<char, bool> predicate;
-            if (separator != null && separator.Length != 0)
+            if (separator is not null && separator.Length != 0)
                 predicate = (c) => Common.Extensions.Array.ArrayExtensions.Contains(separator, c);
             else predicate = char.IsWhiteSpace;
 

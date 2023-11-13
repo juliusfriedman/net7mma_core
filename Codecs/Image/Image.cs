@@ -134,7 +134,7 @@ namespace Media.Codecs.Image
 
         public void SaveBitmap(Stream stream)
         {
-            if (stream == null)
+            if (stream is null)
                 throw new ArgumentNullException(nameof(stream));
 
             int width = Width;

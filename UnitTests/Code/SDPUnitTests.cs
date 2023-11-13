@@ -1215,7 +1215,7 @@ a=control:track2";
 
         System.Diagnostics.Debug.Assert(sessionDescription.MediaDescriptions.Last().MediaType == Media.Sdp.MediaType.audio, "Did not find correct MediaType 'audio;");
 
-        System.Diagnostics.Debug.Assert(false == sessionDescription.MediaDescriptions.Any(m => m.ControlLine == null), "All MediaDescriptons must have a ControlLine which is not null.");
+        System.Diagnostics.Debug.Assert(false == sessionDescription.MediaDescriptions.Any(m => m.ControlLine is null), "All MediaDescriptons must have a ControlLine which is not null.");
 
         //Check time descriptions repeat times
         System.Diagnostics.Debug.Assert(sessionDescription.TimeDescriptions.Count() == 1, "Must have 1 TimeDescription");
@@ -1271,7 +1271,7 @@ a=mpeg4-esid:101";
         //Get the inital object descriptor line
         Media.Sdp.SessionDescriptionLine mpeg4IodLine = sd.Lines.Where(l => l.Type == 'a' && l.Parts.Any(p => p.Contains("mpeg4-iod"))).FirstOrDefault();
 
-        System.Diagnostics.Debug.Assert(mpeg4IodLine != null, "Cannot find InitialObjectDescriptor Line");
+        System.Diagnostics.Debug.Assert(mpeg4IodLine is not null, "Cannot find InitialObjectDescriptor Line");
 
         System.Diagnostics.Debug.Assert(mpeg4IodLine.Parts.Last() == "mpeg4-iod: \"data:application/mpeg4-iod;base64,AoE8AA8BHgEBAQOBDAABQG5kYXRhOmFwcGxpY2F0aW9uL21wZWc0LW9kLWF1O2Jhc2U2NCxBVGdCR3dVZkF4Y0F5U1FBWlFRTklCRUFGM0FBQVBvQUFBRERVQVlCQkE9PQEbAp8DFQBlBQQNQBUAB9AAAD6AAAA+gAYBAwQNAQUAAMgAAAAAAAAAAAYJAQAAAAAAAAAAA2EAAkA+ZGF0YTphcHBsaWNhdGlvbi9tcGVnNC1iaWZzLWF1O2Jhc2U2NCx3QkFTZ1RBcUJYSmhCSWhRUlFVL0FBPT0EEgINAAAUAAAAAAAAAAAFAwAAQAYJAQAAAAAAAAAA\"", "InitialObjectDescriptor Line Contents invalid.");
     }
@@ -1316,11 +1316,11 @@ a=rtpmap:102 H264/90000";
 
             var fmtp = md.FmtpLine;
 
-            System.Diagnostics.Debug.Assert(fmtp != null, "Cannot find FmtpLine in MediaDescription");
+            System.Diagnostics.Debug.Assert(fmtp is not null, "Cannot find FmtpLine in MediaDescription");
 
             var rtpMap = md.RtpMapLine;
 
-            System.Diagnostics.Debug.Assert(rtpMap != null, "Cannot find RtpMapLine in MediaDescription");
+            System.Diagnostics.Debug.Assert(rtpMap is not null, "Cannot find RtpMapLine in MediaDescription");
 
             //Verify and set the port range.
             System.Diagnostics.Debug.Assert(md.HasMultiplePorts, "HasMultiplePorts");
@@ -1393,7 +1393,7 @@ a=rtcp-fb:96 nack";
 
             var fmtp = md.FmtpLine;
 
-            System.Diagnostics.Debug.Assert(fmtp != null, "Cannot find FmtpLine in MediaDescription");
+            System.Diagnostics.Debug.Assert(fmtp is not null, "Cannot find FmtpLine in MediaDescription");
 
             string expected = "a=fmtp:96 packetization-mode=1;profile-level-id=640028;sprop-parameter-sets=Z2QAKKy0BQHv+A0CAAAcIAACvyHsQPoAALQN3//x2IH0AAFoG7//4UA=,aM48bJCRjhwfHDgkEwlzioJgqFA1wx+cVBMFQoGuGPyCoYGjBx5gh+hEICRA48w79CIQEiBx5h38;\r\n";
 
@@ -1401,7 +1401,7 @@ a=rtcp-fb:96 nack";
 
             var rtpMap = md.RtpMapLine;
 
-            System.Diagnostics.Debug.Assert(rtpMap != null, "Cannot find RtpMapLine in MediaDescription");
+            System.Diagnostics.Debug.Assert(rtpMap is not null, "Cannot find RtpMapLine in MediaDescription");
 
             expected = "a=rtcp-fb:96 nack\r\n";
 

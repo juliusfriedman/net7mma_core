@@ -238,7 +238,7 @@ namespace Media.Rtsp.Server
 
         internal void OnFrameDecoded(System.Drawing.Image decoded)
         {
-            if (DecodeFrames && decoded != null)
+            if (DecodeFrames && decoded is not null)
             {
                 FrameDecoded?.Invoke(this, decoded);
             }
@@ -246,7 +246,7 @@ namespace Media.Rtsp.Server
 
         internal void OnFrameDecoded(byte[] decoded)
         {
-            if (DecodeFrames && decoded != null)
+            if (DecodeFrames && decoded is not null)
             {
                 DataDecoded?.Invoke(this, decoded);
             }

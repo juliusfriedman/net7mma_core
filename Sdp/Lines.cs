@@ -264,7 +264,7 @@ namespace Media.Sdp
 
                 result = -1;
 
-                if (line == null || line.m_Type != Sdp.Lines.SessionBandwidthLine.BandwidthType || line.m_Parts.Count <= 0) return false;
+                if (line is null || line.m_Type != Sdp.Lines.SessionBandwidthLine.BandwidthType || line.m_Parts.Count <= 0) return false;
 
                 string[] tokens = line.m_Parts[0].Split(Media.Sdp.SessionDescription.ColonSplit, StringSplitOptions.RemoveEmptyEntries);
 
@@ -495,7 +495,7 @@ namespace Media.Sdp
             {
                 get
                 {
-                    if (m_ConnectionParts != null) return m_ConnectionParts;
+                    if (m_ConnectionParts is not null) return m_ConnectionParts;
 
                     if (string.IsNullOrWhiteSpace(ConnectionAddress)) return Enumerable.Empty<string>();
 
@@ -610,7 +610,7 @@ namespace Media.Sdp
             //    {
             //        if (string.IsNullOrWhiteSpace(ConnectionAddress)) return false;
 
-            //        if (m_ConnectionParts == null) m_ConnectionParts = ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
+            //        if (m_ConnectionParts is null) m_ConnectionParts = ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
 
             //        return m_ConnectionParts.Length > 2;
             //    }

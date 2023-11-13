@@ -89,7 +89,7 @@ namespace Media.Codecs.Image.Jpeg
 
         public void Dispose()
         {
-            if (jpegStream != null)
+            if (jpegStream is not null)
             {
                 jpegStream.Dispose();
                 jpegStream = null;

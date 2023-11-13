@@ -243,7 +243,7 @@ namespace Media.Sdp
 
         public void Add(SessionDescriptionLine line)
         {
-            if (line == null) return;
+            if (line is null) return;
 
             //Should ensure that the line is allowed.
 
@@ -359,7 +359,7 @@ namespace Media.Sdp
             //Check if the mapping matches..., should not be done at this level.
             //All instance still need the sdp in ToString to check if the encoding matches?
 
-            //if (sdp != null)
+            //if (sdp is not null)
             //{
             //    //Todo, maybe use m_Type because the line may not be typed as a ConnectionLine yet.
             //    Sdp.Lines.SessionConnectionLine connectionLine = sdp.Lines.OfType<Sdp.Lines.SessionConnectionLine>().FirstOrDefault();
@@ -372,7 +372,7 @@ namespace Media.Sdp
             //      c=IN IP4 224.2.1.1/127/2
             //      m=video 49170/2 RTP/AVP 31
             //    */
-            //    if (connectionLine != null && connectionLine.HasMultipleAddresses)
+            //    if (connectionLine is not null && connectionLine.HasMultipleAddresses)
             //    {
             //        int numberOfAddresses = connectionLine.NumberOfAddresses;
 

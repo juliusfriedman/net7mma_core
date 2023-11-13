@@ -25,7 +25,7 @@ namespace Media.Http
         /// <param name="socket"></param>
         internal static void ConfigureHttpSocket(Socket socket)
         {
-            if (socket == null) throw new ArgumentNullException("Socket");
+            if (socket is null) throw new ArgumentNullException("Socket");
 
             Media.Common.Extensions.Socket.SocketExtensions.EnableAddressReuse(socket);
             //socket.ExclusiveAddressUse = false;
@@ -247,15 +247,15 @@ namespace Media.Http
         /// Indicates if the RtspClient is connected to the remote host
         /// </summary>
         /// <notes>May want to do a partial receive for 1 byte which would take longer but indicate if truly connected. Udp may not be Connected.</notes>
-        public bool IsConnected { get { return false == IsDisposed && m_ConnectionTime >= TimeSpan.Zero && m_HttpSocket != null; } }
+        public bool IsConnected { get { return false == IsDisposed && m_ConnectionTime >= TimeSpan.Zero && m_HttpSocket is not null; } }
 
         /// <summary>
         /// Gets or Sets the ReadTimeout of the underlying NetworkStream / Socket (msec)
         /// </summary>
         public int SocketReadTimeout
         {
-            get { return IsDisposed || m_HttpSocket == null ? -1 : m_HttpSocket.ReceiveTimeout; }
-            set { if (IsDisposed || m_HttpSocket == null) return; m_HttpSocket.ReceiveTimeout = value; }
+            get { return IsDisposed || m_HttpSocket is null ? -1 : m_HttpSocket.ReceiveTimeout; }
+            set { if (IsDisposed || m_HttpSocket is null) return; m_HttpSocket.ReceiveTimeout = value; }
         }
 
         /// <summary>
@@ -263,8 +263,8 @@ namespace Media.Http
         /// </summary>
         public int SocketWriteTimeout
         {
-            get { return IsDisposed || m_HttpSocket == null ? -1 : m_HttpSocket.SendTimeout; }
-            set { if (IsDisposed || m_HttpSocket == null) return; m_HttpSocket.SendTimeout = value; }
+            get { return IsDisposed || m_HttpSocket is null ? -1 : m_HttpSocket.SendTimeout; }
+            set { if (IsDisposed || m_HttpSocket is null) return; m_HttpSocket.SendTimeout = value; }
         }
 
         /// <summary>
@@ -354,7 +354,7 @@ namespace Media.Http
                 m_HttpSocket = value;
 
                 //Ensure not connected if the socket is removed
-                if (m_HttpSocket == null)
+                if (m_HttpSocket is null)
                 {
                     m_BeginConnect = m_EndConnect = null;
 
@@ -433,7 +433,7 @@ namespace Media.Http
                     if (m_CurrentLocation != value)
                     {
 
-                        if (m_InitialLocation == null) m_InitialLocation = value;
+                        if (m_InitialLocation is null) m_InitialLocation = value;
 
                         //Backup the current location, (needs history list?)
                         m_PreviousLocation = m_CurrentLocation;
@@ -450,13 +450,13 @@ namespace Media.Http
                                 break;
                             case UriHostNameType.Dns:
 
-                                if (m_HttpSocket != null)
+                                if (m_HttpSocket is not null)
                                 {
 
                                     //Will use IPv6 by default if possible.
                                     m_RemoteIP = System.Net.Dns.GetHostAddresses(m_CurrentLocation.DnsSafeHost).FirstOrDefault(a => a.AddressFamily == m_HttpSocket.AddressFamily);
 
-                                    if (m_RemoteIP == null) throw new NotSupportedException("The given Location uses a HostNameType which is not the same as the underlying socket's address family. " + m_CurrentLocation.HostNameType + ", " + m_HttpSocket.AddressFamily + " And as a result no remote IP could be obtained to complete the connection.");
+                                    if (m_RemoteIP is null) throw new NotSupportedException("The given Location uses a HostNameType which is not the same as the underlying socket's address family. " + m_CurrentLocation.HostNameType + ", " + m_HttpSocket.AddressFamily + " And as a result no remote IP could be obtained to complete the connection.");
                                 }
                                 else
                                 {
@@ -515,11 +515,11 @@ namespace Media.Http
         public HttpClient(Uri location, int bufferSize = DefaultBufferSize, Socket existing = null, bool leaveOpen = false, int responseTimeoutInterval = (int)Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond, bool shouldDispose = true)
             :base(shouldDispose)
         {
-            if (location == null) throw new ArgumentNullException("location");
+            if (location is null) throw new ArgumentNullException("location");
 
             if (false == location.IsAbsoluteUri)
             {
-                if (existing == null) throw new ArgumentException("Must be absolute unless a socket is given", "location");
+                if (existing is null) throw new ArgumentException("Must be absolute unless a socket is given", "location");
                 if (existing.Connected) location = Media.Common.Extensions.IPEndPoint.IPEndPointExtensions.ToUri(((IPEndPoint)existing.RemoteEndPoint), HttpMessage.TransportScheme);
                 else if (existing.IsBound) location = Media.Common.Extensions.IPEndPoint.IPEndPointExtensions.ToUri(((IPEndPoint)existing.LocalEndPoint), HttpMessage.TransportScheme);
                 else throw new InvalidOperationException("location must be specified when existing socket must be connected or bound.");
@@ -573,7 +573,7 @@ namespace Media.Http
             : this(new Uri(location), bufferSize) //UriDecode?
         {
             //Check for a null Credential and UserInfo in the Location given.
-            if (Credential == null && false == string.IsNullOrWhiteSpace(CurrentLocation.UserInfo))
+            if (Credential is null && false == string.IsNullOrWhiteSpace(CurrentLocation.UserInfo))
             {
                 //Parse the given cred from the location
                 Credential = Media.Common.Extensions.Uri.UriExtensions.ParseUserInfo(CurrentLocation);
@@ -685,7 +685,7 @@ namespace Media.Http
             OnDisconnected();
 
             //If there is a socket
-            if (m_HttpSocket != null)
+            if (m_HttpSocket is not null)
             {
                 //If LeaveOpen was false and the socket is not shared.
                 if (false == LeaveOpen )
@@ -760,7 +760,7 @@ namespace Media.Http
                     bool wasConnected = IsConnected;
 
                     //If there is no message to send then check for response
-                    if (message == null) goto Connect;
+                    if (message is null) goto Connect;
 
                     #endregion
 
@@ -812,7 +812,7 @@ namespace Media.Http
                     //If there not already an Authorization header and there is an AuthenticationScheme utilize the information in the Credential
                     if (false == message.ContainsHeader(HttpHeaders.Authorization) &&
                         m_AuthenticationScheme != AuthenticationSchemes.None &&
-                        Credential != null)
+                        Credential is not null)
                     {
                         //Basic
                         if (m_AuthenticationScheme == AuthenticationSchemes.Basic)
@@ -854,7 +854,7 @@ namespace Media.Http
                     if (hasResponse && false == wasBlocked) m_InterleaveEvent.Reset();
 
                     //If nothing is being sent this is a receive only operation
-                    if (message == null) goto NothingToSend;
+                    if (message is null) goto NothingToSend;
 
                     #endregion
 
@@ -1053,7 +1053,7 @@ namespace Media.Http
                 Receive:
                     #region Receive
                     //If we can receive 
-                    //if (m_RtspSocket != null && m_RtspSocket.Poll(pollTime, SelectMode.SelectRead))
+                    //if (m_RtspSocket is not null && m_RtspSocket.Poll(pollTime, SelectMode.SelectRead))
                     //{
                     //Receive
                     received += m_HttpSocket.Receive(m_Buffer.Array, offset, m_Buffer.Count, SocketFlags.None, out error);
@@ -1099,7 +1099,7 @@ namespace Media.Http
                         }
 
                         //Raise the exception
-                        if (message != null) throw new SocketException((int)error);
+                        if (message is not null) throw new SocketException((int)error);
                         else return null;
                     }
 
@@ -1113,7 +1113,7 @@ namespace Media.Http
                     //Wait while
                     while (false == IsDisposed &&//The client connected and is not disposed AND
                         //There is no last transmitted message assigned AND it has not already been disposed
-                        (m_LastTransmitted == null || m_LastTransmitted.IsDisposed)
+                        (m_LastTransmitted is null || m_LastTransmitted.IsDisposed)
                         //AND the client is still allowed to wait
                         && ++attempt <= m_ResponseTimeoutInterval)
                     {
@@ -1129,7 +1129,7 @@ namespace Media.Http
                         }
 
                         //Check for any new messages
-                        if (m_LastTransmitted != null) goto HandleResponse;
+                        if (m_LastTransmitted is not null) goto HandleResponse;
 
                         //Calculate how much time has elapsed
                         TimeSpan taken = DateTime.UtcNow - lastAttempt;
@@ -1152,7 +1152,7 @@ namespace Media.Http
 
                         //    //If the client was not disposed re-trasmit the request if there is not a response pending already.
                         //    //Todo allow an option for this feature? (AllowRetransmit)
-                        //    if (false == IsDisposed && m_LastTransmitted == null /*&& request.Method != RtspMethod.PLAY*/)
+                        //    if (false == IsDisposed && m_LastTransmitted is null /*&& request.Method != RtspMethod.PLAY*/)
                         //    {
                         //        //handle re-transmission under UDP
                         //        if (m_HttpSocket.ProtocolType == ProtocolType.Udp)
@@ -1193,7 +1193,7 @@ namespace Media.Http
 
                     //Check for the response if there was a message sent.
                     if (hasResponse &&
-                        m_LastTransmitted != null && message != null &&
+                        m_LastTransmitted is not null && message is not null &&
                         m_LastTransmitted.MessageType == HttpMessageType.Response)
                     {
                         //Calculate the amount of time taken to receive the message.
@@ -1214,7 +1214,7 @@ namespace Media.Http
 
                                     //If there was a WWWAuthenticate header in the response
                                     if (m_LastTransmitted.ContainsHeader(HttpHeaders.WWWAuthenticate) &&
-                                        Credential != null) //And there have been Credentials assigned
+                                        Credential is not null) //And there have been Credentials assigned
                                     {
                                         Received(message, m_LastTransmitted);
 
@@ -1270,7 +1270,7 @@ namespace Media.Http
                         //Could have a remaining property which is set in parse body
 
                         //Http 1.0 without content-length header or with content-length and not yet completed.
-                        if (received > 0 && m_LastTransmitted != null && 
+                        if (received > 0 && m_LastTransmitted is not null && 
                             ((m_LastTransmitted.ContentLength == -1 && m_LastTransmitted.Version >= 1.0) 
                             || 
                             false == m_LastTransmitted.IsComplete))
@@ -1310,7 +1310,7 @@ namespace Media.Http
                 {
                     
                     //Determine if the host will close the connection
-                    if (m_LastTransmitted != null && m_LastTransmitted[HttpHeaders.Connection] == "close")
+                    if (m_LastTransmitted is not null && m_LastTransmitted[HttpHeaders.Connection] == "close")
                     {
                         Disconnect();
                     }
@@ -1556,7 +1556,7 @@ namespace Media.Http
         public virtual HttpMessage Authenticate(HttpMessage request, HttpMessage response = null, bool force = false)
         {
             //If not forced and already TriedCredentials then return the response given.
-            if (false == force && TriedCredentials && response == null) return response;
+            if (false == force && TriedCredentials && response is null) return response;
 
             //http://tools.ietf.org/html/rfc2617
             //3.2.1 The WWW-Authenticate Response Header
@@ -1565,7 +1565,7 @@ namespace Media.Http
 
             //Needs to handle multiple auth types
 
-            string authenticateHeader = response != null ? response[HttpHeaders.WWWAuthenticate] : string.Empty;
+            string authenticateHeader = response is not null ? response[HttpHeaders.WWWAuthenticate] : string.Empty;
 
             if (false == string.IsNullOrWhiteSpace(m_AuthorizationHeader) && false == authenticateHeader.Contains("stale")) authenticateHeader = m_AuthorizationHeader;
 
@@ -1638,7 +1638,7 @@ namespace Media.Http
                 if (false == string.IsNullOrWhiteSpace(cnonce))
                 {
 
-                    if (m_LastTransmitted != null)
+                    if (m_LastTransmitted is not null)
                     {
                         cnonce = "";
                     }
@@ -1660,7 +1660,7 @@ namespace Media.Http
                 if (false == string.IsNullOrWhiteSpace(qop))
                 {
                     qop = qop.Replace("qop=", string.Empty);
-                    if (nc != null) nc = nc.Substring(3);
+                    if (nc is not null) nc = nc.Substring(3);
                 }
 
                 string opaque = baseParts.Where(p => p.StartsWith("opaque", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
@@ -1687,7 +1687,7 @@ namespace Media.Http
             //Cache offset and count, leave a register for received data (should be calulated with length)
             int received = 0;
 
-            //If m_LastTransmitted != null
+            //If m_LastTransmitted is not null
             //Check m_LastTransmitted for a Transfer-Encoding of "chunked"
             //https://en.wikipedia.org/wiki/Chunked_transfer_encoding#Format
 
@@ -1737,7 +1737,7 @@ namespace Media.Http
                                 m_ReceivedBytes += received;
 
                                 //Disposes the last message if it exists.
-                                if (m_LastTransmitted != null)
+                                if (m_LastTransmitted is not null)
                                 {
                                     m_LastTransmitted.Dispose();
 
@@ -1764,7 +1764,7 @@ namespace Media.Http
                     case HttpMessageType.Invalid:
                         {
                             //If there was a previous message then dispose the invalid message
-                            if (m_LastTransmitted != null)
+                            if (m_LastTransmitted is not null)
                             {
                                 //Dispose the invalid message
                                 message.Dispose();

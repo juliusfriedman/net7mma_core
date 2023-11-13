@@ -656,8 +656,8 @@ namespace Media.Concepts.Classes
 
             public static bool operator ==(Distance a, IDistance b)
             {
-                if (a == null) return b == null;
-                if (b == null) return false;
+                if (a is null) return b is null;
+                if (b is null) return false;
                 if (a.Constant.Equals(b.Constant) is false)
                     return a.Units * b.Constant == b.TotalMeters;
                 return a.Units == b.TotalMeters;
@@ -870,8 +870,8 @@ namespace Media.Concepts.Classes
 
             public static bool operator ==(Frequency a, Frequency b)
             {
-                if (a == null) return b == null;
-                if (b == null) return false;
+                if (a is null) return b is null;
+                if (b is null) return false;
                 if (a.Constant.Equals(b.Constant) is false)
                     return a.Units * b.Constant == b.TotalUnits;
                 return a.Units == b.TotalUnits;
@@ -1031,8 +1031,8 @@ namespace Media.Concepts.Classes
 
             public static bool operator ==(Temperature a, ITemperature b)
             {
-                if (a == null) return b == null;
-                if (b == null) return false;
+                if (a is null) return b is null;
+                if (b is null) return false;
                 if (a.Constant.Equals(b.Constant) is false)
                     return a.Units * b.Constant == b.TotalUnits;
                 return a.Units == b.TotalUnits;
@@ -1206,8 +1206,8 @@ namespace Media.Concepts.Classes
 
             public static bool operator ==(Mass a, IMass b)
             {
-                if (a == null) return b == null;
-                if (b == null) return false;
+                if (a is null) return b is null;
+                if (b is null) return false;
                 if (a.Constant.Equals(b.Constant) is false)
                     return a.Units * b.Constant == b.TotalUnits;
                 return a.Units == b.TotalUnits;
@@ -1442,8 +1442,8 @@ namespace Media.Concepts.Classes
 
             public static bool operator ==(Energy a, IEnergy b)
             {
-                if (a == null) return b == null;
-                if (b == null) return false;
+                if (a is null) return b is null;
+                if (b is null) return false;
                 if (a.Constant.Equals(b.Constant) is false)
                     return a.Units * b.Constant == b.TotalUnits;
                 return a.Units == b.TotalUnits;
@@ -1667,8 +1667,8 @@ namespace Media.Concepts.Classes
 
             public static bool operator ==(Velocity a, IVelocity b)
             {
-                if (a == null) return b == null;
-                if (b == null) return false;
+                if (a is null) return b is null;
+                if (b is null) return false;
                 if (a.Constant.Equals(b.Constant) is false)
                     return a.Units * b.Constant == b.TotalUnits;
                 return a.Units == b.TotalUnits;
@@ -1822,8 +1822,8 @@ namespace Media.Concepts.Classes
 
             public static bool operator ==(Force a, IForce b)
             {
-                if (a == null) return b == null;
-                if (b == null) return false;
+                if (a is null) return b is null;
+                if (b is null) return false;
                 if (a.Constant.Equals(b.Constant) is false)
                     return a.Units * b.Constant == b.TotalUnits;
                 return a.Units == b.TotalUnits;
@@ -1986,8 +1986,8 @@ namespace Media.Concepts.Classes
 
             public static bool operator ==(Wavelength a, IWavelength b)
             {
-                if (a == null) return b == null;
-                if (b == null) return false;
+                if (a is null) return b is null;
+                if (b is null) return false;
                 if (a.Constant.Equals(b.Constant) is false)
                     return a.Units * b.Constant == b.TotalUnits;
                 return a.Units == b.TotalUnits;

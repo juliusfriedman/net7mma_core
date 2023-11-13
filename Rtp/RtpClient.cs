@@ -127,7 +127,7 @@ namespace Media.Rtp
 
             internal static void ConfigureRtpRtcpSocket(Socket socket) //,Common.ILogging = null
             {
-                if (socket == null) throw new ArgumentNullException("socket");
+                if (socket is null) throw new ArgumentNullException("socket");
 
                 Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableAddressReuse(socket));
 
@@ -327,7 +327,7 @@ namespace Media.Rtp
 
                 //var timeDesc = sessionDescription.TimeDescriptions.FirstOrDefault();
 
-                //if (timeDesc != null)
+                //if (timeDesc is not null)
                 //{
                 //    ///
                 //}
@@ -2807,7 +2807,7 @@ namespace Media.Rtp
         protected internal virtual void HandleIdentityCollision(TransportContext transportContext)
         {
 
-            if (transportContext == null) throw new ArgumentNullException("transportContext");
+            if (transportContext is null) throw new ArgumentNullException("transportContext");
 
             if (IDisposedExtensions.IsNullOrDisposed(transportContext)) throw new ObjectDisposedException("transportContext");
 
@@ -2835,7 +2835,7 @@ namespace Media.Rtp
         {
             //TransportContext context = tc ?? GetContextByPayloadType(frame.PayloadTypeByte);
             ////If there is a context
-            //if (context == null) return;
+            //if (context is null) return;
         }
 
         /// <summary>
@@ -3385,7 +3385,7 @@ namespace Media.Rtp
 
             InterleavedDataHandler action = OutOfBandData;
 
-            if (action is null || data == null || length.Equals(Common.Binary.Zero)) return;
+            if (action is null || data is null || length.Equals(Common.Binary.Zero)) return;
 
             if (m_ThreadEvents)
             {
@@ -3806,7 +3806,7 @@ namespace Media.Rtp
 
                 if (value == true)
                 {
-                    if (m_EventThread == null || EventsStarted.Equals(DateTime.MinValue))
+                    if (m_EventThread is null || EventsStarted.Equals(DateTime.MinValue))
                     {
                         //Create the event thread
                         m_EventThread = new Thread(new ThreadStart(HandleEvents))
@@ -3826,7 +3826,7 @@ namespace Media.Rtp
                     }
                     
                     //Wait for the start while the value was not changed and the thread is not started.
-                    while (m_ThreadEvents && EventsStarted == DateTime.MinValue && false.Equals(m_EventThread == null)) m_EventReady.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);
+                    while (m_ThreadEvents && EventsStarted == DateTime.MinValue && false.Equals(m_EventThread is null)) m_EventReady.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);
                 }
                 else
                 {
@@ -4166,7 +4166,7 @@ namespace Media.Rtp
         public RtpClient(Common.MemorySegment memory = null, bool incomingPacketEventsEnabled = true, bool frameChangedEventsEnabled = true, bool outgoingPacketEvents = true, bool shouldDispose = true)
             : this(shouldDispose)
         {
-            if (memory == null)
+            if (memory is null)
             {
                 //Determine a good size based on the MTU (this should cover most applications)
                 //Need an IP or the default IP to ensure the MTU Matches, use 1600 because 1500 is unaligned.

@@ -63,7 +63,7 @@ public class Mp4Box : Node
 
     public void AddChildBox(Mp4Box box)
     {
-        if (box == null)
+        if (box is null)
             throw new ArgumentNullException(nameof(box));
 
         AddData(box.Identifier.Concat(box.Data));
@@ -105,7 +105,7 @@ public class Mp4Box : Node
 
     public bool HasChild(Mp4Box box)
     {
-        if (box == null)
+        if (box is null)
             throw new ArgumentNullException(nameof(box));
 
         int offset = 0;
@@ -350,7 +350,7 @@ public class MvhdBox : FullBox
         }
         set
         {
-            if (value == null) return;//Todo set all 0?
+            if (value is null) return;//Todo set all 0?
 
             var offset = OffsetToData + (Version == 1 ? 34 : 22);
 
@@ -369,7 +369,7 @@ public class MvhdBox : FullBox
         }
         set
         {
-            if (value == null) return;//Todo set all 0?
+            if (value is null) return;//Todo set all 0?
 
             var array = value.ToArray();
 
@@ -528,7 +528,7 @@ public class MinfBox : FullBox
     public MinfBox(BaseMediaWriter writer, params Mp4Box[] children)
         : base(writer, Encoding.UTF8.GetBytes("minf"), 0, 0)
     {
-        if (children != null)
+        if (children is not null)
         {
             foreach (var child in children)
             {

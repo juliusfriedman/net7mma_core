@@ -185,9 +185,9 @@ namespace Media.Containers.Mpeg
 
             public static int GetAdaptationFieldLength(byte[] header, int headerOffset, byte[] data, int dataOffset)
             {
-                if (header == null) throw new ArgumentNullException("header");
+                if (header is null) throw new ArgumentNullException("header");
 
-                if (data == null) throw new ArgumentNullException("data");
+                if (data is null) throw new ArgumentNullException("data");
 
                 if (false == HasAdaptationField(header, headerOffset)) return -1;
 
@@ -196,9 +196,9 @@ namespace Media.Containers.Mpeg
 
             public static byte[] GetAdaptationFieldData(byte[] header, int headerOffset, byte[] data, int dataOffset)
             {
-                if (header == null) throw new ArgumentNullException("tsUnit");
+                if (header is null) throw new ArgumentNullException("tsUnit");
 
-                if (data == null) throw new ArgumentNullException("data");
+                if (data is null) throw new ArgumentNullException("data");
 
                 int size = GetAdaptationFieldLength(header, headerOffset, data, dataOffset);
 
@@ -247,7 +247,7 @@ namespace Media.Containers.Mpeg
 
             public static TimeSpan ProgramClockReferenceToTimeSpan(byte[] pcr, int offset)
             {
-                if (pcr == null) throw new ArgumentNullException("pcr");
+                if (pcr is null) throw new ArgumentNullException("pcr");
 
                 int length = pcr.Length;
 
@@ -285,7 +285,7 @@ namespace Media.Containers.Mpeg
 
             public static int AdaptationFieldExtensionLength(byte[] adaptationField)
             {
-                if (adaptationField == null) throw new ArgumentNullException("adaptationField");
+                if (adaptationField is null) throw new ArgumentNullException("adaptationField");
                 return adaptationField[1];
             }
 
@@ -293,19 +293,19 @@ namespace Media.Containers.Mpeg
 
             public static bool HasLegalTimeWindow(byte[] adaptationFieldExtension)
             {
-                if (adaptationFieldExtension == null) throw new ArgumentNullException("adaptationFieldExtension");
+                if (adaptationFieldExtension is null) throw new ArgumentNullException("adaptationFieldExtension");
                 return ((adaptationFieldExtension[2] & ErrorMask) != 0);
             }
 
             public static bool HasPiecewiseRate(byte[] adaptationFieldExtension)
             {
-                if (adaptationFieldExtension == null) throw new ArgumentNullException("adaptationFieldExtension");
+                if (adaptationFieldExtension is null) throw new ArgumentNullException("adaptationFieldExtension");
                 return ((adaptationFieldExtension[2] & PayloadStartUnitMask) != 0);
             }
 
             public static bool HasSeamlessSplice(byte[] adaptationFieldExtension)
             {
-                if (adaptationFieldExtension == null) throw new ArgumentNullException("adaptationFieldExtension");
+                if (adaptationFieldExtension is null) throw new ArgumentNullException("adaptationFieldExtension");
                 return ((adaptationFieldExtension[2] & PriorityMask) != 0);
             }
 

@@ -275,7 +275,7 @@ namespace Media.Concepts.Hardware
             : base(shouldDispose)
         {
             //If no fallback function was specified
-            if (fallback == null)
+            if (fallback is null)
             {
                 //Determine if an existing Fallback method exists on this type
                 string name = "Fallback_" + entryPoint.ReturnType;
@@ -284,7 +284,7 @@ namespace Media.Concepts.Hardware
                 System.Reflection.MethodInfo existingFallback = System.Reflection.IntrospectionExtensions.GetTypeInfo(GetType()).GetMethod(name, bindingFlags);
 
                 //If none exists create one, otherwise use the existing method
-                if (existingFallback == null) fallback = System.Delegate.CreateDelegate(entryPoint.ReturnType, this, name);
+                if (existingFallback is null) fallback = System.Delegate.CreateDelegate(entryPoint.ReturnType, this, name);
                 else fallback = System.Delegate.CreateDelegate(entryPoint.ReturnType, this, existingFallback);
             }
 
@@ -521,7 +521,7 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized | System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static PlatformIntrinsic()
         {
-            if (Allocator != null | Protector != null | ReverseAllocator != null) return;
+            if (Allocator is not null | Protector is not null | ReverseAllocator is not null) return;
 
             if (Common.Extensions.OperatingSystemExtensions.IsWindows)
             {

@@ -37,7 +37,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             internal void DisposeBuffer()
             {
-                if (Buffer != null)
+                if (Buffer is not null)
                 {
                     Buffer.Dispose();
                     Buffer = null;
@@ -70,7 +70,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         public override void Start()
         {
-            if (RtpClient != null) return;
+            if (RtpClient is not null) return;
 
             base.Start();
 

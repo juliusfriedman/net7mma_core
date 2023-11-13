@@ -191,7 +191,7 @@ namespace Media.Concepts.Classes
                                     System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;
                                 }
 
-                                if (false.Equals(Event == null) && Event.IsAlive)
+                                if (false.Equals(Event is null) && Event.IsAlive)
                                 {
                                     //If this is the counter thread
                                     if (System.Threading.Thread.CurrentThread.Equals(m_Counter))

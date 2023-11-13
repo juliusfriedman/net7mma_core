@@ -34,17 +34,17 @@ namespace Media.Common
 
         public static void SetHandled(object sender, EventArgsEx args, bool value = true)
         {
-            if(args != null && false == args.IgnoresSender(sender)) args.Handled = value;
+            if(args is not null && false == args.IgnoresSender(sender)) args.Handled = value;
         }
 
         public static void SetContinue(object sender, EventArgsEx args, bool value = true)
         {
-            if (args != null && false == args.IgnoresSender(sender)) args.Continue = value;
+            if (args is not null && false == args.IgnoresSender(sender)) args.Continue = value;
         }
 
         public static void SetLastHandled(object sender, EventArgsEx args, DateTimeOffset? value = null)
         {
-            if (args != null && false == args.IgnoresSender(sender)) args.LastHandled = value ?? DateTimeOffset.UtcNow;
+            if (args is not null && false == args.IgnoresSender(sender)) args.LastHandled = value ?? DateTimeOffset.UtcNow;
         }
     }
 

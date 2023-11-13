@@ -427,7 +427,7 @@ namespace Media.Rtsp
 
                 builder.Append(connectionType);
 
-                if (source != null)
+                if (source is not null)
                 {
                     builder.Append(SemiColon);
 
@@ -689,7 +689,7 @@ namespace Media.Rtsp
         {
             StringBuilder result = new StringBuilder();
 
-            if (url != null)
+            if (url is not null)
             {
                 result.Append("url=");
 

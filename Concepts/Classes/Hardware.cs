@@ -167,7 +167,7 @@ namespace Media.Concepts.Hardware
         public UnmanagedAction(System.Delegate managedDelegate, bool shouldDispose = true)
             : base(shouldDispose)
         {
-            if (managedDelegate == null) throw new System.ArgumentNullException();
+            if (managedDelegate is null) throw new System.ArgumentNullException();
 
             //System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ManagedDelegate = managedDelegate);
 
@@ -183,7 +183,7 @@ namespace Media.Concepts.Hardware
             : base(shouldDispose)
         {
             if (instructionPointer == System.IntPtr.Zero) throw new System.InvalidOperationException();
-            else if (returnType == null) throw new System.ArgumentNullException();
+            else if (returnType is null) throw new System.ArgumentNullException();
 
             ManagedDelegate = System.Runtime.InteropServices.Marshal.GetDelegateForFunctionPointer(InstructionPointer = instructionPointer, returnType);
         }
@@ -568,7 +568,7 @@ namespace Media.Concepts.Hardware
             : base(newCode, shouldDispose) //Set the Instructions member
         {
             //Ensure not null
-            if (method == null) throw new System.ArgumentNullException("method");
+            if (method is null) throw new System.ArgumentNullException("method");
 
             //Store the MethodInfo
             MethodInfo = method;

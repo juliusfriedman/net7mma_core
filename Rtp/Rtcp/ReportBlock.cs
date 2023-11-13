@@ -249,7 +249,7 @@ namespace Media.Rtcp
         public ReportBlock(ReportBlock reference, bool shouldDispose = true)
             : base(shouldDispose)
         {
-            if (reference == null) throw new ArgumentNullException();
+            if (reference is null) throw new ArgumentNullException();
 
             Memory = reference.Memory;
         }
@@ -314,7 +314,7 @@ namespace Media.Rtcp
 
             IDisposable memory = (IDisposable)Memory;
 
-            if (memory != null)
+            if (memory is not null)
             {
                 memory.Dispose();
 

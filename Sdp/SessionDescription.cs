@@ -1408,7 +1408,7 @@ namespace Media.Sdp
                 controlPart = controlPart.Split(Media.Sdp.SessionDescription.ColonSplit, 2, StringSplitOptions.RemoveEmptyEntries).Last();
 
                 //if unqualified then there is no aggregate control.
-                if (controlPart == SessionDescription.WildcardString && baseUri == null) return false;
+                if (controlPart == SessionDescription.WildcardString && baseUri is null) return false;
 
                 //The control uri may be in the control part
 
@@ -1445,7 +1445,7 @@ namespace Media.Sdp
         //E.g. This index can be used in GetTimeDescription(index)
         public static int GetIndexFor(this SessionDescription sdp, TimeDescription td)
         {
-            //if (sdp == null || td == null) return -1;
+            //if (sdp is null || td is null) return -1;
             if (Common.IDisposedExtensions.IsNullOrDisposed(sdp) || Common.IDisposedExtensions.IsNullOrDisposed(td)) return -1;
 
             return sdp.m_TimeDescriptions.IndexOf(td);

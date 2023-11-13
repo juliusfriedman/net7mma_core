@@ -65,7 +65,7 @@ namespace Media.Common.Extensions.Thread
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool InterruptThread(ref System.Threading.Thread thread)
         {
-            if (thread == null) return false;
+            if (thread is null) return false;
             try { thread.Interrupt(); return false; }
             catch (System.Threading.ThreadInterruptedException) { return true; }
         }
@@ -73,7 +73,7 @@ namespace Media.Common.Extensions.Thread
         public static void AbortAndFree(ref System.Threading.Thread thread, System.Threading.ThreadState state = System.Threading.ThreadState.Stopped, int timeout = (int)Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond)
         {
             //If the worker IsAlive and has the requested state.
-            if (thread != null && (thread.IsAlive && thread.ThreadState.HasFlag(state)))
+            if (thread is not null && (thread.IsAlive && thread.ThreadState.HasFlag(state)))
             {
                 //Attempt to join
                 if (false == thread.Join(timeout))

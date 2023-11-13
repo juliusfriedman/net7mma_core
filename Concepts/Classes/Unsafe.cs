@@ -65,7 +65,7 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static System.IntPtr AddressOf(object obj)
         {
-            if (obj == null) return System.IntPtr.Zero;
+            if (obj is null) return System.IntPtr.Zero;
 
             System.TypedReference reference = __makeref(obj);
 

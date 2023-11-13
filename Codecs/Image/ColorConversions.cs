@@ -62,7 +62,7 @@ namespace Media.Codecs.Image
             {
                 get
                 {
-                    if (lookupTable == null) Initialize();
+                    if (lookupTable is null) Initialize();
                     return lookupTable;
                 }
             }
@@ -74,7 +74,7 @@ namespace Media.Codecs.Image
             {
                 get
                 {
-                    return lookupTable != null;
+                    return lookupTable is not null;
                 }
             }
 

@@ -213,7 +213,7 @@ namespace Media.Common.Collections.Generic
                 if (null == item && null == item2)
                     return i;
                 // if equal return the position
-                if (item != null && item.Equals(item2))
+                if (item is not null && item.Equals(item2))
                     return i;
             }
             // nothing found

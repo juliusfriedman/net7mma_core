@@ -60,7 +60,7 @@ namespace Media.Rtsp
 
         public static void CreateSession(RtspClient parent, bool shouldDispose = true)
         {
-            if (parent == null) throw new ArgumentNullException(nameof(parent));
+            if (parent is null) throw new ArgumentNullException(nameof(parent));
             RtspSession result = new RtspSession(parent, shouldDispose);
 
             
@@ -785,7 +785,7 @@ namespace Media.Rtsp
         public int SocketReadTimeout
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket == null ? -1 : m_RtspSocket.ReceiveTimeout; }
+            get { return Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket is null ? -1 : m_RtspSocket.ReceiveTimeout; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set { if (Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket is null) return; m_RtspSocket.ReceiveTimeout = value; }
         }
@@ -796,7 +796,7 @@ namespace Media.Rtsp
         public int SocketWriteTimeout
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket == null ? -1 : m_RtspSocket.SendTimeout; }
+            get { return Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket is null ? -1 : m_RtspSocket.SendTimeout; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set { if (Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket is null) return; m_RtspSocket.SendTimeout = value; }
         }
@@ -862,7 +862,7 @@ namespace Media.Rtsp
         {
             LastRequest = request;
 
-            if (response != null)
+            if (response is not null)
             {
                 ParseSessionIdAndTimeout(LastResponse = response);
             }
@@ -1351,7 +1351,7 @@ namespace Media.Rtsp
 
                                 ////Ensure the client transport is connected if previously playing and it has since disconnected.
                                 //if (IsPlaying &&
-                                //    m_RtpClient != null &&
+                                //    m_RtpClient is not null &&
                                 //    false == m_RtpClient.IsActive) m_RtpClient.Activate();
                             }
 
@@ -1737,7 +1737,7 @@ namespace Media.Rtsp
                 }
 
                 //Return the result
-                //return message != null && m_LastTransmitted != null && message.CSeq == m_LastTransmitted.CSeq ? m_LastTransmitted : null;
+                //return message is not null && m_LastTransmitted is not null && message.CSeq == m_LastTransmitted.CSeq ? m_LastTransmitted : null;
                 return m_LastTransmitted;
 
             }//Unchecked
@@ -2463,7 +2463,7 @@ namespace Media.Rtsp
 
             //var cc = s.BeginConnect(m_RemoteRtsp, new AsyncCallback((iar)=>{
 
-            //    if (iar == null || false.Equals(iar.IsCompleted) || s == null) return;                    
+                //    if (iar is null || false.Equals(iar.IsCompleted) || s is null) return;                    
 
             //    if(s.Connected) s.EndConnect(iar);
 
@@ -2586,7 +2586,7 @@ namespace Media.Rtsp
             base.Dispose(ShouldDispose);
 
             //If there is a LastRequest
-            if (LastRequest != null)
+            if (LastRequest is not null)
             {
                 //It is no longer persistent
                 using (LastRequest) LastRequest.IsPersistent = false;
@@ -2596,7 +2596,7 @@ namespace Media.Rtsp
             }
 
             //If there is a LastResponse
-            if(LastResponse != null)
+            if(LastResponse is not null)
             { 
                 //It is no longer persistent
                 using (LastResponse) LastResponse.IsPersistent = false;
@@ -2616,7 +2616,7 @@ namespace Media.Rtsp
             }
 
             //If there is a MediaDescription
-            //if (MediaDescription != null)
+            //if (MediaDescription is not null)
             //{
             //    //Call dispose
             //    //MediaDescription.Dispose();
@@ -2626,7 +2626,7 @@ namespace Media.Rtsp
             //}
 
             //If there is a Context
-            if (Context != null)
+            if (Context is not null)
             {
                 //Call dispose
                 //Context.Dispose();

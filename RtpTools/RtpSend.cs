@@ -364,7 +364,7 @@ namespace Media.RtpTools
         /// <returns>The text describes the packet if the <paramref name="format"/> is a text format, otherwise an empty string</returns>
         public static string ToTextualConvention(FileFormat format, Rtcp.RtcpPacket packet)
         {
-            if (packet == null || packet.Payload.Count == 0 || format < FileFormat.Text || format == FileFormat.Short) return string.Empty;
+            if (packet is null || packet.Payload.Count == 0 || format < FileFormat.Text || format == FileFormat.Short) return string.Empty;
 
             if(format == FileFormat.Unknown) return UnknownSpecifier;
             
@@ -438,7 +438,7 @@ namespace Media.RtpTools
         {
             string blockString = string.Empty;
 
-            if (reportBlocks == null || !reportBlocks.Any()) return blockString;            
+            if (reportBlocks is null || !reportBlocks.Any()) return blockString;            
 
             //Build the block string for each block in the report
             foreach (Rtcp.ReportBlock reportBlock in reportBlocks)
@@ -461,7 +461,7 @@ namespace Media.RtpTools
         /// <returns>The string</returns>
         internal static string ToTextualConvention(Rtcp.SourceDescriptionReport sdes)
         {
-            if (sdes == null || sdes.IsDisposed) return string.Empty;
+            if (sdes is null || sdes.IsDisposed) return string.Empty;
 
             StringBuilder blockStringBuilder = new StringBuilder(sdes.BlockCount * Rtcp.SourceDescriptionReport.SourceDescriptionItem.ItemHeaderSize);
 
@@ -504,7 +504,7 @@ namespace Media.RtpTools
         {
             string blockString = string.Empty;
 
-            if (bye == null || bye.IsDisposed) return blockString;
+            if (bye is null || bye.IsDisposed) return blockString;
 
             //if HasReasonForLeaving add
             if (bye.HasReasonForLeaving)//reason=
@@ -513,7 +513,7 @@ namespace Media.RtpTools
             //Write each entry in bye.GetSourceList
             using (var sourceList = bye.GetSourceList())
             {
-                if (sourceList == null) blockString += "#Incomplete Source List Not Included" + (char)Common.ASCII.LineFeed;
+                if (sourceList is null) blockString += "#Incomplete Source List Not Included" + (char)Common.ASCII.LineFeed;
                 else foreach (uint partyId in sourceList)//ssrc=
                         blockString += string.Format(HexFormat, "ssrc", HexSpecifier + partyId.ToString("X"), (char)Common.ASCII.LineFeed);
             }
@@ -532,7 +532,7 @@ namespace Media.RtpTools
         public static string ToTextualConvention(FileFormat format, IEnumerable<Rtcp.RtcpPacket> packets, TimeSpan time, System.Net.IPEndPoint source)
         {
             //Short form does not allow Rtcp, Binary Formats have no textual convention.
-            if (packets == null || format == FileFormat.Short || format <= FileFormat.Dump) return string.Empty;
+            if (packets is null || format == FileFormat.Short || format <= FileFormat.Dump) return string.Empty;
 
             //Store the hex payload in one builder
             StringBuilder hexPayload = format == FileFormat.Hex ? new StringBuilder(64) : null;
@@ -674,7 +674,7 @@ namespace Media.RtpTools
                 using (var rtpExtension = packet.GetExtension())
                 {
 
-                    if (rtpExtension == null)
+                    if (rtpExtension is null)
                     {
                         builder.Append("#Incomplete Extension Not Included");
                         builder.Append((char)Common.ASCII.LineFeed);
@@ -1168,7 +1168,7 @@ namespace Media.RtpTools
         public static string PayloadDescription(this Rtp.RtpPacket packet)
         {
             //Check for a packet
-            if (packet == null) throw new ArgumentNullException("packet");
+            if (packet is null) throw new ArgumentNullException("packet");
 
             //Get the PayloadType from the header.
             byte payloadType =(byte)packet.PayloadType;

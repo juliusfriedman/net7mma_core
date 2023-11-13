@@ -220,7 +220,7 @@ namespace Media.Rtcp
         public RtcpPacket(RtcpHeader header, MemorySegment payload, bool shouldDispose = true)
             : base(shouldDispose)
         {
-            if (header == null) throw new ArgumentNullException("header");
+            if (header is null) throw new ArgumentNullException("header");
 
             //The instance owns the header
             m_OwnsHeader = shouldDispose;
@@ -591,7 +591,7 @@ namespace Media.Rtcp
 
             if (newBytes <= 0) return;
 
-           if (m_OwnedOctets == null)
+           if (m_OwnedOctets is null)
             {
                 m_OwnedOctets = octets.Skip(offset).Take(newBytes).ToArray();
 
@@ -768,7 +768,7 @@ namespace Media.Rtcp
             //Needs to account for buffer or socket.
 
             //Calulcate the amount of octets remaining in the RtcpPacket including the header
-            int octetsRemaining = ((ushort)(Header.LengthInWordsMinusOne + 1)) * 4 - Length, offset = Payload != null ? Payload.Count : 0;
+            int octetsRemaining = ((ushort)(Header.LengthInWordsMinusOne + 1)) * 4 - Length, offset = Payload is not null ? Payload.Count : 0;
 
             if (octetsRemaining > 0)
             {
@@ -776,7 +776,7 @@ namespace Media.Rtcp
                 if (Payload.Count < octetsRemaining)
                 {
                     //Allocte the memory for the required data
-                    if (m_OwnedOctets == null) m_OwnedOctets = new byte[octetsRemaining];
+                    if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
                     else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
                 }
 

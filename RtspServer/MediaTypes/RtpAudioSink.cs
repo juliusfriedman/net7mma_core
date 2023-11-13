@@ -90,7 +90,7 @@ public class RtpAudioSink : RtpSink
                     RtpClient.TransportContext transportContext = RtpClient.GetContextBySourceId(frame.SynchronizationSourceIdentifier);
 
                     //If there is a context
-                    if (transportContext != null)
+                    if (transportContext is not null)
                     {
                         //Increase priority
                         RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.AboveNormal;
@@ -188,7 +188,7 @@ public class RtpAudioSink : RtpSink
     /// </summary>
     public override void Start()
     {
-        if (RtpClient != null) return;
+        if (RtpClient is not null) return;
 
         //Create a RtpClient so events can be sourced from the Server to many clients without this Client knowing about all participants
         //If this class was used to send directly to one person it would be setup with the recievers address

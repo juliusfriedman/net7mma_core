@@ -9,7 +9,7 @@ namespace Media.Common.Extensions
             System.Type localType = someType;
 
             //While there is a type
-            while (localType != null)
+            while (localType is not null)
             {
                 //Get the TypeInfo
                 System.Reflection.TypeInfo typeInfo = System.Reflection.IntrospectionExtensions.GetTypeInfo(localType);

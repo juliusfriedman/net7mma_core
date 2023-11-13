@@ -1049,13 +1049,13 @@ namespace Media.Rtsp
                     //Don't send a request to keep the connection alive
                     DisableKeepAliveRequest = true;
 
-                    if (m_KeepAliveTimer != null) m_KeepAliveTimer.Dispose();
+                    if (m_KeepAliveTimer is not null) m_KeepAliveTimer.Dispose();
 
                     m_KeepAliveTimer = null;
                 }
 
                 //This is probably wrong, the time should be relative to all requests and not just the last...
-                if (m_KeepAliveTimer != null) m_KeepAliveTimer.Change(m_LastTransmitted != null && m_LastTransmitted.Transferred.HasValue ? (m_RtspSessionTimeout - (DateTime.UtcNow - m_LastTransmitted.Created)) : m_RtspSessionTimeout, Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan);
+                if (m_KeepAliveTimer is not null) m_KeepAliveTimer.Change(m_LastTransmitted is not null && m_LastTransmitted.Transferred.HasValue ? (m_RtspSessionTimeout - (DateTime.UtcNow - m_LastTransmitted.Created)) : m_RtspSessionTimeout, Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan);
             }
         }
 
@@ -1114,7 +1114,7 @@ namespace Media.Rtsp
                     if (m_CurrentLocation != value)
                     {
 
-                        if (m_InitialLocation == null) m_InitialLocation = value;
+                        if (m_InitialLocation is null) m_InitialLocation = value;
 
                         //Backup the current location, (needs history list?)
                         m_PreviousLocation = m_CurrentLocation;
@@ -1140,7 +1140,7 @@ namespace Media.Rtsp
                                 //    break;
                                 //}
 
-                                if (m_RtspSocket != null)
+                                if (m_RtspSocket is not null)
                                 {
 
                                     //Will use IPv6 by default if possible.
@@ -1312,7 +1312,7 @@ namespace Media.Rtsp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             protected set
             {
-                //if (value == null) throw new ArgumentNullException("The SessionDescription cannot be null.");
+                //if (value is null) throw new ArgumentNullException("The SessionDescription cannot be null.");
                 m_SessionDescription = value;
             }
         }
@@ -1332,7 +1332,7 @@ namespace Media.Rtsp
         public int SocketReadTimeout
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket == null ? -1 : m_RtspSocket.ReceiveTimeout; }
+            get { return Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket is null ? -1 : m_RtspSocket.ReceiveTimeout; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set { if (Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket is null) return; m_RtspSocket.ReceiveTimeout = value; }
         }
@@ -1343,7 +1343,7 @@ namespace Media.Rtsp
         public int SocketWriteTimeout
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket == null ? -1 : m_RtspSocket.SendTimeout; }
+            get { return Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket is null ? -1 : m_RtspSocket.SendTimeout; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set { if (Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket is null) return; m_RtspSocket.SendTimeout = value; }
         }
@@ -1424,7 +1424,7 @@ namespace Media.Rtsp
 
             //Check for a bufferSize of specified - unspecified value
             //Cases of anything less than or equal to 0 mean use the existing ReceiveBufferSize if possible.
-            if (bufferSize <= 0) bufferSize = m_RtspSocket != null ? m_RtspSocket.ReceiveBufferSize : 0;
+            if (bufferSize <= 0) bufferSize = m_RtspSocket is not null ? m_RtspSocket.ReceiveBufferSize : 0;
 
             //Create the segment given the amount of memory required if possible
             if (bufferSize > 0) m_Buffer = new Common.MemorySegment(bufferSize);
@@ -1859,7 +1859,7 @@ namespace Media.Rtsp
                                                 RtpClient.TransportContext context = m_RtpClient.GetContextBySourceId(ssrc.Value);
 
                                                 //If that context is not null then allow it's ssrc to change now.
-                                                if (context != null)
+                                                if (context is not null)
                                                 {
                                                     if (m_Playing.Remove(context.MediaDescription))
                                                     {
@@ -1878,7 +1878,7 @@ namespace Media.Rtsp
                                                     Common.ILoggingExtensions.Log(Logger, "Unknown context for ssrc = " + ssrc.Value);
                                                 }
                                             }
-                                            else if (uri != null)
+                                            else if (uri is not null)
                                             {
                                                 //Need to get the context by the uri.
                                                 //Location = rtsp://abc.com/live/movie
@@ -1890,7 +1890,7 @@ namespace Media.Rtsp
                                                 RtpClient.TransportContext context = m_RtpClient.GetTransportContexts().FirstOrDefault(tc => tc.MediaDescription.GetAbsoluteControlUri(CurrentLocation, SessionDescription) == uri);
 
                                                 //If that context is not null then allow it's ssrc to change now.
-                                                if (context != null)
+                                                if (context is not null)
                                                 {
                                                     //The last packet will have the sequence number of seq.Value
 
@@ -2015,7 +2015,7 @@ namespace Media.Rtsp
                             RtpClient.TransportContext context = m_RtpClient.GetContextBySourceId(ssrc.Value);
 
                             //If that context is not null then allow it's ssrc to change now.
-                            if (context != null)
+                            if (context is not null)
                             {
                                 if (m_Playing.Remove(context.MediaDescription))
                                 {
@@ -2027,7 +2027,7 @@ namespace Media.Rtsp
                                 context = null;
                             }
                         }
-                        else if (uri != null)
+                        else if (uri is not null)
                         {
                             //Need to get the context by the uri.
                             //Location = rtsp://abc.com/live/movie
@@ -2039,7 +2039,7 @@ namespace Media.Rtsp
                             RtpClient.TransportContext context = m_RtpClient.GetTransportContexts().FirstOrDefault(tc => tc.MediaDescription.GetAbsoluteControlUri(CurrentLocation, SessionDescription) == uri);
 
                             //If that context is not null then allow it's ssrc to change now.
-                            if (context != null)
+                            if (context is not null)
                             {
                                 if (m_Playing.Remove(context.MediaDescription))
                                 {
@@ -2108,7 +2108,7 @@ namespace Media.Rtsp
                     var context = Client.GetTransportContexts().FirstOrDefault(tc => tc.MediaDescription.MediaType == mediaType);
 
                     //If a context was found
-                    if (context != null)
+                    if (context is not null)
                     {
                         //If it was playing
                         if (m_Playing.ContainsKey(context.MediaDescription))
@@ -2229,7 +2229,7 @@ namespace Media.Rtsp
         internal protected virtual void ProcessServerSentRequest(RtspMessage toProcess = null)
         {
             if (false == IgnoreServerSentMessages &&
-                (toProcess == null ||
+                (toProcess is null ||
                 toProcess.RtspMessageType != RtspMessageType.Request ||
                 false == toProcess.IsComplete)) return;
 
@@ -2767,7 +2767,7 @@ namespace Media.Rtsp
                         //In short if you take over a rtsp session and you don't have the SDP from when it was created 
                         //then you can still send and receive data for the connection but you wouldn't know what streams come from what channel
                         //unless you had some prior knowledge (from a session you created previously) or didn't really care (being malicious)
-                        //if (setup == null)
+                        //if (setup is null)
                         //{
                         //    hasContext = true;
 
@@ -3353,7 +3353,7 @@ namespace Media.Rtsp
 
             //var cc = s.BeginConnect(m_RemoteRtsp, new AsyncCallback((iar)=>{
 
-            //    if (iar == null || false.Equals(iar.IsCompleted) || s == null) return;                    
+                //    if (iar is null || false.Equals(iar.IsCompleted) || s is null) return;                    
 
             //    if(s.Connected) s.EndConnect(iar);
 
@@ -4315,7 +4315,7 @@ namespace Media.Rtsp
 
                                 ////Ensure the client transport is connected if previously playing and it has since disconnected.
                                 //if (IsPlaying &&
-                                //    m_RtpClient != null &&
+                                //    m_RtpClient is not null &&
                                 //    false == m_RtpClient.IsActive) m_RtpClient.Activate();
                             }
 
@@ -4709,7 +4709,7 @@ namespace Media.Rtsp
                 }
 
                 //Return the result
-                //return message != null && m_LastTransmitted != null && message.CSeq == m_LastTransmitted.CSeq ? m_LastTransmitted : null;
+                //return message is not null && m_LastTransmitted is not null && message.CSeq == m_LastTransmitted.CSeq ? m_LastTransmitted : null;
                 return m_LastTransmitted;
 
             }//Unchecked
@@ -5708,7 +5708,7 @@ namespace Media.Rtsp
                                             if (m_RtspSocket is not null) created.Initialize(m_RtspSocket, m_RtspSocket);
 
                                             //Test using a new socket
-                                            //if (m_RtspSocket != null) created.Initialize((IPEndPoint)m_RtspSocket.LocalEndPoint, (IPEndPoint)m_RtspSocket.RemoteEndPoint);
+                                            //if (m_RtspSocket is not null) created.Initialize((IPEndPoint)m_RtspSocket.LocalEndPoint, (IPEndPoint)m_RtspSocket.RemoteEndPoint);
 
                                             //Store the SessionId on the context.
                                             created.ApplicationContext = SessionId;
@@ -5759,7 +5759,7 @@ namespace Media.Rtsp
                                         created.Initialize(m_RtspSocket, m_RtspSocket);
 
                                         //Test using a new socket
-                                        //if (m_RtspSocket != null) created.Initialize((IPEndPoint)m_RtspSocket.LocalEndPoint, (IPEndPoint)m_RtspSocket.RemoteEndPoint);
+                                        //if (m_RtspSocket is not null) created.Initialize((IPEndPoint)m_RtspSocket.LocalEndPoint, (IPEndPoint)m_RtspSocket.RemoteEndPoint);
 
                                         //Don't close this socket when disposing. (The RtpClient will dispose it)
                                         //LeaveOpen = true;
@@ -6224,20 +6224,20 @@ namespace Media.Rtsp
 
                 //response may be null because the server dropped the response due to an invalid header on the request.
 
-                //Handle allowed problems with reception of the play response if already playing
-                if (error == SocketError.Success && IsPlaying is false && Common.IDisposedExtensions.IsNullOrDisposed(this) is false && IsConnected)
-                {
-                    //No response or invalid range.
-                    if (response is null || response.RtspStatusCode == RtspStatusCode.InvalidRange)
+                    //Handle allowed problems with reception of the play response if already playing
+                    if (error == SocketError.Success && IsPlaying is false && Common.IDisposedExtensions.IsNullOrDisposed(this) is false && IsConnected)
                     {
-                        //if (response == null && m_RtpProtocol == ProtocolType.Tcp)
-                        //{
-                        //    //If there is transport
-                        //    if (false == Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient))
-                        //    {
-                        //        //Connect the client now.
-                        //        m_RtpClient.Activate();
-                        //    }
+                        //No response or invalid range.
+                        if (response is null || response.RtspStatusCode == RtspStatusCode.InvalidRange)
+                        {
+                            //if (response is null && m_RtpProtocol == ProtocolType.Tcp)
+                            //{
+                            //    //If there is transport
+                            //    if (false == Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient))
+                            //    {
+                            //        //Connect the client now.
+                            //        m_RtpClient.Activate();
+                            //    }
 
                         //    return response;
                         //}
@@ -6306,18 +6306,18 @@ namespace Media.Rtsp
 
                                             if (rtpTime.HasValue) context.RtpTimestamp = rtpTime.Value;
 
-                                            //if (context.Goodbye != null) context.Goodbye = null;
+                                                //if (context.Goodbye is not null) context.Goodbye = null;
 
-                                            context = null;
+                                                context = null;
+                                            }
                                         }
-                                    }
-                                    else if (false.Equals(uri == null))
-                                    {
-                                        //Need to get the context by the uri.
-                                        //Location = rtsp://abc.com/live/movie
-                                        //uri = rtsp://abc.com/live/movie/trackId=0
-                                        //uri = rtsp://abc.com/live/movie/trackId=1
-                                        //uri = rtsp://abc.com/live/movie/trackId=2
+                                        else if (false.Equals(uri is null))
+                                        {
+                                            //Need to get the context by the uri.
+                                            //Location = rtsp://abc.com/live/movie
+                                            //uri = rtsp://abc.com/live/movie/trackId=0
+                                            //uri = rtsp://abc.com/live/movie/trackId=1
+                                            //uri = rtsp://abc.com/live/movie/trackId=2
 
                                         //Get the context created with from the media description with the same resulting control uri
                                         RtpClient.TransportContext context = m_RtpClient.GetTransportContexts().FirstOrDefault(tc => tc.MediaDescription.GetAbsoluteControlUri(CurrentLocation, SessionDescription) == uri);
@@ -6331,7 +6331,7 @@ namespace Media.Rtsp
 
                                             if (rtpTime.HasValue) context.RtpTimestamp = rtpTime.Value;
 
-                                            //if (context.Goodbye != null) context.Goodbye = null;
+                                                //if (context.Goodbye is not null) context.Goodbye = null;
 
                                             context = null;
                                         }
@@ -6537,7 +6537,7 @@ namespace Media.Rtsp
 
                         //If there is a context ensure it has not ended and has recieved data within the context receive interval.
                         if (Common.IDisposedExtensions.IsNullOrDisposed(context) ||
-                            context.Goodbye == null ||
+                            context.Goodbye is null ||
                             context.IsContinious ||
                             context.TimeSending < context.MediaEndTime) continue;
 
@@ -6588,7 +6588,7 @@ namespace Media.Rtsp
 
             //Deactivate if was previously disconnected so long as the ProtocolSwitchTimer is not activated.
             //Might need a flag to see if DisconnectSocket was called.
-            //if (m_ProtocolSwitchTimer == null && false == wasConnected && IsPlaying && true == IsConnected) DisconnectSocket();
+            //if (m_ProtocolSwitchTimer is null && false == wasConnected && IsPlaying && true == IsConnected) DisconnectSocket();
         }
 
         public void EnsureMediaFlows()
@@ -6650,18 +6650,18 @@ namespace Media.Rtsp
 
                                     //If the paused request was not a sucess then it's probably due to an aggregate operation
                                     //Determine if we have to stop everything.
-                                    if (pauseResponse == null || pauseResponse.RtspStatusCode <= RtspStatusCode.OK)
+                                    if (pauseResponse is null || pauseResponse.RtspStatusCode <= RtspStatusCode.OK)
                                     {
 
                                         //Sometime the server doesn't respond to pause or the response gets lost.
-                                        if (pauseResponse == null || pauseResponse.RtspMessageType == RtspMessageType.Invalid)
+                                        if (pauseResponse is null || pauseResponse.RtspMessageType == RtspMessageType.Invalid)
                                         {
                                             //Wait up until the time another request is sent.
                                             m_InterleaveEvent.Wait(m_RtspSessionTimeout);
 
                                             //Need a way to be able to check the request's sequence number..
 
-                                            //if(m_LastTransmitted != null && m_LastTransmitted.CSeq == pauseReqeust.SequnceNumber)
+                                            //if(m_LastTransmitted is not null && m_LastTransmitted.CSeq == pauseReqeust.SequnceNumber)
 
                                             stopAll = true;
                                         }
@@ -6697,17 +6697,17 @@ namespace Media.Rtsp
                                     //If the Teardown was not a success then it's probably due to an aggregate operation.
                                     //If the paused request was not a sucess then it's probably due to an aggregate operation
                                     //Determine if we have to stop everything.
-                                    if (teardownResponse == null || teardownResponse.RtspStatusCode <= RtspStatusCode.OK)
+                                    if (teardownResponse is null || teardownResponse.RtspStatusCode <= RtspStatusCode.OK)
                                     {
                                         //Sometime the server doesn't respond to pause or the response gets lost.
-                                        if (teardownResponse == null || teardownResponse.RtspMessageType == RtspMessageType.Invalid)
+                                        if (teardownResponse is null || teardownResponse.RtspMessageType == RtspMessageType.Invalid)
                                         {
                                             //Wait up until the time another request is sent.
                                             m_InterleaveEvent.Wait(m_RtspSessionTimeout);
 
                                             //Need a way to be able to check the request's sequence number..
 
-                                            //if(m_LastTransmitted != null && m_LastTransmitted.CSeq == pauseReqeust.SequnceNumber)
+                                            //if(m_LastTransmitted is not null && m_LastTransmitted.CSeq == pauseReqeust.SequnceNumber)
 
                                             stopAll = true;
                                         }

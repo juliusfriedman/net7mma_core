@@ -50,8 +50,8 @@ namespace Media.Common.Extensions.Delegate
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static System.Delegate ConvertTo(this System.Delegate self, System.Type type)
         {
-            if (type == null) { throw new System.ArgumentNullException("type"); }
-            if (self == null) { return null; }
+            if (type is null) { throw new System.ArgumentNullException("type"); }
+            if (self is null) { return null; }
 
             if (self.GetType() == type)
                 return self;
@@ -65,7 +65,7 @@ namespace Media.Common.Extensions.Delegate
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void CreateDelegate(ref System.Delegate self, System.Type type = null)
         {
-            if(self != null) foreach(var inv in self.GetInvocationList())
+            if(self is not null) foreach(var inv in self.GetInvocationList())
                     self = System.Delegate.Combine(self, System.Delegate.CreateDelegate(type ?? inv.Method.ReturnType, inv.Target, inv.Method));
         }
 
@@ -76,7 +76,7 @@ namespace Media.Common.Extensions.Delegate
         /// <returns></returns>
         public static System.Delegate CreateDelegate(System.Reflection.MethodInfo method)
         {
-            if (method == null) throw new System.ArgumentNullException("method");
+            if (method is null) throw new System.ArgumentNullException("method");
 
             return method.CreateDelegate(System.Linq.Expressions.Expression.GetDelegateType(method.GetParameters().Select(p => p.ParameterType).Concat(Media.Common.Extensions.Linq.LinqExtensions.Yield(method.ReturnType)).ToArray()));
         }

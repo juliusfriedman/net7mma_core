@@ -97,7 +97,7 @@ public class ListChunk : HeaderChunk
 
     public void AddChunk(Chunk chunk)
     {
-        if (chunk == null)
+        if (chunk is null)
             return;
         var data = Data;
         Data = new(Data.Concat(chunk.Prepare()).ToArray());

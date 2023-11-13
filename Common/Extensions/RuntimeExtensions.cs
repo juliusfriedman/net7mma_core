@@ -61,7 +61,7 @@ namespace Media.Common.Extensions
         public static bool IsMono
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return MonoType != null; }
+            get { return MonoType is not null; }
         }
 
         internal static readonly System.Type MonoMacType = System.Type.GetType("MonoMac");
@@ -69,7 +69,7 @@ namespace Media.Common.Extensions
         public static bool IsMonoMac
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return MonoMacType != null; }
+            get { return MonoMacType is not null; }
         }
 
         //Maybe a IsMonoOrMonoMac...
@@ -79,10 +79,10 @@ namespace Media.Common.Extensions
         public static bool IsiOS
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return MonoTouchObjCRuntimeType != null; }
+            get { return MonoTouchObjCRuntimeType is not null; }
         }
 
-        //To have a Classic property one would need to ensure MonoTouchObjCRuntimeType != null and reflect the Constants.Version field.
+        //To have a Classic property one would need to ensure MonoTouchObjCRuntimeType is not null and reflect the Constants.Version field.
         /*
          https://developer.xamarin.com/recipes/ios/general/projects/environment_checks/
          * 
@@ -101,7 +101,7 @@ namespace Media.Common.Extensions
         public static bool IsAndroid
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return AndroidOSType != null /*|| HasAndroidOS*/; }
+            get { return AndroidOSType is not null /*|| HasAndroidOS*/; }
         }
 
         internal static readonly System.Type WatchKitType = System.Type.GetType("WatchKit");
@@ -112,7 +112,7 @@ namespace Media.Common.Extensions
         public static bool IsWatchKit
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return WatchKitType != null; }
+            get { return WatchKitType is not null; }
         }
 
         //IsRyuJit - http://stackoverflow.com/questions/22422021/how-do-i-verify-that-ryujit-is-jitting-my-app

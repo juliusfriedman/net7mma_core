@@ -448,7 +448,7 @@ namespace Media.Rtsp//.Server
                 IsDisconnected = false;
 
                 //The state is this session.
-                if(LastSend == null)
+                if(LastSend is null)
                 {
                     LastSend = new SocketAsyncEventArgs();
                     LastSend.UserToken = this;
@@ -1153,7 +1153,7 @@ namespace Media.Rtsp//.Server
             //Iterate all TransportContext's in the Source
             foreach (RtpClient.TransportContext sourceContext in source.RtpClient.GetTransportContexts())
             {
-                if (sourceContext == null) continue;
+                if (sourceContext is null) continue;
                 //If the PacketBuffer has any packets related remove packets from the PacketBuffer
                 if (PacketBuffer.Remove((int)sourceContext.SynchronizationSourceIdentifier, out packets))
                 {
@@ -1642,16 +1642,16 @@ namespace Media.Rtsp//.Server
 
             Common.ILoggingExtensions.Log(m_Server.ClientSessionLogger, "Session Recieved Rtp PacketType: " + packet.PayloadType + " - " + " Packet Ssrc = " + packet.SynchronizationSourceIdentifier);
 
-            //if (packet == null || packet.IsDisposed) return;
+            //if (packet is null || packet.IsDisposed) return;
             //else Common.ILoggingExtensions.LogException(m_Server.ClientSessionLogger, new Exception("Recieved Rtp PacketType: " + packet.PayloadType + " - " + " Packet Ssrc = " + packet.SynchronizationSourceIdentifier));
 
             //var context = tc ?? m_RtpClient.GetContextForPacket(packet);
 
-            //if (context == null) Common.ILoggingExtensions.LogException(m_Server.ClientSessionLogger, new Exception("Unknown Rtp Packet Ssrc = " + packet.SynchronizationSourceIdentifier));
+            //if (context is null) Common.ILoggingExtensions.LogException(m_Server.ClientSessionLogger, new Exception("Unknown Rtp Packet Ssrc = " + packet.SynchronizationSourceIdentifier));
             //else Common.ILoggingExtensions.LogException(m_Server.ClientSessionLogger, new Exception("Rtp Packet Ssrc = " + packet.SynchronizationSourceIdentifier + " RemoteId = " + context.RemoteSynchronizationSourceIdentifier + " LocalId = " + context.SynchronizationSourceIdentifier));
 
             //Crash... check bugs in compiler.. emited wrong instruction...
-            //m_Server.Logger.LogException(new Exception("Recieved PacketType: " + packet.PayloadType + " - " + implementation != null ? implementation.Name : string.Empty));
+            //m_Server.Logger.LogException(new Exception("Recieved PacketType: " + packet.PayloadType + " - " + implementation is not null ? implementation.Name : string.Empty));
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1671,7 +1671,7 @@ namespace Media.Rtsp//.Server
             else Common.ILoggingExtensions.LogException(m_Server.ClientSessionLogger, new Exception("Rtcp Packet Ssrc = " + packet.SynchronizationSourceIdentifier + " RemoteId = " + context.RemoteSynchronizationSourceIdentifier + " LocalId = " + context.SynchronizationSourceIdentifier));
 
             //Crash... check bugs in compiler.. emited wrong instruction...
-            //m_Server.Logger.LogException(new Exception("Recieved Rtcp PacketType: " + packet.PayloadType + " - " + implementation != null ? implementation.Name : string.Empty));
+            //m_Server.Logger.LogException(new Exception("Recieved Rtcp PacketType: " + packet.PayloadType + " - " + implementation is not null ? implementation.Name : string.Empty));
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1695,7 +1695,7 @@ namespace Media.Rtsp//.Server
             }
 
             //Crash... check bugs in compiler.. emited wrong instruction...
-            //m_Server.Logger.LogException(new Exception("Sent Rtcp PacketType: " + packet.PayloadType + " - " + implementation != null ? implementation.Name : string.Empty));
+            //m_Server.Logger.LogException(new Exception("Sent Rtcp PacketType: " + packet.PayloadType + " - " + implementation is not null ? implementation.Name : string.Empty));
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -2126,10 +2126,10 @@ namespace Media.Rtsp//.Server
             //        var sourceContext = GetSourceContext(localContext.MediaDescription);
 
             //        //If the sourceContext is null
-            //        if (sourceContext == null || false == sourceContext.HasAnyRecentActivity)
+            //        if (sourceContext is null || false == sourceContext.HasAnyRecentActivity)
             //        {
             //            //Removed Attachment for sourceContext.Id
-            //            Common.ILoggingExtensions.Log(m_Server.Logger, "Session " + (sourceContext == null ? "source is null" :  "sourceContext has no recent activity") +", Removing SourceMedia = " + source.Id);
+            //            Common.ILoggingExtensions.Log(m_Server.Logger, "Session " + (sourceContext is null ? "source is null" :  "sourceContext has no recent activity") +", Removing SourceMedia = " + source.Id);
 
             //            //Remove the attachment from the source context to the session context
             //            RemoveSource(source);
@@ -2176,7 +2176,7 @@ namespace Media.Rtsp//.Server
         internal RtspMessage ProcessRecord(RtspMessage request, Media.Rtsp.Server.IMedia source)
         {
             //Can't record when no Archiver is present
-            if (m_Server.Archiver == null) return CreateRtspResponse(request, RtspStatusCode.PreconditionFailed, null, "No Server Archiver.");
+            if (m_Server.Archiver is null) return CreateRtspResponse(request, RtspStatusCode.PreconditionFailed, null, "No Server Archiver.");
 
             //If already archiving then indicate created
             if (m_Server.Archiver.IsArchiving(source)) return CreateRtspResponse(request, RtspStatusCode.Created);
@@ -2244,7 +2244,7 @@ namespace Media.Rtsp//.Server
         {
             //Todo, NullOrDisposedException,
             if (Common.IDisposedExtensions.IsNullOrDisposed(stream)) throw new Media.Common.Extensions.Exception.ExceptionExtensions.ArgumentNullOrDisposedException("stream", stream);
-            //else if (SessionDescription != null) throw new NotImplementedException("There is already a m_SessionDescription for this session, updating is not implemented at this time");
+            //else if (SessionDescription is not null) throw new NotImplementedException("There is already a m_SessionDescription for this session, updating is not implemented at this time");
 
             string addressString = ((IPEndPoint)m_RtspSocket.LocalEndPoint).Address.ToString();
 

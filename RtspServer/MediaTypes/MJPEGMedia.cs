@@ -182,7 +182,7 @@ namespace Media.Rtsp.Server.MediaTypes
         {
             get
             {
-                if (thread != null)
+                if (thread is not null)
                 {
                     // check thread status
                     if (thread.Join(0) is false)
@@ -242,7 +242,7 @@ namespace Media.Rtsp.Server.MediaTypes
             if (State != StreamState.Started)
             {
                 // check source
-                if (m_Source == null)
+                if (m_Source is null)
                     throw new ArgumentException("Video source is not specified.");
 
                 framesReceived = 0;
@@ -273,7 +273,7 @@ namespace Media.Rtsp.Server.MediaTypes
         public void SignalToStop()
         {
             // stop thread
-            if (thread != null)
+            if (thread is not null)
             {
                 // signal to stop
                 stopEvent.Set();
@@ -289,7 +289,7 @@ namespace Media.Rtsp.Server.MediaTypes
         /// 
         public void WaitForStop()
         {
-            if (thread != null)
+            if (thread is not null)
             {
                 // wait for thread stop
                 thread.Join();
@@ -378,13 +378,13 @@ namespace Media.Rtsp.Server.MediaTypes
                     // create request
                     request = (HttpWebRequest)WebRequest.Create(m_Source);
                     // set user agent
-                    if (userAgent != null)
+                    if (userAgent is not null)
                     {
                         request.UserAgent = userAgent;
                     }
 
                     // set proxy
-                    if (proxy != null)
+                    if (proxy is not null)
                     {
                         request.Proxy = proxy;
                     }
@@ -392,13 +392,13 @@ namespace Media.Rtsp.Server.MediaTypes
                     // set timeout value for the request
                     request.Timeout = requestTimeout;
                     // set login and password
-                    if (SourceCredential != null)
+                    if (SourceCredential is not null)
                         request.Credentials = SourceCredential;
                     // set connection group name
                     if (useSeparateConnectionGroup)
                         request.ConnectionGroupName = GetHashCode().ToString();
                     // force basic authentication through extra headers if required
-                    if (forceBasicAuthentication && SourceCredential != null)
+                    if (forceBasicAuthentication && SourceCredential is not null)
                     {
                         string authInfo = string.Format("{0}:{1}", SourceCredential.UserName, SourceCredential.Password);
                         authInfo = Convert.ToBase64String(Encoding.Default.GetBytes(authInfo));
@@ -581,19 +581,19 @@ namespace Media.Rtsp.Server.MediaTypes
                 finally
                 {
                     // abort request
-                    if (request != null)
+                    if (request is not null)
                     {
                         request.Abort();
                         request = null;
                     }
                     // close response stream
-                    if (stream != null)
+                    if (stream is not null)
                     {
                         stream.Close();
                         stream = null;
                     }
                     // close response
-                    if (response != null)
+                    if (response is not null)
                     {
                         response.Close();
                         response = null;

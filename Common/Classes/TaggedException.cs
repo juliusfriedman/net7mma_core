@@ -171,7 +171,7 @@ namespace Media.Common
         {
             //If given any data 
             //Add any data related to the the Data IDictionary of the Exception using the Hashcode of the data as the key.
-            if (data != null) foreach (object key in data) Data.Add(key.GetHashCode(), key);
+            if (data is not null) foreach (object key in data) Data.Add(key.GetHashCode(), key);
         }
 
         #endregion

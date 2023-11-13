@@ -55,7 +55,7 @@ namespace Media.Rtsp.Server
         //Writes a RtpToolEntry for the packet
         public virtual void WritePacket(IMedia stream, Common.IPacket packet)
         {
-            if (stream == null) return;
+            if (stream is null) return;
 
             RtpTools.RtpDump.Program program;
             if (false == Attached.TryGetValue(stream, out program)) return;
@@ -99,7 +99,7 @@ namespace Media.Rtsp.Server
                 
                 if (false == Attached.TryGetValue(stream, out program)) return;
 
-                if (program != null && false == Common.IDisposedExtensions.IsNullOrDisposed(program.Writer)) program.Writer.Dispose();
+                if (program is not null && false == Common.IDisposedExtensions.IsNullOrDisposed(program.Writer)) program.Writer.Dispose();
 
                 Attached.Remove(stream);
 

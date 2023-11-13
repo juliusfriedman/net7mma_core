@@ -26,7 +26,7 @@ public class RiffWriter : MediaFileWriter
     //TODO, should not write when added, only when flushed etc
     public void AddChunk(Chunk chunk)
     {
-        if (chunk == null)
+        if (chunk is null)
             throw new ArgumentNullException(nameof(chunk));
 
         chunks.Add(chunk);

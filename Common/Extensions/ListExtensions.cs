@@ -43,9 +43,9 @@ namespace Media.Common.Extensions.List
 
         public static void AddRange<T>(this System.Collections.Generic.List<T> list, System.Collections.Generic.IEnumerable<T> source, int start, int length)
         {
-            if (list == null) throw new System.ArgumentNullException("list");
+            if (list is null) throw new System.ArgumentNullException("list");
             
-            if (source == null) throw new System.ArgumentNullException("source");
+            if (source is null) throw new System.ArgumentNullException("source");
 
             int count = System.Linq.Enumerable.Count(source);
 

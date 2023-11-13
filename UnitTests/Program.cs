@@ -1137,7 +1137,7 @@ namespace Media.UnitTests
                         }
 
                         //Print the report information
-                        if (sendersContext.SendersReport != null)
+                        if (sendersContext.SendersReport is not null)
                         {
                             //Measure QoE / QoS based on sent / received ratio.
                             consoleWriter.WriteLine("\t Since : " + sendersContext.SendersReport.Transferred);
@@ -1166,7 +1166,7 @@ namespace Media.UnitTests
                         }
 
                         //Print the report information
-                        if (receiversContext.ReceiversReport != null)
+                        if (receiversContext.ReceiversReport is not null)
                         {
                             //Determine what is actually being received by obtaining the TransportContext of the receiver            
                             //In a real world program you would not have access to the receiversContext so you would look at the sendersContext.RecieverReport
@@ -1507,9 +1507,9 @@ namespace Media.UnitTests
             using (client = new Media.Rtsp.RtspClient(location, protocol, 65540))
             {
                 //Use the credential specified
-                if (cred != null) client.Credential = cred;
+                if (cred is not null) client.Credential = cred;
 
-                if (authenticationScheme != null) client.AuthenticationScheme = authenticationScheme.Value;
+                if (authenticationScheme is not null) client.AuthenticationScheme = authenticationScheme.Value;
 
                 //FileInfo to represent the log
                 System.IO.FileInfo rtspLog = new System.IO.FileInfo("rtspLog" + DateTime.UtcNow.ToFileTimeUtc() + ".log.txt");
@@ -1577,7 +1577,7 @@ namespace Media.UnitTests
                         //Define an event for Rtp Frames Changed.
                         Media.Rtp.RtpClient.RtpFrameHandler rtpFrameReceived = (sender, rtpFrame, context, final) =>
                         {
-                            Media.Sdp.MediaType mediaType = context != null ? context.MediaDescription.MediaType : Sdp.MediaType.unknown;
+                            Media.Sdp.MediaType mediaType = context is not null ? context.MediaDescription.MediaType : Sdp.MediaType.unknown;
 
                             if (Media.Common.IDisposedExtensions.IsNullOrDisposed(rtpFrame)) return;
                             if (rtpFrame.IsEmpty)
@@ -1634,7 +1634,7 @@ namespace Media.UnitTests
                         //Define an event to handle Rtsp Request events
                         client.OnRequest += (sender, message) =>
                         {
-                            if (message != null)
+                            if (message is not null)
                             {
                                 string output = "Client Sent " + message.RtspMessageType + " :" + message.ToString();
 
@@ -1667,7 +1667,7 @@ namespace Media.UnitTests
                         client.OnResponse += (sender, request, response) =>
                         {
                             //Track null and unknown responses
-                            if (response != null)
+                            if (response is not null)
                             {
                                 string output = "Client Received " + response.RtspMessageType + " :" + response.ToString();
 
@@ -1683,7 +1683,7 @@ namespace Media.UnitTests
                             {
                                 string output = "Null Response";
 
-                                if (request != null)
+                                if (request is not null)
                                 {
                                     if (request.RtspMessageType == Media.Rtsp.RtspMessageType.Request)
                                         output = "Client Received Server Sent " + request.RtspMessageType + " :" + request.ToString();
@@ -1709,7 +1709,7 @@ namespace Media.UnitTests
                             //client.Client.MaximumRtcpBandwidthPercentage = 25;
                             ///It SHOULD also subsequently limit the maximum amount of CPU the client will be able to use
 
-                            if (args != null)
+                            if (args is not null)
                             {
                                 Console.WriteLine("\t*****************Playing `" + args.ToString() + "`");
 
@@ -1758,7 +1758,7 @@ namespace Media.UnitTests
                         //args are null if the event applies to all all playing Media.
                         client.OnPause += (sender, args) =>
                         {
-                            if (args != null) Console.WriteLine("\t*****************Pausing Playback `" + args.ToString() + "`(Press Q To Exit)");
+                            if (args is not null) Console.WriteLine("\t*****************Pausing Playback `" + args.ToString() + "`(Press Q To Exit)");
                             else Console.WriteLine("\t*****************Pausing All Playback. (Press Q To Exit)");
                         };
 
@@ -1766,7 +1766,7 @@ namespace Media.UnitTests
                         //args are null if the event applies to all all playing Media.
                         client.OnStop += (sender, args) =>
                         {
-                            if (args != null) Console.WriteLine("\t*****************Stopping Playback of `" + args.ToString() + "`(Press Q To Exit)");
+                            if (args is not null) Console.WriteLine("\t*****************Stopping Playback of `" + args.ToString() + "`(Press Q To Exit)");
                             else Console.WriteLine("\t*****************Stopping All Playback. (Press Q To Exit)");
                         };
 
@@ -2058,13 +2058,13 @@ namespace Media.UnitTests
                                     one = client.SendGetParameter();
                                 else one = client.SendOptions(true);
 
-                                if (one != null) Console.WriteLine(one);
+                                if (one is not null) Console.WriteLine(one);
 
                                 //Try to send an options request now, if that fails just send a tear down
                                 try { two = client.SendOptions(true); }
                                 catch { two = null; }
 
-                                if (two != null) Console.WriteLine(two);
+                                if (two is not null) Console.WriteLine(two);
 
                                 //All done with the client
                                 client.StopPlaying();
@@ -2085,7 +2085,7 @@ namespace Media.UnitTests
                         }
 
                         //Output test info before ending
-                        if (client.Client != null)
+                        if (client.Client is not null)
                         {
 
                             //Print out some information about our program
@@ -2441,7 +2441,7 @@ namespace Media.UnitTests
 
                                         bmpScreenshot.Dispose();
 
-                                        if (server != null && server.IsRunning) goto Start;
+                                        if (server is not null && server.IsRunning) goto Start;
                                     }
                                 }
 
@@ -2499,7 +2499,7 @@ namespace Media.UnitTests
                     Console.WriteLine("Press 'H' to Enable Http on Media.RtspServer");
                     Console.WriteLine("Press 'T' to Perform Load SubTest on Media.RtspServer");
                     Console.WriteLine("Press 'C' to See how many clients are connected.");
-                    //if (sampleStream != null) Console.WriteLine("Press 'F' to See statistics for " + sampleStream.Name);
+                    //if (sampleStream is not null) Console.WriteLine("Press 'F' to See statistics for " + sampleStream.Name);
 
                     System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;                    
 
@@ -2570,7 +2570,7 @@ namespace Media.UnitTests
 
                                                 Console.WriteLine("RecieveSequenceNumber: " + sTc.RecieveSequenceNumber);
 
-                                                if (source.RtpClient != null) Console.WriteLine("m_OutgoingRtpPackets: " + source.RtpClient.m_OutgoingRtpPackets.Count);
+                                                if (source.RtpClient is not null) Console.WriteLine("m_OutgoingRtpPackets: " + source.RtpClient.m_OutgoingRtpPackets.Count);
                                             }
 
                                             source = null;
@@ -2597,7 +2597,7 @@ namespace Media.UnitTests
 
                                                 Console.WriteLine("RecieveSequenceNumber: " + sTc.RtpTimestamp);
 
-                                                if (source.RtpClient != null) Console.WriteLine("m_OutgoingRtpPackets: " + source.RtpClient.m_OutgoingRtpPackets.Count);
+                                                if (source.RtpClient is not null) Console.WriteLine("m_OutgoingRtpPackets: " + source.RtpClient.m_OutgoingRtpPackets.Count);
                                             }
 
                                             source = null;
@@ -2618,7 +2618,7 @@ namespace Media.UnitTests
 
                                         Media.Rtsp.RtspServer localServer = _ as Media.Rtsp.RtspServer;
 
-                                        bool input = localServer == null ? true : localServer.IsRunning;
+                                        bool input = localServer is null ? true : localServer.IsRunning;
 
                                         string name;
 
@@ -3160,7 +3160,7 @@ namespace Media.UnitTests
 
                  var context = tc ?? ((Media.Rtp.RtpClient)sender).GetContextByPayloadType(frame.PayloadTypeByte);
 
-                 if (context == null || context.MediaDescription.MediaType != Media.Sdp.MediaType.video) return;
+                 if (context is null || context.MediaDescription.MediaType != Media.Sdp.MediaType.video) return;
 
                  using (Media.Rtsp.Server.MediaTypes.RFC6184Media.RFC6184Frame hframe = new Media.Rtsp.Server.MediaTypes.RFC6184Media.RFC6184Frame(frame))
                  {                    
@@ -3235,7 +3235,7 @@ namespace Media.UnitTests
                             }
 
                         //Prepend the SPS if it was found
-                        if (sps != null)
+                        if (sps is not null)
                         {
                             //Emulation prevention, present for SPS or PPS
                             fs.WriteByte(0);
@@ -3249,7 +3249,7 @@ namespace Media.UnitTests
                         else throw new System.Exception("SequenceParameterSet not found");
 
                         //Prepend the PPS if it was found.
-                        if (pps != null)
+                        if (pps is not null)
                         {
                             //Emulation prevention, present for SPS or PPS
                             fs.WriteByte(0);
@@ -3303,7 +3303,7 @@ a=rtpmap:99 h263-1998/90000");
 
             Media.Sdp.SessionDescriptionLine connectionLine = sd.ConnectionLine;
 
-            if (connectionLine == null) throw new Exception("Cannot find Connection Line");
+            if (connectionLine is null) throw new Exception("Cannot find Connection Line");
 
              //Test parsing a sdp which has a weird connection line.
             sd = new Media.Sdp.SessionDescription(@"v=0
@@ -3331,7 +3331,7 @@ a=appversion:1.0");
 
             connectionLine = sd.ConnectionLine;
 
-            if (connectionLine == null) throw new Exception("Cannot find Connection Line");
+            if (connectionLine is null) throw new Exception("Cannot find Connection Line");
 
             //Should also verify values of line.
 
@@ -4740,14 +4740,14 @@ a=appversion:1.0");
                     if (packet.IsComplete) Console.ForegroundColor = ConsoleColor.Blue;
                     else Console.ForegroundColor = ConsoleColor.Red;
 
-                    Media.Rtp.RtpClient client = context != null ? null : ((Media.Rtp.RtpClient)sender);
+                    Media.Rtp.RtpClient client = context is not null ? null : ((Media.Rtp.RtpClient)sender);
 
                     Media.Rtp.RtpClient.TransportContext matched = null;
 
-                    if (client != null) matched = client.GetContextForPacket(rtpPacket);
+                    if (client is not null) matched = client.GetContextForPacket(rtpPacket);
                     else matched = (Media.Rtp.RtpClient.TransportContext)context;
 
-                    if (matched == null)
+                    if (matched is null)
                     {                        
 
                         if (Media.Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
@@ -4961,7 +4961,7 @@ a=appversion:1.0");
 
                 byte[] buffer;
 
-                if (data == null)
+                if (data is null)
                 {
                     buffer = new byte[Utility.Random.Next(0, Media.Rtsp.RtspMessage.MaximumLength)];
 

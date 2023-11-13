@@ -241,7 +241,7 @@ namespace Media.UnitTests
                 using (Media.Rtp.RtpExtension rtpExtension = testPacket.GetExtension())
                 {
 
-                    if (rtpExtension == null) throw new Exception("Extension is null");
+                    if (rtpExtension is null) throw new Exception("Extension is null");
 
                     if (!rtpExtension.IsComplete) throw new Exception("Extension is not complete");
 
@@ -374,7 +374,7 @@ namespace Media.UnitTests
                 using (Media.Rtp.RtpExtension rtpExtension = testPacket.GetExtension())
                 {
 
-                    if (rtpExtension == null) throw new Exception("Extension is null");
+                    if (rtpExtension is null) throw new Exception("Extension is null");
 
                     if (!rtpExtension.IsComplete) throw new Exception("Extension is not complete");
 

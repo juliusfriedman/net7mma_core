@@ -58,7 +58,7 @@ namespace Media.Concepts.Classes.E
         /// <returns></returns>
         public static bool operator ==(Extensions a, object b)
         {
-            return a == null ? b == null : a.Equals(b);
+            return a is null ? b is null : a.Equals(b);
         }
 
         /// <summary>

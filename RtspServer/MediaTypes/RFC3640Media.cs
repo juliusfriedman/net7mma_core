@@ -77,7 +77,7 @@ namespace Media.Rtsp.Server.MediaTypes
             {
                 profileId = frequencyIndex = channelConfiguration = packetLen = 0;
 
-                if (attributeLine == null || attributeLine.Type != Sdp.Lines.SessionAttributeLine.AttributeType) return false;
+                if (attributeLine is null || attributeLine.Type != Sdp.Lines.SessionAttributeLine.AttributeType) return false;
 
                 throw new NotImplementedException();
 
@@ -611,7 +611,7 @@ namespace Media.Rtsp.Server.MediaTypes
                             #region Todo allow partial data from previous parsing, (needs bitOffset to be ref)
 
                             //If data exists from the previous packet which is not part of the payload
-                            //if (previouslyIncompleteAccessUnitWithAuxHeaderAndData != null)
+                            //if (previouslyIncompleteAccessUnitWithAuxHeaderAndData is not null)
                             //{
                             //    //May have to write the length in the frameData
                             //    depacketizedAccessUnit = Enumerable.Concat(frameHeader, depacketizedAccessUnit);
@@ -704,7 +704,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         public override void Start()
         {
-            if (RtpClient != null) return;
+            if (RtpClient is not null) return;
 
             base.Start();
 

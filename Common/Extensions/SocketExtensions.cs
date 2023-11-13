@@ -103,7 +103,7 @@ namespace Media.Common.Extensions.Socket
             System.Net.NetworkInformation.IPGlobalProperties ipGlobalProperties = System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties();
 
             //Can't get any information
-            if (ipGlobalProperties == null) return port = -1;
+            if (ipGlobalProperties is null) return port = -1;
 
             //We need endpoints to ensure the ports we want are not in use
             System.Collections.Generic.IEnumerable<System.Net.IPEndPoint> listeners;// = System.Linq.Enumerable.Empty<System.Net.IPEndPoint>();
@@ -136,7 +136,7 @@ namespace Media.Common.Extensions.Socket
                 if (ep.Port < port) continue;
 
                 //Ensure correctly filtering to the given IP
-                if (localIp != null && ep.Address != localIp) continue;
+                if (localIp is not null && ep.Address != localIp) continue;
 
                 if (port == ep.Port) port++; //Increment the port
                 else if (ep.Port == port + 1) port += 2; //Increment by 2, probably not needed. Trying to find a port pair is beyond the scope of this function.
@@ -322,7 +322,7 @@ namespace Media.Common.Extensions.Socket
                             System.Net.IPAddress result = Common.Extensions.NetworkInterface.NetworkInterfaceExtensions.GetFirstMulticastIPAddress(foundInterface, addressFamily);
 
                             //If the result is not null and the result is not System.Net.IPAddress.None
-                            if (result != null && false == Equals(result, System.Net.IPAddress.None))
+                            if (result is not null && false == Equals(result, System.Net.IPAddress.None))
                             {
                                 networkInterface = foundInterface;
 
@@ -1115,7 +1115,7 @@ namespace Media.Common.Extensions.Socket
         {
             System.Net.NetworkInformation.NetworkInterface nif = Common.Extensions.NetworkInterface.NetworkInterfaceExtensions.GetNetworkInterface(socket);
 
-            if (nif == null) return -1;
+            if (nif is null) return -1;
 
             switch (socket.AddressFamily)
             {

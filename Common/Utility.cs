@@ -82,7 +82,7 @@ namespace Media
         public static int ContainsBytes(byte[] buffer, ref int start, ref int count, byte[] octets, int octetStart, int octetCount)
         {
             //If the buffer or the octets are null no dice
-            if (buffer == null || octets == null) return -1;
+            if (buffer is null || octets is null) return -1;
 
             //Cache the lengths
             int bufferLength = buffer.Length, octetsLength = octets.Length;

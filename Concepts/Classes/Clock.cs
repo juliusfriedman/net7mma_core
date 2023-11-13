@@ -282,7 +282,7 @@ namespace Media.UnitTests
             System.Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
             //There must be a static clock
-            if (staticClock == null) throw new System.InvalidOperationException("There is no static Clock.");
+            if (staticClock is null) throw new System.InvalidOperationException("There is no static Clock.");
 
             //The static clock also has JIT overhead
 
@@ -322,7 +322,7 @@ namespace Media.UnitTests
             System.Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
             //There must be a static clock
-            if (staticClock == null) throw new System.InvalidOperationException("There is no static Clock.");
+            if (staticClock is null) throw new System.InvalidOperationException("There is no static Clock.");
 
             //Call Dispose on the staticClock, just to test it
             staticClock.Dispose();

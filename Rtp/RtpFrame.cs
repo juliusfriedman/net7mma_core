@@ -413,7 +413,7 @@ namespace Media.Rtp
         public bool HasDepacketized
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Depacketized == null ? false : Depacketized.Count > 0; }
+            get { return Depacketized is null ? false : Depacketized.Count > 0; }
         }
 
         /// <summary>
@@ -422,7 +422,7 @@ namespace Media.Rtp
         public bool HasBuffer
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return false == (m_Buffer == null) && m_Buffer.CanRead; }
+            get { return false == (m_Buffer is null) && m_Buffer.CanRead; }
         }
 
         /// <summary>
@@ -505,7 +505,7 @@ namespace Media.Rtp
         public int Count
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Packets == null ? 0 : Packets.Count; }
+            get { return Packets is null ? 0 : Packets.Count; }
         }
 
         /// <summary>
@@ -1026,7 +1026,7 @@ namespace Media.Rtp
             int i = IndexOf(ref sequenceNumber);
 
             //> Count
-            if (i < 0 || Packets == null) return null;
+            if (i < 0 || Packets is null) return null;
 
             //Get the packet
             RtpPacket p = Packets[i];
@@ -1144,7 +1144,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
-            if (Packets == null) return;
+            if (Packets is null) return;
 
             //////Multiple threads adding packets would not effect count but removing definitely would...
             ////Packets.Clear();
@@ -1276,7 +1276,7 @@ namespace Media.Rtp
             //When depacketizing the list KeyItem would implicitly be in the same order as the packets.
 
             //Iterate all packets contained and depacketize
-            for (int i = 0 /*false.Equals(Packets == null) && i < Packets.Count*/ ; false.Equals(IsDisposed) && i < Count; ++i) Depacketize(Packets[i]);
+            for (int i = 0 /*false.Equals(Packets is null) && i < Packets.Count*/ ; false.Equals(IsDisposed) && i < Count; ++i) Depacketize(Packets[i]);
 
             //PrepareBuffer must be called to access the buffer.
         }
@@ -1384,7 +1384,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal protected void FreeDepacketizedMemory(bool force = false)
         {
-            if (Depacketized == null) return;
+            if (Depacketized is null) return;
 
             //iterate each key in Depacketized
             foreach (KeyValuePair<double, Common.MemorySegment> pair in Depacketized)
@@ -1822,7 +1822,7 @@ namespace Media.Rtp
     //            {
     //                //join
 
-    //                if (current == null) current = packet;
+    //                if (current is null) current = packet;
     //                else
     //                {
 
@@ -2204,23 +2204,23 @@ namespace Media.UnitTests
                 //Remove a non existing packet
                 using (Media.Rtp.RtpPacket packet = frame.Remove(1))
                 {
-                    if (packet != null) throw new Exception("Packet is not null");
+                    if (packet is not null) throw new Exception("Packet is not null");
                 }
 
                 //Remove three existing packets
                 using (Media.Rtp.RtpPacket packet = frame.Remove(ushort.MaxValue))
                 {
-                    if(packet == null || packet.SequenceNumber != ushort.MaxValue) throw new Exception("Packet is null");
+                    if(packet is null || packet.SequenceNumber != ushort.MaxValue) throw new Exception("Packet is null");
                 }
 
                 using (Media.Rtp.RtpPacket packet = frame.Remove(ushort.MinValue))
                 {
-                    if (packet == null || packet.SequenceNumber != ushort.MinValue) throw new Exception("Packet is null");
+                    if (packet is null || packet.SequenceNumber != ushort.MinValue) throw new Exception("Packet is null");
                 }
 
                 using (Media.Rtp.RtpPacket packet = frame.Remove(ushort.MaxValue - 1))
                 {
-                    if (packet == null || packet.SequenceNumber != ushort.MaxValue - 1) throw new Exception("Packet is null");
+                    if (packet is null || packet.SequenceNumber != ushort.MaxValue - 1) throw new Exception("Packet is null");
                 }
 
                 if (false == frame.IsEmpty) throw new Exception("Frame is not empty");

@@ -73,7 +73,7 @@ namespace Media.Rtsp.Server.MediaTypes
             public static byte[] CreateSingleTimeAggregationUnit(int? DON = null, params byte[][] nals)
             {
 
-                if (nals == null || nals.Count() == 0) throw new InvalidOperationException("Must have at least one nal");
+                if (nals is null || nals.Count() == 0) throw new InvalidOperationException("Must have at least one nal");
 
                 //Get the data required which consists of the Length and the nal.
                 IEnumerable<byte> data = nals.SelectMany(n => Common.Binary.GetBytes((short)n.Length, Common.Binary.IsLittleEndian).Concat(n));
@@ -91,7 +91,7 @@ namespace Media.Rtsp.Server.MediaTypes
             public static byte[] CreateMultiTimeAggregationUnit(int DON, byte dond, int tsOffset, params byte[][] nals)
             {
 
-                if (nals == null || nals.Count() == 0) throw new InvalidOperationException("Must have at least one nal");
+                if (nals is null || nals.Count() == 0) throw new InvalidOperationException("Must have at least one nal");
 
                 //Get the data required which consists of the Length and the nal.
                 IEnumerable<byte> data = nals.SelectMany(n =>
@@ -120,7 +120,7 @@ namespace Media.Rtsp.Server.MediaTypes
             public static byte[] CreateMultiTimeAggregationUnit(int DON, byte dond, short tsOffset, params byte[][] nals)
             {
 
-                if (nals == null || nals.Count() == 0) throw new InvalidOperationException("Must have at least one nal");
+                if (nals is null || nals.Count() == 0) throw new InvalidOperationException("Must have at least one nal");
 
                 //Get the data required which consists of the Length and the nal.
                 IEnumerable<byte> data = nals.SelectMany(n =>
@@ -268,7 +268,7 @@ namespace Media.Rtsp.Server.MediaTypes
             /// <param name="DON">The Decoder Ordering Number (timestamp)</param>
             public virtual void Packetize(byte[] nal, int mtu = 1500, int? DON = null) //sequenceNumber
             {
-                if (nal == null) return;
+                if (nal is null) return;
 
                 int nalLength = nal.Length;
 
@@ -934,7 +934,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         public override void Start()
         {
-            if (RtpClient != null) return;
+            if (RtpClient is not null) return;
 
             base.Start();
 
@@ -1030,7 +1030,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         public override void Dispose()
         {
-            if (encoder != null)
+            if (encoder is not null)
             {
                 encoder.Dispose();
                 encoder = null;

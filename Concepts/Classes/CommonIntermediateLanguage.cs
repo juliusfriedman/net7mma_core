@@ -100,7 +100,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 //        //public static bool HasElements(Array array) { return !Null(array) && array.Length > 0; }
 
-//        //public static bool Null(Object o) { return o == null; }
+//        //public static bool Null(Object o) { return o is null; }
 
 //        //static string[] LineSplits = new string[] { Environment.NewLine };
 
@@ -175,7 +175,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //        //            {
 //        //                //Determine the type
 //        //                Type result = Type.GetType(noted.Substring(0, notationIndex + 1).Trim());
-//        //                if (result != null)
+//        //                if (result is not null)
 //        //                {
 //        //                    members = result.GetMember(noted.Substring(notationIndex + 2).Trim());//Skip .
 //        //                    return typeof(MemberInfo);
@@ -252,7 +252,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //        //{
 
 //        //    ///Use the current assembly
-//        //    if (assembly == null) assembly = Assembly.GetExecutingAssembly();
+//        //    if (assembly is null) assembly = Assembly.GetExecutingAssembly();
 
 //        //    //The methods real name
 //        //    string dynamicName = methodName + returnType.ToString();
@@ -317,7 +317,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //        //        OpCode opCode = Lookup[tokens[0]];
 
 //        //        //No OpCode found
-//        //        if (opCode == null)
+//        //        if (opCode is null)
 //        //        {
 //        //            Utility.BreakIfAttached();
 //        //            continue;
@@ -349,7 +349,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //        //        valueType = GetType(anyValue, out unsigned, out members, out callingConvention);
 
 //        //        //Determine if instructions follow
-//        //        if (opCode != null && !string.IsNullOrEmpty(anyValue))
+//        //        if (opCode is not null && !string.IsNullOrEmpty(anyValue))
 //        //        {
 //        //            if (opCode.Name == "goto") //Check for a label first
 //        //            {
@@ -378,7 +378,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //        //                ParameterInfo[] parameters = methodInfo.GetParameters();
 
 //        //                //Emit call with parameters
-//        //                if (methodInfo == null)
+//        //                if (methodInfo is null)
 //        //                {
 //        //                    //No Method Info
 //        //                    Utility.BreakIfAttached();
@@ -812,7 +812,7 @@ namespace Media.Concepts.Classes
         //[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         //public static uint CallIndirect(System.IntPtr ptr)
         //{
-        //    if (ptr == null) return uint.MinValue;
+        //    if (ptr is null) return uint.MinValue;
 
         //    return CallIndirectDelegate3(ptr);
         //}
@@ -820,7 +820,7 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized | System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static CommonIntermediateLanguage()
         {
-            if (InitblkDelegate != null | CpyblkDelegate != null) return;
+            if (InitblkDelegate is not null | CpyblkDelegate is not null) return;
 
             System.Type CommonIntermediaLanguageType = typeof(CommonIntermediateLanguage);
 

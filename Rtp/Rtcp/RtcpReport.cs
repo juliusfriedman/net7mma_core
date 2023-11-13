@@ -299,7 +299,7 @@ namespace Media.Rtcp
         /// <param name="reportBlock">The IReportBlock instance to add.</param>
         public virtual void Add(IReportBlock reportBlock)
         {
-            if (reportBlock == null) return;
+            if (reportBlock is null) return;
 
             if (IsReadOnly) throw new InvalidOperationException("The RtcpReport can only be modified when IsReadOnly is false.");
 
@@ -323,7 +323,7 @@ namespace Media.Rtcp
 
         public virtual bool Remove(IReportBlock reportBlock)
         {
-            if (reportBlock == null) throw new ArgumentNullException("reportBlock");
+            if (reportBlock is null) throw new ArgumentNullException("reportBlock");
 
             if (IsReadOnly) throw new InvalidOperationException("The RtcpReport can only be modified when IsReadOnly is false.");
 

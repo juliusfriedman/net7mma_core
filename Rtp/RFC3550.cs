@@ -149,7 +149,7 @@ namespace Media
         /// <returns>The sequence of bytes which represent the compound RtcpPacket.</returns>
         public static IEnumerable<byte> ToCompoundBytes(IEnumerable<RtcpPacket> packets)
         {
-            if (packets == null) throw new ArgumentNullException("packets");
+            if (packets is null) throw new ArgumentNullException("packets");
             else if (packets.Count() < 2) goto PreparePackets; //Only a single packet can just be prepared.
             
             RtcpPacket first = packets.First();
@@ -336,7 +336,7 @@ namespace Media
 
                 //The first packet in a compound packet needs to be validated
                 if (parsedPackets == 0 && !IsValidRtcpHeader(currentPacket.Header, currentPacket.Version)) yield break;
-                else if (currentPacket.Version != version || skipUnknownTypes && RtcpPacket.GetImplementationForPayloadType((byte)currentPacket.PayloadType) == null) yield break;
+                else if (currentPacket.Version != version || skipUnknownTypes && RtcpPacket.GetImplementationForPayloadType((byte)currentPacket.PayloadType) is null) yield break;
                 
                 //Count the packets parsed
                 ++parsedPackets;
@@ -385,7 +385,7 @@ namespace Media
 
         public static int ReadPadding(byte[] buffer, int offset, int count)
         {
-            if (count <= 0 || buffer == null) return 0;
+            if (count <= 0 || buffer is null) return 0;
 
             int dataLength = buffer.Length;
 
@@ -1438,7 +1438,7 @@ namespace Media
             public SourceList(Media.Rtp.RtpHeader header, byte[] buffer, int offset = 0, bool shouldDispose = true)
                 : base(shouldDispose)
             {
-                if (header == null) throw new ArgumentNullException("header");
+                if (header is null) throw new ArgumentNullException("header");
 
                 if (header.IsCompressed) throw new NotSupportedException();
 
@@ -1447,7 +1447,7 @@ namespace Media
 
                 if (m_SourceCount > 0)
                 {
-                    if (buffer == null) throw new ArgumentNullException("buffer");
+                    if (buffer is null) throw new ArgumentNullException("buffer");
 
                     //Source lists are only inserted by a mixer and come directly after the header and would be present in the payload,
                     //before the RtpExtension (if present) and before the RtpPacket's actual binary data
@@ -1776,7 +1776,7 @@ namespace Media
             [CLSCompliant(false)]
             public bool TryCopyTo(IList<uint> list, int index = 0)
             {
-                if (list == null || list.IsReadOnly) return false;
+                if (list is null || list.IsReadOnly) return false;
                 try
                 {
                     CheckDisposed();

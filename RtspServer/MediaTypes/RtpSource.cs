@@ -93,7 +93,7 @@ namespace Media.Rtsp.Server.MediaTypes
         //System.Drawing.Image m_lastDecodedFrame;
         //internal virtual void DecodeFrame(Rtp.RtpClient sender, Rtp.RtpFrame frame)
         //{
-        //    if (RtpClient == null || RtpClient != sender) return;
+        //    if (RtpClient is null || RtpClient != sender) return;
         //    try
         //    {
         //        //Get the MediaDescription (by ssrc so dynamic payload types don't conflict

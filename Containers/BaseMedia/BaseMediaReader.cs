@@ -152,9 +152,9 @@ namespace Media.Containers.BaseMedia
 
         public static string ToEncodedFourCharacterCode(Encoding encoding, byte[] identifier, int offset, int count)
         {
-            if (encoding == null) throw new ArgumentNullException("encoding");
+            if (encoding is null) throw new ArgumentNullException("encoding");
 
-            if (identifier == null) throw new ArgumentNullException("identifier");
+            if (identifier is null) throw new ArgumentNullException("identifier");
 
             if (offset + count > identifier.Length) throw new ArgumentOutOfRangeException("offset and count must relfect a position within identifier.");
 
@@ -216,7 +216,7 @@ namespace Media.Containers.BaseMedia
 
             foreach (var box in this)
             {
-                if (names == null || names.Count() == 0 || names.Contains(ToUTF8FourCharacterCode(box.Identifier)))
+                if (names is null || names.Count() == 0 || names.Contains(ToUTF8FourCharacterCode(box.Identifier)))
                 {
                     yield return box;
                 }
@@ -369,7 +369,7 @@ namespace Media.Containers.BaseMedia
             {
                 Node next = ReadNext();
 
-                if (next == null) yield break;
+                if (next is null) yield break;
 
                 yield return next;
 
@@ -487,7 +487,7 @@ namespace Media.Containers.BaseMedia
         {
             get
             {
-                if (m_Matrix == null) ParseMovieHeader();
+                if (m_Matrix is null) ParseMovieHeader();
                 return m_Matrix;
             }
         }
@@ -510,7 +510,7 @@ namespace Media.Containers.BaseMedia
             //Obtain the timeScale and duration from the LAST? mdhd box, can do but is more latent if the file is large...
             using (var mediaHeader = ReadBox("mvhd", Root.Offset)) // ReadBoxes(Root.Offset, "mvhd").LastOrDefault())
             {
-                if (mediaHeader == null) throw new InvalidOperationException("Cannot find 'mvhd' box.");
+                if (mediaHeader is null) throw new InvalidOperationException("Cannot find 'mvhd' box.");
 
                 int offset = 0;
 
@@ -581,7 +581,7 @@ namespace Media.Containers.BaseMedia
         public override IEnumerable<Track> GetTracks() //bool enabled tracks only?
         {
 
-            if (m_Tracks != null)
+            if (m_Tracks is not null)
             {
                 foreach (Track track in m_Tracks) yield return track;
                 yield break;
@@ -881,7 +881,7 @@ namespace Media.Containers.BaseMedia
                                                         if (-2 == waveFormatId)
                                                         {
                                                             //var waveAtom = ReadBox("wave", sampleDescriptionBox.Offset);
-                                                            //if (waveAtom != null)
+                                                            //if (waveAtom is not null)
                                                             //{
                                                             //    flags = Common.Binary.Read24(waveAtom.Raw, 9, Common.Binary.IsLittleEndian);
                                                             //    //Extrack from flags?
@@ -1164,7 +1164,7 @@ namespace Media.Containers.BaseMedia
 
         public override Common.SegmentStream GetSample(Track track, out TimeSpan sampleDuration)
         {
-            if (track == null)
+            if (track is null)
                 throw new ArgumentNullException(nameof(track));
 
             if (track.SampleCount == 0)

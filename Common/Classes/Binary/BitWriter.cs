@@ -155,7 +155,7 @@
         public BitWriter(System.IO.Stream source, Common.Binary.BitOrder bitOrder, int cacheSize = 32, bool leaveOpen = false)
             : base(true)
         {
-            if (source == null) throw new System.ArgumentNullException("source");
+            if (source is null) throw new System.ArgumentNullException("source");
 
             m_BaseStream = source;
 

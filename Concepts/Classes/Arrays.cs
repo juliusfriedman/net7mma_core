@@ -236,7 +236,7 @@ namespace Media.Concepts.Classes
         public static bool operator ==(ArrayElement<T> a, ArrayElement<T> b)
         {
             object boxA = a, boxB = b;
-            return boxA == null ? boxB == null : a.Source.Equals(b.Source);
+            return boxA is null ? boxB is null : a.Source.Equals(b.Source);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1023,7 +1023,7 @@ namespace Media.Concepts.Classes
         public static implicit operator Array<T>(T[] array) { return new Array<T>(array); }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(Array<T> a, Array<T> b) { object boxA = a, boxB = b; return boxA == null ? boxB == null : a.Equals(b); }
+        public static bool operator ==(Array<T> a, Array<T> b) { object boxA = a, boxB = b; return boxA is null ? boxB is null : a.Equals(b); }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Array<T> a, Array<T> b) { return false == (a == b); }
@@ -1046,7 +1046,7 @@ namespace Media.Concepts.Classes
             //Could be close but may need to branch for when we don't want the implicit array.
             //new System.ArraySegment<T>(array, array.m_Header.m_Offset + array.m_Header.m_Reserved, array.m_Header.m_Length);
 
-            //Branch...  same as array.m_Source == null but faster because of 0
+            //Branch...  same as array.m_Source is null but faster because of 0
             //Uses implicit conversion to array because array.m_Source may be null, (array.m_Source ?? array) works but still branches.
             segment = array.m_Header.m_Offset < 0 ? 
                 //Strings...
@@ -1076,7 +1076,7 @@ namespace Media.Concepts.Classes
         //static System.IntPtr ComputeAddress(Array<T> array)
         //{
         //    //Could do something with offset to skip the null check.
-        //    //return array.m_Source == null ? (System.IntPtr)array.m_Header.m_Offset : System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<T>(array.m_Source, array.m_Header.m_Offset);
+        //    //return array.m_Source is null ? (System.IntPtr)array.m_Header.m_Offset : System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<T>(array.m_Source, array.m_Header.m_Offset);
 
         //    //If the object was not null then compute the address using the stored offset, otherwise use the native array.
         //    //This could also be used for native pointers by using array.m_IntPtr...
@@ -1518,7 +1518,7 @@ namespace Media.UnitTests
 
             System.Collections.Generic.IList<char> iListC = stringTest as System.Collections.Generic.IList<char>;
 
-            if (iListC != null)
+            if (iListC is not null)
             {
                 System.Console.WriteLine(iListC[0]);
                 System.Console.WriteLine(iListC.Count);

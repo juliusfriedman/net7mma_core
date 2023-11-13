@@ -316,7 +316,7 @@ namespace Media.Rtp
                 && //AND the call has not been forced AND the context IsRtcpEnabled 
                 (false == force && true == context.IsRtcpEnabled)
                 // OR there is no RtcpSocket
-                || context.RtcpSocket == null)
+                || context.RtcpSocket is null)
             {
                 //Indicate nothing was sent
                 return 0;
@@ -489,10 +489,10 @@ namespace Media.Rtp
         {
             error = System.Net.Sockets.SocketError.SocketError;
 
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || packets == null) return 0;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || packets is null) return 0;
 
             //If we don't have an transportContext to send on or the transportContext has not been identified or Rtcp is Disabled or there is no remote rtcp end point
-            if (Common.IDisposedExtensions.IsNullOrDisposed(context) || context.SynchronizationSourceIdentifier.Equals(Common.Binary.Zero) | false.Equals(context.IsRtcpEnabled) | context.RemoteRtcp == null)
+            if (Common.IDisposedExtensions.IsNullOrDisposed(context) || context.SynchronizationSourceIdentifier.Equals(Common.Binary.Zero) | false.Equals(context.IsRtcpEnabled) | context.RemoteRtcp is null)
             {
                 //Return
                 return 0;
@@ -542,7 +542,7 @@ namespace Media.Rtp
                 }
 
                 //If nothing was sent and the buffers are not null and the socket is tcp use framing.
-                if (length > 0 && context.IsActive && sent == 0 && false.Equals(buffers == null))
+                if (length > 0 && context.IsActive && sent == 0 && false.Equals(buffers is null))
                 {
                     if (context.RtcpSocket.ProtocolType == System.Net.Sockets.ProtocolType.Tcp)
                     {
@@ -708,7 +708,7 @@ namespace Media.Rtp
                 false.Equals(context.IsRtcpEnabled)
                 || //Or Rtcp Bandwidth for this context or RtpClient has been exceeded
                 context.RtcpBandwidthExceeded || AverageRtcpBandwidthExceeded
-                || false.Equals(context.Goodbye == null)) return false; //No reports can be sent.
+                || false.Equals(context.Goodbye is null)) return false; //No reports can be sent.
 
 
             //If forced or the last reports were sent in less time than alloted by the m_SendInterval
@@ -895,7 +895,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public /*virtual */ TransportContext GetContextBySocket(System.Net.Sockets.Socket socket)
         {
-            return socket == null ? null : GetContextBySocketHandle(socket.Handle);
+            return socket is null ? null : GetContextBySocketHandle(socket.Handle);
         }
 
         /// <summary>
@@ -969,7 +969,7 @@ namespace Media.Rtp
 
             //TransportContext transportContext = ssrc.HasValue ? GetContextBySourceId(ssrc.Value) : GetContextForPacket(packet);
 
-            if (transportContext == null) transportContext = ssrc.HasValue ? GetContextBySourceId(ssrc.Value) : GetContextForPacket(packet);
+            if (transportContext is null) transportContext = ssrc.HasValue ? GetContextBySourceId(ssrc.Value) : GetContextForPacket(packet);
 
             //If we don't have an transportContext to send on or the transportContext has not been identified
             if (Common.IDisposedExtensions.IsNullOrDisposed(transportContext) || false.Equals(transportContext.IsActive)) return 0;
@@ -985,7 +985,7 @@ namespace Media.Rtp
             #region Unused [Sends a SendersReport if one was not already]
 
             //Send a SendersReport before any data is sent.
-            //if (transportContext.SendersReport == null && transportContext.IsRtcpEnabled) SendSendersReport(transportContext);
+            //if (transportContext.SendersReport is null && transportContext.IsRtcpEnabled) SendSendersReport(transportContext);
 
             #endregion
 
@@ -1302,7 +1302,7 @@ namespace Media.Rtp
             error = System.Net.Sockets.SocketError.SocketError;
 
             //Check there is valid data and a socket which is able to write and that the RtpClient is not stopping
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || socket == null || length == 0 || data == null) return 0;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || socket is null || length == 0 || data is null) return 0;
 
             int sent = 0;
 
@@ -1475,7 +1475,7 @@ namespace Media.Rtp
                 //var context = GetContextBySocket(socket);
 
                 ////If there was a context and packet cannot fit
-                //if (context != null && received > context.MaximumPacketSize)
+                //if (context is not null && received > context.MaximumPacketSize)
                 //{
                 //    //Log the problem
                 //    Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@ReceiveData - Cannot fit packet in buffer");
@@ -2329,7 +2329,7 @@ namespace Media.Rtp
                                 //If the context does not have continious media it must only receive data for the duration of the media.
                                 || false.Equals(tc.IsContinious) && tc.TimeRemaining < System.TimeSpan.Zero
                                 //There can't be a Goodbye sent or received
-                                || false.Equals(tc.Goodbye == null)) continue;
+                                || false.Equals(tc.Goodbye is null)) continue;
 
                             //Receive Data on the RtpSocket and RtcpSocket, summize the amount of bytes received from each socket.
 
@@ -2649,7 +2649,7 @@ namespace Media.Rtp
                                 if (shouldDispose) Common.BaseDisposable.SetShouldDispose(packet, false, false);
 
                                 //Get the context for the packet
-                                if (sendContext == null || sendContext.SynchronizationSourceIdentifier != packet.SynchronizationSourceIdentifier)
+                                if (sendContext is null || sendContext.SynchronizationSourceIdentifier != packet.SynchronizationSourceIdentifier)
                                 {
                                     sendContext = GetContextForPacket(packet);
 
