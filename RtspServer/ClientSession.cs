@@ -466,7 +466,7 @@ namespace Media.Rtsp//.Server
                     Media.Common.ILoggingExtensions.LogException(m_Server.Logger, ex);
 
                     //if a socket exception occured then handle it.
-                    if (ex is SocketException) m_Server.HandleClientSocketException((SocketException)ex, this);
+                    if (ex is SocketException se) m_Server.HandleClientSocketException(se, this);
 
                     //if not disposed mark disconnected
                     IsDisconnected = object.ReferenceEquals(m_RtspSocket, null) || IsDisposed || HasRuningServer.Equals(false);
