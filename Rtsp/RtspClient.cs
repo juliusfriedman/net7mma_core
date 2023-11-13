@@ -3342,127 +3342,123 @@ namespace Media.Rtsp
             //Todo,
             //IConnection
 
-            try
+            if (m_RemoteRtsp is null) throw new InvalidOperationException("A remote end point must be assigned");
+
+            //Todo, BeginConnect will allow the amount of time to be specified and then you can cancel the connect if it doesn't finish within that time.
+            //System.Net.Sockets.Socket s = new Socket(m_RtspSocket.SocketType, m_RtspSocket.ProtocolType);
+
+            //bool async = false;
+
+            //bool fail = false;
+
+            //var cc = s.BeginConnect(m_RemoteRtsp, new AsyncCallback((iar)=>{
+
+            //    if (iar == null || false.Equals(iar.IsCompleted) || s == null) return;                    
+
+            //    if(s.Connected) s.EndConnect(iar);
+
+            //    if (async)
+            //    {
+            //        if (false.Equals(s.Connected)) s.Dispose();
+
+            //        s = null;
+            //    }
+            //    else
+            //    {
+            //        async = true;
+
+            //        m_RtspSocket.Dispose();
+
+            //        m_RtspSocket = s;
+            //    }
+            //}), null);
+
+            //ThreadPool.QueueUserWorkItem((_) =>
+            //{
+            //    while (false.Equals(async)) if (DateTime.UtcNow - m_BeginConnect.Value > Common.Extensions.TimeSpan.TimeSpanExtensions.OneSecond)
+            //        {
+            //            async = true;
+
+            //            fail = true;
+
+            //            using (cc.AsyncWaitHandle)
+            //            {
+            //                s.Dispose();
+
+            //                m_RtspSocket.Dispose();
+            //            }
+
+            //            s = null;
+            //        }
+            //        else System.Threading.Thread.Yield();
+            //});
+
+            //if (false.Equals(async) && false.Equals(cc.IsCompleted))
+            //{
+                //Try to connect.
+                m_RtspSocket.Connect(m_RemoteRtsp);
+
+            //    async = true;
+            //}
+
+            //if (fail) return;
+
+            //Sample the clock after connecting
+            m_EndConnect = DateTime.UtcNow;
+
+            //Calculate the connection time.
+            m_ConnectionTime = m_EndConnect.Value - m_BeginConnect.Value;
+
+            //When timeouts are set then ensure they are within the amount of time the connection took to establish
+            if ((SocketWriteTimeout + SocketReadTimeout) <= 0)
             {
-                if (object.ReferenceEquals(m_RemoteRtsp, null)) throw new InvalidOperationException("A remote end point must be assigned");
+                //Possibly in a VM the timing may be off (Hardware Abstraction Layer BUGS) and if the timeout occurs a few times witin the R2 the socket may be closed
+                //To prefent this check the value first.
+                int multipliedConnectionTime = (int)(m_ConnectionTime.TotalMilliseconds * multiplier);
 
-                //Todo, BeginConnect will allow the amount of time to be specified and then you can cancel the connect if it doesn't finish within that time.
-                //System.Net.Sockets.Socket s = new Socket(m_RtspSocket.SocketType, m_RtspSocket.ProtocolType);
-
-                //bool async = false;
-
-                //bool fail = false;
-
-                //var cc = s.BeginConnect(m_RemoteRtsp, new AsyncCallback((iar)=>{
-
-                //    if (iar == null || false.Equals(iar.IsCompleted) || s == null) return;                    
-
-                //    if(s.Connected) s.EndConnect(iar);
-
-                //    if (async)
-                //    {
-                //        if (false.Equals(s.Connected)) s.Dispose();
-
-                //        s = null;
-                //    }
-                //    else
-                //    {
-                //        async = true;
-
-                //        m_RtspSocket.Dispose();
-
-                //        m_RtspSocket = s;
-                //    }
-                //}), null);
-
-                //ThreadPool.QueueUserWorkItem((_) =>
+                ////If it took longer than 50 msec to connect 
+                //if (multipliedConnectionTime > SocketWriteTimeout ||
+                //    multipliedConnectionTime > SocketReadTimeout)
                 //{
-                //    while (false.Equals(async)) if (DateTime.UtcNow - m_BeginConnect.Value > Common.Extensions.TimeSpan.TimeSpanExtensions.OneSecond)
-                //        {
-                //            async = true;
-
-                //            fail = true;
-
-                //            using (cc.AsyncWaitHandle)
-                //            {
-                //                s.Dispose();
-
-                //                m_RtspSocket.Dispose();
-                //            }
-
-                //            s = null;
-                //        }
-                //        else System.Threading.Thread.Yield();
-                //});
-
-                //if (false.Equals(async) && false.Equals(cc.IsCompleted))
-                //{
-                    //Try to connect.
-                    m_RtspSocket.Connect(m_RemoteRtsp);
-
-                //    async = true;
+                //    ////Set the read and write timeouts based upon such a time (should include a min of the m_RtspSessionTimeout.)
+                //    //if (m_ConnectionTime > TimeSpan.Zero)
+                //    //{
+                //    //    //Set read and write timeout...
+                //    //    SocketWriteTimeout = SocketReadTimeout = multipliedConnectionTime; //(int)DefaultConnectionTime.TotalMilliseconds;
+                //    //}
+                //    //....else 
                 //}
 
-                //if (fail) return;
-
-                //Sample the clock after connecting
-                m_EndConnect = DateTime.UtcNow;
-
-                //Calculate the connection time.
-                m_ConnectionTime = m_EndConnect.Value - m_BeginConnect.Value;
-
-                //When timeouts are set then ensure they are within the amount of time the connection took to establish
-                if ((SocketWriteTimeout + SocketReadTimeout) <= 0)
-                {
-                    //Possibly in a VM the timing may be off (Hardware Abstraction Layer BUGS) and if the timeout occurs a few times witin the R2 the socket may be closed
-                    //To prefent this check the value first.
-                    int multipliedConnectionTime = (int)(m_ConnectionTime.TotalMilliseconds * multiplier);
-
-                    ////If it took longer than 50 msec to connect 
-                    //if (multipliedConnectionTime > SocketWriteTimeout ||
-                    //    multipliedConnectionTime > SocketReadTimeout)
-                    //{
-                    //    ////Set the read and write timeouts based upon such a time (should include a min of the m_RtspSessionTimeout.)
-                    //    //if (m_ConnectionTime > TimeSpan.Zero)
-                    //    //{
-                    //    //    //Set read and write timeout...
-                    //    //    SocketWriteTimeout = SocketReadTimeout = multipliedConnectionTime; //(int)DefaultConnectionTime.TotalMilliseconds;
-                    //    //}
-                    //    //....else 
-                    //}
-
-                    //Set the connection time using the multiplied value
-                    m_ConnectionTime = System.TimeSpan.FromMilliseconds(multipliedConnectionTime);
-                }
-
-                //Determine the poll time now.
-                m_SocketPollMicroseconds = Media.Common.Binary.Min((int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(m_ConnectionTime), m_SocketPollMicroseconds);
-
-                //Use the multiplier to set the poll time.
-                //m_SocketPollMicroseconds >>= multiplier;
-
-                //The Send and Receive Timeout values are maintained as whatever they are when the socket was created.
-
-                //Todo, post configure socket, offer API in SocketReference with Connection time overload as well as logger.
-
-                //If the protocol is TCP
-                if (m_RtspSocket.ProtocolType == ProtocolType.Tcp)
-                {
-                    //If the connection time was >= 500 msec enable congestion algorithm
-                    if (ConnectionTime.TotalMilliseconds >= DefaultConnectionTime.TotalMilliseconds)
-                    {
-                        // Enable CongestionAlgorithm
-                        Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpCongestionAlgorithm(m_RtspSocket));
-                    }
-                }
-
-                //Don't block (possibly another way to work around the issue)
-                //m_RtspSocket.Blocking = false;                
-
-                //Raise the Connected event.
-                OnConnected();
+                //Set the connection time using the multiplied value
+                m_ConnectionTime = System.TimeSpan.FromMilliseconds(multipliedConnectionTime);
             }
-            catch { throw; }
+
+            //Determine the poll time now.
+            m_SocketPollMicroseconds = Media.Common.Binary.Min((int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(m_ConnectionTime), m_SocketPollMicroseconds);
+
+            //Use the multiplier to set the poll time.
+            //m_SocketPollMicroseconds >>= multiplier;
+
+            //The Send and Receive Timeout values are maintained as whatever they are when the socket was created.
+
+            //Todo, post configure socket, offer API in SocketReference with Connection time overload as well as logger.
+
+            //If the protocol is TCP
+            if (m_RtspSocket.ProtocolType == ProtocolType.Tcp)
+            {
+                //If the connection time was >= 500 msec enable congestion algorithm
+                if (ConnectionTime.TotalMilliseconds >= DefaultConnectionTime.TotalMilliseconds)
+                {
+                    // Enable CongestionAlgorithm
+                    Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpCongestionAlgorithm(m_RtspSocket));
+                }
+            }
+
+            //Don't block (possibly another way to work around the issue)
+            //m_RtspSocket.Blocking = false;                
+
+            //Raise the Connected event.
+            OnConnected();
         }
 
         //handle exception, really needs to know what type of operation this was also.(read or write)
@@ -5222,10 +5218,6 @@ namespace Media.Rtsp
             {
                 return response;
             }
-            catch
-            {
-                throw;
-            }
             finally
             {
                 //Ensure the sessionId is invalided when no longer playing if not forced
@@ -6170,9 +6162,7 @@ namespace Media.Rtsp
 
         public RtspMessage SendPlay(Uri location = null, TimeSpan? startTime = null, TimeSpan? endTime = null, string rangeType = "npt", bool force = false)
         {
-            int sequenceNumber;
-
-            return SendPlay(out sequenceNumber, location, startTime, endTime, rangeType, force);
+            return SendPlay(out int sequenceNumber, location, startTime, endTime, rangeType, force);
         }
 
         public RtspMessage SendPlay(out int sequenceNumber, Uri location = null, TimeSpan? startTime = null, TimeSpan? endTime = null, string rangeType = "npt", bool force = false)
@@ -6195,178 +6185,174 @@ namespace Media.Rtsp
 
             //Check that the Timing description of the session description allows play?           
 
-            try
+            using (RtspMessage play = new RtspMessage(RtspMessageType.Request)
             {
-                using (RtspMessage play = new RtspMessage(RtspMessageType.Request)
+                RtspMethod = RtspMethod.PLAY,
+                Location = location ?? m_CurrentLocation
+            })
+            {
+                /*
+                    A PLAY request without a Range header is legal. It starts playing a
+                    stream from the beginning unless the stream has been paused. If a
+                    stream has been paused via PAUSE, stream delivery resumes at the
+                    pause point. If a stream is playing, such a PLAY request causes no
+                    further action and can be used by the client to test server liveness.
+                    */
+
+                //Maybe should not be set if no start or end time is given.
+                if (startTime.HasValue || endTime.HasValue) play.SetHeader(RtspHeaders.Range, RtspHeaders.RangeHeader(startTime, endTime, rangeType));
+                else if (false.Equals(string.IsNullOrWhiteSpace(rangeType))) //otherwise is a non null or whitespace string was given for rangeType
                 {
-                    RtspMethod = RtspMethod.PLAY,
-                    Location = location ?? m_CurrentLocation
-                })
+                    //Use the given rangeType string verbtaim.
+                    play.SetHeader(RtspHeaders.Range, rangeType);
+                }
+
+
+                //If CloseConnection was specified and the message does not already contain a Connection header
+                if (AutomaticallyDisconnectAfterStartPlaying && play.ContainsHeader(RtspHeaders.Connection).Equals(false))
                 {
-                    /*
-                      A PLAY request without a Range header is legal. It starts playing a
-                        stream from the beginning unless the stream has been paused. If a
-                        stream has been paused via PAUSE, stream delivery resumes at the
-                        pause point. If a stream is playing, such a PLAY request causes no
-                        further action and can be used by the client to test server liveness.
-                     */
+                    //Set the Connection header to close.
+                    play.AppendOrSetHeader(RtspHeaders.Connection, RtspHeaderFields.Connection.Close);
+                }
 
-                    //Maybe should not be set if no start or end time is given.
-                    if (startTime.HasValue || endTime.HasValue) play.SetHeader(RtspHeaders.Range, RtspHeaders.RangeHeader(startTime, endTime, rangeType));
-                    else if (false.Equals(string.IsNullOrWhiteSpace(rangeType))) //otherwise is a non null or whitespace string was given for rangeType
+                //Store any error
+                SocketError error;
+
+                //Send the response
+                RtspMessage response = SendRtspMessage(play, out error, out sequenceNumber, true, true, m_MaximumTransactionAttempts); //?? m_LastTransmitted;
+
+                //response may be null because the server dropped the response due to an invalid header on the request.
+
+                //Handle allowed problems with reception of the play response if already playing
+                if (error == SocketError.Success && false.Equals(IsPlaying) && Common.IDisposedExtensions.IsNullOrDisposed(this).Equals(false) && IsConnected)
+                {
+                    //No response or invalid range.
+                    if (response == null || response.RtspStatusCode == RtspStatusCode.InvalidRange)
                     {
-                        //Use the given rangeType string verbtaim.
-                        play.SetHeader(RtspHeaders.Range, rangeType);
+                        //if (response == null && m_RtpProtocol == ProtocolType.Tcp)
+                        //{
+                        //    //If there is transport
+                        //    if (false == Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient))
+                        //    {
+                        //        //Connect the client now.
+                        //        m_RtpClient.Activate();
+                        //    }
+
+                        //    return response;
+                        //}
+
+                        play.RemoveHeader(Rtsp.RtspHeaders.Range);
+
+                        play.RemoveHeader(Rtsp.RtspHeaders.CSeq);
+
+                        play.RemoveHeader(RtspHeaders.Timestamp);
+
+                        return SendRtspMessage(play);
                     }
-
-
-                    //If CloseConnection was specified and the message does not already contain a Connection header
-                    if (AutomaticallyDisconnectAfterStartPlaying && play.ContainsHeader(RtspHeaders.Connection).Equals(false))
+                    else if (response.RtspStatusCode <= RtspStatusCode.OK)
                     {
-                        //Set the Connection header to close.
-                        play.AppendOrSetHeader(RtspHeaders.Connection, RtspHeaderFields.Connection.Close);
-                    }
-
-                    //Store any error
-                    SocketError error;
-
-                    //Send the response
-                    RtspMessage response = SendRtspMessage(play, out error, out sequenceNumber, true, true, m_MaximumTransactionAttempts); //?? m_LastTransmitted;
-
-                    //response may be null because the server dropped the response due to an invalid header on the request.
-
-                    //Handle allowed problems with reception of the play response if already playing
-                    if (error == SocketError.Success && false.Equals(IsPlaying) && Common.IDisposedExtensions.IsNullOrDisposed(this).Equals(false) && IsConnected)
-                    {
-                        //No response or invalid range.
-                        if (response == null || response.RtspStatusCode == RtspStatusCode.InvalidRange)
+                        //If there is transport
+                        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient)))
                         {
-                            //if (response == null && m_RtpProtocol == ProtocolType.Tcp)
-                            //{
-                            //    //If there is transport
-                            //    if (false == Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient))
-                            //    {
-                            //        //Connect the client now.
-                            //        m_RtpClient.Activate();
-                            //    }
-
-                            //    return response;
-                            //}
-
-                            play.RemoveHeader(Rtsp.RtspHeaders.Range);
-
-                            play.RemoveHeader(Rtsp.RtspHeaders.CSeq);
-
-                            play.RemoveHeader(RtspHeaders.Timestamp);
-
-                            return SendRtspMessage(play);
+                            //Connect the client now.
+                            m_RtpClient.Activate();
                         }
-                        else if (response.RtspStatusCode <= RtspStatusCode.OK)
+
+                        //Set EndTime based on Range
+
+                        //string rangeHeader = response[RtspHeaders.Range];
+
+                        //Should really only get the RtpInfo header if its needed....
+
+                        //Get the rtp-info header
+                        string rtpInfo = response[RtspHeaders.RtpInfo];
+
+                        string[] rtpInfos;
+
+                        //Make a parser class which can be reused?
+
+                        //If parsing of the header succeeded
+                        if (RtspHeaders.TryParseRtpInfo(rtpInfo, out rtpInfos))
                         {
-                            //If there is transport
-                            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient)))
+                            //Notes that more then 1 value here indicates AggregateControl is supported at the server but possibly not the session?
+
+                            //Loop all found sub header values
+                            foreach (string rtpInfoValue in rtpInfos)
                             {
-                                //Connect the client now.
-                                m_RtpClient.Activate();
-                            }
+                                Uri uri;
 
-                            //Set EndTime based on Range
+                                int? rtpTime;
 
-                            //string rangeHeader = response[RtspHeaders.Range];
+                                int? seq;
 
-                            //Should really only get the RtpInfo header if its needed....
+                                int? ssrc;
 
-                            //Get the rtp-info header
-                            string rtpInfo = response[RtspHeaders.RtpInfo];
-
-                            string[] rtpInfos;
-
-                            //Make a parser class which can be reused?
-
-                            //If parsing of the header succeeded
-                            if (RtspHeaders.TryParseRtpInfo(rtpInfo, out rtpInfos))
-                            {
-                                //Notes that more then 1 value here indicates AggregateControl is supported at the server but possibly not the session?
-
-                                //Loop all found sub header values
-                                foreach (string rtpInfoValue in rtpInfos)
+                                //If any value which was needed was found.
+                                if (RtspHeaders.TryParseRtpInfo(rtpInfoValue, out uri, out seq, out rtpTime, out ssrc))
                                 {
-                                    Uri uri;
-
-                                    int? rtpTime;
-
-                                    int? seq;
-
-                                    int? ssrc;
-
-                                    //If any value which was needed was found.
-                                    if (RtspHeaders.TryParseRtpInfo(rtpInfoValue, out uri, out seq, out rtpTime, out ssrc))
+                                    //Just use the ssrc to lookup the context.
+                                    if (ssrc.HasValue)
                                     {
-                                        //Just use the ssrc to lookup the context.
-                                        if (ssrc.HasValue)
+                                        //Get the context created with the ssrc defined above
+                                        RtpClient.TransportContext context = m_RtpClient.GetContextBySourceId(ssrc.Value);
+
+                                        //If that context is not null then allow it's ssrc to change now.
+                                        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(context)))
                                         {
-                                            //Get the context created with the ssrc defined above
-                                            RtpClient.TransportContext context = m_RtpClient.GetContextBySourceId(ssrc.Value);
+                                            context.RemoteSynchronizationSourceIdentifier = ssrc.Value;
 
-                                            //If that context is not null then allow it's ssrc to change now.
-                                            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(context)))
-                                            {
-                                                context.RemoteSynchronizationSourceIdentifier = ssrc.Value;
+                                            if (seq.HasValue) context.RecieveSequenceNumber = seq.Value;
 
-                                                if (seq.HasValue) context.RecieveSequenceNumber = seq.Value;
+                                            if (rtpTime.HasValue) context.RtpTimestamp = rtpTime.Value;
 
-                                                if (rtpTime.HasValue) context.RtpTimestamp = rtpTime.Value;
+                                            //if (context.Goodbye != null) context.Goodbye = null;
 
-                                                //if (context.Goodbye != null) context.Goodbye = null;
-
-                                                context = null;
-                                            }
+                                            context = null;
                                         }
-                                        else if (false.Equals(uri == null))
+                                    }
+                                    else if (false.Equals(uri == null))
+                                    {
+                                        //Need to get the context by the uri.
+                                        //Location = rtsp://abc.com/live/movie
+                                        //uri = rtsp://abc.com/live/movie/trackId=0
+                                        //uri = rtsp://abc.com/live/movie/trackId=1
+                                        //uri = rtsp://abc.com/live/movie/trackId=2
+
+                                        //Get the context created with from the media description with the same resulting control uri
+                                        RtpClient.TransportContext context = m_RtpClient.GetTransportContexts().FirstOrDefault(tc => tc.MediaDescription.GetAbsoluteControlUri(CurrentLocation, SessionDescription) == uri);
+
+                                        //If that context is not null then allow it's ssrc to change now.
+                                        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(context)))
                                         {
-                                            //Need to get the context by the uri.
-                                            //Location = rtsp://abc.com/live/movie
-                                            //uri = rtsp://abc.com/live/movie/trackId=0
-                                            //uri = rtsp://abc.com/live/movie/trackId=1
-                                            //uri = rtsp://abc.com/live/movie/trackId=2
+                                            if (ssrc.HasValue) context.RemoteSynchronizationSourceIdentifier = ssrc.Value;
 
-                                            //Get the context created with from the media description with the same resulting control uri
-                                            RtpClient.TransportContext context = m_RtpClient.GetTransportContexts().FirstOrDefault(tc => tc.MediaDescription.GetAbsoluteControlUri(CurrentLocation, SessionDescription) == uri);
+                                            if (seq.HasValue) context.RecieveSequenceNumber = seq.Value;
 
-                                            //If that context is not null then allow it's ssrc to change now.
-                                            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(context)))
-                                            {
-                                                if (ssrc.HasValue) context.RemoteSynchronizationSourceIdentifier = ssrc.Value;
+                                            if (rtpTime.HasValue) context.RtpTimestamp = rtpTime.Value;
 
-                                                if (seq.HasValue) context.RecieveSequenceNumber = seq.Value;
+                                            //if (context.Goodbye != null) context.Goodbye = null;
 
-                                                if (rtpTime.HasValue) context.RtpTimestamp = rtpTime.Value;
-
-                                                //if (context.Goodbye != null) context.Goodbye = null;
-
-                                                context = null;
-                                            }
-
+                                            context = null;
                                         }
+
                                     }
                                 }
                             }
                         }
                     }
-
-                    //The CloseConnection was specified and the response was received
-                    if (AutomaticallyDisconnectAfterStartPlaying && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(response)))
-                    {
-                        //Should also check if response was seen that it has closed the servers connection...
-
-                        //Disconnect the socket.
-                        DisconnectSocket();
-                    }                    
-
-                    return response;
                 }
+
+                //The CloseConnection was specified and the response was received
+                if (AutomaticallyDisconnectAfterStartPlaying && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(response)))
+                {
+                    //Should also check if response was seen that it has closed the servers connection...
+
+                    //Disconnect the socket.
+                    DisconnectSocket();
+                }                    
+
+                return response;
             }
-            catch { throw; }
         }
 
         /// <summary>

@@ -2452,127 +2452,123 @@ namespace Media.Rtsp
             //Todo,
             //IConnection
 
-            try
+            if (m_RemoteRtsp is null) throw new InvalidOperationException("A remote end point must be assigned");
+
+            //Todo, BeginConnect will allow the amount of time to be specified and then you can cancel the connect if it doesn't finish within that time.
+            //System.Net.Sockets.Socket s = new Socket(m_RtspSocket.SocketType, m_RtspSocket.ProtocolType);
+
+            //bool async = false;
+
+            //bool fail = false;
+
+            //var cc = s.BeginConnect(m_RemoteRtsp, new AsyncCallback((iar)=>{
+
+            //    if (iar == null || false.Equals(iar.IsCompleted) || s == null) return;                    
+
+            //    if(s.Connected) s.EndConnect(iar);
+
+            //    if (async)
+            //    {
+            //        if (false.Equals(s.Connected)) s.Dispose();
+
+            //        s = null;
+            //    }
+            //    else
+            //    {
+            //        async = true;
+
+            //        m_RtspSocket.Dispose();
+
+            //        m_RtspSocket = s;
+            //    }
+            //}), null);
+
+            //ThreadPool.QueueUserWorkItem((_) =>
+            //{
+            //    while (false.Equals(async)) if (DateTime.UtcNow - m_BeginConnect.Value > Common.Extensions.TimeSpan.TimeSpanExtensions.OneSecond)
+            //        {
+            //            async = true;
+
+            //            fail = true;
+
+            //            using (cc.AsyncWaitHandle)
+            //            {
+            //                s.Dispose();
+
+            //                m_RtspSocket.Dispose();
+            //            }
+
+            //            s = null;
+            //        }
+            //        else System.Threading.Thread.Yield();
+            //});
+
+            //if (false.Equals(async) && false.Equals(cc.IsCompleted))
+            //{
+            //Try to connect.
+            m_RtspSocket.Connect(m_RemoteRtsp);
+
+            //    async = true;
+            //}
+
+            //if (fail) return;
+
+            //Sample the clock after connecting
+            m_EndConnect = DateTime.UtcNow;
+
+            //Calculate the connection time.
+            m_ConnectionTime = m_EndConnect.Value - m_BeginConnect.Value;
+
+            //When timeouts are set then ensure they are within the amount of time the connection took to establish
+            if ((SocketWriteTimeout + SocketReadTimeout) <= 0)
             {
-                if (object.ReferenceEquals(m_RemoteRtsp, null)) throw new InvalidOperationException("A remote end point must be assigned");
+                //Possibly in a VM the timing may be off (Hardware Abstraction Layer BUGS) and if the timeout occurs a few times witin the R2 the socket may be closed
+                //To prefent this check the value first.
+                int multipliedConnectionTime = (int)(m_ConnectionTime.TotalMilliseconds * multiplier);
 
-                //Todo, BeginConnect will allow the amount of time to be specified and then you can cancel the connect if it doesn't finish within that time.
-                //System.Net.Sockets.Socket s = new Socket(m_RtspSocket.SocketType, m_RtspSocket.ProtocolType);
-
-                //bool async = false;
-
-                //bool fail = false;
-
-                //var cc = s.BeginConnect(m_RemoteRtsp, new AsyncCallback((iar)=>{
-
-                //    if (iar == null || false.Equals(iar.IsCompleted) || s == null) return;                    
-
-                //    if(s.Connected) s.EndConnect(iar);
-
-                //    if (async)
-                //    {
-                //        if (false.Equals(s.Connected)) s.Dispose();
-
-                //        s = null;
-                //    }
-                //    else
-                //    {
-                //        async = true;
-
-                //        m_RtspSocket.Dispose();
-
-                //        m_RtspSocket = s;
-                //    }
-                //}), null);
-
-                //ThreadPool.QueueUserWorkItem((_) =>
+                ////If it took longer than 50 msec to connect 
+                //if (multipliedConnectionTime > SocketWriteTimeout ||
+                //    multipliedConnectionTime > SocketReadTimeout)
                 //{
-                //    while (false.Equals(async)) if (DateTime.UtcNow - m_BeginConnect.Value > Common.Extensions.TimeSpan.TimeSpanExtensions.OneSecond)
-                //        {
-                //            async = true;
-
-                //            fail = true;
-
-                //            using (cc.AsyncWaitHandle)
-                //            {
-                //                s.Dispose();
-
-                //                m_RtspSocket.Dispose();
-                //            }
-
-                //            s = null;
-                //        }
-                //        else System.Threading.Thread.Yield();
-                //});
-
-                //if (false.Equals(async) && false.Equals(cc.IsCompleted))
-                //{
-                //Try to connect.
-                m_RtspSocket.Connect(m_RemoteRtsp);
-
-                //    async = true;
+                //    ////Set the read and write timeouts based upon such a time (should include a min of the m_RtspSessionTimeout.)
+                //    //if (m_ConnectionTime > TimeSpan.Zero)
+                //    //{
+                //    //    //Set read and write timeout...
+                //    //    SocketWriteTimeout = SocketReadTimeout = multipliedConnectionTime; //(int)DefaultConnectionTime.TotalMilliseconds;
+                //    //}
+                //    //....else 
                 //}
 
-                //if (fail) return;
-
-                //Sample the clock after connecting
-                m_EndConnect = DateTime.UtcNow;
-
-                //Calculate the connection time.
-                m_ConnectionTime = m_EndConnect.Value - m_BeginConnect.Value;
-
-                //When timeouts are set then ensure they are within the amount of time the connection took to establish
-                if ((SocketWriteTimeout + SocketReadTimeout) <= 0)
-                {
-                    //Possibly in a VM the timing may be off (Hardware Abstraction Layer BUGS) and if the timeout occurs a few times witin the R2 the socket may be closed
-                    //To prefent this check the value first.
-                    int multipliedConnectionTime = (int)(m_ConnectionTime.TotalMilliseconds * multiplier);
-
-                    ////If it took longer than 50 msec to connect 
-                    //if (multipliedConnectionTime > SocketWriteTimeout ||
-                    //    multipliedConnectionTime > SocketReadTimeout)
-                    //{
-                    //    ////Set the read and write timeouts based upon such a time (should include a min of the m_RtspSessionTimeout.)
-                    //    //if (m_ConnectionTime > TimeSpan.Zero)
-                    //    //{
-                    //    //    //Set read and write timeout...
-                    //    //    SocketWriteTimeout = SocketReadTimeout = multipliedConnectionTime; //(int)DefaultConnectionTime.TotalMilliseconds;
-                    //    //}
-                    //    //....else 
-                    //}
-
-                    //Set the connection time using the multiplied value
-                    m_ConnectionTime = System.TimeSpan.FromMilliseconds(multipliedConnectionTime);
-                }
-
-                //Determine the poll time now.
-                m_SocketPollMicroseconds = Media.Common.Binary.Min((int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(m_ConnectionTime), m_SocketPollMicroseconds);
-
-                //Use the multiplier to set the poll time.
-                //m_SocketPollMicroseconds >>= multiplier;
-
-                //The Send and Receive Timeout values are maintained as whatever they are when the socket was created.
-
-                //Todo, post configure socket, offer API in SocketReference with Connection time overload as well as logger.
-
-                //If the protocol is TCP
-                if (m_RtspSocket.ProtocolType == ProtocolType.Tcp)
-                {
-                    //If the connection time was >= 500 msec enable congestion algorithm
-                    if (ConnectionTime.TotalMilliseconds >= DefaultConnectionTime.TotalMilliseconds)
-                    {
-                        // Enable CongestionAlgorithm
-                        Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpCongestionAlgorithm(m_RtspSocket));
-                    }
-                }
-
-                //Don't block (possibly another way to work around the issue)
-                //m_RtspSocket.Blocking = false;                
-
-                //Raise the Connected event.
-                OnConnected();
+                //Set the connection time using the multiplied value
+                m_ConnectionTime = System.TimeSpan.FromMilliseconds(multipliedConnectionTime);
             }
-            catch { throw; }
+
+            //Determine the poll time now.
+            m_SocketPollMicroseconds = Media.Common.Binary.Min((int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(m_ConnectionTime), m_SocketPollMicroseconds);
+
+            //Use the multiplier to set the poll time.
+            //m_SocketPollMicroseconds >>= multiplier;
+
+            //The Send and Receive Timeout values are maintained as whatever they are when the socket was created.
+
+            //Todo, post configure socket, offer API in SocketReference with Connection time overload as well as logger.
+
+            //If the protocol is TCP
+            if (m_RtspSocket.ProtocolType == ProtocolType.Tcp)
+            {
+                //If the connection time was >= 500 msec enable congestion algorithm
+                if (ConnectionTime.TotalMilliseconds >= DefaultConnectionTime.TotalMilliseconds)
+                {
+                    // Enable CongestionAlgorithm
+                    Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpCongestionAlgorithm(m_RtspSocket));
+                }
+            }
+
+            //Don't block (possibly another way to work around the issue)
+            //m_RtspSocket.Blocking = false;                
+
+            //Raise the Connected event.
+            OnConnected();
         }
 
         #endregion
