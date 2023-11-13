@@ -273,9 +273,9 @@ namespace Media.RtpTools.RtpDump
                 ++offsetsCount;
             }
 
-                //Only contains data if something goes wrong during parsing,
-                //And would then contain the data consumed while attempting to parse.
-                Common.MemorySegment unexpectedData = null;
+            //Only contains data if something goes wrong during parsing,
+            //And would then contain the data consumed while attempting to parse.
+            Common.MemorySegment unexpectedData = null;
 
             //This allows certain text items to have a data= token and others to not.
             //It also allows reading of Rtp in Rtcp only mode
@@ -308,17 +308,17 @@ namespace Media.RtpTools.RtpDump
                 entry = RtpSend.ParseText(m_Reader, m_Source, ref foundFormat, out unexpectedData);
             }
 
-                //The format of the item does not match the reader(which would only happen if given an unknown format)
-                if (foundFormat != m_Format)
+            //The format of the item does not match the reader(which would only happen if given an unknown format)
+            if (foundFormat != m_Format)
+            {
+                //If the the format of the entry found was binary
+                if (entry.Format < FileFormat.Text)
                 {
-                    //If the the format of the entry found was binary
-                    if (entry.Format < FileFormat.Text)
+                    //The unexpected data consists of the supposed fileheader.
+                    if (m_FileIdentifier == null)
                     {
-                        //The unexpected data consists of the supposed fileheader.
-                        if (m_FileIdentifier == null)
-                        {
-                            //Assign it
-                            m_FileIdentifier = new (unexpectedData);
+                        //Assign it
+                        m_FileIdentifier = new (unexpectedData);
 
                         //Read the following Binary File Header
                         ReadBinaryFileHeader();
@@ -329,13 +329,15 @@ namespace Media.RtpTools.RtpDump
                         //Remove the offset which was not related to an entry.
                         m_Offsets.RemoveAt(offsetsCount - 1);
 
-                            //Read the entry.
-                            return ReadToolEntry();
-                        }
-                        else Media.Common.TaggedExceptionExtensions.RaiseTaggedException(unexpectedData, "Encountered a Binary file header when already parsed the header. The Tag property contains the data unexpected.");
+                        //Read the entry.
+                        return ReadToolEntry();
                     }
-                    else if (unexpectedData != null) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(entry, "Unexpected data found while parsing a Text format. See the Tag property of the InnerException", new Common.TaggedException<Common.MemorySegment>(unexpectedData));
-                }                    
+                    else
+                        Media.Common.TaggedExceptionExtensions.RaiseTaggedException(unexpectedData, "Encountered a Binary file header when already parsed the header. The Tag property contains the data unexpected.");
+                }
+                else if (unexpectedData != null)
+                    Media.Common.TaggedExceptionExtensions.RaiseTaggedException(entry, "Unexpected data found while parsing a Text format. See the Tag property of the InnerException", new Common.TaggedException<Common.MemorySegment>(unexpectedData));
+            }                    
 
             //Call determine format so item has the correct format (Header [or Payload])
             if (foundFormat == FileFormat.Unknown)

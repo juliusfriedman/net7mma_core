@@ -280,7 +280,7 @@ namespace Media.Rtsp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return m_Sessions.Values.ToList();
+                return m_Sessions.Values;
             }
         }
 
@@ -471,7 +471,7 @@ namespace Media.Rtsp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return m_MediaStreams.Values.ToList();
+                return m_MediaStreams.Values;
             }
         }
 
@@ -1369,7 +1369,7 @@ namespace Media.Rtsp
             if (allowPortReuse) Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableUnicastPortReuse(m_TcpServerSocket));
 
             //Create a thread to handle client connections
-            m_ServerThread = new Thread(new ThreadStart(AcceptLoop))// Common.Extensions.Thread.ThreadExtensions.MinimumStackSize)
+            m_ServerThread = new Thread(new ThreadStart(AcceptLoop))
             {
                 //Configure the thread
                 Name = ServerName + "@" + m_ServerPort
@@ -1437,11 +1437,10 @@ namespace Media.Rtsp
                             TimeSpan period = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan;
                             m_Maintainer.Change(dueTime, period);
                         }
-                    }))//, Common.Extensions.Thread.ThreadExtensions.MinimumStackSize)
+                    }))
                     {
                         Priority = m_ServerThread.Priority,
-                        Name = "Maintenance-" + m_ServerThread.Name,
-                        //ApartmentState = ApartmentState.MTA
+                        Name = "Maintenance-" + m_ServerThread.Name
                     };
 
                     thread.TrySetApartmentState(ApartmentState.MTA);

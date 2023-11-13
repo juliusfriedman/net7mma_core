@@ -3805,7 +3805,7 @@ namespace Media.Rtp
                     if (m_EventThread == null || EventsStarted.Equals(DateTime.MinValue))
                     {
                         //Create the event thread
-                        m_EventThread = new Thread(new ThreadStart(HandleEvents))//, Common.Extensions.Thread.ThreadExtensions.MinimumStackSize)
+                        m_EventThread = new Thread(new ThreadStart(HandleEvents))
                         {
                             //Assign name
                             Name = "RtpClient-Events-" + InternalId,
