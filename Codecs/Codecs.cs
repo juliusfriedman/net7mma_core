@@ -24,7 +24,7 @@ namespace Media.Codec
 
         public static Media.Codec.Interfaces.ICodec GetCodec(string name)
         {
-            return m_RegisteredCodecs.FirstOrDefault(c=> string.Compare(c.Name, name, true) == 0);
+            return m_RegisteredCodecs.FirstOrDefault(c=> string.Compare(c.Name, name, true) is 0);
         }
 
         public static bool TryRegisterCodec(Media.Codec.Interfaces.ICodec codec)

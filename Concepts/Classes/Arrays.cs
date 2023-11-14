@@ -333,7 +333,7 @@ namespace Media.Concepts.Classes
 
         //Would be used to indicate if the m_IntPtr member has a value which points to what was a managed object at one point.
         //[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        //public bool IsNative() { return m_Length == 0 && m_Offset > 0; }
+        //public bool IsNative() { return m_Length is 0 && m_Offset > 0; }
         //public bool IsNative() { return m_IntPtr == AddressOf8(); }
 
         //Should be the same in unsafe as fixed(int*x = &this){ int*y = x + System.IntPtr.Size; }

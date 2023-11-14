@@ -148,7 +148,7 @@
 
         public override double GetValue(double t)
         {
-            if (t == 0) return 0;
+            if (t is 0) return 0;
             return Amplitude * GetDampingMultiplier(t) * System.Math.Sign(System.Math.Sin(2 * System.Math.PI * Frequency * t + Phase));
         }
     }

@@ -255,8 +255,8 @@ public class TestCard
             long currentMilliSeconds = timestamp_ms % 1000;
 
             int soundToPlay = 0; // 0 = silence
-            if (((currentSeconds % 60) == 0) && (currentMilliSeconds < 300)) soundToPlay = 1;
-            else if (((currentSeconds % 10) == 0) && (currentMilliSeconds < 100)) soundToPlay = 1;
+            if (((currentSeconds % 60) is 0) && (currentMilliSeconds < 300)) soundToPlay = 1;
+            else if (((currentSeconds % 10) is 0) && (currentMilliSeconds < 100)) soundToPlay = 1;
             else if (((currentSeconds % 10) != 0) && (currentMilliSeconds < 100)) soundToPlay = 2;
             else soundToPlay = 0;
 

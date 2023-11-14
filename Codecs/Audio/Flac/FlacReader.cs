@@ -162,37 +162,37 @@ namespace Media.Codecs.Flac
             ulong v;
             int i;
 
-            if ((x & 0x80) == 0)
+            if ((x & 0x80) is 0)
             {
                 v = x;
                 i = 0;
             }
-            else if ((x & 0xC0) != 0 && (x & 0x20) == 0)
+            else if ((x & 0xC0) != 0 && (x & 0x20) is 0)
             {
                 v = x & 0x1F;
                 i = 1;
             }
-            else if ((x & 0xE0) != 0 && (x & 0x10) == 0) /* 1110xxxx */
+            else if ((x & 0xE0) != 0 && (x & 0x10) is 0) /* 1110xxxx */
             {
                 v = x & 0x0F;
                 i = 2;
             }
-            else if ((x & 0xF0) != 0 && (x & 0x08) == 0) /* 11110xxx */
+            else if ((x & 0xF0) != 0 && (x & 0x08) is 0) /* 11110xxx */
             {
                 v = x & 0x07;
                 i = 3;
             }
-            else if ((x & 0xF8) != 0 && (x & 0x04) == 0) /* 111110xx */
+            else if ((x & 0xF8) != 0 && (x & 0x04) is 0) /* 111110xx */
             {
                 v = x & 0x03;
                 i = 4;
             }
-            else if ((x & 0xFC) != 0 && (x & 0x02) == 0) /* 1111110x */
+            else if ((x & 0xFC) != 0 && (x & 0x02) is 0) /* 1111110x */
             {
                 v = x & 0x01;
                 i = 5;
             }
-            else if ((x & 0xFE) != 0 && (x & 0x01) == 0)
+            else if ((x & 0xFE) != 0 && (x & 0x01) is 0)
             {
                 v = 0;
                 i = 6;
@@ -362,7 +362,7 @@ namespace Media.Codecs.Flac
             //blocksize
             int val = identifier[2] >> 4, blocksize = -1;
 
-            if (val == 0)
+            if (val is 0)
             {
                 throw new InvalidOperationException("Invalid Blocksize value: 0");
             }
@@ -917,7 +917,7 @@ namespace Media.Codecs.Flac
             {
                 uint unaryindicator = (uint)(br.Read24() >> 24);
 
-                while (unaryindicator == 0)
+                while (unaryindicator is 0)
                 {
                     ReadByte();
                     result += 8;

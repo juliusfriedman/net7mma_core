@@ -94,7 +94,7 @@
                 s.Band[band].ap[1] = -wd3;
 
             // Block 4, UPZERO
-            wd1 = (d == 0) ? 0 : 128;
+            wd1 = (d is 0) ? 0 : 128;
             s.Band[band].sg[0] = d >> 15;
             for (i = 1; i < 7; i++)
             {
@@ -277,7 +277,7 @@
                     //Lookup with array
                     //wd2 = rh2[ihigh];
 
-                    //Avoid lookup, ihigh == 0 or even gets 2, odd gets 1
+                    //Avoid lookup, ihigh is 0 or even gets 2, odd gets 1
                     wd2 = Common.Binary.IsEven(ref ihigh) ? 2 : 1;
                     
                     wd1 = (band1.nb * 127) >> 7;
@@ -474,7 +474,7 @@
                     //Lookup with array
                     //ih2 = rh2[ihigh];
 
-                    //Avoid lookup, ihigh == 0 or even gets 2, odd gets 1
+                    //Avoid lookup, ihigh is 0 or even gets 2, odd gets 1
                     ih2 = Common.Binary.IsEven(ref ihigh) ? 2 : 1;
 
                     wd = (band1.nb * 127) >> 7;

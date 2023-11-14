@@ -305,7 +305,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //        //            labels.Add(code.Substring(0, qualifierIndex), generator.DefineLabel());
 //        //            continue;
 //        //        }
-//        //        else if (qualifierIndex == 0) Utility.BreakIfAttached();
+//        //        else if (qualifierIndex is 0) Utility.BreakIfAttached();
 
 //        //        //Split into tokens
 //        //        string[] tokens = code.Split(TokenSplits, StringSplitOptions.RemoveEmptyEntries);

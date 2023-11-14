@@ -252,7 +252,7 @@ namespace Media.Containers.Nut
 
             foreach (var tag in this)
             {
-                if (names is null || names.Count() == 0 || names.Contains((StartCode)Common.Binary.ReadU64(tag.Identifier, 0, Common.Binary.IsLittleEndian)))
+                if (names is null || names.Count() is 0 || names.Contains((StartCode)Common.Binary.ReadU64(tag.Identifier, 0, Common.Binary.IsLittleEndian)))
                     yield return tag;
 
                 count -= tag.TotalSize;
@@ -441,7 +441,7 @@ namespace Media.Containers.Nut
 
                 int timeBaseCount = (int)DecodeVariableLength(stream, out bytesRead);
 
-                if (timeBaseCount == 0) throw new InvalidOperationException("No Timebase");
+                if (timeBaseCount is 0) throw new InvalidOperationException("No Timebase");
 
                 m_TimeBases = new List<long>(timeBaseCount);
 
@@ -491,7 +491,7 @@ namespace Media.Containers.Nut
                     {
                         if (tmp_size > tmp_mul) throw new InvalidOperationException("count underflow");
                         count = tmp_mul - tmp_size;
-                        if (count == 0) throw new InvalidOperationException("count is 0");
+                        if (count is 0) throw new InvalidOperationException("count is 0");
                     }
 
                     if (tmp_fields > 6)
@@ -512,7 +512,7 @@ namespace Media.Containers.Nut
                     //for (int j = 8; j < tmp_fields; ++j) tmp_res = DecodeLength(stream, out bytesRead);
                     while (tmp_fields-- > 8) DecodeVariableLength(stream, out bytesRead);
 
-                    if (count == 0 || i + count > MaximumHeaderOptions) throw new InvalidOperationException("Invalid count for header: " + i + ", count: " + count);
+                    if (count is 0 || i + count > MaximumHeaderOptions) throw new InvalidOperationException("Invalid count for header: " + i + ", count: " + count);
 
                     //Read the HeaderOption (should also be bounded by length?)
                     for (int j = 0; j < count && i < MaximumHeaderOptions; j++, i++)

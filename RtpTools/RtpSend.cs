@@ -364,7 +364,7 @@ namespace Media.RtpTools
         /// <returns>The text describes the packet if the <paramref name="format"/> is a text format, otherwise an empty string</returns>
         public static string ToTextualConvention(FileFormat format, Rtcp.RtcpPacket packet)
         {
-            if (packet is null || packet.Payload.Count == 0 || format < FileFormat.Text || format == FileFormat.Short) return string.Empty;
+            if (packet is null || packet.Payload.Count is 0 || format < FileFormat.Text || format == FileFormat.Short) return string.Empty;
 
             if(format == FileFormat.Unknown) return UnknownSpecifier;
             
@@ -793,7 +793,7 @@ namespace Media.RtpTools
                 lineBytesLength = lineBytes.Count;
 
                 //If nothing was read return
-                if (lineBytesLength == 0) return null;
+                if (lineBytesLength is 0) return null;
 
                 //If the format is unknown then 
                 if (formatUnknown)
@@ -859,14 +859,14 @@ namespace Media.RtpTools
                     int dataLen = 0, tokenOffset = 0;
 
                     //If nothing was tokenized then return the unexpected data.
-                    if (tokens.Length == 0)
+                    if (tokens.Length is 0)
                     {
                         unexpected = lineBytes;
                         return null;
                     }
 
                     //The first token must be a timeOffset
-                    if (timeOffset == 0) timeOffset = double.Parse(tokens[tokenOffset++]);
+                    if (timeOffset is 0) timeOffset = double.Parse(tokens[tokenOffset++]);
 
                     //For each token in the tokens after the timeOffset
                     for (int e = tokens.Length; tokenOffset < e; ++tokenOffset)

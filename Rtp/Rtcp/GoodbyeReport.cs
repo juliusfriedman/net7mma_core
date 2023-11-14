@@ -331,7 +331,7 @@ namespace Media.Rtcp
 
             int reportBlocksRemaining = ReportBlocksRemaining;
 
-            if (reportBlocksRemaining == 0) throw new InvalidOperationException("A RtcpReport can only hold 31 ReportBlocks");
+            if (reportBlocksRemaining is 0) throw new InvalidOperationException("A RtcpReport can only hold 31 ReportBlocks");
 
             //Add the bytes to the payload and set the LengthInWordsMinusOne and increase the BlockCount
             
@@ -465,7 +465,7 @@ namespace Media.UnitTests
                             System.Diagnostics.Debug.Assert(p.PaddingOctets == PaddingCounter, "Unexpected PaddingOctets");
 
                             //Check all data in the padding but not the padding octet itself.
-                            System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b == 0), "Unexpected PaddingData");
+                            System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b is 0), "Unexpected PaddingData");
 
                             //Add remaining amount of reports to test the Add method
 

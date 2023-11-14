@@ -518,7 +518,7 @@ namespace Media.Container
         /// <param name="count">The amount of bytes to skip.</param>
         /// <returns><see cref="Position"/></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
-        public virtual long Skip(long count) { return count /*<=*/== 0 ? Position : Position += count; } //Should also work in reverse... and without the branch although if == 0 is a good check
+        public virtual long Skip(long count) { return count /*<=*/== 0 ? Position : Position += count; } //Should also work in reverse... and without the branch although if is 0 is a good check
 
         /// <summary>
         /// using a new FileStream with ReadOnly access a seek to the given position is performed and a subsequent read at the given position is performed.
@@ -532,7 +532,7 @@ namespace Media.Container
         public virtual int ReadAt(long position, byte[] buffer, int offset, int count) { return ReadAt(position, buffer, offset, count, true); }
         public virtual int ReadAt(long position, byte[] buffer, int offset, int count, bool refreshFileInfo = true)
         {
-            if (count == 0) return 0;
+            if (count is 0) return 0;
 
             using (var stream = new System.IO.FileStream(Name, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
             {
@@ -557,7 +557,7 @@ namespace Media.Container
         public virtual void WriteAt(long position, byte[] buffer, int offset, int count) { WriteAt(position, buffer, offset, count, true); }
         public virtual void WriteAt(long position, byte[] buffer, int offset, int count, bool refreshFileInfo = true)
         {
-            if (count == 0) return;
+            if (count is 0) return;
             using (var stream = new System.IO.FileStream(Name, System.IO.FileMode.Open, System.IO.FileAccess.Write, System.IO.FileShare.ReadWrite))
             {
                 if (position != stream.Seek(position, System.IO.SeekOrigin.Begin)) throw new InvalidOperationException("Unable to obtain the given position");

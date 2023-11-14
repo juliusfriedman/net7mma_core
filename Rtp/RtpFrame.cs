@@ -466,7 +466,7 @@ namespace Media.Rtp
                     //Single packet only
                     case 1: return false;
                     //Skip the range check for 2 packets
-                    case 2: return ((short)(m_LowestSequenceNumber - m_HighestSequenceNumber) != -1); //(should be same as 1 + (short)((m_LowestSequenceNumber - m_HighestSequenceNumber)) == 0 but saves an additional addition)
+                    case 2: return ((short)(m_LowestSequenceNumber - m_HighestSequenceNumber) != -1); //(should be same as 1 + (short)((m_LowestSequenceNumber - m_HighestSequenceNumber)) is 0 but saves an additional addition)
                     //2 or more packets, cache the m_LowestSequenceNumber and check all packets to be sequential starting at offset 1
                     default: RtpPacket p; for (int nextSeq = m_LowestSequenceNumber == ushort.MaxValue ? ushort.MinValue : m_LowestSequenceNumber + 1, i = 1; i < count; ++i)
                         {
@@ -1091,7 +1091,7 @@ namespace Media.Rtp
                     }
                 default:
                     {
-                        //Skip the access of the array for all cases but when the sequence was == to the m_LowestSequenceNumber (i == 0)
+                        //Skip the access of the array for all cases but when the sequence was == to the m_LowestSequenceNumber (i is 0)
                         if(i is 0) //(sequenceNumber == m_LowestSequenceNumber)
                         {
                             m_LowestSequenceNumber = Packets[0].SequenceNumber; //First
@@ -1325,7 +1325,7 @@ namespace Media.Rtp
             //    Common.MemorySegment value = pair.Value;
 
             //    //if null, disposed or empty skip
-            //    if (Common.IDisposedExtensions.IsNullOrDisposed(value) || value.Count == 0) continue;
+            //    if (Common.IDisposedExtensions.IsNullOrDisposed(value) || value.Count is 0) continue;
 
             //    //Write it to the Buffer
             //    m_Buffer.Write(value.Array, value.Offset, value.Count);
@@ -1353,7 +1353,7 @@ namespace Media.Rtp
                 Common.MemorySegment value = pair.Value;
 
                 //if null, disposed or empty skip
-                if (Common.IDisposedExtensions.IsNullOrDisposed(value) || value.Count == 0) continue;
+                if (Common.IDisposedExtensions.IsNullOrDisposed(value) || value.Count is 0) continue;
 
                 //Write it to the Buffer
                 System.Array.Copy(value.Array, value.Offset, buffer, offset, value.Count);

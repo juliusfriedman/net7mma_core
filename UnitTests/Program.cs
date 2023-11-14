@@ -1224,7 +1224,7 @@ namespace Media.UnitTests
 
                         int offset = 0, max = data.Length;
 
-                        if (max == 0) continue;
+                        if (max is 0) continue;
 
                         //Determine further action based on the PacketLength, Version etc.
                         if (entry.IsRtcp)
@@ -1431,7 +1431,7 @@ namespace Media.UnitTests
                             int size = data.Length;
 
                             //Check for Media.RtcpPackets first
-                            if (entry.PacketLength == 0)
+                            if (entry.PacketLength is 0)
                             {
                                 //Reading compound packets out of a single item
                                 foreach (Media.Rtcp.RtcpPacket rtcpPacket in Media.Rtcp.RtcpPacket.GetPackets(data, 0, size))
@@ -1540,7 +1540,7 @@ namespace Media.UnitTests
                                 Console.WriteLine("\t*****************\nConnectionTime:" + client.ConnectionTime);
 
                                 //If the client is not already playing, and the client hasn't received any messages yet then start playing
-                                if (false == client.IsPlaying && client.MessagesReceived == 0)
+                                if (false == client.IsPlaying && client.MessagesReceived is 0)
                                 {
                                     Console.WriteLine("\t*****************\nStarting Playback of :" + client.CurrentLocation);
 
@@ -4669,7 +4669,7 @@ a=appversion:1.0");
                 }
 
                 //Write the amount of failures and successes unless all tests passed
-                if (failures == 0) writeInfo("\tAll '" + count + "' Tests Passed!\r\n\tPress (W) To Run Again, (D) to Debug or any other key to continue.", null, ConsoleColor.Green);
+                if (failures is 0) writeInfo("\tAll '" + count + "' Tests Passed!\r\n\tPress (W) To Run Again, (D) to Debug or any other key to continue.", null, ConsoleColor.Green);
                 else writeInfo("\t" + failures + " Failures, " + successes + " Successes", null, failures > 0 ? ConsoleColor.Red : ConsoleColor.Green);
 
                 //Oops core lib
@@ -4994,7 +4994,7 @@ a=appversion:1.0");
                     int sent = 0;
                     //Send only some of the data
                     do sent = client.RtspSocket.Send(buffer, 0, Common.Binary.Min(ref toSend, ref max), System.Net.Sockets.SocketFlags.None);
-                    while (sent == 0);
+                    while (sent is 0);
 
                     string output = message.ContentEncoding.GetString(buffer, 0, sent);
 

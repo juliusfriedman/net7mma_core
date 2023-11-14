@@ -225,7 +225,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
         foreach (var chunk in this)
         {
-            if (names is null || names.Count() == 0 || names.Contains(Common.Binary.Read32(chunk.Identifier, 0, Media.Common.Binary.IsBigEndian)))
+            if (names is null || names.Count() is 0 || names.Contains(Common.Binary.Read32(chunk.Identifier, 0, Media.Common.Binary.IsBigEndian)))
             {
                 yield return chunk;
                 continue;
@@ -362,7 +362,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
             if (m_Needs64BitInfo.Value && //If the file needs information from the ds64 node
                 //The value must not have been read before and not found to be 0
-                m_DataSize == 0 && 
+                m_DataSize is 0 && 
                 //There must be at least 28 bytes in a junk / ds64 chunk
                 next.DataSize >= 28 &&
                 //This is the ds64 chunk
@@ -371,7 +371,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
                 m_DataSize = (ulong)Common.Binary.Read64(next.Data, MinimumSize, Media.Common.Binary.IsBigEndian);
 
-                //if this is found to be == 0 then what?
+                //if this is found to be is 0 then what?
 
                 /*
                  struct DataSize64Chunk // declare DataSize64Chunk structure

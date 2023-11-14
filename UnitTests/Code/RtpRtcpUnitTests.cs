@@ -413,14 +413,14 @@ namespace Media.UnitTests
             Media.Rtcp.RtcpPacket p = new Media.Rtcp.RtcpPacket(new Media.Rtcp.RtcpHeader(0, 0, false, 0), Enumerable.Empty<byte>());
 
             //Check the Padding bit after modification
-            System.Diagnostics.Debug.Assert(p.SynchronizationSourceIdentifier == 0, "SynchronizationSourceIdentifier should equal 0");
+            System.Diagnostics.Debug.Assert(p.SynchronizationSourceIdentifier is 0, "SynchronizationSourceIdentifier should equal 0");
 
             //Set a values
             p.SynchronizationSourceIdentifier = 7;
 
             //Value should be in memory but the LengthInWords is not correctly set.
 
-            System.Diagnostics.Debug.Assert(p.SynchronizationSourceIdentifier == 0, "SynchronizationSourceIdentifier should equal 0");
+            System.Diagnostics.Debug.Assert(p.SynchronizationSourceIdentifier is 0, "SynchronizationSourceIdentifier should equal 0");
 
             p.SetLengthInWordsMinusOne();
 

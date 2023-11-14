@@ -48,7 +48,7 @@ namespace Media.Codecs.Image.Jpeg
                     //Ensure not padded
                     if (FunctionCode == Media.Codecs.Image.Jpeg.Markers.Prefix
                         ||
-                        FunctionCode == 0) continue;
+                        FunctionCode is 0) continue;
 
                     //Last Tag
                     if (FunctionCode == Media.Codecs.Image.Jpeg.Markers.StartOfInformation

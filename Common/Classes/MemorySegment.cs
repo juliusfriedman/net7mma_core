@@ -623,7 +623,7 @@ namespace Media.Common
                     first ??= segment;
 
                     //Subtract from needed and if 0 remains break
-                    if ((needed -= found) == 0) break;
+                    if ((needed -= found) is 0) break;
 
                     //Continue
                     continue;

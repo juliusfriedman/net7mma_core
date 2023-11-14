@@ -84,7 +84,7 @@ namespace Media.Containers.Gxf
 
             foreach (var element in this)
             {
-                if (identifiers is null || identifiers.Count() == 0 || identifiers.Contains((Identifier)element.Identifier[0])) yield return element;
+                if (identifiers is null || identifiers.Count() is 0 || identifiers.Contains((Identifier)element.Identifier[0])) yield return element;
 
                 count -= element.DataSize;
 

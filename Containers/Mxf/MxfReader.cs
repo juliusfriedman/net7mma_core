@@ -548,7 +548,7 @@ namespace Media.Containers.Mxf
             {
                 length &= ~MultiByteLength;
 
-                if (length == 0) throw new InvalidOperationException("BER32 Indefinite Length Not Supported. Use DER Form.");
+                if (length is 0) throw new InvalidOperationException("BER32 Indefinite Length Not Supported. Use DER Form.");
 
                 if (length > 8) throw new InvalidOperationException("BER32 Lengths larger than 8 are Not Supported.");
 
@@ -1283,7 +1283,7 @@ namespace Media.Containers.Mxf
             {
                 Guid objectId = new Guid(mxfObject.Identifier);
 
-                if (names is null || names.Count() == 0 || (exact ? names.Contains(objectId) : names.Any(n => CompareUL(n, objectId, ignoreRegistry, ignoreVersion, ignoreType))))
+                if (names is null || names.Count() is 0 || (exact ? names.Contains(objectId) : names.Any(n => CompareUL(n, objectId, ignoreRegistry, ignoreVersion, ignoreType))))
                     yield return mxfObject;
 
                 count -= mxfObject.TotalSize;
@@ -1630,7 +1630,7 @@ namespace Media.Containers.Mxf
                                         ++i;
 
                                         //Component [ARGB, argb, F, YCBR]
-                                        if(descriptor.Data[++localOffset] == 0) break;
+                                        if(descriptor.Data[++localOffset] is 0) break;
                                         
                                         //Bits per component
                                         bitDepth += descriptor.Data[localOffset++];
@@ -1690,7 +1690,7 @@ namespace Media.Containers.Mxf
                 }
 
                 //Do not yield Timecode Tracks or duplicate entries
-                if (trackNumber == 0 || lastTrackNumber == trackNumber) continue;
+                if (trackNumber is 0 || lastTrackNumber == trackNumber) continue;
 
                 //Try to use the trackName if needed and we can
                 if (mediaType == Sdp.MediaType.unknown && false == string.IsNullOrWhiteSpace(trackName)) switch (trackName)

@@ -698,7 +698,7 @@ namespace Media.Rtsp
             //Todo THIS MUST NOT HAPPEN MORE THEN 1 time and only if the line ending was used by the headers to indicate the end... seems more approprivate there...
 
             //Ensure no control characters were left from parsing of the header values if more data is available then remains
-            if (existingBodySize == 0 && available > 0 && Array.IndexOf<char>(m_EncodedLineEnds, decoder.GetChars(buffer, position, 1)[0]) >= 0)
+            if (existingBodySize is 0 && available > 0 && Array.IndexOf<char>(m_EncodedLineEnds, decoder.GetChars(buffer, position, 1)[0]) >= 0)
             {
                 ++position;
 
@@ -889,7 +889,7 @@ namespace Media.Rtsp
 
         protected override void OnHeaderAdded(string headerName, string headerValue)
         {
-            if (string.Compare(headerName, Http.HttpHeaders.TransferEncoding, true) == 0) throw new InvalidOperationException("Protocol: " + Protocol + ", does not support TrasferEncoding.");
+            if (string.Compare(headerName, Http.HttpHeaders.TransferEncoding, true) is 0) throw new InvalidOperationException("Protocol: " + Protocol + ", does not support TrasferEncoding.");
 
             base.OnHeaderAdded(headerName, headerValue);
         }
@@ -953,7 +953,7 @@ namespace Media.Rtsp
                 &&
                 other.m_CSeq == m_CSeq
                 &&
-                string.Compare(other.m_Body, m_Body, false) == 0;
+                string.Compare(other.m_Body, m_Body, false) is 0;
                 //&&               
                 //other.Length == Length;
         }
@@ -1038,7 +1038,7 @@ namespace Media.UnitTests
                         if (false == (serialized.RtspStatusCode == request.RtspStatusCode &&
                         serialized.CSeq == request.CSeq &&
                         serialized.Version == request.Version &&
-                        string.Compare(serialized.Body, TestBody, false) == 0) ||
+                        string.Compare(serialized.Body, TestBody, false) is 0) ||
                         false == serialized.IsComplete || false == request.IsComplete)
                         {
                             throw new Exception("Response Serialization Testing Failed With Body!");
@@ -1055,7 +1055,7 @@ namespace Media.UnitTests
                         if (false == (serialized.RtspStatusCode == request.RtspStatusCode &&
                         serialized.CSeq == request.CSeq &&
                         serialized.Version == request.Version &&
-                        string.Compare(serialized.Body, TestBody, false) == 0) ||
+                        string.Compare(serialized.Body, TestBody, false) is 0) ||
                         false == serialized.IsComplete || false == request.IsComplete)
                         {
                             throw new Exception("Response Serialization Testing Failed Without CSeq!");
@@ -1105,7 +1105,7 @@ namespace Media.UnitTests
                             if (false == (serialized.RtspStatusCode == response.RtspStatusCode &&
                             serialized.CSeq == response.CSeq &&
                             serialized.Version == response.Version &&
-                            string.Compare(serialized.Body, response.Body, false) == 0) ||
+                            string.Compare(serialized.Body, response.Body, false) is 0) ||
                             false == serialized.IsComplete || false == response.IsComplete)
                             {
                                 throw new Exception("Response Serialization Testing Failed With Body!");
@@ -1123,7 +1123,7 @@ namespace Media.UnitTests
                         if (false == (serialized.RtspStatusCode == response.RtspStatusCode &&
                         serialized.CSeq == response.CSeq &&
                         serialized.Version == response.Version &&
-                        string.Compare(serialized.Body, response.Body, false) == 0) ||
+                        string.Compare(serialized.Body, response.Body, false) is 0) ||
                         false == serialized.IsComplete || false == response.IsComplete)
                         {
                             throw new Exception("Response Serialization Testing Failed Without CSeq!");

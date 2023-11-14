@@ -1658,7 +1658,7 @@ namespace Media.Rtsp
             //Is was already playing then set the value
             if (HandleStopEvent && 
                 Common.IDisposedExtensions.IsNullOrDisposed(mediaDescription) && 
-                m_StartedPlaying.HasValue || m_Playing.Count == 0) m_StartedPlaying = null;
+                m_StartedPlaying.HasValue || m_Playing.Count is 0) m_StartedPlaying = null;
 
             RtspClientAction action = OnStop;
 
@@ -1804,7 +1804,7 @@ namespace Media.Rtsp
 
                 #region [MSRTSP - application/x-wms-extension-cmd]
 
-                if (string.Compare(contentType, "application/x-wms-extension-cmd", true) == 0)
+                if (string.Compare(contentType, "application/x-wms-extension-cmd", true) is 0)
                 {
                     string xNotice = set["X-Notice"];
 
@@ -2326,7 +2326,7 @@ namespace Media.Rtsp
                     {
 
                         //Something else...
-                        if (string.Compare(toProcess.MethodString, "END_OF_STREAM", true) == 0)
+                        if (string.Compare(toProcess.MethodString, "END_OF_STREAM", true) is 0)
                         {
                             //Should be merged with Teardown.
                             ProcessRemoteEndOfStream(toProcess);
@@ -3763,7 +3763,7 @@ namespace Media.Rtsp
                     else uri = uri.Substring(11);
                 }
 
-                string qop = baseParts.Where(p => string.Compare(RtspHeaderFields.Authorization.Attributes.QualityOfProtection, p, true) == 0).FirstOrDefault();
+                string qop = baseParts.Where(p => string.Compare(RtspHeaderFields.Authorization.Attributes.QualityOfProtection, p, true) is 0).FirstOrDefault();
 
                 if (string.IsNullOrWhiteSpace(qop) is false)
                 {
@@ -5316,8 +5316,8 @@ namespace Media.Rtsp
 
             ////Attempt to parse them
             //if (RtpClient.TransportContext.TryParseBandwidthDirectives(mediaDescription, out rr, out rs, out a) &&
-            //    rr == 0 && //If the rr AND
-            //    rs == 0/* && a == 0*/) // rs directive specified 0 (Should check AS?)
+            //    rr is 0 && //If the rr AND
+            //    rs is 0/* && a is 0*/) // rs directive specified 0 (Should check AS?)
             //{
             //    //RTSP is not needed
             //    needsRtcp = false;
@@ -5513,7 +5513,7 @@ namespace Media.Rtsp
                             {
                                 //Should probably check for open port again...
 
-                                rtcpTemp = Media.Common.Extensions.Socket.SocketExtensions.ReservePort(SocketType.Dgram, ProtocolType.Udp, ((IPEndPoint)m_RtspSocket.LocalEndPoint).Address, (clientRtcpPort = (openPort == ushort.MaxValue || openPort == 0 ? openPort : openPort + 1)));
+                                rtcpTemp = Media.Common.Extensions.Socket.SocketExtensions.ReservePort(SocketType.Dgram, ProtocolType.Udp, ((IPEndPoint)m_RtspSocket.LocalEndPoint).Address, (clientRtcpPort = (openPort == ushort.MaxValue || openPort is 0 ? openPort : openPort + 1)));
                             }
                         }
 

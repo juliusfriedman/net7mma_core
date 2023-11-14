@@ -101,12 +101,12 @@ namespace Media.Rtcp
                     //16384 is the maximum value which should occupy the LengthInWordsMinusOne in a single IP RTCP packet
                     //Values over this such as 65535 will be truncated to 0 when added with 1 when the result type is not bound to ushort
 
-                    //When LengthInWordsMinusOne == 0 this means there should only be the header, 0 + 1 = 1 * 4 = 4
+                    //When LengthInWordsMinusOne is 0 this means there should only be the header, 0 + 1 = 1 * 4 = 4
 
                     int lengthInBytes = headerSize > remains ? 0 : Binary.MachineWordsToBytes((ushort)(header.LengthInWordsMinusOne + 1)); 
 
                     //Create a packet using the existing header and the bytes left in the packet
-                    using (RtcpPacket newPacket = new RtcpPacket(header, lengthInBytes == 0 ? MemorySegment.Empty : new MemorySegment(array, offset + headerSize, Binary.Clamp(lengthInBytes - headerSize, 0, remains - headerSize)), shouldDispose))
+                    using (RtcpPacket newPacket = new RtcpPacket(header, lengthInBytes is 0 ? MemorySegment.Empty : new MemorySegment(array, offset + headerSize, Binary.Clamp(lengthInBytes - headerSize, 0, remains - headerSize)), shouldDispose))
                     {
                         lengthInBytes = headerSize + newPacket.Payload.Count;
 
@@ -360,7 +360,7 @@ namespace Media.Rtcp
         public RtcpPacket(int version, int payloadType, int padding, int blockCount, int ssrc, int lengthInWords, byte[] payload, int index, int count, bool shouldDispose = true)
             :this(version, payloadType, padding, ssrc, blockCount, lengthInWords, shouldDispose)
         {
-            if (count == 0) return;
+            if (count is 0) return;
 
             int lowerBound = payload.GetLowerBound(0), upperBound = payload.GetUpperBound(0);
 
@@ -567,7 +567,7 @@ namespace Media.Rtcp
             throw new NotImplementedException();
 
             //Would have to check existing Padding, if the same then return,
-            //If less padding would have to be removed && if == 0 then Padding = false.
+            //If less padding would have to be removed && if is 0 then Padding = false.
             //If greater then padding would have to be added up to 255 respecting what is already present
         }
 
@@ -709,7 +709,7 @@ namespace Media.Rtcp
 
                 int padding = PaddingOctets;
 
-                if (padding == 0) return Common.MemorySegment.Empty;
+                if (padding is 0) return Common.MemorySegment.Empty;
 
                 return new Common.MemorySegment(Payload.Array, (Payload.Offset + Payload.Count) - padding, padding);
             }
@@ -1119,7 +1119,7 @@ namespace Media.UnitTests
                                         System.Diagnostics.Debug.Assert(p.BlockCount == ReportBlockCounter, "Unexpected BlockCount");
 
                                         //Check the SynchronizationSourceIdentifier
-                                        System.Diagnostics.Debug.Assert(p.SynchronizationSourceIdentifier == 0 || p.SynchronizationSourceIdentifier == 7, "Unexpected SynchronizationSourceIdentifier");
+                                        System.Diagnostics.Debug.Assert(p.SynchronizationSourceIdentifier is 0 || p.SynchronizationSourceIdentifier == 7, "Unexpected SynchronizationSourceIdentifier");
 
                                         //Check the LengthInWordsMinusOne, should not be 0 when padding is used...
                                         System.Diagnostics.Debug.Assert(p.Header.LengthInWordsMinusOne == ushort.MaxValue, "Unexpected LengthInWordsMinusOne");
@@ -1156,7 +1156,7 @@ namespace Media.UnitTests
                                             System.Diagnostics.Debug.Assert(s.BlockCount == ReportBlockCounter, "Unexpected BlockCount");
 
                                             //Check the SynchronizationSourceIdentifier, we specified 0 for the length in words...
-                                            //s.SynchronizationSourceIdentifier == 0 || 
+                                            //s.SynchronizationSourceIdentifier is 0 || 
                                             System.Diagnostics.Debug.Assert(s.SynchronizationSourceIdentifier == p.SynchronizationSourceIdentifier, "Unexpected SynchronizationSourceIdentifier");
 
                                             //Check the LengthInWordsMinusOne

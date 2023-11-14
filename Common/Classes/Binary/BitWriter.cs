@@ -56,7 +56,7 @@
         /// <summary>
         /// Indicates if the <see cref="BitIndex"/> is aligned to a byte boundary.
         /// </summary>
-        public bool IsAligned { get { return m_BitIndex % Common.Binary.BitsPerByte == 0; } }
+        public bool IsAligned { get { return m_BitIndex % Common.Binary.BitsPerByte is 0; } }
 
         /// <summary>
         /// Gets the <see cref="System.IO.Stream"/> from which the data is written.

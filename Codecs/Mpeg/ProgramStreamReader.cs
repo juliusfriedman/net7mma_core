@@ -80,7 +80,7 @@ namespace Media.Containers.Mpeg
             foreach (Container.Node node in this)
             {
                 //If no names were specified or they were and the identifier marker was contained return the node
-                if (names is null || names.Length == 0 || names.Contains(node.Identifier[3])) yield return node;
+                if (names is null || names.Length is 0 || names.Contains(node.Identifier[3])) yield return node;
                 
                 //Decrease by TotalSize of the node
                 count -= node.TotalSize;

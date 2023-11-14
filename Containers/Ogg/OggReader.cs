@@ -182,7 +182,7 @@ namespace Media.Containers.Ogg
                 CapturePattern found = (CapturePattern)Common.Binary.ReadU64(page.Identifier, 0, Media.Common.Binary.IsBigEndian);
                 
                 //If contained the found or the unmasked found then return the page
-                if (names is null || names.Count() == 0 || names.Any(n => n == found || n == (CapturePattern)((ulong)found & uint.MaxValue))) yield return page;
+                if (names is null || names.Count() is 0 || names.Any(n => n == found || n == (CapturePattern)((ulong)found & uint.MaxValue))) yield return page;
                 else if( page.DataSize > 0)
                 {
                     //Get the capture pattern from the data
@@ -380,7 +380,7 @@ namespace Media.Containers.Ogg
                     if (pageHeaderType.HasFlag(HeaderType.FirstPage)) m_PageBegins.Add(serial, page);
 
                     //If no begin page was found then we don't need anything
-                    if (m_PageBegins.Count == 0) continue;
+                    if (m_PageBegins.Count is 0) continue;
 
                     //Check for info page which may have comments
                     if (m_InfoPages.Count < m_PageBegins.Count && page.Data[0] == PacketTypeComment) m_InfoPages.Add(serial, page);
@@ -732,7 +732,7 @@ namespace Media.Containers.Ogg
                                 //3 4:4:4 (see Section 4.4.1).
 
                                 //calculate BitDept from above?
-                                //if(bitDepth == 0) bitDepth = 8;
+                                //if(bitDepth is 0) bitDepth = 8;
                                 //else bitDepth *= 8; //16, 24
                             }
                             break;

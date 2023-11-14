@@ -371,7 +371,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public RtpPacket(byte[] buffer, int offset, int count, bool shouldDispose = true) : base(shouldDispose)
         {
-            if (buffer is null || buffer.Length == 0 || count <= 0) throw new ArgumentException("Must have data in a RtpPacket");
+            if (buffer is null || buffer.Length is 0 || count <= 0) throw new ArgumentException("Must have data in a RtpPacket");
 
             m_OwnedOctets = new byte[count];
 

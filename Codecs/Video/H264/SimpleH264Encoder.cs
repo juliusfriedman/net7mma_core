@@ -369,7 +369,7 @@ public class SimpleH264Encoder : IDisposable
         public void addbyte(byte cByte)
         {
             //Byte alignment optimization
-            if ((m_nLastbitinbuffer % 8) == 0)
+            if ((m_nLastbitinbuffer % 8) is 0)
             {
                 addbytetostream(cByte);
             }

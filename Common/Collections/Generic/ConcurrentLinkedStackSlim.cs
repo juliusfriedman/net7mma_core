@@ -469,7 +469,7 @@ namespace Media.UnitTests
 
             dequeueThread.Start();
 
-            while (countOut == 0 && countIn == 0) mre.WaitOne(0);
+            while (countOut is 0 && countIn is 0) mre.WaitOne(0);
 
             while (countOut < Amount)
             {
@@ -670,7 +670,7 @@ namespace Media.UnitTests
 
             System.Linq.ParallelEnumerable.ForAll(popThreads.AsParallel(), t => t.Start());
 
-            while (stackLevelCountOut == 0 && statLevelCountIn == 0) sharedResetEvent.WaitOne(0);
+            while (stackLevelCountOut is 0 && statLevelCountIn is 0) sharedResetEvent.WaitOne(0);
 
             while (stackLevelCountOut < product)
             {

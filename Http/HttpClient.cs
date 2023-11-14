@@ -863,7 +863,7 @@ namespace Media.Http
                     //Determine if the message should be sent in chunks
                     bool sendChunked = SendChunked && false == string.IsNullOrWhiteSpace(message.Body) 
                         || 
-                        message.Version > 1.0 && string.Compare(message[HttpHeaders.TransferEncoding], "chunked", true) == 0;
+                        message.Version > 1.0 && string.Compare(message[HttpHeaders.TransferEncoding], "chunked", true) is 0;
 
                     //Protocol version < 1.1 does not support Transfer-Encoding.
                     if (sendChunked && ProtocolVersion < 1.1)
@@ -879,7 +879,7 @@ namespace Media.Http
                     }
 
                     //May not have to make a distinct case for multipart... the data would already be in the body...
-                    bool multiPart = string.Compare(message[HttpHeaders.ContentType], "multipart/form-data", true) == 0;                 
+                    bool multiPart = string.Compare(message[HttpHeaders.ContentType], "multipart/form-data", true) is 0;                 
 
                     
 
@@ -1581,7 +1581,7 @@ namespace Media.Http
 
             //Todo, should be constsants for basic and digest etc,
 
-            if (string.Compare(baseParts[0].Trim(), "basic", true) == 0 || m_AuthenticationScheme == AuthenticationSchemes.Basic)
+            if (string.Compare(baseParts[0].Trim(), "basic", true) is 0 || m_AuthenticationScheme == AuthenticationSchemes.Basic)
             {
                 AuthenticationScheme = AuthenticationSchemes.Basic;
 
@@ -1591,7 +1591,7 @@ namespace Media.Http
                 return SendHttpMessage(request);
 
             }
-            else if (string.Compare(baseParts[0].Trim(), "digest", true) == 0 || m_AuthenticationScheme == AuthenticationSchemes.Digest)
+            else if (string.Compare(baseParts[0].Trim(), "digest", true) is 0 || m_AuthenticationScheme == AuthenticationSchemes.Digest)
             {
                 AuthenticationScheme = AuthenticationSchemes.Digest;
 
@@ -1634,7 +1634,7 @@ namespace Media.Http
                 string nonce = baseParts.Where(p => p.StartsWith("nonce", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();
                 if (false == string.IsNullOrWhiteSpace(nonce)) nonce = nonce.Substring(6).Replace("\"", string.Empty).Replace("\'", string.Empty);
 
-                string cnonce = baseParts.Where(p => p.StartsWith("cnonce", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();//parts.Where(p => string.Compare("cnonce", p, true) == 0).FirstOrDefault();
+                string cnonce = baseParts.Where(p => p.StartsWith("cnonce", StringComparison.InvariantCultureIgnoreCase)).FirstOrDefault();//parts.Where(p => string.Compare("cnonce", p, true) is 0).FirstOrDefault();
                 if (false == string.IsNullOrWhiteSpace(cnonce))
                 {
 
@@ -1655,7 +1655,7 @@ namespace Media.Http
                     else uri = uri.Substring(11);
                 }
 
-                string qop = baseParts.Where(p => string.Compare("qop", p, true) == 0).FirstOrDefault();
+                string qop = baseParts.Where(p => string.Compare("qop", p, true) is 0).FirstOrDefault();
 
                 if (false == string.IsNullOrWhiteSpace(qop))
                 {
@@ -1682,7 +1682,7 @@ namespace Media.Http
 
         void ProcessMessageData(object sender, byte[] data, int offset, int length)
         {
-            if (length == 0) return;
+            if (length is 0) return;
 
             //Cache offset and count, leave a register for received data (should be calulated with length)
             int received = 0;
@@ -1706,7 +1706,7 @@ namespace Media.Http
                     case HttpMessageType.Response:
                         {
                             //Sometimes the content may contain characters which don't belong to a new message, validate this by checking the version
-                            //if (message.Version == 0.0) goto case HttpMessageType.Invalid;
+                            //if (message.Version is 0.0) goto case HttpMessageType.Invalid;
 
                             if (message.Version != ProtocolVersion) goto case HttpMessageType.Invalid;
 
@@ -1724,7 +1724,7 @@ namespace Media.Http
                                     //Take in some bytes from the socket
                                     int justReceived = message.CompleteFrom(m_HttpSocket, m_Buffer);
 
-                                    if (justReceived == 0) break;
+                                    if (justReceived is 0) break;
 
                                     //Incrment for justReceived
                                     received += justReceived;

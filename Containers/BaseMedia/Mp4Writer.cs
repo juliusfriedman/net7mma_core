@@ -157,7 +157,7 @@ namespace Media.Containers.BaseMedia
 
         public void AddAudioTrack(uint sampleRate, ushort channelCount, int[] sampleSizes, TimeSpan[] sampleDurations)
         {
-            if (sampleRate == 0 || channelCount == 0)
+            if (sampleRate is 0 || channelCount is 0)
                 throw new ArgumentException("Invalid sample rate or channel count");
 
             uint creationTime = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();

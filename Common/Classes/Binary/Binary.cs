@@ -1201,7 +1201,7 @@ namespace Media.Common
         {
             //int bitIndex, byteIndex = Math.DivRem(index, Binary.BitsPerByte, out bitIndex);
 
-            //Only increases after bitIndex has been exhausted (bitIndex == 0)
+            //Only increases after bitIndex has been exhausted (bitIndex is 0)
             int byteIndex = index >> Binary.Tres;
 
             //(source index) Always <= 7, then decreases for each iteration
@@ -1228,7 +1228,7 @@ namespace Media.Common
         {
             //int bitIndex, byteIndex = Math.DivRem(index, Binary.BitsPerByte, out bitIndex);
 
-            //Only increases after bitIndex has been exhausted (bitIndex == 0)
+            //Only increases after bitIndex has been exhausted (bitIndex is 0)
             int byteIndex = index >> Binary.Tres;
 
             //(source index) Always <= 7, then decreases for each iteration
@@ -1253,7 +1253,7 @@ namespace Media.Common
         {
             //int bitIndex, byteIndex = Math.DivRem(index, Binary.BitsPerByte, out bitIndex);
 
-            //Only increases after bitIndex has been exhausted (bitIndex == 0)
+            //Only increases after bitIndex has been exhausted (bitIndex is 0)
             int byteIndex = index >> Binary.Tres;
 
             //(source index) Always <= 7, then decreases for each iteration
@@ -1271,7 +1271,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool GetBitReverse(byte[] self, int index)
         {
-            //Only increases after bitIndex has been exhausted (bitIndex == 0)
+            //Only increases after bitIndex has been exhausted (bitIndex is 0)
             int byteIndex = index >> Binary.Tres;
 
             //(source index) Always <= 7, then decreases for each iteration
@@ -1285,7 +1285,7 @@ namespace Media.Common
         {
             //int bitIndex, byteIndex = Math.DivRem(index, Binary.BitsPerByte, out bitIndex);
 
-            //Only increases after bitIndex has been exhausted (bitIndex == 0)
+            //Only increases after bitIndex has been exhausted (bitIndex is 0)
             int byteIndex = index >> Binary.Tres;
 
             //(source index) Always <= 7, then decreases for each iteration
@@ -1362,7 +1362,7 @@ namespace Media.Common
 
             for (int index = bitOffset, end = bitOffset + bitCount; index < end; ++index)
             {
-                //Only increases after bitIndex has been exhausted (bitIndex == 0)
+                //Only increases after bitIndex has been exhausted (bitIndex is 0)
                 byteOffset = index >> Binary.Tres;
 
                 //(source index) Always <= 7, then decreases for each iteration
@@ -1584,7 +1584,7 @@ namespace Media.Common
                     throw new ArgumentOutOfRangeException(nameof(byteCount), byteCount, "Provided arguments would require reading outside of the data array upper bounds.");
                 }
 
-                if (byteCount == 0)
+                if (byteCount is 0)
                 {
                     return 0;
                 }
@@ -2073,7 +2073,7 @@ namespace Media.Common
 
             if (sizeInBytes > Binary.Octo) throw new NotSupportedException("Only sizes up to 8 octets are supported in a long.");
 
-            if (sizeInBytes == 0 || sign == 0) return Binary.Nihil;
+            if (sizeInBytes is 0 || sign is 0) return Binary.Nihil;
 
             unchecked
             {
@@ -2335,7 +2335,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void WriteInteger(byte[] buffer, int index, int count, ulong value, int shift = Binary.BitsPerByte)
         {
-            if (buffer is null || count == 0) return;
+            if (buffer is null || count is 0) return;
 
             unchecked
             {
@@ -2383,7 +2383,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void WriteReversedInteger(byte[] buffer, int index, int count, ulong value, int shift = Binary.BitsPerByte)
         {
-            if (buffer is null || count == 0) return;
+            if (buffer is null || count is 0) return;
 
             unchecked
             {

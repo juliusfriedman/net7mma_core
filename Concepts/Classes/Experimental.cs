@@ -796,7 +796,7 @@ namespace Media.Concepts.Experimental
             if (offset < 0) throw new ArgumentOutOfRangeException("offset must refer to a location within the buffer.");
             else if (count + offset > Length) throw new ArgumentOutOfRangeException("count must refer to a location within the buffer with respect to offset.");
 
-            if (count == 0) return Enumerable.Empty<byte>();
+            if (count is 0) return Enumerable.Empty<byte>();
             buffer = buffer ?? new byte[count];
             int len = count;
             while ((len -= m_Stream.Read(buffer, offset, count)) > 0
@@ -830,7 +830,7 @@ namespace Media.Concepts.Experimental
 
         internal protected long CoreIndexOf(IEnumerable<byte> items, int start = -1, int count = -1)
         {
-            if (m_Stream is null || m_Disposed || items is null || items == Enumerable.Empty<byte>() || count == 0) return -1;
+            if (m_Stream is null || m_Disposed || items is null || items == Enumerable.Empty<byte>() || count is 0) return -1;
             if (count == -1) count = items.Count();
 
             if (!Initialized && !MoveNext()) return -1;
@@ -858,7 +858,7 @@ namespace Media.Concepts.Experimental
                         if (!itemPointer.MoveNext()) break;
                     }
                     //The match is complete
-                    if (j == 0)
+                    if (j is 0)
                     {
                         //If CanSeek and moved the position and we will go back to where we were
                         //if (m_Stream.CanSeek && position != Position) m_Stream.Seek(position, System.IO.SeekOrigin.Begin); //Curent and Begin need to be aware...
@@ -1224,7 +1224,7 @@ namespace Media.Concepts.Experimental
 
             LinkedStream result = new LinkedStream(new EnumerableByteStream(new System.IO.MemoryStream()));
 
-            if (count == 0) return result;
+            if (count is 0) return result;
 
             while (absoluteIndex > 0)
             {

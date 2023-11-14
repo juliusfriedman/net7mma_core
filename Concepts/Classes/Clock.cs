@@ -250,7 +250,7 @@ namespace Media.Concepts.Classes
                 {
                     while (--nanos >= 2)
                     {
-                        /* if(--nanos % 2 == 0) */
+                        /* if(--nanos % 2 is 0) */
                         NanoSleep((long)0); //nanos -= 1 + (ops / (ulong)AverageOperationsPerTick);// *10;
                     }
                 }

@@ -170,7 +170,7 @@ namespace Media.Sdp
                             if (false.Equals(string.IsNullOrWhiteSpace(startTimeString)) && string.Compare(startTimeString, "now", StringComparison.OrdinalIgnoreCase) != 0) start = startTimeString.IndexOf(Colon) >= 0 ? TimeSpan.Parse(startTimeString, System.Globalization.CultureInfo.InvariantCulture) : TimeSpan.FromSeconds(double.Parse(startTimeString, System.Globalization.CultureInfo.InvariantCulture));
 
                             //If both strings were the same don't parse again.
-                            if (string.Compare(startTimeString, endTimeString) == 0) end = start;
+                            if (string.Compare(startTimeString, endTimeString) is 0) end = start;
                             else if (false.Equals(string.IsNullOrWhiteSpace(endTimeString))) end = startTimeString.IndexOf(Colon) >= 0 ? TimeSpan.Parse(endTimeString, System.Globalization.CultureInfo.InvariantCulture) : TimeSpan.FromSeconds(double.Parse(endTimeString, System.Globalization.CultureInfo.InvariantCulture));
 
                             return true;
@@ -207,7 +207,7 @@ namespace Media.Sdp
                             }
 
                             //Parse and determine the end time
-                            if (string.Compare(startTimeString, endTimeString) == 0) end = start;
+                            if (string.Compare(startTimeString, endTimeString) is 0) end = start;
                             else if (false.Equals( string.IsNullOrWhiteSpace(endTimeString)) && DateTime.TryParseExact(startTimeString, clockFormat, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out date))
                             {
                                 //Time in the past

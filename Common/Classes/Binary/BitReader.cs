@@ -266,7 +266,7 @@
                 bytesRead = m_BaseStream.Read(m_ByteCache.Array, m_ByteCache.Offset + m_ByteIndex + bytesRead, bytesToRead);
 
                 //Check for EOF
-                if (bytesRead == 0) break;
+                if (bytesRead is 0) break;
 
                 //Adjust for the bytesRead
                 bytesToRead -= bytesRead;               

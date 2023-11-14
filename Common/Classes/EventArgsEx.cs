@@ -73,7 +73,7 @@ namespace Media.Common
         /// <remarks>
         /// 
         /////// The structure of this value was highly dependant on the following:
-        /////// Signature == 0 : No return value
+        /////// Signature is 0 : No return value
         /////// Signature &lt;0 : Will throw an exception (-0)
         /////// Signature &gt;0 : May throw an exception
         /// </remarks>

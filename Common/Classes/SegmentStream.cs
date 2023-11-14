@@ -776,7 +776,7 @@ namespace Media.Common
                         }
                         else if (offset <= 0)
                         {
-                            //Should use End style when offset < 0 but not == 0...
+                            //Should use End style when offset < 0 but not is 0...
 
                             WorkingSegment = Segments[(m_Index = 0)];
 

@@ -158,7 +158,7 @@ namespace Media.Concepts.Classes
             while (continue_)
             {
                 //If there is no size make a new object which allocated 12 or more bytes to make a gap, next allocation should be aligned.
-                if (size == 0)
+                if (size is 0)
                 {
                     object gap = new object();
                 }

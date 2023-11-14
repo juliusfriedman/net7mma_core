@@ -1588,7 +1588,7 @@ namespace Media.Http
                 //Check for the requested encoding
                 contentEncoding = contentEncoding.Trim();
 
-                System.Text.EncodingInfo requested = System.Text.Encoding.GetEncodings().FirstOrDefault(e => string.Compare(e.Name, contentEncoding, false, System.Globalization.CultureInfo.InvariantCulture) == 0);
+                System.Text.EncodingInfo requested = System.Text.Encoding.GetEncodings().FirstOrDefault(e => string.Compare(e.Name, contentEncoding, false, System.Globalization.CultureInfo.InvariantCulture) is 0);
 
                 if (false.Equals(requested is null)) contentDecoder = requested.GetEncoding();
                 else if (true.Equals(raiseWhenNotFound)) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(contentEncoding, "The given message was encoded in a Encoding which is not present on this system and no fallback encoding was acceptible to decode the message. The tag has been set the value of the requested encoding");
@@ -1661,7 +1661,7 @@ namespace Media.Http
             byte[] buffer = m_Buffer.GetBuffer();
 
             //Ensure no control characters were left from parsing of the header values if more data is available then remains
-            if (existingBodySize == 0 && available > 0 && Array.IndexOf<char>(m_EncodedLineEnds, decoder.GetChars(buffer, position, 1)[0]) >= 0)
+            if (existingBodySize is 0 && available > 0 && Array.IndexOf<char>(m_EncodedLineEnds, decoder.GetChars(buffer, position, 1)[0]) >= 0)
             {
                 ++position;
 
@@ -1785,7 +1785,7 @@ namespace Media.Http
                 }
                 else //Content-Length style message
                 {
-                    if (existingBodySize == 0)
+                    if (existingBodySize is 0)
                         m_Body = decoder.GetString(buffer, position, Media.Common.Binary.Min(ref available, ref remaining));
                     else                     //Append to the existing body
                         m_Body += decoder.GetString(buffer, position, Media.Common.Binary.Min(ref available, ref remaining));
@@ -2893,7 +2893,7 @@ namespace Media.UnitTests
                     {
                         if (false == (serialized.HttpStatusCode == request.HttpStatusCode &&
                         serialized.Version == request.Version &&
-                        string.Compare(serialized.Body, TestBody, false) == 0) ||
+                        string.Compare(serialized.Body, TestBody, false) is 0) ||
                         false == serialized.IsComplete || false == request.IsComplete)
                         {
                             throw new Exception("Response Serialization Testing Failed With Body!");
@@ -2906,7 +2906,7 @@ namespace Media.UnitTests
                     {
                         if (false == (serialized.HttpStatusCode == request.HttpStatusCode &&
                         serialized.Version == request.Version &&
-                        string.Compare(serialized.Body, TestBody, false) == 0) ||
+                        string.Compare(serialized.Body, TestBody, false) is 0) ||
                         false == serialized.IsComplete || false == request.IsComplete)
                         {
                             throw new Exception("Response Serialization Testing Failed Without CSeq!");
@@ -2953,7 +2953,7 @@ namespace Media.UnitTests
                         {
                             if (false == (serialized.HttpStatusCode == response.HttpStatusCode &&
                             serialized.Version == response.Version &&
-                            string.Compare(serialized.Body, response.Body, false) == 0) ||
+                            string.Compare(serialized.Body, response.Body, false) is 0) ||
                             false == serialized.IsComplete || false == response.IsComplete)
                             {
                                 throw new Exception("Response Serialization Testing Failed With Body!");
@@ -2967,7 +2967,7 @@ namespace Media.UnitTests
                     {
                         if (false == (serialized.HttpStatusCode == response.HttpStatusCode &&
                         serialized.Version == response.Version &&
-                        string.Compare(serialized.Body, response.Body, false) == 0) ||
+                        string.Compare(serialized.Body, response.Body, false) is 0) ||
                         false == serialized.IsComplete || false == response.IsComplete)
                         {
                             throw new Exception("Response Serialization Testing Failed Without CSeq!");

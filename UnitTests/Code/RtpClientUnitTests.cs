@@ -555,7 +555,7 @@ namespace Media.UnitTests
                         {
                             int used = lastInterleaved.CompleteFrom(null, memory);
 
-                            if (used == 0 || lastLength == lastInterleaved.Length) return;
+                            if (used is 0 || lastLength == lastInterleaved.Length) return;
 
                             Console.ForegroundColor = ConsoleColor.Yellow;
                             Console.WriteLine("Added Data (" + used + ") Bytes");
@@ -719,7 +719,7 @@ namespace Media.UnitTests
                         Console.ForegroundColor = ConsoleColor.Yellow;
                         Console.WriteLine("Missed:" + (rtspOut - rtspIn) + " Messages of" + rtspOut);
                     }
-                    else if (rtspIn == 0)
+                    else if (rtspIn is 0)
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Missed All Messages");
@@ -763,7 +763,7 @@ namespace Media.UnitTests
                     //Create a RtpPacket from the 
                     using (var rtpPacket = new Media.Rtp.RtpPacket(contextAvailable.Version, padding, extension, null))
                     {
-                        System.Diagnostics.Debug.Assert(rtpClient.SendRtpPacket(rtpPacket) == 0, "Sent a packet when there was no Session or Media Description or TransportContext");
+                        System.Diagnostics.Debug.Assert(rtpClient.SendRtpPacket(rtpPacket) is 0, "Sent a packet when there was no Session or Media Description or TransportContext");
                     }
                 }
             }

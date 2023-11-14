@@ -39,7 +39,7 @@
             byte compressedByte;
 
             sign = ((~sample) >> 8) & 0x80;
-            if (sign == 0)
+            if (sign is 0)
                 sample = (short)-sample;
             if (sample > cClip)
                 sample = cClip;

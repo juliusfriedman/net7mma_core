@@ -59,7 +59,7 @@
             //Remember, we added to the original, so we need to subtract from the final
             data -= MuLawEncoder.BIAS;
             //If the sign bit is 0, the number is positive. Otherwise, negative.
-            return (short)(sign == 0 ? data : -data);
+            return (short)(sign is 0 ? data : -data);
         }
 
         /// <summary>

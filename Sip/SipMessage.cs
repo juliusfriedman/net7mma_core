@@ -204,7 +204,7 @@ namespace Media.Sip
 
         protected override void OnHeaderAdded(string headerName, string headerValue)
         {
-            if (string.Compare(headerName, Http.HttpHeaders.TransferEncoding, true) == 0) throw new InvalidOperationException("Protocol: " + Protocol + ", does not support TrasferEncoding.");
+            if (string.Compare(headerName, Http.HttpHeaders.TransferEncoding, true) is 0) throw new InvalidOperationException("Protocol: " + Protocol + ", does not support TrasferEncoding.");
 
             base.OnHeaderAdded(headerName, headerValue);
         }

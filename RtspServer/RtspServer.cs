@@ -436,7 +436,7 @@ namespace Media.Rtsp
 
                 //Applied from
                 //https://msdn.microsoft.com/en-us/library/system.threading.threadstate%28v=vs.110%29.aspx
-                //(m_ServerThread.ThreadState & (ThreadState.Stopped | ThreadState.Unstarted)) == 0;
+                //(m_ServerThread.ThreadState & (ThreadState.Stopped | ThreadState.Unstarted)) is 0;
 
                 #endregion
             }
@@ -492,7 +492,7 @@ namespace Media.Rtsp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {                
-                if (TotalStreamCount == 0) return 0;
+                if (TotalStreamCount is 0) return 0;
                 return MediaStreams.Where(s => s.State == Media.Rtsp.Server.SourceMedia.StreamState.Started && s.IsReady == true).Count();
             }
         }
@@ -703,7 +703,7 @@ namespace Media.Rtsp
 
             if (context is null) return;
 
-            if (context.Request.AcceptTypes.Any(t => string.Compare(t, "application/x-rtsp-tunnelled") == 0))
+            if (context.Request.AcceptTypes.Any(t => string.Compare(t, "application/x-rtsp-tunnelled") is 0))
             {
                 if (context.Request.HasEntityBody)
                 {
@@ -1055,7 +1055,7 @@ namespace Media.Rtsp
                     diff = string.Compare(stream.Name, streamName, StringComparison.InvariantCultureIgnoreCase);
 
                     //If the name matches the streamName or stream Id then we found it
-                    if (diff == 0)
+                    if (diff is 0)
                     {
                         found = stream;
 
@@ -1065,7 +1065,7 @@ namespace Media.Rtsp
                     //Check the Id
                     diff = string.Compare(stream.Id.ToString(), streamName, StringComparison.InvariantCultureIgnoreCase);
 
-                    if (diff == 0)
+                    if (diff is 0)
                     {
                         found = stream;
 
@@ -1080,7 +1080,7 @@ namespace Media.Rtsp
 
                             diff = string.Compare(alias.ToLowerInvariant(), streamName, StringComparison.InvariantCultureIgnoreCase);
 
-                            if (diff == 0)
+                            if (diff is 0)
                             {
                                 found = stream;
 
@@ -2180,7 +2180,7 @@ namespace Media.Rtsp
                 //All requests need the CSeq
                 if (request.ContainsHeader(RtspHeaders.CSeq) is false)
                 {
-                    //if(request.HeaderCount == 0)
+                    //if(request.HeaderCount is 0)
 
                     //Send back a BadRequest.
                     ProcessInvalidRtspRequest(session, Rtsp.RtspStatusCode.BadRequest, null, sendResponse);
@@ -2825,7 +2825,7 @@ namespace Media.Rtsp
                 }
 
                 ////should check to ensure wrong type was not used e.g. basic in place of digest...
-                //if (string.Compare(authType, RtspHeaderFields.Authorization.Digest, true) == 0)
+                //if (string.Compare(authType, RtspHeaderFields.Authorization.Digest, true) is 0)
                 //{
                 //    //if (session.Storage["nOnce"] is not null)
                 //    //{
@@ -3197,7 +3197,7 @@ namespace Media.Rtsp
                 //10.4 SETUP says we would have to bundle pipelined requests.
                 //That is contradictory.
 
-                //if (session.Playing.Count == 0) session.SessionId = null;
+                //if (session.Playing.Count is 0) session.SessionId = null;
 
                 string connectionHeader = request[RtspHeaders.Connection];
 

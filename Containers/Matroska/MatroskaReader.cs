@@ -633,7 +633,7 @@ namespace Media.Containers.Matroska
             Byte mask = 0x80, id_length = 1;
             
             // Figure out the size in bytes
-            while (id_length <= 4 && (header_byte & mask) == 0)
+            while (id_length <= 4 && (header_byte & mask) is 0)
             {
                 id_length++;
                 mask >>= 1;
@@ -668,7 +668,7 @@ namespace Media.Containers.Matroska
             Byte mask = 0x80, size_length = 1;
 
             // Figure out the size in bytes (Should check MaxSize in the header)
-            while (size_length <= 8 && (header_byte & mask) == 0)
+            while (size_length <= 8 && (header_byte & mask) is 0)
             {
                 size_length++;
                 mask >>= 1;
@@ -728,7 +728,7 @@ namespace Media.Containers.Matroska
 
             foreach (var element in this)
             {
-                if (identifiers is null || identifiers .Count () == 0 || identifiers.Contains(Common.Binary.Read32(element.Identifier, 0, Common.Binary.IsLittleEndian)))
+                if (identifiers is null || identifiers .Count () is 0 || identifiers.Contains(Common.Binary.Read32(element.Identifier, 0, Common.Binary.IsLittleEndian)))
                 {
                     yield return element;
                     continue;
@@ -1352,7 +1352,7 @@ namespace Media.Containers.Matroska
                     //Need to find all CueTimes to accurately describe duration and start time and sample count...
                     // is WONDERFUL                    
                     //Only do this one time for now...
-                    if(sampleCount == 0) foreach (var elem in ReadElements(trackEntryElement.DataOffset, Identifier.Cues))
+                    if(sampleCount is 0) foreach (var elem in ReadElements(trackEntryElement.DataOffset, Identifier.Cues))
                     {
                         using (var cueStream = elem.DataStream)
                         {

@@ -281,7 +281,7 @@ namespace Media.Concepts.Classes
 
             System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;
 
-            while (false.Equals(m_Enabled.Equals(uint.MinValue)) && m_Ops == 0)
+            while (false.Equals(m_Enabled.Equals(uint.MinValue)) && m_Ops is 0)
             {
                 if (System.Threading.Thread.CurrentThread.Equals(m_Counter))
                 {

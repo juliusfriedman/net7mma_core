@@ -511,7 +511,7 @@ namespace Media.Rtp
                 //result.NtpTimestamp = context.SenderNtpTimestamp;// + context.SenderNtpOffset;
 
                 //Might be correct to always sample
-                //if (result.NtpTimestamp == 0) result.NtpDateTime = DateTime.UtcNow;
+                //if (result.NtpTimestamp is 0) result.NtpDateTime = DateTime.UtcNow;
 
                 result.NtpDateTime = DateTime.UtcNow;//.Add(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);//.AddSeconds(context.NtpOffset);
 
@@ -538,7 +538,7 @@ namespace Media.Rtp
                  //result.RtpTimestamp = (int)(result.NtpTimestamp >> 32);                
 
                  //If no data has been received this value will be 0, set it to the expected value based on the time.
-                 //if (result.RtpTimestamp == 0)
+                 //if (result.RtpTimestamp is 0)
                  //result.RtpTimestamp = (int)(context.SenderRtpTimestamp - result.RtpTimestamp);
 
                  //result.RtpTimestamp += result.RtpTimestamp % 9000;
@@ -1765,7 +1765,7 @@ namespace Media.Rtp
                 //If there is no Payload return, this prevents injection by utilizing just a RtpHeader which happens to be valid.
                 //I can think of no good reason to allow this in this implementation, if required dervive and ensure that RTCP is not better suited for whatever is being done.
                 //The underlying goto CheckSequenceNumber is what is used to performed this check currently.
-                //if (payloadLength == 0 && packet.PayloadType != 13) return false;
+                //if (payloadLength is 0 && packet.PayloadType != 13) return false;
                 //else if (packet.PayloadType == 13  || packet.PayloadType == 19) goto CheckSequenceNumber;
 
                 if (packet.Header.IsCompressed || packet.PayloadType.Equals(13)) goto CheckSequenceNumber;

@@ -335,7 +335,7 @@ namespace Media
                 int firstPayloadType = currentPacket.PayloadType;
 
                 //The first packet in a compound packet needs to be validated
-                if (parsedPackets == 0 && !IsValidRtcpHeader(currentPacket.Header, currentPacket.Version)) yield break;
+                if (parsedPackets is 0 && !IsValidRtcpHeader(currentPacket.Header, currentPacket.Version)) yield break;
                 else if (currentPacket.Version != version || skipUnknownTypes && RtcpPacket.GetImplementationForPayloadType((byte)currentPacket.PayloadType) is null) yield break;
                 
                 //Count the packets parsed
@@ -390,7 +390,7 @@ namespace Media
             int dataLength = buffer.Length;
 
             //If there are no more bytes to parse we cannot continue
-            if (dataLength == 0 || offset > dataLength) return 0;
+            if (dataLength is 0 || offset > dataLength) return 0;
 
             /*
               If the padding bit is set, the packet contains one or more
@@ -578,7 +578,7 @@ namespace Media
                     RtpMaxSeq = (ushort)sequenceNumber;
 
                     //If no more probation is required then reset the coutners and indicate the packet is in state
-                    if (RtpProbation == 0)
+                    if (RtpProbation is 0)
                     {
                         ResetRtpValidationCounters(ref sequenceNumber, ref RtpBaseSeq, ref RtpMaxSeq, ref RtpBadSeq, ref RtpSeqCycles, ref RtpReceivedPrior, ref RtpPacketsRecieved);
 
@@ -674,7 +674,7 @@ namespace Media
 
             int lost_interval = expected_interval - received_interval;
 
-            if (expected_interval == 0 || lost_interval <= 0)
+            if (expected_interval is 0 || lost_interval <= 0)
             {
                 fraction = 0;
             }
@@ -953,7 +953,7 @@ namespace Media
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-                //Example 223 & 32 == 0
+                //Example 223 & 32 is 0
                 //Where 32 == PaddingMask and 223 == (11011111) Binary and would indicate a version 3 header with no padding, extension set and 15 CC
                 get { return (First8Bits & PaddingMask) > 0; }
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

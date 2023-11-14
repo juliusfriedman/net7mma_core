@@ -27,7 +27,7 @@ public class Mp4Box : Node
     public bool IsExtendedLength => Length == 1;
 
     //Indicates to end of file
-    public bool IndefiniteSize => Length == 0;
+    public bool IndefiniteSize => Length is 0;
 
     public long ExtendedLength
     {
@@ -902,10 +902,10 @@ public class TrackFragmentRandomAccessEntryBox : FullBox
 {
     public ulong Time
     {
-        get => Version == 0 ? Binary.ReadU32(Data, OffsetToData, Binary.IsLittleEndian) : Binary.ReadU64(Data, OffsetToData, Binary.IsLittleEndian);
+        get => Version is 0 ? Binary.ReadU32(Data, OffsetToData, Binary.IsLittleEndian) : Binary.ReadU64(Data, OffsetToData, Binary.IsLittleEndian);
         set
         {
-            if (Version == 0)
+            if (Version is 0)
                 Binary.Write32(Data.Array, OffsetToData, Binary.IsLittleEndian, (uint)value);
             else
                 Binary.Write64(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
@@ -914,30 +914,30 @@ public class TrackFragmentRandomAccessEntryBox : FullBox
 
     public uint MoofOffset
     {
-        get => Binary.ReadU32(Data, OffsetToData + (Version == 0 ? 4 : 8), Binary.IsLittleEndian);
-        set => Binary.Write32(Data.Array, OffsetToData + (Version == 0 ? 4 : 8), Binary.IsLittleEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData + (Version is 0 ? 4 : 8), Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData + (Version is 0 ? 4 : 8), Binary.IsLittleEndian, value);
     }
 
     public uint TrafNumber
     {
-        get => Binary.ReadU32(Data, OffsetToData + (Version == 0 ? 8 : 12), Binary.IsLittleEndian);
-        set => Binary.Write32(Data.Array, OffsetToData + (Version == 0 ? 8 : 12), Binary.IsLittleEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData + (Version is 0 ? 8 : 12), Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData + (Version is 0 ? 8 : 12), Binary.IsLittleEndian, value);
     }
 
     public uint TrunNumber
     {
-        get => Binary.ReadU32(Data, OffsetToData + (Version == 0 ? 12 : 16), Binary.IsLittleEndian);
-        set => Binary.Write32(Data.Array, OffsetToData + (Version == 0 ? 12 : 16), Binary.IsLittleEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData + (Version is 0 ? 12 : 16), Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData + (Version is 0 ? 12 : 16), Binary.IsLittleEndian, value);
     }
 
     public uint SampleNumber
     {
-        get => Binary.ReadU32(Data, OffsetToData + (Version == 0 ? 16 : 20), Binary.IsLittleEndian);
-        set => Binary.Write32(Data.Array, OffsetToData + (Version == 0 ? 16 : 20), Binary.IsLittleEndian, value);
+        get => Binary.ReadU32(Data, OffsetToData + (Version is 0 ? 16 : 20), Binary.IsLittleEndian);
+        set => Binary.Write32(Data.Array, OffsetToData + (Version is 0 ? 16 : 20), Binary.IsLittleEndian, value);
     }
 
     public TrackFragmentRandomAccessEntryBox(BaseMediaWriter writer, byte version)
-        : base(writer, Encoding.UTF8.GetBytes("tfra"), version, 0, version == 0 ? 20 : 24)
+        : base(writer, Encoding.UTF8.GetBytes("tfra"), version, 0, version is 0 ? 20 : 24)
     {
     }
 }
@@ -995,10 +995,10 @@ public class TrunBox : FullBox
 
     public ulong TrackDataOffset
     {
-        get => (Version == 0) ? Binary.ReadU32(Data, 8, Binary.IsLittleEndian) : Binary.ReadU64(Data, 8, Binary.IsLittleEndian);
+        get => (Version is 0) ? Binary.ReadU32(Data, 8, Binary.IsLittleEndian) : Binary.ReadU64(Data, 8, Binary.IsLittleEndian);
         set
         {
-            if (Version == 0)
+            if (Version is 0)
                 Binary.Write32(Data.Array, 8, Binary.IsLittleEndian, (uint)value);
             else
                 Binary.Write64(Data.Array, 8, Binary.IsLittleEndian, value);
@@ -1007,7 +1007,7 @@ public class TrunBox : FullBox
 
     public uint FirstSampleFlags
     {
-        get => (Version == 0) ? 0 : Binary.ReadU32(Data, 16, Binary.IsLittleEndian);
+        get => (Version is 0) ? 0 : Binary.ReadU32(Data, 16, Binary.IsLittleEndian);
         set => Binary.Write32(Data.Array, 16, Binary.IsLittleEndian, value);
     }
 
@@ -1015,7 +1015,7 @@ public class TrunBox : FullBox
     {
         get
         {
-            var offset = (Version == 0) ? 12 : 20;
+            var offset = (Version is 0) ? 12 : 20;
             for (int i = 0; i < SampleCount; i++)
             {
                 yield return Binary.ReadU32(Data, ref offset, Binary.IsLittleEndian);
@@ -1023,7 +1023,7 @@ public class TrunBox : FullBox
         }
         set
         {
-            var offset = (Version == 0) ? 12 : 20;
+            var offset = (Version is 0) ? 12 : 20;
 
             foreach (var flag in value)
             {
@@ -1287,7 +1287,7 @@ public class TkhdBox : FullBox
     public TkhdBox(BaseMediaWriter writer, ushort version, uint flags)
         : base(writer, Encoding.ASCII.GetBytes("tkhd"), (byte)version, flags)
     {
-        if (version == 0)
+        if (version is 0)
             Data = new(new byte[84]);
         else if (version == 1)
             Data = new(new byte[92]);

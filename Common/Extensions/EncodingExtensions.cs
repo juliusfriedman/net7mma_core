@@ -132,7 +132,7 @@ namespace Media.Common.Extensions.Encoding
 
             //int charCount = decoder.GetCharCount(buffer, offset, count);
 
-            //if(charCount == 0) return true;
+            //if(charCount is 0) return true;
 
             int toRead, delemitsLength = delimits.Length;
 
@@ -309,7 +309,7 @@ namespace Media.Common.Extensions.Encoding
                 return sawDelimit;
             }
 
-            result = builder.Length == 0 ? string.Empty : builder.ToString();
+            result = builder.Length is 0 ? string.Empty : builder.ToString();
 
             builder = null;
 
@@ -387,7 +387,7 @@ namespace Media.Common.Extensions.Encoding
             int toEncodeLength = toEncode.GetUpperBound(0); 
 
             //If 0 then return the empty char array
-            if (toEncodeLength == 0) return EmptyChar;
+            if (toEncodeLength is 0) return EmptyChar;
 
             //GetChars using the first element and the length
             return GetChars(encoding, toEncode, toEncode.GetLowerBound(0), toEncodeLength);
@@ -426,7 +426,7 @@ namespace Media.Common.Extensions.Encoding
             int toEncodeLength = toEncode.GetUpperBound(0);
 
             //If 0 then return the empty char array
-            if (toEncodeLength == 0) return EmptyChar;
+            if (toEncodeLength is 0) return EmptyChar;
 
             //GetChars using the first element and the length
             return GetChars(decoder, toEncode, toEncode.GetLowerBound(0), toEncodeLength);

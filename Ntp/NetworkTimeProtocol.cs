@@ -178,7 +178,7 @@ namespace Media.Ntp
 
                 //Adding a tick here can make the diff 0
 
-                //System.TimeSpan.FromMilliseconds(0.1) .ticks == 0
+                //System.TimeSpan.FromMilliseconds(0.1) .ticks is 0
                 //System.TimeSpan.FromMilliseconds(1e-4) == System.TimeSpan.Zero
 
                 //(long)((decimal)seconds * System.TimeSpan.TicksPerSecond + (decimal)(fractions * 100000m)) doesn't work...
@@ -188,7 +188,7 @@ namespace Media.Ntp
                 //Return the result of adding the ticks to the epoch
                 //If the epoch was given then use that value otherwise determine the epoch based on the highest bit.
                 return epoch.HasValue ? epoch.Value.AddTicks(ticks) :
-                        (seconds & 0x80000000L) == 0 ?
+                        (seconds & 0x80000000L) is 0 ?
                             UtcEpoch2036.AddTicks(ticks) :
                                 UtcEpoch1900.AddTicks(ticks);
             }

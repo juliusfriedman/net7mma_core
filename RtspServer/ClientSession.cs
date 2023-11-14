@@ -1289,7 +1289,7 @@ namespace Media.Rtsp//.Server
             //Todo, option for UniqueIdentity
 
             //Check if the ssrc was 0 which indicates any id
-            if (localSsrc == 0)
+            if (localSsrc is 0)
             {
                 //use a new id if your using IListSockets as the stack can merge the buffers into a single pdu.
                 //Or
@@ -1449,9 +1449,9 @@ namespace Media.Rtsp//.Server
                 //SendInterval, both could be updated based on the connection time.
 
                 ////Check if the punch packets made it out.
-                //if ((setupContext.IsRtpEnabled && ((IPEndPoint)setupContext.RemoteRtp).Port == 0) 
+                //if ((setupContext.IsRtpEnabled && ((IPEndPoint)setupContext.RemoteRtp).Port is 0) 
                 //    || 
-                //    (setupContext.IsRtcpEnabled && ((IPEndPoint)setupContext.RemoteRtcp).Port == 0))
+                //    (setupContext.IsRtcpEnabled && ((IPEndPoint)setupContext.RemoteRtcp).Port is 0))
                 //{
                 //    //Response should be a 461 or we should indicate the remote party is not yet listening in the response 
                 //    //Could also use StatusCode (100) with a reason phrase or header

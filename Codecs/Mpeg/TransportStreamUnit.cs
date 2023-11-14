@@ -209,7 +209,7 @@ namespace Media.Containers.Mpeg
 
                 //It is also stated that if there are any extra bytes they are related to the adaptation field no matter if size is set or not.
                 //0 for PES Means unbounded however it is not stated what this means...
-                //E.g when GetAdaptationFieldLength == 0 and there is more then 1 byte in data is there at least 1 byte for the flags? e.f Math.Max(1, size);
+                //E.g when GetAdaptationFieldLength is 0 and there is more then 1 byte in data is there at least 1 byte for the flags? e.f Math.Max(1, size);
 
                 //For anything including 0 return nothing, otherwise skip the length and return the amount of bytes indicated by length.
 

@@ -180,13 +180,13 @@ public class SDPUnitTests
 
         System.Diagnostics.Debug.Assert(values[2] == 2898848070, "Unexpected value (End Adjustment Time)");
 
-        System.Diagnostics.Debug.Assert(values[3] == 0, "Unexpected value (End Adjustment Offset)");
+        System.Diagnostics.Debug.Assert(values[3] is 0, "Unexpected value (End Adjustment Offset)");
 
-        System.Diagnostics.Debug.Assert(values[4] == 0, "Unexpected value (Start Adjustment Time)");
+        System.Diagnostics.Debug.Assert(values[4] is 0, "Unexpected value (Start Adjustment Time)");
 
         System.Diagnostics.Debug.Assert(values[5] == -3600, "Unexpected value (End Adjustment Offset)");
 
-        System.Diagnostics.Debug.Assert(values[6] == 0, "Unexpected value (Start Adjustment Time)");
+        System.Diagnostics.Debug.Assert(values[6] is 0, "Unexpected value (Start Adjustment Time)");
 
         //Loop the AdjustmentTimes
         for (int i = 0, e = line.AdjustmentTimesCount; i < e; ++i)
@@ -208,7 +208,7 @@ public class SDPUnitTests
 
             TimeSpan endOffset = line.GetAdjustmentOffset(i);
 
-            System.Diagnostics.Debug.Assert(endOffset.Hours == 0, "Unexpected AdjustmentOffset");
+            System.Diagnostics.Debug.Assert(endOffset.Hours is 0, "Unexpected AdjustmentOffset");
 
             System.Diagnostics.Debug.Assert(endDate == Line.GetAdjustmentDate(i), "Unexpected AdjustmentDate");
 
@@ -671,7 +671,7 @@ r=7d 1h 0 25h";
 
             System.Diagnostics.Debug.Assert(md.PayloadTypes.Last() == 98, "Could not read the Payload List");
 
-            System.Diagnostics.Debug.Assert(string.Compare(md.MediaDescriptionLine.ToString(), "m=audio 49230 RTP/AVP 96 97 98\r\n") == 0, "Did not handle Payload List Correct");
+            System.Diagnostics.Debug.Assert(string.Compare(md.MediaDescriptionLine.ToString(), "m=audio 49230 RTP/AVP 96 97 98\r\n") is 0, "Did not handle Payload List Correct");
 
             System.Diagnostics.Debug.Assert(md.AttributeLines.Count() == 3, "Unexpected number of AttributeLines");
 
@@ -691,9 +691,9 @@ r=7d 1h 0 25h";
 
             System.Diagnostics.Debug.Assert(false == line.HasMultiplePorts, "Unexpected HasPortRange");
 
-            //System.Diagnostics.Debug.Assert(line.PortRange == 0, "Unexpected PortRange");
+            //System.Diagnostics.Debug.Assert(line.PortRange is 0, "Unexpected PortRange");
 
-            System.Diagnostics.Debug.Assert(string.Compare(md.MediaDescriptionLine.ToString(), line.ToString()) == 0, "Not string equal");
+            System.Diagnostics.Debug.Assert(string.Compare(md.MediaDescriptionLine.ToString(), line.ToString()) is 0, "Not string equal");
 
             System.Diagnostics.Debug.Assert(md.MediaDescriptionLine == line, "Not Type Equals");
 
@@ -767,7 +767,7 @@ r=7d 1h 0 25h";
         System.Diagnostics.Debug.Assert(Media.Sdp.MediaType.audio == sdp.MediaDescriptions.First().MediaType, "The media type not parsed correctly.");
         System.Diagnostics.Debug.Assert(12228 == sdp.MediaDescriptions.First().MediaPort, "The connection port was not parsed correctly.");
         System.Diagnostics.Debug.Assert(0 == sdp.MediaDescriptions.First().PayloadTypes.First(), "The first media format was incorrect.");         // ToDo: Can't cope with multiple media formats?
-        //Assert.IsTrue(sdp.Media[0].MediaFormats[0].FormatID == 0, "The highest priority media format ID was incorrect.");
+        //Assert.IsTrue(sdp.Media[0].MediaFormats[0].FormatID is 0, "The highest priority media format ID was incorrect.");
         //Assert.IsTrue(sdp.Media[0].MediaFormats[0].Name == "PCMU", "The highest priority media format name was incorrect.");
         //Assert.IsTrue(sdp.Media[0].MediaFormats[0].ClockRate == 8000, "The highest priority media format clockrate was incorrect.");
         System.Diagnostics.Debug.Assert("a=rtpmap:0 PCMU/8000\r\n" == sdp.MediaDescriptions.First().RtpMapLine.ToString(), "The rtpmap line for the PCM format was not parsed correctly.");  // ToDo "Parts" should be put into named properties where possible.  
@@ -839,19 +839,19 @@ a=control:track1
         {
             //This string should be equal exactly, but because the class corrects of the lines the order it's not exactly the same.
             //T= is before the media description in the example..
-            //System.Diagnostics.Debug.Assert(string.Compare(sdp.ToString(), testVector) == 0, "Unexpected sdp.ToString");
+            //System.Diagnostics.Debug.Assert(string.Compare(sdp.ToString(), testVector) is 0, "Unexpected sdp.ToString");
 
             foreach (Media.Sdp.MediaDescription md in sdp.MediaDescriptions)
             {
                 Media.Sdp.Lines.SessionConnectionLine cLine = new Media.Sdp.Lines.SessionConnectionLine(md.ConnectionLine);
 
-                System.Diagnostics.Debug.Assert(string.Compare(cLine.ConnectionNetworkType, Media.Sdp.Lines.SessionConnectionLine.InConnectionToken) == 0, "Unexpected ConnectionNetworkType");
+                System.Diagnostics.Debug.Assert(string.Compare(cLine.ConnectionNetworkType, Media.Sdp.Lines.SessionConnectionLine.InConnectionToken) is 0, "Unexpected ConnectionNetworkType");
 
-                System.Diagnostics.Debug.Assert(string.Compare(cLine.ConnectionAddressType, Media.Sdp.Lines.SessionConnectionLine.IP4) == 0, "Unexpected ConnectionAddressType");
+                System.Diagnostics.Debug.Assert(string.Compare(cLine.ConnectionAddressType, Media.Sdp.Lines.SessionConnectionLine.IP4) is 0, "Unexpected ConnectionAddressType");
 
-                System.Diagnostics.Debug.Assert(string.Compare(cLine.ConnectionAddress, "232.248.50.1/255") == 0, "Unexpected ConnectionAddress");
+                System.Diagnostics.Debug.Assert(string.Compare(cLine.ConnectionAddress, "232.248.50.1/255") is 0, "Unexpected ConnectionAddress");
 
-                System.Diagnostics.Debug.Assert(string.Compare(cLine.Host, "232.248.50.1") == 0, "Unexpected Host");
+                System.Diagnostics.Debug.Assert(string.Compare(cLine.Host, "232.248.50.1") is 0, "Unexpected Host");
 
                 System.Diagnostics.Debug.Assert(Media.Common.Extensions.IPAddress.IPAddressExtensions.IsMulticast(System.Net.IPAddress.Parse(cLine.Host)), "Must be a IsMulticast");
 
@@ -878,9 +878,9 @@ a=control:track1
 
         Media.Sdp.Lines.SessionConnectionLine cLine = new Media.Sdp.Lines.SessionConnectionLine(testVector);
 
-        System.Diagnostics.Debug.Assert(string.Compare(cLine.ConnectionNetworkType, Media.Sdp.Lines.SessionConnectionLine.InConnectionToken) == 0, "Unexpected ConnectionNetworkType");
+        System.Diagnostics.Debug.Assert(string.Compare(cLine.ConnectionNetworkType, Media.Sdp.Lines.SessionConnectionLine.InConnectionToken) is 0, "Unexpected ConnectionNetworkType");
 
-        System.Diagnostics.Debug.Assert(string.Compare(cLine.ConnectionAddressType, Media.Sdp.Lines.SessionConnectionLine.IP4) == 0, "Unexpected ConnectionAddressType");
+        System.Diagnostics.Debug.Assert(string.Compare(cLine.ConnectionAddressType, Media.Sdp.Lines.SessionConnectionLine.IP4) is 0, "Unexpected ConnectionAddressType");
 
         //Todo
         //IPAddress name of property is wrong. (ConnectionAddress)
@@ -933,16 +933,16 @@ a=control:track1
         using (var audioDescription = new Media.Sdp.SessionDescription(mediaFormat, originatorAndSession, sessionName))
         {
             //Ensure the correct SessionDescriptionVersion was set
-            System.Diagnostics.Debug.Assert(audioDescription.SessionDescriptionVersion == 0, "Did not find Correct SessionDescriptionVersion");
+            System.Diagnostics.Debug.Assert(audioDescription.SessionDescriptionVersion is 0, "Did not find Correct SessionDescriptionVersion");
 
             //When created the version of the `o=` line should be 1.
-            System.Diagnostics.Debug.Assert(audioDescription.DocumentVersion == 0, "Did not find Correct SessionVersion");
+            System.Diagnostics.Debug.Assert(audioDescription.DocumentVersion is 0, "Did not find Correct SessionVersion");
 
             //Add the MediaDescription
             audioDescription.Add(new Media.Sdp.MediaDescription(Media.Sdp.MediaType.audio, profile, 0, mediaPort), false);
 
             //update version was specified false so the verison of the document should not change
-            System.Diagnostics.Debug.Assert(audioDescription.DocumentVersion == 0, "Did not find Correct SessionVersion");
+            System.Diagnostics.Debug.Assert(audioDescription.DocumentVersion is 0, "Did not find Correct SessionVersion");
 
             //Determine what the output should look like
             string expected = string.Format("v=0\r\no={0}\r\ns={1}\r\nm={2} {3} RTP/AVP {4}\r\n", originatorAndSession, sessionName, mediaType, mediaPort, mediaFormat);
@@ -951,7 +951,7 @@ a=control:track1
             string actual = audioDescription.ToString();
 
             //Check the result of the comparsion
-            System.Diagnostics.Debug.Assert(string.Compare(expected, actual) == 0, "Did not output expected result");
+            System.Diagnostics.Debug.Assert(string.Compare(expected, actual) is 0, "Did not output expected result");
         }
     }
 
@@ -963,7 +963,7 @@ a=control:track1
         {
 
             //update version was specified false so the verison of the document should have updated.
-            System.Diagnostics.Debug.Assert(sdp.DocumentVersion == 0, "Did not find Correct SessionVersion");
+            System.Diagnostics.Debug.Assert(sdp.DocumentVersion is 0, "Did not find Correct SessionVersion");
 
             //Add a connection line, updating the version 
             sdp.Add(new Media.Sdp.Lines.SessionConnectionLine()
@@ -984,7 +984,7 @@ a=control:track1
 
             string expected = "v=0\r\no=v√ƒ  9223372036802072014   \r\ns=Bandit\r\nc=IN * 0.0.0.0\r\n";
 
-            System.Diagnostics.Debug.Assert(string.Compare(sdp.ToString(), expected) == 0, "Did not output correct result.");
+            System.Diagnostics.Debug.Assert(string.Compare(sdp.ToString(), expected) is 0, "Did not output correct result.");
 
             //Try to get a token to update the document
             var token = sdp.BeginUpdate();
@@ -1138,7 +1138,7 @@ a=control:track1
 
             System.Diagnostics.Debug.Assert(line.PayloadTypes.Count() == 2);
 
-            System.Diagnostics.Debug.Assert(line.PayloadTypes.First() == 0);
+            System.Diagnostics.Debug.Assert(line.PayloadTypes.First() is 0);
 
             System.Diagnostics.Debug.Assert(line.PayloadTypes.Last() == 8);
 
@@ -1220,9 +1220,9 @@ a=control:track2";
         //Check time descriptions repeat times
         System.Diagnostics.Debug.Assert(sessionDescription.TimeDescriptions.Count() == 1, "Must have 1 TimeDescription");
 
-        System.Diagnostics.Debug.Assert(sessionDescription.TimeDescriptions.First().StartTime == 0, "Did not parse SessionStartTime");
+        System.Diagnostics.Debug.Assert(sessionDescription.TimeDescriptions.First().StartTime is 0, "Did not parse SessionStartTime");
 
-        System.Diagnostics.Debug.Assert(sessionDescription.TimeDescriptions.First().StopTime == 0, "Did not parse SessionStopTime");
+        System.Diagnostics.Debug.Assert(sessionDescription.TimeDescriptions.First().StopTime is 0, "Did not parse SessionStopTime");
 
         System.Diagnostics.Debug.Assert(sessionDescription.TimeDescriptions.First().RepeatLines.Count == 2, "First TimeDescription must have 2 RepeatTime entries.");
 
@@ -1341,7 +1341,7 @@ a=rtpmap:102 H264/90000";
             string actualMediaDescription = md.ToString();
 
             //Check the result of the comparsion
-            System.Diagnostics.Debug.Assert(string.Compare(expectedMediaDescription, actualMediaDescription) == 0, "Did not output expected result");
+            System.Diagnostics.Debug.Assert(string.Compare(expectedMediaDescription, actualMediaDescription) is 0, "Did not output expected result");
 
             md.NumberOfPorts = 0;
 
@@ -1354,7 +1354,7 @@ a=rtpmap:102 H264/90000";
             actualMediaDescription = md.ToString();
 
             //Check the result of the comparsion
-            System.Diagnostics.Debug.Assert(string.Compare(expectedMediaDescription, actualMediaDescription) == 0, "Did not output expected result");
+            System.Diagnostics.Debug.Assert(string.Compare(expectedMediaDescription, actualMediaDescription) is 0, "Did not output expected result");
 
         }
 
@@ -1397,7 +1397,7 @@ a=rtcp-fb:96 nack";
 
             string expected = "a=fmtp:96 packetization-mode=1;profile-level-id=640028;sprop-parameter-sets=Z2QAKKy0BQHv+A0CAAAcIAACvyHsQPoAALQN3//x2IH0AAFoG7//4UA=,aM48bJCRjhwfHDgkEwlzioJgqFA1wx+cVBMFQoGuGPyCoYGjBx5gh+hEICRA48w79CIQEiBx5h38;\r\n";
 
-            System.Diagnostics.Debug.Assert(string.Compare(fmtp.ToString(), expected, StringComparison.InvariantCultureIgnoreCase) == 0, "Did not output correct FmtpLine line");
+            System.Diagnostics.Debug.Assert(string.Compare(fmtp.ToString(), expected, StringComparison.InvariantCultureIgnoreCase) is 0, "Did not output correct FmtpLine line");
 
             var rtpMap = md.RtpMapLine;
 
@@ -1405,7 +1405,7 @@ a=rtcp-fb:96 nack";
 
             expected = "a=rtcp-fb:96 nack\r\n";
 
-            System.Diagnostics.Debug.Assert(string.Compare(sd.AttributeLines.Last().ToString(), expected, StringComparison.InvariantCultureIgnoreCase) == 0, "Did not output correct feedback line");
+            System.Diagnostics.Debug.Assert(string.Compare(sd.AttributeLines.Last().ToString(), expected, StringComparison.InvariantCultureIgnoreCase) is 0, "Did not output correct feedback line");
 
             System.Diagnostics.Debug.Assert(sd.AttributeLines.Last() == md.AttributeLines.Last(), "Both last attribute lines should be equal to each other");
         }

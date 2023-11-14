@@ -542,7 +542,7 @@ namespace Media.Rtp
                 }
 
                 //If nothing was sent and the buffers are not null and the socket is tcp use framing.
-                if (length > 0 && context.IsActive && sent == 0 && false.Equals(buffers is null))
+                if (length > 0 && context.IsActive && sent is 0 && false.Equals(buffers is null))
                 {
                     if (context.RtcpSocket.ProtocolType == System.Net.Sockets.ProtocolType.Tcp)
                     {
@@ -582,7 +582,7 @@ namespace Media.Rtp
                 }
 
                 //If nothing was sent then send the data now.
-                if (length > 0 && sent == 0)
+                if (length > 0 && sent is 0)
                 {
                     //Send the framing seperately to keep the allocations minimal.
 
@@ -835,7 +835,7 @@ namespace Media.Rtp
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(frame)) return null;
 
-            return TransportContexts.Count == 0 ? null : GetContextBySourceId(frame.SynchronizationSourceIdentifier) ?? GetContextByPayloadType(frame.PayloadType);
+            return TransportContexts.Count is 0 ? null : GetContextBySourceId(frame.SynchronizationSourceIdentifier) ?? GetContextByPayloadType(frame.PayloadType);
         }
 
         /// <summary>
@@ -1302,7 +1302,7 @@ namespace Media.Rtp
             error = System.Net.Sockets.SocketError.SocketError;
 
             //Check there is valid data and a socket which is able to write and that the RtpClient is not stopping
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || socket is null || length == 0 || data is null) return 0;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || socket is null || length is 0 || data is null) return 0;
 
             int sent = 0;
 

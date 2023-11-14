@@ -725,7 +725,7 @@ namespace Media.Concepts.Classes
         [System.CLSCompliant(false)]
         public bool IsNull(ref Bitable a) { return Processor.IsNull(ref a); }
 
-        public bool IsZero(Bitable a) { return System.Linq.Enumerable.All(a.Memory, (b => b == 0)); }
+        public bool IsZero(Bitable a) { return System.Linq.Enumerable.All(a.Memory, (b => b is 0)); }
 
         public bool IsNullOrZero(ref Number a) { return IsNull(a) || IsZero(a); }
 

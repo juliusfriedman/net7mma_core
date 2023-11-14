@@ -302,7 +302,7 @@ namespace Media.UnitTests
                             System.Diagnostics.Debug.Assert(p.PaddingOctets == PaddingCounter, "Unexpected PaddingOctets");
 
                             //Check all data in the padding but not the padding octet itself.
-                            System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b == 0), "Unexpected PaddingData");
+                            System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b is 0), "Unexpected PaddingData");
 
                             //Serialize and Deserialize the packet and verify again
                             using (Media.Rtcp.ApplicationSpecificReport s = new Rtcp.ApplicationSpecificReport(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0)))

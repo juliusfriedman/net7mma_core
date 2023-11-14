@@ -32,7 +32,7 @@ public class RiffWriter : MediaFileWriter
         chunks.Add(chunk);
         chunk.DataOffset = Position;
         
-        if(chunk.Length == 0)
+        if(chunk.Length is 0)
             chunk.Length = (int)chunk.DataSize;
         else if (Binary.IsOdd(chunk.Length))
             chunk.Length++;

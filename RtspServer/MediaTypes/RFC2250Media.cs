@@ -502,11 +502,11 @@ namespace Media.Rtsp.Server.MediaTypes
                             for (j = 0; j < 8; j++)
                                 B[k1, k2] += A[i, j] * cosine[k1, i] * cosine[k2, j];
 
-                        if (k1 == 0)
+                        if (k1 is 0)
                             Cu = SQRT2o2;
                         else
                             Cu = 1.0;
-                        if (k2 == 0)
+                        if (k2 is 0)
                             Cv = SQRT2o2;
                         else
                             Cv = 1.0;
@@ -594,7 +594,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 if (invert)
                     for (i = esi[cat]; i < esi[cat] + cat; i++)
                     {
-                        if (DCbits[i] == 0)
+                        if (DCbits[i] is 0)
                             DCbits[i] = 1;
                         else
                             DCbits[i] = 0;
@@ -657,7 +657,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 {
                     // First figure out how many consecutive zeros
                     run = 0;
-                    while ((zz[arrayPosition] == 0) && (arrayPosition < 63))
+                    while ((zz[arrayPosition] is 0) && (arrayPosition < 63))
                     {
                         run++;
                         arrayPosition++;
@@ -723,14 +723,14 @@ namespace Media.Rtsp.Server.MediaTypes
                         if (AC < 0)
                             code += 1;
                     }
-                    else if ((run == 0) && ((Math.Abs(AC) >= 19) && (Math.Abs(AC) <= 40)))
+                    else if ((run is 0) && ((Math.Abs(AC) >= 19) && (Math.Abs(AC) <= 40)))
                     {
                         code = ACcode[89 + Math.Abs(AC) - 19];
                         size = ACsize[89 + Math.Abs(AC) - 19];
                         if (AC < 0)
                             code += 1;
                     }
-                    else if ((run == 0) && (AC == 0))	// EOB condition
+                    else if ((run is 0) && (AC is 0))	// EOB condition
                     {
                         code = 2;
                         size = 2;

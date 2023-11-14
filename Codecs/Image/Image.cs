@@ -252,7 +252,7 @@ namespace Media.Codecs.Image
                 case Media.Codec.DataLayout.SemiPlanar:
                     int yPlaneWidth = PlaneWidth(componentIndex);
                     // Non interleaved plane
-                    if (componentIndex == 0)
+                    if (componentIndex is 0)
                     {
                         offset += (y * yPlaneWidth + x) * component.Length;
                         break;
@@ -671,7 +671,7 @@ namespace Media.UnitTests
                     for (int componentIndex = 0; componentIndex < imageFormat.Length; componentIndex++)
                     {
                         int expectedOffset;
-                        if (componentIndex == 0) // Y component
+                        if (componentIndex is 0) // Y component
                         {
                             expectedOffset = y * image.Width + x;
                         }

@@ -108,7 +108,7 @@ namespace Media.Rtsp.Server.MediaTypes
 		           channel_configuration                           3
 		           original/copy                                   1    0: original; 1: copy
 		           home                                            1    usually 0
-		           emphasis                                        2    only if ID == 0 (ie MPEG-4)  // not present in some documentation?
+		           emphasis                                        2    only if ID is 0 (ie MPEG-4)  // not present in some documentation?
 
 		           * ADTS Variable Header: these can change from frame to frame
 		           copyright_identification_bit                    1
@@ -118,7 +118,7 @@ namespace Media.Rtsp.Server.MediaTypes
 		           no_raw_data_blocks_in_frame                     2
 
 		           * ADTS Error check
-		           crc_check                                      16    only if protection_absent == 0
+		           crc_check                                      16    only if protection_absent is 0
                  */
 
                 byte[] header = new byte[7];
@@ -257,13 +257,13 @@ namespace Media.Rtsp.Server.MediaTypes
                 /*  https://gstrtpmp4adepay.c#L189
                 * Parse StreamMuxConfig according to ISO/IEC 14496-3:
                 *
-                * audioMuxVersion           == 0 (1 bit)
+                * audioMuxVersion           is 0 (1 bit)
                 * allStreamsSameTimeFraming == 1 (1 bit)
                 * numSubFrames              == rtpmp4adepay->numSubFrames (6 bits)
-                * numProgram                == 0 (4 bits)
-                * numLayer                  == 0 (3 bits)
+                * numProgram                is 0 (4 bits)
+                * numLayer                  is 0 (3 bits)
                 *
-                * We only require audioMuxVersion == 0;
+                * We only require audioMuxVersion is 0;
                 *
                 * The remaining bit of the second byte and the rest of the bits are used
                 * for audioSpecificConfig which we need to set in codec_info.
@@ -429,8 +429,8 @@ namespace Media.Rtsp.Server.MediaTypes
 
                     #endregion
 
-                    //Check for auSize == 0 because there is nothing to consume
-                    if (auSize == 0)
+                    //Check for auSize is 0 because there is nothing to consume
+                    if (auSize is 0)
                     {
                         //Todo, offset didn't move for the bits just read...
 
@@ -455,10 +455,10 @@ namespace Media.Rtsp.Server.MediaTypes
                           than 0 signals that interleaving is applied.
                          */
 
-                    //This should check that if indexLength == 0 and indexDeltaLength == 0 there is an invalid operation exception
+                    //This should check that if indexLength is 0 and indexDeltaLength is 0 there is an invalid operation exception
                     //This can be done before we even read into the packet.
 
-                    if (Depacketized.Count == 0 && indexLength > 0)
+                    if (Depacketized.Count is 0 && indexLength > 0)
                     {
 
                         //Ensure enough data is present to read the bit field
@@ -475,7 +475,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     else if (indexDeltaLength > 0)//Must be present... should check.
                     {
 
-                        //If Depacketized.Count == 0 this should not occur...
+                        //If Depacketized.Count is 0 this should not occur...
 
                         //Ensure enough data is present to read the bit field
                         if (indexDeltaLength > (remainsInAu = (max - offset) - 1))
@@ -492,7 +492,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                         //An AU-Index-delta value larger than 0 signals that interleaving is applied.
 
-                        if (auIndex == 0) auIndex = Depacketized.Count + 1;
+                        if (auIndex is 0) auIndex = Depacketized.Count + 1;
                     }
 
                     #endregion

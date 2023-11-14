@@ -167,7 +167,7 @@ public class RtpVideoSink : RtpSink
             {
                 try
                 {
-                    if (Frames.Count == 0 && State == StreamState.Started)
+                    if (Frames.Count is 0 && State == StreamState.Started)
                     {
                         if (RtpClient.IsActive) RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.Lowest;
 

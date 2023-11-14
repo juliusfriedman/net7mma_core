@@ -591,8 +591,8 @@ namespace Media.Rtcp
             /// </summary>
             public bool AtEndOfList
             {
-                //get { return ChunkDataOffset > ChunkData.Count() || StartedEnumeration && CurrentItem.ItemType == 0; }
-                get { return ItemIndex < m_Count || StartedEnumeration && CurrentItem.ItemType == 0; }
+                //get { return ChunkDataOffset > ChunkData.Count() || StartedEnumeration && CurrentItem.ItemType is 0; }
+                get { return ItemIndex < m_Count || StartedEnumeration && CurrentItem.ItemType is 0; }
             }
 
             public int Size { get { return ChunkData.Count(); } }
@@ -1183,18 +1183,18 @@ namespace Media.Rtcp
 
             if (IsReadOnly) throw new InvalidOperationException("A SourceDescription Chunk cannot be added when IsReadOnly is true.");
 
-            if (ReportBlocksRemaining == 0) throw new InvalidOperationException("A RtcpReport can only hold 31 ReportBlocks");
+            if (ReportBlocksRemaining is 0) throw new InvalidOperationException("A RtcpReport can only hold 31 ReportBlocks");
 
             int chunkSize = chunk.Size;
 
             //if there was no data in the chunk then there is nothing more to add.
-            if (chunkSize == 0) return;
+            if (chunkSize is 0) return;
 
-            //The octets which will be added to the payload consist of the ChunkData without the octets of the ChunkIdentifier in cases where BlockCount == 0
+            //The octets which will be added to the payload consist of the ChunkData without the octets of the ChunkIdentifier in cases where BlockCount is 0
             IEnumerable<byte> chunkData = chunk.ChunkData;
 
             //In the first SourceDescriptionChunk added to a SourceDescription the header contains the BlockIdentifier. 
-            if (BlockCount++ == 0)
+            if (BlockCount++ is 0)
             {
                 //Set the value in the header
                 Header.SendersSynchronizationSourceIdentifier = chunk.ChunkIdentifer;
@@ -1241,7 +1241,7 @@ namespace Media.Rtcp
 
         public bool Remove(SourceDescriptionChunk chunk)
         {
-            if (chunk is null || IsReadOnly || BlockCount == 0) return false;
+            if (chunk is null || IsReadOnly || BlockCount is 0) return false;
 
             //Determine where in the payload the chunk resides.
             int chunkOffset = 0, chunkIndex = 0;
@@ -1269,7 +1269,7 @@ namespace Media.Rtcp
             if (false == contained) return false;
 
             //If the chunk is overlapped in the header
-            if (chunkIndex == 0)
+            if (chunkIndex is 0)
             {
                 //Remove only the octets in the Payload which would correspond to the chunk which does no include the identifier
                 m_OwnedOctets = m_OwnedOctets.Skip(chunk.Size - SourceDescriptionChunk.IdentifierSize).ToArray();
@@ -1557,7 +1557,7 @@ namespace Media.UnitTests
                             System.Diagnostics.Debug.Assert(p.PaddingOctets == PaddingCounter, "Unexpected PaddingOctets");
 
                             //Check all data in the padding but not the padding octet itself.
-                            System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b == 0), "Unexpected PaddingData");
+                            System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b is 0), "Unexpected PaddingData");
 
                             //Iterate for the amount of reports to add.
                             if (ItemLength > 0)
@@ -1588,7 +1588,7 @@ namespace Media.UnitTests
                             System.Diagnostics.Debug.Assert(p.PaddingOctets == PaddingCounter, "Unexpected PaddingOctets");
 
                             //Check all data in the padding but not the padding octet itself.
-                            System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b == 0), "Unexpected PaddingData");
+                            System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b is 0), "Unexpected PaddingData");
 
 
                             //TODO

@@ -51,7 +51,7 @@ namespace Media.Common.Extensions.Math
                 b %= a;
 
                 //If b is 0 the result is a
-                if (b == 0) return a;
+                if (b is 0) return a;
 
                 //Divide a by the module of b
                 a %= b;

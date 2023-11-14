@@ -234,7 +234,7 @@ namespace Media.UnitTests
                     //sw.Timer.m_Counter.Join(0);
                 }
 
-                //while (sw.ElapsedNanoseconds == 0.0 && sw.Elapsed == System.TimeSpan.Zero)
+                //while (sw.ElapsedNanoseconds is 0.0 && sw.Elapsed == System.TimeSpan.Zero)
                 //{
                 //    sw.Timer.m_Clock.NanoSleep(0);
 

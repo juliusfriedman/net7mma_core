@@ -177,7 +177,7 @@ namespace Media.Containers.Asf
 
             foreach (var asfObject in this)
             {
-                if (names is null || names.Count() == 0 || names.Contains(new Guid(asfObject.Identifier.Take(IdentifierSize).ToArray())))
+                if (names is null || names.Count() is 0 || names.Contains(new Guid(asfObject.Identifier.Take(IdentifierSize).ToArray())))
                 {
                     yield return asfObject;
                     continue;
@@ -200,7 +200,7 @@ namespace Media.Containers.Asf
         //    {
         //        count -= asfObject.TotalSize;
 
-        //        if (names is null || names.Count() == 0 || names.Contains(new Guid(asfObject.Identifier.Take(IdentifierSize).ToArray())))
+        //        if (names is null || names.Count() is 0 || names.Contains(new Guid(asfObject.Identifier.Take(IdentifierSize).ToArray())))
         //        {
         //            yield return asfObject;
         //        }

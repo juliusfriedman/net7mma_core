@@ -1282,7 +1282,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.InteropServices.UnmanagedFunctionPointer(System.Runtime.InteropServices.CallingConvention.Cdecl)]
             internal delegate uint ReadCpuTypeDelegate();
 
-            //Should return == 0 if cpuid is supported
+            //Should return is 0 if cpuid is supported
             byte[] x86CodeBytes = new byte[]{
                 0x9C, // pushf   ;Save EFLAGS
                 0x9C, // pushf   ;Store EFLAGS
@@ -2182,7 +2182,7 @@ namespace Media.Concepts.Hardware
                 if (false == string.IsNullOrEmpty(CpuId.ProcessorBrandString)) return CpuId.ProcessorBrandString;
 
                 //If the feature isn't support return the VendorString.
-                if (CpuId.GetMaximumExtendedFeatureLevel() == 0) return CpuId.ProcessorBrandString = CpuId.GetVendorString();
+                if (CpuId.GetMaximumExtendedFeatureLevel() is 0) return CpuId.ProcessorBrandString = CpuId.GetVendorString();
 
                 System.Text.StringBuilder builder = new System.Text.StringBuilder(128);
 
@@ -2210,7 +2210,7 @@ namespace Media.Concepts.Hardware
                 int maxFunctionLevel = CpuId.GetMaximumFeatureLevel();
 
                 //if the max function level is less than 4 or the vendor is not Intel then indicate 1.
-                if (maxFunctionLevel < 4 || false == (string.Compare(CpuId.GetVendorString(), VendorStrings.GenuineIntel) == 0)) return 1;
+                if (maxFunctionLevel < 4 || false == (string.Compare(CpuId.GetVendorString(), VendorStrings.GenuineIntel) is 0)) return 1;
 
                 Common.MemorySegment registers;
 
@@ -2223,7 +2223,7 @@ namespace Media.Concepts.Hardware
                     registers = CpuId.RetrieveInformation(1);
 
                     //Read the bit which indicates if hyper threading is supported
-                    if (false == (Common.Binary.ReadBits(registers.Array, 28, 1, false) == 0))
+                    if (false == (Common.Binary.ReadBits(registers.Array, 28, 1, false) is 0))
                     {
                         // read the number of cores from the 2nd register
                         cores = (int)Common.Binary.ReadBits(registers.Array, 8, 8, false);
@@ -2250,7 +2250,7 @@ namespace Media.Concepts.Hardware
                 cores = (int)Common.Binary.ReadBits(registers.Array, 32, 16, false);
                 
                 //return the amount of cores
-                return cores == 0 ? 1 : cores;
+                return cores is 0 ? 1 : cores;
             }            
 
             /// <summary>
@@ -2441,7 +2441,7 @@ namespace Media.Concepts.Hardware
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    if (GetMaximumFeatureLevel() == 0) return -1;
+                    if (GetMaximumFeatureLevel() is 0) return -1;
 
                     //Access the memory of the registers previously retrieved
                     Common.MemorySegment registers = RetrieveInformation(1);
@@ -2459,7 +2459,7 @@ namespace Media.Concepts.Hardware
                 get
                 {
 
-                    if (GetMaximumFeatureLevel() == 0) return -1;
+                    if (GetMaximumFeatureLevel() is 0) return -1;
 
                     //Access the memory of the registers previously retrieved
                     Common.MemorySegment registers = RetrieveInformation(1);
@@ -2477,7 +2477,7 @@ namespace Media.Concepts.Hardware
                 get
                 {
 
-                    if (GetMaximumFeatureLevel() == 0) return -1;
+                    if (GetMaximumFeatureLevel() is 0) return -1;
 
                     //Access the memory of the registers previously retrieved
                     Common.MemorySegment registers = RetrieveInformation(1);
@@ -2495,7 +2495,7 @@ namespace Media.Concepts.Hardware
                 get
                 {
 
-                    if (GetMaximumFeatureLevel() == 0) return -1;
+                    if (GetMaximumFeatureLevel() is 0) return -1;
 
                     //Access the memory of the registers previously retrieved
                     Common.MemorySegment registers = RetrieveInformation(1);
@@ -2513,7 +2513,7 @@ namespace Media.Concepts.Hardware
                 get
                 {
 
-                    if (GetMaximumFeatureLevel() == 0) return -1;
+                    if (GetMaximumFeatureLevel() is 0) return -1;
 
                     //Access the memory of the registers previously retrieved
                     Common.MemorySegment registers = RetrieveInformation(1);
@@ -2531,7 +2531,7 @@ namespace Media.Concepts.Hardware
                 get
                 {
 
-                    if (GetMaximumFeatureLevel() == 0) return -1;
+                    if (GetMaximumFeatureLevel() is 0) return -1;
 
                     //Access the memory of the registers previously retrieved
                     Common.MemorySegment registers = RetrieveInformation(1);
@@ -2549,7 +2549,7 @@ namespace Media.Concepts.Hardware
                 get
                 {
 
-                    if (GetMaximumFeatureLevel() == 0) return -1;
+                    if (GetMaximumFeatureLevel() is 0) return -1;
 
                     //Access the memory of the registers previously retrieved
                     Common.MemorySegment registers = RetrieveInformation(1);
@@ -2785,7 +2785,7 @@ namespace Media.Concepts.Hardware
                         CpuIdFeatureAttribute attribute = (CpuIdFeatureAttribute)attrib;
 
                         //CPUID etc.
-                        if (attribute.Function == 0) continue;
+                        if (attribute.Function is 0) continue;
 
                         //Get the information if needed
                         if (attribute.Function != currentFunction) information = CpuId.RetrieveInformation(currentFunction = attribute.Function).Array;
@@ -2794,7 +2794,7 @@ namespace Media.Concepts.Hardware
                         if (0 == Common.Binary.ReadBits(information,  Common.Binary.BitsPerInteger * attribute.Register + attribute.Bit, 1, false))
                         {
                             //reduce supported count and if 0 remove feature because no supported attribute could be matched
-                            if (--supported == 0)
+                            if (--supported is 0)
                             {
                                 //remove it
                                 FeatureInformation.Remove((CpuIdFeature)System.Enum.Parse(CpuIdFeatureType, member.Name));
@@ -3437,7 +3437,7 @@ namespace Media.Concepts.Hardware
                                 try
                                 {
                                     //Check for failure even if the function succeeds because we may be using the safe asm which ensures 0 as the result on failure
-                                    if (GenerateRandom() == 0)
+                                    if (GenerateRandom() is 0)
                                     {
                                         EntryPoint.Dispose();
 
@@ -3797,7 +3797,7 @@ namespace Media.Concepts.Hardware
                                 try
                                 {
                                     //Check for failure even if the function succeeds because we may be using the safe asm which ensures 0 as the result on failure
-                                    if (GenerateSeed() == 0)
+                                    if (GenerateSeed() is 0)
                                     {
                                         EntryPoint.Dispose();
 

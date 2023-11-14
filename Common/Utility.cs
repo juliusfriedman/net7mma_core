@@ -91,7 +91,7 @@ namespace Media
             if (bufferLength < octetCount || start + octetCount > bufferLength || octetCount > octetsLength) return -1;
 
             //Nothing to search nothing to return, leave start where it was.
-            if (octetCount == 0 && bufferLength == 0 || count == 0) return -1;
+            if (octetCount is 0 && bufferLength is 0 || count is 0) return -1;
 
             //Create the variables we will use in the searching process
             int checkedBytes = 0, matchedBytes = 0, lastPosition = -1;

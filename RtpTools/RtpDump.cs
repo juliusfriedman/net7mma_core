@@ -253,7 +253,7 @@ namespace Media.RtpTools.RtpDump
             if (!HasNext) return entry;
 
             //Read the file header if no other data has been read yet and the format possibly has header (Determines Binary or Text FileFormat)
-            if (m_Reader.BaseStream.Position == 0) ReadFileHeader();
+            if (m_Reader.BaseStream.Position is 0) ReadFileHeader();
                 
             //If no format can be determined then raise a DumpReader type exception with the following message.
             if (m_Format == FileFormat.Unknown) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Unable to determine format!");
@@ -264,7 +264,7 @@ namespace Media.RtpTools.RtpDump
             long position = m_Reader.BaseStream.Position;
 
             //Add the offset if we didn't already know about it
-            if (offsetsCount == 0 || m_Reader.BaseStream.Position > m_Offsets[offsetsCount - 1])
+            if (offsetsCount is 0 || m_Reader.BaseStream.Position > m_Offsets[offsetsCount - 1])
             {
                 //Which is the position in the stream
                 m_Offsets.Add(position);

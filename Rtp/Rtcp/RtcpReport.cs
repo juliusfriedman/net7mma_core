@@ -303,13 +303,13 @@ namespace Media.Rtcp
 
             if (IsReadOnly) throw new InvalidOperationException("The RtcpReport can only be modified when IsReadOnly is false.");
 
-            if (ReportBlocksRemaining == 0) throw new InvalidOperationException("A RtcpReport can only hold 31 ReportBlocks");
+            if (ReportBlocksRemaining is 0) throw new InvalidOperationException("A RtcpReport can only hold 31 ReportBlocks");
 
             //Determine the size of the block
             int reportBlockSize = reportBlock.Size;
 
             //If there is nothing being added then there is nothing to do.
-            if(reportBlockSize == 0) return;
+            if(reportBlockSize is 0) return;
 
             //Increase the BlockCount
             ++BlockCount;

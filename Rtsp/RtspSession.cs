@@ -1895,7 +1895,7 @@ namespace Media.Rtsp
                     else uri = uri.Substring(11);
                 }
 
-                string qop = baseParts.Where(p => string.Compare(RtspHeaderFields.Authorization.Attributes.QualityOfProtection, p, true) == 0).FirstOrDefault();
+                string qop = baseParts.Where(p => string.Compare(RtspHeaderFields.Authorization.Attributes.QualityOfProtection, p, true) is 0).FirstOrDefault();
 
                 if (string.IsNullOrWhiteSpace(qop) is false)
                 {

@@ -462,7 +462,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         }
 
                         // read next portion from stream
-                        if ((read = stream.Read(buffer, total, readSize)) == 0)
+                        if ((read = stream.Read(buffer, total, readSize)) is 0)
                             throw new ApplicationException();
 
                         total += read;
