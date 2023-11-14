@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Sip
 {
@@ -22,7 +19,7 @@ namespace Media.Sip
         //String which identifies a Http Request or Response
         public new const string MessageIdentifier = "SIP";
 
-        public static SipMessage FromString(string data, System.Text.Encoding encoding = null)
+        public static new SipMessage FromString(string data, System.Text.Encoding encoding = null)
         {
             if (string.IsNullOrWhiteSpace(data)) throw new InvalidOperationException("data cannot be null or whitespace.");
 
