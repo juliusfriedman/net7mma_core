@@ -257,7 +257,7 @@ namespace Media.Common
         internal protected virtual void Dispose(bool disposing)
         {
             //Do not dispose when ShouldDispose is false.
-            if (false.Equals(disposing) || false.Equals(ShouldDispose) /*|| State >> 32 > 0*/) return;
+            if (disposing is false || ShouldDispose is false /*|| State >> 32 > 0*/) return;
 
             Destruct();
 
@@ -308,7 +308,7 @@ namespace Media.Common
         void Destruct()
         {
             //If not disposed return.
-            if (false.Equals(ShouldDispose) || IsDisposed) return;
+            if (ShouldDispose is false || IsDisposed) return;
 
             //Call Dispose
             //Dispose(ShouldDispose);            
@@ -332,7 +332,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public virtual void Dispose()
         {
-            //if (false.Equals(IsUndisposed) || IsFinalized || false.Equals(ShouldDispose) || IsDisposed) return;
+            //if (false.Equals(IsUndisposed) || IsFinalized || ShouldDispose is false || IsDisposed) return;
 
             Destruct();
         }
@@ -374,7 +374,7 @@ namespace Media.Common
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return IsUndisposed && false.Equals(IsFinalized) ? false.Equals(IsDisposed) && ShouldDispose : false;
+                return IsUndisposed && false.Equals(IsFinalized) ? IsDisposed is false && ShouldDispose : false;
             }
         }
     }

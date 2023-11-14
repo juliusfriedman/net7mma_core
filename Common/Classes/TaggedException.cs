@@ -214,7 +214,7 @@ namespace Media.Common
         /// </summary>
         void System.IDisposable.Dispose()
         {
-            if (false.Equals(ShouldDispose) || @base.IsDisposed) return;
+            if (ShouldDispose is false || @base.IsDisposed) return;
 
             @base.Dispose(ShouldDispose);
 

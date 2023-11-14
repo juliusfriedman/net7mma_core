@@ -78,7 +78,7 @@ namespace Media.Common.Extensions.Stream
             {
                 base.Dispose(disposing || ResponseOutputStream is null || false == ResponseOutputStream.CanRead);
 
-                if (false == ShouldDispose) return;
+                if (ShouldDispose is false) return;
 
                 //HandleDisposing(this, ds.Dispose);
 
@@ -238,7 +238,7 @@ namespace Media.Common.Extensions.Stream
                 {
                     base.Dispose(disposing || false == (ResponseStream is not null && ResponseStream.CanRead));
 
-                    if (false == ShouldDispose) return;
+                    if (ShouldDispose is false) return;
 
                     //HandleDisposing(this, ds.Dispose);
 
@@ -809,7 +809,7 @@ namespace Media.Common.Extensions.Stream
 
                 base.Dispose(disposing);
 
-                if (false == ShouldDispose) return;
+                if (ShouldDispose is false) return;
 
                 Cancel();
 
@@ -1012,7 +1012,7 @@ namespace Media.Common.Extensions.Stream
 
                                 TransactionBase.RaiseTransactionWrite(this);
 
-                                if (false == IsTransactionCanceled && false == IsDisposed) AsyncResult = Source.BeginRead(Memory.Array, Memory.Offset, Memory.Count, ReadFunction, this);
+                                if (false == IsTransactionCanceled && IsDisposed is false) AsyncResult = Source.BeginRead(Memory.Array, Memory.Offset, Memory.Count, ReadFunction, this);
 
                                 return;
                             }

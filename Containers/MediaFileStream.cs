@@ -214,7 +214,7 @@ namespace Media.Container
         //Could also use FileOptions.DeleteOnClose, Could also just have an Extension method.
         void DeleteFromFileInfoIfExists()
         {
-            if (/*false == IsDisposed && */ FileInfo is not null && FileInfo.Exists) FileInfo.Delete();
+            if (/*IsDisposed is false && */ FileInfo is not null && FileInfo.Exists) FileInfo.Delete();
         }
 
         bool TryDeleteFromFileInfoIfExists()

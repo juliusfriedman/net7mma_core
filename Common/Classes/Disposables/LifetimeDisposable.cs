@@ -101,7 +101,7 @@ namespace Media.Common
 
         internal protected override void Dispose(bool disposing)
         {
-            //if (false == ShouldDispose && false == disposing && LifetimeElapsed) disposing = ShouldDispose = true;
+            //if (ShouldDispose is false && disposing is false && LifetimeElapsed) disposing = ShouldDispose = true;
 
             //base.Dispose(disposing);
 

@@ -179,7 +179,7 @@ namespace Media.Concepts.Classes
 
         protected override void Dispose(bool disposing)
         {
-            if (false == disposing | false == ShouldDispose | IsDisposed) return;
+            if (disposing is false | ShouldDispose is false | IsDisposed) return;
 
             try
             {

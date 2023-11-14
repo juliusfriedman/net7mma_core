@@ -119,7 +119,7 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected override void Dispose(bool disposing)
         {
-            if (this.InstructionPointer == System.IntPtr.Zero || false == ShouldDispose) return;
+            if (this.InstructionPointer == System.IntPtr.Zero || ShouldDispose is false) return;
 
             this.InstructionPointer = System.IntPtr.Zero;
 
@@ -360,7 +360,7 @@ namespace Media.Concepts.Hardware
 
         protected override void Dispose(bool disposing)
         {
-            if (IsDisposed || false == disposing || false == ShouldDispose) return;
+            if (IsDisposed || disposing is false || ShouldDispose is false) return;
 
             Instructions = null;
 
@@ -628,7 +628,7 @@ namespace Media.Concepts.Hardware
 
         protected override void Dispose(bool disposing)
         {
-            if (IsDisposed || false == disposing || false == ShouldDispose) return;
+            if (IsDisposed || disposing is false || ShouldDispose is false) return;
 
             //Call VirtualFree first
             base.Dispose(disposing);

@@ -695,7 +695,7 @@
 
         public override void Dispose()
         {
-            if (IsDisposed || false == ShouldDispose) return;
+            if (IsDisposed || ShouldDispose is false) return;
 
             base.Dispose();
 

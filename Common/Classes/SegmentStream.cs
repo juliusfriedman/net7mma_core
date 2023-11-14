@@ -463,19 +463,19 @@ namespace Media.Common
         public override bool CanRead
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return false == IsDisposed; }
+            get { return IsDisposed is false; }
         }
 
         public override bool CanSeek
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return false == IsDisposed; }
+            get { return IsDisposed is false; }
         }
 
         public override bool CanWrite
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return false == IsDisposed; }
+            get { return IsDisposed is false; }
         }
 
         public override void Flush()

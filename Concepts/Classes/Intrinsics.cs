@@ -719,7 +719,7 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected override void Dispose(bool disposing)
         {
-            if (false == disposing || false == ShouldDispose) return;
+            if (disposing is false || ShouldDispose is false) return;
 
             base.Dispose(disposing);
 

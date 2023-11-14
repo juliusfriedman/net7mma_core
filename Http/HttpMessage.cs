@@ -1083,7 +1083,7 @@ namespace Media.Http
 
             if (IsDisposed && false.Equals(IsPersistent)) return m_StatusLineParsed;
 
-            if (m_StatusLineParsed && false.Equals(force)) return true;
+            if (m_StatusLineParsed && force is false) return true;
 
             //Dont rely on the message type obtained previously
             //if (MessageType != HttpMessageType.Invalid) return true;
@@ -1174,12 +1174,12 @@ namespace Media.Http
                 }
 
                 //If the delemit was observed then try to find a new status line...
-                if (sawDelemit && MessageType == HttpMessageType.Invalid && false.Equals(IsDisposed))
+                if (sawDelemit && MessageType == HttpMessageType.Invalid && IsDisposed is false)
                 {
                     //Warning advaning buffer may not be desirable here and is done to pick up new information which occurs after the above function has exited.
                     m_Buffer.Position += read;
 
-                    if (false.Equals(IsDisposed) && m_Buffer.Position < m_Buffer.Length) goto Parse;
+                    if (IsDisposed is false && m_Buffer.Position < m_Buffer.Length) goto Parse;
                 }
 
             }
@@ -1250,7 +1250,7 @@ namespace Media.Http
                     IsDisposed && IsPersistent is false) return m_HeadersParsed;
 
                 //Headers were parsed if there is already a body.
-                if (m_HeadersParsed && false.Equals(force)) return true;
+                if (m_HeadersParsed && force is false) return true;
 
                 //Need 2 empty lines to end the header section
                 int emptyLine = 0; //This should be a class level varible
@@ -1290,7 +1290,7 @@ namespace Media.Http
                 byte[] buffer = m_Buffer.GetBuffer();
 
                 //While we didn't find the end of the header section in the local call (buffer may be in use)
-                while (false.Equals(IsDisposed) && 
+                while (IsDisposed is false && 
                         m_Buffer.CanRead && 
                         emptyLine <= 2 && 
                         (remains = max - position) > 0)
@@ -1541,7 +1541,7 @@ namespace Media.Http
         {
             if (IsDisposed && false.Equals(IsPersistent)) return false;
 
-            if (false.Equals(force) && m_ContentLength >= 0) return false;
+            if (force is false && m_ContentLength >= 0) return false;
 
             //See if there is a Content-Length header
             string contentLength = GetHeader(HttpHeaders.ContentLength);
@@ -1610,7 +1610,7 @@ namespace Media.Http
             if (IsDisposed && false.Equals(IsPersistent)) return false;
 
             //If the message is invalid or
-            if (false.Equals(force) && MessageType.Equals(HttpMessageType.Invalid)) return true; //or the message is complete then return true
+            if (force is false && MessageType.Equals(HttpMessageType.Invalid)) return true; //or the message is complete then return true
 
             //If no headers could be parsed then don't parse the body
             if (false.Equals(ParseHeaders())) return false;
@@ -2549,11 +2549,11 @@ namespace Media.Http
         /// </summary>
         protected override void Dispose(bool disposing)
         {
-            if (IsPersistent || false.Equals(disposing) || false.Equals(ShouldDispose)) return;
+            if (IsPersistent || disposing is false || ShouldDispose is false) return;
 
             base.Dispose(ShouldDispose && false.Equals(IsPersistent));
 
-            if (false.Equals(IsDisposed)) return;
+            if (IsDisposed is false) return;
 
             //No longer needed.
             DisposeBuffer();

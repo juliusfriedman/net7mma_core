@@ -81,7 +81,7 @@ namespace Media.Rtcp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-            get { return false == IsDisposed && Memory.Count >= ReportBlockSize; }
+            get { return IsDisposed is false && Memory.Count >= ReportBlockSize; }
         }
 
         /// <summary>
@@ -308,7 +308,7 @@ namespace Media.Rtcp
 
         protected override void Dispose(bool disposing)
         {
-            if (false == disposing || false == ShouldDispose) return;
+            if (disposing is false || ShouldDispose is false) return;
 
             base.Dispose(ShouldDispose);
 

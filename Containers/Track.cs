@@ -169,11 +169,11 @@ namespace Media.Container
 
         protected override void Dispose(bool disposing)
         {
-            if (false.Equals(disposing)) return;
+            if (disposing is false) return;
 
             base.Dispose(ShouldDispose);
 
-            if (false.Equals(IsDisposed)) return;
+            if (IsDisposed is false) return;
 
             //Dispose the stream.
             DataStream.Dispose();

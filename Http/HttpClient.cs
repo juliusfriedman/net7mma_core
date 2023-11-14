@@ -247,7 +247,7 @@ namespace Media.Http
         /// Indicates if the RtspClient is connected to the remote host
         /// </summary>
         /// <notes>May want to do a partial receive for 1 byte which would take longer but indicate if truly connected. Udp may not be Connected.</notes>
-        public bool IsConnected { get { return false == IsDisposed && m_ConnectionTime >= TimeSpan.Zero && m_HttpSocket is not null; } }
+        public bool IsConnected { get { return IsDisposed is false && m_ConnectionTime >= TimeSpan.Zero && m_HttpSocket is not null; } }
 
         /// <summary>
         /// Gets or Sets the ReadTimeout of the underlying NetworkStream / Socket (msec)
@@ -1111,7 +1111,7 @@ namespace Media.Http
                     DateTime lastAttempt = DateTime.UtcNow;
 
                     //Wait while
-                    while (false == IsDisposed &&//The client connected and is not disposed AND
+                    while (IsDisposed is false &&//The client connected and is not disposed AND
                         //There is no last transmitted message assigned AND it has not already been disposed
                         (m_LastTransmitted is null || m_LastTransmitted.IsDisposed)
                         //AND the client is still allowed to wait
@@ -1152,7 +1152,7 @@ namespace Media.Http
 
                         //    //If the client was not disposed re-trasmit the request if there is not a response pending already.
                         //    //Todo allow an option for this feature? (AllowRetransmit)
-                        //    if (false == IsDisposed && m_LastTransmitted is null /*&& request.Method != RtspMethod.PLAY*/)
+                        //    if (IsDisposed is false && m_LastTransmitted is null /*&& request.Method != RtspMethod.PLAY*/)
                         //    {
                         //        //handle re-transmission under UDP
                         //        if (m_HttpSocket.ProtocolType == ProtocolType.Udp)
@@ -1868,11 +1868,11 @@ namespace Media.Http
 
         protected override void Dispose(bool disposing)
         {
-            if (false.Equals(disposing) || false.Equals(ShouldDispose)) return;
+            if (disposing is false || ShouldDispose is false) return;
 
             base.Dispose(ShouldDispose);
 
-            if (false.Equals(IsDisposed)) return;
+            if (IsDisposed is false) return;
 
             AdditionalHeaders.Clear();
 

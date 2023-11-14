@@ -865,7 +865,7 @@ namespace Media.Rtsp
             //If the message is disposed then no parsing can occur
             if (IsDisposed && false.Equals(IsPersistent)) return false;
 
-            if (false.Equals(force) && m_CSeq >= 0) return false;
+            if (force is false && m_CSeq >= 0) return false;
 
             //See if there is a Content-Length header
             string sequenceNumber = GetHeader(RtspHeaders.CSeq);

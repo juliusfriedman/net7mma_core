@@ -971,20 +971,20 @@ namespace Media.Rtcp
         /// </summary>
         protected override void Dispose(bool disposing)
         {
-            if (false.Equals(disposing) || false.Equals(ShouldDispose)) return;
+            if (disposing is false || ShouldDispose is false) return;
 
             base.Dispose(ShouldDispose);
 
-            if (false.Equals(IsDisposed)) return;
+            if (IsDisposed is false) return;
 
             //If there is a referenced RtpHeader
-            if (m_OwnsHeader && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(Header)))
+            if (m_OwnsHeader && Common.IDisposedExtensions.IsNullOrDisposed(Header) is false)
             {
                 //Dispose it
                 Header.Dispose();
             }
 
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(Payload)))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(Payload) is false)
             {
                 //Payload goes away when Disposing
                 Payload.Dispose();

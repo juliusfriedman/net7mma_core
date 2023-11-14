@@ -441,7 +441,7 @@ namespace Media.Rtp
         public virtual bool IsComplete
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return false == IsDisposed && false == IsMissingPackets && HasMarker; }
+            get { return IsDisposed is false && false == IsMissingPackets && HasMarker; }
         }
 
         //Todo, for Rtcp feedback one would need the sequence numbers of the missing packets...
@@ -852,7 +852,7 @@ namespace Media.Rtp
 
             //If AllowMultiplePayloadTypes is true then the packets should maintain their order by PayloadType and then SequenceNumber.
             //Search for insert point while the index < count and while roll over would not occur
-            while (false.Equals(IsDisposed) && insert < count && (short)(seq - (tempSeq = Packets[insert].SequenceNumber)) > 0)
+            while (IsDisposed is false && insert < count && (short)(seq - (tempSeq = Packets[insert].SequenceNumber)) > 0)
             {
                 //move the index
                 ++insert;
@@ -1276,7 +1276,7 @@ namespace Media.Rtp
             //When depacketizing the list KeyItem would implicitly be in the same order as the packets.
 
             //Iterate all packets contained and depacketize
-            for (int i = 0 /*false.Equals(Packets is null) && i < Packets.Count*/ ; false.Equals(IsDisposed) && i < Count; ++i) Depacketize(Packets[i]);
+            for (int i = 0 /*false.Equals(Packets is null) && i < Packets.Count*/ ; IsDisposed is false && i < Count; ++i) Depacketize(Packets[i]);
 
             //PrepareBuffer must be called to access the buffer.
         }
@@ -1467,11 +1467,11 @@ namespace Media.Rtp
 
         protected override void Dispose(bool disposing)
         {
-            if (false.Equals(disposing)) return;
+            if (disposing is false) return;
 
             base.Dispose(ShouldDispose);
 
-            if (false.Equals(IsDisposed)) return;
+            if (IsDisposed is false) return;
 
             //Dispose the buffer.
             DisposeBuffer();

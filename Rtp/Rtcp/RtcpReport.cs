@@ -168,7 +168,7 @@ namespace Media.Rtcp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-            get { return false == IsDisposed && HasReports ? ReportBlock.ReportBlockSize * Header.BlockCount : 0; }
+            get { return IsDisposed is false && HasReports ? ReportBlock.ReportBlockSize * Header.BlockCount : 0; }
         }
 
         //Todo Segment properties an inline
@@ -263,7 +263,7 @@ namespace Media.Rtcp
 
             //Loop for the BlockCount, bounded by BlockCount and count of bytes in the ReportData
             for (int currentSize = 0, count = ReportBlockOctets, blockCounter = BlockCount, localOffset = Payload.Offset + offset; 
-                count > 0 && --blockCounter >= 0 && localOffset + count <= Payload.Count && false.Equals(IsDisposed); 
+                count > 0 && --blockCounter >= 0 && localOffset + count <= Payload.Count && IsDisposed is false; 
                 count -= currentSize) //Subtract the currentSize each iteration
             {
                 //Create the report block using the payload data available, should probably Clamp(count, 0, ReportBlock.ReportBlockSize at report block size since the sdes has its own enumerator.

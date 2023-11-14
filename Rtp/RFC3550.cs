@@ -1284,11 +1284,11 @@ namespace Media
             
             protected override void Dispose(bool disposing)
             {
-                if (false.Equals(disposing) || false.Equals(ShouldDispose)) return;
+                if (disposing is false || ShouldDispose is false) return;
 
                 base.Dispose(ShouldDispose);
 
-                if (false.Equals(IsDisposed)) return;
+                if (IsDisposed is false) return;
 
                 m_Memory.Dispose();
             }
@@ -1541,7 +1541,7 @@ namespace Media
             public bool IsComplete
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return false == IsDisposed && m_SourceCount * Binary.BytesPerInteger >= Size; }
+                get { return IsDisposed is false && m_SourceCount * Binary.BytesPerInteger >= Size; }
             }
 
             uint IEnumerator<uint>.Current

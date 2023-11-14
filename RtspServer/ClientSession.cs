@@ -111,7 +111,7 @@ namespace Media.Rtsp//.Server
         {
             if (IsGoodUnlessNullOrDisposed(a, b) <= 0) return Common.Binary.NegativeOne;
 
-            if (a is RtpPacket) return TryAssessIsBadPacketThreshold(a as RtpPacket, b);
+            if (a is RtpPacket p) return TryAssessIsBadPacketThreshold(p, b);
 
             return IsGoodUnlessNullOrDisposed(a, b);
         }
@@ -378,8 +378,8 @@ namespace Media.Rtsp//.Server
             try
             {
                 //while the socket cannot read in m_SocketPollMicroseconds or less 
-                while (false.Equals(IsDisposed) &&
-                    false.Equals(IsDisconnected) &&
+                while (IsDisposed is false &&
+                    IsDisconnected is false &&
                     HasRuningServer &&
                     false.Equals(m_RtspSocket.Poll(m_SocketPollMicroseconds, SelectMode.SelectRead)))
                 {
@@ -1617,7 +1617,7 @@ namespace Media.Rtsp//.Server
         void ProcessClientSessionBuffer(object sender, byte[] data, int offset, int length)
         {
             //Process the data received
-            if(false.Equals(IsDisconnected)) m_Server.ProcessClientBuffer(this, length);
+            if(IsDisconnected is false) m_Server.ProcessClientBuffer(this, length);
 
             //Handle high usage when client disconnects.
             if (length is 0 && m_RtpClient.IsActive)

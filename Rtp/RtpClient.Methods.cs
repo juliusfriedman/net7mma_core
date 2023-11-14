@@ -260,7 +260,7 @@ namespace Media.Rtp
                 || //OR the context is disposed
                 Common.IDisposedExtensions.IsNullOrDisposed(context)
                 || //OR the call has not been forced AND the context IsRtcpEnabled AND the context is active
-                (false.Equals(force) && context.IsRtcpEnabled && context.IsActive
+                (force is false && context.IsRtcpEnabled && context.IsActive
                 && //AND the final Goodbye was sent already
                 context.Goodbye is not null &&
                 context.Goodbye.Transferred.HasValue))
@@ -278,7 +278,7 @@ namespace Media.Rtp
             if (Common.IDisposedExtensions.IsNullOrDisposed(sourceList) && empty) goodBye.BlockCount = 0;
 
             //Store the Goodbye in the context if not forced the ssrc was given and it was for the context given.
-            if (false.Equals(force) && ssrc.HasValue && ssrc.Value.Equals(context.SynchronizationSourceIdentifier)) context.Goodbye = goodBye;
+            if (force is false && ssrc.HasValue && ssrc.Value.Equals(context.SynchronizationSourceIdentifier)) context.Goodbye = goodBye;
 
             //Send the packet and return the amount of bytes which resulted.
             return SendRtcpPackets(System.Linq.Enumerable.Concat(PrepareReports(context, false, true), Media.Common.Extensions.Linq.LinqExtensions.Yield(goodBye)));
@@ -359,7 +359,7 @@ namespace Media.Rtp
             //Determine if the ReceiversReport can be sent.
             if (Common.IDisposedExtensions.IsNullOrDisposed(this) || Common.IDisposedExtensions.IsNullOrDisposed(context)  //If the context is disposed
                 && //AND the call has not been forced AND the context IsRtcpEnabled 
-                (false.Equals(force) && context.IsRtcpEnabled)
+                (force is false && context.IsRtcpEnabled)
                 // OR there is no RtcpSocket
                 || context.RtcpSocket is null)
             {
@@ -420,7 +420,7 @@ namespace Media.Rtp
         ////            if (tc.DataChannel == channel || tc.ControlChannel == channel) return tc;
         ////    }
         ////    catch (InvalidOperationException) { return GetContextByChannel(channel); }
-        ////    catch { if (false == IsDisposed) throw; }
+        ////    catch { if (IsDisposed is false) throw; }
         ////    return null;
         ////}
 
@@ -512,8 +512,7 @@ namespace Media.Rtp
 
             if (m_IListSockets)
             {
-                System.Collections.Generic.List<System.ArraySegment<byte>> buffers = new System.Collections.Generic.List<System.ArraySegment<byte>>();
-
+                System.Collections.Generic.List<System.ArraySegment<byte>> buffers = new();
                 System.Collections.Generic.IList<System.ArraySegment<byte>> packetBuffers;
 
                 //Try to get the buffer for each packet
@@ -542,7 +541,7 @@ namespace Media.Rtp
                 }
 
                 //If nothing was sent and the buffers are not null and the socket is tcp use framing.
-                if (length > 0 && context.IsActive && sent is 0 && false.Equals(buffers is null))
+                if (length > 0 && context.IsActive && sent is 0 && buffers is not null)
                 {
                     if (context.RtcpSocket.ProtocolType == System.Net.Sockets.ProtocolType.Tcp)
                     {
@@ -704,7 +703,7 @@ namespace Media.Rtp
             error = System.Net.Sockets.SocketError.SocketError;
 
             //Check for the stop signal (or disposal)
-            if (false.Equals(force) && m_StopRequested || Common.IDisposedExtensions.IsNullOrDisposed(this) ||  //Otherwise
+            if (force is false && m_StopRequested || Common.IDisposedExtensions.IsNullOrDisposed(this) ||  //Otherwise
                 false.Equals(context.IsRtcpEnabled)
                 || //Or Rtcp Bandwidth for this context or RtpClient has been exceeded
                 context.RtcpBandwidthExceeded || AverageRtcpBandwidthExceeded

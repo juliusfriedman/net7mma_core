@@ -427,7 +427,7 @@ namespace Media.Rtsp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return false == IsDisposed &&
+                return IsDisposed is false &&
                     false == m_StopRequested &&
                     m_Started.HasValue &&
                      m_ServerThread is not null;
@@ -1554,7 +1554,7 @@ namespace Media.Rtsp
 
                             Common.ILoggingExtensions.Log(Logger, "Cannot Stop Stream: " + stream.Name + " Id=" + stream.Id);
 
-                            if (ex is ThreadAbortException) System.Threading.Thread.ResetAbort();
+                            if (ex is ThreadAbortException) Thread.ResetAbort();
                         }
                     });
                 }
@@ -1811,7 +1811,7 @@ namespace Media.Rtsp
                 ThreadPool.QueueUserWorkItem((o) =>
                 {
                     //Allocate a session, copy 12 bytes + into the stack
-                    ClientSession session = new ClientSession(this, clientSocket, null, true, interframeGap, true);
+                    ClientSession session = new(this, clientSocket, null, true, interframeGap, true);
 
                     //Try to add it now
                     bool added = TryAddSession(session);
@@ -3537,7 +3537,7 @@ namespace Media.Rtsp
         /// </summary>
         public override void Dispose()
         {
-            if (IsDisposed || false.Equals(ShouldDispose)) return;
+            if (IsDisposed || ShouldDispose is false) return;
 
             base.Dispose();
 

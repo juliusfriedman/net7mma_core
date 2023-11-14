@@ -448,7 +448,7 @@ namespace Media.RtpTools.RtpDump
         /// </summary>
         public override void Dispose()
         {
-            if (IsDisposed || false == ShouldDispose) return;
+            if (IsDisposed || ShouldDispose is false) return;
             m_FileIdentifier = null;
             Close();
             base.Dispose(ShouldDispose);
@@ -876,7 +876,7 @@ namespace Media.RtpTools.RtpDump
         /// </summary>
         public override void Dispose()
         {
-            if (IsDisposed || false == ShouldDispose) return;
+            if (IsDisposed || ShouldDispose is false) return;
             Close();
             base.Dispose(ShouldDispose);
             m_Writer.Dispose();

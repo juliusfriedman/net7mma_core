@@ -250,7 +250,7 @@ namespace Media.Common
             if (false.Equals(other.IsUndisposed))
             {
                 //If this allocation was not contrived
-                if (false.Equals(force))
+                if (force is false)
                 {
                     m_Array = EmptyBytes;
 

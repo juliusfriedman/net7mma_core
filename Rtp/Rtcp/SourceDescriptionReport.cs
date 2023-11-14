@@ -415,7 +415,7 @@ namespace Media.Rtcp
 
             protected override void Dispose(bool disposing)
             {
-                if (false == disposing || false == ShouldDispose) return;
+                if (disposing is false || ShouldDispose is false) return;
 
                 base.Dispose(ShouldDispose);
 
@@ -609,7 +609,7 @@ namespace Media.Rtcp
             /// </summary>
             protected override void Dispose(bool disposing)
             {
-                if (false.Equals(disposing) || false.Equals(ShouldDispose)) return;
+                if (disposing is false || ShouldDispose is false) return;
 
                 base.Dispose(ShouldDispose);
 
@@ -644,7 +644,7 @@ namespace Media.Rtcp
             public bool MoveNext()
             {
                 //If the enumerator is disposed or AtEndOfList is true
-                if (false == IsDisposed && false == AtEndOfList)
+                if (IsDisposed is false && false == AtEndOfList)
                 {
                     //Dipose the current item
                     if (StartedEnumeration && CurrentItem is not null)
@@ -1021,7 +1021,7 @@ namespace Media.Rtcp
 
             protected override void Dispose(bool disposing)
             {
-                if (false == disposing || false == ShouldDispose) return;
+                if (disposing is false || ShouldDispose is false) return;
 
                 base.Dispose(ShouldDispose);
 
@@ -1163,7 +1163,7 @@ namespace Media.Rtcp
         public override int ReportBlockOctets
         {
             //The Header may have a ssrc, the ssrc is in the header
-            get { return false == IsDisposed && HasReports ? Payload.Count - PaddingOctets + Header.Size - RtcpHeader.Length : 0; }
+            get { return IsDisposed is false && HasReports ? Payload.Count - PaddingOctets + Header.Size - RtcpHeader.Length : 0; }
         }
 
         #endregion

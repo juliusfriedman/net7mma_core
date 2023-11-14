@@ -59,7 +59,7 @@ namespace Media.Common.Classes.Loggers
 
         protected internal override void Dispose(bool disposing)
         {
-            if (false.Equals(disposing) || false.Equals(ShouldDispose)) return;
+            if (disposing is false || ShouldDispose is false) return;
 
             base.Dispose(disposing);
 
