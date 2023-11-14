@@ -1277,7 +1277,7 @@ namespace Media.Containers.Mxf
 
             Position = offset;
 
-            bool exact = (ignoreRegistry == ignoreVersion == ignoreType) == true;
+            bool exact = (ignoreRegistry == ignoreVersion == ignoreType);
 
             foreach (var mxfObject in this)
             {

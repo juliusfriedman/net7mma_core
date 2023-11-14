@@ -293,7 +293,7 @@ namespace Media.Common
 
             foreach (Common.MemorySegment ms in Segments)
             {
-                if (ms.Count.Equals(Common.Binary.Zero)) continue;
+                if (ms.Count is Common.Binary.Zero) continue;
 
                 min = Binary.Min(count, ms.Count);
 
@@ -788,7 +788,7 @@ namespace Media.Common
                         if (offset < m_Position)
                         {
                             //If at the first byte in a new segment go to the last segment
-                            if (m_Cursor.Equals(Common.Binary.LongZero))
+                            if (m_Cursor is Common.Binary.LongZero)
                             {
                                 WorkingSegment = Segments[--m_Index];
 
@@ -872,7 +872,7 @@ namespace Media.Common
                 case System.IO.SeekOrigin.Current:
                     {
                         //If there is no change in offset return the position
-                        if (offset.Equals(Common.Binary.LongZero)) return m_Position;
+                        if (offset is Common.Binary.LongZero) return m_Position;
 
                         //When offset < 0
                         if (offset < Common.Binary.LongZero)

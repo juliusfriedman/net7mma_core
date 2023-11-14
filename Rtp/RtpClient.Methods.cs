@@ -289,16 +289,13 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public /*virtual*/ void SendSendersReports()
         {
-            if (false.Equals(IsUndisposed) && false.Equals(m_StopRequested))
+            if (IsUndisposed is false && m_StopRequested is false)
             {
-                TransportContext tc;
                 for (int i = 0; i < TransportContexts.Count; ++i)
                 {
-
-                    tc = TransportContexts[i];
+                    TransportContext tc = TransportContexts[i];
                     SendSendersReport(tc);
                 }
-                tc = null;
             }
         }
 
@@ -491,7 +488,7 @@ namespace Media.Rtp
             if (Common.IDisposedExtensions.IsNullOrDisposed(this) || packets is null) return 0;
 
             //If we don't have an transportContext to send on or the transportContext has not been identified or Rtcp is Disabled or there is no remote rtcp end point
-            if (Common.IDisposedExtensions.IsNullOrDisposed(context) || context.SynchronizationSourceIdentifier.Equals(Common.Binary.Zero) | false.Equals(context.IsRtcpEnabled) | context.RemoteRtcp is null)
+            if (Common.IDisposedExtensions.IsNullOrDisposed(context) || context.SynchronizationSourceIdentifier is Common.Binary.Zero | false.Equals(context.IsRtcpEnabled) | context.RemoteRtcp is null)
             {
                 //Return
                 return 0;

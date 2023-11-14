@@ -218,7 +218,7 @@ namespace Media.Common.Collections.Generic
         public bool IsEmpty
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Count.Equals(Common.Binary.LongZero); }
+            get { return Count is Common.Binary.LongZero; }
         }
 
         #endregion
@@ -341,7 +341,7 @@ namespace Media.Common.Collections.Generic
             //Node pnew = new Node(ref t);
             //First = System.Threading.Interlocked.Exchange<Node>(ref Last, pnew).Next = pnew;
 
-            //if (/*Count.Equals(Common.Binary.LongZero) ||*/ First is null)) 
+            //if (/*Count is Common.Binary.LongZero ||*/ First is null)) 
             //else Last = Last.Next = new Node(ref t);
 
             switch (System.Threading.Interlocked.Read(ref m_Count))

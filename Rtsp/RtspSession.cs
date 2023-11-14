@@ -1626,7 +1626,7 @@ namespace Media.Rtsp
                                                 //If we dont have an exiting id then this is valid if the header was completely recieved only.
                                                 if (string.IsNullOrWhiteSpace(value) is false &&
                                                     string.IsNullOrWhiteSpace(SessionId) ||
-                                                    false.Equals(string.Compare(value, SessionId).Equals(Common.Binary.Zero)))
+                                                    false.Equals(string.Compare(value, SessionId) is Common.Binary.Zero))
                                                 {
                                                     //Get the SessionId if present
                                                     SessionId = sessionHeaderParts[0].Trim();

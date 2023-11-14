@@ -380,7 +380,7 @@ namespace Media.Rtp
 
                 //tc.ConfigureSocket = given;
 
-                //Todo, should verify ports against PortRange when HasPortRange == true.
+                //Todo, should verify ports against PortRange when HasPortRange.
 
                 //if (mediaDescription.PortRange.HasValue) //mediaDescription.HasPortRange
                 //{
@@ -940,7 +940,7 @@ namespace Media.Rtp
             internal bool InDiscovery
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return ValidRtpPacketsReceived < MinimumSequentialValidRtpPackets && RemoteSynchronizationSourceIdentifier.Equals(Common.Binary.Zero); }
+                get { return ValidRtpPacketsReceived < MinimumSequentialValidRtpPackets && RemoteSynchronizationSourceIdentifier is Common.Binary.Zero; }
             }
 
             /// <summary>
@@ -1054,15 +1054,15 @@ namespace Media.Rtp
                     double maximumRtcpBandwidthPercentage = MaximumRtcpBandwidthPercentage;
 
                     //If disposed no limit is imposed do not check
-                    if (maximumRtcpBandwidthPercentage.Equals(Common.Binary.DoubleZero)) return false;
+                    if (maximumRtcpBandwidthPercentage is Common.Binary.DoubleZero) return false;
 
                     long totalReceived = TotalBytesReceieved;
 
-                    if (totalReceived.Equals(Common.Binary.LongZero)) return false;
+                    if (totalReceived is Common.Binary.LongZero) return false;
 
                     long totalRtcp = TotalRtcpBytesSent + TotalRtcpBytesReceieved;
 
-                    if (totalRtcp.Equals(Common.Binary.LongZero)) return false;
+                    if (totalRtcp is Common.Binary.LongZero) return false;
 
                     return totalRtcp >= totalReceived / maximumRtcpBandwidthPercentage;
                 }
@@ -1678,11 +1678,11 @@ namespace Media.Rtp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             internal protected void AssignIdentity(int seed = SendersReport.PayloadType)
             {
-                if (SynchronizationSourceIdentifier.Equals(Common.Binary.Zero))
+                if (SynchronizationSourceIdentifier is Common.Binary.Zero)
                 {
                     //Generate the id per RFC3550
                     do SynchronizationSourceIdentifier = RFC3550.Random32(seed);
-                    while (SynchronizationSourceIdentifier.Equals(Common.Binary.Zero) || SynchronizationSourceIdentifier.Equals(RemoteSynchronizationSourceIdentifier));
+                    while (SynchronizationSourceIdentifier is Common.Binary.Zero || SynchronizationSourceIdentifier.Equals(RemoteSynchronizationSourceIdentifier));
                 }
             }
 
@@ -2807,7 +2807,7 @@ namespace Media.Rtp
         protected internal virtual void HandleIdentityCollision(TransportContext transportContext)
         {
 
-            if (transportContext is null) throw new ArgumentNullException("transportContext");
+            if (transportContext is null) throw new ArgumentNullException(nameof(transportContext));
 
             if (IDisposedExtensions.IsNullOrDisposed(transportContext)) throw new ObjectDisposedException("transportContext");
 
@@ -2849,7 +2849,9 @@ namespace Media.Rtp
             //if (false == this.Equals(sender)) return;
 
             //Determine if the incoming packet CAN be handled
-            if (false.Equals(RtpEnabled) || IDisposedExtensions.IsNullOrDisposed(packet) || IDisposedExtensions.IsNullOrDisposed(this)) return;
+            if (RtpEnabled is false ||
+                IDisposedExtensions.IsNullOrDisposed(packet) ||
+                IDisposedExtensions.IsNullOrDisposed(this)) return;
 
             //Should check right here incase the packet was incorrectly mapped to rtp from rtcp by checking the payload type to be in the reserved range for rtcp conflict avoidance.
 
@@ -2859,13 +2861,13 @@ namespace Media.Rtp
 
             //Notes that sometimes multiple payload types are being sent from a sender, in such cases the transportContext may incorrectly be selected here.
             //E.g.if payloadTypes of two contexts overlap and the ssrc is not well defined for each.
-            transportContext =  transportContext ?? GetContextForPacket(packet);
+            transportContext ??= GetContextForPacket(packet);
 
             //Raise the event for the packet. (Could add valid here)
             OnRtpPacketReceieved(packet, transportContext);            
 
             //If the client shouldn't handle the packet then return.            
-            if (false.Equals(HandleIncomingRtpPackets) || packet.IsCompressed)
+            if (HandleIncomingRtpPackets is false || packet.IsCompressed)
             {
                 return;
             }
@@ -2980,15 +2982,18 @@ namespace Media.Rtp
                 //Todo, offer a reason via out why the packet is not valid to reduce overhead of checking from the Validate function
 
                 //If the packet sequence number is not valid
-                if (false.Equals(transportContext.ValidatePacketAndUpdateSequenceNumber(packet)))
+                if (transportContext.ValidatePacketAndUpdateSequenceNumber(packet) is false)
                 {
 
                     //If the pt is not in the media description this is out of band data and the packet was already evented.
-                    if (false.Equals(transportContext.AllowsMultiplePayloadTypes) && false.Equals(transportContext.MediaDescription.PayloadTypes.Contains(pt))) return;
+                    if (transportContext.AllowsMultiplePayloadTypes is false &&
+                        transportContext.MediaDescription.PayloadTypes.Contains(pt) is false)
+                        return;
                     //If duplicate packets are not allowed
                     //else if (false.Equals(transportContext.AllowDuplicatePackets) && transportContext.RecieveSequenceNumber >= packet.SequenceNumber) return;
                     //If the context does not allow out of order packets return.
-                    else if (false.Equals(transportContext.AllowOutOfOrderPackets)) return;
+                    else if (transportContext.AllowOutOfOrderPackets is false)
+                        return;
 
                     //Increment for a failed reception, possibly rename
                     ++transportContext.m_FailedRtpReceptions;
@@ -3116,7 +3121,8 @@ namespace Media.Rtp
                 transportContext.RfcRtpBytesRecieved += packetLength - (packet.Header.Size + packet.HeaderOctets + packet.PaddingOctets);
 
                 //Set the time when the first RtpPacket was received if required
-                if (transportContext.m_FirstPacketReceived == DateTime.MinValue) transportContext.m_FirstPacketReceived = packet.Created;
+                if (transportContext.m_FirstPacketReceived == DateTime.MinValue)
+                    transportContext.m_FirstPacketReceived = packet.Created;
 
                 //Update the SequenceNumber and Timestamp and calulcate Inter-Arrival (Mark the context as active)
                 transportContext.UpdateJitterAndTimestamp(packet);
@@ -3125,7 +3131,7 @@ namespace Media.Rtp
                 transportContext.m_LastRtpIn = packet.Created;
 
                 //If the instance does not handle frame changed events then return
-                if (false.Equals(HandleFrameChanges)) return;
+                if (HandleFrameChanges is false) return;
 
                 #region HandleFrameChanges
 
@@ -3149,13 +3155,14 @@ namespace Media.Rtp
                     };
 
                     //The LastFrame changed
-                     OnRtpFrameChanged(transportContext.CurrentFrame, transportContext);
+                    OnRtpFrameChanged(transportContext.CurrentFrame, transportContext);
 
                     //Nothing else to do
                     return;
+                }
 
-                }//Check to see if the frame belongs to the last frame
-                else if (false.Equals(IDisposedExtensions.IsNullOrDisposed(transportContext.LastFrame)) 
+                //Check to see if the frame belongs to the last frame
+                if (IDisposedExtensions.IsNullOrDisposed(transportContext.LastFrame) is false
                     &&
                     packetTimestamp.Equals(transportContext.LastFrame.Timestamp))
                 {
@@ -3170,27 +3177,28 @@ namespace Media.Rtp
                         //Backup of frames in LastFrame.
                         if (final)
                         {
-                            Common.ILoggingExtensions.Log(Logger, InternalId + "HandleFrameChanges => LastFrame Disposing @ " + transportContext.LastFrame.Count);
+                            Common.ILoggingExtensions.Log(Logger,
+                                InternalId + "HandleFrameChanges => LastFrame Disposing @ " + transportContext.LastFrame.Count);
 
                             transportContext.LastFrame.Dispose();
-
                             transportContext.LastFrame = null;
                         }
-
                     }
                     else
                     {
                         //Could jump to case log
-                        Common.ILoggingExtensions.Log(Logger, InternalId + "HandleFrameChanges => transportContext.LastFrame @ TryAdd failed, (" + packet.PayloadType + ") RecieveSequenceNumber = " + transportContext.RecieveSequenceNumber + ", PacketSequenceNumber = " + packet.SequenceNumber + " Timestamp = " + packetTimestamp + "=>" + packetTimestamp.Equals(transportContext.LastFrame.Timestamp) + "[" + transportContext.LastFrame.LowestSequenceNumber + "," + transportContext.LastFrame.HighestSequenceNumber + "]" + ". HasMarker = " + transportContext.LastFrame.HasMarker);
+                        Common.ILoggingExtensions.Log(Logger,
+                            InternalId + "HandleFrameChanges => transportContext.LastFrame @ TryAdd failed, (" + packet.PayloadType + ") RecieveSequenceNumber = " + transportContext.RecieveSequenceNumber + ", PacketSequenceNumber = " + packet.SequenceNumber + " Timestamp = " + packetTimestamp + "=>" + packetTimestamp.Equals(transportContext.LastFrame.Timestamp) + "[" + transportContext.LastFrame.LowestSequenceNumber + "," + transportContext.LastFrame.HighestSequenceNumber + "]" + ". HasMarker = " + transportContext.LastFrame.HasMarker);
                     }
                     
                     //Nothing else to do
                     return;
+                }
 
-                }//Check to see if the frame belongs to a new frame
-                else if (false.Equals(IDisposedExtensions.IsNullOrDisposed(transportContext.CurrentFrame)) 
+                //Check to see if the frame belongs to a new frame
+                if (IDisposedExtensions.IsNullOrDisposed(transportContext.CurrentFrame) is false 
                     && 
-                    false.Equals(packetTimestamp.Equals(transportContext.CurrentFrame.Timestamp)))
+                    packetTimestamp.Equals(transportContext.CurrentFrame.Timestamp) is false)
                 {
                     //////We already set to the value of packet.SequenceNumber in UpdateSequenceNumber.
                     //////Before cycling packets check the packets sequence number.
@@ -3207,13 +3215,12 @@ namespace Media.Rtp
                     //}
 
                     //Dispose the last frame, it's going out of scope.
-                    if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(transportContext.LastFrame)))
+                    if (Common.IDisposedExtensions.IsNullOrDisposed(transportContext.LastFrame) is false)
                     {
                         //Indicate the frame is going out of scope
                         OnRtpFrameChanged(transportContext.LastFrame, transportContext, true);
 
                         transportContext.LastFrame.Dispose();
-
                         transportContext.LastFrame = null;
 
                         //Move the frame to be finalized
@@ -3233,9 +3240,11 @@ namespace Media.Rtp
                     OnRtpFrameChanged(transportContext.CurrentFrame, transportContext);
 
                     return;
-                }//Check to see if the frame belongs to the current frame
-                else if (false.Equals(IDisposedExtensions.IsNullOrDisposed(transportContext.CurrentFrame)) &&
-                   packetTimestamp.Equals(transportContext.CurrentFrame.Timestamp))
+                }
+                
+                //Check to see if the frame belongs to the current frame
+                if (IDisposedExtensions.IsNullOrDisposed(transportContext.CurrentFrame) is false &&
+                    packetTimestamp.Equals(transportContext.CurrentFrame.Timestamp))
                 {
                     //If the packet was added to the frame
                     if (transportContext.CurrentFrame.TryAdd(packet.Clone(true, true, true, true, false, true), transportContext.AllowDuplicatePackets))
@@ -3251,7 +3260,6 @@ namespace Media.Rtp
                             Common.ILoggingExtensions.Log(Logger, InternalId + "HandleFrameChanges => CurrentFrame Disposing @ " + transportContext.CurrentFrame.Count);
 
                             transportContext.CurrentFrame.Dispose();
-
                             transportContext.CurrentFrame = null;
                         }
                     }
@@ -3279,7 +3287,10 @@ namespace Media.Rtp
         /// <param name="packet"></param>
         protected internal virtual void HandleOutgoingRtpPacket(object sender, RtpPacket packet = null, TransportContext tc = null)
         {
-            if (IDisposedExtensions.IsNullOrDisposed(this) || false.Equals(HandleOutgoingRtpPackets) || IDisposedExtensions.IsNullOrDisposed(packet) || false.Equals(packet.Transferred.HasValue)) return;
+            if (IDisposedExtensions.IsNullOrDisposed(this) ||
+                HandleOutgoingRtpPackets is false ||
+                IDisposedExtensions.IsNullOrDisposed(packet) ||
+                packet.Transferred.HasValue is false) return;
 
             #region TransportContext Handles Packet
 
@@ -3340,7 +3351,10 @@ namespace Media.Rtp
         /// <param name="packet"></param>OutgoingRtcpPacketEventsEnabled
         protected internal virtual void HandleOutgoingRtcpPacket(object sender, RtcpPacket packet = null, TransportContext tc = null)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || IDisposedExtensions.IsNullOrDisposed(packet) || false.Equals(HandleOutgoingRtcpPackets) || false.Equals(packet.Transferred.HasValue)) return;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) ||
+                IDisposedExtensions.IsNullOrDisposed(packet) ||
+                HandleOutgoingRtcpPackets is false ||
+                packet.Transferred.HasValue is false) return;
 
             #region TransportContext Handles Packet
 
@@ -3390,16 +3404,22 @@ namespace Media.Rtp
             if (m_ThreadEvents)
             {
                 m_EventData.Enqueue((Context: null, Packet: new Common.Classes.PacketBase(data, offset, length, true, true), Final: true, Received: true));
-
                 m_EventReady.Set();
 
                 return;
             }
 
-            foreach (InterleavedDataHandler handler in action.GetInvocationList())
+            foreach (InterleavedDataHandler handler in action.GetInvocationList().Cast<InterleavedDataHandler>())
             {
-                try { handler(this, data, offset, length); }
-                catch (Exception ex) { Common.ILoggingExtensions.LogException(Logger, ex); return; }
+                try
+                {
+                    handler(this, data, offset, length);
+                }
+                catch (Exception ex)
+                {
+                    Common.ILoggingExtensions.LogException(Logger, ex);
+                    return;
+                }
             }
         }
 
@@ -3410,18 +3430,30 @@ namespace Media.Rtp
 
             InterleavedDataHandler action = OutOfBandData;
 
-            if (action is null || IDisposedExtensions.IsNullOrDisposed(packet) || packet.Length.Equals(Common.Binary.LongZero)) return;
+            if (action is null ||
+                IDisposedExtensions.IsNullOrDisposed(packet) ||
+                packet.Length is Common.Binary.LongZero) return;
 
             ParallelEnumerable.ForAll(action.GetInvocationList().AsParallel(), (d) =>
             {
-                if (IDisposedExtensions.IsNullOrDisposed(packet) || Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
-                try { ((InterleavedDataHandler)(d))(this, packet.Data, 0, (int)packet.Length); }
-                catch (Exception ex) { Common.ILoggingExtensions.LogException(Logger, ex); }                
+                if (IDisposedExtensions.IsNullOrDisposed(packet) ||
+                    Common.IDisposedExtensions.IsNullOrDisposed(this))
+                    return;
+
+                try
+                {
+                    ((InterleavedDataHandler)d)(this, packet.Data, 0, (int)packet.Length);
+                }
+                catch (Exception ex)
+                {
+                    Common.ILoggingExtensions.LogException(Logger, ex);
+                }
             });
 
             //Don't have to waste cycles on this thread calling dispose...
             //Todo, check if ShouldDispose was set to false in event..
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(packet))) Common.BaseDisposable.SetShouldDispose(packet, true, false);
+            if (Common.IDisposedExtensions.IsNullOrDisposed(packet) is false)
+                Common.BaseDisposable.SetShouldDispose(packet, true, false);
         }
 
         /// <summary>
@@ -3431,7 +3463,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected internal void OnRtpPacketReceieved(RtpPacket packet, TransportContext tc = null)
         {
-            if (IDisposedExtensions.IsNullOrDisposed(this) || false.Equals(IncomingRtpPacketEventsEnabled)) return;
+            if (IDisposedExtensions.IsNullOrDisposed(this) || IncomingRtpPacketEventsEnabled is false) return;
 
             RtpPacketHandler action = RtpPacketReceieved;
 
@@ -3445,7 +3477,6 @@ namespace Media.Rtp
             {
                 //Use a clone of the packet and data into a new reference so it can stay alive for the event.
                 m_EventData.Enqueue((Context: tc, Packet: packet.Clone(true, true, true, true, false, true), Final: false, Received: true));
-
                 m_EventReady.Set();
 
                 //todo, should call dispose is finalizer was missed...
@@ -3454,15 +3485,27 @@ namespace Media.Rtp
                 return;
             }
 
-            foreach (RtpPacketHandler handler in action.GetInvocationList())
+            foreach (RtpPacketHandler handler in action.GetInvocationList().Cast<RtpPacketHandler>())
             {
-                if (Common.IDisposedExtensions.IsNullOrDisposed(packet) || Common.IDisposedExtensions.IsNullOrDisposed(this)) break;
-                try { handler(this, packet, tc); }
-                catch (Exception ex) { Common.ILoggingExtensions.LogException(Logger, ex); break; }
+                if (Common.IDisposedExtensions.IsNullOrDisposed(packet) ||
+                    Common.IDisposedExtensions.IsNullOrDisposed(this)) break;
+
+                try
+                {
+                    handler(this, packet, tc);
+                }
+                catch (Exception ex)
+                {
+                    Common.ILoggingExtensions.LogException(Logger, ex);
+                    break;
+                }
             }
 
             //Allow the packet to be destroyed if an event did not already change this.
-            if (shouldDispose && packet.ShouldDispose is false && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(packet))) Common.BaseDisposable.SetShouldDispose(packet, true, false);
+            if (shouldDispose &&
+                packet.ShouldDispose is false &&
+                Common.IDisposedExtensions.IsNullOrDisposed(packet) is false)
+                Common.BaseDisposable.SetShouldDispose(packet, true, false);
         }
 
         /// <summary>
@@ -3472,7 +3515,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected internal void OnRtcpPacketReceieved(RtcpPacket packet = null, TransportContext tc = null)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || false.Equals(IncomingRtcpPacketEventsEnabled)) return;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || IncomingRtcpPacketEventsEnabled is false) return;
 
             RtcpPacketHandler action = RtcpPacketReceieved;
 
@@ -3485,9 +3528,7 @@ namespace Media.Rtp
             if (m_ThreadEvents)
             {
                 //Todo, only clone if ShouldDispose is true.
-
                 m_EventData.Enqueue((Context: tc, Packet: packet.Clone(true, true, false), Final: false, Received: true));
-
                 m_EventReady.Set();
 
                 //todo, should call dispose is finalizer was missed...
@@ -3496,15 +3537,28 @@ namespace Media.Rtp
                 return;
             }
 
-            foreach (RtcpPacketHandler handler in action.GetInvocationList())
+            foreach (RtcpPacketHandler handler in action.GetInvocationList().Cast<RtcpPacketHandler>())
             {
-                if (IDisposedExtensions.IsNullOrDisposed(packet) || IDisposedExtensions.IsNullOrDisposed(this)) break;
-                try { handler(this, packet, tc); }
-                catch (Exception ex) { Common.ILoggingExtensions.LogException(Logger, ex); break; }
+                if (IDisposedExtensions.IsNullOrDisposed(packet) ||
+                    IDisposedExtensions.IsNullOrDisposed(this))
+                    break;
+
+                try
+                {
+                    handler(this, packet, tc);
+                }
+                catch (Exception ex)
+                {
+                    Common.ILoggingExtensions.LogException(Logger, ex);
+                    break;
+                }
             }
 
             //Allow the packet to be destroyed if an event did not already change this.
-            if (shouldDispose && packet.ShouldDispose is false && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(packet))) Common.BaseDisposable.SetShouldDispose(packet, true, false);
+            if (shouldDispose &&
+                packet.ShouldDispose is false &&
+                Common.IDisposedExtensions.IsNullOrDisposed(packet) is false)
+                Common.BaseDisposable.SetShouldDispose(packet, true, false);
         }
 
         /// <summary>
@@ -3514,11 +3568,14 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal protected void OnRtpFrameChanged(RtpFrame frame = null, TransportContext tc = null, bool final = false)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || false.Equals(FrameChangedEventsEnabled)) return;            
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) ||
+                FrameChangedEventsEnabled is false) return;
 
             RtpFrameHandler action = RtpFrameChanged;
 
-            if (action is null || IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) return;
+            if (action is null ||
+                IDisposedExtensions.IsNullOrDisposed(frame) ||
+                frame.IsEmpty) return;
 
             bool shouldDispose = frame.ShouldDispose;
 
@@ -3526,33 +3583,48 @@ namespace Media.Rtp
 
             if (m_ThreadEvents)
             {
-                                                                                                //new RtpFrame(frame)
                 m_EventData.Enqueue((Context: tc, Packet: frame, Final: final, Received: true));
-
                 m_EventReady.Set();
 
                 return;
             }
 
-            foreach (RtpFrameHandler handler in action.GetInvocationList())
+            foreach (RtpFrameHandler handler in action.GetInvocationList().Cast<RtpFrameHandler>())
             {
-                if (IDisposedExtensions.IsNullOrDisposed(frame) || Common.IDisposedExtensions.IsNullOrDisposed(this)) break;
-                try { handler(this, frame, tc, final); }
-                catch (Exception ex) { Common.ILoggingExtensions.LogException(Logger, ex); break; }
+                if (IDisposedExtensions.IsNullOrDisposed(frame) ||
+                    Common.IDisposedExtensions.IsNullOrDisposed(this))
+                    break;
+
+                try
+                {
+                    handler(this, frame, tc, final);
+                }
+                catch (Exception ex)
+                {
+                    Common.ILoggingExtensions.LogException(Logger, ex);
+                    break;
+                }
             }
 
             //On final events set ShouldDispose to true, do not call Dispose
-            if (final && shouldDispose && Common.IDisposedExtensions.IsNullOrDisposed(frame) is false && frame.ShouldDispose is false) SetShouldDispose(frame, true, false);
+            if (final &&
+                shouldDispose &&
+                Common.IDisposedExtensions.IsNullOrDisposed(frame) is false &&
+                frame.ShouldDispose is false)
+                SetShouldDispose(frame, true, false);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal void ParallelRtpFrameChanged(RtpFrame frame = null, TransportContext tc = null, bool final = false)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || false.Equals(FrameChangedEventsEnabled)) return;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) ||
+                FrameChangedEventsEnabled is false) return;
 
             RtpFrameHandler action = RtpFrameChanged;
 
-            if (action is null || IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) return;
+            if (action is null ||
+                IDisposedExtensions.IsNullOrDisposed(frame) ||
+                frame.IsEmpty) return;
 
             bool shouldDispose = frame.ShouldDispose;
 
@@ -3561,13 +3633,25 @@ namespace Media.Rtp
             //RtpFrameHandler would need the cast up front.
             ParallelEnumerable.ForAll(action.GetInvocationList().AsParallel(), (d) =>
             {
-                if (IDisposedExtensions.IsNullOrDisposed(frame) || Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
-                try { ((RtpFrameHandler)(d))(this, frame, tc, final); }
-                catch (Exception ex) { Common.ILoggingExtensions.LogException(Logger, ex); }                
+                if (IDisposedExtensions.IsNullOrDisposed(frame) ||
+                Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
+
+                try
+                {
+                    ((RtpFrameHandler)d)(this, frame, tc, final);
+                }
+                catch (Exception ex)
+                {
+                    Common.ILoggingExtensions.LogException(Logger, ex);
+                }
             });
 
             //On final events set ShouldDispose to true, do not call Dispose
-            if (final && shouldDispose && Common.IDisposedExtensions.IsNullOrDisposed(frame) is false && frame.ShouldDispose is false) SetShouldDispose(frame, true, false);
+            if (final &&
+                shouldDispose &&
+                Common.IDisposedExtensions.IsNullOrDisposed(frame) is false &&
+                frame.ShouldDispose is false)
+                SetShouldDispose(frame, true, false);
         }
 
         //IPacket overload could reduce code but would cost time to check type.
@@ -3575,7 +3659,8 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal void ParallelRtpPacketRecieved(RtpPacket packet = null, TransportContext tc = null)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || false.Equals(HandleIncomingRtpPackets)) return;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) ||
+                HandleIncomingRtpPackets is false) return;
 
             RtpPacketHandler action = RtpPacketReceieved;
 
@@ -3584,9 +3669,17 @@ namespace Media.Rtp
             //RtpFrameHandler would need the cast up front.
             ParallelEnumerable.ForAll(action.GetInvocationList().AsParallel(), (d) =>
             {
-                if (IDisposedExtensions.IsNullOrDisposed(packet) || Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
-                try { ((RtpPacketHandler)(d))(this, packet, tc); }
-                catch (Exception ex) { Common.ILoggingExtensions.LogException(Logger, ex); }
+                if (IDisposedExtensions.IsNullOrDisposed(packet) ||
+                Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
+
+                try
+                {
+                    ((RtpPacketHandler)d)(this, packet, tc);
+                }
+                catch (Exception ex)
+                {
+                    Common.ILoggingExtensions.LogException(Logger, ex);
+                }
             });
 
             //Allow the packet to be disposed, do not call dispose now.
@@ -3596,7 +3689,8 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal void ParallelRtpPacketSent(RtpPacket packet = null, TransportContext tc = null)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || false == HandleOutgoingRtpPackets) return;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) ||
+                HandleOutgoingRtpPackets is false) return;
 
             RtpPacketHandler action = RtpPacketSent;
 
@@ -3605,9 +3699,17 @@ namespace Media.Rtp
             //RtpFrameHandler would need the cast up front.
             ParallelEnumerable.ForAll(action.GetInvocationList().AsParallel(), (d) =>
             {
-                if (IDisposedExtensions.IsNullOrDisposed(packet) || Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
-                try { ((RtpPacketHandler)(d))(this, packet, tc); }
-                catch (Exception ex) { Common.ILoggingExtensions.LogException(Logger, ex);}               
+                if (IDisposedExtensions.IsNullOrDisposed(packet) ||
+                Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
+
+                try
+                {
+                    ((RtpPacketHandler)d)(this, packet, tc);
+                }
+                catch (Exception ex)
+                {
+                    Common.ILoggingExtensions.LogException(Logger, ex);
+                }
             });
             
             //allow packet to be disposed...
@@ -3617,19 +3719,28 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal void ParallelRtcpPacketRecieved(RtcpPacket packet = null, TransportContext tc = null)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || false.Equals(HandleIncomingRtcpPackets)) return;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) ||
+                HandleIncomingRtcpPackets is false) return;
 
             RtcpPacketHandler action = RtcpPacketReceieved;
 
-            if (action is null || IDisposedExtensions.IsNullOrDisposed(packet)) return;
+            if (action is null ||
+                IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
             //RtpFrameHandler would need the cast up front.
             ParallelEnumerable.ForAll(action.GetInvocationList().AsParallel(), (d) =>
             {
-                if (IDisposedExtensions.IsNullOrDisposed(packet) || Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
-                try { ((RtcpPacketHandler)(d))(this, packet, tc); }
-                catch (Exception ex) { Common.ILoggingExtensions.LogException(Logger, ex); }
-                //finally { packet.Dispose(); }
+                if (IDisposedExtensions.IsNullOrDisposed(packet) ||
+                    Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
+
+                try
+                {
+                    ((RtcpPacketHandler)d)(this, packet, tc);
+                }
+                catch (Exception ex)
+                {
+                    Common.ILoggingExtensions.LogException(Logger, ex);
+                }
             });
 
             //Allow the packet to be disposed, do not call dispose now.
@@ -3639,19 +3750,29 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal void ParallelRtcpPacketSent(RtcpPacket packet = null, TransportContext tc = null)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || false == HandleOutgoingRtcpPackets) return;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) ||
+                HandleOutgoingRtcpPackets is false) return;
 
             RtcpPacketHandler action = RtcpPacketSent;
 
-            if (action is null || IDisposedExtensions.IsNullOrDisposed(packet)) return;
+            if (action is null ||
+                IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
             //RtpFrameHandler would need the cast up front.
             ParallelEnumerable.ForAll(action.GetInvocationList().AsParallel(), (d) =>
             {
-                if (IDisposedExtensions.IsNullOrDisposed(packet) || Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
-                try { ((RtcpPacketHandler)(d))(this, packet, tc); }
-                catch (Exception ex) { Common.ILoggingExtensions.LogException(Logger, ex); }
-                //finally { packet.Dispose(); }
+                if (IDisposedExtensions.IsNullOrDisposed(packet) ||
+                    Common.IDisposedExtensions.IsNullOrDisposed(this))
+                    return;
+
+                try
+                {
+                    ((RtcpPacketHandler)d)(this, packet, tc);
+                }
+                catch (Exception ex)
+                {
+                    Common.ILoggingExtensions.LogException(Logger, ex);
+                }
             });
 
             //Allow the packet to be disposed, do not call dispose now.
@@ -3666,11 +3787,14 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal protected void OnRtpPacketSent(RtpPacket packet, TransportContext tc = null)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || false == OutgoingRtpPacketEventsEnabled) return;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) ||
+                OutgoingRtpPacketEventsEnabled is false) return;
 
             RtpPacketHandler action = RtpPacketSent;
 
-            if (action is null || IDisposedExtensions.IsNullOrDisposed(packet) || Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
+            if (action is null ||
+                IDisposedExtensions.IsNullOrDisposed(packet) ||
+                Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
 
             //bool shouldDispose = packet.ShouldDispose;
 
@@ -3679,17 +3803,25 @@ namespace Media.Rtp
             if (m_ThreadEvents)
             {
                 m_EventData.Enqueue((Context: tc, Packet: packet, Final: false, Received: true));
-
                 m_EventReady.Set();
 
                 return;
             }
 
-            foreach (RtpPacketHandler handler in action.GetInvocationList())
+            foreach (RtpPacketHandler handler in action.GetInvocationList().Cast<RtpPacketHandler>())
             {
-                if (IDisposedExtensions.IsNullOrDisposed(packet) || IDisposedExtensions.IsNullOrDisposed(this)) break;
-                try { handler(this, packet, tc); }
-                catch (Exception ex) { Common.ILoggingExtensions.LogException(Logger, ex); break; }
+                if (IDisposedExtensions.IsNullOrDisposed(packet) ||
+                    IDisposedExtensions.IsNullOrDisposed(this)) break;
+
+                try
+                {
+                    handler(this, packet, tc);
+                }
+                catch (Exception ex) 
+                {
+                    Common.ILoggingExtensions.LogException(Logger, ex);
+                    break;
+                }
             }
 
             //if(shouldDispose && false == packet.IsDisposed) Common.BaseDisposable.SetShouldDispose(packet, true, false);
@@ -3702,7 +3834,8 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal protected void OnRtcpPacketSent(RtcpPacket packet, TransportContext tc = null)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || false == OutgoingRtcpPacketEventsEnabled) return;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) ||
+                OutgoingRtcpPacketEventsEnabled is false) return;
 
             RtcpPacketHandler action = RtcpPacketSent;
 
@@ -3719,11 +3852,20 @@ namespace Media.Rtp
                 return;
             }
 
-            foreach (RtcpPacketHandler handler in action.GetInvocationList())
+            foreach (RtcpPacketHandler handler in action.GetInvocationList().Cast<RtcpPacketHandler>())
             {
-                if (IDisposedExtensions.IsNullOrDisposed(packet) || Common.IDisposedExtensions.IsNullOrDisposed(this)) break;
-                try { handler(this, packet, tc); }
-                catch (Exception ex) { Common.ILoggingExtensions.LogException(Logger, ex); break; }
+                if (IDisposedExtensions.IsNullOrDisposed(packet) ||
+                    Common.IDisposedExtensions.IsNullOrDisposed(this)) break;
+
+                try
+                {
+                    handler(this, packet, tc);
+                }
+                catch (Exception ex)
+                {
+                    Common.ILoggingExtensions.LogException(Logger, ex);
+                    break;
+                }
             }
 
             //if (shouldDispose) Common.BaseDisposable.SetShouldDispose(packet, true, false);
@@ -3797,14 +3939,14 @@ namespace Media.Rtp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized | System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set
             {
-                if (false.Equals(IsActive)) return;
+                if (IsActive is false) return;
 
                 if (value.Equals(m_ThreadEvents)) return;
 
                 //Update the value.
                 m_ThreadEvents = value;
 
-                if (value == true)
+                if (value)
                 {
                     if (m_EventThread is null || EventsStarted.Equals(DateTime.MinValue))
                     {
@@ -3812,7 +3954,7 @@ namespace Media.Rtp
                         m_EventThread = new Thread(new ThreadStart(HandleEvents))
                         {
                             //Assign name
-                            Name = "RtpClient-Events-" + InternalId,
+                            Name = $"{nameof(RtpClient)}-Events-{InternalId}",
 
                             //Start highest
                             Priority = ThreadPriority.Highest
@@ -3826,7 +3968,8 @@ namespace Media.Rtp
                     }
                     
                     //Wait for the start while the value was not changed and the thread is not started.
-                    while (m_ThreadEvents && EventsStarted == DateTime.MinValue && false.Equals(m_EventThread is null)) m_EventReady.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);
+                    while (m_ThreadEvents && EventsStarted == DateTime.MinValue && m_EventThread is not null)
+                        m_EventReady.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);
                 }
                 else
                 {
@@ -4048,26 +4191,27 @@ namespace Media.Rtp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (false.Equals(RtcpEnabled) || IDisposedExtensions.IsNullOrDisposed(this)) return true;
+                if (RtcpEnabled is false ||
+                    IDisposedExtensions.IsNullOrDisposed(this)) return true;
 
                 //If disposed no limit is imposed do not check
 
                 double averageMaximumRtcpBandwidthPercentage = AverageMaximumRtcpBandwidthPercentage;
-
-                if (averageMaximumRtcpBandwidthPercentage.Equals(Common.Binary.DoubleZero)) return false;
+                if (averageMaximumRtcpBandwidthPercentage is Common.Binary.DoubleZero)
+                    return false;
 
                 int amountOfContexts = TransportContexts.Count;
-
-                if (amountOfContexts.Equals(Common.Binary.Zero)) return true;
+                if (amountOfContexts is Common.Binary.Zero)
+                    return true;
 
                 //Obtain the summation of the total bytes sent over the amount of context's
                 long totalReceived = TotalBytesReceieved;
-
-                if (totalReceived.Equals(Common.Binary.LongZero)) return false;
+                if (totalReceived is Common.Binary.LongZero)
+                    return false;
 
                 long totalRtcp = TotalRtcpBytesSent + TotalRtcpBytesReceieved;
-
-                if (totalRtcp.Equals(Common.Binary.LongZero)) return false;
+                if (totalRtcp is Common.Binary.LongZero)
+                    return false;
 
                 return totalRtcp >= totalReceived / averageMaximumRtcpBandwidthPercentage;
             }
@@ -4146,7 +4290,8 @@ namespace Media.Rtp
         static RtpClient()
         {
             //Todo make static with port. static readonly int DefaultRtpTransportPort. (see if Rtcp also has one)
-            if (false == UriParser.IsKnownScheme(RtpProtcolScheme)) UriParser.Register(new HttpStyleUriParser(), RtpProtcolScheme, 9670);
+            if (UriParser.IsKnownScheme(RtpProtcolScheme) is false)
+                UriParser.Register(new HttpStyleUriParser(), RtpProtcolScheme, 9670);
         }
 
         RtpClient(bool shouldDispose = true)
@@ -4163,7 +4308,11 @@ namespace Media.Rtp
         /// <param name="memory">The optional memory segment to use</param>
         /// <param name="incomingPacketEventsEnabled"><see cref="IncomingPacketEventsEnabled"/></param>
         /// <param name="frameChangedEventsEnabled"><see cref="FrameChangedEventsEnabled"/></param>
-        public RtpClient(Common.MemorySegment memory = null, bool incomingPacketEventsEnabled = true, bool frameChangedEventsEnabled = true, bool outgoingPacketEvents = true, bool shouldDispose = true)
+        public RtpClient(Common.MemorySegment memory = null,
+            bool incomingPacketEventsEnabled = true,
+            bool frameChangedEventsEnabled = true,
+            bool outgoingPacketEvents = true,
+            bool shouldDispose = true)
             : this(shouldDispose)
         {
             if (memory is null)
@@ -4176,7 +4325,8 @@ namespace Media.Rtp
             {
                 m_Buffer = memory;
 
-                if (m_Buffer.Count < RtpHeader.Length) throw new ArgumentOutOfRangeException(nameof(memory), "must contain enough space for a RtpHeader"); //memory.Count 
+                if (m_Buffer.Count < RtpHeader.Length)
+                    throw new ArgumentOutOfRangeException(nameof(memory), $"must contain enough space for a RtpHeader >= ({RtpHeader.Length})"); //memory.Count 
             }
 
             //RtpPacketReceieved += new RtpPacketHandler(HandleIncomingRtpPacket);
@@ -4202,7 +4352,12 @@ namespace Media.Rtp
         /// <param name="offset">The offset to start using the buffer at</param>
         /// <param name="incomingPacketEventsEnabled"><see cref="IncomingPacketEventsEnabled"/></param>
         /// <param name="frameChangedEventsEnabled"><see cref="FrameChangedEventsEnabled"/></param>
-        public RtpClient(byte[] buffer, int offset = 0, bool incomingPacketEventsEnabled = true, bool frameChangedEventsEnabled = true, bool outgoingPacketEvents = true, bool shouldDispose = true)
+        public RtpClient(byte[] buffer,
+            int offset = 0,
+            bool incomingPacketEventsEnabled = true,
+            bool frameChangedEventsEnabled = true,
+            bool outgoingPacketEvents = true,
+            bool shouldDispose = true)
             : this(new Common.MemorySegment(buffer, offset), incomingPacketEventsEnabled, frameChangedEventsEnabled, outgoingPacketEvents, shouldDispose) { }
 
         /// <summary>
@@ -4213,12 +4368,18 @@ namespace Media.Rtp
         /// <param name="count">The amount of bytes to use in the buffer</param>
         /// <param name="incomingPacketEventsEnabled"><see cref="IncomingPacketEventsEnabled"/></param>
         /// <param name="frameChangedEventsEnabled"><see cref="FrameChangedEventsEnabled"/></param>
-        public RtpClient(byte[] buffer, int offset, int count, bool incomingPacketEventsEnabled = true, bool outgoingPacketEvents = true, bool frameChangedEventsEnabled = true, bool shouldDispose = true) 
+        public RtpClient(byte[] buffer,
+            int offset,
+            int count,
+            bool incomingPacketEventsEnabled = true,
+            bool outgoingPacketEvents = true,
+            bool frameChangedEventsEnabled = true,
+            bool shouldDispose = true) 
             : this(new Common.MemorySegment(buffer, offset, count), incomingPacketEventsEnabled, frameChangedEventsEnabled, outgoingPacketEvents, shouldDispose) { }
 
         #endregion
 
-        #region Overloads               
+        #region Overloads
 
         public override string ToString()
         {
@@ -4240,7 +4401,7 @@ namespace Media.Rtp
 
             base.Dispose(ShouldDispose);
 
-            if (false.Equals(IDisposedExtensions.IsNullOrDisposed(this))) return;
+            if (IDisposedExtensions.IsNullOrDisposed(this) is false) return;
 
             DisposeAndClearTransportContexts();
 
@@ -4280,7 +4441,7 @@ namespace Media.Rtp
             ClientName = null;
 
             //Remove the buffer
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_Buffer)))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(m_Buffer) is false)
             {
                 m_Buffer.Dispose();
 

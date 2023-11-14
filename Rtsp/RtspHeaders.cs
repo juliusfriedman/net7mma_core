@@ -435,14 +435,14 @@ namespace Media.Rtsp
                     builder.Append(source);
                 }
 
-                if (unicast.HasValue && unicast.Value == true)
+                if (unicast.HasValue && unicast.Value)
                 {
                     builder.Append(SemiColon);
 
                     //todo, put in static grammar
                     builder.Append("unicast");
                 }
-                else if (multicast.HasValue && multicast.Value == true)
+                else if (multicast.HasValue && multicast.Value)
                 {
                     builder.Append(SemiColon);
 
@@ -495,7 +495,7 @@ namespace Media.Rtsp
 
                 //
 
-                if (interleaved.HasValue && interleaved.Value == true)
+                if (interleaved.HasValue && interleaved.Value)
                 {
                     builder.Append(SemiColon);
 

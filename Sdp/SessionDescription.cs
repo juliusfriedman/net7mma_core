@@ -375,7 +375,7 @@ namespace Media.Sdp
 
                 if (string.IsNullOrWhiteSpace(value)) throw new InvalidOperationException("The SessionOriginatorLine is required to have a non-null and non-empty value.");
 
-                bool hadValueWithSetVersion = m_OriginatorLine is not null && m_OriginatorLine.SessionVersion.Equals(Common.Binary.LongZero) is false;
+                bool hadValueWithSetVersion = m_OriginatorLine is not null && m_OriginatorLine.SessionVersion is Common.Binary.LongZero is false;
 
                 if (hadValueWithSetVersion &&
                     string.Compare(value, m_OriginatorLine.ToString(), StringComparison.InvariantCultureIgnoreCase) is 0) return;
@@ -408,7 +408,7 @@ namespace Media.Sdp
 
                 m_NameLine = new Lines.SessionNameLine(value);
 
-                EndUpdate(token, DocumentVersion.Equals(Common.Binary.LongZero) is false);
+                EndUpdate(token, DocumentVersion is Common.Binary.LongZero is false);
             }
         }
 

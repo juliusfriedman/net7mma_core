@@ -433,7 +433,7 @@ namespace Media.UnitTests
                                 //Use the SourceList
                                 using (Media.RFC3550.SourceList sourceList = p.GetSourceList())
                                 {
-                                    System.Diagnostics.Debug.Assert(sourceList.IsComplete == true, "SourceList.IsComplete");
+                                    System.Diagnostics.Debug.Assert(sourceList.IsComplete, "SourceList.IsComplete");
 
                                     System.Diagnostics.Debug.Assert(expectedSourceListSize == sourceList.Size, "Unexpected SourceList Size");
 

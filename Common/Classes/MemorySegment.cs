@@ -549,7 +549,7 @@ namespace Media.Common
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(segment)) return null;
 
-            if (segment.m_Length.Equals(Common.Binary.LongZero)) return MemorySegment.EmptyBytes;
+            if (segment.m_Length is Common.Binary.LongZero) return MemorySegment.EmptyBytes;
 
             byte[] copy = new byte[segment.LongLength];
 

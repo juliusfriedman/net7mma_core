@@ -245,7 +245,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal protected void CheckDisposed()
         {
-            if (false.Equals(IsUndisposed) || IsFinalized || IsDisposed) throw new ObjectDisposedException(GetType().Name);
+            if (IsUndisposed is false || IsFinalized || IsDisposed) throw new ObjectDisposedException(GetType().Name);
         }
 
         //ReleaseResources
@@ -332,7 +332,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public virtual void Dispose()
         {
-            //if (false.Equals(IsUndisposed) || IsFinalized || ShouldDispose is false || IsDisposed) return;
+            //if (IsUndisposed is false || IsFinalized || ShouldDispose is false || IsDisposed) return;
 
             Destruct();
         }

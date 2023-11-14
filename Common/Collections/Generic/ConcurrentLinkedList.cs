@@ -85,7 +85,7 @@ namespace Media.Common.Collections.Generic
         public bool IsEmpty
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Count.Equals(Common.Binary.LongZero); }
+            get { return Count is Common.Binary.LongZero; }
         }
 
         /// <summary>

@@ -795,7 +795,7 @@ namespace Media.UnitTests
 
                     //_rtpAudioClient.Activate();
 
-                    System.Diagnostics.Debug.Assert(_audioRTPTransportContext.IsActive == true, "Found a active context");
+                    System.Diagnostics.Debug.Assert(_audioRTPTransportContext.IsActive, "Found a active context");
                 }
             }
         }

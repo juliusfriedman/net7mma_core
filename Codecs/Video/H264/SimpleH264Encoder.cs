@@ -164,7 +164,7 @@ public class SimpleH264Encoder : IDisposable
                 throw new System.Exception("Error: NO bytes to save");
             }
 
-            if (bemulationprevention == true)
+            if (bemulationprevention)
             {
                 //Emulation prevention will be used:
                 /*As per h.264 spec,
@@ -261,7 +261,7 @@ public class SimpleH264Encoder : IDisposable
             //Used to add NAL header stream
             //Remember: NAL header is byte oriented
 
-            if (bDoAlign == true)
+            if (bDoAlign)
             {
                 dobytealign();
             }

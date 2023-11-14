@@ -2503,7 +2503,7 @@ namespace Media.Rtsp
                                 received = interleaved.Length;
 
                                 //If playing and interleaved stream AND the last transmitted message is NOT null and is NOT Complete then attempt to complete it
-                                if (received < length && false.Equals(IDisposedExtensions.IsNullOrDisposed(this)) && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted)) /*&& interleaved.StatusLineParsed*/)
+                                if (received < length && IDisposedExtensions.IsNullOrDisposed(this) is false && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted)) /*&& interleaved.StatusLineParsed*/)
                                 {
                                     //RtspMessage local = m_LastTransmitted;
 
@@ -3043,7 +3043,7 @@ namespace Media.Rtsp
 
             //Should be an option..
             //Initiate a keep alive now if data is still not flowing.
-            if (SendKeepAliveImmediatelyAfterStartPlaying && Client.TotalBytesReceieved.Equals(Common.Binary.LongZero)) SendKeepAliveRequest(null);
+            if (SendKeepAliveImmediatelyAfterStartPlaying && Client.TotalBytesReceieved is Common.Binary.LongZero) SendKeepAliveRequest(null);
 
             TimeSpan halfSessionTimeWithConnection = TimeSpan.FromTicks(m_RtspSessionTimeout.Subtract(m_ConnectionTime).Ticks >> 1);
 
@@ -4601,7 +4601,7 @@ namespace Media.Rtsp
                                                 //If we dont have an exiting id then this is valid if the header was completely recieved only.
                                                 if (string.IsNullOrWhiteSpace(value) is false &&
                                                     string.IsNullOrWhiteSpace(m_SessionId) ||
-                                                    false.Equals(string.Compare(value, m_SessionId).Equals(Common.Binary.Zero)))
+                                                    false.Equals(string.Compare(value, m_SessionId) is Common.Binary.Zero))
                                                 {
                                                     //Get the SessionId if present
                                                     m_SessionId = sessionHeaderParts[0].Trim();
@@ -6054,8 +6054,8 @@ namespace Media.Rtsp
                     //Filter the contexts which have received absolutely NO data.
                     var contextsWithoutFlow = Client.GetTransportContexts().Where(tc => false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(tc)) &&
                         m_Playing.ContainsKey(tc.MediaDescription) &&
-                        tc.TotalBytesReceieved.Equals(Common.Binary.LongZero) 
-                        && tc.TotalPacketsSent.Equals(Common.Binary.LongZero)
+                        tc.TotalBytesReceieved is Common.Binary.LongZero 
+                        && tc.TotalPacketsSent is Common.Binary.LongZero
                         && tc.TimeActive > tc.ReceiveInterval);
                     //tc.TimeSending > tc.ReceiveInterval);
 

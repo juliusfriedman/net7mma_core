@@ -759,7 +759,7 @@ namespace Media.Concepts.Classes
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return m_Header.m_Length.Equals(Common.Binary.Zero);
+                return m_Header.m_Length is Common.Binary.Zero;
             }
         }
 
