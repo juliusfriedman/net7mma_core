@@ -300,7 +300,7 @@ namespace Media.RtpTools
         #region Methods
 
         /// <summary>
-        /// Add all the data given by data to the Blob and increments max size.
+        /// Add all the data given by data to the Blob and sets max size.
         /// </summary>
         /// <param name="data"></param>
         public void Concat(IEnumerable<byte> data) => BlobLength = (Blob = Enumerable.Concat(Blob, data).ToArray()).Length;
