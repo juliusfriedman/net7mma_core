@@ -422,9 +422,7 @@ namespace Media.Common
         {
             if (System.Object.ReferenceEquals(this, obj)) return true;
 
-            if (false.Equals((obj is MemorySegment))) return false;
-
-            return Equals(obj as MemorySegment);
+            return obj is MemorySegment m && Equals(m);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

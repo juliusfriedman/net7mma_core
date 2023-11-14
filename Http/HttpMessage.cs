@@ -2602,9 +2602,7 @@ namespace Media.Http
         {
             if (ReferenceEquals(this, obj)) return true;
 
-            if (obj is not HttpMessage m) return false;
-
-            return Equals(m);
+            return obj is HttpMessage m && Equals(m);
         }
 
         #endregion

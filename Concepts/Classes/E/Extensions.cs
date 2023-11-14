@@ -104,9 +104,7 @@ namespace Media.Concepts.Classes.E
         {
             if (object.ReferenceEquals(this, obj)) return true;
 
-            if ((obj is Extensions) is false) return false;
-
-            return Equals(obj as Extensions);
+            return obj is Extensions e && Equals(e);
         }
 
         //Todo, @IHashCode{}:ICode{},IHash{}

@@ -1307,9 +1307,7 @@ namespace Media
             {
                 if (System.Object.ReferenceEquals(this, obj)) return true;
 
-                if (false.Equals((obj is CommonHeaderBits))) return false;
-
-                return Equals(obj as CommonHeaderBits);
+                return obj is CommonHeaderBits b && Equals(b);
             }
 
             #endregion

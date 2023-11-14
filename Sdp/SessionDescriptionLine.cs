@@ -428,9 +428,7 @@ namespace Media.Sdp
             //System.Object
             if (object.ReferenceEquals(this, obj)) return true;
 
-            if ((obj is SessionDescriptionLine) is false) return false;
-
-            return Equals(obj as SessionDescriptionLine);
+            return obj is SessionDescriptionLine l && Equals(l);
         }
 
         //ToString should be implemented by GetEnumerator and String.Join(string.Empty, GetEnumerator)

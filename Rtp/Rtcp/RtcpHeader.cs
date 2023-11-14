@@ -600,11 +600,9 @@ namespace Media.Rtcp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            if(System.Object.ReferenceEquals(this, obj)) return true;
+            if (System.Object.ReferenceEquals(this, obj)) return true;
 
-            if (false.Equals((obj is RtcpHeader))) return false;
-
-            return Equals(obj as RtcpHeader);
+            return obj is RtcpHeader h && Equals(h);
         }
 
         #endregion

@@ -1512,9 +1512,7 @@ namespace Media.Rtp
         {
             if (System.Object.ReferenceEquals(this, obj)) return true;
 
-            if (false.Equals((obj is RtpFrame))) return false;
-
-            return Equals(obj as RtpFrame);
+            return obj is RtpFrame f && Equals(f);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
