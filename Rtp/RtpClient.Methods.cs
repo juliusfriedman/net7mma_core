@@ -262,8 +262,7 @@ namespace Media.Rtp
                 || //OR the call has not been forced AND the context IsRtcpEnabled AND the context is active
                 (force is false && context.IsRtcpEnabled && context.IsActive
                 && //AND the final Goodbye was sent already
-                context.Goodbye is not null &&
-                context.Goodbye.Transferred.HasValue))
+                context.Goodbye?.Transferred.HasValue is true))
             {
                 //Indicate nothing was sent
                 return 0;
@@ -875,10 +874,10 @@ namespace Media.Rtp
             {
                 c = TransportContexts[i];
 
-                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(c)) &&
+                if (Common.IDisposedExtensions.IsNullOrDisposed(c) is false &&
                     c.IsActive &&
-                    c.RtpSocket is not null &&
-                    c.RtpSocket.Handle == socketHandle) break;
+                    (c.RtpSocket is not null && c.RtpSocket.Handle == socketHandle ||
+                     c.RtcpSocket is not null && c.RtcpSocket.Handle == socketHandle)) break;
 
                 c = null;
             }

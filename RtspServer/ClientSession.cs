@@ -435,7 +435,7 @@ namespace Media.Rtsp//.Server
             //Check for no data or 0 length when sharing socket.
             if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(data, out int check) ||
                 length - offset > check ||
-                (length.Equals(Common.Binary.Zero) && SharesSocket)) return;
+                (length is Common.Binary.Zero && SharesSocket)) return;
 
             try
             {

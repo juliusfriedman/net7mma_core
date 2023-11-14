@@ -74,15 +74,15 @@ namespace Media.Common.Extensions.String
             //Dont check the results for overflow
             unchecked
             {
-                if (length.Equals(Common.Binary.Zero)) return null;
+                if (length is Common.Binary.Zero) return null;
 
                 if (length <= -1) length = str.Length;
 
                 int check = length - start;
 
-                if (start > check) throw new System.ArgumentOutOfRangeException("start");
+                if (start > check) throw new System.ArgumentOutOfRangeException(nameof(start));
 
-                if (length > check) throw new System.ArgumentOutOfRangeException("length");
+                if (length > check) throw new System.ArgumentOutOfRangeException(nameof(length));
 
                 System.Collections.Generic.IEnumerable<byte> result = Media.Common.MemorySegment.EmptyBytes;
 

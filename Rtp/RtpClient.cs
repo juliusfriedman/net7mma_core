@@ -415,7 +415,7 @@ namespace Media.Rtp
                             localPort is 0 ? localPort : localPort++, //LocalRtp
                             localPort is 0 ? localPort : localPort++, //LocalRtcp                            
                             rtpPort ?? mediaDescription.MediaPort, //RemoteRtp
-                            rtcpPort ?? (false.Equals(mediaDescription.MediaPort is 0) ? mediaDescription.MediaPort + 1 : mediaDescription.MediaPort)); //RemoteRtcp
+                            rtcpPort ?? (mediaDescription.MediaPort is not 0 ? mediaDescription.MediaPort + 1 : mediaDescription.MediaPort)); //RemoteRtcp
                     }
                     else if (hasSocket)//If had a socket use it
                     {
@@ -1622,7 +1622,7 @@ namespace Media.Rtp
 
                 if (dataChannel.Equals(controlChannel)) throw new InvalidOperationException("dataChannel and controlChannel must be unique.");
 
-                if (ssrc.Equals(senderSsrc) && false.Equals(ssrc is 0)) throw new InvalidOperationException("ssrc and senderSsrc must be unique.");
+                if (ssrc.Equals(senderSsrc) && ssrc is not 0) throw new InvalidOperationException("ssrc and senderSsrc must be unique.");
 
                 if (minimumSequentialRtpPackets < 0) throw new InvalidOperationException("minimumSequentialRtpPackets must be >= 0");
 
@@ -2527,7 +2527,7 @@ namespace Media.Rtp
             }
 
             //Only if the packet was not addressed to a unique party with the id of 0 and there is a null context or the context is in discovery.
-            if (false.Equals(partyId is 0) && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(transportContext)))// && transportContext.InDiscovery)                
+            if (partyId is not 0 && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(transportContext)))// && transportContext.InDiscovery)                
             {
                 //Cache the payloadType and blockCount
                 int blockCount = packet.BlockCount;
@@ -3385,7 +3385,7 @@ namespace Media.Rtp
 
             InterleavedDataHandler action = OutOfBandData;
 
-            if (action is null || data is null || length.Equals(Common.Binary.Zero)) return;
+            if (action is null || data is null || length is Common.Binary.Zero) return;
 
             if (m_ThreadEvents)
             {
