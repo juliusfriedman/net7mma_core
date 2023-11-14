@@ -98,7 +98,7 @@ namespace Media.Http
 
             HttpClientAction action = OnConnect;
 
-            if (object.ReferenceEquals(action, null)) return;
+            if (action is null) return;
 
             foreach (HttpClientAction handler in action.GetInvocationList())
             {
@@ -116,7 +116,7 @@ namespace Media.Http
 
             RequestHandler action = OnRequest;
 
-            if (object.ReferenceEquals(action, null)) return;
+            if (action is null) return;
 
             foreach (RequestHandler handler in action.GetInvocationList())
             {
@@ -133,7 +133,7 @@ namespace Media.Http
 
             ResponseHandler action = OnResponse;
 
-            if (object.ReferenceEquals(action, null)) return;
+            if (action is null) return;
 
             foreach (ResponseHandler handler in action.GetInvocationList())
             {
@@ -150,7 +150,7 @@ namespace Media.Http
 
             HttpClientAction action = OnDisconnect;
 
-            if (object.ReferenceEquals(action, null)) return;
+            if (action is null) return;
 
             foreach (HttpClientAction handler in action.GetInvocationList())
             {
@@ -604,13 +604,13 @@ namespace Media.Http
                 if (force is false && IsConnected) return;
 
                 //Deactivate any existing previous socket and erase connect times.
-                if (object.ReferenceEquals(m_HttpSocket, null) is false) DisconnectSocket();
+                if (m_HttpSocket is not null) DisconnectSocket();
 
                 //Create the socket
                 m_HttpSocket = new Socket(m_RemoteIP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                
+
                 //Configure the socket
-                if (object.ReferenceEquals(ConfigureSocket,null) is false) ConfigureSocket(m_HttpSocket);
+                if (ConfigureSocket is not null) ConfigureSocket(m_HttpSocket);
 
                 //We started connecting now.
                 m_BeginConnect = DateTime.UtcNow;
@@ -913,7 +913,7 @@ namespace Media.Http
                             //Should not modify the memory, instead should creat it's own url and send based on that.
                             //ICKLY
                             //modify location to only be Path and Query
-                            if (object.ReferenceEquals(message.Location, null))
+                            if (message.Location is null)
                             {
                                 if (string.IsNullOrEmpty(CurrentLocation.PathAndQuery))
                                     message.Location = HttpMessage.Wildcard;

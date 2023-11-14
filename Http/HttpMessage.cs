@@ -823,7 +823,7 @@ namespace Media.Http
 
                 //If the status line was not parsed
                 if (false.Equals(m_StatusLineParsed) ||  //All requests must have a StatusLine OR
-                    object.ReferenceEquals(m_Buffer,null) is false &&  // Be parsing the StatusLine
+                    m_Buffer is not null &&  // Be parsing the StatusLine
                     m_Buffer.Length <= MinimumStatusLineSize) return false;
 
                 //Messages without complete header sections are not complete
@@ -934,7 +934,7 @@ namespace Media.Http
             
             Version = version ?? DefaultVersion;
 
-            if (object.ReferenceEquals(contentEncoding,null) is false) ContentEncoding = contentEncoding;
+            if (contentEncoding is not null) ContentEncoding = contentEncoding;
 
             m_StatusLineParsed = m_HeadersParsed = true;
 
@@ -962,14 +962,14 @@ namespace Media.Http
 
             //Sanely
             //length could be > data.Length or offset could be allowed to be negitive...
-            if (object.ReferenceEquals(data, null) || offset < 0 || offset >= (length = Media.Common.Binary.Clamp(length, 0, data.Length)))
+            if (data is null || offset < 0 || offset >= (length = Media.Common.Binary.Clamp(length, 0, data.Length)))
             {
                 return;
             }
 
             //use the supplied encoding if present.
-            if (object.ReferenceEquals(contentEncoding,null) is false &&
-                object.ReferenceEquals(contentEncoding,ContentEncoding) is false)
+            if (contentEncoding is not null &&
+                object.ReferenceEquals(contentEncoding, ContentEncoding) is false)
             {
                 //Set the Content-Encoding header
                 ContentEncoding = contentEncoding;
@@ -1257,7 +1257,7 @@ namespace Media.Http
 
                 //m_HeadersParsed should maintain the amount of emptyLines encountered through all parsing unless force is true.
 
-                if (object.ReferenceEquals(m_Buffer, null) || m_Buffer.CanSeek is false) return false;
+                if (m_Buffer is null || m_Buffer.CanSeek is false) return false;
 
                 //Ensure at the beginning of the buffer.
                 m_Buffer.Seek(m_HeaderOffset, System.IO.SeekOrigin.Begin);
@@ -1397,7 +1397,7 @@ namespace Media.Http
                 //}
 
                 //There may be control characters from the last header still in the buffer, (ParseBody handles this)            
-                if(object.ReferenceEquals(m_Buffer, null) is false && m_Buffer.CanSeek) m_Buffer.Seek(position, System.IO.SeekOrigin.Begin);
+                if (m_Buffer is not null && m_Buffer.CanSeek) m_Buffer.Seek(position, System.IO.SeekOrigin.Begin);
 
                 //Check that an end header section was seen or that the delemit was encountered
                 return (m_HeadersParsed = emptyLine >= 2 || sawDelemit) && (IsDisposed is false || IsPersistent);
@@ -1456,7 +1456,7 @@ namespace Media.Http
                         headerValue.Append(rawLine);
 
                         //Stop parsing when an exception occurs (even if more data remains)
-                        if (object.ReferenceEquals(encountered, null) is false) break;
+                        if (encountered is not null) break;
 
                         //Do update the position to the position of the buffer
                         position = m_Buffer.Position; //don't use justRead, BinaryReader and ReadChars is another great function (Fallback encoder may backtrack, may also decide output buffer is too small based on the same back track)
@@ -1818,7 +1818,7 @@ namespace Media.Http
         public virtual string ToEncodedString()
         {
             if (IsDisposed && IsPersistent is false) goto Exit;
-            if(object.ReferenceEquals(HeaderEncoding, null) is false) try
+            if (HeaderEncoding is not null) try
             {
                 return HeaderEncoding.GetString(Prepare(true, true, false, false).ToArray())
                 +
@@ -2037,7 +2037,7 @@ namespace Media.Http
             string headerValue = GetHeaderValue(name, out headerName);
 
             //The name was contained if name is not null
-            return false == object.ReferenceEquals(headerName, null);// is false;
+            return headerName is not null;// is false;
         }
 
         internal bool ContainsEntityHeader(string name, out string headerName)
@@ -2052,7 +2052,7 @@ namespace Media.Http
             string headerValue = GetEntityHeaderValue(name, out headerName);
 
             //The name was contained if name is not null
-            return object.ReferenceEquals(headerName, null) is false;
+            return headerName is not null;
         }
 
         public virtual bool ContainsHeader(string name)
@@ -2285,7 +2285,7 @@ namespace Media.Http
 
             System.Text.Encoding headerEncoding = m_HeaderEncoding;
 
-            if (object.ReferenceEquals(headerEncoding, null)) return sequence;
+            if (headerEncoding is null) return sequence;
 
             //StatusLine?
             //foreach (byte b in headerEncoding.GetBytes(StatusLine)
@@ -2309,9 +2309,9 @@ namespace Media.Http
                 //UriEncode - bool optional? Uri Encoding? (RFC, PunyCode, Raw, etc) 
                 //See also https://github.com/dotnet/corefxlab/blob/8cd063a1e163a0db906343bb5ba1b53c02eb83d6/src/System.Text.Encodings.Web.Utf8/UrlEncoder.cs
 
-                uriEncoding = uriEncoding ?? headerEncoding;
+                uriEncoding ??= headerEncoding;
 
-                string uri = object.ReferenceEquals(Location, null) ? HttpMessage.Wildcard.ToString() : Location.OriginalString;
+                string uri = Location is null ? HttpMessage.Wildcard.ToString() : Location.OriginalString;
 
                 if (escapeUri) uri = System.Uri.EscapeUriString(uri); //Converts to Unicode to Utf8 where needed so set to false if utf16 or otherwise is needed.
 
@@ -2375,7 +2375,8 @@ namespace Media.Http
 
             //if (includeEmptyLine && m_EncodedLineEnds is not null) foreach (byte b in headerEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
 
-            if (includeEmptyLine && object.ReferenceEquals(m_EncodedLineEnds, null) is false) sequence = Enumerable.Concat(sequence, headerEncoding.GetBytes(m_EncodedLineEnds));
+            if (includeEmptyLine && m_EncodedLineEnds is not null)
+                sequence = Enumerable.Concat(sequence, headerEncoding.GetBytes(m_EncodedLineEnds));
 
             headerEncoding = null;
 
@@ -2400,7 +2401,7 @@ namespace Media.Http
 
             //e.g if(false == string.IsNullOrEmptyOrWhiteSpace(m_HeaderFormat)) { format header using format and then encode to bytes and return that }
 
-            if (object.ReferenceEquals(m_EncodedWhiteSpace, null)) return sequence;
+            if (m_EncodedWhiteSpace is null) return sequence;
 
             IEnumerable<byte> whiteSpace = m_HeaderEncoding.GetBytes(m_EncodedWhiteSpace);
 
@@ -2415,7 +2416,8 @@ namespace Media.Http
                 sequence = Enumerable.Concat(sequence, PrepareHeader(header.Key, header.Value));
             }
 
-            if (includeEmptyLine && object.ReferenceEquals(m_EncodedLineEnds, null) is false) sequence = Enumerable.Concat(sequence, m_HeaderEncoding.GetBytes(m_EncodedLineEnds)); //foreach (byte b in m_HeaderEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
+            if (includeEmptyLine && m_EncodedLineEnds is not null)
+                sequence = Enumerable.Concat(sequence, m_HeaderEncoding.GetBytes(m_EncodedLineEnds)); //foreach (byte b in m_HeaderEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
 
             return sequence;
         }
@@ -2444,7 +2446,8 @@ namespace Media.Http
                 sequence = Enumerable.Concat(sequence, PrepareHeader(header.Key, header.Value));
             }
 
-            if (includeEmptyLine && object.ReferenceEquals(m_EncodedLineEnds, null) is false) sequence = Enumerable.Concat(sequence, m_HeaderEncoding.GetBytes(m_EncodedLineEnds)); //foreach (byte b in m_HeaderEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
+            if (includeEmptyLine && m_EncodedLineEnds is not null)
+                sequence = Enumerable.Concat(sequence, m_HeaderEncoding.GetBytes(m_EncodedLineEnds)); //foreach (byte b in m_HeaderEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
 
             return sequence;
         }
@@ -2525,7 +2528,8 @@ namespace Media.Http
 
             //includeEmptyLine = m_ContentLength < 0;
 
-            if (includeEmptyLine && object.ReferenceEquals(m_EncodedLineEnds, null) is false) sequence = Enumerable.Concat(sequence, ContentEncoding.GetBytes(m_EncodedLineEnds));  //foreach (byte b in m_HeaderEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
+            if (includeEmptyLine && m_EncodedLineEnds is not null)
+                sequence = Enumerable.Concat(sequence, ContentEncoding.GetBytes(m_EncodedLineEnds));  //foreach (byte b in m_HeaderEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
 
             return sequence;
         }
@@ -2577,7 +2581,7 @@ namespace Media.Http
             //Fast path doesn't show true equality.
             //other.Created != Created
 
-            if (object.ReferenceEquals(other, null)) return false;
+            if (other is null) return false;
 
             return other.MessageType == MessageType
                 &&
@@ -2596,11 +2600,11 @@ namespace Media.Http
 
         public override bool Equals(object obj)
         {
-            if (object.ReferenceEquals(this, obj)) return true;
+            if (ReferenceEquals(this, obj)) return true;
 
-            if ((obj is HttpMessage) is false) return false;
+            if (obj is not HttpMessage m) return false;
 
-            return Equals(obj as HttpMessage);
+            return Equals(m);
         }
 
         #endregion
@@ -2609,7 +2613,7 @@ namespace Media.Http
 
         public static bool operator ==(HttpMessage a, HttpMessage b)
         {
-            return object.ReferenceEquals(a, null) ? object.ReferenceEquals(b, null) : a.Equals(b);
+            return a is null ? b is null : a.Equals(b);
         }
 
         public static bool operator !=(HttpMessage a, HttpMessage b) { return (a == b) is false; }
@@ -2654,7 +2658,7 @@ namespace Media.Http
         {
             if (IsDisposed && IsPersistent is false) return 0;
 
-            bool hasSocket = object.ReferenceEquals(socket, null) is false,
+            bool hasSocket = socket is not null,
                  hasBuffer = buffer.IsDisposed is false && buffer.Count > 0;
 
             //If there is no socket or no data available in the buffer nothing can be done
@@ -2671,7 +2675,7 @@ namespace Media.Http
             if (false.Equals(hasSocket))
             {
                 //Create the buffer if it was null
-                if (object.ReferenceEquals(m_Buffer, null) || false.Equals(m_Buffer.CanWrite))
+                if (m_Buffer is null || m_Buffer.CanWrite is false)
                 {
                     m_Buffer = new System.IO.MemoryStream();
 
@@ -2698,8 +2702,10 @@ namespace Media.Http
             }
 
             //If the status line was not parsed return the number of bytes written, reparse if there are no headers parsed yet.
-            if (false.Equals(ParseStatusLine(MessageType == HttpMessageType.Invalid) || false.Equals(m_StatusLineParsed))) return received;
-            else if (false.Equals(object.ReferenceEquals(m_Buffer, null)) && m_Buffer.CanSeek) m_Buffer.Seek(m_HeaderOffset, System.IO.SeekOrigin.Begin); // Seek past the status line.
+            if ((ParseStatusLine(MessageType == HttpMessageType.Invalid) || m_StatusLineParsed is false) is false)
+                return received;
+            else if (m_Buffer is not null && m_Buffer.CanSeek)
+                m_Buffer.Seek(m_HeaderOffset, System.IO.SeekOrigin.Begin); // Seek past the status line.
 
             //Determine if there can be and is a body already
             bool hasNullBody = CanHaveBody && string.IsNullOrEmpty(m_Body);
