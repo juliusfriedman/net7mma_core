@@ -704,7 +704,7 @@ namespace Media.Common
         {
             fixed (byte* b = ByteArray)
             {
-                return System.Runtime.InteropServices.Marshal.PtrToStringAuto((System.IntPtr)b, Common.Binary.BytesPerInteger);
+                return System.Runtime.InteropServices.Marshal.PtrToStringAuto((nint)b, Common.Binary.BytesPerInteger);
                 //return (encoding ?? System.Text.Encoding.Default).GetString(b, Common.Binary.BytesPerInteger);
             }
         }
@@ -751,7 +751,7 @@ namespace Media.Common
         {
             fixed (byte* b = ByteArray)
             {
-                return System.Runtime.InteropServices.Marshal.PtrToStringAuto((System.IntPtr)b, Common.Binary.BytesPerLong);
+                return System.Runtime.InteropServices.Marshal.PtrToStringAuto((nint)b, Common.Binary.BytesPerLong);
                 //return (encoding ?? System.Text.Encoding.Default).GetString(b, Common.Binary.BytesPerLong);
             }
         }

@@ -429,7 +429,7 @@ namespace Media.Common
         /// Even in 32 bit builds, if the processor is truly 64 bit then that will take precedence.
         /// </summary>
         /// <returns>The size in bytes of the pointer type the processor uses natively.</returns>
-        /// <remarks>As opposed to <see cref="System.IntPtr.Size"/></remarks>
+        /// <remarks>As opposed to <see cref="nint.Size"/></remarks>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int GetNativePointerSize()
         {
@@ -440,7 +440,7 @@ namespace Media.Common
 
             //false == CodeType == System.Reflection.PortableExecutableKinds.PE32Plus ?
 
-            return IsX64() ? Common.Binary.BytesPerLong :  IsX86() ? Common.Binary.BytesPerInteger : System.IntPtr.Size;
+            return IsX64() ? Common.Binary.BytesPerLong :  IsX86() ? Common.Binary.BytesPerInteger : nint.Size;
         }
 
         /// <summary>
@@ -789,7 +789,7 @@ namespace Media.Common
                 m_NativePointeSize = GetNativePointerSize();
 
                 //Write out information for tracing if there is a discrepancy
-                System.Diagnostics.Trace.WriteLineIf(System.IntPtr.Size != m_NativePointeSize, string.Format("Did not detect the NativePointerSize correctly, Found:{0}, Expected:{1}", m_NativePointeSize, System.IntPtr.Size));
+                System.Diagnostics.Trace.WriteLineIf(nint.Size != m_NativePointeSize, string.Format("Did not detect the NativePointerSize correctly, Found:{0}, Expected:{1}", m_NativePointeSize, nint.Size));
 
                 //Environment check?
                 //http://superuser.com/questions/305901/possible-values-of-processor-architecture

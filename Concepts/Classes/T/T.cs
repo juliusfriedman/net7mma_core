@@ -46,9 +46,9 @@ namespace Media.Concepts.Classes.T
     /// </summary>
     internal class T : Media.Concepts.Classes.I.IPtr
     {
-        internal System.IntPtr Reference;
+        internal nint Reference;
 
-        System.IntPtr I.IPtr.IntPtr
+        nint I.IPtr.IntPtr
         {
             get { return Reference; }
         }
@@ -91,14 +91,14 @@ namespace Media.Concepts.Classes.T
         {
             System.TypedReference typedRefeence = __makeref(type);
 
-            Reference = (System.IntPtr)(&typedRefeence);
+            Reference = (nint)(&typedRefeence);
         }
 
         internal  TypeReference(string type)
         {
             System.TypedReference typedRefeence = __makeref(type);
 
-            Reference = (System.IntPtr)(&typedRefeence);
+            Reference = (nint)(&typedRefeence);
         }
     }
 
@@ -201,7 +201,7 @@ namespace Media.Concepts.Classes.T
         public TypedInformation(string type)
             : base(new Classes.T.T()
             {
-                Reference = System.IntPtr.Zero
+                Reference = nint.Zero
             })
         {
             TypeReference = new TypeReference<T>(type);
@@ -404,7 +404,7 @@ namespace Media.Concepts.Classes.T
 
             //Could be stored in * < 0
 
-            //System.Type reference = System.Type.GetTypeFromHandle(new System.RuntimeTypeHandle(new System.IntPtr(supportedTypeIndex)));
+            //System.Type reference = System.Type.GetTypeFromHandle(new System.RuntimeTypeHandle(new nint(supportedTypeIndex)));
         }
 
         // if we know instance type\subtype (eg interface) and know an index

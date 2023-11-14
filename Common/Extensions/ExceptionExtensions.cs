@@ -58,7 +58,7 @@ namespace Media.Common.Extensions.Exception
             get
             {
                 //See http://geekswithblogs.net/akraus1/archive/2008/04/08/121121.aspx
-                return System.Runtime.InteropServices.Marshal.GetExceptionPointers() == System.IntPtr.Zero && 
+                return System.Runtime.InteropServices.Marshal.GetExceptionPointers() == nint.Zero && 
                     System.Runtime.InteropServices.Marshal.GetExceptionCode().Equals(Common.Binary.Zero) ? false : true;
             }
         }

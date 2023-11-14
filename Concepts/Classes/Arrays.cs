@@ -326,7 +326,7 @@ namespace Media.Concepts.Classes
         public bool IsNullPointerOrObject() { return IsNullPointer() | IsNullObject(); }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public bool IsNullPointer() { return m_IntPtr == System.IntPtr.Zero; }
+        public bool IsNullPointer() { return m_IntPtr == nint.Zero; }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool IsNullObject() { return m_Object is null; }
@@ -336,9 +336,9 @@ namespace Media.Concepts.Classes
         //public bool IsNative() { return m_Length is 0 && m_Offset > 0; }
         //public bool IsNative() { return m_IntPtr == AddressOf8(); }
 
-        //Should be the same in unsafe as fixed(int*x = &this){ int*y = x + System.IntPtr.Size; }
+        //Should be the same in unsafe as fixed(int*x = &this){ int*y = x + nint.Size; }
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal System.IntPtr get_AddressOf8() { return Unsafe.AddressOf<object>(ref m_Object); }
+        internal nint get_AddressOf8() { return Unsafe.AddressOf<object>(ref m_Object); }
 
         /// <summary>
         /// The length of the data in the array or the low bytes if <see cref="m_IntPtr"/> is assigned
@@ -381,7 +381,7 @@ namespace Media.Concepts.Classes
 
         //4 or 8 bytes
         [System.Runtime.InteropServices.FieldOffset(0)]
-        internal System.IntPtr m_IntPtr;
+        internal nint m_IntPtr;
 
         //4 bytes
         [System.Runtime.InteropServices.FieldOffset(0)]
@@ -410,7 +410,7 @@ namespace Media.Concepts.Classes
         //For native pointers....
         //4 or 8 bytes
         ////[System.Runtime.InteropServices.FieldOffset(16)]
-        //internal System.IntPtr m_IntPtr2;
+        //internal nint m_IntPtr2;
 
         //For the size of the type of the size of the native pointer
         //4 bytes
@@ -559,7 +559,7 @@ namespace Media.Concepts.Classes
             //    fixed (char* t = s)
             //    {
             //        //Store the address in Offset, increase by 12 for the CLR Header. (string is + 12 to the first character in x86 of x64)
-            //        m_Header.m_Offset = (int)((int)(System.IntPtr)t - (int)Unsafe.AddressOf<string>(ref s));
+            //        m_Header.m_Offset = (int)((int)(nint)t - (int)Unsafe.AddressOf<string>(ref s));
             //    }
             //}
 #else
@@ -616,7 +616,7 @@ namespace Media.Concepts.Classes
             //Store the native pointer... a lot of good this does because we don't manage it and we don't know if it's really a pointer or a value.
             //To attainst true branchless operation a second field in the structure would need to be allocated which is designated for pointer values and only pointer values
             //As the m_Offset member is shared with the m_Length memeber this will also set Offset and Length which is not desireable when your dealing with native pointers.
-            //m_Header.m_IntPtr = (System.IntPtr)data;
+            //m_Header.m_IntPtr = (nint)data;
 
             //make a new array to store the data we read
             //m_Header.m_Array = m_Source = new T[length];
@@ -638,7 +638,7 @@ namespace Media.Concepts.Classes
             //m_Header.m_Length = length;
 
             //Since Offset and IntPtr are shared set the IntPtr
-            //m_Header.m_IntPtr = (System.IntPtr)data + offset;
+            //m_Header.m_IntPtr = (nint)data + offset;
         }
 
         /// <summary>
@@ -659,7 +659,7 @@ namespace Media.Concepts.Classes
             m_Header.m_Length = length;
 
             //Since Offset and IntPtr are shared set the IntPtr with the offset.
-            m_Header.m_IntPtr = (System.IntPtr)data + offset;
+            m_Header.m_IntPtr = (nint)data + offset;
         }
 
         #region Generic
@@ -1073,10 +1073,10 @@ namespace Media.Concepts.Classes
         ///// <param name="array"></param>
         ///// <returns></returns>
         //[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        //static System.IntPtr ComputeAddress(Array<T> array)
+        //static nint ComputeAddress(Array<T> array)
         //{
         //    //Could do something with offset to skip the null check.
-        //    //return array.m_Source is null ? (System.IntPtr)array.m_Header.m_Offset : System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<T>(array.m_Source, array.m_Header.m_Offset);
+        //    //return array.m_Source is null ? (nint)array.m_Header.m_Offset : System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<T>(array.m_Source, array.m_Header.m_Offset);
 
         //    //If the object was not null then compute the address using the stored offset, otherwise use the native array.
         //    //This could also be used for native pointers by using array.m_IntPtr...
@@ -1112,7 +1112,7 @@ namespace Media.Concepts.Classes
         /// <param name="array"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static System.IntPtr ComputeMaxAddress(Array<T> array)
+        static nint ComputeMaxAddress(Array<T> array)
         {
             return System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(array.m_Header.m_Array, array.m_Header.m_Length);
         }
@@ -1124,7 +1124,7 @@ namespace Media.Concepts.Classes
         /// <returns></returns>
         /// <remarks>Was branchless before ...</remarks>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static System.IntPtr ComputeBaseAddress(Array<T> array)
+        static nint ComputeBaseAddress(Array<T> array)
         {
             //Requires a cmp because the array cannot be null.
             //Could proably work around this by always storing an array in the m_Object field which contains the object...
@@ -1137,13 +1137,13 @@ namespace Media.Concepts.Classes
         ////Not yet working 100% for aligned or unaligned cases
         ////The amount of bytes between index and the offset in the array, used to calulcate position. result can be +/-, used for BaseAddress + or MaxAddress -
         //[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        //static System.IntPtr ComputeElementAlignedAddress/*<ElementType>*/(Array<T> array, ref int index)
+        //static nint ComputeElementAlignedAddress/*<ElementType>*/(Array<T> array, ref int index)
         //{
         //    //Not correctl because T may be different size than source, would require conversion to dest size from source size.
         //    //return System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(array.m_Header.m_Array, array.m_Header.m_Offset + index);
 
         //    //Where is element 0 in the array.
-        //    System.IntPtr baseAddress = ComputeBaseAddress(array);
+        //    nint baseAddress = ComputeBaseAddress(array);
 
         //    //Strings... or different sizes...
         //    //How big is one element in source, array.m_SizeOfT
@@ -1270,7 +1270,7 @@ namespace Media.Concepts.Classes
             //unsafe
             //{
             //    //Store the address in Offset, increase by 12 for the CLR Header. (string is + 12 to the first character in x86 of x64)
-            //    array.m_Header.m_Offset = (int)((int)(System.IntPtr)array.m_Header.get_AddressOf8() - (int)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(array.m_Source, array.Offset));
+            //    array.m_Header.m_Offset = (int)((int)(nint)array.m_Header.get_AddressOf8() - (int)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(array.m_Source, array.Offset));
             //}
 
 
@@ -1755,7 +1755,7 @@ namespace Media.UnitTests
 
                     char[] unsafeclrChars = Concepts.Classes.Unsafe.ReinterpretCast<string, char[]>(ref clrString);
 
-                    System.IntPtr ptrCast = Concepts.Classes.Unsafe.ReinterpretCast<string, System.IntPtr>(ref clrString);
+                    nint ptrCast = Concepts.Classes.Unsafe.ReinterpretCast<string, nint>(ref clrString);
 
                     System.Console.WriteLine("p@" + ptrCast.ToString());
 

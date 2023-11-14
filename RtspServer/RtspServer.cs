@@ -923,7 +923,7 @@ namespace Media.Rtsp
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal IEnumerable<ClientSession> GetSessions(System.IntPtr handle)
+        internal IEnumerable<ClientSession> GetSessions(nint handle)
         {
             //Return all clients which match the given handle.
             return Clients.Where(c => false.Equals(c.IsDisconnected) && (c.m_RtspSocket is not null) && c.m_RtspSocket.Handle == handle);

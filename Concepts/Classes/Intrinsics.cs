@@ -64,9 +64,9 @@ namespace Media.Concepts.Hardware
         /// Stub method which is used for fallback
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        internal static System.IntPtr Fallback_IntPtr()
+        internal static nint Fallback_IntPtr()
         {
-            return System.IntPtr.Zero;
+            return nint.Zero;
         }
 
         /// <summary>
@@ -136,11 +136,11 @@ namespace Media.Concepts.Hardware
             try
             {
                 //needs IL
-                //Media.Common.Extensions.Generic.GenericExtensions.As<System.IntPtr, T>(EntryPoint.InstructionPointer);
+                //Media.Common.Extensions.Generic.GenericExtensions.As<nint, T>(EntryPoint.InstructionPointer);
 
                 ulong result = Concepts.Classes.CommonIntermediateLanguage.CallIndirect(EntryPoint.InstructionPointer);
 
-                //return Concepts.Classes.Unsafe.Read<T>((System.IntPtr)Concepts.Classes.CommonIntermediateLanguage.CallIndirect(EntryPoint.InstructionPointer));
+                //return Concepts.Classes.Unsafe.Read<T>((nint)Concepts.Classes.CommonIntermediateLanguage.CallIndirect(EntryPoint.InstructionPointer));
 
                 //Needs a way to be able to return IntPtr always which can then be read.
                 //using ref overload here doens't work on non ref types..
@@ -158,7 +158,7 @@ namespace Media.Concepts.Hardware
 
                 ulong result = Concepts.Classes.CommonIntermediateLanguage.CallIndirect(EntryPoint.InstructionPointer);
 
-                //return Concepts.Classes.Unsafe.Read<T>((System.IntPtr)Concepts.Classes.CommonIntermediateLanguage.CallIndirect(EntryPoint.InstructionPointer));
+                //return Concepts.Classes.Unsafe.Read<T>((nint)Concepts.Classes.CommonIntermediateLanguage.CallIndirect(EntryPoint.InstructionPointer));
 
                 return Concepts.Classes.Unsafe.ReinterpretCast<ulong, T>(result);
             }
@@ -466,7 +466,7 @@ namespace Media.Concepts.Hardware
             //Done previously by having State kept on Intrinsic in a Dictionary using the Metadatoken.
             new PlatformMethodReplacement(Common.Extensions.ExpressionExtensions.SymbolExtensions.GetMethodInfo(() => Replacement()), 
                 //Use either the x64 of x86 code
-                machine ? Common.Machine.IsX64() ? x64Rdtscp : x86Rdtscp : System.IntPtr.Size == Common.Binary.BytesPerLong ? x64RdtscCpuid : x86Rdtscp,
+                machine ? Common.Machine.IsX64() ? x64Rdtscp : x86Rdtscp : nint.Size == Common.Binary.BytesPerLong ? x64RdtscCpuid : x86Rdtscp,
                 true, //Restore should be determined based on state and otherwise
                 shouldDispose),
             (System.Func<ulong>)DiagnosticStopWatchGetTimestamp) 
@@ -539,7 +539,7 @@ namespace Media.Concepts.Hardware
                       WindowsEntryPoint.MemoryProtection.ExecuteReadWrite //The permissions              
                     );
 
-                    if (entryPoint.InstructionPointer == System.IntPtr.Zero) throw new System.ComponentModel.Win32Exception();
+                    if (entryPoint.InstructionPointer == nint.Zero) throw new System.ComponentModel.Win32Exception();
 
                     // Copy our instructions to the CodePointer
                     System.Runtime.InteropServices.Marshal.Copy(entryPoint.Instructions, 0, entryPoint.InstructionPointer, codeSize);
@@ -551,7 +551,7 @@ namespace Media.Concepts.Hardware
                     // Change the access of the allocated memory from R/W to Execute
                     uint oldProtection;
 
-                    if (false == WindowsEntryPoint.VirtualProtect(entryPoint.InstructionPointer, (System.IntPtr)entryPoint.Instructions.Length, WindowsEntryPoint.MemoryProtection.Execute, out oldProtection)) throw new System.ComponentModel.Win32Exception();
+                    if (false == WindowsEntryPoint.VirtualProtect(entryPoint.InstructionPointer, (nint)entryPoint.Instructions.Length, WindowsEntryPoint.MemoryProtection.Execute, out oldProtection)) throw new System.ComponentModel.Win32Exception();
                 };
 
                 //Create the De-Allocator
@@ -571,7 +571,7 @@ namespace Media.Concepts.Hardware
                         (ulong)codeSize, //The size of the code
                         UnixEntryPoint.MmapProtsExecuteReadWrite, UnixEntryPoint.MmapFlagsAnonymousPrivate, -1, (long)0);
 
-                    if (System.IntPtr.Zero.Equals(entryPoint.InstructionPointer)) throw new System.Security.SecurityException(UnixEntryPoint.GetLastError().ToString());
+                    if (nint.Zero.Equals(entryPoint.InstructionPointer)) throw new System.Security.SecurityException(UnixEntryPoint.GetLastError().ToString());
 
                     // Copy our instructions to the CodePointer
                     System.Runtime.InteropServices.Marshal.Copy(entryPoint.Instructions, 0, entryPoint.InstructionPointer, codeSize);
@@ -818,7 +818,7 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.InteropServices.DllImport(Kernel32, SetLastError = true)]
-        internal static extern System.IntPtr VirtualAlloc(System.IntPtr lpAddress, System.UIntPtr dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
+        internal static extern nint VirtualAlloc(nint lpAddress, System.UIntPtr dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
 
         /// <summary>
         /// 
@@ -830,7 +830,7 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.InteropServices.DllImport(Kernel32)]
-        internal static extern bool VirtualFree(System.IntPtr lpAddress, System.UInt32 dwSize, FreeType dwFreeType);
+        internal static extern bool VirtualFree(nint lpAddress, System.UInt32 dwSize, FreeType dwFreeType);
 
         /// <summary>
         /// 
@@ -844,7 +844,7 @@ namespace Media.Concepts.Hardware
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.InteropServices.DllImport(Kernel32, ExactSpelling = true, SetLastError = true)]
         [return: System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.Bool)]
-        internal static extern bool VirtualProtect(System.IntPtr lpAddress, System.IntPtr dwSize, MemoryProtection flAllocationType, out uint lpflOldProtect);
+        internal static extern bool VirtualProtect(nint lpAddress, nint dwSize, MemoryProtection flAllocationType, out uint lpflOldProtect);
 
         /// <summary>
         /// Calls <see cref="VirtualAlloc"/> to ensure <see cref="MemoryProtection.ExecuteReadWrite"/> permission on the <see cref="InstructionPointer"/>.
@@ -865,7 +865,7 @@ namespace Media.Concepts.Hardware
             );
 
             //If the memory is not executable, read and write than throw an exception indicating why.
-            if (System.IntPtr.Zero.Equals(InstructionPointer)) throw new System.ComponentModel.Win32Exception(System.Runtime.InteropServices.Marshal.GetLastWin32Error());
+            if (nint.Zero.Equals(InstructionPointer)) throw new System.ComponentModel.Win32Exception(System.Runtime.InteropServices.Marshal.GetLastWin32Error());
 
             // Copy our instructions to the CodePointer
             System.Runtime.InteropServices.Marshal.Copy(Instructions, 0, InstructionPointer, codeSize);
@@ -898,7 +898,7 @@ namespace Media.Concepts.Hardware
             // Change the access of the allocated memory to Execute
             uint oldProtection;
 
-            if (false == VirtualProtect(InstructionPointer, (System.IntPtr)Instructions.Length, MemoryProtection.Execute, out oldProtection))
+            if (false == VirtualProtect(InstructionPointer, (nint)Instructions.Length, MemoryProtection.Execute, out oldProtection))
             {
                 int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
 #if DEBUG
@@ -936,9 +936,9 @@ namespace Media.Concepts.Hardware
         /// <param name="pointer"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static System.IntPtr GetPageBaseAddress(System.IntPtr pointer)
+        internal static nint GetPageBaseAddress(nint pointer)
         {
-            return (System.IntPtr)((long)pointer & ~(PAGE_SIZE - 1));
+            return (nint)((long)pointer & ~(PAGE_SIZE - 1));
         }
 
         static System.Type MonoPosix = System.Type.GetType("Mono.Posix");
@@ -999,11 +999,11 @@ namespace Media.Concepts.Hardware
         //Create the MmapFlags parameter (ANONYMOUS | PRIVATE)
         static object mmapFlagsAnonymousPrivate = System.Enum.ToObject(MmapFlags, MmapFlagsAnonymousPrivate);
 
-        internal static System.Func<System.IntPtr, ulong, int, int, int, long, System.IntPtr> _Mmap;
+        internal static System.Func<nint, ulong, int, int, int, long, nint> _Mmap;
 
-        internal static System.Func<System.IntPtr, ulong, int> _Munmap;
+        internal static System.Func<nint, ulong, int> _Munmap;
 
-        internal static System.Func<System.IntPtr, ulong, int, int> _Mprotect;
+        internal static System.Func<nint, ulong, int, int> _Mprotect;
 
         internal static System.Func<int, int> _Sysconf;
 
@@ -1011,21 +1011,21 @@ namespace Media.Concepts.Hardware
 
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static System.IntPtr Mmap(System.IntPtr start, ulong length, int/*MmapProts*/ prot, int/*MmapFlags*/ flags, int fd, long offset)
+        public static nint Mmap(nint start, ulong length, int/*MmapProts*/ prot, int/*MmapFlags*/ flags, int fd, long offset)
         {
             return _Mmap(start, length, prot, flags, fd, offset);
         }
 
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static int Munmap(System.IntPtr start, ulong length)
+        public static int Munmap(nint start, ulong length)
         {
             return _Munmap(start, length);
         }
 
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static int MProtect(System.IntPtr start, ulong len, int /*MmapProts*/ prot)
+        public static int MProtect(nint start, ulong len, int /*MmapProts*/ prot)
         {
             return _Mprotect(start, len, prot);
         }
@@ -1048,16 +1048,16 @@ namespace Media.Concepts.Hardware
         static UnixEntryPoint()
         {
             // public static extern IntPtr mmap (IntPtr start, ulong length, MmapProts prot, MmapFlags flags, int fd, long offset);
-            _Mmap = (System.Func<System.IntPtr, ulong, int, int, int, long, System.IntPtr>)System.Delegate.CreateDelegate(typeof(System.Func<System.IntPtr, ulong, int, int, int, long, System.IntPtr>), mmap);
+            _Mmap = (System.Func<nint, ulong, int, int, int, long, nint>)System.Delegate.CreateDelegate(typeof(System.Func<nint, ulong, int, int, int, long, nint>), mmap);
 
             //public static extern int munmap (IntPtr start, ulong length);
-            _Munmap = (System.Func<System.IntPtr, ulong, int>)System.Delegate.CreateDelegate(typeof(System.Func<System.IntPtr, ulong, int>), munmap);
+            _Munmap = (System.Func<nint, ulong, int>)System.Delegate.CreateDelegate(typeof(System.Func<nint, ulong, int>), munmap);
 
             //public static long sysconf (SysconfName name)
             _Sysconf = (System.Func<int, int>)System.Delegate.CreateDelegate(typeof(System.Func<int, int>), sysconf);
 
             //public static extern int mprotect (IntPtr start, ulong len, MmapProts prot);
-            _Mprotect = (System.Func<System.IntPtr, ulong, int, int>)System.Delegate.CreateDelegate(typeof(System.Func<System.IntPtr, ulong, int, int>), mprotect);
+            _Mprotect = (System.Func<nint, ulong, int, int>)System.Delegate.CreateDelegate(typeof(System.Func<nint, ulong, int, int>), mprotect);
 
             //public static Errno GetLastError()
             _GetLastError = (System.Func<int>)System.Delegate.CreateDelegate(typeof(System.Func<int>), getLastError);
@@ -1076,7 +1076,7 @@ namespace Media.Concepts.Hardware
 
             InstructionPointer = Mmap(InstructionPointer, (ulong)codeSize, MmapProtsExecuteReadWrite, MmapFlagsAnonymousPrivate, -1, 0);
 
-            if (System.IntPtr.Zero.Equals(InstructionPointer)) throw new System.Security.SecurityException(GetLastError().ToString());
+            if (nint.Zero.Equals(InstructionPointer)) throw new System.Security.SecurityException(GetLastError().ToString());
 
             // Copy our instructions to the InstructionPointer
             System.Runtime.InteropServices.Marshal.Copy(Instructions, 0, InstructionPointer, codeSize);

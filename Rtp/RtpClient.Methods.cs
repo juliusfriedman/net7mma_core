@@ -866,7 +866,7 @@ namespace Media.Rtp
         /// <param name="payloadType"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public /*virtual */ TransportContext GetContextBySocketHandle(System.IntPtr socketHandle)
+        public /*virtual */ TransportContext GetContextBySocketHandle(nint socketHandle)
         {
             RtpClient.TransportContext c = null;
 

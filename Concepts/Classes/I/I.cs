@@ -53,7 +53,7 @@ namespace Media.Concepts.Classes.I
 
     public interface IPtr : Media.Common.Interfaces.Interface
     {
-        System.IntPtr IntPtr { get; }
+        nint IntPtr { get; }
     }
 
     public interface IPointer : IPtr

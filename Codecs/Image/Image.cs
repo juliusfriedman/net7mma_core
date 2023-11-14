@@ -881,7 +881,7 @@ namespace Media.UnitTests
                 {
                     fixed (byte* ptr = rgbImage.Data.Array)
                     {
-                        yuvImage = new Codecs.Image.Image(Yuv420P, testWidth, testHeight, Media.Codecs.Image.ColorConversions.RGBToYUV420Managed(rgbImage.Width, rgbImage.Height, (System.IntPtr)ptr));
+                        yuvImage = new Codecs.Image.Image(Yuv420P, testWidth, testHeight, Media.Codecs.Image.ColorConversions.RGBToYUV420Managed(rgbImage.Width, rgbImage.Height, (nint)ptr));
                     }
 
                 }

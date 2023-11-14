@@ -50,7 +50,7 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// The location of the code to be called.
         /// </summary>
-        internal protected System.IntPtr InstructionPointer;
+        internal protected nint InstructionPointer;
 
         #endregion
 
@@ -82,9 +82,9 @@ namespace Media.Concepts.Hardware
         ///// </summary>
         ///// <param name="result"></param>
         //[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        //internal void CallIndirect(out System.IntPtr result)
+        //internal void CallIndirect(out nint result)
         //{
-        //    result = (System.IntPtr)Concepts.Classes.CommonIntermediateLanguage.CallIndirect(InstructionPointer);
+        //    result = (nint)Concepts.Classes.CommonIntermediateLanguage.CallIndirect(InstructionPointer);
         //}
 
         #endregion
@@ -106,7 +106,7 @@ namespace Media.Concepts.Hardware
         /// </summary>
         /// <param name="instructionPointer"></param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public MachineFunction(bool shouldDispose, System.IntPtr instructionPointer)
+        public MachineFunction(bool shouldDispose, nint instructionPointer)
             : this(shouldDispose)
         {
             InstructionPointer = instructionPointer;
@@ -119,9 +119,9 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected override void Dispose(bool disposing)
         {
-            if (this.InstructionPointer == System.IntPtr.Zero || ShouldDispose is false) return;
+            if (this.InstructionPointer == nint.Zero || ShouldDispose is false) return;
 
-            this.InstructionPointer = System.IntPtr.Zero;
+            this.InstructionPointer = nint.Zero;
 
             base.Dispose(disposing);
         }
@@ -179,10 +179,10 @@ namespace Media.Concepts.Hardware
         /// </summary>
         /// <param name="instructionPointer"></param>
         /// <param name="returnType"></param>
-        public UnmanagedAction(System.IntPtr instructionPointer, System.Type returnType, bool shouldDispose = true)
+        public UnmanagedAction(nint instructionPointer, System.Type returnType, bool shouldDispose = true)
             : base(shouldDispose)
         {
-            if (instructionPointer == System.IntPtr.Zero) throw new System.InvalidOperationException();
+            if (instructionPointer == nint.Zero) throw new System.InvalidOperationException();
             else if (returnType is null) throw new System.ArgumentNullException();
 
             ManagedDelegate = System.Runtime.InteropServices.Marshal.GetDelegateForFunctionPointer(InstructionPointer = instructionPointer, returnType);
@@ -195,7 +195,7 @@ namespace Media.Concepts.Hardware
         /// <param name="instructionPointer"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static UnmanagedAction Create<T>(System.IntPtr instructionPointer) { return new UnmanagedAction(instructionPointer, typeof(T)); }
+        public static UnmanagedAction Create<T>(nint instructionPointer) { return new UnmanagedAction(instructionPointer, typeof(T)); }
     }
 
     /// <summary>
@@ -234,7 +234,7 @@ namespace Media.Concepts.Hardware
         /// <param name="instructionPointer"></param>
         /// <param name="returnType"></param>
         /// <param name="shouldDispose"></param>
-        public UnmanagedFunction(System.IntPtr instructionPointer, System.Type returnType, bool shouldDispose = true)
+        public UnmanagedFunction(nint instructionPointer, System.Type returnType, bool shouldDispose = true)
             : base(instructionPointer, returnType, shouldDispose)
         {
 
@@ -247,7 +247,7 @@ namespace Media.Concepts.Hardware
         ///// <param name="instructionPointer"></param>
         ///// <returns></returns>
         //[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        //public static UnmanagedFunction Create<T>(System.IntPtr instructionPointer, System.Delegate managedDelegate)
+        //public static UnmanagedFunction Create<T>(nint instructionPointer, System.Delegate managedDelegate)
         //{
         //    return new UnmanagedFunction(managedDelegate.Method.MethodHandle.GetFunctionPointer(), typeof(T));
         //}
@@ -330,7 +330,7 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal protected void SetInstructions(byte[] x86codeBytes, byte[] x64codeBytes, bool machine = true)
         {
-            if (machine ? false == Common.Machine.IsX64() : System.IntPtr.Size == 4)
+            if (machine ? false == Common.Machine.IsX64() : nint.Size == 4)
             {
                 Instructions = x86codeBytes;
             }

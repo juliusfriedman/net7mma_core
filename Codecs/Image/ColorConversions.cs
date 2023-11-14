@@ -250,7 +250,7 @@ namespace Media.Codecs.Image
 
         const int OT = 112, M = 129, X = 66, Q = 25, Z = 18, B = -38, C = 74, D = 94;
 
-        public static unsafe byte[] BGRA2YUV420Managed(int width, int height, System.IntPtr scan0)
+        public static unsafe byte[] BGRA2YUV420Managed(int width, int height, nint scan0)
         {
             //Parrallel
             int frameSize = width * height;
@@ -300,7 +300,7 @@ namespace Media.Codecs.Image
             }
         }
 
-        public static unsafe byte[] ARGB2YUV420Managed(int width, int height, System.IntPtr scan0)
+        public static unsafe byte[] ARGB2YUV420Managed(int width, int height, nint scan0)
         {
             //Parrallel
             int frameSize = width * height;
@@ -350,7 +350,7 @@ namespace Media.Codecs.Image
             }
         }
 
-        public static unsafe byte[] RGBToYUV420Managed(int width, int height, System.IntPtr scan0)
+        public static unsafe byte[] RGBToYUV420Managed(int width, int height, nint scan0)
         {
             //Parrallel
             int frameSize = width * height;
