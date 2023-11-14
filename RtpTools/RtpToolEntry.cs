@@ -303,7 +303,7 @@ namespace Media.RtpTools
         /// Add all the data given by data to the Blob and increments max size.
         /// </summary>
         /// <param name="data"></param>
-        public void Concat(IEnumerable<byte> data) { Blob = Enumerable.Concat(Blob, data).ToArray(); BlobLength += data.Count(); }
+        public void Concat(IEnumerable<byte> data) => BlobLength = (Blob = Enumerable.Concat(Blob, data).ToArray()).Length;
 
         /// <summary>
         /// Performas a write by using <see cref="System.Array.Copy"/> into the underlying Blob with the given parameters
