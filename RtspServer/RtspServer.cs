@@ -1025,7 +1025,7 @@ namespace Media.Rtsp
 
             string streamBase = null, streamName = null;
 
-            streamBase = mediaLocation.Segments.Any(s=>(s.IndexOf("live", StringComparison.InvariantCultureIgnoreCase) >= 0)) ? "live" : "archive";
+            streamBase = mediaLocation.Segments.Any(s => s.Contains("live", StringComparison.InvariantCultureIgnoreCase)) ? "live" : "archive";
 
             streamName = mediaLocation.Segments.Last().Replace("/", string.Empty).Trim();
 
@@ -3239,7 +3239,7 @@ namespace Media.Rtsp
                 string connectionHeader = request[RtspHeaders.Connection];
 
                 if (string.IsNullOrWhiteSpace(connectionHeader) is false &&
-                    connectionHeader.IndexOf(RtspHeaderFields.Connection.Close,  StringComparison.OrdinalIgnoreCase) >= 0)
+                    connectionHeader.Contains(RtspHeaderFields.Connection.Close, StringComparison.OrdinalIgnoreCase))
                 {
                     TryDisposeAndRemoveSession(session);
                 }
@@ -3297,7 +3297,6 @@ namespace Media.Rtsp
         /// <returns>True if authroized, otherwise false</returns>
         public virtual bool AuthenticateRequest(RtspMessage request, Uri sourceLocation)
         {
-
             if (Common.IDisposedExtensions.IsNullOrDisposed(request)) return false; //throw new ArgumentNullException("request");
 
             if (sourceLocation is null) return false;
@@ -3363,7 +3362,7 @@ namespace Media.Rtsp
                 
 
                 //If the SourceAuthenticationScheme is Basic and the header contains the BASIC indication then validiate using BASIC authentication
-                if (authType.IndexOf(RtspHeaderFields.Authorization.Basic, StringComparison.OrdinalIgnoreCase) >= 0)
+                if (authType.Contains(RtspHeaderFields.Authorization.Basic, StringComparison.OrdinalIgnoreCase))
                 {
                     //realm may be present? 
                     //Basic realm="''" dasfhadfhsaghf
@@ -3375,9 +3374,9 @@ namespace Media.Rtsp
                     parts = authHeader.Split(':');
 
                     //If enough return the determination by comparison as the result
-                    return parts.Length > 1 && (parts[0].Equals(requiredCredential.UserName) && parts[1].Equals(requiredCredential.Password));
+                    return parts.Length > 1 && parts[0].Equals(requiredCredential.UserName) && parts[1].Equals(requiredCredential.Password);
                 }
-                else if (authType.IndexOf(RtspHeaderFields.Authorization.Digest, StringComparison.OrdinalIgnoreCase) >= 0)
+                else if (authType.Contains(RtspHeaderFields.Authorization.Digest, StringComparison.OrdinalIgnoreCase))
                 {
                     //http://tools.ietf.org/html/rfc2617
                     //Digest RFC2617
