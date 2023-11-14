@@ -97,7 +97,7 @@ namespace Media.Concepts.Classes.E
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public unsafe bool Equals(Extensions other)
         {
-            return object.ReferenceEquals(this, NilExtensions) ? object.ReferenceEquals(other, NilExtensions) : Unsafe.AddressOf(this) == Unsafe.AddressOf(other);
+            return this is null ? other is null : Unsafe.AddressOf(this) == Unsafe.AddressOf(other);
         }
 
         public override bool Equals(object obj)

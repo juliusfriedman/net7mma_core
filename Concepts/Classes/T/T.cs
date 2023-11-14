@@ -122,7 +122,7 @@ namespace Media.Concepts.Classes.T
             {
                 unsafe
                 {
-                    return object.ReferenceEquals(__refvalue(*(System.TypedReference*)(Reference.Reference), System.Type), null) is false;
+                    return __refvalue(*(System.TypedReference*)(Reference.Reference), System.Type) is not null;
                 }
             }
         }
@@ -311,15 +311,11 @@ namespace Media.Concepts.Classes.T
 
         void Probe(System.Type type, System.Reflection.BindingFlags bindingFlags = System.Reflection.BindingFlags.Public)
         {
-            if (object.ReferenceEquals(type, NilType)) return;
-
-            System.Exception any;
+            if (type is null) return;
 
             System.Reflection.ConstructorInfo[] constructors = type.GetConstructors(bindingFlags);
 
-            int register;
-
-            if (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(constructors, out register)
+            if (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(constructors, out int register)
                 ||
                 register <= 0) return;
 
@@ -338,7 +334,7 @@ namespace Media.Concepts.Classes.T
 
             var probe = new System.Tuple<System.Reflection.ConstructorInfo[], System.Reflection.ParameterInfo[][]>(constructors, parameters);
 
-            if (Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryAdd(m_SupportedTypes, ref type, ref probe, out any) is false)
+            if (Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryAdd(m_SupportedTypes, ref type, ref probe, out _) is false)
             {
                 //The type was already probed
             }

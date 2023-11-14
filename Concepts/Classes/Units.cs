@@ -243,8 +243,8 @@ namespace Media.Concepts.Classes
 
         static bool Parse(UnitBase units, string value, int offset = 0, int count = -1, char[] symbols = null, System.Globalization.NumberStyles ns = System.Globalization.NumberStyles.None, System.Globalization.NumberFormatInfo nfi = null)
         {
-            if ((object.ReferenceEquals(units, null) || object.ReferenceEquals(units.Symbols, null)) && 
-                object.ReferenceEquals(units.Symbols, null) || string.IsNullOrWhiteSpace(value)) return false;
+            if ((units is null || units.Symbols is null) &&
+                units.Symbols is null || string.IsNullOrWhiteSpace(value)) return false;
 
             if (count < 0) count = value.Length - offset;
 
@@ -252,7 +252,7 @@ namespace Media.Concepts.Classes
 
             if (symbolIndex < 0 || symbolIndex > count) return false;
 
-            if (object.ReferenceEquals(units, null) is false)
+            if (units is not null)
             {
                 try
                 {

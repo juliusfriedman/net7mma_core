@@ -64,7 +64,7 @@ namespace Media.Concepts.Classes.GC
         /// <param name="result">If null nothing occurs</param>
         static void Controlation(System.IAsyncResult result)
         {
-            if (object.ReferenceEquals(result, null)) return;
+            if (result is null) return;
 
             System.Threading.Monitor.Enter(result);
 
@@ -114,7 +114,7 @@ namespace Media.Concepts.Classes.GC
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return false.Equals(object.ReferenceEquals(CurrentResult, null)) && System.Threading.Monitor.IsEntered(CurrentResult);
+                return (CurrentResult is not null) && System.Threading.Monitor.IsEntered(CurrentResult);
             }
         }
 
@@ -123,14 +123,14 @@ namespace Media.Concepts.Classes.GC
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return false.Equals(object.ReferenceEquals(ControlationThread, null)) && ControlationThread.IsAlive;
+                return (ControlationThread is not null) && ControlationThread.IsAlive;
             }
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void Start()
         {
-            if (object.ReferenceEquals(ControlationThread, null))
+            if (ControlationThread is null)
             {
                 ControlationThread = new System.Threading.Thread(ControlationLogic);
 
@@ -141,19 +141,19 @@ namespace Media.Concepts.Classes.GC
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void Stop()
         {
-            if (false.Equals(IsAlive)) Media.Common.Extensions.Thread.ThreadExtensions.AbortAndFree(ref ControlationThread, Timeout);
+            if (IsAlive is false) Media.Common.Extensions.Thread.ThreadExtensions.AbortAndFree(ref ControlationThread, Timeout);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void Suspend()
         {
-           if(IsAlive) ControlationThread.Suspend();
+           if (IsAlive) ControlationThread.Suspend();
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void Resume()
         {
-            if (false.Equals(IsAlive)) ControlationThread.Resume();
+            if (IsAlive is false) ControlationThread.Resume();
         }
     }
 }

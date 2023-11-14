@@ -105,7 +105,7 @@ namespace Media.Concepts.Classes.v
         /// </summary>
         Common.Classes.Class Common.Interfaces.InterClass.Class
         {
-            get { return System.Object.ReferenceEquals(Delegation, null) ? this : Delegation; }
+            get { return Delegation is null ? this : Delegation; }
         }
 
         #endregion

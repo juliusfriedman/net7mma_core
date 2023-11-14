@@ -1665,7 +1665,7 @@ namespace Media.Concepts.Classes
 
         public static bool operator ==(Bitable a, Bitable b)
         {
-            return object.ReferenceEquals(b, null) ? object.ReferenceEquals(a, null) : a.Equals(b);
+            return b is null ? a is null : b.Equals(a);
         }
 
         public static bool operator !=(Bitable a, Bitable b)

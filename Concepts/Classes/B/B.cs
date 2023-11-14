@@ -258,7 +258,8 @@ namespace Media.Concepts.Classes.B
         /// <returns></returns>
         bool Common.Interfaces.ITrySet.TrySet(object t)
         {
-            if (object.ReferenceEquals(t, null)) return Bias = false;
+            if (t is null)
+                return Bias = false;
 
             //could be anything in t...
 

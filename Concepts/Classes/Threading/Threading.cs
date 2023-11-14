@@ -130,7 +130,7 @@ namespace Media.Concepts.Classes.Threading
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void Start(System.Threading.Thread thread)
         {
-            if (object.ReferenceEquals(thread, null) || thread.IsAlive) return;
+            if (thread is null || thread.IsAlive) return;
 
             thread.Priority = (System.Threading.ThreadPriority)StartPriority;
 
@@ -147,7 +147,7 @@ namespace Media.Concepts.Classes.Threading
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void RaiseAbort(System.Threading.Thread thread)
         {
-            if (object.ReferenceEquals(thread, null) || thread.ThreadState.HasFlag(System.Threading.ThreadState.Aborted) || thread.ThreadState.HasFlag(System.Threading.ThreadState.AbortRequested)) return;
+            if (thread is null || thread.ThreadState.HasFlag(System.Threading.ThreadState.Aborted) || thread.ThreadState.HasFlag(System.Threading.ThreadState.AbortRequested)) return;
 
             thread.Priority = (System.Threading.ThreadPriority)AbortPriority;
 
@@ -166,7 +166,7 @@ namespace Media.Concepts.Classes.Threading
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool JoinFor(System.Threading.Thread thread, System.Threading.ThreadPriority priority, System.TimeSpan timeout)
         {
-            if (object.ReferenceEquals(thread, null) || thread.ThreadState.HasFlag(System.Threading.ThreadState.WaitSleepJoin)) return false;
+            if (thread is null || thread.ThreadState.HasFlag(System.Threading.ThreadState.WaitSleepJoin)) return false;
 
             System.Threading.ThreadPriority previous = thread.Priority;
 
@@ -184,7 +184,7 @@ namespace Media.Concepts.Classes.Threading
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void SleepFor(System.Threading.Thread thread, System.TimeSpan timeout, System.Threading.ThreadPriority priority)
         {
-            if (object.ReferenceEquals(thread, null) || thread.ThreadState.HasFlag(System.Threading.ThreadState.WaitSleepJoin)) return;
+            if (thread is null || thread.ThreadState.HasFlag(System.Threading.ThreadState.WaitSleepJoin)) return;
 
             System.Threading.ThreadPriority previous = thread.Priority;
 
@@ -209,7 +209,7 @@ namespace Media.Concepts.Classes.Threading
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void SetIdle(System.Threading.Thread thread)
         {
-            if (object.ReferenceEquals(thread, null) || false.Equals(thread.IsAlive)) return;
+            if (thread is null || false.Equals(thread.IsAlive)) return;
 
             thread.Priority = (System.Threading.ThreadPriority)IdlePriority;
         }
@@ -222,7 +222,7 @@ namespace Media.Concepts.Classes.Threading
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void SetRunning(System.Threading.Thread thread, System.Threading.ThreadPriority priority)
         {
-            if (object.ReferenceEquals(thread, null) || false.Equals(thread.IsAlive)) return;
+            if (thread is null || false.Equals(thread.IsAlive)) return;
 
             thread.Priority = priority;
         }
@@ -297,7 +297,7 @@ namespace Media.Concepts.Classes.Threading
 
         public void Store(System.Exception e)
         {
-            if (object.ReferenceEquals(e, NilException)) return;
+            if (e is null) return;
 
             Aggregates = System.Linq.Enumerable.Concat(Aggregates, Media.Common.Extensions.Linq.LinqExtensions.Yield(e));
         }
@@ -309,7 +309,7 @@ namespace Media.Concepts.Classes.Threading
         /// <returns>True when handled, otherwise false</returns>
         public bool Handle(System.Exception e)
         {
-            if (object.ReferenceEquals(e, NilException)) return true;
+            if (e is null) return true;
 
             foreach (var ExceptionHandler in ExceptionHandlers)
             {
@@ -407,11 +407,11 @@ namespace Media.Concepts.Classes.Threading
 
         public System.DateTimeOffset Started { get; protected set; }
 
-        readonly static System.DateTimeOffset DefaultDateTimeOffset = default(System.DateTimeOffset);
+        readonly static System.DateTimeOffset DefaultDateTimeOffset = default;
 
         public bool IsStarted { get { return Started.Equals(DefaultDateTimeOffset) is false; } }
 
-        public bool HasUnderlyingCompressedStack { get { return object.ReferenceEquals(UnderlyingCompressedStack, null) is false; } }
+        public bool HasUnderlyingCompressedStack { get { return UnderlyingCompressedStack is not null; } }
 
         //-- IUpdateable
 
@@ -429,7 +429,7 @@ namespace Media.Concepts.Classes.Threading
 
         public bool Add(System.Action action)
         {
-            if (object.ReferenceEquals(action, null)) return false;
+            if (action is null) return false;
 
             System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan> Item = new System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan>(action, UnderlyingThreadsPriorityInformation, System.Threading.Timeout.InfiniteTimeSpan);
 
@@ -482,18 +482,16 @@ namespace Media.Concepts.Classes.Threading
             {
                 UnderlyingThread.Priority = System.Threading.ThreadPriority.Normal;
 
-                if (object.ReferenceEquals(ExceptionHandler, null) is false)
+                if (ExceptionHandler is not null)
                 {
                     UnderlyingCompressedStack = System.Threading.CompressedStack.Capture();
 
-                    using (var enumerator = Exceptions.GetExceptions())
+                    using var enumerator = Exceptions.GetExceptions();
+                    while (enumerator.MoveNext() && UpdateTokenSource.IsCancellationRequested is false)
                     {
-                        while (enumerator.MoveNext() && UpdateTokenSource.IsCancellationRequested is false)
-                        {
-                            UnderlyingThread.Priority = System.Threading.ThreadPriority.BelowNormal; 
+                        UnderlyingThread.Priority = System.Threading.ThreadPriority.BelowNormal;
 
-                            throw enumerator.Current;
-                        }
+                        throw enumerator.Current;
                     }
                 }
 
@@ -577,7 +575,7 @@ namespace Media.Concepts.Classes.Threading
             }
             catch (System.Exception)
             {
-                if (object.ReferenceEquals(ExceptionHandler, null) is false)
+                if (ExceptionHandler is not null)
                 {
                     AggregateExceptions.Handle(ExceptionHandler);
 
@@ -586,7 +584,7 @@ namespace Media.Concepts.Classes.Threading
             }
             finally
             {
-                if (object.ReferenceEquals(ExceptionHandler, null) is false &&
+                if (ExceptionHandler is not null &&
                     AggregateExceptions.Data.Count > 0) throw AggregateExceptions;
             }
             
@@ -602,7 +600,7 @@ namespace Media.Concepts.Classes.Threading
 
         static void ConfigureFiber(Fiber fiber)
         {
-            if (object.ReferenceEquals(fiber, Nil) || fiber.IsStarted || Common.IDisposedExtensions.IsNullOrDisposed(fiber)) return;
+            if (fiber is null || fiber.IsStarted || Common.IDisposedExtensions.IsNullOrDisposed(fiber)) return;
 
             fiber.UnderlyingThread.TrySetApartmentState(System.Threading.ApartmentState.MTA);
 
@@ -621,7 +619,7 @@ namespace Media.Concepts.Classes.Threading
 
             UnderlyingThreadsPriorityInformation = new ThreadPriorityInformation();
 
-            if (object.ReferenceEquals(ConfigureThread, Nil) is false)
+            if (ConfigureThread is not null)
             {
                 ConfigureThread(UnderlyingThread);
             }
