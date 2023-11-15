@@ -1766,7 +1766,7 @@ namespace Media.Rtsp//.Server
             RtpClient.TransportContext sourceContext = Attached.Keys.FirstOrDefault(c => c.MediaDescription.Equals(md));
 
             //If the sourceContext is not null
-            if (Common.IDisposedExtensions.IsNullOrDisposed(sourceContext).Equals(false))
+            if (Common.IDisposedExtensions.IsNotNullOrDisposed(sourceContext))
             {
                 //Remove the entry from the sessions routing table
                 Attached.Remove(sourceContext);
