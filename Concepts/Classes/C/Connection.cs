@@ -145,7 +145,7 @@ namespace Media.Concepts.Classes.C
 
         public bool IsPersistent
         {
-            get { return ShouldDispose.Equals(false); }
+            get { return ShouldDispose is false; }
         }
 
         #endregion
@@ -190,7 +190,7 @@ namespace Media.Concepts.Classes.C
 
             EndConnect();
 
-            m_Connected = false.Equals(m_Connecting);
+            m_Connected = m_Connecting is false;
         }
 
         #endregion

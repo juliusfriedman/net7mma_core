@@ -67,7 +67,7 @@ namespace Media.Concepts.Classes.E
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        public static bool operator !=(Extensions a, object b) { return (a == b).Equals(false); }
+        public static bool operator !=(Extensions a, object b) { return (a == b) is false; }
 
         /// <summary>
         /// Returns this instance casted to a <see cref="System.ValueType"/>
@@ -104,7 +104,7 @@ namespace Media.Concepts.Classes.E
         {
             if (object.ReferenceEquals(this, obj)) return true;
 
-            if ((obj is Extensions).Equals(false)) return false;
+            if ((obj is Extensions) is false) return false;
 
             return Equals(obj as Extensions);
         }

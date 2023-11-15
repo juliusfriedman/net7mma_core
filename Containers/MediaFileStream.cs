@@ -214,7 +214,7 @@ namespace Media.Container
         //Could also use FileOptions.DeleteOnClose, Could also just have an Extension method.
         void DeleteFromFileInfoIfExists()
         {
-            if (/*false == IsDisposed && */ Object.ReferenceEquals(FileInfo, null).Equals(false) && FileInfo.Exists) FileInfo.Delete();
+            if (/*false == IsDisposed && */ FileInfo is not null && FileInfo.Exists) FileInfo.Delete();
         }
 
         bool TryDeleteFromFileInfoIfExists()
@@ -254,7 +254,7 @@ namespace Media.Container
             
             //Wait for the end of the transaction or the root to be valid
             //Buffering && Root == null
-            while (result.IsTransactionDone.Equals(false) && Object.ReferenceEquals(Root, null)) result.AsyncWaitHandle.WaitOne(0);
+            while (result.IsTransactionDone is false && Root is null) result.AsyncWaitHandle.WaitOne(0);
         }
 
         public MediaFileStream(Uri source, System.IO.Stream stream, DateTime? quantifier = null, int size = 8192, Action afterClose = null)
@@ -293,7 +293,7 @@ namespace Media.Container
         {
             Buffering = false;
 
-            if (Object.ReferenceEquals(t, null).Equals(false))
+            if (t is not null)
             {
                 t.TransactionCompleted -= IStreamCopyTransactionResultCompleted;
 
@@ -487,7 +487,7 @@ namespace Media.Container
         public virtual void RefreshFileInfo(bool updateLength = true)
         {            
             //If the FileInfo is not null
-            if (Object.ReferenceEquals(FileInfo, null).Equals(false))
+            if (FileInfo is not null)
             {
                 FileInfo.Refresh();
 

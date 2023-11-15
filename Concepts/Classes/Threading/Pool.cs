@@ -458,14 +458,14 @@ namespace Media.Concepts.Classes.Threading
 
             //    //Allocate the lease instance while it was not created previously
             //    do leaseAllocation.Value = lease = new Lease(this, id, /*emure * */size, Get(id, size));
-            //    while (leaseAllocation.IsValueCreated.Equals(false));
+            //    while (leaseAllocation.IsValueCreated is false);
 
             //    //After the instance is allocated the members must also be allocated
             //    using (System.Threading.ThreadLocal<T[]> arrayAllocation = new System.Threading.ThreadLocal<T[]>())
             //    {
             //        //Create a reference to the array while it was not created previously
             //        do arrayAllocation.Value = lease.Lessee;
-            //        while (arrayAllocation.IsValueCreated.Equals(false));
+            //        while (arrayAllocation.IsValueCreated is false);
 
             //        //Track the reference
             //        m_Leases.Add(lease);

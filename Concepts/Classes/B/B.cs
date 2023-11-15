@@ -94,7 +94,7 @@ namespace Media.Concepts.Classes.B
         /// <param name="b"></param>
         static void ExceptIfTrue(bool b)
         {
-            if (b.Equals(false)) return;
+            if (b is false) return;
 
             throw new System.Exception();
         }
@@ -158,11 +158,11 @@ namespace Media.Concepts.Classes.B
         /// <returns>True if <see cref="Bias"/> equals <see cref="true"/>, otherwise false</returns>
         public bool Good()
         {
-            if (object.ReferenceEquals(Iudex, null)) return false;
+            if (Iudex is null) return false;
 
             Iudex(ConsciousBias());
 
-            return Bias.Equals(true);
+            return Bias;
         }
 
         /// <summary>
@@ -171,11 +171,11 @@ namespace Media.Concepts.Classes.B
         /// <returns>True if <see cref="Bias"/> equals <see cref="false"/>, otherwise true</returns>
         public bool Bad()
         {
-            if (object.ReferenceEquals(Iudex, null)) return false;
+            if (Iudex is null) return false;
 
             Iudex(ConsciousBias());
 
-            return Bias.Equals(false);
+            return Bias is false;
         }
 
         #endregion
@@ -258,7 +258,7 @@ namespace Media.Concepts.Classes.B
         /// <returns></returns>
         bool Common.Interfaces.ITrySet.TrySet(object t)
         {
-            if (object.ReferenceEquals(t, null)) return Bias = false;
+            if (t is null) return Bias = false;
 
             //could be anything in t...
 

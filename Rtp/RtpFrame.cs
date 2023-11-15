@@ -70,7 +70,7 @@ namespace Media.Rtp
                 using (RtpExtension extension = packet.GetExtension())
                 {
                     //If present and complete
-                    if (Common.IDisposedExtensions.IsNullOrDisposed(extension).Equals(false) && extension.IsComplete)
+                    if (Common.IDisposedExtensions.IsNullOrDisposed(extension) is false && extension.IsComplete)
                     {
                         //If the data should be included then include it
                         if (useExtensions)
@@ -762,7 +762,7 @@ namespace Media.Rtp
                 else if (false.Equals(ts.Equals(m_Timestamp))) throw new ArgumentException("packet.Timestamp must match frame Timestamp", "packet");
 
                 if (m_PayloadType.Equals(-1)) m_PayloadType = pt;
-                else if (AllowsMultiplePayloadTypes.Equals(false) && false.Equals(pt.Equals(PayloadType))) throw new ArgumentException("packet.PayloadType must match frame PayloadType", "packet");
+                else if (AllowsMultiplePayloadTypes is false && false.Equals(pt.Equals(PayloadType))) throw new ArgumentException("packet.PayloadType must match frame PayloadType", "packet");
 
                 m_LowestSequenceNumber = m_HighestSequenceNumber = seq;
 
@@ -784,7 +784,7 @@ namespace Media.Rtp
 
             //At least 1 packet is contained
             //Check payload type if indicated
-            if (AllowsMultiplePayloadTypes.Equals(false) && false.Equals(pt.Equals(PayloadType))) throw new ArgumentException("packet.PayloadType must match frame PayloadType", "packet");
+            if (AllowsMultiplePayloadTypes is false && false.Equals(pt.Equals(PayloadType))) throw new ArgumentException("packet.PayloadType must match frame PayloadType", "packet");
 
             //If the identity is not the same
             if (false.Equals(ssrc.Equals(m_Ssrc)))
@@ -822,7 +822,7 @@ namespace Media.Rtp
             if (pt.Equals(PayloadType))
             {
                 //Ensure not a duplicate (Must also check PayloadType if multiple types are allowed)
-                if ((m_LowestSequenceNumber.Equals(seq) || m_HighestSequenceNumber.Equals(seq))) if (false.Equals(allowDuplicates)) throw new InvalidOperationException("Cannot have duplicate packets in the same frame.");
+                if ((m_LowestSequenceNumber.Equals(seq) || m_HighestSequenceNumber.Equals(seq))) if (allowDuplicates is false) throw new InvalidOperationException("Cannot have duplicate packets in the same frame.");
                     else
                     {
                         insert = IndexOf(ref seq);
@@ -845,21 +845,21 @@ namespace Media.Rtp
             bool packetMarker = packet.Marker;
 
             //If not a duplicate and the marker is already contained and the options do not permit adding, throw an exception
-            if ((packetMarker || HasMarker) && false.Equals(allowPacketsAfterMarker))
+            if ((packetMarker || HasMarker) && allowPacketsAfterMarker is false)
             {
                 throw new InvalidOperationException("Cannot add packets after the marker packet.");
             }
 
             //If AllowMultiplePayloadTypes is true then the packets should maintain their order by PayloadType and then SequenceNumber.
             //Search for insert point while the index < count and while roll over would not occur
-            while (false.Equals(IsDisposed) && insert < count && (short)(seq - (tempSeq = Packets[insert].SequenceNumber)) > 0)
+            while (IsDisposed is false && insert < count && (short)(seq - (tempSeq = Packets[insert].SequenceNumber)) > 0)
             {
                 //move the index
                 ++insert;
             }
             
             //Ensure not a duplicate
-            if (false.Equals(allowDuplicates) && tempSeq.Equals(seq))
+            if (allowDuplicates is false && tempSeq.Equals(seq))
             {                
                 throw new InvalidOperationException("Cannot have duplicate packets in the same frame.");
             }
@@ -1258,7 +1258,7 @@ namespace Media.Rtp
         public virtual void Depacketize(bool allowIncomplete)
         {
             //May allow incomplete packets.
-            if (false.Equals(allowIncomplete) && false.Equals(IsComplete)) return;
+            if (allowIncomplete is false && IsComplete is false) return;
 
             //This should proably provide the index to Depacketize otherwise the order cannot be preserved and when removing the order is unknown.
 
@@ -1276,7 +1276,7 @@ namespace Media.Rtp
             //When depacketizing the list KeyItem would implicitly be in the same order as the packets.
 
             //Iterate all packets contained and depacketize
-            for (int i = 0 /*false.Equals(Packets == null) && i < Packets.Count*/ ; false.Equals(IsDisposed) && i < Count; ++i) Depacketize(Packets[i]);
+            for (int i = 0 /*false.Equals(Packets == null) && i < Packets.Count*/ ; IsDisposed is false && i < Count; ++i) Depacketize(Packets[i]);
 
             //PrepareBuffer must be called to access the buffer.
         }
@@ -1293,7 +1293,7 @@ namespace Media.Rtp
             if (Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
             //Not really helpful at this level?
-            if (false.Equals(AllowsMultiplePayloadTypes) && false.Equals(packet.PayloadType.Equals(PayloadType))) return;
+            if (AllowsMultiplePayloadTypes is false && false.Equals(packet.PayloadType.Equals(PayloadType))) return;
 
             int index = (short)packet.SequenceNumber;
 
@@ -1310,7 +1310,7 @@ namespace Media.Rtp
         internal protected void PrepareBuffer() //bool, persist, action pre pre write, post write
         {
             //Ensure there is something to write to the buffer
-            if (false.Equals(HasDepacketized)) return;
+            if (HasDepacketized is false) return;
 
             //If already exists then dispose
             DisposeBuffer();
@@ -1467,11 +1467,11 @@ namespace Media.Rtp
 
         protected override void Dispose(bool disposing)
         {
-            if (false.Equals(disposing)) return;
+            if (disposing is false) return;
 
             base.Dispose(ShouldDispose);
 
-            if (false.Equals(IsDisposed)) return;
+            if (IsDisposed is false) return;
 
             //Dispose the buffer.
             DisposeBuffer();
@@ -1532,7 +1532,7 @@ namespace Media.Rtp
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(RtpFrame a, RtpFrame b) { return (a == b).Equals(false); }
+        public static bool operator !=(RtpFrame a, RtpFrame b) { return (a == b) is false; }
 
         #endregion
 

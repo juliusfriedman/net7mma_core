@@ -230,7 +230,7 @@ namespace Media.Http
                                 //The MD5 hash of the combined HA1 result, server nonce (nonce), request counter (nc), client nonce (cnonce), quality of protection code (qop) and HA2 result is calculated. The result is the "response" value provided by the client.
                                 ResponseHash = Cryptography.MD5.GetHash(encoding.GetBytes(string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}:{2}:{3}:{4}:{5}", Convert.ToHexString(HA1), nOncePart, Convert.ToHexString(HA2), ncPart, cnOncePart, qopPart)));
                                 result = string.Format(System.Globalization.CultureInfo.InvariantCulture, "Digest username=\"{0}\", realm=\"{1}\", nonce=\"{2}\", uri=\"{3}\", qop=\"{4}\" nc=\"{5} cnonce=\"{6}\"", usernamePart, realmPart, nOncePart, uriPart, qopPart, ncPart, cnOncePart);
-                                if (string.IsNullOrWhiteSpace(opaquePart).Equals(false)) result += "opaque=\"" + opaquePart + '"';
+                                if (string.IsNullOrWhiteSpace(opaquePart) is false) result += "opaque=\"" + opaquePart + '"';
                             }
                             else
                             {

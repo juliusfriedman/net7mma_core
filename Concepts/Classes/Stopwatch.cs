@@ -167,7 +167,7 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void Stop()
         {
-            if (false.Equals(Enabled)) return;
+            if (Enabled is false) return;
 
             Timer.Stop();
 

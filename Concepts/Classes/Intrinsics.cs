@@ -241,7 +241,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return false.Equals(IsFallback);
+                return IsFallback is false;
             }
         }
 

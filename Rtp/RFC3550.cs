@@ -1284,11 +1284,11 @@ namespace Media
             
             protected override void Dispose(bool disposing)
             {
-                if (false.Equals(disposing) || false.Equals(ShouldDispose)) return;
+                if (disposing is false || ShouldDispose is false) return;
 
                 base.Dispose(ShouldDispose);
 
-                if (false.Equals(IsDisposed)) return;
+                if (IsDisposed is false) return;
 
                 m_Memory.Dispose();
             }
@@ -1340,7 +1340,7 @@ namespace Media
             }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            public static bool operator !=(CommonHeaderBits a, CommonHeaderBits b) { return (a == b).Equals(false); }
+            public static bool operator !=(CommonHeaderBits a, CommonHeaderBits b) { return (a == b) is false; }
 
             #endregion
         }

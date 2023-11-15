@@ -62,7 +62,7 @@ namespace Media.Common.Extensions.WaitHandle
             }
             finally
             {
-                if (object.ReferenceEquals(handle, NilWaitHandle).Equals(false)) handle.Dispose();
+                if (object.ReferenceEquals(handle, NilWaitHandle) is false) handle.Dispose();
             }
 
             handle = null;

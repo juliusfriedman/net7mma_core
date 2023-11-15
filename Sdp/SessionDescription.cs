@@ -344,13 +344,13 @@ namespace Media.Sdp
         public int SessionDescriptionVersion
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return object.ReferenceEquals(m_SessionVersionLine, null) ? -1 : m_SessionVersionLine.Version; }
+            get { return m_SessionVersionLine is null ? -1 : m_SessionVersionLine.Version; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             private set
             {
                 if (IsDisposed || UnderModification) return;
 
-                if (object.ReferenceEquals(m_SessionVersionLine, null).Equals(false) && 
+                if (m_SessionVersionLine is not null && 
                     value.Equals(m_SessionVersionLine.Version)) return;
                 
                 var token = BeginUpdate();
@@ -375,7 +375,7 @@ namespace Media.Sdp
 
                 if (string.IsNullOrWhiteSpace(value)) throw new InvalidOperationException("The SessionOriginatorLine is required to have a non-null and non-empty value.");
 
-                bool hadValueWithSetVersion = object.ReferenceEquals(m_OriginatorLine, null).Equals(false) && m_OriginatorLine.SessionVersion.Equals(Common.Binary.LongZero).Equals(false);
+                bool hadValueWithSetVersion = m_OriginatorLine is not null && m_OriginatorLine.SessionVersion.Equals(Common.Binary.LongZero) is false;
 
                 if (hadValueWithSetVersion && 
                     string.Compare(value, m_OriginatorLine.ToString(), StringComparison.InvariantCultureIgnoreCase).Equals(0)) return;
@@ -401,14 +401,14 @@ namespace Media.Sdp
             {
                 if (IsDisposed) return;
 
-                if (object.ReferenceEquals(m_NameLine, null).Equals(false) && 
+                if (m_NameLine is not null && 
                     string.Compare(value, m_NameLine.SessionName, StringComparison.InvariantCultureIgnoreCase).Equals(0)) return;
 
                 var token = BeginUpdate();
 
                 m_NameLine = new Lines.SessionNameLine(value);
 
-                EndUpdate(token, DocumentVersion.Equals(Common.Binary.LongZero).Equals(false));
+                EndUpdate(token, DocumentVersion.Equals(Common.Binary.LongZero) is false);
             }
         }
 
@@ -421,7 +421,7 @@ namespace Media.Sdp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return object.ReferenceEquals(m_OriginatorLine, null) ? string.Empty : m_OriginatorLine.SessionId;
+                return m_OriginatorLine is null ? string.Empty : m_OriginatorLine.SessionId;
             }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set
@@ -430,7 +430,7 @@ namespace Media.Sdp
 
                 if (string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException();
 
-                if (object.ReferenceEquals(m_OriginatorLine, null) || string.Compare(value, m_OriginatorLine.SessionId, StringComparison.InvariantCultureIgnoreCase).Equals(0)) return;
+                if (m_OriginatorLine is null || string.Compare(value, m_OriginatorLine.SessionId, StringComparison.InvariantCultureIgnoreCase).Equals(0)) return;
 
                 var token = BeginUpdate();
 
@@ -445,12 +445,12 @@ namespace Media.Sdp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return object.ReferenceEquals(m_OriginatorLine, null) ? 0 : m_OriginatorLine.SessionVersion;
+                return m_OriginatorLine is null ? 0 : m_OriginatorLine.SessionVersion;
             }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set
             {
-                if (IsDisposed || UnderModification || object.ReferenceEquals(m_OriginatorLine, null)) return;
+                if (IsDisposed || UnderModification || m_OriginatorLine is null) return;
 
                 var token = BeginUpdate();
 
@@ -482,7 +482,7 @@ namespace Media.Sdp
 
                 m_TimeDescriptions.Clear();
 
-                if(object.ReferenceEquals(value, null).Equals(false)) m_TimeDescriptions.AddRange(value);
+                if(value is not null) m_TimeDescriptions.AddRange(value);
 
                 EndUpdate(token, true);
             }
@@ -510,7 +510,7 @@ namespace Media.Sdp
 
                 m_MediaDescriptions.Clear();
 
-                if (object.ReferenceEquals(value, null).Equals(false)) m_MediaDescriptions.AddRange(value);
+                if (value is not null) m_MediaDescriptions.AddRange(value);
 
                 EndUpdate(token, true);
             }
@@ -523,7 +523,7 @@ namespace Media.Sdp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set
             {
-                if (IsDisposed || UnderModification || object.ReferenceEquals(value, null)) return;
+                if (IsDisposed || UnderModification || value is null) return;
 
                 var token = BeginUpdate();
 
@@ -541,7 +541,7 @@ namespace Media.Sdp
             set
             {
                 if (IsDisposed || UnderModification) return;
-                else if (object.ReferenceEquals(value, null))
+                else if (value is null)
                 {
                     var token = BeginUpdate();
 
@@ -568,7 +568,7 @@ namespace Media.Sdp
             set
             {
                 if (IsDisposed || UnderModification) return;
-                else if (object.ReferenceEquals(value, null))
+                else if (value is null)
                 {
                     var token = BeginUpdate();
 
@@ -627,7 +627,7 @@ namespace Media.Sdp
         public bool UnderModification
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return m_Update.IsSet.Equals(false) || m_UpdateTokenSource.IsCancellationRequested; } //When requested may already be cancelled and no longer under modification...
+            get { return m_Update.IsSet is false || m_UpdateTokenSource.IsCancellationRequested; } //When requested may already be cancelled and no longer under modification...
         }
 
         public SessionDescriptionLine ConnectionLine
@@ -640,7 +640,7 @@ namespace Media.Sdp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set
             {
-                if (object.ReferenceEquals(value, null).Equals(false) && value.m_Type.Equals(Sdp.Lines.SessionConnectionLine.ConnectionType).Equals(false))
+                if (value is not null && value.m_Type.Equals(Sdp.Lines.SessionConnectionLine.ConnectionType) is false)
                 {
                     throw new InvalidOperationException("The ConnectionList must be a ConnectionLine");
                 }
@@ -725,9 +725,9 @@ namespace Media.Sdp
         {
             get
             {
-                return (object.ReferenceEquals(m_OriginatorLine, null) ? 0 : m_OriginatorLine.Length) +
-                    (object.ReferenceEquals(m_NameLine, null) ? 0 : m_NameLine.Length) +
-                    (object.ReferenceEquals(m_SessionVersionLine, null) ? 0 : m_SessionVersionLine.Length) +
+                return (m_OriginatorLine is null ? 0 : m_OriginatorLine.Length) +
+                    (m_NameLine is null ? 0 : m_NameLine.Length) +
+                    (m_SessionVersionLine is null ? 0 : m_SessionVersionLine.Length) +
                     m_Lines.Sum(l => l.Length) +
                     m_MediaDescriptions.Sum(md => md.Length) +
                     m_TimeDescriptions.Sum(td => td.Length);
@@ -943,7 +943,7 @@ namespace Media.Sdp
 
         public void Add(MediaDescription mediaDescription, bool updateVersion = true)
         {
-            if (IsDisposed || object.ReferenceEquals(mediaDescription, null)) return;
+            if (IsDisposed || mediaDescription is null) return;
 
             var token = BeginUpdate();
 
@@ -954,7 +954,7 @@ namespace Media.Sdp
 
         public void Add(TimeDescription timeDescription, bool updateVersion = true)
         {
-            if (IsDisposed || object.ReferenceEquals(timeDescription, null)) return;
+            if (IsDisposed || timeDescription is null) return;
 
             var token = BeginUpdate();
 
@@ -965,7 +965,7 @@ namespace Media.Sdp
 
         public void Add(SessionDescriptionLine line, bool updateVersion = true)
         {
-            if (IsDisposed || object.ReferenceEquals(line, null)) return;
+            if (IsDisposed || line is null) return;
 
             var token = BeginUpdate();
 
@@ -990,7 +990,7 @@ namespace Media.Sdp
 
         public bool Remove(SessionDescriptionLine line, bool updateVersion = true)
         {
-            if (IsDisposed || object.ReferenceEquals(line, null)) return false;
+            if (IsDisposed || line is null) return false;
 
             var token = BeginUpdate();
 
@@ -1033,12 +1033,12 @@ namespace Media.Sdp
                 ////    break;
             }
 
-            if (result.Equals(false))
+            if (result is false)
             {
                 result = m_Lines.Remove(line);
             }
 
-            if (result.Equals(false))
+            if (result is false)
             {
                 foreach (MediaDescription md in MediaDescriptions) if (result = md.Remove(line)) break;
             }
@@ -1050,7 +1050,7 @@ namespace Media.Sdp
 
         public bool Remove(TimeDescription timeDescription, bool updateVersion = true)
         {
-            if (IsDisposed || object.ReferenceEquals(timeDescription, null)) return false;
+            if (IsDisposed || timeDescription is null) return false;
 
             var token = BeginUpdate();
 
@@ -1063,7 +1063,7 @@ namespace Media.Sdp
 
         public bool Remove(MediaDescription mediaDescription, bool updateVersion = true)
         {
-            if (IsDisposed || object.ReferenceEquals(mediaDescription, null)) return false;
+            if (IsDisposed || mediaDescription is null) return false;
 
             var token = BeginUpdate();
 
@@ -1112,11 +1112,11 @@ namespace Media.Sdp
         public void UpdateVersion(System.Threading.CancellationToken token)
         {
 
-            if (token.Equals(m_UpdateTokenSource.Token).Equals(false)) throw new InvalidOperationException("Must obtain the CancellationToken from a call to BeginUpdate.");
+            if (token.Equals(m_UpdateTokenSource.Token) is false) throw new InvalidOperationException("Must obtain the CancellationToken from a call to BeginUpdate.");
 
-            if(token.IsCancellationRequested.Equals(false)
+            if(token.IsCancellationRequested is false
                 &&
-                object.ReferenceEquals(m_OriginatorLine , null).Equals(false))
+                object.ReferenceEquals(m_OriginatorLine , null) is false)
             {
                 ++m_OriginatorLine.SessionVersion;
             }
@@ -1160,7 +1160,7 @@ namespace Media.Sdp
             CheckDisposed();
 
             //That came from out cancellation source
-            if (token.Equals(m_UpdateTokenSource.Token).Equals(false)) throw new InvalidOperationException("Must obtain the CancellationToken from a call to BeginUpdate.");
+            if (token.Equals(m_UpdateTokenSource.Token) is false) throw new InvalidOperationException("Must obtain the CancellationToken from a call to BeginUpdate.");
 
             // check for manually removed state or a call without an update..
             //if(m_Update.Wait(1, token)) { would check that the event was manually cleared... }
@@ -1192,7 +1192,7 @@ namespace Media.Sdp
             //System.Object
             if (object.ReferenceEquals(this, obj)) return true;
 
-            if ((obj is SessionDescription).Equals(false)) return false;
+            if ((obj is SessionDescription) is false) return false;
 
             return Equals(obj as SessionDescription);
         }
@@ -1209,13 +1209,13 @@ namespace Media.Sdp
 
             StringBuilder buffer = new StringBuilder();
 
-            if(object.ReferenceEquals(m_SessionVersionLine, null).Equals(false)) buffer.Append(m_SessionVersionLine.ToString());
+            if(m_SessionVersionLine is not null) buffer.Append(m_SessionVersionLine.ToString());
 
-            if (object.ReferenceEquals(m_OriginatorLine, null).Equals(false)) buffer.Append(m_OriginatorLine.ToString());
+            if (m_OriginatorLine is not null) buffer.Append(m_OriginatorLine.ToString());
 
-            if (object.ReferenceEquals(m_NameLine, null).Equals(false)) buffer.Append(m_NameLine.ToString());
+            if (m_NameLine is not null) buffer.Append(m_NameLine.ToString());
 
-            foreach (SessionDescriptionLine l in m_Lines.Where(l => l.m_Type.Equals(Sdp.Lines.SessionBandwidthLine.BandwidthType).Equals(false) && l.m_Type.Equals(Sdp.Lines.SessionAttributeLine.AttributeType).Equals(false)))
+            foreach (SessionDescriptionLine l in m_Lines.Where(l => l.m_Type.Equals(Sdp.Lines.SessionBandwidthLine.BandwidthType) is false && l.m_Type.Equals(Sdp.Lines.SessionAttributeLine.AttributeType) is false))
             {
                 buffer.Append(l.ToString());
             }
@@ -1241,11 +1241,11 @@ namespace Media.Sdp
 
         protected override void Dispose(bool disposing)
         {
-            if (false.Equals(disposing) || false.Equals(ShouldDispose)) return;
+            if (disposing is false || ShouldDispose is false) return;
 
             base.Dispose(ShouldDispose);
 
-            if (IsDisposed.Equals(false)) return;
+            if (IsDisposed is false) return;
 
             m_SessionVersionLine = null;
 
@@ -1284,27 +1284,27 @@ namespace Media.Sdp
         //{
         //    if (Common.IDisposedExtensions.IsNullOrDisposed(this)) return string.Empty;
 
-        //    return object.ReferenceEquals(PrepareLines, null) ? ToString() : string.Join(string.Empty, PrepareLines(this).Select(l => l.ToString()));
+        //    return PrepareLines is null ? ToString() : string.Join(string.Empty, PrepareLines(this).Select(l => l.ToString()));
         //}
 
         public IEnumerator<SessionDescriptionLine> GetEnumerator()
         {
-            //if (object.ReferenceEquals(PrepareLines, null).Equals(false))
+            //if (PrepareLines is not null)
             //{
             //    foreach (var line in PrepareLines(this)) yield return line;
 
             //    yield break;
             //}
 
-            if (object.ReferenceEquals(m_SessionVersionLine, null).Equals(false)) yield return m_SessionVersionLine;
+            if (m_SessionVersionLine is not null) yield return m_SessionVersionLine;
 
-            if (object.ReferenceEquals(m_OriginatorLine, null).Equals(false)) yield return m_OriginatorLine;
+            if (m_OriginatorLine is not null) yield return m_OriginatorLine;
 
-            if (object.ReferenceEquals(m_NameLine, null).Equals(false)) yield return m_NameLine;
+            if (m_NameLine is not null) yield return m_NameLine;
 
             foreach (var line in m_Lines)
             {
-                if (object.ReferenceEquals(line, null)) continue;
+                if (line is null) continue;
 
                 yield return line;
             }
@@ -1337,19 +1337,19 @@ namespace Media.Sdp
 
         public static bool operator ==(SessionDescription a, SessionDescription b)
         {
-            return object.ReferenceEquals(b, null) ? object.ReferenceEquals(a, null) : a.Equals(b);
+            return b is null ? a is null : a.Equals(b);
         }
 
-        public static bool operator !=(SessionDescription a, SessionDescription b) { return (a == b).Equals(false); }
+        public static bool operator !=(SessionDescription a, SessionDescription b) { return (a == b) is false; }
 
         //Possibly 
 
         public static bool operator ==(SessionDescription a, SessionDescriptionLine b)
         {
-            return object.ReferenceEquals(b, null) ? object.ReferenceEquals(a, null) : a.Contains(b);
+            return b is null ? a is null : a.Contains(b);
         }
 
-        public static bool operator !=(SessionDescription a, SessionDescriptionLine b) { return (a == b).Equals(false); }
+        public static bool operator !=(SessionDescription a, SessionDescriptionLine b) { return (a == b) is false; }
 
         public override int GetHashCode()
         {
@@ -1361,7 +1361,7 @@ namespace Media.Sdp
     {
         public static string PrepareString(IEnumerable<Sdp.SessionDescriptionLine> lines, Action<IEnumerable<Sdp.SessionDescriptionLine>> orderLinesBy = null)
         {
-            if (object.ReferenceEquals(orderLinesBy, null).Equals(false)) orderLinesBy(lines);
+            if (orderLinesBy is not null) orderLinesBy(lines);
 
             return string.Join(string.Empty, lines);
         }
@@ -1388,13 +1388,13 @@ namespace Media.Sdp
             SessionDescriptionLine controlLine = sdp.ControlLine;
 
             //If there is a control line in the SDP it contains the URI used to setup and control the media
-            if (object.ReferenceEquals(controlLine, null)) return false;
+            if (controlLine is null) return false;
 
             //Get the control token
             string controlPart = controlLine.Parts.Where(p => p.Contains(AttributeFields.Control)).FirstOrDefault();
 
             //If there is a controlPart in the controlLine
-            if (string.IsNullOrWhiteSpace(controlPart).Equals(false))
+            if (string.IsNullOrWhiteSpace(controlPart) is false)
             {
                 /*
                     If this attribute contains only an asterisk (*), then the URL is

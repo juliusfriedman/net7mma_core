@@ -868,11 +868,11 @@ namespace Media.Rtp
         /// </summary>        
         protected override void Dispose(bool disposing)
         {
-            if (false.Equals(disposing) || false.Equals(ShouldDispose)) return;
+            if (disposing is false || ShouldDispose is false) return;
 
             base.Dispose(ShouldDispose);
 
-            if (false.Equals(IsDisposed)) return;
+            if (IsDisposed is false) return;
 
             //If there is a referenced RtpHeader
             if (m_OwnsHeader && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(Header)))
@@ -966,7 +966,7 @@ namespace Media.Rtp
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(RtpPacket a, RtpPacket b) { return (a == b).Equals(false); }
+        public static bool operator !=(RtpPacket a, RtpPacket b) { return (a == b) is false; }
 
         #endregion
 

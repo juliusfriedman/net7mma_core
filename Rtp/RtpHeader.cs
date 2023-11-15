@@ -554,11 +554,11 @@ namespace Media.Rtp
 
         protected override void Dispose(bool disposing)
         {
-            if (false.Equals(disposing) || false.Equals(ShouldDispose)) return;
+            if (disposing is false || ShouldDispose is false) return;
 
             base.Dispose(ShouldDispose);
 
-            if (false.Equals(IsDisposed)) return;
+            if (IsDisposed is false) return;
 
             if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(First16Bits)))
             {
@@ -616,7 +616,7 @@ namespace Media.Rtp
             return b is null ? a is null : a.Equals(b);
         }
 
-        public static bool operator !=(RtpHeader a, RtpHeader b) { return (a == b).Equals(false); }
+        public static bool operator !=(RtpHeader a, RtpHeader b) { return (a == b) is false; }
 
         #endregion
     }

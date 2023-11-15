@@ -291,17 +291,17 @@ namespace Media.Sdp
 
         public static bool operator ==(TimeDescription a, TimeDescription b)
         {
-            return object.ReferenceEquals(b, null) ? object.ReferenceEquals(a, null) : a.Equals(b);
+            return b is null ? a is null : a.Equals(b);
         }
 
-        public static bool operator !=(TimeDescription a, TimeDescription b) { return (a == b).Equals(false); }
+        public static bool operator !=(TimeDescription a, TimeDescription b) { return (a == b) is false; }
 
         public static bool operator ==(TimeDescription a, SessionDescriptionLine b)
         {
-            return object.ReferenceEquals(b, null) ? object.ReferenceEquals(a, null) : a.Contains(b);
+            return b is null ? a is null : a.Contains(b);
         }
 
-        public static bool operator !=(TimeDescription a, SessionDescriptionLine b) { return (a == b).Equals(false); }
+        public static bool operator !=(TimeDescription a, SessionDescriptionLine b) { return (a == b) is false; }
     }
 
     #endregion

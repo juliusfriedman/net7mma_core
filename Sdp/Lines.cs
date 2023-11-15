@@ -57,7 +57,7 @@ namespace Media.Sdp
             {
                 get
                 {
-                    if (false.Equals(object.ReferenceEquals(m_AttributeParts, null))) return m_AttributeParts;
+                    if (false.Equals(m_AttributeParts is null)) return m_AttributeParts;
 
                     //Todo, should be contigious to all derived parts which do not occur within m_Parts
                     m_AttributeParts = new string[2];
@@ -146,14 +146,14 @@ namespace Media.Sdp
                 : base(AttributeType, seperator, partCount)
             {
                 //If any parts are expected
-                if (partCount > 0 && string.IsNullOrWhiteSpace(attributeName).Equals(false))
+                if (partCount > 0 && string.IsNullOrWhiteSpace(attributeName) is false)
                 {
                     //(AttributeName)
                     //SetPart(0, attributeName);
                     SetPart(0, string.Concat(attributeName, SessionDescription.ColonString));
 
                     //If there is any value
-                    if (partCount > 1 && string.IsNullOrWhiteSpace(attributeValue).Equals(false))
+                    if (partCount > 1 && string.IsNullOrWhiteSpace(attributeValue) is false)
                     {
                         int reduce = 0;
 
@@ -517,7 +517,7 @@ namespace Media.Sdp
                 {
                     if (string.IsNullOrWhiteSpace(ConnectionAddress)) return null;
 
-                    if (object.ReferenceEquals(m_ConnectionParts, null)) m_ConnectionParts = ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
+                    if (m_ConnectionParts is null) m_ConnectionParts = ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
 
                     //Should verify that the string contains a . and is not shorter/longer than x, y...
                     return m_ConnectionParts[0];
@@ -551,7 +551,7 @@ namespace Media.Sdp
                 {
                     if (string.IsNullOrWhiteSpace(ConnectionAddress)) return false;
 
-                    if (object.ReferenceEquals(m_ConnectionParts, null)) m_ConnectionParts = ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
+                    if (m_ConnectionParts is null) m_ConnectionParts = ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
 
                     return m_ConnectionParts.Length > 1;
                 }
@@ -568,7 +568,7 @@ namespace Media.Sdp
 
                     if (string.IsNullOrWhiteSpace(ConnectionAddress)) return 0;
 
-                    if (object.ReferenceEquals(m_ConnectionParts, null)) m_ConnectionParts = ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
+                    if (m_ConnectionParts is null) m_ConnectionParts = ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
 
                     if (m_ConnectionParts.Length > 1)
                     {
@@ -625,7 +625,7 @@ namespace Media.Sdp
                 {
                     if (string.IsNullOrWhiteSpace(ConnectionAddress)) return 1;
 
-                    if (object.ReferenceEquals(m_ConnectionParts, null)) m_ConnectionParts = ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
+                    if (m_ConnectionParts is null) m_ConnectionParts = ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
 
                     if (m_ConnectionParts.Length > 2)
                     {
@@ -675,7 +675,7 @@ namespace Media.Sdp
             public SessionConnectionLine(SessionDescriptionLine line)
                 : this()
             {
-                if (line.m_Type.Equals(ConnectionType).Equals(false)) throw new InvalidOperationException("Not a SessionConnectionLine");
+                if (line.m_Type.Equals(ConnectionType) is false) throw new InvalidOperationException("Not a SessionConnectionLine");
 
                 m_Parts.Clear();
 
@@ -709,7 +709,7 @@ namespace Media.Sdp
             public SessionConnectionLine(string line) 
                 : base(line, SessionDescription.SpaceString, 3)
             {
-                if (m_Type.Equals(ConnectionType).Equals(false)) throw new InvalidOperationException("Not a SessionConnectionLine line");
+                if (m_Type.Equals(ConnectionType) is false) throw new InvalidOperationException("Not a SessionConnectionLine line");
             }
 
             #endregion
@@ -1553,7 +1553,7 @@ namespace Media.Sdp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    if (object.ReferenceEquals(PayloadTypeTokens, null))
+                    if (PayloadTypeTokens is null)
                     {
                         //Todo, should be contigious to all derived parts which do not occur within m_Parts
                         PayloadTypeTokens = MediaFormat.Split(SessionDescription.Space);
@@ -2044,7 +2044,7 @@ namespace Media.Sdp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    if (false.Equals(object.ReferenceEquals(m_InformationParts, null))) return m_InformationParts;
+                    if (false.Equals(m_InformationParts is null)) return m_InformationParts;
 
                     string attributeValue = AttributeValue;
 
@@ -2227,7 +2227,7 @@ namespace Media.Sdp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    if (false.Equals(object.ReferenceEquals(m_EncodingParameters, null))) return m_EncodingParameters;
+                    if (false.Equals(m_EncodingParameters is null)) return m_EncodingParameters;
 
                     if (string.IsNullOrWhiteSpace(EncodingParametersToken)) return Enumerable.Empty<string>();
 
@@ -2473,7 +2473,7 @@ namespace Media.Sdp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    if (false.Equals(object.ReferenceEquals(m_FormatSpecificParameters, null))) return m_FormatSpecificParameters;
+                    if (false.Equals(m_FormatSpecificParameters is null)) return m_FormatSpecificParameters;
 
                     if (string.IsNullOrWhiteSpace(FormatSpecificParameterToken)) return Enumerable.Empty<string>();
 

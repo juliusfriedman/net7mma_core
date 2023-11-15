@@ -135,7 +135,7 @@ namespace Media.Common.Extensions.NetworkInterface
             if (socket is null) throw new System.ArgumentNullException(nameof(socket));
             else if (socket.Handle == nint.Zero) return null;
             
-            System.Net.IPEndPoint localEndPoint = socket.IsBound.Equals(false) ? Common.Extensions.IPEndPoint.IPEndPointExtensions.Any : (System.Net.IPEndPoint)socket.LocalEndPoint;
+            System.Net.IPEndPoint localEndPoint = socket.IsBound is false ? Common.Extensions.IPEndPoint.IPEndPointExtensions.Any : (System.Net.IPEndPoint)socket.LocalEndPoint;
 
             return GetNetworkInterface(localEndPoint);
         }

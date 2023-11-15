@@ -50,7 +50,7 @@ namespace Media.Common.Extensions.Generic.Dictionary
             try
             {
                 //Check if the key is already contained
-                if (dictionary.ContainsKey(key).Equals(false))
+                if (dictionary.ContainsKey(key) is false)
                 {
                     //Attempt to add
                     dictionary.Add(key, value);

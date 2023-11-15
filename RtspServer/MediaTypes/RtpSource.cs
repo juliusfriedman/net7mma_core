@@ -135,7 +135,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         public override bool TrySetLogger(Common.ILogging logger)
         {
-            if (IsReady.Equals(false)) return false;
+            if (IsReady is false) return false;
 
             try
             {
@@ -152,7 +152,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         public override bool TryGetLogger(out Common.ILogging logger)
         {
-            if (IsReady.Equals(false))
+            if (IsReady is false)
             {
                 return base.TryGetLogger(out logger);
             }
@@ -182,7 +182,7 @@ namespace Media.Rtsp.Server.MediaTypes
             if (State >= StreamState.StopRequested) return;
             
             //If there is a RtpClient call Activate.
-            if (object.ReferenceEquals(RtpClient, null).Equals(false)) RtpClient.Activate();
+            if (RtpClient is not null) RtpClient.Activate();
 
             //Should be done in first packet recieved...
             base.IsReady = true;
@@ -196,7 +196,7 @@ namespace Media.Rtsp.Server.MediaTypes
             if (State <= StreamState.StopRequested) return;
 
             //When the stream is not stared
-            if (Common.IDisposedExtensions.IsNullOrDisposed(RtpClient).Equals(false)) RtpClient.Deactivate();
+            if (Common.IDisposedExtensions.IsNullOrDisposed(RtpClient) is false) RtpClient.Deactivate();
 
             //Indicate no longer ready.
             base.IsReady = false;
@@ -207,11 +207,11 @@ namespace Media.Rtsp.Server.MediaTypes
 
         public override void Dispose()
         {
-            if (IsDisposed || ShouldDispose.Equals(false)) return;
+            if (IsDisposed || ShouldDispose is false) return;
 
             base.Dispose();
 
-            if (Common.IDisposedExtensions.IsNullOrDisposed(RtpClient).Equals(false))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(RtpClient) is false)
             {
                 RtpClient.Dispose();
 

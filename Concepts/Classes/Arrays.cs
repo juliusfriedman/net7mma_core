@@ -329,7 +329,7 @@ namespace Media.Concepts.Classes
         public bool IsNullPointer() { return m_IntPtr == System.IntPtr.Zero; }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public bool IsNullObject() { return object.ReferenceEquals(m_Object, null); }
+        public bool IsNullObject() { return m_Object is null; }
 
         //Would be used to indicate if the m_IntPtr member has a value which points to what was a managed object at one point.
         //[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

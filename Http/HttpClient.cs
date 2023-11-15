@@ -98,7 +98,7 @@ namespace Media.Http
 
             HttpClientAction action = OnConnect;
 
-            if (object.ReferenceEquals(action, null)) return;
+            if (action is null) return;
 
             foreach (HttpClientAction handler in action.GetInvocationList())
             {
@@ -116,7 +116,7 @@ namespace Media.Http
 
             RequestHandler action = OnRequest;
 
-            if (object.ReferenceEquals(action, null)) return;
+            if (action is null) return;
 
             foreach (RequestHandler handler in action.GetInvocationList())
             {
@@ -133,7 +133,7 @@ namespace Media.Http
 
             ResponseHandler action = OnResponse;
 
-            if (object.ReferenceEquals(action, null)) return;
+            if (action is null) return;
 
             foreach (ResponseHandler handler in action.GetInvocationList())
             {
@@ -150,7 +150,7 @@ namespace Media.Http
 
             HttpClientAction action = OnDisconnect;
 
-            if (object.ReferenceEquals(action, null)) return;
+            if (action is null) return;
 
             foreach (HttpClientAction handler in action.GetInvocationList())
             {
@@ -601,16 +601,16 @@ namespace Media.Http
             try
             {
                 //Ensure logic for UDP is correct, may have to store flag.
-                if (force.Equals(false) && IsConnected) return;
+                if (force is false && IsConnected) return;
 
                 //Deactivate any existing previous socket and erase connect times.
-                if (object.ReferenceEquals(m_HttpSocket, null).Equals(false)) DisconnectSocket();
+                if (m_HttpSocket is not null) DisconnectSocket();
 
                 //Create the socket
                 m_HttpSocket = new Socket(m_RemoteIP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 
                 //Configure the socket
-                if (object.ReferenceEquals(ConfigureSocket,null).Equals(false)) ConfigureSocket(m_HttpSocket);
+                if (object.ReferenceEquals(ConfigureSocket,null) is false) ConfigureSocket(m_HttpSocket);
 
                 //We started connecting now.
                 m_BeginConnect = DateTime.UtcNow;
@@ -1868,15 +1868,15 @@ namespace Media.Http
 
         protected override void Dispose(bool disposing)
         {
-            if (false.Equals(disposing) || false.Equals(ShouldDispose)) return;
+            if (disposing is false || ShouldDispose is false) return;
 
             base.Dispose(ShouldDispose);
 
-            if (false.Equals(IsDisposed)) return;
+            if (IsDisposed is false) return;
 
             AdditionalHeaders.Clear();
 
-            Disconnect(LeaveOpen.Equals(false));
+            Disconnect(LeaveOpen is false);
         }
 
         #endregion        

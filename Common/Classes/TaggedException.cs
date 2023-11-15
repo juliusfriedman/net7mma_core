@@ -214,7 +214,7 @@ namespace Media.Common
         /// </summary>
         void System.IDisposable.Dispose()
         {
-            if (false.Equals(ShouldDispose) || @base.IsDisposed) return;
+            if (ShouldDispose is false || @base.IsDisposed) return;
 
             @base.Dispose(ShouldDispose);
 
@@ -260,7 +260,7 @@ namespace Media.Common
         public static void RaiseAndAttachIfUnhandled<T>(this TaggedException<T> exception, bool breakForResume = true)
         {
             //If not attaching then fall back to TryRaise which hides the exception and return.
-            if (false.Equals(breakForResume))
+            if (breakForResume is false)
             {
                 exception.TryRaise();
 

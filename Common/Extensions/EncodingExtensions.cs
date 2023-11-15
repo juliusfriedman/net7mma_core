@@ -182,7 +182,7 @@ namespace Media.Common.Extensions.Encoding
                         {
                             sawDelimit = true;
 
-                            if (false.Equals(includeDelimits)) charsUsed = c;
+                            if (includeDelimits is false) charsUsed = c;
                             else charsUsed = ++c;
 
                             break;
@@ -190,7 +190,7 @@ namespace Media.Common.Extensions.Encoding
                     }
 
                 if (charsUsed > 0) builder.Append(results, 0, charsUsed);
-            } while (count > 0 && false.Equals(sawDelimit));
+            } while (count > 0 && sawDelimit is false);
 
             if (builder == null)
             {

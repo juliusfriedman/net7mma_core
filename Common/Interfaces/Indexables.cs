@@ -117,7 +117,7 @@ namespace Media.Common.Interfaces
             get { return m_IsReadOnly; }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            protected set { if (m_Mutable && false.Equals(m_IsReadOnly)) m_IsReadOnly = value; }
+            protected set { if (m_Mutable && m_IsReadOnly is false) m_IsReadOnly = value; }
         }
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace Media.Common.Interfaces
             get { return m_IsWriteOnly; }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            protected set { if (m_Mutable && m_IsReadOnly.Equals(false) && m_IsWriteOnly.Equals(false)) m_IsWriteOnly = value; }
+            protected set { if (m_Mutable && m_IsReadOnly is false && m_IsWriteOnly is false) m_IsWriteOnly = value; }
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace Media.Common.Interfaces
             get { return m_Mutable; }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            protected set { if (false.Equals(m_IsReadOnly) && m_Mutable) m_Mutable = value; }
+            protected set { if (m_IsReadOnly is false && m_Mutable) m_Mutable = value; }
         }
     }
 

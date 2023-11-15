@@ -442,7 +442,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 if (false.Equals(packet.PayloadType.Equals(PayloadType)))
                 {
-                    if (false.Equals(AllowsMultiplePayloadTypes)) return;
+                    if (AllowsMultiplePayloadTypes is false) return;
                 }
 
                 ///Must have at least 2 bytes (When nalUnitType is a FragmentUnit.. 3)
@@ -461,7 +461,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 forbidden_zero_bit of the NAL unit MUST be set to one to indicate a
                 syntax violation.
                 */
-                if (false.Equals(ignoreForbiddenZeroBit) && false.Equals(0.Equals(((firstByte & 0x80) >> 7))))
+                if (ignoreForbiddenZeroBit is false && false.Equals(0.Equals(((firstByte & 0x80) >> 7))))
                 {
                     //would need additional state to ensure all packets now have this bit.
 

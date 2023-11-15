@@ -1665,12 +1665,12 @@ namespace Media.Concepts.Classes
 
         public static bool operator ==(Bitable a, Bitable b)
         {
-            return object.ReferenceEquals(b, null) ? object.ReferenceEquals(a, null) : a.Equals(b);
+            return b is null ? a is null : a.Equals(b);
         }
 
         public static bool operator !=(Bitable a, Bitable b)
         {
-            return (a == b).Equals(false);
+            return (a == b) is false;
         }
 
         public static Bitable operator +(Bitable a, Bitable b)
@@ -2445,7 +2445,7 @@ namespace Media.Concepts.Classes
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return false.Equals(IsWhole);
+                return IsWhole is false;
             }
         }
 

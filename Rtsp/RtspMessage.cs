@@ -447,11 +447,11 @@ namespace Media.Rtsp
             {                
 
                 //Disposed is complete 
-                if (IsDisposed && IsPersistent.Equals(false)) return false;
+                if (IsDisposed && IsPersistent is false) return false;
 
                 //If the status line was not parsed
-                if (m_StatusLineParsed.Equals(false) || //All requests must have a StatusLine OR
-                    object.ReferenceEquals(m_Buffer, null).Equals(false) &&  // Be parsing the StatusLine
+                if (m_StatusLineParsed is false || //All requests must have a StatusLine OR
+                    m_Buffer is not null &&  // Be parsing the StatusLine
                     m_Buffer.Length <= MinimumStatusLineSize) return false;
 
                 if (false.Equals(string.IsNullOrWhiteSpace(ParsedProtocol)) && false.Equals(ParsedProtocol.Equals(Protocol, StringComparison.OrdinalIgnoreCase)))
@@ -479,7 +479,7 @@ namespace Media.Rtsp
                     //Messages with ContentLength AND no Body are not complete.
                     //Determine if the count of the octets in the body is greater than or equal to the supposed amount
 
-                    return ParseContentLength(hasNullBody).Equals(false) && hasNullBody && m_ContentLength > 0 ? m_HeadersParsed : ContentEncoding.GetByteCount(m_Body) >= m_ContentLength;
+                    return ParseContentLength(hasNullBody) is false && hasNullBody && m_ContentLength > 0 ? m_HeadersParsed : ContentEncoding.GetByteCount(m_Body) >= m_ContentLength;
 
                     //return hasNullBody && m_ContentLength > 0 ? false : false == hasNullBody && m_ContentLength <= 0 || (ContentEncoding.GetByteCount(m_Body) >= m_ContentLength);
 
@@ -648,29 +648,29 @@ namespace Media.Rtsp
             remaining = 0;//-1 unable to determine yet
 
             //If the message is disposed then the body is parsed.
-            if (IsDisposed && IsPersistent.Equals(false)) return false;
+            if (IsDisposed && IsPersistent is false) return false;
 
             //If the message is invalid or
-            if (force.Equals(false) && (RtspMessageType == RtspMessageType.Invalid ||
+            if (force is false && (RtspMessageType == RtspMessageType.Invalid ||
                 //false == string.IsNullOrWhiteSpace(m_Body) || //or body was already started parsing
                 IsComplete)) return true; //or the message is complete then return true
 
             //If no headers could be parsed then don't parse the body, should pass force?
-            if (ParseHeaders().Equals(false)) return false;
+            if (ParseHeaders() is false) return false;
 
             //If there is no ContentLength then do not parse the body, this could be allowed to parse further...
             //requireContentLength && 
-            if (m_ContentLength < 0 && ParseContentLength().Equals(false)) return false;
+            if (m_ContentLength < 0 && ParseContentLength() is false) return false;
 
             //Empty body or no ContentLength
             //If the message cannot have a body it is parsed.
             //If the content length was set to 0 on purpose than this logic needs to be changed to continue parsing.
-            if (false.Equals(CanHaveBody) || m_ContentLength.Equals(0)) return true;
+            if (CanHaveBody is false || m_ContentLength.Equals(0)) return true;
 
             //Get the decoder to use for the body
             Encoding decoder = ParseContentEncoding(false, FallbackToDefaultEncoding);
 
-            if (object.ReferenceEquals(decoder, null)) return false;
+            if (decoder is null) return false;
 
             int existingBodySize = decoder.GetByteCount(m_Body);
 
@@ -680,7 +680,7 @@ namespace Media.Rtsp
             if (remaining <= 0) return true;
 
             //If there was no buffer or an unreadable buffer then no parsing can occur
-            if (object.ReferenceEquals(m_Buffer, null) || m_Buffer.CanRead.Equals(false)) return false;
+            if (m_Buffer is null || m_Buffer.CanRead is false) return false;
 
             //Quite possibly should be long
             int max = (int)m_Buffer.Length;
@@ -733,13 +733,13 @@ namespace Media.Rtsp
         //[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         //public override int CompleteFrom(System.Net.Sockets.Socket socket, Common.MemorySegment buffer)
         //{
-        //    if (IsDisposed && false.Equals(IsPersistent)) return 0;
+        //    if (IsDisposed && IsPersistent is false) return 0;
 
-        //    bool hasSocket = object.ReferenceEquals(socket, null).Equals(false), 
-        //         hasBuffer = buffer.IsDisposed.Equals(false) && buffer.Count > 0;
+        //    bool hasSocket = socket is not null, 
+        //         hasBuffer = buffer.IsDisposed is false && buffer.Count > 0;
 
         //    //If there is no socket or no data available in the buffer nothing can be done
-        //    if (false.Equals(hasSocket) && false.Equals(hasBuffer))
+        //    if (hasSocket is false && hasBuffer is false)
         //    {
         //        return 0;
         //    }
@@ -749,10 +749,10 @@ namespace Media.Rtsp
 
         //    int received = 0;
 
-        //    if (false.Equals(hasSocket))
+        //    if (hasSocket is false)
         //    {
         //        //Create the buffer if it was null
-        //        if (object.ReferenceEquals(m_Buffer, null) || false.Equals(m_Buffer.CanWrite))
+        //        if (m_Buffer is null || false.Equals(m_Buffer.CanWrite))
         //        {
         //            m_Buffer = new System.IO.MemoryStream();
 
@@ -771,7 +771,7 @@ namespace Media.Rtsp
         //        //If there was a buffer
         //        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(buffer)) && buffer.Count > 0)
         //        {
-        //            if (object.ReferenceEquals(m_Buffer, null)) return received;
+        //            if (m_Buffer is null) return received;
 
         //            //Write the new data
         //            if (m_Buffer.CanWrite) m_Buffer.Write(buffer.Array, buffer.Offset, received += buffer.Count);
@@ -782,8 +782,8 @@ namespace Media.Rtsp
         //    }
 
         //    //If the status line was not parsed return the number of bytes written, reparse if there are no headers parsed yet.
-        //    if (false.Equals(ParseStatusLine(RtspMessageType == RtspMessageType.Invalid) || false.Equals(m_StatusLineParsed))) return received;
-        //    else if (false.Equals(object.ReferenceEquals(m_Buffer, null)) && m_Buffer.CanSeek) m_Buffer.Seek(m_HeaderOffset, System.IO.SeekOrigin.Begin); // Seek past the status line.
+        //    if (false.Equals(ParseStatusLine(RtspMessageType == RtspMessageType.Invalid) || m_StatusLineParsed is false)) return received;
+        //    else if (false.Equals(m_Buffer is null) && m_Buffer.CanSeek) m_Buffer.Seek(m_HeaderOffset, System.IO.SeekOrigin.Begin); // Seek past the status line.
 
         //    //Determine if there can be and is a body already
         //    bool hasNullBody = CanHaveBody && string.IsNullOrEmpty(m_Body);
@@ -861,9 +861,9 @@ namespace Media.Rtsp
         internal protected virtual bool ParseSequenceNumber(bool force = false)
         {
             //If the message is disposed then no parsing can occur
-            if (IsDisposed && false.Equals(IsPersistent)) return false;
+            if (IsDisposed && IsPersistent is false) return false;
 
-            if (false.Equals(force) && m_CSeq >= 0) return false;
+            if (force is false && m_CSeq >= 0) return false;
 
             //See if there is a Content-Length header
             string sequenceNumber = GetHeader(RtspHeaders.CSeq);
@@ -898,7 +898,7 @@ namespace Media.Rtsp
         /// <param name="headerName"></param>
         protected override void OnHeaderRemoved(string headerName, string headerValue)
         {
-            if (IsDisposed && false.Equals(IsPersistent)) return;
+            if (IsDisposed && IsPersistent is false) return;
 
             //If there is a null or empty header ignore
             if (string.IsNullOrWhiteSpace(headerName)) return;
@@ -964,10 +964,10 @@ namespace Media.Rtsp
 
         public static bool operator ==(RtspMessage a, RtspMessage b)
         {
-            return object.ReferenceEquals(b, null) ? object.ReferenceEquals(a, null) : a.Equals(b);
+            return b is null ? a is null : a.Equals(b);
         }
 
-        public static bool operator !=(RtspMessage a, RtspMessage b) { return (a == b).Equals(false); }
+        public static bool operator !=(RtspMessage a, RtspMessage b) { return (a == b) is false; }
 
         #endregion
     }

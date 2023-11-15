@@ -223,14 +223,14 @@ namespace Media.Common
 
         bool IEvent.Enabled
         {
-            get { return Common.IDisposedExtensions.IsNullOrDisposed(this).Equals(false) && IEventExtensions.IsEnabled(this); }
+            get { return Common.IDisposedExtensions.IsNullOrDisposed(this) is false && IEventExtensions.IsEnabled(this); }
         }
 
         Delegate IEvent.Source
         {
             get
             {
-                return Common.IDisposedExtensions.IsNullOrDisposed(this).Equals(false) ? 
+                return Common.IDisposedExtensions.IsNullOrDisposed(this) is false ? 
                     IEventExtensions.HasSource(this) ? 
                         Event : Consumed as Delegate 
                             : null; 
@@ -255,7 +255,7 @@ namespace Media.Common
         void IDisposable.Dispose()
         {
             if (this.IsNullOrDisposed() || // ....
-                (ShouldDispose = IEventExtensions.IsNull(this).Equals(false))) return;
+                (ShouldDispose = IEventExtensions.IsNull(this) is false)) return;
 
             this.Event = null;
 

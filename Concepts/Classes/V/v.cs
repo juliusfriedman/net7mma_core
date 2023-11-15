@@ -105,7 +105,7 @@ namespace Media.Concepts.Classes.v
         /// </summary>
         Common.Classes.Class Common.Interfaces.InterClass.Class
         {
-            get { return System.Object.ReferenceEquals(Delegation, null) ? this : Delegation; }
+            get { return Delegation is null ? this : Delegation; }
         }
 
         #endregion
@@ -180,7 +180,7 @@ namespace Media.Concepts.Classes.v
         {
             get
             {
-                return object.ReferenceEquals(Prototype, null) ? 
+                return Prototype is null ? 
                     Void : object.ReferenceEquals(Prototype.Delegation, null) 
                         ? Void : Prototype.Delegation.SystemDelegate ?? Void;
             }
@@ -250,7 +250,7 @@ namespace Media.Concepts.Classes.v
         /// <param name="t">t</param>
         /// <param name="v">v</param>
         static void Invalid (T t, out bool v){
-            v = object.ReferenceEquals(t, null);
+            v = t is null;
         }
 
         /// <summary>

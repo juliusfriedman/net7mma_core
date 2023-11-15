@@ -701,7 +701,7 @@ namespace Media.Rtcp
         {
             get
             {
-                if (IsDisposed || false.Equals(Padding) || false.Equals(IsComplete) || Payload.Count.Equals(0)) return Media.Common.MemorySegment.Empty;
+                if (IsDisposed || Padding is false || IsComplete is false || Payload.Count.Equals(0)) return Media.Common.MemorySegment.Empty;
 
                 //return Payload.Skip(Payload.Count - PaddingOctets);
 
@@ -949,7 +949,7 @@ namespace Media.Rtcp
         {
             return payloadType > default(byte) &&
                 implementation is not null &&
-                implementation.IsAbstract.Equals(false) &&
+                implementation.IsAbstract is false &&
                 implementation.IsSubclassOf(RtcpPacketType)
                     ? Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryAdd(ImplementationMap, payloadType, implementation, out _)
                     : false;
@@ -971,11 +971,11 @@ namespace Media.Rtcp
         /// </summary>
         protected override void Dispose(bool disposing)
         {
-            if (false.Equals(disposing) || false.Equals(ShouldDispose)) return;
+            if (disposing is false || ShouldDispose is false) return;
 
             base.Dispose(ShouldDispose);
 
-            if (false.Equals(IsDisposed)) return;
+            if (IsDisposed is false) return;
 
             //If there is a referenced RtpHeader
             if (m_OwnsHeader && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(Header)))
@@ -1011,7 +1011,7 @@ namespace Media.Rtcp
         {
             if (System.Object.ReferenceEquals(this, obj)) return true;
 
-            if ((obj is RtcpPacket).Equals(false)) return false;
+            if ((obj is RtcpPacket) is false) return false;
 
             return Equals(obj as RtcpPacket);
         }
@@ -1032,7 +1032,7 @@ namespace Media.Rtcp
         }
         
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(RtcpPacket a, RtcpPacket b) { return (a == b).Equals(false); }
+        public static bool operator !=(RtcpPacket a, RtcpPacket b) { return (a == b) is false; }
 
         #endregion
 

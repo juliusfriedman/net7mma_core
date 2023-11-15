@@ -117,11 +117,11 @@ namespace Media.Common.Loggers
 
         protected internal override void Dispose(bool disposing)
         {
-            if (disposing.Equals(false)) return;
+            if (disposing is false) return;
 
             base.Dispose(ShouldDispose);
 
-            if (IsDisposed.Equals(false)) return;
+            if (IsDisposed is false) return;
 
             m_FileInfo = null;
 

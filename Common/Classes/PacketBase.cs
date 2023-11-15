@@ -383,7 +383,7 @@
         public bool IsHolding
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Common.IDisposedExtensions.IsNullOrDisposed(Holding).Equals(false); }
+            get { return Common.IDisposedExtensions.IsNullOrDisposed(Holding) is false; }
         }
 
 

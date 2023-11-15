@@ -245,7 +245,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal protected void CheckDisposed()
         {
-            if (false.Equals(IsUndisposed) || IsFinalized || IsDisposed) throw new ObjectDisposedException(GetType().Name);
+            if (IsUndisposed is false || IsFinalized || IsDisposed) throw new ObjectDisposedException(GetType().Name);
         }
 
         //ReleaseResources
@@ -257,7 +257,7 @@ namespace Media.Common
         internal protected virtual void Dispose(bool disposing)
         {
             //Do not dispose when ShouldDispose is false.
-            if (false.Equals(disposing) || false.Equals(ShouldDispose) /*|| State >> 32 > 0*/) return;
+            if (disposing is false || ShouldDispose is false /*|| State >> 32 > 0*/) return;
 
             Destruct();
 
@@ -308,7 +308,7 @@ namespace Media.Common
         void Destruct()
         {
             //If not disposed return.
-            if (false.Equals(ShouldDispose) || IsDisposed) return;
+            if (ShouldDispose is false || IsDisposed) return;
 
             //Call Dispose
             //Dispose(ShouldDispose);            
@@ -319,7 +319,7 @@ namespace Media.Common
             GC.SuppressFinalize(this);
 
             //May already be finalized....
-            if (System.Threading.Interlocked.CompareExchange(ref State, Disposed, Undisposed) != Disposed && IsFinalized.Equals(false)) return;
+            if (System.Threading.Interlocked.CompareExchange(ref State, Disposed, Undisposed) != Disposed && IsFinalized is false) return;
 
             //Virtual
             IsDisposed = true;
@@ -332,7 +332,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public virtual void Dispose()
         {
-            //if (false.Equals(IsUndisposed) || IsFinalized || false.Equals(ShouldDispose) || IsDisposed) return;
+            //if (IsUndisposed is false || IsFinalized || ShouldDispose is false || IsDisposed) return;
 
             Destruct();
         }
@@ -363,7 +363,7 @@ namespace Media.Common
         bool IDisposed.IsDisposed
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return IsUndisposed && false.Equals(IsFinalized) ? false : IsDisposed; }
+            get { return IsUndisposed && IsFinalized is false ? false : IsDisposed; }
         }
 
         /// <summary>
@@ -374,7 +374,7 @@ namespace Media.Common
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return IsUndisposed && false.Equals(IsFinalized) ? false.Equals(IsDisposed) && ShouldDispose : false;
+                return IsUndisposed && IsFinalized is false ? IsDisposed is false && ShouldDispose : false;
             }
         }
     }

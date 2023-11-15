@@ -185,9 +185,9 @@ namespace Media
                 {
 #if NATIVE
                     if (System.Runtime.InteropServices.Marshal.ReadByte(System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<byte>(array, p))
-                        .Equals(System.Runtime.InteropServices.Marshal.ReadByte(System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<byte>(needle, i)).Equals(false))) break;
+                        .Equals(System.Runtime.InteropServices.Marshal.ReadByte(System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<byte>(needle, i)) is false)) break;
 #else
-                    if (array[p].Equals(needle[i]).Equals(false))
+                    if (array[p].Equals(needle[i]) is false)
                     {
                         break;
                     }

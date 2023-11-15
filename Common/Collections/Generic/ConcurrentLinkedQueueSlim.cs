@@ -328,7 +328,7 @@ namespace Media.Common.Collections.Generic
             bool added = false;
 
             do added = TryEnqueue(ref t);
-            while (false.Equals(added));
+            while (added is false);
         }
 
         [System.CLSCompliant(false)]
@@ -364,7 +364,7 @@ namespace Media.Common.Collections.Generic
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal void Clear(bool all, out Node head, out Node tail)
         {
-            if (false.Equals(all))
+            if (all is false)
             {
                 head = First;
 
