@@ -4190,9 +4190,6 @@ namespace Media.Rtsp
                         case SocketError.Success:
                         default:
                             {
-                                //If we didn't send anything send out data now.
-                                if (sent == 0) goto SendData;
-
                                 //If anything was received
                                 if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) &&
                                     received > 0 &&
@@ -4208,10 +4205,9 @@ namespace Media.Rtsp
                                     ///from the construct itself such that instances which utilize or share memory with the construct can safely intepret the data therein.
 
 #if UNSAFE
-                        if (char.IsLetterOrDigit(((*(byte*)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<byte>(m_Buffer.Array, offset))).Equals(false))
+                                    if (char.IsLetterOrDigit(((*(byte*)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<byte>(m_Buffer.Array, offset))).Equals(false))
 #else
-                                    if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient)) &&
-                                        char.IsLetterOrDigit((char)m_Buffer.Array[offset]).Equals(false))
+                                    if (char.IsLetterOrDigit((char)m_Buffer.Array[offset]).Equals(false))
 #endif
                                     {
                                         //Some people just start sending packets hoping that the context will be created dynamically.
@@ -4220,7 +4216,7 @@ namespace Media.Rtsp
 
                                         //Make sure the thread is ready for the RtpClient client
                                         if (m_RtpClient.IsActive.Equals(false)
-                                            && Common.IDisposedExtensions.IsNullOrDisposed(this).Equals(false))
+                                            && Common.IDisposedExtensions.IsNotNullOrDisposed(this))
                                         {
                                             //Store the offset
                                             m_RtpClient.m_SignalOffset = offset;
@@ -4257,6 +4253,9 @@ namespace Media.Rtsp
                                 } //Nothing was received, if the socket is not shared
                                 else if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) && false.Equals(SharesSocket))
                                 {
+                                    //If no data was sent yet, send it now.
+                                    if (sent == 0) goto SendData;
+
                                     //Check for non fatal exceptions and continue to wait
                                     if (++attempt <= m_MaximumTransactionAttempts &&
                                         false.Equals(fatal))
