@@ -2844,16 +2844,16 @@ namespace Media.Rtsp
             {
                 //Parse type from authHeader
 
-                string[] parts = authHeader.Split((char)Common.ASCII.Space);
+                //string[] parts = authHeader.Split((char)Common.ASCII.Space, 2, StringSplitOptions.RemoveEmptyEntries);
 
-                string authType = null;
+                //string authType = null;
 
-                //Warning didn't check 2 parts..
-                if (parts.Length > 0)
-                {
-                    authType = parts[0];
-                    authHeader = parts[1];
-                }
+                ////Warning didn't check 2 parts..
+                //if (parts.Length > 0)
+                //{
+                //    authType = parts[0];
+                //    authHeader = parts[1];
+                //}
 
                 ////should check to ensure wrong type was not used e.g. basic in place of digest...
                 //if (string.Compare(authType, RtspHeaderFields.Authorization.Digest, true) == 0)
