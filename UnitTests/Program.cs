@@ -2269,7 +2269,7 @@ namespace Media.UnitTests
                     var sources = new List<Rtsp.Server.MediaTypes.RtspSource>();
                     for(int i = 1; i <= 9; ++i)
                     {
-                        var source = new Media.Rtsp.Server.MediaTypes.RtspSource($"R2_05{i}", $"rtsp://8.15.251.101:1935/rtplive/R2_05{i}", Rtsp.RtspClient.ClientProtocolType.Tcp, 10 * 1024);
+                        var source = new Media.Rtsp.Server.MediaTypes.RtspSource($"R2_05{i}", $"rtsp://8.15.251.101:1935/rtplive/R2_05{i}", Rtsp.RtspClient.ClientProtocolType.Tcp, 0);
                         source.RtpClient.ThreadEvents = true;
                         source.RtpClient.IListSockets = true;
                         source.RtspClient.DisableKeepAliveRequest = true;
