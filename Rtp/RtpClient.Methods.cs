@@ -2324,11 +2324,11 @@ namespace Media.Rtp
                             //Check for a context which is able to receive data
                             if (Common.IDisposedExtensions.IsNullOrDisposed(tc)
                                 //Active must be true
-                                || false.Equals(tc.IsActive)
+                                || tc.IsActive is false
                                 //If the context does not have continious media it must only receive data for the duration of the media.
-                                || false.Equals(tc.IsContinious) && tc.TimeRemaining < System.TimeSpan.Zero
+                                || tc.IsContinious is false && tc.TimeRemaining < System.TimeSpan.Zero
                                 //There can't be a Goodbye sent or received
-                                || false.Equals(tc.Goodbye == null)) continue;
+                                || tc.Goodbye is not null) continue;
 
                             //Receive Data on the RtpSocket and RtcpSocket, summize the amount of bytes received from each socket.
 
@@ -2385,7 +2385,7 @@ namespace Media.Rtp
                                 receivedRtp += ReceiveData(tc.RtpSocket, ref tc.RemoteRtp, out lastError, rtpEnabled, duplexing, tc.ContextMemory);
 
                                 //Check if an error occured
-                                if (receivedRtp is 0 || false.Equals(lastError == System.Net.Sockets.SocketError.Success))
+                                if (receivedRtp is 0 || lastError is not System.Net.Sockets.SocketError.Success)
                                 {
                                     //Increment for failed receptions
                                     ++tc.m_FailedRtpReceptions;
@@ -2441,7 +2441,7 @@ namespace Media.Rtp
                                     receivedRtcp += ReceiveData(tc.RtcpSocket, ref tc.RemoteRtcp, out lastError, duplexing, rtcpEnabled, tc.ContextMemory);
 
                                     //Check if an error occured
-                                    if (receivedRtcp is 0 || false.Equals(lastError == System.Net.Sockets.SocketError.Success))
+                                    if (receivedRtcp is 0 || lastError is not System.Net.Sockets.SocketError.Success)
                                     {
                                         //Increment for failed receptions
                                         ++tc.m_FailedRtcpReceptions;
@@ -2449,7 +2449,7 @@ namespace Media.Rtp
                                         //Log for the error
                                         Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@SendRecieve RtcpSocket - SocketError = " + lastError + " lastOperation = " + lastOperation + " taken = " + taken);
 
-                                        if (false.Equals(tc.HasAnyRecentActivity))
+                                        if (tc.HasAnyRecentActivity is false)
                                         {
                                             //Indicate the poll was not successful
                                             lastError = System.Net.Sockets.SocketError.TimedOut;
