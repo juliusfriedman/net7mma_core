@@ -2306,7 +2306,7 @@ namespace Media.Rtp
                         ////System.Collections.ArrayList errorSockets = new System.Collections.ArrayList();
 
                         //Loop each context, newly added contexts will be seen on each iteration
-                        for (int i = 0; false.Equals(shouldStop = IsUndisposed is false || m_StopRequested) && i < TransportContexts.Count; ++i)
+                        for (int i = 0; (shouldStop = IsUndisposed is false || m_StopRequested) is false && i < TransportContexts.Count; ++i)
                         {
 
                             //Todo, HandOff
@@ -2426,7 +2426,7 @@ namespace Media.Rtp
                             }
                             
                             //if Rtcp is enabled
-                            if (rtcpEnabled && false.Equals(shouldStop = IsUndisposed is false || m_StopRequested))
+                            if (rtcpEnabled && (shouldStop = IsUndisposed is false || m_StopRequested) is false)
                             {
                                 //Check if reports needs to be received (Sometimes data doesn't flow immediately)
                                 bool needsToReceiveReports = tc.LastRtcpReportReceived.Equals(System.TimeSpan.MinValue) || tc.LastRtcpReportReceived >= tc.m_ReceiveInterval;
