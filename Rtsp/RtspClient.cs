@@ -3561,7 +3561,7 @@ namespace Media.Rtsp
                 try
                 {
                     //Don't really care if the response is received or not (indicate to close the connection)
-                    using (SendTeardown(null, disconnectSocket)) ;
+                    using (SendTeardown(null, disconnectSocket, false, RtspHeaderFields.Connection.Close)) ;
                 }
                 catch
                 {
