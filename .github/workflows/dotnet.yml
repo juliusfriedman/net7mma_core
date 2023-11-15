@@ -14,7 +14,7 @@ jobs:
     strategy:
       matrix:      
         os: [ "macos-latest", "windows-latest", "ubuntu-latest" ]
-        dotnet-version: [ "7.0.x" ]
+        dotnet-version: [ "8.0.x" ]
         
     runs-on: ${{ matrix.os }}
 
