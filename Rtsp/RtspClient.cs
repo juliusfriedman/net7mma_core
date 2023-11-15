@@ -2640,6 +2640,9 @@ namespace Media.Rtsp
                 //Send describe if we need a session description
                 using (var describe = SendDescribe())
                 {
+                    //Some servers will not provide a descibe when it was previously provided on the same connection
+                    if (describe is null) goto Setup;
+
                     //The description is no longer needed
                     describe.IsPersistent = false;
 
@@ -4045,6 +4048,7 @@ namespace Media.Rtsp
                         goto Receive;
                     }
 
+                SendData:
                     //If we can write before the session will end
                     if (IsConnected &&
                         object.ReferenceEquals(m_RtspSocket, null).Equals(false) &&
@@ -4186,6 +4190,9 @@ namespace Media.Rtsp
                         case SocketError.Success:
                         default:
                             {
+                                //If we didn't send anything send out data now.
+                                if (sent == 0) goto SendData;
+
                                 //If anything was received
                                 if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) &&
                                     received > 0 &&
@@ -4833,7 +4840,7 @@ namespace Media.Rtsp
                 Describe:
                     response = SendRtspMessage(describe, out error, true, true, m_MaximumTransactionAttempts) ?? m_LastTransmitted;
 
-                    //Todo, check error
+                    if (response is null) return response;
 
                     //Handle no response
                     //If the remote end point is just sending Interleaved Binary Data out of no where it is possible to continue without a SessionDescription
@@ -5155,7 +5162,7 @@ namespace Media.Rtsp
             }
         }
 
-        public RtspMessage SendTeardown(MediaDescription mediaDescription = null, bool disconnect = false, bool force = false)
+        public RtspMessage SendTeardown(MediaDescription mediaDescription = null, bool disconnect = false, bool force = false, string connection = null)
         {
             RtspMessage response = null;
 
@@ -5210,8 +5217,8 @@ namespace Media.Rtsp
 
                 //Return the result of the Teardown
                 return SendTeardown(Common.IDisposedExtensions.IsNullOrDisposed(mediaDescription) ? m_CurrentLocation : mediaDescription.GetAbsoluteControlUri(CurrentLocation, SessionDescription), 
-                    SessionId, 
-                    RtspHeaderFields.Connection.Close, 
+                    SessionId,
+                    connection, 
                     disconnect);
             }
             catch (Common.TaggedException<RtspClient>)
