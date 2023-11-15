@@ -909,9 +909,7 @@ namespace Media.Rtp
         {
             if (System.Object.ReferenceEquals(this, obj)) return true;
 
-            if (false.Equals((obj is RtpPacket))) return false;
-
-            return Equals(obj as RtpPacket);
+            return obj is RtpPacket rtp && Equals(rtp);
         }
 
         //Packet equals...

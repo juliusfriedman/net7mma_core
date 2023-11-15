@@ -602,9 +602,7 @@ namespace Media.Rtcp
         {
             if(System.Object.ReferenceEquals(this, obj)) return true;
 
-            if (false.Equals((obj is RtcpHeader))) return false;
-
-            return Equals(obj as RtcpHeader);
+            return obj is RtcpHeader header && Equals(header);
         }
 
         #endregion

@@ -934,9 +934,7 @@ namespace Media.Rtsp
         {
             if (System.Object.ReferenceEquals(this, obj)) return true;
 
-            if (false.Equals((obj is RtspMessage))) return false;
-
-            RtspMessage other = obj as RtspMessage;
+            if (obj is not RtspMessage other) return false;
 
             //Fast path doesn't show true equality.
             //other.Created != Created

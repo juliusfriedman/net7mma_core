@@ -1011,9 +1011,7 @@ namespace Media.Rtcp
         {
             if (System.Object.ReferenceEquals(this, obj)) return true;
 
-            if ((obj is RtcpPacket) is false) return false;
-
-            return Equals(obj as RtcpPacket);
+            return obj is RtcpPacket rtcp && Equals(rtcp);
         }
 
         //Packet equals...

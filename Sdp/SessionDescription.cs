@@ -1192,9 +1192,7 @@ namespace Media.Sdp
             //System.Object
             if (object.ReferenceEquals(this, obj)) return true;
 
-            if ((obj is SessionDescription) is false) return false;
-
-            return Equals(obj as SessionDescription);
+            return obj is SessionDescription sdp && Equals(sdp);
         }
 
         /// <summary>
