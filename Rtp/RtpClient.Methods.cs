@@ -492,7 +492,7 @@ namespace Media.Rtp
             if (Common.IDisposedExtensions.IsNullOrDisposed(this) || packets == null) return 0;
 
             //If we don't have an transportContext to send on or the transportContext has not been identified or Rtcp is Disabled or there is no remote rtcp end point
-            if (Common.IDisposedExtensions.IsNullOrDisposed(context) || context.SynchronizationSourceIdentifier.Equals(Common.Binary.Zero) | false.Equals(context.IsRtcpEnabled) | context.RemoteRtcp == null)
+            if (Common.IDisposedExtensions.IsNullOrDisposed(context) || context.SynchronizationSourceIdentifier is Common.Binary.Zero | false.Equals(context.IsRtcpEnabled) | context.RemoteRtcp == null)
             {
                 //Return
                 return 0;
@@ -1468,7 +1468,7 @@ namespace Media.Rtp
                 //{              
 
                 do received += justRecieved = socket.ReceiveFrom(buffer.Array, buffer.Offset + received, buffer.Count - received, System.Net.Sockets.SocketFlags.None, ref remote);
-                while (received.Equals(0) /*|| justRecieved > 0 && received + justRecieved < pmax*/ && socket.Connected);
+                while (received is 0 /*|| justRecieved > 0 && received + justRecieved < pmax*/ && socket.Connected);
 
                 ////Lookup the context to determine if the packet will fit
                 //var context = GetContextBySocket(socket);
@@ -1920,7 +1920,7 @@ namespace Media.Rtp
                         registerX = memory.Count;
 
                         //Don't use 0 as flow control here. Raising what potentially be multiple events would be dumb.
-                        if (registerX.Equals(0))
+                        if (registerX is 0)
                         {
                             offset += sessionRequired;
 
@@ -2006,7 +2006,7 @@ namespace Media.Rtp
         internal protected /*virtual*/ void ParseAndHandleData(Common.MemorySegment memory, ref bool parseRtcp, ref bool parseRtp, ref int remaining, ref int expected)
         {
 
-            if (Common.IDisposedExtensions.IsNullOrDisposed(memory) || memory.Count.Equals(0) || remaining <= 0) return;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(memory) || memory.Count is 0 || remaining <= 0) return;
 
             //handle demultiplex scenarios e.g. RFC5761
             if (parseRtcp.Equals(parseRtp) && memory.Count > RFC3550.CommonHeaderBits.Size)
@@ -2385,7 +2385,7 @@ namespace Media.Rtp
                                 receivedRtp += ReceiveData(tc.RtpSocket, ref tc.RemoteRtp, out lastError, rtpEnabled, duplexing, tc.ContextMemory);
 
                                 //Check if an error occured
-                                if (receivedRtp.Equals(0) || false.Equals(lastError == System.Net.Sockets.SocketError.Success))
+                                if (receivedRtp is 0 || false.Equals(lastError == System.Net.Sockets.SocketError.Success))
                                 {
                                     //Increment for failed receptions
                                     ++tc.m_FailedRtpReceptions;
@@ -2441,7 +2441,7 @@ namespace Media.Rtp
                                     receivedRtcp += ReceiveData(tc.RtcpSocket, ref tc.RemoteRtcp, out lastError, duplexing, rtcpEnabled, tc.ContextMemory);
 
                                     //Check if an error occured
-                                    if (receivedRtcp.Equals(0) || false.Equals(lastError == System.Net.Sockets.SocketError.Success))
+                                    if (receivedRtcp is 0 || false.Equals(lastError == System.Net.Sockets.SocketError.Success))
                                     {
                                         //Increment for failed receptions
                                         ++tc.m_FailedRtcpReceptions;
@@ -2492,7 +2492,7 @@ namespace Media.Rtp
                             default:
                                 {
                                     //If there are no packets outgoing
-                                    if ((m_OutgoingRtcpPackets.Count + m_OutgoingRtpPackets.Count).Equals(0))
+                                    if ((m_OutgoingRtcpPackets.Count + m_OutgoingRtpPackets.Count) is 0)
                                     {
 
                                         //Just Take no action (leave Priority Normal)

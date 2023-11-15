@@ -293,7 +293,7 @@ namespace Media.Common
 
             foreach (Common.MemorySegment ms in Segments)
             {
-                if (ms.Count.Equals(Common.Binary.Zero)) continue;
+                if (ms.Count is Common.Binary.Zero) continue;
 
                 min = Binary.Min(count, ms.Count);
 

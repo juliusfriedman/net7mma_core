@@ -1974,7 +1974,7 @@ namespace Media.Rtsp
                         received = session.LastRequest.CompleteFrom(null, data);
 
                         //If nothing was recieved then do nothing.
-                        if (received.Equals(0))
+                        if (received is 0)
                         {
                             Media.Common.ILoggingExtensions.Log(Logger, "Session:" + session.Id + "Did not use buffer of " + data.Count + " bytes.");
                         }
@@ -2027,7 +2027,7 @@ namespace Media.Rtsp
                     session.LastRequest = request;
 
                     //Ensure the session is still connected.
-                    if (session.m_RtspSocket.Available.Equals(0)) session.SendRtspData(Media.Common.MemorySegment.EmptyBytes);
+                    if (session.m_RtspSocket.Available is 0) session.SendRtspData(Media.Common.MemorySegment.EmptyBytes);
                     else session.StartReceive();
                     //}
                 }
@@ -2728,7 +2728,7 @@ namespace Media.Rtsp
                 else
                 {
                     //Test the connectivity and start another receive
-                    if (session.m_RtspSocket.Available.Equals(0)) session.SendRtspData(Media.Common.MemorySegment.EmptyBytes);
+                    if (session.m_RtspSocket.Available is 0) session.SendRtspData(Media.Common.MemorySegment.EmptyBytes);
                     else session.StartReceive();
                 }
             }
@@ -3042,7 +3042,7 @@ namespace Media.Rtsp
             Sdp.MediaDescription mediaDescription;
 
             if ((symbolIndex = track.IndexOf('=')) >= 0 && int.TryParse(Media.Common.ASCII.ExtractNumber(track, symbolIndex, track.Length), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out trackId)) mediaDescription = found.SessionDescription.GetMediaDescription(trackId - 1);
-            else mediaDescription = found.SessionDescription.MediaDescriptions.FirstOrDefault(md => string.Compare(track, md.MediaType.ToString(), true, System.Globalization.CultureInfo.InvariantCulture).Equals(0));
+            else mediaDescription = found.SessionDescription.MediaDescriptions.FirstOrDefault(md => string.Compare(track, md.MediaType.ToString(), true, System.Globalization.CultureInfo.InvariantCulture) is 0);
 
             ////Find the MediaDescription for the request based on the track variable
             //foreach (Sdp.MediaDescription md in found.SessionDescription.MediaDescriptions)
@@ -3234,7 +3234,7 @@ namespace Media.Rtsp
 
                 if (string.IsNullOrWhiteSpace(connectionHeader) is false)
                 {
-                    if (string.Compare(connectionHeader.Trim(), RtspHeaderFields.Connection.Close, true).Equals(0))
+                    if (string.Compare(connectionHeader.Trim(), RtspHeaderFields.Connection.Close, true) is 0)
                     {
                         TryDisposeAndRemoveSession(session);
                     }

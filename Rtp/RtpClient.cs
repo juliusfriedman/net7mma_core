@@ -244,7 +244,7 @@ namespace Media.Rtp
                 int ttl = 255;
 
                 //If no remoteSsrc was given then check for one
-                if (remoteSsrc.Equals(0))
+                if (remoteSsrc is 0)
                 {
                     //Check for SSRC Attribute Line on the Media Description
                     //a=ssrc:<ssrc-id> <attribute>
@@ -286,7 +286,7 @@ namespace Media.Rtp
                     if (Media.Sdp.Lines.SessionBandwidthLine.TryParseBandwidthDirectives(mediaDescription, out reportReceivingEvery, out reportSendingEvery, out asData))
                     {
                         //Determine if rtcp is disabled in the media description
-                        bool rtcpDisabled = reportReceivingEvery.Equals(0) && reportSendingEvery.Equals(0);
+                        bool rtcpDisabled = reportReceivingEvery is 0 && reportSendingEvery is 0;
 
                         //If Rtcp is not disabled then this will set the read and write timeouts.
                         if (rtcpDisabled is false)
@@ -398,7 +398,7 @@ namespace Media.Rtp
                     if (configure is not null) tc.ConfigureSocket = configure;
 
                     //Check for udp if no existing socket was given
-                    if (hasSocket is false && string.Compare(mediaDescription.MediaProtocol, Media.Rtp.RtpClient.RtpAvpProfileIdentifier, true).Equals(0))
+                    if (hasSocket is false && string.Compare(mediaDescription.MediaProtocol, Media.Rtp.RtpClient.RtpAvpProfileIdentifier, true) is 0)
                     {
                         //Registers must be stored, it might make more sense to leave the defaults as is and change the parameters of this function to then
                         //- allow for sockets to be given to the Initialize e.g. a Initializer delegate.
@@ -413,10 +413,10 @@ namespace Media.Rtp
 
                         //Create the sockets and connect
                         tc.Initialize(localIp, remoteIp, //LocalIP, RemoteIP
-                            localPort.Equals(0) ? localPort : localPort++, //LocalRtp
-                            localPort.Equals(0) ? localPort : localPort++, //LocalRtcp                            
+                            localPort is 0 ? localPort : localPort++, //LocalRtp
+                            localPort is 0 ? localPort : localPort++, //LocalRtcp                            
                             rtpPort ?? mediaDescription.MediaPort, //RemoteRtp
-                            rtcpPort ?? (false.Equals(mediaDescription.MediaPort.Equals(0)) ? mediaDescription.MediaPort + 1 : mediaDescription.MediaPort)); //RemoteRtcp
+                            rtcpPort ?? (false.Equals(mediaDescription.MediaPort is 0) ? mediaDescription.MediaPort + 1 : mediaDescription.MediaPort)); //RemoteRtcp
                     }
                     else if (hasSocket)//If had a socket use it
                     {
@@ -941,7 +941,7 @@ namespace Media.Rtp
             internal bool InDiscovery
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return ValidRtpPacketsReceived < MinimumSequentialValidRtpPackets && RemoteSynchronizationSourceIdentifier.Equals(Common.Binary.Zero); }
+                get { return ValidRtpPacketsReceived < MinimumSequentialValidRtpPackets && RemoteSynchronizationSourceIdentifier is Common.Binary.Zero; }
             }
 
             /// <summary>
@@ -1622,7 +1622,7 @@ namespace Media.Rtp
 
                 if (dataChannel.Equals(controlChannel)) throw new InvalidOperationException("dataChannel and controlChannel must be unique.");
 
-                if (ssrc.Equals(senderSsrc) && false.Equals(ssrc.Equals(0))) throw new InvalidOperationException("ssrc and senderSsrc must be unique.");
+                if (ssrc.Equals(senderSsrc) && false.Equals(ssrc is 0)) throw new InvalidOperationException("ssrc and senderSsrc must be unique.");
 
                 if (minimumSequentialRtpPackets < 0) throw new InvalidOperationException("minimumSequentialRtpPackets must be >= 0");
 
@@ -1678,11 +1678,11 @@ namespace Media.Rtp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             internal protected void AssignIdentity(int seed = SendersReport.PayloadType)
             {
-                if (SynchronizationSourceIdentifier.Equals(Common.Binary.Zero))
+                if (SynchronizationSourceIdentifier is Common.Binary.Zero)
                 {
                     //Generate the id per RFC3550
                     do SynchronizationSourceIdentifier = RFC3550.Random32(seed);
-                    while (SynchronizationSourceIdentifier.Equals(Common.Binary.Zero) || SynchronizationSourceIdentifier.Equals(RemoteSynchronizationSourceIdentifier));
+                    while (SynchronizationSourceIdentifier is Common.Binary.Zero || SynchronizationSourceIdentifier.Equals(RemoteSynchronizationSourceIdentifier));
                 }
             }
 
@@ -2523,13 +2523,13 @@ namespace Media.Rtp
             }
 
             //Only if the packet was not addressed to a unique party with the id of 0 and there is a null context or the context is in discovery.
-            if (false.Equals(partyId.Equals(0)) && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(transportContext)))// && transportContext.InDiscovery)                
+            if (false.Equals(partyId is 0) && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(transportContext)))// && transportContext.InDiscovery)                
             {
                 //Cache the payloadType and blockCount
                 int blockCount = packet.BlockCount;
 
                 //Before checking the type ensure there is a party id and block count
-                ////if (blockCount.Equals(0))
+                ////if (blockCount is 0)
                 ////{
                 ////    //If there was a context and the remote party has not yet been identified.
                 ////    if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(transportContext)) &&
@@ -2560,7 +2560,7 @@ namespace Media.Rtp
                         {
                             int blockId = reportBlock.BlockIdentifier;
 
-                            if (blockCount.Equals(0)) continue;
+                            if (blockCount is 0) continue;
 
                             //Attempt to obtain a context by the identifier in the report block
                             transportContext = GetContextBySourceId(blockId);
@@ -2608,7 +2608,7 @@ namespace Media.Rtp
                             //Iterate each party leaving
                             foreach (int party in sourceList)
                             {
-                                if (party.Equals(0)) continue;
+                                if (party is 0) continue;
 
                                 //Attempt to obtain a context by the identifier in the report block
                                 transportContext = GetContextBySourceId(party);
@@ -2646,7 +2646,7 @@ namespace Media.Rtp
                         {
                             int blockId = reportBlock.BlockIdentifier;
 
-                            if (blockCount.Equals(0)) continue;
+                            if (blockCount is 0) continue;
 
                             //Attempt to obtain a context by the identifier in the report block
                             transportContext = GetContextBySourceId(blockId);
@@ -2654,11 +2654,11 @@ namespace Media.Rtp
                             //If there was a context and the remote party has not yet been identified.
                             if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(transportContext)) && 
                                 transportContext.Version == packetVersion) //&&
-                                //transportContext.RemoteSynchronizationSourceIdentifier.Equals(0))
+                                //transportContext.RemoteSynchronizationSourceIdentifier is 0)
                             {
 
                                 //Identify the remote party by this id. (This would be the id they think we have?)
-                                if (transportContext.RemoteSynchronizationSourceIdentifier.Equals(0))
+                                if (transportContext.RemoteSynchronizationSourceIdentifier is 0)
                                 {
                                     Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@HandleIncomingRtcpPacket Set RemoteSynchronizationSourceIdentifier @ SR " + transportContext.SynchronizationSourceIdentifier + " to=" + transportContext.RemoteSynchronizationSourceIdentifier + "RR blockId=" + blockId + " NtpTimestamp=" + transportContext.NtpTimestamp + " RtpTimestamp=" + transportContext.RtpTimestamp + " RtpJitter=" + transportContext.RtpJitter + " NtpOffset=" + transportContext.NtpOffset);
 
@@ -3014,7 +3014,7 @@ namespace Media.Rtp
                 //if (transportContext.InDiscovery || transportContext.IsValid && false.Equals(partyId.Equals(transportContext.RemoteSynchronizationSourceIdentifier)))
                 //{
                 //    //If not yet set, set the remote id 
-                //    if (transportContext.RemoteSynchronizationSourceIdentifier.Equals(0))
+                //    if (transportContext.RemoteSynchronizationSourceIdentifier is 0)
                 //    {
                 //        transportContext.RemoteSynchronizationSourceIdentifier = partyId;
 
@@ -3067,7 +3067,7 @@ namespace Media.Rtp
                 //        //SendGoodbye(transportContext, System.Text.Encoding.UTF8.GetBytes("ssrc"), transportContext.SynchronizationSourceIdentifier, true, null, false);
 
                 //        //Option AssumeIdentity / CoalesceIdentities
-                //        if(partyId.Equals(0)) packet.SynchronizationSourceIdentifier = transportContext.RemoteSynchronizationSourceIdentifier;
+                //        if(partyId is 0) packet.SynchronizationSourceIdentifier = transportContext.RemoteSynchronizationSourceIdentifier;
                 //    }
                 //}
 
@@ -3381,7 +3381,7 @@ namespace Media.Rtp
 
             InterleavedDataHandler action = OutOfBandData;
 
-            if (action is null || data == null || length.Equals(Common.Binary.Zero)) return;
+            if (action is null || data == null || length is Common.Binary.Zero) return;
 
             if (m_ThreadEvents)
             {
@@ -4054,7 +4054,7 @@ namespace Media.Rtp
 
                 int amountOfContexts = TransportContexts.Count;
 
-                if (amountOfContexts.Equals(Common.Binary.Zero)) return true;
+                if (amountOfContexts is Common.Binary.Zero) return true;
 
                 //Obtain the summation of the total bytes sent over the amount of context's
                 long totalReceived = TotalBytesReceieved;

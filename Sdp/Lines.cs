@@ -682,7 +682,7 @@ namespace Media.Sdp
                 //Needs to parse with seperator 
                 //Currently
                 //ToString has logic which prevents this from mattering.
-                if (line.m_Parts.Count.Equals(1))
+                if (line.m_Parts.Count is 1)
                 {
                     string temp = line.m_Parts[0];
 
@@ -882,7 +882,7 @@ namespace Media.Sdp
                 m_Parts.Clear();
 
                 //Needs to parse with seperator (ToString is hacked up to prevent this from mattering)
-                if (line.m_Parts.Count.Equals(1))
+                if (line.m_Parts.Count is 1)
                 {
                     string temp = line.m_Parts[0];
 
@@ -2337,7 +2337,7 @@ namespace Media.Sdp
             public RtpMapLine(SessionDescriptionLine line)
            : base(line)
             {
-                if (m_Parts.Count.Equals(0)
+                if (m_Parts.Count is 0
                     ||
                     false.Equals(AttributeName.StartsWith(AttributeFields.RtpMap, StringComparison.OrdinalIgnoreCase))) throw new InvalidOperationException("Not a RtpMap line");
                 //Seperator?
@@ -2370,7 +2370,7 @@ namespace Media.Sdp
             public RtpMapLine(string[] sdpLines, ref int index, string seperator = null, int partCount = 1)
                 : base(sdpLines, ref index, seperator ?? SessionDescription.ForwardSlashString, partCount)
             {
-                if (m_Parts.Count.Equals(0)
+                if (m_Parts.Count is 0
                     ||
                     false.Equals(AttributeName.StartsWith(AttributeFields.RtpMap, StringComparison.OrdinalIgnoreCase))) throw new InvalidOperationException("Not a RtpMap line");
             }
@@ -2496,7 +2496,7 @@ namespace Media.Sdp
             public FormatTypeLine(SessionDescriptionLine line)
                 : base(line)
             {
-                if (m_Parts.Count.Equals(0)
+                if (m_Parts.Count is 0
                     ||
                     false.Equals(AttributeName.StartsWith(AttributeFields.FormatType, StringComparison.OrdinalIgnoreCase))) throw new InvalidOperationException("Not a FormatTypeLine line");
                 //else if (m_Parts.Count == 1)
@@ -2538,7 +2538,7 @@ namespace Media.Sdp
             public FormatTypeLine(string[] sdpLines, ref int index, string seperator = null, int partCount = 1)
                 : base(sdpLines, ref index, seperator ?? SessionDescription.SemiColonString, partCount)
             {
-                if (m_Parts.Count.Equals(0)
+                if (m_Parts.Count is 0
                     ||
                     false.Equals(AttributeName.StartsWith(AttributeFields.FormatType, StringComparison.OrdinalIgnoreCase))) throw new InvalidOperationException("Not a FormatTypeLine line");
                     //false == GetPart(0).StartsWith(AttributeFields.FormatType, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("Not a FormatTypeLine line");

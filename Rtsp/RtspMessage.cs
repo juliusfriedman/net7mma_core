@@ -665,7 +665,7 @@ namespace Media.Rtsp
             //Empty body or no ContentLength
             //If the message cannot have a body it is parsed.
             //If the content length was set to 0 on purpose than this logic needs to be changed to continue parsing.
-            if (CanHaveBody is false || m_ContentLength.Equals(0)) return true;
+            if (CanHaveBody is false || m_ContentLength is 0) return true;
 
             //Get the decoder to use for the body
             Encoding decoder = ParseContentEncoding(false, FallbackToDefaultEncoding);
@@ -708,7 +708,7 @@ namespace Media.Rtsp
             {
                 //Todo, copy or annotate, DO NOT ALLOCATE TO STRING...
 
-                if (existingBodySize.Equals(0))
+                if (existingBodySize is 0)
                     m_Body = decoder.GetString(buffer, position, Media.Common.Binary.Min(ref available, ref remaining));
                 else                     //Append to the existing body
                     m_Body += decoder.GetString(buffer, position, Media.Common.Binary.Min(ref available, ref remaining));

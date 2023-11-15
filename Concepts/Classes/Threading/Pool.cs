@@ -247,8 +247,8 @@ namespace Media.Concepts.Classes.Threading
         {
             get
             {
-                if(Slots.Equals(0)) return -(Whole * m_Leases.Count);
-                else if (m_Leases.Count.Equals(0)) return -(Whole * Slots);
+                if(Slots is 0) return -(Whole * m_Leases.Count);
+                else if (m_Leases.Count is 0) return -(Whole * Slots);
                 return (m_Leases.Count / Slots) / Whole;
             }
         }

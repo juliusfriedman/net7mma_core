@@ -628,12 +628,12 @@ namespace Media.Sdp
             try
             {
                 //Ensure not a bounded end and that the end time is less than now
-                if (false.Equals(td.StopTime.Equals(0))
+                if (false.Equals(td.StopTime is 0)
                     &&
                     td.NtpStopDateTime >= DateTime.UtcNow) return false;
 
                 //Ensure start time is not bounded and that the start time is greater than now
-                if (false.Equals(td.StartTime.Equals(0))
+                if (false.Equals(td.StartTime is 0)
                     &&
                     td.NtpStartDateTime > DateTime.UtcNow) return false;
 
@@ -645,7 +645,7 @@ namespace Media.Sdp
             catch
             {
                 //Out of range values for conversion, assume true if end is unbounded
-                if (false.Equals(td.StopTime.Equals(0))) return false;
+                if (false.Equals(td.StopTime is 0)) return false;
             }
             finally
             {

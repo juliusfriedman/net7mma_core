@@ -110,7 +110,7 @@ namespace Media.Common.Extensions.Encoding
 
             int max;
 
-            if (count.Equals(Common.Binary.Zero) || Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer, out max))
+            if (count is Common.Binary.Zero || Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer, out max))
             {
                 result = null;
 
@@ -121,7 +121,7 @@ namespace Media.Common.Extensions.Encoding
             max -= offset;
 
             //The smaller of the two, max and count
-            if ((count = Common.Binary.Min(ref max, ref count)).Equals(0)) return false;
+            if ((count = Common.Binary.Min(ref max, ref count)) is 0) return false;
 
             bool sawDelimit = false;
 
@@ -160,7 +160,7 @@ namespace Media.Common.Extensions.Encoding
 #endif
 
                 //If there are not enough bytes to decode the char
-                if (justRead.Equals(Common.Binary.Zero))
+                if (justRead is Common.Binary.Zero)
                 {
                     break;
                 }
@@ -199,7 +199,7 @@ namespace Media.Common.Extensions.Encoding
                 return sawDelimit;
             }
 
-            result = builder.Length.Equals(Common.Binary.Zero) ? string.Empty : builder.ToString();
+            result = builder.Length is Common.Binary.Zero ? string.Empty : builder.ToString();
 
             //Take the amount of bytes in the string as what was read.
             read = encoding.GetByteCount(result);
@@ -235,7 +235,7 @@ namespace Media.Common.Extensions.Encoding
 
             if (delimits == null) delimits = EmptyChar;
 
-            if (stream == null || false.Equals(stream.CanRead) || count.Equals(Common.Binary.Zero))
+            if (stream == null || false.Equals(stream.CanRead) || count is Common.Binary.Zero)
             {
                 result = null;
 

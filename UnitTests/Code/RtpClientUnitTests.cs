@@ -822,7 +822,7 @@ a=sendonly";
                 using (Rtp.RtpClient test = Rtp.RtpClient.FromSessionDescription(sdp))
                 {
                     //Verify that there are the expected amount of context's
-                    if (false.Equals(test.GetTransportContexts().Count().Equals(1))) throw new System.Exception("Unexpected amount of TransportContext's");
+                    if (false.Equals(test.GetTransportContexts().Count() is 1)) throw new System.Exception("Unexpected amount of TransportContext's");
 
                     Rtp.RtpClient.TransportContext firstContext = test.GetTransportContexts().First();
 

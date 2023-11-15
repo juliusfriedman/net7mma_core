@@ -378,7 +378,7 @@ namespace Media.Sdp
                 bool hadValueWithSetVersion = m_OriginatorLine is not null && m_OriginatorLine.SessionVersion.Equals(Common.Binary.LongZero) is false;
 
                 if (hadValueWithSetVersion && 
-                    string.Compare(value, m_OriginatorLine.ToString(), StringComparison.InvariantCultureIgnoreCase).Equals(0)) return;
+                    string.Compare(value, m_OriginatorLine.ToString(), StringComparison.InvariantCultureIgnoreCase) is 0) return;
 
                 var token = BeginUpdate();
 
@@ -402,7 +402,7 @@ namespace Media.Sdp
                 if (IsDisposed) return;
 
                 if (m_NameLine is not null && 
-                    string.Compare(value, m_NameLine.SessionName, StringComparison.InvariantCultureIgnoreCase).Equals(0)) return;
+                    string.Compare(value, m_NameLine.SessionName, StringComparison.InvariantCultureIgnoreCase) is 0) return;
 
                 var token = BeginUpdate();
 
@@ -430,7 +430,7 @@ namespace Media.Sdp
 
                 if (string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException();
 
-                if (m_OriginatorLine is null || string.Compare(value, m_OriginatorLine.SessionId, StringComparison.InvariantCultureIgnoreCase).Equals(0)) return;
+                if (m_OriginatorLine is null || string.Compare(value, m_OriginatorLine.SessionId, StringComparison.InvariantCultureIgnoreCase) is 0) return;
 
                 var token = BeginUpdate();
 
