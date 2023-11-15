@@ -1772,17 +1772,17 @@ namespace Media.UnitTests
                         //Attach a logger
                         client.Logger = new Media.Common.Loggers.ConsoleLogger();
 
-                    //Enable echoing headers
-                    //client.EchoXHeaders = true;
+                        //Enable echoing headers
+                        //client.EchoXHeaders = true;
 
-                    //Enable sending blocksize header (sometimes helpful for better bandwidth utilization)
-                    //client.SendBlocksize = true;
+                        //Enable sending blocksize header (sometimes helpful for better bandwidth utilization)
+                        //client.SendBlocksize = true;
 
-                    //If UserAgent should be sent.
-                    //client.SendUserAgent = true;
-                    //client.UserAgent = "LibVLC/2.1.5 (LIVE555 Streaming Media v2014.05.27)";
+                        //If UserAgent should be sent.
+                        //client.SendUserAgent = true;
+                        //client.UserAgent = "LibVLC/2.1.5 (LIVE555 Streaming Media v2014.05.27)";
 
-
+                        //client.DisableKeepAliveRequest = true;
                 Start:
 
                         //Allow the client to switch protocols if data is not received.
@@ -2272,7 +2272,7 @@ namespace Media.UnitTests
                         var source = new Media.Rtsp.Server.MediaTypes.RtspSource($"R2_05{i}", $"rtsp://8.15.251.101:1935/rtplive/R2_05{i}", Rtsp.RtspClient.ClientProtocolType.Tcp, 10 * 1024);
                         source.RtpClient.ThreadEvents = true;
                         source.RtpClient.IListSockets = true;
-                        source.RtpClient.RtcpEnabled = false;
+                        source.RtspClient.DisableKeepAliveRequest = true;
                         server.TryAddMedia(source);
                         sources.Add(source);
                     }
