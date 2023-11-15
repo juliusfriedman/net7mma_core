@@ -1739,19 +1739,15 @@ namespace Media.Rtsp//.Server
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal void RemoveSource(Media.Rtsp.Server.IMediaSource source)
         {
-            if (source is RtpSource)
+            if (source is RtpSource rtpSource && Common.IDisposedExtensions.IsNotNullOrDisposed(rtpSource.RtpClient))
             {
-                RtpSource rtpSource = source as RtpSource;
-                if (Common.IDisposedExtensions.IsNullOrDisposed(rtpSource.RtpClient).Equals(false))
-                {
-                    //For each TransportContext in the RtpClient
-                    foreach (RtpClient.TransportContext tc in rtpSource.RtpClient.GetTransportContexts()) Attached.Remove(tc);
+                //For each TransportContext in the RtpClient
+                foreach (RtpClient.TransportContext tc in rtpSource.RtpClient.GetTransportContexts()) Attached.Remove(tc);
 
-                    //Detach events
-                    rtpSource.RtpClient.RtcpPacketReceieved -= OnSourceRtcpPacketRecieved;
-                    rtpSource.RtpClient.RtpPacketReceieved -= OnSourceRtpPacketRecieved;
-                    rtpSource.RtpClient.RtpFrameChanged -= OnSourceFrameChanged;
-                }
+                //Detach events
+                rtpSource.RtpClient.RtcpPacketReceieved -= OnSourceRtcpPacketRecieved;
+                rtpSource.RtpClient.RtpPacketReceieved -= OnSourceRtpPacketRecieved;
+                rtpSource.RtpClient.RtpFrameChanged -= OnSourceFrameChanged;
             }
 
             Playing.Remove(source.Id);
