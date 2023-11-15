@@ -262,7 +262,7 @@ namespace Media.Rtp
                 || //OR the call has not been forced AND the context IsRtcpEnabled AND the context is active
                 (force is false && context.IsRtcpEnabled && context.IsActive
                 && //AND the final Goodbye was sent already
-                object.ReferenceEquals(context.Goodbye, null) is false && 
+                context.Goodbye is not null && 
                 context.Goodbye.Transferred.HasValue))
             {
                 //Indicate nothing was sent
@@ -361,7 +361,7 @@ namespace Media.Rtp
                 && //AND the call has not been forced AND the context IsRtcpEnabled 
                 (force is false && context.IsRtcpEnabled)
                 // OR there is no RtcpSocket
-                || object.ReferenceEquals(context.RtcpSocket, null))
+                || context.RtcpSocket is null)
             {
                 //Indicate nothing was sent
                 return 0;
@@ -751,7 +751,7 @@ namespace Media.Rtp
             }
 
             //Calulcate for the currently inactive time period
-            if (object.ReferenceEquals(context.Goodbye, null) &&
+            if (context.Goodbye is null &&
                 false.Equals(context.HasAnyRecentActivity))
             {
                 //Set the amount of time inactive
@@ -801,7 +801,7 @@ namespace Media.Rtp
                 if (c.MediaDescription.MediaType == mediaDescription.MediaType &&
                     c.MediaDescription.MediaFormat.Equals(mediaDescription.MediaFormat, System.StringComparison.InvariantCultureIgnoreCase)
                     ||
-                    object.ReferenceEquals(c.MediaDescription.ControlLine, null) is false &&
+                    c.MediaDescription.ControlLine is null &&
                     c.MediaDescription.ControlLine.Equals(mediaDescription.ControlLine)) break;
 
                 c = null;
@@ -878,7 +878,7 @@ namespace Media.Rtp
             {
                 c = TransportContexts[i];
 
-                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(c)) && c.IsActive && object.ReferenceEquals(c.RtpSocket, null) is false && c.RtpSocket.Handle == socketHandle || object.ReferenceEquals(c.RtcpSocket, null) is false && c.RtcpSocket.Handle == socketHandle) break;
+                if (Common.IDisposedExtensions.IsNullOrDisposed(c) is false && c.IsActive && c.RtpSocket is not null && c.RtpSocket.Handle == socketHandle || c.RtcpSocket is not null && c.RtcpSocket.Handle == socketHandle) break;
 
                 c = null;
             }

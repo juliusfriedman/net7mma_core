@@ -2192,7 +2192,7 @@ namespace Media.Rtsp
                 {
                     return;
                 }//Ensure the session is added to the connected clients if it has not been already.
-                else if (object.ReferenceEquals(session.m_Contained, null)) TryAddSession(session);
+                else if (session.m_Contained is null) TryAddSession(session);
                 
                 //Check for session moved from another process.
                 //else if (session.m_Contained != null && session.m_Contained != this) return;

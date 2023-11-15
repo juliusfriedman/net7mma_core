@@ -2189,7 +2189,7 @@ namespace Media.Rtp
                 }
 
                 //If a different socket is used for rtcp configure it also
-                if (object.ReferenceEquals((RtcpSocket = rtcpSocket), null) is false)
+                if ((RtcpSocket = rtcpSocket) is not null)
                 {
                     //If the socket is not the same as the RtcpSocket configure it also
                     if ((RtpSocket.Handle == RtcpSocket.Handle) is false)
