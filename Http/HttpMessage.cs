@@ -2034,10 +2034,10 @@ namespace Media.Http
             if (string.IsNullOrWhiteSpace(name)) return false;
 
             //Get the header value of the given headerName
-            string headerValue = GetHeaderValue(name, out headerName);
+            _ = GetHeaderValue(name, out headerName);
 
             //The name was contained if name is not null
-            return false == headerName is null;// is false;
+            return headerName is not null;// is false;
         }
 
         internal bool ContainsEntityHeader(string name, out string headerName)
@@ -2049,7 +2049,7 @@ namespace Media.Http
             if (string.IsNullOrWhiteSpace(name)) return false;
 
             //Get the header value of the given headerName
-            string headerValue = GetEntityHeaderValue(name, out headerName);
+            _ = GetEntityHeaderValue(name, out headerName);
 
             //The name was contained if name is not null
             return headerName is not null;
@@ -2059,14 +2059,14 @@ namespace Media.Http
         {
             if (IsDisposed && IsPersistent is false) return false;
 
-            return ContainsHeader(name, out name);
+            return ContainsHeader(name, out _);
         }
 
         public virtual bool ContainsEntityHeader(string name)
         {
             if (IsDisposed && IsPersistent is false) return false;
 
-            return ContainsEntityHeader(name, out name);
+            return ContainsEntityHeader(name, out _);
         }
 
         /// <summary>
