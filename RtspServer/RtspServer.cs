@@ -1484,7 +1484,7 @@ namespace Media.Rtsp
             DisableUnreliableTransport();
 
             //Stop maintaining the server
-            if (false.Equals(m_Maintainer == null))
+            if (m_Maintainer is not null)
             {
                 m_Maintainer.Dispose();
 
@@ -2828,7 +2828,7 @@ namespace Media.Rtsp
 
                     //Should use auth-int and qop
 
-                    authenticateHeader = string.Format(System.Globalization.CultureInfo.InvariantCulture, "Digest username={0},realm={1},nonce={2},cnonce={3}", requiredCredential.UserName, (string.IsNullOrWhiteSpace(requiredCredential.Domain) ? ServerName : requiredCredential.Domain), ((long)(Utility.Random.Next(int.MaxValue) << 32 | (Utility.Random.Next(int.MaxValue)))).ToString("X"), Utility.Random.Next(int.MaxValue).ToString("X"));
+                    authenticateHeader = string.Format(System.Globalization.CultureInfo.InvariantCulture, "Digest username={0},realm={1},nonce={2},cnonce={3}", requiredCredential.UserName, (string.IsNullOrWhiteSpace(requiredCredential.Domain) ? ServerName : requiredCredential.Domain), (((long)Utility.Random.Next(int.MaxValue)) << 32 | (long)(Utility.Random.Next(int.MaxValue))).ToString("X"), Utility.Random.Next(int.MaxValue).ToString("X"));
                 }
                 else if (object.ReferenceEquals(requiredCredential = RequiredCredentials.GetCredential(sourceLocation, RtspHeaderFields.Authorization.Basic), null) is false)
                 {
