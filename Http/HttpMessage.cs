@@ -2598,9 +2598,7 @@ namespace Media.Http
         {
             if (object.ReferenceEquals(this, obj)) return true;
 
-            if ((obj is HttpMessage) is false) return false;
-
-            return Equals(obj as HttpMessage);
+            return obj is HttpMessage http && Equals(http);
         }
 
         #endregion
