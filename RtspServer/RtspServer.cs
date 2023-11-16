@@ -3366,10 +3366,9 @@ namespace Media.Rtsp
             {
                 parts = authHeader.Split((char)Common.ASCII.Space);
 
-                if (parts.Length > 0)
+                if (parts.Length > 1)
                 { 
                     authType = parts[0];
-
                     authHeader = parts[1];
                 }
 
