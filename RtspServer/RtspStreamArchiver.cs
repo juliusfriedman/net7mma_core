@@ -57,20 +57,19 @@ namespace Media.Rtsp.Server
         {
             if (stream == null) return;
 
-            RtpTools.RtpDump.Program program;
-            if (false == Attached.TryGetValue(stream, out program)) return;
+            if (false == Attached.TryGetValue(stream, out RtpTools.RtpDump.Program program)) return;
 
-            if (packet is Rtp.RtpPacket p) program.Writer.WritePacket(p);
-            else program.Writer.WritePacket(packet as Rtcp.RtcpPacket);
+            if (packet is Rtp.RtpPacket p)
+                program.Writer.WritePacket(p);
+            else
+                program.Writer.WritePacket(packet as Rtcp.RtcpPacket);
         }
 
         public virtual void Start(IMedia stream, RtpTools.FileFormat format = RtpTools.FileFormat.Binary)
         {
-
-            if (stream is RtpSource)
+            if (stream is RtpSource p)
             {
-                RtpTools.RtpDump.Program program;
-                if (Attached.TryGetValue(stream, out program)) return;
+                if (Attached.TryGetValue(stream, out RtpTools.RtpDump.Program program)) return;
 
                 Prepare(stream);
 
@@ -78,39 +77,36 @@ namespace Media.Rtsp.Server
 
                 Attached.Add(stream, program);
 
-                (stream as RtpSource).RtpClient.RtpPacketReceieved += RtpClientPacketReceieved;
-                (stream as RtpSource).RtpClient.RtcpPacketReceieved += RtpClientPacketReceieved;
+                p.RtpClient.RtpPacketReceieved += RtpClientPacketReceieved;
+                p.RtpClient.RtcpPacketReceieved += RtpClientPacketReceieved;
 
             }
         }
 
         void RtpClientPacketReceieved(object sender, Common.IPacket packet = null, Media.Rtp.RtpClient.TransportContext tc = null)
         {
-            if(sender is Rtp.RtpClient)
-                WritePacket(Attached.Keys.FirstOrDefault(s => (s as RtpSource).RtpClient == sender as Rtp.RtpClient), packet);
+            if(sender is Rtp.RtpClient c)
+                WritePacket(Attached.Keys.FirstOrDefault(s => (s as RtpSource).RtpClient == c), packet);
         }
 
         //Stop recoding a stream
         public virtual void Stop(IMedia stream)
         {
-            if (stream is RtpSource)
+            if (stream is RtpSource s)
             {
-                RtpTools.RtpDump.Program program;
-                
-                if (false == Attached.TryGetValue(stream, out program)) return;
+                if (false == Attached.TryGetValue(stream, out RtpTools.RtpDump.Program program)) return;
 
                 if (program != null && false == Common.IDisposedExtensions.IsNullOrDisposed(program.Writer)) program.Writer.Dispose();
 
                 Attached.Remove(stream);
 
-                (stream as RtpSource).RtpClient.RtpPacketReceieved -= RtpClientPacketReceieved;
-                (stream as RtpSource).RtpClient.RtcpPacketReceieved -= RtpClientPacketReceieved;
+                s.RtpClient.RtpPacketReceieved -= RtpClientPacketReceieved;
+                s.RtpClient.RtcpPacketReceieved -= RtpClientPacketReceieved;
             }
         }
 
         public override void Dispose()
         {
-
             if (IsDisposed) return;
 
             base.Dispose();
@@ -121,14 +117,13 @@ namespace Media.Rtsp.Server
             Attached = null;
         }
 
-        public readonly List<ArchiveSource> Sources = new List<ArchiveSource>();
+        public readonly List<ArchiveSource> Sources = new();
 
         public class ArchiveSource : SourceMedia
         {
             public ArchiveSource(string name, Uri source)
                 : base(name, source)
             {
-
             }
 
             public ArchiveSource(string name, Uri source, Guid id)
@@ -138,7 +133,7 @@ namespace Media.Rtsp.Server
             }
             
 
-            public List<RtpSource> Playback = new List<RtpSource>();
+            public List<RtpSource> Playback = new();
 
             public RtpSource CreatePlayback()
             {
@@ -150,9 +145,6 @@ namespace Media.Rtsp.Server
             }
 
             //Implicit operator to RtpSource which creates a new RtpSource configured from the main source using CreatePlayback
-
-
-
         }
 
         public IMedia FindStreamByLocation(Uri mediaLocation)
