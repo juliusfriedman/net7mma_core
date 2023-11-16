@@ -36,6 +36,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
+using System;
+
 namespace Media.Common
 { 
     /// <summary>
@@ -151,6 +153,7 @@ namespace Media.Common
         /// <param name="tag"></param>
         /// <param name="info"><see cref="System.Runtime.Serialization.SerializationInfo"/></param>
         /// <param name="context"><see cref="System.Runtime.Serialization.StreamingContext"/></param>
+        [Obsolete]
         protected TaggedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
             : base(info, context)
         {
@@ -184,6 +187,7 @@ namespace Media.Common
         /// </summary>
         /// <param name="info"><see cref="System.Runtime.Serialization.SerializationInfo"/></param>
         /// <param name="context"><see cref="System.Runtime.Serialization.StreamingContext"/></param>
+        [Obsolete]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
         {
             System.ArgumentNullException.ThrowIfNull(info);
