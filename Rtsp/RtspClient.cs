@@ -2390,8 +2390,8 @@ namespace Media.Rtsp
         internal void ProcessInterleavedData(object sender, byte[] data, int offset, int length)
         {
             if (length <= 0 ||
-                offset + length >= data.Length ||
                 Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(data) ||
+                offset + length >= data.Length ||
                 Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
 
             //Todo, it's possible a new varialbe could be passed to indicate this is binary data or a continuation..
