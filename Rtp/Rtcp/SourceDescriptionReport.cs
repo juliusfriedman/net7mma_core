@@ -613,7 +613,7 @@ namespace Media.Rtcp
 
                 base.Dispose(ShouldDispose);
 
-                if (false.Equals(CurrentItem == null))
+                if (CurrentItem is not null)
                 {
                     CurrentItem.Dispose();
 
@@ -629,7 +629,7 @@ namespace Media.Rtcp
 
                 //null check unncessary since cast will throw an exception..
 
-                if (false.Equals(chunkData == null))
+                if (chunkData is not null)
                 {
                     chunkData.Dispose();
 
