@@ -106,19 +106,21 @@ namespace Media.RtpTools
             //offset (4)
 
             if (Media.Common.Binary.IsBigEndian)
-                return BitConverter.GetBytes((ushort)(packet.Length + sizeOf_RD_packet_T)).
-                    Concat
-                    (packet is Rtcp.RtcpPacket ?
-                    BitConverter.GetBytes((ushort)0)
-                :
-                    BitConverter.GetBytes((ushort)(packet.Length)).Concat(BitConverter.GetBytes(offset)));
+                return BitConverter
+                    .GetBytes((ushort)(packet.Length + sizeOf_RD_packet_T))
+                    .Concat(packet is Rtcp.RtcpPacket
+                        ? BitConverter.GetBytes((ushort)0)
+                        : BitConverter
+                            .GetBytes((ushort)(packet.Length))
+                            .Concat(BitConverter.GetBytes(offset)));
 
-            return BitConverter.GetBytes((ushort)(packet.Length + sizeOf_RD_packet_T)).Reverse().
-                Concat
-                (packet is Rtcp.RtcpPacket ?
-                BitConverter.GetBytes((ushort)0)
-            :
-                BitConverter.GetBytes((ushort)(packet.Length)).Reverse()).Concat(BitConverter.GetBytes(offset).Reverse());
+            return BitConverter
+                .GetBytes((ushort)(packet.Length + sizeOf_RD_packet_T))
+                .Reverse()
+                .Concat(packet is Rtcp.RtcpPacket
+                    ? BitConverter.GetBytes((ushort)0)
+                    : BitConverter.GetBytes((ushort)(packet.Length)).Reverse())
+                .Concat(BitConverter.GetBytes(offset).Reverse());
         }
 
         public const int sizeOf_RD_hdr_t = 16, //Columbia RtpTools don't include this for every packet, only the first.
@@ -134,35 +136,24 @@ namespace Media.RtpTools
                844525727.922518 954850177 30670
            */
 
-
-            if (source == null) source = new System.Net.IPEndPoint(0, 0);
+            source ??= new System.Net.IPEndPoint(0, 0);
 
             //Tokenize the entry
-            string [] entryParts = Encoding.ASCII.GetString(memory.Array, memory.Offset, memory.Count - 1).Split((char)Common.ASCII.Space);
+            string[] entryParts = Encoding.ASCII
+                .GetString(memory.Array, memory.Offset, memory.Count - 1)
+                .Split((char)Common.ASCII.Space);
 
-            int partCount = entryParts.Length;
+            IPacket packet = entryParts.Length > 2
+                //This is a Vat / Rtp entry
+                //Parse the SEQ
+                //Parse the TS / Length In Words
+                ? new Rtp.RtpPacket(2, false, false, int.Parse(entryParts[1]) < 0, 0, 0, 0, int.Parse(entryParts[2]), int.Parse(entryParts[1]), Media.Common.MemorySegment.EmptyBytes)
+                : new Rtcp.RtcpPacket(2, 0, 0, 0, int.Parse(entryParts[1]), 0);
 
             //Get timeBase.
-
-            //Parse the TS / Length In Words
-
             double time = double.Parse(entryParts[0]);
 
-            if (partCount > 2)
-            {
-                //This is a Vat / Rtp entry
-
-                //Parse the SEQ
-
-                int ts = int.Parse(entryParts[1]);
-
-                return new RtpToolEntry(timeBase.AddMilliseconds(time), source, new Rtp.RtpPacket(2, false, false, ts < 0, 0, 0, 0, int.Parse(entryParts[2]), ts, Media.Common.MemorySegment.EmptyBytes), offset, fileOffset ?? 0);
-
-            }
-            else
-            {
-                 return new RtpToolEntry(timeBase.AddMilliseconds(time), source, new Rtcp.RtcpPacket(2, 0, 0, 0, int.Parse(entryParts[1]), partCount > 2 ? int.Parse(entryParts[2]) : 0),offset, fileOffset ?? 0);
-            }
+            return new RtpToolEntry(timeBase.AddMilliseconds(time), source, packet, offset, fileOffset ?? 0);
         }
 
         #endregion
