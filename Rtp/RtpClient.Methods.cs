@@ -545,7 +545,7 @@ namespace Media.Rtp
                 }
 
                 //If nothing was sent and the buffers are not null and the socket is tcp use framing.
-                if (length > 0 && context.IsActive && sent == 0 && false.Equals(buffers == null))
+                if (length > 0 && context.IsActive && sent == 0 && buffers is not null)
                 {
                     if (context.RtcpSocket.ProtocolType == System.Net.Sockets.ProtocolType.Tcp)
                     {
