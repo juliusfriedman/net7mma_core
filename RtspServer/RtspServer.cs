@@ -1213,17 +1213,17 @@ namespace Media.Rtsp
                 if (IDisposedExtensions.IsNullOrDisposed(session) || session.IsDisconnected
                     &&
                     //If the session has an attached source but no client OR the RtpClient is disposed or not active
-                    session.Playing.Count >= 0 && (IDisposedExtensions.IsNullOrDisposed(session.m_RtpClient) || false.Equals(session.m_RtpClient.IsActive))
+                    session.Playing.Count >= 0 && (IDisposedExtensions.IsNullOrDisposed(session.m_RtpClient) || session.m_RtpClient.IsActive is false)
                     ||//There was no last request
-                    session.LastRequest == null
+                    session.LastRequest is null
                     ||//OR there is a last request AND
-                    (false.Equals(session.LastRequest == null)
+                    (session.LastRequest is not null
                     && //The last request was created longer ago than required to keep clients active
                     (maintenanceStarted - session.LastRequest.Created) > RtspClientInactivityTimeout)
                     ||//There was no last response
-                    session.LastResponse == null
+                    session.LastResponse is null
                     || //OR there is a last response AND
-                    (false.Equals(session.LastResponse == null)
+                    (session.LastResponse is not null
                     && //The last response was transferred longer ago than required to keep clients active
                     session.LastResponse.Transferred.HasValue
                     && (maintenanceStarted - session.LastResponse.Transferred) > RtspClientInactivityTimeout))
