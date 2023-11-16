@@ -42,39 +42,20 @@ namespace Media.Common.Extensions
     {
         public static readonly System.PlatformID EnvironmentOsPlatformId = System.Environment.OSVersion.Platform;
 
-        internal const int PlatformIdMono = 4, PlatformIdMonoMac = 6, PlatformIdMono2 = 128;
-
-        internal static int IntPlatformIdValue { get { return (int)EnvironmentOsPlatformId; } }
-
         //Should be taken into account when setting socket options...
 
-        public static bool IsLinux
-        {
-            get
-            {
-                switch (IntPlatformIdValue)
-                {
-                    case PlatformIdMono:
-                    case PlatformIdMonoMac:
-                    case PlatformIdMono2:
-                        return true;
-                    default: return EnvironmentOsPlatformId == System.PlatformID.Unix;
-                }
-            }
-        }
+        private static readonly bool isLinux =
+            System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                System.Runtime.InteropServices.OSPlatform.Linux);
 
-        public static bool IsMac
-        {
-            get
-            {
-                switch (IntPlatformIdValue)
-                {
-                    case PlatformIdMonoMac:
-                        return true;
-                    default: return EnvironmentOsPlatformId == System.PlatformID.MacOSX;
-                }
-            }
-        }
+        public static bool IsLinux => isLinux;
+
+
+        private static readonly bool isMac =
+            System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                System.Runtime.InteropServices.OSPlatform.OSX);
+
+        public static bool IsMac => IsMac;
 
         public static bool IsXbox
         {
@@ -84,21 +65,11 @@ namespace Media.Common.Extensions
             }
         }
 
-        public static bool IsWindows
-        {
-            get
-            {
-                switch (EnvironmentOsPlatformId)
-                {
-                    case System.PlatformID.Win32NT:
-                    case System.PlatformID.Win32S:
-                    case System.PlatformID.Win32Windows:
-                    case System.PlatformID.WinCE:
-                        return true;
-                    default: return false;
-                }
-            }
-        }
+        private static readonly bool isWindows =
+            System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                System.Runtime.InteropServices.OSPlatform.Windows);
+
+        public static bool IsWindows => isWindows;
 
         //Notes these values are compiled into the library.
         //To determine at RunTime use the RuntimeExtensions.

@@ -463,7 +463,11 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public /*virtual*/ void EnquePacket(Rtcp.RtcpPacket packet)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || m_StopRequested || Common.IDisposedExtensions.IsNullOrDisposed(packet) || MaximumOutgoingPackets > 0 && m_OutgoingRtpPackets.Count > MaximumOutgoingPackets)
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) ||
+                m_StopRequested ||
+                Common.IDisposedExtensions.IsNullOrDisposed(packet) ||
+                MaximumOutgoingPackets > 0 &&
+                m_OutgoingRtpPackets.Count > MaximumOutgoingPackets)
             {
                 //Turn threading on.
                 ThreadEvents = true;
