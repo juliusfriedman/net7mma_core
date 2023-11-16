@@ -492,7 +492,10 @@ namespace Media.Rtp
             if (Common.IDisposedExtensions.IsNullOrDisposed(this) || packets == null) return 0;
 
             //If we don't have an transportContext to send on or the transportContext has not been identified or Rtcp is Disabled or there is no remote rtcp end point
-            if (Common.IDisposedExtensions.IsNullOrDisposed(context) || context.SynchronizationSourceIdentifier is Common.Binary.Zero | false.Equals(context.IsRtcpEnabled) | context.RemoteRtcp == null)
+            if (Common.IDisposedExtensions.IsNullOrDisposed(context) ||
+                context.SynchronizationSourceIdentifier is Common.Binary.Zero ||
+                context.IsRtcpEnabled is false ||
+                context.RemoteRtcp is null)
             {
                 //Return
                 return 0;
@@ -801,7 +804,7 @@ namespace Media.Rtp
                 if (c.MediaDescription.MediaType == mediaDescription.MediaType &&
                     c.MediaDescription.MediaFormat.Equals(mediaDescription.MediaFormat, System.StringComparison.InvariantCultureIgnoreCase)
                     ||
-                    c.MediaDescription.ControlLine is null &&
+                    c.MediaDescription.ControlLine is not null &&
                     c.MediaDescription.ControlLine.Equals(mediaDescription.ControlLine)) break;
 
                 c = null;
@@ -2378,7 +2381,8 @@ namespace Media.Rtp
                                 //&& (readSockets.Contains(tc.RtpSocket) || errorSockets.Contains(tc.RtpSocket))
                                 //Check if the socket can read data first or that data needs to be received
                                 && 
-                                (tc.LastRtpPacketReceived.Equals(System.TimeSpan.MinValue) | tc.LastRtpPacketReceived >= tc.m_ReceiveInterval) || tc.RtpSocket.Poll(usec, System.Net.Sockets.SelectMode.SelectRead))
+                                (tc.LastRtpPacketReceived.Equals(System.TimeSpan.MinValue) | tc.LastRtpPacketReceived >= tc.m_ReceiveInterval) ||
+                                 tc.RtpSocket.Poll(usec, System.Net.Sockets.SelectMode.SelectRead))
                             {
                             //RtpTry:
                                 //Receive RtpData
