@@ -2499,6 +2499,7 @@ namespace Media.Common
         [CLSCompliant(false)]
         public static void Write24(byte[] buffer, ref int index, bool reverse, int value) => WriteInteger(buffer, ref index, Binary.Tres, (ulong)value, reverse);
 
+        [CLSCompliant(false)]
         public static void Write32(byte[] buffer, ref int index, bool reverse, uint value) => WriteInteger(buffer, ref index, Binary.BytesPerInteger, value, reverse);
 
         [CLSCompliant(false)]
