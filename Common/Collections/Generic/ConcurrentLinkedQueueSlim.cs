@@ -656,7 +656,7 @@ namespace Media.UnitTests
 
                 if (enumerateCount >= ThreadCount) enumerateCount = 0;
 
-                return enumerateThreads[enumerateCount] = new System.Threading.Thread(() =>
+                var enumerateThread = enumerateThreads[enumerateCount] = new System.Threading.Thread(() =>
                 {
                     try
                     {
@@ -683,15 +683,17 @@ namespace Media.UnitTests
                 {
                     Name = "enumerateThreads" + enumerateCount++,
 
-                    ApartmentState = System.Threading.ApartmentState.MTA,
-
                     Priority = System.Threading.ThreadPriority.AboveNormal
                 };
+
+                enumerateThread.TrySetApartmentState(System.Threading.ApartmentState.MTA);
+
+                return enumerateThread;
             };
 
             for (int t = ThreadCount - 1; t >= 0; --t)
             {
-                enqueueThreads[t] = new System.Threading.Thread(() =>
+                var enqueueThread = enqueueThreads[t] = new System.Threading.Thread(() =>
                 {
                     int threadLocalCountIn = 0;
 
@@ -733,14 +735,14 @@ namespace Media.UnitTests
 
                 })
                 {
-                    ApartmentState = System.Threading.ApartmentState.MTA,
-
                     Priority = System.Threading.ThreadPriority.Normal,
 
                     Name = "enqueueThreads_" + t
                 };
 
-                dequeueThreads[t] = new System.Threading.Thread(() =>
+                enqueueThread.TrySetApartmentState(System.Threading.ApartmentState.MTA);
+
+                var dequeueThread = dequeueThreads[t] = new System.Threading.Thread(() =>
                 {
                     int threadLocalCountOut = 0;
 
@@ -772,10 +774,10 @@ namespace Media.UnitTests
                 {
                     Priority = System.Threading.ThreadPriority.BelowNormal,
 
-                    ApartmentState = System.Threading.ApartmentState.MTA,
-
                     Name = "dequeueThreads_" + t
                 };
+
+                dequeueThread.TrySetApartmentState(System.Threading.ApartmentState.MTA);
 
                 enumerateThreads[t] = createEnumerateThread();
             }
