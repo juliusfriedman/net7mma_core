@@ -1194,16 +1194,16 @@ namespace Media.Rtsp
 
             Clients.AsParallel().ForAll((session) =>
             {
-                if (session == null) return;
+                if (session is null) return;
 
                 //Check for inactivity at the RtspLevel first and then the RtpLevel.
                 if (session.Created > maintenanceStarted
                     || //Or if the LastRequest was created after maintenanceStarted
-                    false.Equals(session.LastRequest == null) && session.LastRequest.Created > maintenanceStarted
+                    session.LastRequest is not null && session.LastRequest.Created > maintenanceStarted
                     || //Or if the LastResponse was created after maintenanceStarted
-                    false.Equals(session.LastResponse == null) && session.LastResponse.Created > maintenanceStarted
+                    session.LastResponse is not null && session.LastResponse.Created > maintenanceStarted
                     || //Or if there were no resources released
-                    false.Equals(session.IsDisconnected) && false == session.ReleaseUnusedResources())
+                    session.IsDisconnected is false && session.ReleaseUnusedResources() is false)
                 {
                     //Do not attempt to perform any disconnection of the session
                     return;
