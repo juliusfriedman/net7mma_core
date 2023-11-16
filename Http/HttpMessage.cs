@@ -823,7 +823,7 @@ namespace Media.Http
 
                 //If the status line was not parsed
                 if (m_StatusLineParsed is false ||  //All requests must have a StatusLine OR
-                    object.ReferenceEquals(m_Buffer,null) is false &&  // Be parsing the StatusLine
+                    m_Buffer is not null &&  // Be parsing the StatusLine
                     m_Buffer.Length <= MinimumStatusLineSize) return false;
 
                 //Messages without complete header sections are not complete
@@ -934,7 +934,7 @@ namespace Media.Http
             
             Version = version ?? DefaultVersion;
 
-            if (object.ReferenceEquals(contentEncoding,null) is false) ContentEncoding = contentEncoding;
+            if (contentEncoding is not null) ContentEncoding = contentEncoding;
 
             m_StatusLineParsed = m_HeadersParsed = true;
 
@@ -968,7 +968,7 @@ namespace Media.Http
             }
 
             //use the supplied encoding if present.
-            if (object.ReferenceEquals(contentEncoding,null) is false &&
+            if (contentEncoding is not null &&
                 object.ReferenceEquals(contentEncoding,ContentEncoding) is false)
             {
                 //Set the Content-Encoding header

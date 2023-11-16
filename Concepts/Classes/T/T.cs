@@ -122,7 +122,7 @@ namespace Media.Concepts.Classes.T
             {
                 unsafe
                 {
-                    return object.ReferenceEquals(__refvalue(*(System.TypedReference*)(Reference.Reference), System.Type), null) is false;
+                    return __refvalue(*(System.TypedReference*)(Reference.Reference), System.Type) is not null;
                 }
             }
         }

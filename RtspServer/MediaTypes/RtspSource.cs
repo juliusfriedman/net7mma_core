@@ -226,7 +226,7 @@ namespace Media.Rtsp.Server.MediaTypes
             }
             
             //If only certain media should be setup 
-            if (object.ReferenceEquals(specificMedia ,null) is false) SpecificMediaTypes = specificMedia;
+            if (specificMedia is not null) SpecificMediaTypes = specificMedia;
 
             //If there was a start time given
             if (startTime.HasValue) MediaStartTime = startTime;
