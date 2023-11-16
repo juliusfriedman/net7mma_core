@@ -3491,7 +3491,7 @@ namespace Media.Rtsp
             if (m_RtspSocket is not null)
             {
                 //If LeaveOpen was false and the socket is not shared.
-                if (force || LeaveOpen is false && SharesSocket is false)
+                if (force || (LeaveOpen is false && SharesSocket is false))
                 {
                     #region The Great Debate on Closing
 
