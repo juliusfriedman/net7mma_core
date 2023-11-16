@@ -284,8 +284,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                     //	Put memory stream (which contains the encoded image) into buffer
                     ms = MPEG.getMS();
-                    byte[] buffer = new Byte[ms.Length];
-                    buffer = ms.ToArray();
+                    byte[] buffer = ms.ToArray();
 
                     //	Set MPEG Sequence Header bits to correct image size
                     j = 2048;
