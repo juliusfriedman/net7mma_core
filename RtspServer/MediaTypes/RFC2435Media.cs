@@ -2317,15 +2317,8 @@ namespace Media.Rtsp.Server.MediaTypes
 
         void EnsureDimensions()
         {
-            int over;
-
-            Math.DivRem(Width, Common.Binary.BitsPerByte, out over);
-
-            /*if (over > 0) */Width += over;
-
-            Math.DivRem(Height, Common.Binary.BitsPerByte, out over);
-
-            /*if (over > 0) */Height += over;
+            Width += Width % Common.Binary.BitsPerByte;
+            Height += Height % Common.Binary.BitsPerByte;
         }
 
         //SourceStream Implementation
