@@ -611,7 +611,7 @@ namespace Media.Rtp
 
         public static bool operator ==(RtpHeader a, RtpHeader b)
         {
-            return b is null ? a is null : a.Equals(b);
+            return b is null ? a is null : b.Equals(a);
         }
 
         public static bool operator !=(RtpHeader a, RtpHeader b) { return (a == b) is false; }
