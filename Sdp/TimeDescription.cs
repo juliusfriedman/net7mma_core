@@ -291,7 +291,7 @@ namespace Media.Sdp
 
         public static bool operator ==(TimeDescription a, TimeDescription b)
         {
-            return b is null ? a is null : a.Equals(b);
+            return b is null ? a is null : b.Equals(a);
         }
 
         public static bool operator !=(TimeDescription a, TimeDescription b) { return (a == b) is false; }
