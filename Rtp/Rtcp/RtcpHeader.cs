@@ -564,7 +564,7 @@ namespace Media.Rtcp
 
             if (IsDisposed is false) return;
 
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(First16Bits)))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(First16Bits) is false)
             {
                 //Dispose the instance
                 First16Bits.Dispose();
@@ -573,7 +573,7 @@ namespace Media.Rtcp
                 First16Bits = null;
             }
 
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(SegmentToLast6Bytes)))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(SegmentToLast6Bytes) is false)
             {
                 //Invalidate the pointer
                 SegmentToLast6Bytes.Dispose();

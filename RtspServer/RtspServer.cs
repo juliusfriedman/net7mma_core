@@ -892,7 +892,7 @@ namespace Media.Rtsp
         //    try
         //    {
         //        //If the session was not disposed
-        //        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(session)))
+        //        if (Common.IDisposedExtensions.IsNullOrDisposed(session) is false)
         //        {
         //            //indicate the session is disposing
         //            Common.ILoggingExtensions.Log(Logger, "Disposing Client: " + session.Id + " @ " + DateTime.UtcNow);
@@ -2623,7 +2623,7 @@ namespace Media.Rtsp
             try
             {
                 //if there is a message to send
-                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(message)))
+                if (Common.IDisposedExtensions.IsNullOrDisposed(message) is false)
                 {
                     //AddServerHeaders()->
 

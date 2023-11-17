@@ -252,7 +252,7 @@ namespace Media.Rtsp
                 //The socket is shared if there is a context using the same socket
                 RtpClient.TransportContext context = m_RtpClient.GetContextBySocket(m_RtspSocket);
 
-                return false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(context)) && context.IsActive;// && context.HasAnyRecentActivity;
+                return Common.IDisposedExtensions.IsNullOrDisposed(context) is false && context.IsActive;// && context.HasAnyRecentActivity;
             }
         }
 
@@ -1098,7 +1098,7 @@ namespace Media.Rtsp
                         case SocketError.ConnectionReset:
                         case SocketError.Shutdown:
                             {
-                                if (AutomaticallyReconnect && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)))
+                                if (AutomaticallyReconnect && Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
                                 {
                                     //Check if the client was connected already
                                     if (wasConnected && IsConnected is false)
@@ -1118,7 +1118,7 @@ namespace Media.Rtsp
                         default:
                             {
                                 //if the client is not disposed and a fatal error was not encountered.
-                                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) &&
+                                if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false &&
                                     fatal is false)
                                 {
                                     //If this is not a re-transmit
@@ -1167,7 +1167,7 @@ namespace Media.Rtsp
                     if (hasResponse is false || Common.IDisposedExtensions.IsNullOrDisposed(this)) return null;
 
                     //If the socket is shared the response will be propagated via an event.
-                    if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) && SharesSocket) goto Wait;
+                    if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false && SharesSocket) goto Wait;
                     #endregion
 
                     //Receive some data (only referenced by the check for disconnection)
@@ -1201,7 +1201,7 @@ namespace Media.Rtsp
                         case SocketError.ConnectionReset:
                         case SocketError.Shutdown:
                             {
-                                if (AutomaticallyReconnect && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)))
+                                if (AutomaticallyReconnect && Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
                                 {
                                     //Check if the client was connected already
                                     if (wasConnected && IsConnected is false)
@@ -1223,7 +1223,7 @@ namespace Media.Rtsp
                         default:
                             {
                                 //If anything was received
-                                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) &&
+                                if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false &&
                                     received > 0 &&
                                     SharesSocket is false)
                                 {
@@ -1239,7 +1239,7 @@ namespace Media.Rtsp
 #if UNSAFE
                         if (char.IsLetterOrDigit(((*(byte*)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<byte>(m_Buffer.Array, offset))) is false)
 #else
-                                    if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient)) &&
+                                    if (Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient) is false &&
                                         char.IsLetterOrDigit((char)m_Buffer.Array[offset]) is false)
 #endif
                                     {
@@ -1284,7 +1284,7 @@ namespace Media.Rtsp
                                         m_Client.ProcessInterleavedData(this, m_Buffer.Array, offset, Common.Binary.Min(received, m_Buffer.Count - offset));
                                     }
                                 } //Nothing was received, if the socket is not shared
-                                else if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) && SharesSocket is false)
+                                else if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false && SharesSocket is false)
                                 {
                                     //Check for non fatal exceptions and continue to wait
                                     if (++attempt <= m_MaximumTransactionAttempts &&
@@ -1315,7 +1315,7 @@ namespace Media.Rtsp
                     DateTime lastAttempt = DateTime.UtcNow;
 
                     //Wait while
-                    while (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) &&//The client connected and is not disposed AND
+                    while (Common.IDisposedExtensions.IsNullOrDisposed(this) is false &&//The client connected and is not disposed AND
                                                                                              //There is no last transmitted message assigned AND it has not already been disposed
                         Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) &&
                         //AND the client is still allowed to wait
@@ -1323,7 +1323,7 @@ namespace Media.Rtsp
                         m_InterleaveEvent.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick) is false)
                     {
                         //Check for any new messages
-                        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted))) goto HandleResponse;
+                        if (Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) is false) goto HandleResponse;
 
                         //Calculate how much time has elapsed
                         TimeSpan taken = DateTime.UtcNow - lastAttempt;
@@ -1431,7 +1431,7 @@ namespace Media.Rtsp
                             case RtspMessageType.Response:
                                 //If the event is not in disposed already
                                 //If the client is not disposed
-                                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)))
+                                if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
                                 {
                                     ////Log for incomplete messages.
                                     //if (m_LastTransmitted.IsComplete is false)
@@ -2117,7 +2117,7 @@ namespace Media.Rtsp
 
         public void UpdatePushedMessages(RtspMessage request, RtspMessage response)
         {
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(request)) && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(LastInboundRequest)))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(request) is false && Common.IDisposedExtensions.IsNullOrDisposed(LastInboundRequest) is false)
             {
                 LastInboundRequest.IsPersistent = false;
 
@@ -2130,7 +2130,7 @@ namespace Media.Rtsp
                 LastInboundRequest.IsPersistent = true;
             }
 
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(LastInboundResponse)))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(LastInboundResponse) is false)
             {
                 LastInboundResponse.IsPersistent = false;
 

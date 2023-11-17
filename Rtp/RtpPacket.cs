@@ -112,7 +112,7 @@ namespace Media.Rtp
             {
                 if (IsDisposed || Payload.Count is 0 || Header.Extension is false) return 0;
 
-                using (RtpExtension extension = GetExtension()) return false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(extension)) ? extension.Size : 0;
+                using (RtpExtension extension = GetExtension()) return Common.IDisposedExtensions.IsNullOrDisposed(extension) is false ? extension.Size : 0;
             }
         }
 
@@ -588,7 +588,7 @@ namespace Media.Rtp
             if (includeSourceList && hasSourceList)
             {
                 RFC3550.SourceList sourceList = GetSourceList();
-                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(sourceList))) binarySequence = sourceList.GetBinaryEnumerable();
+                if (Common.IDisposedExtensions.IsNullOrDisposed(sourceList) is false) binarySequence = sourceList.GetBinaryEnumerable();
                 else binarySequence = Media.Common.MemorySegment.EmptyBytes;
             }
 
@@ -602,7 +602,7 @@ namespace Media.Rtp
                 using (RtpExtension extension = GetExtension())
                 {
                     //If an extension could be obtained include it
-                    if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(extension))) binarySequence = binarySequence.Concat(extension);
+                    if (Common.IDisposedExtensions.IsNullOrDisposed(extension) is false) binarySequence = binarySequence.Concat(extension);
                 }
             }
 
@@ -875,13 +875,13 @@ namespace Media.Rtp
             if (IsDisposed is false) return;
 
             //If there is a referenced RtpHeader
-            if (m_OwnsHeader && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(Header)))
+            if (m_OwnsHeader && Common.IDisposedExtensions.IsNullOrDisposed(Header) is false)
             {
                 //Dispose it
                 Header.Dispose();
             }
 
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(Payload)))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(Payload) is false)
             {
                 //Payload goes away when Disposing
                 Payload.Dispose();

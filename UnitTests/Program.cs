@@ -2892,7 +2892,7 @@ namespace Media.UnitTests
 
             bool allowHttp = false, allowUdp = false;
 
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(server)) && server.MediaStreams.Count() > 0)
+            if (Common.IDisposedExtensions.IsNullOrDisposed(server) is false && server.MediaStreams.Count() > 0)
             {
                 if (server.HttpEnabled) dop /= 2;
                 if (server.UdpEnabled) dop /= 2;

@@ -158,7 +158,7 @@ namespace Media.Rtsp.Server.MediaTypes
         public override bool IsReady
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return base.IsReady && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(RtspClient)) && RtspClient.IsPlaying; }
+            get { return base.IsReady && Common.IDisposedExtensions.IsNullOrDisposed(RtspClient) is false && RtspClient.IsPlaying; }
         }
 
         #endregion

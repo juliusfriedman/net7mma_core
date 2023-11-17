@@ -456,7 +456,7 @@ namespace Media.Rtp
             //Determine based on reading the packet this is where a RtcpReport class would be useful to allow reading the Ssrc without knownin the details about the type of report
             try { return GetContextBySourceId(packet.SynchronizationSourceIdentifier); }
             catch (System.InvalidOperationException) { return GetContextForPacket(packet); }
-            catch { if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this))) throw; }
+            catch { if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false) throw; }
             return null;
         }
 
@@ -861,7 +861,7 @@ namespace Media.Rtp
             {
                 c = TransportContexts[i];
 
-                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(c)) &&
+                if (Common.IDisposedExtensions.IsNullOrDisposed(c) is false &&
                     false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(c.MediaDescription)) &&
                     System.Linq.Enumerable.Contains(c.MediaDescription.PayloadTypes, payloadType)) break;
 
@@ -1582,7 +1582,7 @@ namespace Media.Rtp
             while (Common.IDisposedExtensions.IsNullOrDisposed(m_Buffer) is false &&
                 remainingInBuffer > Common.Binary.Zero &&
                 offset >= m_Buffer.Offset &&
-                false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)))
+                Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
             {
             ContinueParsing:
                 //Assume not rtp or rtcp and that the data is compatible with the session
@@ -1625,7 +1625,7 @@ namespace Media.Rtp
                         jumbo = frameLength > bufferLength;
 
                         //If there WAS a context
-                        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(relevent)))
+                        if (Common.IDisposedExtensions.IsNullOrDisposed(relevent) is false)
                         {
                             ////Handle indepent framing, supposedly independent and interleaved are not allowed on the same connection...
                             ////We will see if that holds true and for how long...
@@ -1849,7 +1849,7 @@ namespace Media.Rtp
                     frameLength > remainingInBuffer ? frameLength - remainingInBuffer : 0;
 
                 //If there is anymore data remaining on the wire
-                if (remainingOnSocket > 0 && false.Equals(socket is null) && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)))
+                if (remainingOnSocket > 0 && false.Equals(socket is null) && Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
                 {
                     //Align the buffer if anything remains on the socket.
                     if (remainingOnSocket + offset + remainingInBuffer > bufferLength)
@@ -1868,7 +1868,7 @@ namespace Media.Rtp
                     System.Net.Sockets.SocketError error = System.Net.Sockets.SocketError.Success;
 
                     //Get all the remaining data, todo, if not active must activate and join thread to hand off context.
-                    while (remainingOnSocket > 0 && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)))
+                    while (remainingOnSocket > 0 && Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
                     {
                         registerY = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(buffer, offset, remainingOnSocket, socket, out error);
 
@@ -1917,7 +1917,7 @@ namespace Media.Rtp
                 }
 
                 //If the client is not disposed
-                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)))
+                if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
                 {
                     //Calulcate how much remains
                     //remainingInFrame = jumbo ? frameLength - remainingInBuffer : frameLength;                    

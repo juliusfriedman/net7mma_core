@@ -1074,7 +1074,7 @@ namespace Media.Common
                 m_Position = m_Cursor = -1;
 
                 //Handled with free...
-                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(WorkingSegment)))
+                if (Common.IDisposedExtensions.IsNullOrDisposed(WorkingSegment) is false)
                 {
                     BaseDisposable.SetShouldDispose(WorkingSegment, true, true);
 

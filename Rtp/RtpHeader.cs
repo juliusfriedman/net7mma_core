@@ -560,7 +560,7 @@ namespace Media.Rtp
 
             if (IsDisposed is false) return;
 
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(First16Bits)))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(First16Bits) is false)
             {
                 //Dispose the instance
                 First16Bits.Dispose();
@@ -570,7 +570,7 @@ namespace Media.Rtp
             }
 
 
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(SegmentToLast10Bytes)))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(SegmentToLast10Bytes) is false)
             {
                 //Invalidate the pointer
                 SegmentToLast10Bytes.Dispose();

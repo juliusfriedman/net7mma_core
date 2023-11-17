@@ -814,7 +814,7 @@ namespace Media.Rtsp
                 //The socket is shared if there is a context using the same socket
                 RtpClient.TransportContext context = m_RtpClient.GetContextBySocket(m_RtspSocket);
 
-                return false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(context)) && context.IsActive;// && context.HasAnyRecentActivity;
+                return Common.IDisposedExtensions.IsNullOrDisposed(context) is false && context.IsActive;// && context.HasAnyRecentActivity;
             }
         }
 
@@ -2446,7 +2446,7 @@ namespace Media.Rtsp
                                 //If not playing an interleaved stream, Complete the message if not complete (Should maybe check for Content-Length)
                                 //Idea was to allow `Disposed` message to potentially be completed and then not disposed anymore....
 
-                                while (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) &&
+                                while (Common.IDisposedExtensions.IsNullOrDisposed(this) is false &&
                                     SharesSocket is false &&
                                     interleaved.IsComplete is false)
                                 {
@@ -2502,7 +2502,7 @@ namespace Media.Rtsp
                                 received = interleaved.Length;
 
                                 //If playing and interleaved stream AND the last transmitted message is NOT null and is NOT Complete then attempt to complete it
-                                if (received < length && false.Equals(IDisposedExtensions.IsNullOrDisposed(this)) && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted)) /*&& interleaved.StatusLineParsed*/)
+                                if (received < length && false.Equals(IDisposedExtensions.IsNullOrDisposed(this)) && Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) is false /*&& interleaved.StatusLineParsed*/)
                                 {
                                     //RtspMessage local = m_LastTransmitted;
 
@@ -2717,7 +2717,7 @@ namespace Media.Rtsp
                 //if (md.MediaType == MediaType.application) continue;
 
                 //If transport was already setup then see if the transport has a context for the media
-                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(Client)))
+                if (Common.IDisposedExtensions.IsNullOrDisposed(Client) is false)
                 {
                     //Get the context for the media
                     var context = Client.GetContextForMediaDescription(md);
@@ -2907,7 +2907,7 @@ namespace Media.Rtsp
                                     {
                                         if (m_InterleaveEvent.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneMillisecond))
                                         {
-                                            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted))) if ((currentStatusCode = m_LastTransmitted.RtspStatusCode) <= RtspStatusCode.OK) break;
+                                            if (Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) is false) if ((currentStatusCode = m_LastTransmitted.RtspStatusCode) <= RtspStatusCode.OK) break;
                                         }
                                     }
                                     else
@@ -3033,10 +3033,10 @@ namespace Media.Rtsp
                 } while (IsConnected && m_RtpClient.TotalBytesReceieved is 0);
 
             //Ensure the RtpClient is still active.
-            if(false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this))) m_RtpClient.Activate();
+            if(Common.IDisposedExtensions.IsNullOrDisposed(this) is false) m_RtpClient.Activate();
 
             //Enumerate the setup media and add it to the playing list.
-            foreach (var media in setupMedia) if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) && m_Playing.Keys.Contains(media) is false) m_Playing.Add(media, new MediaSessionState(SessionDescription, media));
+            foreach (var media in setupMedia) if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false && m_Playing.Keys.Contains(media) is false) m_Playing.Add(media, new MediaSessionState(SessionDescription, media));
 
             //Fire an event
             if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false) OnPlaying();
@@ -3600,7 +3600,7 @@ namespace Media.Rtsp
             }
 
             //When the RtspClient is Disconnected the RtpClient is deactivated...
-            //if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(Client)) && Client.IsActive) Client.Deactivate();
+            //if (Common.IDisposedExtensions.IsNullOrDisposed(Client) is false && Client.IsActive) Client.Deactivate();
 
             if (disconnectSocket) DisconnectSocket();
         }
@@ -4066,7 +4066,7 @@ namespace Media.Rtsp
                         case SocketError.ConnectionReset:
                         case SocketError.Shutdown:
                             {
-                                if (AutomaticallyReconnect && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)))
+                                if (AutomaticallyReconnect && Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
                                 {
                                     //Check if the client was connected already
                                     if (wasConnected && IsConnected is false)
@@ -4086,7 +4086,7 @@ namespace Media.Rtsp
                         default:
                             {
                                 //if the client is not disposed and a fatal error was not encountered.
-                                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) &&
+                                if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false &&
                                     fatal is false)
                                 {
                                     //If this is not a re-transmit
@@ -4135,7 +4135,7 @@ namespace Media.Rtsp
                     if (hasResponse is false || Common.IDisposedExtensions.IsNullOrDisposed(this)) return null;
 
                     //If the socket is shared the response will be propagated via an event.
-                    if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) && SharesSocket) goto Wait;
+                    if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false && SharesSocket) goto Wait;
                     #endregion
 
                 //Receive some data (only referenced by the check for disconnection)
@@ -4169,7 +4169,7 @@ namespace Media.Rtsp
                         case SocketError.ConnectionReset:
                         case SocketError.Shutdown:
                             {
-                                if (AutomaticallyReconnect && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)))
+                                if (AutomaticallyReconnect && Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
                                 {
                                     //Check if the client was connected already
                                     if (wasConnected && IsConnected is false)
@@ -4191,7 +4191,7 @@ namespace Media.Rtsp
                         default:
                             {
                                 //If anything was received
-                                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) &&
+                                if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false &&
                                     received > 0 &&
                                     SharesSocket is false)
                                 {
@@ -4251,7 +4251,7 @@ namespace Media.Rtsp
                                         ProcessInterleavedData(this, m_Buffer.Array, offset, Common.Binary.Min(received, m_Buffer.Count - offset));
                                     }
                                 } //Nothing was received, if the socket is not shared
-                                else if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) && SharesSocket is false)
+                                else if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false && SharesSocket is false)
                                 {
                                     //If no data was sent yet, send it now.
                                     if (sent == 0) goto SendData;
@@ -4285,7 +4285,7 @@ namespace Media.Rtsp
                     DateTime lastAttempt = DateTime.UtcNow;
 
                     //Wait while
-                    while (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) &&//The client connected and is not disposed AND
+                    while (Common.IDisposedExtensions.IsNullOrDisposed(this) is false &&//The client connected and is not disposed AND
                         //There is no last transmitted message assigned AND it has not already been disposed
                         Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) &&
                         //AND the client is still allowed to wait
@@ -4293,7 +4293,7 @@ namespace Media.Rtsp
                         m_InterleaveEvent.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick) is false)
                     {
                         //Check for any new messages
-                        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted))) goto HandleResponse;
+                        if (Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) is false) goto HandleResponse;
 
                         //Calculate how much time has elapsed
                         TimeSpan taken = DateTime.UtcNow - lastAttempt;
@@ -4401,7 +4401,7 @@ namespace Media.Rtsp
                             case RtspMessageType.Response:
                                 //If the event is not in disposed already
                                 //If the client is not disposed
-                                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)))
+                                if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
                                 {
                                     ////Log for incomplete messages.
                                     //if (m_LastTransmitted.IsComplete is false)
@@ -5175,7 +5175,7 @@ namespace Media.Rtsp
             try
             {
                 //If there is a client then stop the flow of this media now with RTP
-                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient)))
+                if (Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient) is false)
                 {
                     //Send a goodbye for all contexts if the mediaDescription was not given
                     if (Common.IDisposedExtensions.IsNullOrDisposed(mediaDescription))
@@ -5189,7 +5189,7 @@ namespace Media.Rtsp
                         RtpClient.TransportContext context = m_RtpClient.GetContextForMediaDescription(mediaDescription);
 
                         //If context was determined then send a goodbye
-                        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(context)))
+                        if (Common.IDisposedExtensions.IsNullOrDisposed(context) is false)
                         {
                             //Send a goodbye now (but still allow reception)
                             m_RtpClient.SendGoodbye(context);
@@ -5481,7 +5481,7 @@ namespace Media.Rtsp
                                 //Select which port to use, SelectMediaPort()
                                 RtpClient.TransportContext lastContext = m_RtpClient.GetTransportContexts().LastOrDefault();
 
-                                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(lastContext)) && 
+                                if (Common.IDisposedExtensions.IsNullOrDisposed(lastContext) is false && 
                                     lastContext.IsActive)
                                 {
                                     lastPortUsed = ((IPEndPoint)(lastContext.LocalRtp ?? lastContext.LocalRtcp)).Port + 1;
@@ -5701,7 +5701,7 @@ namespace Media.Rtsp
                                 if (interleaved)
                                 {
                                     //If there is a client which is not disposed
-                                    if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient)))
+                                    if (Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient) is false)
                                     {
                                         //Obtain a context via the given data channel or control channel
                                         created = m_RtpClient.GetContextByChannels(dataChannel, controlChannel);
@@ -6013,7 +6013,7 @@ namespace Media.Rtsp
             //Should check for KeepAlive header in previous requests?
 
             //If not already Disposed and the protocol was not already specified as or configured to TCP
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) &&  //And
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false &&  //And
                 IsPlaying) //Still playing
             {
                 //Filter any context which is not playing, disposed or has activity
@@ -6051,14 +6051,14 @@ namespace Media.Rtsp
                 catch (Exception ex) { Common.ILoggingExtensions.Log(Logger, ToString() + "@MonitorProtocol: " + ex.Message); }
 
                 //If not disposed AND IsConnected and if protocol switch is still allowed AND IsPlaying and not already TCP
-                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) &&
+                if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false &&
                     IsConnected && 
                     false.Equals(m_RtpProtocol == ProtocolType.Tcp) &&
                     AllowAlternateTransport && 
                     IsPlaying)
                 {
                     //Filter the contexts which have received absolutely NO data.
-                    var contextsWithoutFlow = Client.GetTransportContexts().Where(tc => false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(tc)) &&
+                    var contextsWithoutFlow = Client.GetTransportContexts().Where(tc => Common.IDisposedExtensions.IsNullOrDisposed(tc) is false &&
                         m_Playing.Keys.Contains(tc.MediaDescription) &&
                         tc.TotalBytesReceieved.Equals(Common.Binary.LongZero) 
                         && tc.TotalPacketsSent.Equals(Common.Binary.LongZero)
@@ -6134,7 +6134,7 @@ namespace Media.Rtsp
             }
 
             //If there is still a timer change it based on the last messages round trip time, should be relative to all messages...
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) && m_ProtocolMonitor is not null)
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false && m_ProtocolMonitor is not null)
                 try { m_ProtocolMonitor.Change(m_ConnectionTime.Add(LastMessageRoundTripTime), Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan); }
                 catch (Exception ex) { Common.ILoggingExtensions.Log(Logger, ToString() + "@MonitorProtocol: " + ex.Message); }
         }
@@ -6151,8 +6151,8 @@ namespace Media.Rtsp
             if (Common.IDisposedExtensions.IsNullOrDisposed(context)) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(context, "The given mediaDescription has not been SETUP or is disposed. See Tag for context.");
 
             //Check if the media was previsouly playing
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(context)) && 
-                false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(mediaDescription)) && 
+            if (Common.IDisposedExtensions.IsNullOrDisposed(context) is false && 
+                Common.IDisposedExtensions.IsNullOrDisposed(mediaDescription) is false && 
                 false.Equals(m_Playing.ContainsKey(mediaDescription)))
             {
                 //Keep track of whats playing
@@ -6258,7 +6258,7 @@ namespace Media.Rtsp
                     else if (response.RtspStatusCode <= RtspStatusCode.OK)
                     {
                         //If there is transport
-                        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient)))
+                        if (Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient) is false)
                         {
                             //Connect the client now.
                             m_RtpClient.Activate();
@@ -6303,7 +6303,7 @@ namespace Media.Rtsp
                                         RtpClient.TransportContext context = m_RtpClient.GetContextBySourceId(ssrc.Value);
 
                                         //If that context is not null then allow it's ssrc to change now.
-                                        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(context)))
+                                        if (Common.IDisposedExtensions.IsNullOrDisposed(context) is false)
                                         {
                                             context.RemoteSynchronizationSourceIdentifier = ssrc.Value;
 
@@ -6328,7 +6328,7 @@ namespace Media.Rtsp
                                         RtpClient.TransportContext context = m_RtpClient.GetTransportContexts().FirstOrDefault(tc => tc.MediaDescription.GetAbsoluteControlUri(CurrentLocation, SessionDescription) == uri);
 
                                         //If that context is not null then allow it's ssrc to change now.
-                                        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(context)))
+                                        if (Common.IDisposedExtensions.IsNullOrDisposed(context) is false)
                                         {
                                             if (ssrc.HasValue) context.RemoteSynchronizationSourceIdentifier = ssrc.Value;
 
@@ -6349,7 +6349,7 @@ namespace Media.Rtsp
                 }
 
                 //The CloseConnection was specified and the response was received
-                if (AutomaticallyDisconnectAfterStartPlaying && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(response)))
+                if (AutomaticallyDisconnectAfterStartPlaying && Common.IDisposedExtensions.IsNullOrDisposed(response) is false)
                 {
                     //Should also check if response was seen that it has closed the servers connection...
 
@@ -6557,7 +6557,7 @@ namespace Media.Rtsp
                         }
 
                         //If there was a context for the media ensure it is removed and disposed from the underlying transport.
-                        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(context)))
+                        if (Common.IDisposedExtensions.IsNullOrDisposed(context) is false)
                         {
                             //handle leaving open changes?
                             //if(context.LeaveOpen)
@@ -6617,7 +6617,7 @@ namespace Media.Rtsp
                 }
 
                 //Determine what contexts are playing and have set a goodbye
-                var contextsWithGoodbye = Client.GetTransportContexts().Where(tc => false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(tc)) &&
+                var contextsWithGoodbye = Client.GetTransportContexts().Where(tc => Common.IDisposedExtensions.IsNullOrDisposed(tc) is false &&
                     m_Playing.Keys.Contains(tc.MediaDescription) &&
                     false.Equals(object.ReferenceEquals(tc.Goodbye, null)));
 
@@ -6637,7 +6637,7 @@ namespace Media.Rtsp
                     if (stopAll is false) foreach (var context in contextsWithGoodbye.ToArray())
                         {
                             //Ensure still in playing
-                            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(context)) &&
+                            if (Common.IDisposedExtensions.IsNullOrDisposed(context) is false &&
                                 false.Equals(m_Playing.Keys.Contains(context.MediaDescription)) || context.HasAnyRecentActivity) continue;
 
                             int requestCseq;
@@ -6764,7 +6764,7 @@ namespace Media.Rtsp
                         EndTime.Value.Equals(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan) is false &&
                         //And there is enough time to attempt
                         DateTime.UtcNow - m_StartedPlaying.Value > EndTime.Value.Subtract(m_LastMessageRoundTripTime.Add(m_ConnectionTime.Add(m_LastServerDelay)))
-                        && contextsWithGoodbye.All(tc => false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(tc)) && tc.HasAnyRecentActivity is false))
+                        && contextsWithGoodbye.All(tc => Common.IDisposedExtensions.IsNullOrDisposed(tc) is false && tc.HasAnyRecentActivity is false))
                     {
 
                         if (supportPause)
@@ -6875,7 +6875,7 @@ namespace Media.Rtsp
 
             base.Dispose(ShouldDispose);
 
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this))) return;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false) return;
 
             if (m_ProtocolMonitor is not null)
             {
@@ -6888,7 +6888,7 @@ namespace Media.Rtsp
 
             StopPlaying();
 
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient)))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient) is false)
             {
                 m_RtpClient.OutOfBandData -= ProcessInterleavedData;
 
@@ -6897,7 +6897,7 @@ namespace Media.Rtsp
                 m_RtpClient = null;
             }
 
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_Buffer)))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(m_Buffer) is false)
             {
                 m_Buffer.Dispose();
 

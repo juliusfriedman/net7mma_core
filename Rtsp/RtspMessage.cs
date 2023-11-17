@@ -769,7 +769,7 @@ namespace Media.Rtsp
         //        }
 
         //        //If there was a buffer
-        //        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(buffer)) && buffer.Count > 0)
+        //        if (Common.IDisposedExtensions.IsNullOrDisposed(buffer) is false && buffer.Count > 0)
         //        {
         //            if (m_Buffer is null) return received;
 

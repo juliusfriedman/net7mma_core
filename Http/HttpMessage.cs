@@ -2685,7 +2685,7 @@ namespace Media.Http
                 }
 
                 //If there was a buffer
-                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(buffer)) && buffer.Count > 0)
+                if (Common.IDisposedExtensions.IsNullOrDisposed(buffer) is false && buffer.Count > 0)
                 {
                     //Write the new data
                     m_Buffer.Write(buffer.Array, buffer.Offset, received += buffer.Count);

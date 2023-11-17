@@ -2057,7 +2057,7 @@ namespace Media.Rtp
 
                     //Setup the receive buffer size for all sockets of this context to use memory defined in excess of the context memory to ensure a high receive rate in udp without dropping packets
                     if ((RecieveBufferSizeMultiplier >= 0 || SendBufferSizeMultiplier >= 0) &&
-                        false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(ContextMemory)) &&
+                        Common.IDisposedExtensions.IsNullOrDisposed(ContextMemory) is false &&
                         ContextMemory.Count > 0)
                     {
                         //Ensure the receive buffer size is updated for that context.
@@ -2247,7 +2247,7 @@ namespace Media.Rtp
 
                 ////Setup the receive buffer size for all sockets of this context to use memory defined in excess of the context memory to ensure a high receive rate in udp without dropping packets
                 //if (RecieveBufferSizeMultiplier >= 0 || SendBufferSizeMultiplier >= 0 &&
-                //    false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(ContextMemory)) &&
+                //    Common.IDisposedExtensions.IsNullOrDisposed(ContextMemory) is false &&
                 //    ContextMemory.Count > 0)
                 //{
                 //    //Ensure the receive buffer size is updated for that context.
@@ -2514,7 +2514,7 @@ namespace Media.Rtp
                 return;
 
             }//else if there is a context and the version doesn't match.
-            else if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(transportContext)) && false.Equals(transportContext.Version.Equals(packetVersion)))
+            else if (Common.IDisposedExtensions.IsNullOrDisposed(transportContext) is false && false.Equals(transportContext.Version.Equals(packetVersion)))
             {
                 Media.Common.ILoggingExtensions.Log(Logger, InternalId + "HandleIncomingRtcpPacket Invalid Version, Found =>" + packetVersion + ", Expected =>" + transportContext.Version);
 
@@ -2523,7 +2523,7 @@ namespace Media.Rtp
             }
 
             //Only if the packet was not addressed to a unique party with the id of 0 and there is a null context or the context is in discovery.
-            if (false.Equals(partyId is 0) && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(transportContext)))// && transportContext.InDiscovery)                
+            if (false.Equals(partyId is 0) && Common.IDisposedExtensions.IsNullOrDisposed(transportContext) is false)// && transportContext.InDiscovery)                
             {
                 //Cache the payloadType and blockCount
                 int blockCount = packet.BlockCount;
@@ -2532,7 +2532,7 @@ namespace Media.Rtp
                 ////if (blockCount is 0)
                 ////{
                 ////    //If there was a context and the remote party has not yet been identified.
-                ////    if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(transportContext)) &&
+                ////    if (Common.IDisposedExtensions.IsNullOrDisposed(transportContext) is false &&
                 ////        transportContext.InDiscovery &&
                 ////        transportContext.Version.Equals(packetVersion))
                 ////    {
@@ -2566,7 +2566,7 @@ namespace Media.Rtp
                             transportContext = GetContextBySourceId(blockId);
 
                             //If there was a context and the remote party has not yet been identified.
-                            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(transportContext)) && 
+                            if (Common.IDisposedExtensions.IsNullOrDisposed(transportContext) is false && 
                                 transportContext.InDiscovery &&
                                 transportContext.Version.Equals(packetVersion))
                             {
@@ -2614,7 +2614,7 @@ namespace Media.Rtp
                                 transportContext = GetContextBySourceId(party);
 
                                 //If there was a context
-                                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(transportContext)) && 
+                                if (Common.IDisposedExtensions.IsNullOrDisposed(transportContext) is false && 
                                     transportContext.Version.Equals(packetVersion))
                                 {
                                     //Send report now if possible.
@@ -2652,7 +2652,7 @@ namespace Media.Rtp
                             transportContext = GetContextBySourceId(blockId);
 
                             //If there was a context and the remote party has not yet been identified.
-                            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(transportContext)) && 
+                            if (Common.IDisposedExtensions.IsNullOrDisposed(transportContext) is false && 
                                 transportContext.Version == packetVersion) //&&
                                 //transportContext.RemoteSynchronizationSourceIdentifier is 0)
                             {
@@ -3417,7 +3417,7 @@ namespace Media.Rtp
 
             //Don't have to waste cycles on this thread calling dispose...
             //Todo, check if ShouldDispose was set to false in event..
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(packet))) Common.BaseDisposable.SetShouldDispose(packet, true, false);
+            if (Common.IDisposedExtensions.IsNullOrDisposed(packet) is false) Common.BaseDisposable.SetShouldDispose(packet, true, false);
         }
 
         /// <summary>
@@ -3458,7 +3458,7 @@ namespace Media.Rtp
             }
 
             //Allow the packet to be destroyed if an event did not already change this.
-            if (shouldDispose && packet.ShouldDispose is false && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(packet))) Common.BaseDisposable.SetShouldDispose(packet, true, false);
+            if (shouldDispose && packet.ShouldDispose is false && Common.IDisposedExtensions.IsNullOrDisposed(packet) is false) Common.BaseDisposable.SetShouldDispose(packet, true, false);
         }
 
         /// <summary>
@@ -3500,7 +3500,7 @@ namespace Media.Rtp
             }
 
             //Allow the packet to be destroyed if an event did not already change this.
-            if (shouldDispose && packet.ShouldDispose is false && false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(packet))) Common.BaseDisposable.SetShouldDispose(packet, true, false);
+            if (shouldDispose && packet.ShouldDispose is false && Common.IDisposedExtensions.IsNullOrDisposed(packet) is false) Common.BaseDisposable.SetShouldDispose(packet, true, false);
         }
 
         /// <summary>
@@ -4277,7 +4277,7 @@ namespace Media.Rtp
             ClientName = null;
 
             //Remove the buffer
-            if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(m_Buffer)))
+            if (Common.IDisposedExtensions.IsNullOrDisposed(m_Buffer) is false)
             {
                 m_Buffer.Dispose();
 
