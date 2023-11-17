@@ -2,22 +2,25 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Media.Rtsp.Server
 {
     public class RtspStreamArchiver : Common.BaseDisposable
     {
-
         //Nested type for playback
 
-        public readonly string BaseDirectory = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "archive";
+        public readonly string BaseDirectory =
+            System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "archive";
 
-        IDictionary<IMedia, RtpTools.RtpDump.Program> Attached = new System.Collections.Concurrent.ConcurrentDictionary<IMedia, RtpTools.RtpDump.Program>();
+        IDictionary<IMedia, RtpTools.RtpDump.Program> Attached =
+            new System.Collections.Concurrent.ConcurrentDictionary<IMedia, RtpTools.RtpDump.Program>();
         
         RtspStreamArchiver(bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
-            if (false == System.IO.Directory.Exists(BaseDirectory))
+            if (System.IO.Directory.Exists(BaseDirectory) is false)
             {
                 System.IO.Directory.CreateDirectory(BaseDirectory);
             }
@@ -26,38 +29,41 @@ namespace Media.Rtsp.Server
         //Creates directories
         public virtual void Prepare(IMedia stream)
         {
-            if (false == System.IO.Directory.Exists(BaseDirectory + '/' + stream.Id))
+            string path = System.IO.Path.Combine(BaseDirectory, stream.Id.ToString());
+            if (System.IO.Directory.Exists(path) is false)
             {
-                System.IO.Directory.CreateDirectory(BaseDirectory + '/' + stream.Id);
+                System.IO.Directory.CreateDirectory(path);
             }
 
             //Create Toc file?
 
             //Start, End
-        }        
-
-        //Determine if directory is created
-        public virtual bool IsArchiving(IMedia stream)
-        {
-            return Attached.ContainsKey(stream);
         }
 
+        //Determine if directory is created
+        public virtual bool IsArchiving(IMedia stream) => Attached.ContainsKey(stream);
+
         //Writes a .Sdp file
-        public virtual void WriteDescription(IMedia stream, Sdp.SessionDescription sdp)
+        public virtual async Task WriteDescriptionAsync(IMedia stream,
+            Sdp.SessionDescription sdp,
+            CancellationToken cancellationToken)
         {
-            if (false == IsArchiving(stream)) return;
+            if (IsArchiving(stream) is false) return;
 
             //Add lines with Alias info?
 
-            System.IO.File.WriteAllText(BaseDirectory + '/' + stream.Id +'/' + "SessionDescription.sdp", sdp.ToString());
+            string path = System.IO.Path.Combine(BaseDirectory, stream.Id.ToString(), "SessionDescription.sdp");
+            await System.IO.File
+                .WriteAllTextAsync(path, sdp.ToString(), cancellationToken)
+                .ConfigureAwait(false);
         }
 
         //Writes a RtpToolEntry for the packet
         public virtual void WritePacket(IMedia stream, Common.IPacket packet)
         {
-            if (stream == null) return;
+            if (stream is null) return;
 
-            if (false == Attached.TryGetValue(stream, out RtpTools.RtpDump.Program program)) return;
+            if (Attached.TryGetValue(stream, out RtpTools.RtpDump.Program program) is false) return;
 
             if (packet is Rtp.RtpPacket p)
                 program.Writer.WritePacket(p);
@@ -79,14 +85,15 @@ namespace Media.Rtsp.Server
 
                 p.RtpClient.RtpPacketReceieved += RtpClientPacketReceieved;
                 p.RtpClient.RtcpPacketReceieved += RtpClientPacketReceieved;
-
             }
         }
 
-        void RtpClientPacketReceieved(object sender, Common.IPacket packet = null, Media.Rtp.RtpClient.TransportContext tc = null)
+        void RtpClientPacketReceieved(object sender,
+            Common.IPacket packet = null,
+            Media.Rtp.RtpClient.TransportContext tc = null)
         {
-            if(sender is Rtp.RtpClient c)
-                WritePacket(Attached.Keys.FirstOrDefault(s => (s as RtpSource).RtpClient == c), packet);
+            if (sender is Rtp.RtpClient c)
+                WritePacket(Attached.Keys.FirstOrDefault(k => k is RtpSource s && s.RtpClient == c), packet);
         }
 
         //Stop recoding a stream
@@ -94,9 +101,11 @@ namespace Media.Rtsp.Server
         {
             if (stream is RtpSource s)
             {
-                if (false == Attached.TryGetValue(stream, out RtpTools.RtpDump.Program program)) return;
+                if (Attached.TryGetValue(stream, out RtpTools.RtpDump.Program program) is false) return;
 
-                if (program != null && false == Common.IDisposedExtensions.IsNullOrDisposed(program.Writer)) program.Writer.Dispose();
+                if (program is not null &&
+                    Common.IDisposedExtensions.IsNullOrDisposed(program.Writer) is false)
+                    program.Writer.Dispose();
 
                 Attached.Remove(stream);
 
@@ -117,15 +126,10 @@ namespace Media.Rtsp.Server
             Attached = null;
         }
 
-        public readonly List<ArchiveSource> Sources = new();
+        public readonly List<ArchiveSource> Sources = [];
 
-        public class ArchiveSource : SourceMedia
+        public class ArchiveSource(string name, Uri source) : SourceMedia(name, source)
         {
-            public ArchiveSource(string name, Uri source)
-                : base(name, source)
-            {
-            }
-
             public ArchiveSource(string name, Uri source, Guid id)
                 : this(name, source)
             {
@@ -133,7 +137,7 @@ namespace Media.Rtsp.Server
             }
             
 
-            public List<RtpSource> Playback = new();
+            public readonly List<RtpSource> Playback = [];
 
             public RtpSource CreatePlayback()
             {
