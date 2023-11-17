@@ -55,7 +55,7 @@ namespace Media.Common.Extensions
             System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
                 System.Runtime.InteropServices.OSPlatform.OSX);
 
-        public static bool IsMac => IsMac;
+        public static bool IsMac => isMac;
 
         public static bool IsXbox
         {
