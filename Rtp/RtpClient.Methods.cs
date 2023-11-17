@@ -1607,7 +1607,9 @@ namespace Media.Rtp
                         //decrease what remains
                         remainingInBuffer -= frameLength;
 
+#if DEBUG
                         Media.Common.ILoggingExtensions.Log(Logger, InternalId + "@ProcessFrameData - raisedEvent for frameLength: " + frameLength.ToString() +" remainingInBuffer=" + remainingInBuffer);
+#endif
 
                         //Iterate again
                         continue;
@@ -1940,12 +1942,16 @@ namespace Media.Rtp
                         if (hasFrameHeader)
                         {
                             ParseAndHandleData(memory, ref expectRtcp, ref expectRtp, ref registerX, ref remainingInFrame);
+#if DEBUG
                             Media.Common.ILoggingExtensions.Log(Logger, InternalId + "ProcessFrameData - ParseAndHandleData");
+#endif
                         }
                         else
                         {
                             OnOutOfBandData(memory.Array, memory.Offset, memory.Count);
+#if DEBUG
                             Media.Common.ILoggingExtensions.Log(Logger, InternalId + "ProcessFrameData - OnOutOfBandData");
+#endif
                         }
 
                         //Decrease remaining in buffer
@@ -2747,7 +2753,7 @@ namespace Media.Rtp
             Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@SendRecieve - Exit");
         }
 
-        #endregion
+#endregion
 
         public bool TrySetLogger(Media.Common.ILogging logger)
         {
