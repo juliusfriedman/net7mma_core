@@ -300,14 +300,14 @@ namespace Media.Sdp
         public static bool operator !=(MediaDescription a, SessionDescriptionLine b) { return (a == b) is false; }
         public static bool operator ==(MediaDescription a, MediaDescription b)
         {
-            return b is null ? a is null : a.Equals(b);
+            return b is null ? a is null : b.Equals(a);
         }
 
         public static bool operator !=(MediaDescription a, MediaDescription b) { return (a == b) is false; }
 
         public static bool operator ==(MediaDescription a, Sdp.Lines.SessionMediaDescriptionLine b)
         {
-            return b is null ? a is null : a.MediaDescriptionLine.Equals(b);
+            return b is null ? a is null : b.Equals(a.MediaDescriptionLine);
         }
 
         public static bool operator !=(MediaDescription a, Sdp.Lines.SessionMediaDescriptionLine b) { return (a == b) is false; }

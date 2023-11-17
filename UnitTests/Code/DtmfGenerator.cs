@@ -77,7 +77,7 @@ public static class DtmfGenerator
     /// <summary>Indicates whether this `Config` and a specified object are equal.</summary>
     /// <param name="obj">The object to compare with the current `Config`.</param>
     /// <returns>Returns `true` if `obj` this `Config` are the same type and represent the same value; otherwise, `false`.</returns>
-    public override bool Equals(object? obj) => obj is Config other && Equals(other);
+    public override bool Equals(object obj) => obj is Config other && Equals(other);
 
     /// <summary>Indicates whether the left-hand side `Config` is equal to the right-hand side `Config`.</summary>
     /// <param name="left">The left-hand side `Config` of the comparison.</param>

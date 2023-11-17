@@ -2390,8 +2390,8 @@ namespace Media.Rtsp
         internal void ProcessInterleavedData(object sender, byte[] data, int offset, int length)
         {
             if (length <= 0 ||
-                offset + length >= data.Length ||
                 Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(data) ||
+                offset + length >= data.Length ||
                 Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
 
             //Todo, it's possible a new varialbe could be passed to indicate this is binary data or a continuation..
@@ -3491,7 +3491,7 @@ namespace Media.Rtsp
             if (m_RtspSocket is not null)
             {
                 //If LeaveOpen was false and the socket is not shared.
-                if (force || LeaveOpen is false && SharesSocket is false)
+                if (force || (LeaveOpen is false && SharesSocket is false))
                 {
                     #region The Great Debate on Closing
 

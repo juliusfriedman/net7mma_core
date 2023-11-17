@@ -1336,7 +1336,7 @@ namespace Media
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static bool operator ==(CommonHeaderBits a, CommonHeaderBits b)
             {
-                return b is null ? a is null : a.Equals(b);
+                return b is null ? a is null : b.Equals(a);
             }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

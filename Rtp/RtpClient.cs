@@ -3822,7 +3822,8 @@ namespace Media.Rtp
                     }
                     
                     //Wait for the start while the value was not changed and the thread is not started.
-                    while (m_ThreadEvents && EventsStarted == DateTime.MinValue && false.Equals(m_EventThread == null)) m_EventReady.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);
+                    while (m_ThreadEvents && EventsStarted == DateTime.MinValue && m_EventThread is not null)
+                        m_EventReady.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);
                 }
                 else
                 {

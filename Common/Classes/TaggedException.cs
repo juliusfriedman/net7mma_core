@@ -36,6 +36,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
+using System;
+
 namespace Media.Common
 { 
     /// <summary>
@@ -54,7 +56,6 @@ namespace Media.Common
     /// <typeparam name="T">The type data in the Tag property</typeparam>
     public class TaggedException<T> : System.Exception, ITaggedException, IDisposed
     {
-
         #region Constants
 
         /// <summary>
@@ -78,7 +79,7 @@ namespace Media.Common
 
         #region Fields
 
-        readonly Common.SuppressedFinalizerDisposable @base = new Common.SuppressedFinalizerDisposable(true);
+        readonly Common.SuppressedFinalizerDisposable @base = new(true);
 
         #endregion
 
@@ -120,7 +121,7 @@ namespace Media.Common
         /// Creates the default for <typeparamref name="T"/> in the <see cref="Tag"/> property.
         /// </summary>
         public TaggedException()
-            : base() { Tag = default(T); }
+            : base() { Tag = default; }
 
         /// <summary>
         /// Creates the default for <typeparamref name="T"/> from <paramref name="tag"/> in <see cref="Tag"/> and assigns <see cref="Exception.Message"/>
@@ -152,6 +153,7 @@ namespace Media.Common
         /// <param name="tag"></param>
         /// <param name="info"><see cref="System.Runtime.Serialization.SerializationInfo"/></param>
         /// <param name="context"><see cref="System.Runtime.Serialization.StreamingContext"/></param>
+        [Obsolete]
         protected TaggedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
             : base(info, context)
         {
@@ -171,7 +173,9 @@ namespace Media.Common
         {
             //If given any data 
             //Add any data related to the the Data IDictionary of the Exception using the Hashcode of the data as the key.
-            if (data != null) foreach (object key in data) Data.Add(key.GetHashCode(), key);
+            if (data != null)
+                foreach (object key in data)
+                    Data.Add(key.GetHashCode(), key);
         }
 
         #endregion
@@ -183,12 +187,14 @@ namespace Media.Common
         /// </summary>
         /// <param name="info"><see cref="System.Runtime.Serialization.SerializationInfo"/></param>
         /// <param name="context"><see cref="System.Runtime.Serialization.StreamingContext"/></param>
+        [Obsolete]
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context)
         {
-            if (info is null) throw new System.ArgumentNullException(nameof(info));
+            System.ArgumentNullException.ThrowIfNull(info);
 
             //Add the Tag to the info
             info.AddValue(TagPropertyString, Tag);
+
             //Get all other exception data from base.
             base.GetObjectData(info, context);
         }
@@ -233,6 +239,7 @@ namespace Media.Common
         /// </summary>
         /// <typeparam name="T">The type related to the exception.</typeparam>
         /// <param name="exception">The <see cref="System.Exception"/> which occured.</param>
+        [System.Diagnostics.CodeAnalysis.DoesNotReturn]
         public static void Raise<T>(this TaggedException<T> exception)
         {
             if (exception is not null)
@@ -268,14 +275,17 @@ namespace Media.Common
             }
 
             //Raise the exception
-            try { exception.Raise(); }
+            try
+            {
+                exception.Raise();
+            }
             catch //Handle it
             {
                 //If the debugger is not attached and it cannot be then return
-                if (false.Equals(Common.Extensions.Debug.DebugExtensions.Attach())) return;
+                if (Extensions.Debug.DebugExtensions.Attach() is false) return;
 
                 //Break if still attached
-                Common.Extensions.Debug.DebugExtensions.BreakIfAttached();
+                Extensions.Debug.DebugExtensions.BreakIfAttached();
             }
         }
 
@@ -286,7 +296,11 @@ namespace Media.Common
         /// <param name="tag">The element related to the exception</param>
         /// <param name="message">The message realted to the exception, if not provided a default message will be used.</param>
         /// <param name="innerException">any <see cref="System.Exception"/> which is related to the exception being thrown</param>
-        public static void RaiseTaggedException<T>(T tag, string message, System.Exception innerException = null) { new TaggedException<T>(tag, message ?? TaggedException<T>.DefaultExceptionTypeMessage(), innerException).Raise(); }
+        [System.Diagnostics.CodeAnalysis.DoesNotReturn]
+        public static void RaiseTaggedException<T>(T tag, string message, System.Exception innerException = null)
+        {
+            new TaggedException<T>(tag, message ?? TaggedException<T>.DefaultExceptionTypeMessage(), innerException).Raise();
+        }
 
         /// <summary>
         /// </summary>
@@ -294,6 +308,9 @@ namespace Media.Common
         /// <param name="tag">The element related to the exception</param>
         /// <param name="message">The message realted to the exception, if not provided a default message will be used.</param>
         /// <param name="innerException">any <see cref="System.Exception"/> which is related to the exception being thrown</param>
-        public static void TryRaiseTaggedException<T>(T tag, string message, System.Exception innerException = null) { new TaggedException<T>(tag, message ?? TaggedException<T>.DefaultExceptionTypeMessage(), innerException).TryRaise(); }
+        public static void TryRaiseTaggedException<T>(T tag, string message, System.Exception innerException = null)
+        {
+            new TaggedException<T>(tag, message ?? TaggedException<T>.DefaultExceptionTypeMessage(), innerException).TryRaise();
+        }
     }
 }

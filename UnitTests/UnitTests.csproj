@@ -43,7 +43,6 @@
     <ProjectReference Include="..\Containers\Riff\Container.Riff.csproj" />
     <ProjectReference Include="..\Cryptography\Cryptography.csproj" />
     <ProjectReference Include="..\Http\Http.csproj" />
-    <ProjectReference Include="..\Media\Media.Consolidated.csproj" />
     <ProjectReference Include="..\Ntp\Ntp.csproj" />
     <ProjectReference Include="..\RtcpFeedback\Rtcp.Feedback.csproj" />
     <ProjectReference Include="..\RtpTools\RtpTools.csproj" />

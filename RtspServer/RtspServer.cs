@@ -1194,16 +1194,16 @@ namespace Media.Rtsp
 
             Clients.AsParallel().ForAll((session) =>
             {
-                if (session == null) return;
+                if (session is null) return;
 
                 //Check for inactivity at the RtspLevel first and then the RtpLevel.
                 if (session.Created > maintenanceStarted
                     || //Or if the LastRequest was created after maintenanceStarted
-                    false.Equals(session.LastRequest == null) && session.LastRequest.Created > maintenanceStarted
+                    session.LastRequest is not null && session.LastRequest.Created > maintenanceStarted
                     || //Or if the LastResponse was created after maintenanceStarted
-                    false.Equals(session.LastResponse == null) && session.LastResponse.Created > maintenanceStarted
+                    session.LastResponse is not null && session.LastResponse.Created > maintenanceStarted
                     || //Or if there were no resources released
-                    false.Equals(session.IsDisconnected) && false == session.ReleaseUnusedResources())
+                    session.IsDisconnected is false && session.ReleaseUnusedResources() is false)
                 {
                     //Do not attempt to perform any disconnection of the session
                     return;
@@ -1213,17 +1213,17 @@ namespace Media.Rtsp
                 if (IDisposedExtensions.IsNullOrDisposed(session) || session.IsDisconnected
                     &&
                     //If the session has an attached source but no client OR the RtpClient is disposed or not active
-                    session.Playing.Count >= 0 && (IDisposedExtensions.IsNullOrDisposed(session.m_RtpClient) || false.Equals(session.m_RtpClient.IsActive))
+                    session.Playing.Count >= 0 && (IDisposedExtensions.IsNullOrDisposed(session.m_RtpClient) || session.m_RtpClient.IsActive is false)
                     ||//There was no last request
-                    session.LastRequest == null
+                    session.LastRequest is null
                     ||//OR there is a last request AND
-                    (false.Equals(session.LastRequest == null)
+                    (session.LastRequest is not null
                     && //The last request was created longer ago than required to keep clients active
                     (maintenanceStarted - session.LastRequest.Created) > RtspClientInactivityTimeout)
                     ||//There was no last response
-                    session.LastResponse == null
+                    session.LastResponse is null
                     || //OR there is a last response AND
-                    (false.Equals(session.LastResponse == null)
+                    (session.LastResponse is not null
                     && //The last response was transferred longer ago than required to keep clients active
                     session.LastResponse.Transferred.HasValue
                     && (maintenanceStarted - session.LastResponse.Transferred) > RtspClientInactivityTimeout))
@@ -1484,7 +1484,7 @@ namespace Media.Rtsp
             DisableUnreliableTransport();
 
             //Stop maintaining the server
-            if (false.Equals(m_Maintainer == null))
+            if (m_Maintainer is not null)
             {
                 m_Maintainer.Dispose();
 
@@ -2828,7 +2828,7 @@ namespace Media.Rtsp
 
                     //Should use auth-int and qop
 
-                    authenticateHeader = string.Format(System.Globalization.CultureInfo.InvariantCulture, "Digest username={0},realm={1},nonce={2},cnonce={3}", requiredCredential.UserName, (string.IsNullOrWhiteSpace(requiredCredential.Domain) ? ServerName : requiredCredential.Domain), ((long)(Utility.Random.Next(int.MaxValue) << 32 | (Utility.Random.Next(int.MaxValue)))).ToString("X"), Utility.Random.Next(int.MaxValue).ToString("X"));
+                    authenticateHeader = string.Format(System.Globalization.CultureInfo.InvariantCulture, "Digest username={0},realm={1},nonce={2},cnonce={3}", requiredCredential.UserName, (string.IsNullOrWhiteSpace(requiredCredential.Domain) ? ServerName : requiredCredential.Domain), (((long)Utility.Random.Next(int.MaxValue)) << 32 | (long)(Utility.Random.Next(int.MaxValue))).ToString("X"), Utility.Random.Next(int.MaxValue).ToString("X"));
                 }
                 else if (object.ReferenceEquals(requiredCredential = RequiredCredentials.GetCredential(sourceLocation, RtspHeaderFields.Authorization.Basic), null) is false)
                 {
@@ -3366,10 +3366,9 @@ namespace Media.Rtsp
             {
                 parts = authHeader.Split((char)Common.ASCII.Space);
 
-                if (parts.Length > 0)
+                if (parts.Length > 1)
                 { 
                     authType = parts[0];
-
                     authHeader = parts[1];
                 }
 

@@ -513,9 +513,8 @@ namespace Media.RtpTools
             //Write each entry in bye.GetSourceList
             using (var sourceList = bye.GetSourceList())
             {
-                if (sourceList == null) blockString += "#Incomplete Source List Not Included" + (char)Common.ASCII.LineFeed;
-                else foreach (uint partyId in sourceList)//ssrc=
-                        blockString += string.Format(HexFormat, "ssrc", HexSpecifier + partyId.ToString("X"), (char)Common.ASCII.LineFeed);
+                foreach (uint partyId in sourceList)//ssrc=
+                    blockString += string.Format(HexFormat, "ssrc", HexSpecifier + partyId.ToString("X"), (char)Common.ASCII.LineFeed);
             }
 
             return blockString;

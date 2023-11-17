@@ -72,36 +72,24 @@ namespace Media.Common.Extensions
             get { return MonoMacType != null; }
         }
 
-        //Maybe a IsMonoOrMonoMac...
-
-        internal static readonly System.Type MonoTouchObjCRuntimeType = System.Type.GetType("MonoTouch.ObjCRuntime");
+        internal static readonly bool isiOS =
+            System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                System.Runtime.InteropServices.OSPlatform.Create("iOS"));
 
         public static bool IsiOS
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return MonoTouchObjCRuntimeType != null; }
+            get { return isiOS; }
         }
 
-        //To have a Classic property one would need to ensure MonoTouchObjCRuntimeType != null and reflect the Constants.Version field.
-        /*
-         https://developer.xamarin.com/recipes/ios/general/projects/environment_checks/
-         * 
-         Version version = new Version (ObjCRuntime.Constants.Version);
-         if (version > new Version (7,0))
-         {
-           // Code that uses features from Xamarin.iOS 7.0
-         }
-         */
-
-        internal static readonly System.Type AndroidOSType = System.Type.GetType("Android.OS");
-
-        //Don't matter at this time anyway as this library may be loaded outside of the app domain where Android is loaded...
-        //internal static bool HasAndroidOS = NamespaceExists("Android.OS");
+        internal static readonly bool isAndroid =
+            System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+                System.Runtime.InteropServices.OSPlatform.Create("Android"));
 
         public static bool IsAndroid
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return AndroidOSType != null /*|| HasAndroidOS*/; }
+            get { return isAndroid; }
         }
 
         internal static readonly System.Type WatchKitType = System.Type.GetType("WatchKit");

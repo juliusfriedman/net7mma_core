@@ -80,13 +80,6 @@ namespace Media.Rtsp.Server.MediaTypes
                 if (attributeLine == null || attributeLine.Type != Sdp.Lines.SessionAttributeLine.AttributeType) return false;
 
                 throw new NotImplementedException();
-
-                foreach (string part in attributeLine.Parts)
-                {
-                    //
-                }
-
-                return true;
             }
 
             /// <summary>

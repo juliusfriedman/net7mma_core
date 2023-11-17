@@ -273,7 +273,8 @@ namespace Media.Rtsp.Server.MediaTypes
         public RtpSource(string name, System.Uri source, Rtp.RtpClient client, bool perPacket = false)
             : this(name, source, perPacket)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(client)) throw new Media.Common.Extensions.Exception.ExceptionExtensions.ArgumentNullOrDisposedException(client);            
+            if (Common.IDisposedExtensions.IsNullOrDisposed(client))
+                throw new Media.Common.Extensions.Exception.ExceptionExtensions.ArgumentNullOrDisposedException(client);
 
             RtpClient = client;
         }
@@ -286,12 +287,11 @@ namespace Media.Rtsp.Server.MediaTypes
         public RtpSource(string name, Sdp.SessionDescription sessionDescription)
             : base(name, new System.Uri(string.Join(System.Uri.SchemeDelimiter, Rtp.RtpClient.RtpProtcolScheme, ((Sdp.Lines.SessionConnectionLine)sessionDescription.ConnectionLine).Host)))
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(sessionDescription)) throw new Media.Common.Extensions.Exception.ExceptionExtensions.ArgumentNullOrDisposedException("sessionDescription", sessionDescription);
+            if (Common.IDisposedExtensions.IsNullOrDisposed(sessionDescription))
+                throw new Media.Common.Extensions.Exception.ExceptionExtensions.ArgumentNullOrDisposedException(nameof(sessionDescription), sessionDescription);
 
             RtpClient = Rtp.RtpClient.FromSessionDescription(SessionDescription = sessionDescription);
-
             RtpClient.FrameChangedEventsEnabled = PerPacket == false;
-
             RtpClient.ThreadEvents = true;
         }
 

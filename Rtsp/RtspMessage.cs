@@ -962,7 +962,7 @@ namespace Media.Rtsp
 
         public static bool operator ==(RtspMessage a, RtspMessage b)
         {
-            return b is null ? a is null : a.Equals(b);
+            return b is null ? a is null : b.Equals(a);
         }
 
         public static bool operator !=(RtspMessage a, RtspMessage b) { return (a == b) is false; }

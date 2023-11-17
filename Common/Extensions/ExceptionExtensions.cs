@@ -43,7 +43,6 @@ namespace Media.Common.Extensions.Exception
     /// </summary>
     public static class ExceptionExtensions
     {
-
         /// <summary>
         /// The <see cref="null"/> <see cref="System.Exception"/>
         /// </summary>
@@ -52,18 +51,19 @@ namespace Media.Common.Extensions.Exception
         /// <summary>
         /// Check if we are in a exception unwind scenario or not.
         /// </summary>
+        [System.Obsolete]
         public static bool InException
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                //See http://geekswithblogs.net/akraus1/archive/2008/04/08/121121.aspx
-                return System.Runtime.InteropServices.Marshal.GetExceptionPointers() == System.IntPtr.Zero && 
+                // See http://geekswithblogs.net/akraus1/archive/2008/04/08/121121.aspx
+                return System.Runtime.InteropServices.Marshal.GetExceptionPointers() == nint.Zero &&
                     System.Runtime.InteropServices.Marshal.GetExceptionCode() is Common.Binary.Zero ? false : true;
             }
         }
 
-        //http://stackoverflow.com/questions/3007608/resuming-execution-of-code-after-exception-is-thrown-and-caught
+        // https://stackoverflow.com/questions/3007608/resuming-execution-of-code-after-exception-is-thrown-and-caught
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static System.Exception ResumeOnError(System.Action action)
         {
@@ -82,7 +82,7 @@ namespace Media.Common.Extensions.Exception
         /// <summary>
         /// Represents an exception which usually contains a reference to a null or disposed object.
         /// </summary>
-        public class ArgumentNullOrDisposedException : System.ArgumentNullException
+        public class ArgumentNullOrDisposedException(string paramName) : System.ArgumentNullException(paramName)
         {
             public readonly IDisposed Disposed;
 
@@ -92,15 +92,16 @@ namespace Media.Common.Extensions.Exception
             public bool HasDisposed
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return Disposed is not null; }
+                get => Disposed is not null;
             }
 
 #if DEBUG
             private readonly System.Diagnostics.StackFrame StackFrame;
-            
-            public ArgumentNullOrDisposedException(string paramName, IDisposed what, int stackFrameDepth, bool fNeedFileInfo) : this(paramName)
+
+            public ArgumentNullOrDisposedException(string paramName, IDisposed what, int stackFrameDepth, bool fNeedFileInfo)
+                : this(paramName)
             {
-                //Warning, memory consumption...
+                // Warning, memory consumption...
                 StackFrame = new System.Diagnostics.StackFrame(stackFrameDepth, fNeedFileInfo);
                 Disposed = what;
             }
@@ -113,8 +114,6 @@ namespace Media.Common.Extensions.Exception
             {
                 Disposed = what;
             }
-
-            public ArgumentNullOrDisposedException(string paramName) : base(paramName) { }
         }
     }
 }

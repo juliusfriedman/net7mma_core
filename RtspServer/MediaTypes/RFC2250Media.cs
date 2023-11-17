@@ -132,223 +132,209 @@ namespace Media.Rtsp.Server.MediaTypes
 
         //Move to Codec mpeg
         //MpegEncoder
-
-        public byte[] WriteMPEGSequence(Bitmap img)
+        public static ArraySegment<byte> WriteMPEGSequence(Bitmap img)
         {
-            int i;
-            int j, k1, k2;
-            long j2;
-            byte tempByte;
+            const int ACSIZE = 1764;
 
-            int ACSIZE = 1764;
             byte[] leftoverBits = new byte[10];
             byte[] DCbits = new byte[24];
             byte[] ACbits = new byte[ACSIZE];
 
-            int DCY, DCCR, DCCB, lastDCY, lastDCCR, lastDCCB;
+            int j, k1, k2;
+            int DCY, DCCR, DCCB;
             int hblock, vblock;
-            byte[,] Y = new byte[16, 16];
-            byte[,] CR = new byte[8, 8];
-            byte[,] CB = new byte[8, 8];
+
             byte[,] block = new byte[8, 8];
-            double[,] S = new double[8, 8];
-            int[,] Q = new int[8, 8];
-            int[] ZZ = new int[64];
-            long imageBytes = 0;
-            long bitRate;
 
-            MPEGFunctions MPEG = new MPEGFunctions();
+            MPEGFunctions MPEG = new();
 
-            imageBytes = img.Height * img.Width * 3;
+            using MemoryStream wms = new();
+            // Create output file and Memory Stream to write encoded image to
+            using BinaryWriter bw = new(wms);
 
-            using (MemoryStream wms = new MemoryStream())
-            {
-                // Create output file and Memory Stream to write encoded image to
-                using (BinaryWriter bw = new BinaryWriter(wms))
+            //	Set up variables to encode image into MPEG frame
+            int lastDCY = 128;
+            int lastDCCR = 128, lastDCCB = 128;
+            int i;
+            for (i = 0; i < 10; i++)
+                leftoverBits[i] = 255;
+            for (i = 0; i < 24; i++)
+                ACbits[i] = 255;
+            for (i = 0; i < 24; i++)
+                DCbits[i] = 255;
+
+            long outBytes = 20;
+
+            // Write MPEG picture and slice headers to MemoryStream
+            for (i = 0; i < 10; i++)
+                MPEG.picHeaderBits[i + 32] = (byte)((0 & (int)Math.Pow(2, 9 - i)) >> (9 - i));
+
+            MPEG.writeToMS(leftoverBits, MPEG.picHeaderBits, ACbits, ref outBytes);
+            MPEG.writeToMS(leftoverBits, MPEG.sliceHeaderBits, ACbits, ref outBytes);
+
+            // Do this for each 16x16 pixel block in the bitmap file
+            for (vblock = 0; vblock < img.Height / 16; vblock++)
+                for (hblock = 0; hblock < img.Width / 16; hblock++)
                 {
-                    MemoryStream ms = new MemoryStream();
+                    //	Write 2 bits for Macroblock header to leftoverbits
+                    //	leftoverbits = '1', '1';
+                    MPEG.writeMbHeader(leftoverBits);
 
+                    //	Fill the Y[] array with a 16x16 block of RGB values
+                    byte[,] Y = MPEG.getYMatrix(img, vblock, hblock);
+                    //	Fill the CR and CB arrays with 8x8 blocks by subsampling 
+                    //	the RGB array
+                    byte[,] CR = MPEG.getCRMatrix(img, vblock, hblock);
+                    byte[,] CB = MPEG.getCBMatrix(img, vblock, hblock);
 
-                    //	Set up variables to encode image into MPEG frame
-                    lastDCY = 128;
-                    lastDCCR = lastDCCB = 128;
-                    for (i = 0; i < 10; i++)
-                        leftoverBits[i] = 255;
-                    for (i = 0; i < 24; i++)
-                        ACbits[i] = 255;
+                    double[,] S;
+                    int[,] Q;
+                    int[] ZZ;
+                    // First calculate DCTs for the 4 Y blocks
+                    for (k1 = 0; k1 < 2; k1++)
+                        for (k2 = 0; k2 < 2; k2++)
+                        {
+                            //	Put 8x8 Y blocks into the block[] array and
+                            //	then calculate the DCT and quantize the result
+                            for (i = 0; i < 8; i++)
+                                for (j = 0; j < 8; j++)
+                                    block[i, j] = Y[(k1 * 8 + i), (k2 * 8 + j)];
+                            S = MPEG.calculateDCT(block);
+                            Q = MPEG.Quantize(S);
+
+                            //	Section to differentially Huffman encode DC values
+                            //	DC is the diffential value for the DC coefficient
+                            //	lastDC is the running total of the full magnitude
+                            //	Then send the DC value to DCHuffmanEncode
+                            for (i = 0; i < 24; i++)
+                                DCbits[i] = 255;
+                            DCY = (new int[8, 8])[0, 0] - lastDCY;
+                            lastDCY += DCY;
+                            DCbits = MPEG.DCHuffmanEncode(DCY, MPEG.DCLumCode, MPEG.DCLumSize);
+
+                            //	Section to encode AC Huffman values
+                            //	Put the AC coefficients into the ACarray[]
+                            //	in zigzag order, then Huffman encode the
+                            //	resulting array.
+                            for (i = 0; i < ACSIZE; i++)
+                                ACbits[i] = 255;
+                            ZZ = MPEG.Zigzag(new int[8, 8]);
+                            ACbits = MPEG.ACHuffmanEncode(ZZ);
+
+                            //	Write the encoded bits to the MemoryStream
+                            MPEG.writeToMS(leftoverBits, DCbits, ACbits, ref outBytes);
+                        }
+
+                    // Now calculate the DCT for the CB array and quantize
+                    S = MPEG.calculateDCT(CB);
+                    Q = MPEG.Quantize(S);
+
+                    //	Encode DC value
                     for (i = 0; i < 24; i++)
                         DCbits[i] = 255;
+                    DCCB = (new int[8, 8])[0, 0] - lastDCCB;
+                    lastDCCB += DCCB;
+                    DCbits = MPEG.DCHuffmanEncode(DCCB, MPEG.DCChromCode, MPEG.DCChromSize);
 
-                    long outBytes = 20;
+                    //	Encode AC values
+                    for (i = 0; i < ACSIZE; i++)
+                        ACbits[i] = 255;
+                    ZZ = MPEG.Zigzag(new int[8, 8]);
+                    ACbits = MPEG.ACHuffmanEncode(ZZ);
 
-                    // Write MPEG picture and slice headers to MemoryStream
-                    for (i = 0; i < 10; i++)
-                        MPEG.picHeaderBits[i + 32] = (byte)((0 & (int)Math.Pow(2, 9 - i)) >> (9 - i));
-                    MPEG.writeToMS(leftoverBits, MPEG.picHeaderBits, ACbits, ref outBytes);
-                    MPEG.writeToMS(leftoverBits, MPEG.sliceHeaderBits, ACbits, ref outBytes);
+                    //	Write the encoded bits to the MemoryStream
+                    MPEG.writeToMS(leftoverBits, DCbits, ACbits, ref outBytes);
 
-                    // Do this for each 16x16 pixel block in the bitmap file
-                    for (vblock = 0; vblock < img.Height / 16; vblock++)
-                        for (hblock = 0; hblock < img.Width / 16; hblock++)
-                        {
-                            //	Write 2 bits for Macroblock header to leftoverbits
-                            //	leftoverbits = '1', '1';
-                            MPEG.writeMbHeader(leftoverBits);
+                    // Now calculate the DCT for the CR array and quantize
+                    S = MPEG.calculateDCT(CR);
+                    Q = MPEG.Quantize(S);
 
-                            //	Fill the Y[] array with a 16x16 block of RGB values
-                            Y = MPEG.getYMatrix(img, vblock, hblock);
-                            //	Fill the CR and CB arrays with 8x8 blocks by subsampling 
-                            //	the RGB array
-                            CR = MPEG.getCRMatrix(img, vblock, hblock);
-                            CB = MPEG.getCBMatrix(img, vblock, hblock);
+                    // Encode DC value
+                    for (i = 0; i < 24; i++)
+                        DCbits[i] = 255;
+                    DCCR = (new int[8, 8])[0, 0] - lastDCCR;
+                    lastDCCR += DCCR;
+                    DCbits = MPEG.DCHuffmanEncode(DCCR, MPEG.DCChromCode, MPEG.DCChromSize);
 
-                            // First calculate DCTs for the 4 Y blocks
-                            for (k1 = 0; k1 < 2; k1++)
-                                for (k2 = 0; k2 < 2; k2++)
-                                {
-                                    //	Put 8x8 Y blocks into the block[] array and
-                                    //	then calculate the DCT and quantize the result
-                                    for (i = 0; i < 8; i++)
-                                        for (j = 0; j < 8; j++)
-                                            block[i, j] = Y[(k1 * 8 + i), (k2 * 8 + j)];
-                                    S = MPEG.calculateDCT(block);
-                                    Q = MPEG.Quantize(S);
+                    //	Encode AC values
+                    for (i = 0; i < ACSIZE; i++)
+                        ACbits[i] = 255;
+                    ZZ = MPEG.Zigzag(new int[8, 8]);
+                    ACbits = MPEG.ACHuffmanEncode(ZZ);
 
-                                    //	Section to differentially Huffman encode DC values
-                                    //	DC is the diffential value for the DC coefficient
-                                    //	lastDC is the running total of the full magnitude
-                                    //	Then send the DC value to DCHuffmanEncode
-                                    for (i = 0; i < 24; i++)
-                                        DCbits[i] = 255;
-                                    DCY = Q[0, 0] - lastDCY;
-                                    lastDCY += DCY;
-                                    DCbits = MPEG.DCHuffmanEncode(DCY, MPEG.DCLumCode, MPEG.DCLumSize);
-
-                                    //	Section to encode AC Huffman values
-                                    //	Put the AC coefficients into the ACarray[]
-                                    //	in zigzag order, then Huffman encode the
-                                    //	resulting array.
-                                    for (i = 0; i < ACSIZE; i++)
-                                        ACbits[i] = 255;
-                                    ZZ = MPEG.Zigzag(Q);
-                                    ACbits = MPEG.ACHuffmanEncode(ZZ);
-
-                                    //	Write the encoded bits to the MemoryStream
-                                    MPEG.writeToMS(leftoverBits, DCbits, ACbits, ref outBytes);
-                                }
-
-                            // Now calculate the DCT for the CB array and quantize
-                            S = MPEG.calculateDCT(CB);
-                            Q = MPEG.Quantize(S);
-
-                            //	Encode DC value
-                            for (i = 0; i < 24; i++)
-                                DCbits[i] = 255;
-                            DCCB = Q[0, 0] - lastDCCB;
-                            lastDCCB += DCCB;
-                            DCbits = MPEG.DCHuffmanEncode(DCCB, MPEG.DCChromCode, MPEG.DCChromSize);
-
-                            //	Encode AC values
-                            for (i = 0; i < ACSIZE; i++)
-                                ACbits[i] = 255;
-                            ZZ = MPEG.Zigzag(Q);
-                            ACbits = MPEG.ACHuffmanEncode(ZZ);
-
-                            //	Write the encoded bits to the MemoryStream
-                            MPEG.writeToMS(leftoverBits, DCbits, ACbits, ref outBytes);
-
-                            // Now calculate the DCT for the CR array and quantize
-                            S = MPEG.calculateDCT(CR);
-                            Q = MPEG.Quantize(S);
-
-                            // Encode DC value
-                            for (i = 0; i < 24; i++)
-                                DCbits[i] = 255;
-                            DCCR = Q[0, 0] - lastDCCR;
-                            lastDCCR += DCCR;
-                            DCbits = MPEG.DCHuffmanEncode(DCCR, MPEG.DCChromCode, MPEG.DCChromSize);
-
-                            //	Encode AC values
-                            for (i = 0; i < ACSIZE; i++)
-                                ACbits[i] = 255;
-                            ZZ = MPEG.Zigzag(Q);
-                            ACbits = MPEG.ACHuffmanEncode(ZZ);
-
-                            //	Write the encoded bits to the MemoryStream
-                            MPEG.writeToMS(leftoverBits, DCbits, ACbits, ref outBytes);
-                        }
-
-                    // Write EOP bits to the MemoryStream
-                    MPEG.writeEOP(leftoverBits, MPEG.EOPBits);
-                    outBytes++;
-
-                    //	Put memory stream (which contains the encoded image) into buffer
-                    ms = MPEG.getMS();
-                    byte[] buffer = new Byte[ms.Length];
-                    buffer = ms.ToArray();
-
-                    //	Set MPEG Sequence Header bits to correct image size
-                    j = 2048;
-                    for (i = 0; i < 12; i++)
-                    {
-                        MPEG.seqHeaderBits[i + 32] = (byte)((j & img.Width) >> (11 - i));
-                        MPEG.seqHeaderBits[i + 44] = (byte)((j & img.Height) >> (11 - i));
-                        j >>= 1;
-                    }
-
-                    //	Set MPEG Sequence Header bits to bitRate value
-                    bitRate = ms.Length * 30 * 8 / 400;
-                    j2 = 131072;
-                    for (i = 0; i < 18; i++)
-                    {
-                        MPEG.seqHeaderBits[i + 64] = (byte)((j2 & bitRate) >> (17 - i));
-                        j2 >>= 1;
-                    }
-
-                    //	Write MPEG Sequence header to file
-                    for (i = 0; i < 12; i++)
-                    {
-                        tempByte = 0;
-                        for (j = 0; j < 8; j++)
-                            tempByte = (byte)(tempByte * 2 + MPEG.seqHeaderBits[i * 8 + j]);
-                        bw.Write(tempByte);
-                    }
-
-                    //	Write MPEG GOP header to file
-                    for (i = 0; i < 8; i++)
-                    {
-                        tempByte = 0;
-                        for (j = 0; j < 8; j++)
-                            tempByte = (byte)(tempByte * 2 + MPEG.GOPHeaderBits[i * 8 + j]);
-                        bw.Write(tempByte);
-                    }
-
-                    //	Fix the picture header for each MPEG frame and write 
-                    //	the buffer to the file
-                    for (i = 0; i < 1; i++)
-                    {
-                        for (j = 0; j < 10; j++)
-                            MPEG.picHeaderBits[j + 32] = (byte)((i & (int)Math.Pow(2, 9 - j)) >> (9 - j));
-                        for (j = 0; j < 4; j++)
-                        {
-                            tempByte = 0;
-                            for (k1 = 0; k1 < 8; k1++)
-                                tempByte = (byte)(2 * tempByte + MPEG.picHeaderBits[j * 8 + k1]);
-                            buffer[j] = tempByte;
-                        }
-                        bw.Write(buffer);
-                    }
-
-                    // Write the End Of Sequence header
-                    bw.Write((byte)0x00);
-                    bw.Write((byte)0x00);
-                    bw.Write((byte)0x01);
-                    bw.Write((byte)0xb7);
-
-                    bw.Close();
-                    return wms.ToArray();
+                    //	Write the encoded bits to the MemoryStream
+                    MPEG.writeToMS(leftoverBits, DCbits, ACbits, ref outBytes);
                 }
+
+            // Write EOP bits to the MemoryStream
+            MPEG.writeEOP(leftoverBits, MPEG.EOPBits);
+            outBytes++;
+
+            //	Put memory stream (which contains the encoded image) into buffer
+            MemoryStream ms = MPEG.getMS();
+
+            if (!ms.TryGetBuffer(out var buffer)) buffer = ms.ToArray();
+
+            //	Set MPEG Sequence Header bits to correct image size
+            j = 2048;
+            for (i = 0; i < 12; i++)
+            {
+                MPEG.seqHeaderBits[i + 32] = (byte)((j & img.Width) >> (11 - i));
+                MPEG.seqHeaderBits[i + 44] = (byte)((j & img.Height) >> (11 - i));
+                j >>= 1;
             }
+
+            //	Set MPEG Sequence Header bits to bitRate value
+            long bitRate = ms.Length * 30 * 8 / 400;
+            long j2 = 131072;
+            for (i = 0; i < 18; i++)
+            {
+                MPEG.seqHeaderBits[i + 64] = (byte)((j2 & bitRate) >> (17 - i));
+                j2 >>= 1;
+            }
+
+            byte tempByte;
+            //	Write MPEG Sequence header to file
+            for (i = 0; i < 12; i++)
+            {
+                tempByte = 0;
+                for (j = 0; j < 8; j++)
+                    tempByte = (byte)(tempByte * 2 + MPEG.seqHeaderBits[i * 8 + j]);
+                bw.Write(tempByte);
+            }
+
+            //	Write MPEG GOP header to file
+            for (i = 0; i < 8; i++)
+            {
+                tempByte = 0;
+                for (j = 0; j < 8; j++)
+                    tempByte = (byte)(tempByte * 2 + MPEG.GOPHeaderBits[i * 8 + j]);
+                bw.Write(tempByte);
+            }
+
+            //	Fix the picture header for each MPEG frame and write 
+            //	the buffer to the file
+            for (i = 0; i < 1; i++)
+            {
+                for (j = 0; j < 10; j++)
+                    MPEG.picHeaderBits[j + 32] = (byte)((i & (int)Math.Pow(2, 9 - j)) >> (9 - j));
+                for (j = 0; j < 4; j++)
+                {
+                    tempByte = 0;
+                    for (k1 = 0; k1 < 8; k1++)
+                        tempByte = (byte)(2 * tempByte + MPEG.picHeaderBits[j * 8 + k1]);
+                    buffer[j] = tempByte;
+                }
+                bw.Write(buffer);
+            }
+
+            // Write the End Of Sequence header
+            bw.Write((byte)0x00);
+            bw.Write((byte)0x00);
+            bw.Write((byte)0x01);
+            bw.Write((byte)0xb7);
+
+            return wms.TryGetBuffer(out var result) ? result : null;
         }
 
         /// <summary>
