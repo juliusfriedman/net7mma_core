@@ -6,7 +6,6 @@ using Media.Sdp;
 using Media.Sdp.Lines;
 using System;
 using System.Collections.Generic;
-using static Media.Rtsp.Server.MediaTypes.RFC2435Media;
 
 namespace Media.Rtsp.Server.MediaTypes;
 
@@ -250,14 +249,7 @@ public class RtpVideoSink : RtpSink
 
                         packets = null;
 
-                        //Check for if previews should be updated (only for the jpeg type for now)
-                        if (DecodeFrames && frame.PayloadType is RFC2435Frame.RtpJpegPayloadType)
-                        {
-                            OnFrameDecoded((RFC2435Media.RFC2435Frame)frame);
-                        }
-
                         ++FramesPerSecondCounter;
-
                     }
 
                     //If we are to loop images then add it back at the end
