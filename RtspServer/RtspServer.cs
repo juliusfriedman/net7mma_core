@@ -959,7 +959,7 @@ namespace Media.Rtsp
         internal IEnumerable<ClientSession> GetSessions(System.IntPtr handle)
         {
             //Return all clients which match the given handle.
-            return Clients.Where(c => false.Equals(c.IsDisconnected) && object.ReferenceEquals(c.m_RtspSocket, null) is false && c.m_RtspSocket.Handle == handle);
+            return Clients.Where(c => c.IsDisconnected is false && object.ReferenceEquals(c.m_RtspSocket, null) is false && c.m_RtspSocket.Handle == handle);
         }     
 
         #endregion
@@ -1245,7 +1245,7 @@ namespace Media.Rtsp
             //        || //Or if the LastResponse was created after maintenanceStarted
             //        false.Equals(session.LastResponse == null) && session.LastResponse.Created > maintenanceStarted
             //        || //Or if there were no resources released
-            //        false.Equals(session.IsDisconnected) && false == session.ReleaseUnusedResources())
+            //        session.IsDisconnected is false && false == session.ReleaseUnusedResources())
             //    {
             //        //Do not attempt to perform any disconnection of the session
             //        continue;
@@ -1656,7 +1656,7 @@ namespace Media.Rtsp
                         //using (WaitHandle handle = lastAccept.AsyncWaitHandle)
                         //{
                         //    //Wait half the timeout using the event
-                        //    while (IsRunning && false.Equals(lastAccept.IsCompleted) && false.Equals(handle.WaitOne(halfTimeout)))
+                        //    while (IsRunning && lastAccept.IsCompleted is false && false.Equals(handle.WaitOne(halfTimeout)))
                         //    {
 
                         //        if (accept.Wait(halfTimeout)) break;
@@ -2121,7 +2121,7 @@ namespace Media.Rtsp
                 {
 
                     //Don't do anything if the session cannot be acted on.
-                    if (IDisposedExtensions.IsNullOrDisposed(session) || session.IsDisconnected || false.Equals(session.HasRuningServer)) return;
+                    if (IDisposedExtensions.IsNullOrDisposed(session) || session.IsDisconnected || session.HasRuningServer is false) return;
 
                     //Ensure the bytes were completely sent..
                     int sent = e.BytesTransferred;

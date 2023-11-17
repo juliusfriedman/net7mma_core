@@ -247,7 +247,7 @@ namespace Media.Rtsp
                 if (Common.IDisposedExtensions.IsNullOrDisposed(this)) return true;
 
                 // A null or disposed client or one which is no longer connected cannot share the socket
-                if (Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient) || false.Equals(m_RtpClient.IsActive)) return false;
+                if (Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient) || m_RtpClient.IsActive is false) return false;
 
                 //The socket is shared if there is a context using the same socket
                 RtpClient.TransportContext context = m_RtpClient.GetContextBySocket(m_RtspSocket);
@@ -697,7 +697,7 @@ namespace Media.Rtsp
 
                 TimeSpan? startTime = default(TimeSpan?);
 
-                foreach (RtpClient.TransportContext tc in m_RtpClient.GetTransportContexts()) if (false.Equals(startTime.HasValue) || tc.m_StartTime > startTime) startTime = tc.m_StartTime;
+                foreach (RtpClient.TransportContext tc in m_RtpClient.GetTransportContexts()) if (startTime.HasValue is false || tc.m_StartTime > startTime) startTime = tc.m_StartTime;
 
                 return startTime;
             }
@@ -715,7 +715,7 @@ namespace Media.Rtsp
 
                 TimeSpan? endTime = default(TimeSpan?);
 
-                foreach (RtpClient.TransportContext tc in m_RtpClient.GetTransportContexts()) if (false.Equals(endTime.HasValue) || tc.m_EndTime > endTime) endTime = tc.m_EndTime;
+                foreach (RtpClient.TransportContext tc in m_RtpClient.GetTransportContexts()) if (endTime.HasValue is false || tc.m_EndTime > endTime) endTime = tc.m_EndTime;
 
                 return endTime;
             }
@@ -2296,7 +2296,7 @@ namespace Media.Rtsp
                         foreach (Socket socket in ((ISocketReference)transportContext).GetReferencedSockets())
                         {
                             //Check for the socket to not be disposed...
-                            if (socket is null || false.Equals(socket.Connected)) continue;
+                            if (socket is null || socket.Connected is false) continue;
 
                             IPEndPoint ipendPoint = (IPEndPoint)socket.RemoteEndPoint;
 
@@ -2463,13 +2463,13 @@ namespace Media.Rtsp
 
             //var cc = s.BeginConnect(m_RemoteRtsp, new AsyncCallback((iar)=>{
 
-            //    if (iar == null || false.Equals(iar.IsCompleted) || s == null) return;                    
+            //    if (iar == null || iar.IsCompleted is false || s == null) return;                    
 
             //    if(s.Connected) s.EndConnect(iar);
 
             //    if (async)
             //    {
-            //        if (false.Equals(s.Connected)) s.Dispose();
+            //        if (s.Connected is false) s.Dispose();
 
             //        s = null;
             //    }
@@ -2503,7 +2503,7 @@ namespace Media.Rtsp
             //        else System.Threading.Thread.Yield();
             //});
 
-            //if (async is false && false.Equals(cc.IsCompleted))
+            //if (async is false && cc.IsCompleted is false)
             //{
             //Try to connect.
             m_RtspSocket.Connect(m_RemoteRtsp);

@@ -550,8 +550,8 @@ namespace Media.Rtp
 
                 //Ensure there is a remote party
                 //If source blocks are included include them and calculate their statistics
-                // && false.Equals(context.InDiscovery) && context.IsValid) ??
-                if (empty is false && false.Equals(context.InDiscovery) && context.IsValid) //&& context.TotalPacketsSent > 0)
+                // && context.InDiscovery is false && context.IsValid) ??
+                if (empty is false && context.InDiscovery is false && context.IsValid) //&& context.TotalPacketsSent > 0)
                 {
                     uint fraction, lost;
 
@@ -2116,7 +2116,7 @@ namespace Media.Rtp
                 if (IDisposedExtensions.IsNullOrDisposed(this) || IsActive) return;
 
                 //If the socket is not exclusively using the address
-                if (false.Equals(duplexed.ExclusiveAddressUse))
+                if (duplexed.ExclusiveAddressUse is false)
                 {
                     //Duplicte the socket's type for a Rtcp socket.
                     Socket rtcpSocket = new Socket(duplexed.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
@@ -2172,12 +2172,12 @@ namespace Media.Rtp
                 {
                     LocalRtp = RtpSocket.LocalEndPoint;
 
-                    if (false.Equals(RtpSocket.IsBound))
+                    if (RtpSocket.IsBound is false)
                     {
                         RtpSocket.Bind(LocalRtp);
                     }
 
-                    if (false.Equals(RtpSocket.Connected))
+                    if (RtpSocket.Connected is false)
                     {
                         try { RtpSocket.Connect(RemoteRtp); }
                         catch
@@ -2200,9 +2200,9 @@ namespace Media.Rtp
 
                         RemoteRtcp = RtcpSocket.RemoteEndPoint;
 
-                        if (LocalRtcp is not null && false.Equals(RtcpSocket.IsBound)) RtcpSocket.Bind(LocalRtcp);
+                        if (LocalRtcp is not null && RtcpSocket.IsBound is false) RtcpSocket.Bind(LocalRtcp);
 
-                        if (RemoteRtcp is not null && false.Equals(RtcpSocket.Connected)) try { RtcpSocket.Connect(RemoteRtcp); }
+                        if (RemoteRtcp is not null && RtcpSocket.Connected is false) try { RtcpSocket.Connect(RemoteRtcp); }
                             catch
                             {
                                 /*Todo, Only tcp must succeed*/
@@ -2588,7 +2588,7 @@ namespace Media.Rtp
 
                                 //Check packet loss...
 
-                                Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@HandleIncomingRtcpPacket Set RemoteSynchronizationSourceIdentifier @ RR " + transportContext.SynchronizationSourceIdentifier + " to=" + transportContext.RemoteSynchronizationSourceIdentifier + "RR blockId=" + blockId + " SenderNtpTimestamp=" + transportContext.NtpTimestamp + " SenderRtpTimestamp=" + transportContext.SenderRtpTimestamp + " SenderJitter=" + transportContext.SenderJitter + " NtpOffset=" + transportContext.SenderNtpOffset);
+                                Media.Common.ILoggingExtensions.Log(Logger, InternalId + "@HandleIncomingRtcpPacket Set RemoteSynchronizationSourceIdentifier @ RR " + transportContext.SynchronizationSourceIdentifier + " to=" + transportContext.RemoteSynchronizationSourceIdentifier + "RR blockId=" + blockId + " SenderNtpTimestamp=" + transportContext.NtpTimestamp + " SenderRtpTimestamp=" + transportContext.SenderRtpTimestamp + " SenderJitter=" + transportContext.SenderJitter + " NtpOffset=" + transportContext.SenderNtpOffset);
 
                                 //Stop looking for a context.
                                 break;
@@ -2620,7 +2620,7 @@ namespace Media.Rtp
                                     //Send report now if possible.
                                     bool reportsSent = SendReports(transportContext);                                    
 
-                                    Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@HandleIncomingRtcpPacket Recieved Goodbye @ " + transportContext.SynchronizationSourceIdentifier + " from=" + partyId + " reportSent=" + reportsSent);
+                                    Media.Common.ILoggingExtensions.Log(Logger, InternalId + "@HandleIncomingRtcpPacket Recieved Goodbye @ " + transportContext.SynchronizationSourceIdentifier + " from=" + partyId + " reportSent=" + reportsSent);
 
                                     transportContext.ResetRtpValidationCounters(transportContext.m_SequenceNumber);
 
@@ -2660,7 +2660,7 @@ namespace Media.Rtp
                                 //Identify the remote party by this id. (This would be the id they think we have?)
                                 if (transportContext.RemoteSynchronizationSourceIdentifier is 0)
                                 {
-                                    Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@HandleIncomingRtcpPacket Set RemoteSynchronizationSourceIdentifier @ SR " + transportContext.SynchronizationSourceIdentifier + " to=" + transportContext.RemoteSynchronizationSourceIdentifier + "RR blockId=" + blockId + " NtpTimestamp=" + transportContext.NtpTimestamp + " RtpTimestamp=" + transportContext.RtpTimestamp + " RtpJitter=" + transportContext.RtpJitter + " NtpOffset=" + transportContext.NtpOffset);
+                                    Media.Common.ILoggingExtensions.Log(Logger, InternalId + "@HandleIncomingRtcpPacket Set RemoteSynchronizationSourceIdentifier @ SR " + transportContext.SynchronizationSourceIdentifier + " to=" + transportContext.RemoteSynchronizationSourceIdentifier + "RR blockId=" + blockId + " NtpTimestamp=" + transportContext.NtpTimestamp + " RtpTimestamp=" + transportContext.RtpTimestamp + " RtpJitter=" + transportContext.RtpJitter + " NtpOffset=" + transportContext.NtpOffset);
 
                                     transportContext.RemoteSynchronizationSourceIdentifier = blockId;
                                 }
@@ -2980,11 +2980,11 @@ namespace Media.Rtp
                 {
 
                     //If the pt is not in the media description this is out of band data and the packet was already evented.
-                    if (false.Equals(transportContext.AllowsMultiplePayloadTypes) && false.Equals(transportContext.MediaDescription.PayloadTypes.Contains(pt))) return;
+                    if (transportContext.AllowsMultiplePayloadTypes is false && false.Equals(transportContext.MediaDescription.PayloadTypes.Contains(pt))) return;
                     //If duplicate packets are not allowed
-                    //else if (false.Equals(transportContext.AllowDuplicatePackets) && transportContext.RecieveSequenceNumber >= packet.SequenceNumber) return;
+                    //else if (transportContext.AllowDuplicatePackets is false && transportContext.RecieveSequenceNumber >= packet.SequenceNumber) return;
                     //If the context does not allow out of order packets return.
-                    else if (false.Equals(transportContext.AllowOutOfOrderPackets)) return;
+                    else if (transportContext.AllowOutOfOrderPackets is false) return;
 
                     //Increment for a failed reception, possibly rename
                     ++transportContext.m_FailedRtpReceptions;
@@ -4284,7 +4284,7 @@ namespace Media.Rtp
                 m_Buffer = null;
             }
 
-            Media.Common.ILoggingExtensions.Log(Logger, GetType().Name + "("+ ToString() + ")@Dipose - Complete");
+            Media.Common.ILoggingExtensions.Log(Logger, GetType().Name + "("+ InternalId + ")@Dipose - Complete");
 
             //Unset the logger
             Logger = null;
@@ -4300,9 +4300,9 @@ namespace Media.Rtp
 
             //Was not returning threads whih may not have been null..
 
-            if (IsActive || m_WorkerThread is null == false) threads = threads.Concat(Media.Common.Extensions.Linq.LinqExtensions.Yield(m_WorkerThread));
+            if (IsActive || m_WorkerThread is not null) threads = threads.Concat(Media.Common.Extensions.Linq.LinqExtensions.Yield(m_WorkerThread));
 
-            if (m_ThreadEvents || m_EventThread is null == false) threads = threads.Concat(Media.Common.Extensions.Linq.LinqExtensions.Yield(m_EventThread));
+            if (m_ThreadEvents || m_EventThread is not null) threads = threads.Concat(Media.Common.Extensions.Linq.LinqExtensions.Yield(m_EventThread));
 
             return threads;
         }

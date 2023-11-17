@@ -809,7 +809,7 @@ namespace Media.Rtsp
                 if (Common.IDisposedExtensions.IsNullOrDisposed(this)) return true;
 
                 // A null or disposed client or one which is no longer connected cannot share the socket
-                if (Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient) || false.Equals(m_RtpClient.IsActive)) return false;
+                if (Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient) || m_RtpClient.IsActive is false) return false;
 
                 //The socket is shared if there is a context using the same socket
                 RtpClient.TransportContext context = m_RtpClient.GetContextBySocket(m_RtspSocket);
@@ -934,7 +934,7 @@ namespace Media.Rtsp
 
                 TimeSpan? startTime = default(TimeSpan?);
 
-                foreach (RtpClient.TransportContext tc in Client.GetTransportContexts()) if (false.Equals(startTime.HasValue) || tc.m_StartTime > startTime) startTime = tc.m_StartTime;
+                foreach (RtpClient.TransportContext tc in Client.GetTransportContexts()) if (startTime.HasValue is false || tc.m_StartTime > startTime) startTime = tc.m_StartTime;
 
                 return startTime;
             }
@@ -952,7 +952,7 @@ namespace Media.Rtsp
 
                 TimeSpan? endTime = default(TimeSpan?);
 
-                foreach (RtpClient.TransportContext tc in Client.GetTransportContexts()) if (false.Equals(endTime.HasValue) || tc.m_EndTime > endTime) endTime = tc.m_EndTime;
+                foreach (RtpClient.TransportContext tc in Client.GetTransportContexts()) if (endTime.HasValue is false || tc.m_EndTime > endTime) endTime = tc.m_EndTime;
 
                 return endTime;
             }
@@ -1605,7 +1605,7 @@ namespace Media.Rtsp
             if (Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
 
             //Is was not already playing then set the value
-            if (HandlePlayEvent && false.Equals(m_StartedPlaying.HasValue))
+            if (HandlePlayEvent && m_StartedPlaying.HasValue is false)
             {
                 //Set started playing
                 m_StartedPlaying = DateTime.UtcNow;
@@ -2448,7 +2448,7 @@ namespace Media.Rtsp
 
                                 while (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(this)) &&
                                     SharesSocket is false &&
-                                    false.Equals(interleaved.IsComplete))
+                                    interleaved.IsComplete is false)
                                 {
                                     //Take in some bytes from the socket
                                     int justReceived = interleaved.CompleteFrom(m_RtspSocket, m_Buffer);
@@ -3189,7 +3189,7 @@ namespace Media.Rtsp
                         foreach (Socket socket in ((ISocketReference)transportContext).GetReferencedSockets())
                         {
                             //Check for the socket to not be disposed...
-                            if (socket is null || false.Equals(socket.Connected)) continue;
+                            if (socket is null || socket.Connected is false) continue;
 
                             IPEndPoint ipendPoint = (IPEndPoint)socket.RemoteEndPoint;
 
@@ -3356,13 +3356,13 @@ namespace Media.Rtsp
 
             //var cc = s.BeginConnect(m_RemoteRtsp, new AsyncCallback((iar)=>{
 
-            //    if (iar == null || false.Equals(iar.IsCompleted) || s == null) return;                    
+            //    if (iar == null || iar.IsCompleted is false || s == null) return;                    
 
             //    if(s.Connected) s.EndConnect(iar);
 
             //    if (async)
             //    {
-            //        if (false.Equals(s.Connected)) s.Dispose();
+            //        if (s.Connected is false) s.Dispose();
 
             //        s = null;
             //    }
@@ -3396,7 +3396,7 @@ namespace Media.Rtsp
             //        else System.Threading.Thread.Yield();
             //});
 
-            //if (async is false && false.Equals(cc.IsCompleted))
+            //if (async is false && cc.IsCompleted is false)
             //{
                 //Try to connect.
                 m_RtspSocket.Connect(m_RemoteRtsp);
@@ -6649,7 +6649,7 @@ namespace Media.Rtsp
                                 if (context.TimeRemaining >= context.ReceiveInterval + m_LastMessageRoundTripTime + m_LastServerDelay) continue;
 
                                 //If the context is not continious and there is no more time remaining do nothing
-                                if (false.Equals(context.IsContinious) && context.TimeRemaining <= TimeSpan.Zero) continue;
+                                if (context.IsContinious is false && context.TimeRemaining <= TimeSpan.Zero) continue;
 
                                 //Send the PAUSE request
                                 using (var pauseResponse = SendPause(out requestCseq, context.MediaDescription))
@@ -6693,7 +6693,7 @@ namespace Media.Rtsp
                                 if (context.TimeRemaining >= context.ReceiveInterval + m_LastMessageRoundTripTime + m_LastServerDelay) continue;
 
                                 //If the context is not continious and there is no more time remaining do nothing
-                                if (false.Equals(context.IsContinious) && context.TimeRemaining <= TimeSpan.Zero) continue;
+                                if (context.IsContinious is false && context.TimeRemaining <= TimeSpan.Zero) continue;
 
                                 //If the context was disposed then continue
                                 if (Common.IDisposedExtensions.IsNullOrDisposed(context)) continue;
@@ -6764,7 +6764,7 @@ namespace Media.Rtsp
                         EndTime.Value.Equals(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan) is false &&
                         //And there is enough time to attempt
                         DateTime.UtcNow - m_StartedPlaying.Value > EndTime.Value.Subtract(m_LastMessageRoundTripTime.Add(m_ConnectionTime.Add(m_LastServerDelay)))
-                        && contextsWithGoodbye.All(tc => false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(tc)) && false.Equals(tc.HasAnyRecentActivity)))
+                        && contextsWithGoodbye.All(tc => false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(tc)) && tc.HasAnyRecentActivity is false))
                     {
 
                         if (supportPause)

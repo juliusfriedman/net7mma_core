@@ -235,7 +235,7 @@ namespace Media.Common.Extensions.Encoding
 
             if (delimits == null) delimits = EmptyChar;
 
-            if (stream == null || false.Equals(stream.CanRead) || count is Common.Binary.Zero)
+            if (stream == null || stream.CanRead is false || count is Common.Binary.Zero)
             {
                 result = null;
 

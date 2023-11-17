@@ -752,7 +752,7 @@ namespace Media.Rtsp
         //    if (hasSocket is false)
         //    {
         //        //Create the buffer if it was null
-        //        if (m_Buffer is null || false.Equals(m_Buffer.CanWrite))
+        //        if (m_Buffer is null || m_Buffer.CanWrite is false)
         //        {
         //            m_Buffer = new System.IO.MemoryStream();
 

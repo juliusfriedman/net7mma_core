@@ -96,7 +96,7 @@ namespace Media.Concepts.Classes.GC
                 System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;
 
                 //Wait half the timeout using the event
-                while (false.Equals(CurrentResult.IsCompleted) && false.Equals(handle.WaitOne(HalfTimeout)))
+                while (CurrentResult.IsCompleted is false && false.Equals(handle.WaitOne(HalfTimeout)))
                 {
                     //Check for stop or completion and wait the other half
                     if (CurrentResult.IsCompleted) continue;

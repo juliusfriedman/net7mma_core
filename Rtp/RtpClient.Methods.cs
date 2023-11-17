@@ -90,7 +90,7 @@ namespace Media.Rtp
                     }
 
                     //if chekcking remote identifier (and it has been defined)
-                    if (checkRemoteIdentity && false.Equals(context.InDiscovery) && false.Equals(c.InDiscovery) &&
+                    if (checkRemoteIdentity && context.InDiscovery is false && c.InDiscovery is false &&
                         c.RemoteSynchronizationSourceIdentifier == context.RemoteSynchronizationSourceIdentifier)
                     {
                         foreach (var pt in context.MediaDescription.PayloadTypes)
@@ -714,7 +714,7 @@ namespace Media.Rtp
 
             //Check for the stop signal (or disposal)
             if (force is false && m_StopRequested || Common.IDisposedExtensions.IsNullOrDisposed(this) ||  //Otherwise
-                false.Equals(context.IsRtcpEnabled)
+                context.IsRtcpEnabled is false
                 || //Or Rtcp Bandwidth for this context or RtpClient has been exceeded
                 context.RtcpBandwidthExceeded || AverageRtcpBandwidthExceeded
                 || false.Equals(context.Goodbye == null)) return false; //No reports can be sent.
@@ -752,14 +752,14 @@ namespace Media.Rtp
                 ||
                 context.HasRecentRtcpActivity
                 || //If the context has a continous flow OR the general Uptime is less then context MediaEndTime
-                (false.Equals(context.IsContinious) && Uptime < context.MediaEndTime))
+                (context.IsContinious is false && Uptime < context.MediaEndTime))
             {
                 return false;
             }
 
             //Calulcate for the currently inactive time period
             if (context.Goodbye is null &&
-                false.Equals(context.HasAnyRecentActivity))
+                context.HasAnyRecentActivity is false)
             {
                 //Set the amount of time inactive
                 context.m_InactiveTime = System.DateTime.UtcNow - lastActivity;
@@ -978,7 +978,7 @@ namespace Media.Rtp
             if (transportContext == null) transportContext = ssrc.HasValue ? GetContextBySourceId(ssrc.Value) : GetContextForPacket(packet);
 
             //If we don't have an transportContext to send on or the transportContext has not been identified
-            if (Common.IDisposedExtensions.IsNullOrDisposed(transportContext) || false.Equals(transportContext.IsActive)) return 0;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(transportContext) || transportContext.IsActive is false) return 0;
 
             //Ensure not sending too large of a packet
             if (packet.Length > transportContext.MaximumPacketSize) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(transportContext, "See Tag. The given packet must be smaller than the value in the transportContext.MaximumPacketSize.");
@@ -1705,7 +1705,7 @@ namespace Media.Rtp
                                 if (incompatible is false)
                                 {
                                     //Determine if the packet is Rtcp by looking at the found channel and the relvent control channel
-                                    if (frameChannel.Equals(relevent.ControlChannel) && false.Equals(relevent.InDiscovery))
+                                    if (frameChannel.Equals(relevent.ControlChannel) && relevent.InDiscovery is false)
                                     {
                                         //Rtcp
 
@@ -1738,7 +1738,7 @@ namespace Media.Rtp
                                             if (incompatible is false && //It was not already ruled incomaptible
                                                 lengthInWordsPlusOne > 0 && //If there is supposed to be SSRC in the packet
                                                 header.Size > Rtcp.RtcpHeader.Length && //The header ACTUALLY contains enough bytes to have a SSRC
-                                                false.Equals(relevent.InDiscovery))//The remote context knowns the identity of the remote stream                                                 
+                                                relevent.InDiscovery is false)//The remote context knowns the identity of the remote stream                                                 
                                             {
                                                 //Determine if Rtcp is expected
                                                 //Perform another lookup and check compatibility
@@ -1748,7 +1748,7 @@ namespace Media.Rtp
                                     }
 
                                     //May be mixing channels...
-                                    if (expectRtcp is false && false.Equals(relevent.InDiscovery))
+                                    if (expectRtcp is false && relevent.InDiscovery is false)
                                     {
                                         //Rtp
                                         if (remainingInBuffer <= sessionRequired + Rtp.RtpHeader.Length)
@@ -1760,7 +1760,7 @@ namespace Media.Rtp
                                         }
 
                                         //the context by payload type is null is not discovering the identity check the SSRC.
-                                        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(GetContextByPayloadType(common.RtpPayloadType))) /*&& false.Equals(relevent.InDiscovery)*/)
+                                        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(GetContextByPayloadType(common.RtpPayloadType))) /*&& relevent.InDiscovery is false*/)
                                         {
                                             using (Rtp.RtpHeader header = new RtpHeader(buffer, offset + sessionRequired))
                                             {
@@ -2175,7 +2175,7 @@ namespace Media.Rtp
                     while (m_ThreadEvents)
                     {
                         //If the event is not set
-                        if (false.Equals(m_EventReady.IsSet))
+                        if (m_EventReady.IsSet is false)
                         {
                             //Wait for the event signal half of the amount of time
                             if (false.Equals(m_EventReady.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick)))
@@ -2488,7 +2488,7 @@ namespace Media.Rtp
                                 //Try to send reports for the latest packets or a goodbye if inactive.
                                 if (SendReports(tc, out lastError) || SendGoodbyeIfInactive(lastOperation, tc)) lastOperation = System.DateTime.UtcNow;
                             }
-                            //else if (false.Equals(tc.HasSentRtcpWithinSendInterval) && SendReports(tc, out lastError)) lastOperation = System.DateTime.UtcNow;
+                            //else if (tc.HasSentRtcpWithinSendInterval is false && SendReports(tc, out lastError)) lastOperation = System.DateTime.UtcNow;
                         }
 
                         //if there was a socket error at the last stage

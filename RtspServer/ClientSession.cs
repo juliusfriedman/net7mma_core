@@ -569,9 +569,9 @@ namespace Media.Rtsp//.Server
             //if (BadPacketDecision(packet, localContext) < 0) goto Exit;
 
             //If the packet seqeuence is out of order in reception to the client
-            if (m_RtpClient.IsActive && 
-                false.Equals(localContext.UpdateSequenceNumber(ref packetSequenceNumber)) && 
-                false.Equals(localContext.AllowOutOfOrderPackets))
+            if (m_RtpClient.IsActive &&
+                localContext.UpdateSequenceNumber(ref packetSequenceNumber) is false && 
+                localContext.AllowOutOfOrderPackets is false)
             {
                 //Check how many packets were receieved out of order.
                 if (++localContext.m_FailedRtpReceptions > localContext.MinimumSequentialValidRtpPackets)
@@ -1096,7 +1096,7 @@ namespace Media.Rtsp//.Server
             //Set the MediaProperties header.
 
             //Ensure RtpClient is now connected connected so packets will begin to go out when enqued
-            if (false.Equals(m_RtpClient.IsActive))
+            if (m_RtpClient.IsActive is false)
             {
                 m_RtpClient.Activate();
 
@@ -1121,7 +1121,7 @@ namespace Media.Rtsp//.Server
             //SkipIncompleteFrame option?
 
             //Wait for the last possible moment to send frames.
-            if (final is false/* && false.Equals(frame.HasMarker)*/) return;
+            if (final is false/* && frame.HasMarker is false*/) return;
 
             //Loop and observe changes each iteration
             //for (int i = 0; i < frame.Count; ++i) OnSourceRtpPacketRecieved(sender, frame[i], tc);
@@ -1867,7 +1867,7 @@ namespace Media.Rtsp//.Server
                     //E.g. IsInactive
 
                     //If the context does not have any activity
-                    if (false.Equals(context.HasAnyRecentActivity) && m_RtpClient.Uptime >= context.m_ReceiveInterval.Add(context.m_SendInterval)) // && context.InactiveTime > context.ReceiveInterval)
+                    if (context.HasAnyRecentActivity is false && m_RtpClient.Uptime >= context.m_ReceiveInterval.Add(context.m_SendInterval)) // && context.InactiveTime > context.ReceiveInterval)
                     {
                         //Session level logger
                         //Context has no activity
@@ -1882,7 +1882,7 @@ namespace Media.Rtsp//.Server
                         //Todo, if source is no active it should probably be removed.
 
                         //If there was a source context AND the source has activity
-                        if (Common.IDisposedExtensions.IsNullOrDisposed(sourceContext) is false && false.Equals(sourceContext.IsActive) /*|| false.Equals(sourceContext.HasAnyRecentActivity)*/)
+                        if (Common.IDisposedExtensions.IsNullOrDisposed(sourceContext) is false && sourceContext.IsActive is false /*|| sourceContext.HasAnyRecentActivity is false*/)
                         {
                             //Get the attached source
                             Media.Rtsp.Server.SourceMedia sourceMedia;
@@ -1940,7 +1940,7 @@ namespace Media.Rtsp//.Server
                     //    //Todo, if source is no active it should probably be removed.
 
                     //    //If there was a source context AND the source has activity
-                    //    if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(sourceContext)) && sourceContext.IsActive && false.Equals(sourceContext.HasAnyRecentActivity))
+                    //    if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(sourceContext)) && sourceContext.IsActive && sourceContext.HasAnyRecentActivity is false)
                     //    {
                     //        //Get the attached source
                     //        Media.Rtsp.Server.SourceMedia sourceMedia;
@@ -1992,7 +1992,7 @@ namespace Media.Rtsp//.Server
                 //    //E.g. IsInactive
 
                 //    //If the context does not have any activity
-                //    if (false.Equals(context.HasAnyRecentActivity) && m_RtpClient.Uptime >= context.m_ReceiveInterval.Add(context.m_SendInterval))
+                //    if (context.HasAnyRecentActivity is false && m_RtpClient.Uptime >= context.m_ReceiveInterval.Add(context.m_SendInterval))
                 //    {
                 //        //Session level logger
                 //        //Context has no activity
@@ -2007,7 +2007,7 @@ namespace Media.Rtsp//.Server
                 //        //Todo, if source is no active it should probably be removed.
 
                 //        //If there was a source context AND the source has activity
-                //        if (Common.IDisposedExtensions.IsNullOrDisposed(sourceContext) is false && false.Equals(sourceContext.IsActive) /*|| false.Equals(sourceContext.HasAnyRecentActivity)*/)
+                //        if (Common.IDisposedExtensions.IsNullOrDisposed(sourceContext) is false && sourceContext.IsActive is false /*|| sourceContext.HasAnyRecentActivity is false*/)
                 //        {
                 //            //Get the attached source
                 //            Media.Rtsp.Server.SourceMedia sourceMedia;
@@ -2062,7 +2062,7 @@ namespace Media.Rtsp//.Server
                 //        //Todo, if source is no active it should probably be removed.
 
                 //        //If there was a source context AND the source has activity
-                //        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(sourceContext)) && sourceContext.IsActive && false.Equals(sourceContext.HasAnyRecentActivity))
+                //        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(sourceContext)) && sourceContext.IsActive && sourceContext.HasAnyRecentActivity is false)
                 //        {
                 //            //Get the attached source
                 //            Media.Rtsp.Server.SourceMedia sourceMedia;

@@ -209,7 +209,7 @@ namespace Media.Concepts.Classes.Threading
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void SetIdle(System.Threading.Thread thread)
         {
-            if (thread is null || false.Equals(thread.IsAlive)) return;
+            if (thread is null || thread.IsAlive is false) return;
 
             thread.Priority = (System.Threading.ThreadPriority)IdlePriority;
         }
@@ -222,7 +222,7 @@ namespace Media.Concepts.Classes.Threading
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void SetRunning(System.Threading.Thread thread, System.Threading.ThreadPriority priority)
         {
-            if (thread is null || false.Equals(thread.IsAlive)) return;
+            if (thread is null || thread.IsAlive is false) return;
 
             thread.Priority = priority;
         }

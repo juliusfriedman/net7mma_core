@@ -247,7 +247,7 @@ namespace Media.Common
             if (Common.IDisposedExtensions.IsNullOrDisposed(other)) return;
 
             //If the other finalizer has ran now
-            if (false.Equals(other.IsUndisposed))
+            if (other.IsUndisposed is false)
             {
                 //If this allocation was not contrived
                 if (force is false)

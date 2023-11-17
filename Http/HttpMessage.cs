@@ -1621,7 +1621,7 @@ namespace Media.Http
             if (CanHaveBody is false) return true;
 
             //If there was no buffer or an unreadable buffer then no parsing can occur
-            if (m_Buffer == null || false.Equals(m_Buffer.CanRead)) return false;
+            if (m_Buffer == null || m_Buffer.CanRead is false) return false;
 
             //Quite possibly should be long
             int max = (int)m_Buffer.Length;
@@ -2669,7 +2669,7 @@ namespace Media.Http
             if (hasSocket is false)
             {
                 //Create the buffer if it was null
-                if (m_Buffer is null || false.Equals(m_Buffer.CanWrite))
+                if (m_Buffer is null || m_Buffer.CanWrite is false)
                 {
                     m_Buffer = new System.IO.MemoryStream();
 

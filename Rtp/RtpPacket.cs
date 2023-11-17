@@ -110,7 +110,7 @@ namespace Media.Rtp
 
             get
             {
-                if (IsDisposed || Payload.Count is 0 || false.Equals(Header.Extension)) return 0;
+                if (IsDisposed || Payload.Count is 0 || Header.Extension is false) return 0;
 
                 using (RtpExtension extension = GetExtension()) return false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(extension)) ? extension.Size : 0;
             }
@@ -136,7 +136,7 @@ namespace Media.Rtp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-            get { if (IsDisposed || false.Equals(Header.Padding)) return 0; return Media.RFC3550.ReadPadding(Payload.Array, Payload.Offset + Payload.Count - 1, 1); }
+            get { if (IsDisposed || Header.Padding is false) return 0; return Media.RFC3550.ReadPadding(Payload.Array, Payload.Offset + Payload.Count - 1, 1); }
         }
 
         /// <summary>
@@ -167,14 +167,14 @@ namespace Media.Rtp
                 //Check the Extension bit in the header, if set the RtpExtension must be complete
                 if (Header.Extension) using (RtpExtension extension = GetExtension())
                     {
-                        if (extension == null || false.Equals(extension.IsComplete)) return false;
+                        if (extension == null || extension.IsComplete is false) return false;
 
                         //Reduce the number of octets in the payload by the number of octets which make up the extension
                         octetsContained -= extension.Size;
                     }
 
                 //If there is no padding there must be at least 0 octetsContained.
-                if (false.Equals(Header.Padding)) return octetsContained >= 0;
+                if (Header.Padding is false) return octetsContained >= 0;
 
                 //Otherwise calulcate the amount of padding in the Payload
                 int paddingOctets = PaddingOctets;

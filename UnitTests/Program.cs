@@ -2267,7 +2267,7 @@ namespace Media.UnitTests
 
                     //Traffic
                     var sources = new List<Rtsp.Server.MediaTypes.RtspSource>();
-                    for(int i = 1; i <= 9; ++i)
+                    for(int i = 7; i <= 9; ++i)
                     {
                         var source = new Media.Rtsp.Server.MediaTypes.RtspSource($"R2_05{i}", $"rtsp://8.15.251.101:1935/rtplive/R2_05{i}", Rtsp.RtspClient.ClientProtocolType.Tcp, 0);
                         source.RtpClient.ThreadEvents = true;
@@ -2482,7 +2482,7 @@ namespace Media.UnitTests
                     rtpToolThread.Start();
 
                     //Wait for the server to start.
-                    while (false.Equals(server.IsRunning)) System.Threading.Thread.Sleep(0);
+                    while (server.IsRunning is false) System.Threading.Thread.Sleep(0);
 
                     //Start taking pictures of the desktop and making packets in a seperate thread.
                     captureThread.Priority = System.Threading.ThreadPriority.BelowNormal;
@@ -2549,7 +2549,7 @@ namespace Media.UnitTests
 
                                         Console.WriteLine("Ready: " + stream.IsReady);
 
-                                        if (false.Equals(stream.IsReady)) continue;
+                                        if (stream.IsReady is false) continue;
 
                                         if (stream is Rtsp.Server.MediaTypes.RtspSource)
                                         {
