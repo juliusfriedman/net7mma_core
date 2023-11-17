@@ -1276,7 +1276,7 @@ namespace Media.Rtp
             //When depacketizing the list KeyItem would implicitly be in the same order as the packets.
 
             //Iterate all packets contained and depacketize
-            for (int i = 0 /*false.Equals(Packets == null) && i < Packets.Count*/ ; IsDisposed is false && i < Count; ++i) Depacketize(Packets[i]);
+            for (int i = 0 /*Packets is not null && i < Packets.Count*/ ; IsDisposed is false && i < Count; ++i) Depacketize(Packets[i]);
 
             //PrepareBuffer must be called to access the buffer.
         }

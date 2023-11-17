@@ -1073,7 +1073,7 @@ namespace Media.Http
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected void DisposeBuffer()
         {
-            if (false.Equals(m_Buffer == null) && m_Buffer.CanWrite) m_Buffer.Dispose();
+            if (m_Buffer is not null && m_Buffer.CanWrite) m_Buffer.Dispose();
 
             m_Buffer = null;
         }
@@ -1574,7 +1574,7 @@ namespace Media.Http
             //If the message is disposed then no parsing can occur
             if (IsDisposed && IsPersistent is false) return null;
 
-            if (force is false && false.Equals(m_ContentDecoder == null)) return m_ContentDecoder;
+            if (force is false && m_ContentDecoder is not null) return m_ContentDecoder;
 
             //Get the content encoding required by the headers for the body
             string contentEncoding = GetHeader(HttpHeaders.ContentEncoding);
@@ -1590,8 +1590,8 @@ namespace Media.Http
 
                 System.Text.EncodingInfo requested = System.Text.Encoding.GetEncodings().FirstOrDefault(e => string.Compare(e.Name, contentEncoding, false, System.Globalization.CultureInfo.InvariantCulture) == 0);
 
-                if (false.Equals(requested == null)) contentDecoder = requested.GetEncoding();
-                else if (true.Equals(raiseWhenNotFound)) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(contentEncoding, "The given message was encoded in a Encoding which is not present on this system and no fallback encoding was acceptible to decode the message. The tag has been set the value of the requested encoding");
+                if (requested is not null) contentDecoder = requested.GetEncoding();
+                else if (raiseWhenNotFound) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(contentEncoding, "The given message was encoded in a Encoding which is not present on this system and no fallback encoding was acceptible to decode the message. The tag has been set the value of the requested encoding");
                 else contentDecoder = System.Text.Encoding.Default;
             }
 

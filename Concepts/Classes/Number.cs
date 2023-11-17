@@ -1477,7 +1477,7 @@ namespace Media.Concepts.Classes
                 byte bitz = bits.m_Bits;
 
                 if (bitz.Equals(theirBits)) return x;
-                else if (true.Equals(ignoreEndian) && reverse.Equals(bitz)) return x;
+                else if (ignoreEndian && reverse.Equals(bitz)) return x;
 
                 ++x;
             }

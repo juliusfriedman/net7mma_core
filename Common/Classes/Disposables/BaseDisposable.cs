@@ -101,7 +101,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal protected static void SetShouldDisposeIfSenderIsBaseDisposableAndDisposeNow(object sender, EventArgs e)
         {
-            if (false.Equals(sender == null) && sender is BaseDisposable) SetShouldDispose((sender as BaseDisposable), true, true);
+            if (sender is BaseDisposable bd) SetShouldDispose(bd, true, true);
         }
 
         /// <summary>

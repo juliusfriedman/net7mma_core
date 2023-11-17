@@ -1668,7 +1668,7 @@ namespace Media.Rtsp
                         //        //    System.Net.Sockets.Socket stale = m_TcpServerSocket.EndAccept(lastAccept);
 
                         //        //    //If there is a socket
-                        //        //    if (false.Equals(stale == null))
+                        //        //    if (stale is not null)
                         //        //    {
                         //        //        //Dispose it
                         //        //        stale.Dispose();

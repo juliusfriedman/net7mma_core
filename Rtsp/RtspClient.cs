@@ -772,7 +772,7 @@ namespace Media.Rtsp
                     }
 
                     //If wasDisconnected and now conneted raise an vent 
-                    if (true.Equals(wasDisconnected))
+                    if (wasDisconnected)
                     {
                         OnConnected();
                     }
@@ -6316,7 +6316,7 @@ namespace Media.Rtsp
                                             context = null;
                                         }
                                     }
-                                    else if (false.Equals(uri == null))
+                                    else if (uri is not null)
                                     {
                                         //Need to get the context by the uri.
                                         //Location = rtsp://abc.com/live/movie
