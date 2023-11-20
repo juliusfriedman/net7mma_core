@@ -2195,7 +2195,6 @@ namespace Media.Rtp
                         HandleEvent();
                     }
                 }
-                catch (System.Threading.ThreadAbortException) { System.Threading.Thread.ResetAbort(); Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@HandleEvents Aborted"); }
                 catch (System.Exception ex) { Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@HandleEvents: " + ex.Message); goto Begin; }
             }
         }
@@ -2702,14 +2701,6 @@ namespace Media.Rtp
 
                         #endregion
                     }
-                }
-                catch (System.Threading.ThreadAbortException)
-                {
-                    System.Threading.Thread.ResetAbort();
-
-                    if (critical) System.Threading.Thread.EndCriticalRegion();
-
-                    Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@SendRecieve Aborted");
                 }
                 catch (System.Exception ex)
                 {

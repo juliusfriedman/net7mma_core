@@ -1547,8 +1547,6 @@ namespace Media.Rtsp
                             Common.ILoggingExtensions.LogException(Logger,ex);
 
                             Common.ILoggingExtensions.Log(Logger, "Cannot Start Stream: " + stream.Name + " Id=" + stream.Id);
-
-                            if (ex is ThreadAbortException) System.Threading.Thread.ResetAbort();
                         }
 
                     }, this);
@@ -1586,8 +1584,6 @@ namespace Media.Rtsp
                             Common.ILoggingExtensions.LogException(Logger, ex);
 
                             Common.ILoggingExtensions.Log(Logger, "Cannot Stop Stream: " + stream.Name + " Id=" + stream.Id);
-
-                            if (ex is ThreadAbortException) System.Threading.Thread.ResetAbort();
                         }
                     });
                 }
@@ -1702,17 +1698,6 @@ namespace Media.Rtsp
                         else System.Threading.Thread.Sleep(halfTimeout);
                     }
                 }
-            }
-            catch (ThreadAbortException)
-            {
-                //Stop is now requested
-                m_StopRequested = true;
-
-                //Handle the abort
-                Thread.ResetAbort();
-
-                //All workers threads which exist now exit.
-                return;
             }
             catch (Exception ex)
             {

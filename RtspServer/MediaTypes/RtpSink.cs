@@ -175,9 +175,8 @@ namespace Media.Rtsp.Server.MediaTypes
 
                     //Check for bandwidth and sleep if necessary
                 }
-                catch (System.Exception ex)
+                catch (System.Exception)
                 {
-                    if (ex is System.Threading.ThreadAbortException) return;
                     continue;
                 }
             }

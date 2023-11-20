@@ -458,10 +458,6 @@ namespace Media.Rtsp.Server.MediaTypes
                             break;
                     }
                 }
-                catch (ThreadAbortException)
-                {
-                    break;
-                }
                 catch (Exception)
                 {
                     // wait for a while before the next try

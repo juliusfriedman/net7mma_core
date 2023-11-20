@@ -165,18 +165,8 @@ public class RtpAudioSink : RtpSink
 
                     System.Threading.Thread.Sleep(ClockRate);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    if (ex is System.Threading.ThreadAbortException)
-                    {
-                        //Handle the abort
-                        System.Threading.Thread.ResetAbort();
-
-                        Stop();
-
-                        return;
-                    }
-                    
                     continue;
                 }
             }
