@@ -42,10 +42,10 @@ using System.Threading;
 using System.Net;
 using Media.Common;
 using Media.Rtp;
-using Media.Rtcp;
 using Media.Rtsp.Server.MediaTypes;
 using Media.Rtsp.Server.Loggers;
 using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace Media.Rtsp
 {
@@ -1320,7 +1320,7 @@ namespace Media.Rtsp
         /// Starts the RtspServer and listens for requests.
         /// Starts all streams contained in the server
         /// </summary>
-        public virtual void Start(bool allowAddressReuse = false, bool allowPortReuse = false)
+        public virtual async Task StartAsync(bool allowAddressReuse = false, bool allowPortReuse = false)
         {
             //Dont allow starting when disposed
             CheckDisposed();
@@ -1343,7 +1343,8 @@ namespace Media.Rtsp
 
                 ConfigureRtspServerSocket(m_TcpServerSocket, out m_SocketPollMicroSeconds, ref reconfigureSocket, m_UdpServerSocket);
 
-                Media.Common.Extensions.Socket.SocketExtensions.ChangeTcpKeepAlive(m_TcpServerSocket, m_SocketPollMicroSeconds, m_SocketPollMicroSeconds);           
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    Media.Common.Extensions.Socket.SocketExtensions.ChangeTcpKeepAlive(m_TcpServerSocket, m_SocketPollMicroSeconds, m_SocketPollMicroSeconds));
             };
 
             //Configure the socket
@@ -1357,14 +1358,16 @@ namespace Media.Rtsp
 
             //Ensure the address can be re-used
             if (allowAddressReuse)
-                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableAddressReuse(m_TcpServerSocket));
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    Media.Common.Extensions.Socket.SocketExtensions.EnableAddressReuse(m_TcpServerSocket));
 
             //Windows >= 10 and Some Unix
             if (allowPortReuse)
-                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableUnicastPortReuse(m_TcpServerSocket));
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    Media.Common.Extensions.Socket.SocketExtensions.EnableUnicastPortReuse(m_TcpServerSocket));
 
             //Create a thread to handle client connections
-            m_ServerThread = new Thread(new ThreadStart(AcceptLoop))
+            m_ServerThread = new Thread(AcceptLoop)
             {
                 //Configure the thread
                 Name = ServerName + "@" + m_ServerPort
@@ -1379,16 +1382,19 @@ namespace Media.Rtsp
             m_ServerThread.Start();
 
             //Timer for maintaince ( one quarter of the ticks)
-            m_Maintainer = new Timer(new TimerCallback(MaintainServer), null, TimeSpan.FromTicks(RtspClientInactivityTimeout.Ticks >> 2), Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan);
+            m_Maintainer = new Timer(MaintainServer,
+                null,
+                TimeSpan.FromTicks(RtspClientInactivityTimeout.Ticks >> 2),
+                Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan);
 
             if (m_UdpPort >= 0) EnableUnreliableTransport(m_UdpPort);
-
             if (m_HttpPort >= 0) EnableHttpTransport(m_HttpPort);
 
             //Start streaming from m_Streams before server can accept connections.
-            StartStreams();
+            await StartStreamsAsync().ConfigureAwait(false);
 
-            while (m_Started.HasValue is false) Thread.Sleep(0);
+            while (m_Started.HasValue is false)
+                await Task.Delay(0).ConfigureAwait(false);
 
             Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
                 Media.Common.Extensions.Socket.SocketExtensions.ChangeTcpKeepAlive(
@@ -1411,7 +1417,7 @@ namespace Media.Rtsp
 
                 try
                 {
-                    var thread = new Thread(new ThreadStart(() =>
+                    var thread = new Thread(() =>
                     {
                         try
                         {
@@ -1436,7 +1442,7 @@ namespace Media.Rtsp
                             TimeSpan period = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan;
                             m_Maintainer.Change(dueTime, period);
                         }
-                    }))
+                    })
                     {
                         Priority = m_ServerThread.Priority,
                         Name = "Maintenance-" + m_ServerThread.Name
@@ -1455,12 +1461,12 @@ namespace Media.Rtsp
         }
 
         //Should allow to be set in constructor...
-        bool m_LeaveOpen;
+        readonly bool m_LeaveOpen;
 
         /// <summary>
         /// Stops recieving RtspRequests and stops streaming all contained streams
         /// </summary>
-        public virtual void Stop(bool leaveOpen = false)
+        public virtual async Task StopAsync(bool leaveOpen = false)
         {
             //If there is not a server thread return
             if (IsRunning is false) return;
@@ -1474,7 +1480,7 @@ namespace Media.Rtsp
             Common.ILoggingExtensions.Log(Logger, "Uptime:" + Uptime);
             Common.ILoggingExtensions.Log(Logger, "Sent:" + m_Sent);
             Common.ILoggingExtensions.Log(Logger, "Receieved:" + m_Recieved);
-            
+
             //Todo, leaveOpen...
 
             //Stop other listeners
@@ -1486,14 +1492,13 @@ namespace Media.Rtsp
             if (m_Maintainer is not null)
             {
                 m_Maintainer.Dispose();
-
                 m_Maintainer = null;
 
                 //m_Maintaining = false;
-            }            
-            
+            }
+
             //Stop listening to source streams
-            StopStreams();
+            await StopStreamsAsync().ConfigureAwait(false);
 
             //Remove all clients
             foreach (ClientSession session in Clients)
@@ -1506,14 +1511,17 @@ namespace Media.Rtsp
             Media.Common.Extensions.Thread.ThreadExtensions.TryAbortAndFree(ref m_ServerThread);
 
             //Dispose the server socket
-            if (m_TcpServerSocket is not null)                
+            if (m_TcpServerSocket is not null)
             {
                 //Dispose the socket if not leaving it open...
-                if (leaveOpen is false) m_TcpServerSocket.Dispose();
+                if (leaveOpen is false)
+                {
+                    m_TcpServerSocket.Dispose();
+                }
 
                 m_TcpServerSocket = null;
             }
-          
+
             //Erase statistics
             m_Started = null;
 
@@ -1523,38 +1531,35 @@ namespace Media.Rtsp
         /// <summary>
         /// Starts all streams contained in the video server in parallel
         /// </summary>
-        internal virtual void StartStreams()
+        internal virtual async Task StartStreamsAsync()
         {
+            List<Task> streamTasks = [];
+
             foreach (Media.Rtsp.Server.IMedia stream in MediaStreams)
             {
                 if (m_StopRequested) return;
 
-                if (Common.IDisposedExtensions.IsNullOrDisposed(stream) || stream.IsDisabled) continue;
+                streamTasks.Add(StartStreamAsync(stream));
+            }
+
+            await Task.WhenAll(streamTasks).ConfigureAwait(false);
+
+            async Task StartStreamAsync(Media.Rtsp.Server.IMedia stream)
+            {
+                if (Common.IDisposedExtensions.IsNullOrDisposed(stream) ||
+                    stream.IsDisabled)
+                    return;
+
+                Common.ILoggingExtensions.Log(Logger, "Starting Stream: " + stream.Name + " Id=" + stream.Id);
 
                 try
                 {
-                    ThreadPool.QueueUserWorkItem((s) =>
-                    {
-                        try
-                        {
-                            Common.ILoggingExtensions.Log(Logger, "Starting Stream: " + stream.Name + " Id=" + stream.Id);
-
-                            stream.Start();
-                        }
-                        catch (Exception ex)
-                        {
-                            Common.ILoggingExtensions.LogException(Logger,ex);
-
-                            Common.ILoggingExtensions.Log(Logger, "Cannot Start Stream: " + stream.Name + " Id=" + stream.Id);
-                        }
-
-                    }, this);
-                }                
-                catch(Exception ex)
+                    await Task.Run(() => stream.Start());
+                }
+                catch (Exception ex)
                 {
                     Common.ILoggingExtensions.LogException(Logger, ex);
-
-                    continue;
+                    Common.ILoggingExtensions.Log(Logger, "Cannot Start Stream: " + stream.Name + " Id=" + stream.Id);
                 }
             }
         }
@@ -1562,37 +1567,36 @@ namespace Media.Rtsp
         /// <summary>
         /// Stops all contained streams from streaming in parallel
         /// </summary>
-        internal virtual void StopStreams()
+        internal virtual async Task StopStreamsAsync()
         {
+            List<Task> streamTasks = [];
+
             foreach (Media.Rtsp.Server.IMedia stream in MediaStreams)
             {
-                if (Common.IDisposedExtensions.IsNullOrDisposed(stream) || stream.IsDisabled) continue;
+                streamTasks.Add(StopStreamAsync(stream));
+            }
+
+            await Task.WhenAll(streamTasks).ConfigureAwait(false);
+
+            async Task StopStreamAsync(Media.Rtsp.Server.IMedia stream)
+            {
+                if (Common.IDisposedExtensions.IsNullOrDisposed(stream) ||
+                    stream.IsDisabled)
+                    return;
+
+                Common.ILoggingExtensions.Log(Logger, "Stopping Stream: " + stream.Name + " Id=" + stream.Id);
 
                 try
                 {
-                    ThreadPool.QueueUserWorkItem((s) =>
-                    {
-                        try
-                        {
-                            Common.ILoggingExtensions.Log(Logger, "Stopping Stream: " + stream.Name + " Id=" + stream.Id);
-
-                            stream.Stop();
-                        }
-                        catch (Exception ex)
-                        {
-                            Common.ILoggingExtensions.LogException(Logger, ex);
-
-                            Common.ILoggingExtensions.Log(Logger, "Cannot Stop Stream: " + stream.Name + " Id=" + stream.Id);
-                        }
-                    });
+                    await Task.Run(() => stream.Stop());
                 }
                 catch (Exception ex)
                 {
                     Common.ILoggingExtensions.LogException(Logger, ex);
-                    continue;
+                    Common.ILoggingExtensions.Log(Logger, "Cannot Stop Stream: " + stream.Name + " Id=" + stream.Id);
                 }
             }
-        }        
+        }
 
         /// <summary>
         /// The loop where Tcp connections are accepted
@@ -1601,7 +1605,7 @@ namespace Media.Rtsp
         {
             SocketAsyncEventArgs lastAccept = null;
             var eventArgs = new SocketAsyncEventArgs();
-            eventArgs.Completed += ProcessAccept;            
+            eventArgs.Completed += ProcessAccept;
 
             //Indicate Thread Started
             m_Started = DateTime.UtcNow;
@@ -3545,7 +3549,7 @@ namespace Media.Rtsp
         #region IDisposable
 
         /// <summary>
-        /// Calls <see cref="Stop"/> 
+        /// Calls <see cref="StopAsync"/> 
         /// Removes and Disposes all contained streams
         /// Removes all custom request handlers
         /// </summary>
@@ -3553,9 +3557,7 @@ namespace Media.Rtsp
         {
             if (IsDisposed || ShouldDispose is false) return;
 
-            base.Dispose();
-
-            Stop(m_LeaveOpen);
+            StopAsync(m_LeaveOpen).GetAwaiter().GetResult();
 
             foreach (var stream in m_MediaStreams)
             {
@@ -3568,6 +3570,29 @@ namespace Media.Rtsp
 
             //Clear custom handlers
             m_RequestHandlers.Clear();
+
+            base.Dispose();
+        }
+
+        public override async ValueTask DisposeAsync()
+        {
+            if (IsDisposed || ShouldDispose is false) return;
+
+            await StopAsync(m_LeaveOpen).ConfigureAwait(false);
+
+            foreach (var stream in m_MediaStreams)
+            {
+                if (m_MediaStreams.TryRemove(stream.Key, out var removed))
+                    removed.Dispose();
+            }
+
+            //Clear streams
+            m_MediaStreams.Clear();
+
+            //Clear custom handlers
+            m_RequestHandlers.Clear();
+
+            await base.DisposeAsync().ConfigureAwait(false);
         }
 
         #endregion

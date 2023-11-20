@@ -270,7 +270,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 stopEvent = new ManualResetEvent(false);
 
                 // create and start new thread
-                thread = new Thread(new ThreadStart(WorkerThread))
+                thread = new Thread(WorkerThread)
                 {
                     Name = m_Source.ToString() // mainly for debugging
                 };

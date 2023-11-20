@@ -286,8 +286,8 @@ namespace Media.Rtsp.Server
         //Sets the State = StreamState.Stopped
         public virtual void Stop()
         {
-            State = StreamState.Stopped; 
-            
+            State = StreamState.Stopped;
+
             m_StartedTimeUtc = null;
         }
 
@@ -325,9 +325,9 @@ namespace Media.Rtsp.Server
                 SessionDescription = null;
             }
 
-            base.Dispose();
-
             Stop();
+
+            base.Dispose();
         }
     }
 }

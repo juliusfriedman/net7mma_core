@@ -42,6 +42,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 #endregion
 
@@ -60,7 +61,7 @@ namespace Media.Common
     /// </remarks>
     [CLSCompliant(true)]
     [System.Runtime.InteropServices.ComVisible(true)]
-    public abstract class BaseDisposable : IDisposed
+    public abstract class BaseDisposable : IDisposed, IAsyncDisposable
     {
         #region Constants / Statics
 
@@ -355,6 +356,18 @@ namespace Media.Common
         void IDisposable.Dispose()
         {
             Destruct();
+        }
+
+        /// <summary>
+        /// Allows derived implemenations a chance to destory manged or unmanged resources.
+        /// Calls <see cref="Destruct"/> if not <see cref="IsFinalized"/>, <see cref="IsUndisposed"/>, <see cref="ShouldDispose"/>, and not <see cref="IsDisposed"/>
+        /// </summary>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public virtual ValueTask DisposeAsync()
+        {
+            Destruct();
+
+            return ValueTask.CompletedTask;
         }
 
         /// <summary>

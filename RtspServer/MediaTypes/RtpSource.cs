@@ -182,7 +182,7 @@ namespace Media.Rtsp.Server.MediaTypes
             if (State >= StreamState.StopRequested) return;
             
             //If there is a RtpClient call Activate.
-            if (RtpClient is not null) RtpClient.Activate();
+            RtpClient?.Activate();
 
             //Should be done in first packet recieved...
             base.IsReady = true;
@@ -209,14 +209,14 @@ namespace Media.Rtsp.Server.MediaTypes
         {
             if (IsDisposed || ShouldDispose is false) return;
 
-            base.Dispose();
-
             if (Common.IDisposedExtensions.IsNullOrDisposed(RtpClient) is false)
             {
                 RtpClient.Dispose();
 
                 RtpClient = null;
             }
+
+            base.Dispose();
         }
 
         #endregion
