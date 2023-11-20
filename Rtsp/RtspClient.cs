@@ -6052,8 +6052,8 @@ namespace Media.Rtsp
 
                 //If not disposed AND IsConnected and if protocol switch is still allowed AND IsPlaying and not already TCP
                 if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false &&
-                    IsConnected && 
-                    false.Equals(m_RtpProtocol == ProtocolType.Tcp) &&
+                    IsConnected &&
+                    m_RtpProtocol is not ProtocolType.Tcp &&
                     AllowAlternateTransport && 
                     IsPlaying)
                 {
@@ -6073,12 +6073,12 @@ namespace Media.Rtsp
                         try
                         {
                             //If the client has not already switched to Tcp
-                            if (false.Equals(m_RtpProtocol == ProtocolType.Tcp))
+                            if (m_RtpProtocol is not ProtocolType.Tcp)
                             {
                                 //Ensure Tcp protocol
                                 m_RtpProtocol = ProtocolType.Tcp;
                             }
-                            else if (false.Equals(m_RtpProtocol == ProtocolType.Udp))
+                            else if (m_RtpProtocol is not ProtocolType.Udp)
                             {
                                 //Ensure Udp protocol
                                 m_RtpProtocol = ProtocolType.Udp;
