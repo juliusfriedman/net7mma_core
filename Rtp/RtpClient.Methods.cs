@@ -1579,7 +1579,8 @@ namespace Media.Rtp
             int registerX, registerY;
 
             //While not disposed and there is data remaining (within the buffer)
-            while (Common.IDisposedExtensions.IsNullOrDisposed(m_Buffer) is false &&
+            while (m_StopRequested is false &&
+                Common.IDisposedExtensions.IsNullOrDisposed(m_Buffer) is false &&
                 remainingInBuffer > Common.Binary.Zero &&
                 offset >= m_Buffer.Offset &&
                 Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
@@ -1849,7 +1850,7 @@ namespace Media.Rtp
                     frameLength > remainingInBuffer ? frameLength - remainingInBuffer : 0;
 
                 //If there is anymore data remaining on the wire
-                if (remainingOnSocket > 0 && socket is not null && Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
+                if (m_StopRequested is false && remainingOnSocket > 0 && socket is not null && Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
                 {
                     //Align the buffer if anything remains on the socket.
                     if (remainingOnSocket + offset + remainingInBuffer > bufferLength)
@@ -1917,7 +1918,7 @@ namespace Media.Rtp
                 }
 
                 //If the client is not disposed
-                if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
+                if (m_StopRequested is false && Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
                 {
                     //Calulcate how much remains
                     //remainingInFrame = jumbo ? frameLength - remainingInBuffer : frameLength;                    
