@@ -2756,11 +2756,9 @@ namespace Media.UnitTests
                                         new Sdp.SessionDescriptionLine("a=type:broadcast")
                                     };
 
-                                    var compositeSource = new Media.Rtsp.Server.MediaTypes.RtpVideoSink("Composite", null);
+                                    var compositeSource = new Media.Rtsp.Server.MediaTypes.RtpVideoSink("Composite", compositeSession);
 
                                     compositeSource.Start();
-
-                                    compositeSource.SessionDescription = compositeSession;
 
                                     if (!server.TryAddMedia(compositeSource))
                                     {
