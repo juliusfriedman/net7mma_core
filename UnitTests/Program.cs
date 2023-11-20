@@ -2752,7 +2752,7 @@ namespace Media.UnitTests
                                         },
                                         sources.FirstOrDefault().SessionDescription.MediaDescriptions.FirstOrDefault(),
                                         new Sdp.SessionDescriptionLine("a=control:*"),
-                                        new Sdp.SessionDescriptionLine("a=sendonly"),
+                                        new Sdp.SessionDescriptionLine("a=recvonly"),
                                         new Sdp.SessionDescriptionLine("a=type:broadcast")
                                     };
 

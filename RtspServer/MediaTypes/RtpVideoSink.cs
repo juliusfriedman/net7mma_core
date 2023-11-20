@@ -111,7 +111,7 @@ public class RtpVideoSink : RtpSink
                 new SessionDescriptionLine("a=control:*"),
 
                 //Ensure the session members know they can only receive
-                new SessionDescriptionLine("a=sendonly"),
+                new SessionDescriptionLine("a=recvonly"),
 
                 //that this a broadcast.
                 new SessionDescriptionLine("a=type:broadcast")

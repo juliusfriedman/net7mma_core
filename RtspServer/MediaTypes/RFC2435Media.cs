@@ -2352,7 +2352,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 new Sdp.SessionDescriptionLine("a=control:*"),
 
                 //Ensure the session members know they can only receive
-                new Sdp.SessionDescriptionLine("a=sendonly"), //recvonly?
+                new Sdp.SessionDescriptionLine("a=recvonly"),
 
                 //that this a broadcast.
                 new Sdp.SessionDescriptionLine("a=type:broadcast")
