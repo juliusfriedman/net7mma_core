@@ -2616,8 +2616,7 @@ namespace Media.Rtsp
         /// <summary>
         /// Increments and returns the current <see cref="ClientSequenceNumber"/>
         /// </summary>
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
-        internal int NextClientSequenceNumber() { return ++m_CSeq; }
+        internal int NextClientSequenceNumber() { return Interlocked.Increment(ref m_CSeq); }
 
         //Determine if throwing exceptions are proper here.
         //Should have end time also?
@@ -3336,8 +3335,7 @@ namespace Media.Rtsp
                 m_BeginConnect = DateTime.UtcNow;
 
                 //Handle the connection attempt (Assumes there is already a RemoteRtsp value)
-                ProcessEndConnect(null);
-
+                ProcessEndConnect(state: null);
             }
             catch (Exception ex)
             {
@@ -3360,67 +3358,9 @@ namespace Media.Rtsp
         {
             //Todo,
             //IConnection
-
             if (m_RemoteRtsp is null) throw new InvalidOperationException("A remote end point must be assigned");
 
-            //Todo, BeginConnect will allow the amount of time to be specified and then you can cancel the connect if it doesn't finish within that time.
-            //System.Net.Sockets.Socket s = new Socket(m_RtspSocket.SocketType, m_RtspSocket.ProtocolType);
-
-            //bool async = false;
-
-            //bool fail = false;
-
-            //var cc = s.BeginConnect(m_RemoteRtsp, new AsyncCallback((iar)=>{
-
-            //    if (iar == null || iar.IsCompleted is false || s == null) return;                    
-
-            //    if(s.Connected) s.EndConnect(iar);
-
-            //    if (async)
-            //    {
-            //        if (s.Connected is false) s.Dispose();
-
-            //        s = null;
-            //    }
-            //    else
-            //    {
-            //        async = true;
-
-            //        m_RtspSocket.Dispose();
-
-            //        m_RtspSocket = s;
-            //    }
-            //}), null);
-
-            //ThreadPool.QueueUserWorkItem((_) =>
-            //{
-            //    while (async is false) if (DateTime.UtcNow - m_BeginConnect.Value > Common.Extensions.TimeSpan.TimeSpanExtensions.OneSecond)
-            //        {
-            //            async = true;
-
-            //            fail = true;
-
-            //            using (cc.AsyncWaitHandle)
-            //            {
-            //                s.Dispose();
-
-            //                m_RtspSocket.Dispose();
-            //            }
-
-            //            s = null;
-            //        }
-            //        else System.Threading.Thread.Yield();
-            //});
-
-            //if (async is false && cc.IsCompleted is false)
-            //{
-                //Try to connect.
-                m_RtspSocket.Connect(m_RemoteRtsp);
-
-            //    async = true;
-            //}
-
-            //if (fail) return;
+            m_RtspSocket.Connect(m_RemoteRtsp);
 
             //Sample the clock after connecting
             m_EndConnect = DateTime.UtcNow;
@@ -3479,12 +3419,6 @@ namespace Media.Rtsp
             //Raise the Connected event.
             OnConnected();
         }
-
-        //handle exception, really needs to know what type of operation this was also.(read or write)
-        //virtual void HandleSocketException(SocketException exception, bool wasReading, wasWriting)
-        //{
-
-        //}
 
         /// <summary>
         /// If <see cref="IsConnected"/> nothing occurs.
