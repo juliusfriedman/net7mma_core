@@ -5228,7 +5228,10 @@ namespace Media.Rtsp
             {
                 //Ensure the sessionId is invalided when no longer playing if not forced
                 if (force is false && IsPlaying is false) m_SessionId = null;
-            }
+
+                //If there is nothing playing now we can deactivate the RtpClient.
+                if (m_Playing.Count is 0 && m_RtpClient.IsActive) m_RtpClient.Deactivate();
+            }   
         }
 
         public RtspMessage SendSetup(MediaDescription mediaDescription)

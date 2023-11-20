@@ -1849,7 +1849,7 @@ namespace Media.Rtp
                     frameLength > remainingInBuffer ? frameLength - remainingInBuffer : 0;
 
                 //If there is anymore data remaining on the wire
-                if (remainingOnSocket > 0 && false.Equals(socket is null) && Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
+                if (remainingOnSocket > 0 && socket is not null && Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
                 {
                     //Align the buffer if anything remains on the socket.
                     if (remainingOnSocket + offset + remainingInBuffer > bufferLength)
@@ -1868,7 +1868,7 @@ namespace Media.Rtp
                     System.Net.Sockets.SocketError error = System.Net.Sockets.SocketError.Success;
 
                     //Get all the remaining data, todo, if not active must activate and join thread to hand off context.
-                    while (remainingOnSocket > 0 && Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
+                    while (m_StopRequested is false && remainingOnSocket > 0 && Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
                     {
                         registerY = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(buffer, offset, remainingOnSocket, socket, out error);
 
