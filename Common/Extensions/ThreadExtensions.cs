@@ -76,15 +76,9 @@ namespace Media.Common.Extensions.Thread
             if (thread != null && (thread.IsAlive && thread.ThreadState.HasFlag(state)))
             {
                 //Attempt to join
-                if (false == thread.Join(timeout))
+                if (thread.Join(timeout) is false)
                 {
-                    try
-                    {
-                        //Abort
-                        thread.Abort();
-                    }
-                    catch (System.Threading.ThreadAbortException) { System.Threading.Thread.ResetAbort(); }
-                    catch { throw; } //Cancellation not supported
+                    throw new System.PlatformNotSupportedException("Thread.Abort is not supported. Ensure your thread has stopped.");
                 }
 
                 //Reset the state of the thread to indicate success
@@ -92,21 +86,22 @@ namespace Media.Common.Extensions.Thread
             }
         }
 
-        public static void AbortAndFree(ref System.Threading.Thread thread, System.TimeSpan timeout, System.Threading.ThreadState state = System.Threading.ThreadState.Stopped)
+        public static void AbortAndFree(ref System.Threading.Thread thread, System.TimeSpan timeout,
+            System.Threading.ThreadState state = System.Threading.ThreadState.Stopped)
         {
             //If the worker IsAlive and has doesn't have the requested state.
             if (thread is not null &&
-                false.Equals(thread.ThreadState.HasFlag(state)))
+                thread.ThreadState.HasFlag(state) is false)
             {
                 //Attempt to join if not already, todo check flags are compatible in all implementations.
-                if (false.Equals(thread.ThreadState.HasFlag(System.Threading.ThreadState.AbortRequested | System.Threading.ThreadState.Aborted)) && 
+                if (thread
+                        .ThreadState
+                        .HasFlag(System.Threading.ThreadState.AbortRequested |
+                                 System.Threading.ThreadState.Aborted) is false &&
                     IsRunning(thread) &&
-                    false.Equals(thread.Join(timeout)))
+                    thread.Join(timeout) is false)
                 {
-                    //Abort
-                    try { thread.Abort(); }
-                    catch (System.Threading.ThreadAbortException) { System.Threading.Thread.ResetAbort(); }
-                    catch { throw; } //Cancellation not supported
+                    throw new System.PlatformNotSupportedException("Thread.Abort is not supported. Ensure your thread has stopped.");
                 }
             }
 

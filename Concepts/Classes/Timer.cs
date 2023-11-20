@@ -322,15 +322,7 @@ namespace Media.Concepts.Classes
             
             Stop(); 
 
-            try { m_Counter.Abort(m_Frequency); }
-            catch (System.Threading.ThreadAbortException) { System.Threading.Thread.ResetAbort(); }
-            catch { }
-            finally
-            {
-                Tick = null;
-            }
-
-            
+            Tick = null;
         }
 
     }
