@@ -2269,7 +2269,7 @@ namespace Media.UnitTests
                     var sources = new List<Rtsp.Server.MediaTypes.RtspSource>();
                     for(int i = 1; i <= 9; ++i)
                     {
-                        var source = new Media.Rtsp.Server.MediaTypes.RtspSource($"R2_05{i}", $"rtsp://8.15.251.101:1935/rtplive/R2_05{i}", Rtsp.RtspClient.ClientProtocolType.Tcp, 0);
+                        var source = new Media.Rtsp.Server.MediaTypes.RtspSource($"R2_05{i}", $"rtsp://8.15.251.101:1935/rtplive/R2_05{i}", Rtsp.RtspClient.ClientProtocolType.Tcp, 0, null, null, null, true);
                         source.RtpClient.ThreadEvents = true;
                         source.RtpClient.IListSockets = true;
                         source.RtspClient.DisableKeepAliveRequest = true;
@@ -2771,7 +2771,12 @@ namespace Media.UnitTests
                                     compositeContext.SynchronizationSourceIdentifier = RFC3550.Random32(0);
                                     compositeContext.RemoteSynchronizationSourceIdentifier = 0;
 
-                                    RtpClient.RtpPacketHandler sendPacket = (s, p, tc) => compositeSource.EnquePacket(p);
+                                    RtpClient.RtpPacketHandler sendPacket = (s, p, tc) =>
+                                    {
+                                        RtpFrame f = [p];
+                                        f.SynchronizationSourceIdentifier = compositeContext.SynchronizationSourceIdentifier;
+                                        compositeSource.Frames.Enqueue(f);
+                                    };
 
                                     RtpClient.RtpFrameHandler sendFrame = (s, f, tc, final) =>
                                     {

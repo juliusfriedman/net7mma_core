@@ -6063,10 +6063,10 @@ namespace Media.Rtsp
                     //Filter the contexts which have received absolutely NO data.
                     var contextsWithoutFlow = Client.GetTransportContexts().Where(tc => Common.IDisposedExtensions.IsNullOrDisposed(tc) is false &&
                         m_Playing.Keys.Contains(tc.MediaDescription) &&
-                        tc.TotalBytesReceieved.Equals(Common.Binary.LongZero) 
-                        && tc.TotalPacketsSent.Equals(Common.Binary.LongZero)
-                        && tc.TimeActive > tc.ReceiveInterval);
-                    //tc.TimeSending > tc.ReceiveInterval);
+                        tc.TotalBytesReceieved is Common.Binary.LongZero && 
+                        tc.TotalPacketsSent is Common.Binary.LongZero && 
+                        tc.TimeActive > tc.ReceiveInterval);
+                        //tc.TimeSending > tc.ReceiveInterval);
 
                     //InactiveTime or ActiveTime on the tc. (Another value)
 
@@ -6134,6 +6134,11 @@ namespace Media.Rtsp
                         }
                     }
                 }
+            }
+            else if(m_Playing.Count > 0)
+            {
+                StopPlaying();
+                StartPlaying();
             }
 
             //If there is still a timer change it based on the last messages round trip time, should be relative to all messages...
