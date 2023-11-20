@@ -65,7 +65,7 @@ namespace Media.Rtsp
         /// <param name="socket"></param>
         internal static void ConfigureRtspSocket(Socket socket)
         {
-            if (socket is null) throw new ArgumentNullException("Socket");
+            ArgumentNullException.ThrowIfNull(socket);
 
             //Xamarin's .net implementation on Android suffers from nuances that neither core nor mono suffer from.
             //If this option fails to be set there the socket can't be used easily.
@@ -89,7 +89,8 @@ namespace Media.Rtsp
             Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => socket.ReceiveBufferSize = 0);
 
             //Dont fragment for ip4, ip6 does ptmud
-            if (socket.AddressFamily == AddressFamily.InterNetwork) Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => socket.DontFragment = true);
+            if (socket.AddressFamily == AddressFamily.InterNetwork)
+                Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => socket.DontFragment = true);
 
             //Rtsp over Tcp
             if (socket.ProtocolType == ProtocolType.Tcp)
@@ -113,17 +114,17 @@ namespace Media.Rtsp
                     Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableTcpRetransmissions(socket));
 
                     // Enable No Syn Retries
-                    Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpNoSynRetries(socket));
+                    Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpNoSynRetries(socket));
 
                     // Set OffloadPreferred
-                    Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.SetTcpOffloadPreference(socket));
+                    Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.SetTcpOffloadPreference(socket));
 
                     //Done in ProcessEndConnect based on ConnectionTime
                     //Enable Congestion Algorithm (when there is not enough bandwidth this sometimes helps)
-                    //Media.Common.Extensions.Socket.SocketExtensions.EnableTcpCongestionAlgorithm(socket);
+                    //Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpCongestionAlgorithm(socket));
 
                     // For network debugging
-                    //Media.Common.Extensions.Socket.SocketExtensions.EnableTcpTimestamp(socket);                   
+                    //Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpTimestamp(socket));                   
                 }
             }
         }

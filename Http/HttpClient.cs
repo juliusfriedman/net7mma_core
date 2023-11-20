@@ -25,9 +25,9 @@ namespace Media.Http
         /// <param name="socket"></param>
         internal static void ConfigureHttpSocket(Socket socket)
         {
-            if (socket == null) throw new ArgumentNullException("Socket");
+            ArgumentNullException.ThrowIfNull(socket);
 
-            Media.Common.Extensions.Socket.SocketExtensions.EnableAddressReuse(socket);
+            Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableAddressReuse(socket));
             //socket.ExclusiveAddressUse = false;
             //socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
 
@@ -56,13 +56,14 @@ namespace Media.Http
                 //Media.Common.Extensions.Socket.SocketExtensions.EnableTcpCongestionAlgorithm(socket);
 
                 // Set option that allows socket to close gracefully without lingering.
-                Media.Common.Extensions.Socket.SocketExtensions.DisableLinger(socket);
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableLinger(socket));
 
                 //Retransmit for 0 sec
-                if(Common.Extensions.OperatingSystemExtensions.IsWindows) Media.Common.Extensions.Socket.SocketExtensions.DisableTcpRetransmissions(socket);
+                if(Common.Extensions.OperatingSystemExtensions.IsWindows)
+                    Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableTcpRetransmissions(socket));
 
                 //If both send and receieve buffer size are 0 then there is no coalescing when nagle's algorithm is disabled
-                Media.Common.Extensions.Socket.SocketExtensions.DisableTcpNagelAlgorithm(socket);
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableTcpNagelAlgorithm(socket));
                 //socket.NoDelay = true;
 
                 //Allow more than one byte of urgent data

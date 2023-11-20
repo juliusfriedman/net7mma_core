@@ -127,7 +127,7 @@ namespace Media.Rtp
 
             internal static void ConfigureRtpRtcpSocket(Socket socket) //,Common.ILogging = null
             {
-                if (socket == null) throw new ArgumentNullException("socket");
+                ArgumentNullException.ThrowIfNull(socket);
 
                 Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableAddressReuse(socket));
 

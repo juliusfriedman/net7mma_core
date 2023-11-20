@@ -73,8 +73,8 @@ namespace Media.Rtsp
 
         internal static void ConfigureRtspServerSocket(Socket socket, Socket prototype = null)
         {
-            int i4; bool i4b = false;
-            ConfigureRtspServerSocket(socket, out i4, ref i4b, prototype);
+            bool i4b = false;
+            ConfigureRtspServerSocket(socket, out _, ref i4b, prototype);
         }
 
         internal static void ConfigureRtspServerSocket(Socket socket, out int interFrameGap, Socket prototype = null)
@@ -85,7 +85,7 @@ namespace Media.Rtsp
 
         internal static void ConfigureRtspServerSocket(Socket socket, out int interFrameGap, ref bool reconfigure, Socket prototype = null)
         {
-            if (socket is null) throw new ArgumentNullException("socket");
+            ArgumentNullException.ThrowIfNull(socket);
 
             if (reconfigure is false)
             {
@@ -98,9 +98,9 @@ namespace Media.Rtsp
 
             //Tcp confgiuration
             if (socket.ProtocolType == ProtocolType.Tcp)
-            {                
+            {
                 // Set option that allows socket to close gracefully without lingering.
-                Media.Common.Extensions.Socket.SocketExtensions.DisableLinger(socket);
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableLinger(socket));
 
                 //Windows options
                 if (Common.Extensions.OperatingSystemExtensions.IsWindows)
@@ -109,7 +109,7 @@ namespace Media.Rtsp
                     //Media.Common.Extensions.Socket.SocketExtensions.EnableTcpTimestamp(socket);
 
                     //Retransmit for 0 sec
-                    Media.Common.Extensions.Socket.SocketExtensions.DisableTcpRetransmissions(socket);
+                    Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableTcpRetransmissions(socket));
 
                     // Enable No Syn Retries
                     Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpNoSynRetries(socket));
@@ -122,25 +122,20 @@ namespace Media.Rtsp
                 }
 
                 //If both send and receieve buffer size are 0 then there is no coalescing when socket's algorithm is disabled
-                Media.Common.Extensions.Socket.SocketExtensions.DisableTcpNagelAlgorithm(socket);
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableTcpNagelAlgorithm(socket));
                 //socket.NoDelay = true;
 
                 //Allow more than one byte of urgent data
-                Media.Common.Extensions.Socket.SocketExtensions.EnableTcpExpedited(socket);
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpExpedited(socket));
 
                 //Receive any urgent data in the normal data stream
-                Media.Common.Extensions.Socket.SocketExtensions.EnableTcpOutOfBandDataInLine(socket);  
-             
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpOutOfBandDataInLine(socket));
 
                 //Todo, MaxSegmentSize
-
             }
-            //else if(socket.ProtocolType == ProtocolType.Udp)
-            //{
-                
-            //}
 
-            if (socket.AddressFamily == AddressFamily.InterNetwork) socket.DontFragment = true;
+            if (socket.AddressFamily == AddressFamily.InterNetwork)
+                socket.DontFragment = true;
 
             //Better performance for 1 core...
             //socket.UseOnlyOverlappedIO is nop in .net core.
@@ -159,7 +154,6 @@ namespace Media.Rtsp
 
                 //Use 1/10 th of the total inter packet gap
                 interFrameGap /= 10;
-
             }
             else
             {
@@ -191,7 +185,6 @@ namespace Media.Rtsp
                 //Create a buffer using the size of the largest message possible without a Content-Length header.
                 //This helps to ensure that partial messages are not recieved by the server from a client if possible (should eventually allow much smaller)                
             }
-
         }
 
         #region Fields
@@ -1344,7 +1337,7 @@ namespace Media.Rtsp
             //Create the server Socket
             m_TcpServerSocket = new Socket(m_ServerIP.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-            if(ConfigureSocket is null) ConfigureSocket = (Socket server) =>
+            ConfigureSocket ??= (Socket server) =>
             {
                 bool reconfigureSocket = false;
 
@@ -1363,10 +1356,12 @@ namespace Media.Rtsp
             m_TcpServerSocket.Listen(m_MaximumConnections);
 
             //Ensure the address can be re-used
-            if(allowAddressReuse) Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableAddressReuse(m_TcpServerSocket));
+            if (allowAddressReuse)
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableAddressReuse(m_TcpServerSocket));
 
             //Windows >= 10 and Some Unix
-            if (allowPortReuse) Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableUnicastPortReuse(m_TcpServerSocket));
+            if (allowPortReuse)
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableUnicastPortReuse(m_TcpServerSocket));
 
             //Create a thread to handle client connections
             m_ServerThread = new Thread(new ThreadStart(AcceptLoop))
@@ -1393,9 +1388,13 @@ namespace Media.Rtsp
             //Start streaming from m_Streams before server can accept connections.
             StartStreams();
 
-            while (m_Started.HasValue is false) System.Threading.Thread.Sleep(0);
+            while (m_Started.HasValue is false) Thread.Sleep(0);
 
-            Media.Common.Extensions.Socket.SocketExtensions.ChangeTcpKeepAlive(m_TcpServerSocket, m_SocketPollMicroSeconds, m_SocketPollMicroSeconds << 1);
+            Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                Media.Common.Extensions.Socket.SocketExtensions.ChangeTcpKeepAlive(
+                    m_TcpServerSocket,
+                    time: m_SocketPollMicroSeconds,
+                    interval: m_SocketPollMicroSeconds << 1));
         }
 
         /// <summary>
