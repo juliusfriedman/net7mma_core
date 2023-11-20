@@ -20,7 +20,7 @@ public class RtpVideoSink : RtpSink
 
     internal protected ConcurrentLinkedQueueSlim<RtpFrame> Frames = new();
 
-    protected int FramesPerSecondCounter = 0;
+    protected ulong FramesPerSecondCounter = 0;
 
     #endregion
 
@@ -180,126 +180,124 @@ public class RtpVideoSink : RtpSink
     {
         RtpClient.FrameChangedEventsEnabled = false;
 
-        unchecked
+        while (State is StreamState.Started)
         {
-            while (State is StreamState.Started)
+            try
             {
-                try
+                if (Frames.Count is 0 && State is StreamState.Started)
                 {
-                    if (Frames.Count is 0 && State is StreamState.Started)
-                    {
-                        if (RtpClient.IsActive)
-                            RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.Lowest;
+                    if (RtpClient.IsActive)
+                        RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.Lowest;
 
                     System.Threading.Thread.Sleep(ClockRate);
                     continue;
                 }
+
+                //int period = (clockRate * 1000 / m_Frames.Count);
 
                 //Dequeue a frame or die
                 if (!Frames.TryDequeue(out RtpFrame frame) ||
                     Common.IDisposedExtensions.IsNullOrDisposed(frame) ||
-                    frame.IsEmpty)
-                    continue;
+                    frame.IsEmpty) continue;
 
-                    //Get the transportChannel for the packet
-                    Rtp.RtpClient.TransportContext transportContext =
-                        RtpClient.GetContextBySourceId(frame.SynchronizationSourceIdentifier);
+                //Get the transportChannel for the packet
+                Rtp.RtpClient.TransportContext transportContext =
+                    RtpClient.GetContextBySourceId(frame.SynchronizationSourceIdentifier);
 
-                    //If there is a context
-                    if (transportContext is not null)
+                //If there is a context
+                if (transportContext is not null)
+                {
+                    //Increase priority
+                    RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.AboveNormal;
+
+                    //Ensure HasRecievedRtpWithinSendInterval is true
+                    //transportContext.m_LastRtpIn = DateTime.UtcNow;
+
+                    transportContext.RtpTimestamp += ClockRate * 1000;
+
+                    frame.Timestamp = transportContext.RtpTimestamp;
+
+                    //Fire a frame changed event manually
+                    if (RtpClient.FrameChangedEventsEnabled)
+                        RtpClient.OnRtpFrameChanged(frame, transportContext, true);
+
+                    //Todo, should not copy packets
+
+                    //Take all the packet from the frame
+                    IEnumerable<Rtp.RtpPacket> packets = frame;
+
+                    //Clear the frame to reset sequence numbers (could add method to do this)
+                    //frame.RemoveAllPackets();
+
+                    if (Loop) frame = [];
+
+                    //Todo, should provide access to property or provide a method which updates this property.
+
+                    //Iterate each packet in the frame
+                    foreach (Rtp.RtpPacket packet in packets)
                     {
-                        //Increase priority
-                        RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.AboveNormal;
+                        //Copy the values before we signal the server
+                        //packet.Channel = transportContext.DataChannel;
+                        packet.SynchronizationSourceIdentifier = SourceId;
+                        packet.Timestamp = transportContext.RtpTimestamp;
+                        //Assign next sequence number
+                        packet.SequenceNumber = transportContext.RecieveSequenceNumber switch
+                        {
+                            ushort.MaxValue => transportContext.RecieveSequenceNumber = 0,
+                            //Increment the sequence number on the transportChannel and assign the result to the packet
+                            _ => ++transportContext.RecieveSequenceNumber,
+                        };
 
-                        //Ensure HasRecievedRtpWithinSendInterval is true
-                        //transportContext.m_LastRtpIn = DateTime.UtcNow;
+                        //Fire an event so the server sends a packet to all clients connected to this source
+                        if (RtpClient.FrameChangedEventsEnabled is false)
+                            RtpClient.OnRtpPacketReceieved(packet, transportContext);
 
-                        transportContext.RtpTimestamp += ClockRate * 1000;
+                        //Put the packet back to ensure the timestamp and other values are correct.
+                        if (Loop) frame.Add(packet);
 
-                        frame.Timestamp = transportContext.RtpTimestamp;
-
-                        //Fire a frame changed event manually
-                        if (RtpClient.FrameChangedEventsEnabled)
-                            RtpClient.OnRtpFrameChanged(frame, transportContext, true);
-
-                        //Todo, should not copy packets
-
-                        //Take all the packet from the frame
-                        IEnumerable<Rtp.RtpPacket> packets = frame;
-
-                        //Clear the frame to reset sequence numbers (could add method to do this)
-                        //frame.RemoveAllPackets();
-
-                        if (Loop) frame = [];
+                        //Update the jitter and timestamp
+                        transportContext.UpdateJitterAndTimestamp(packet);
 
                         //Todo, should provide access to property or provide a method which updates this property.
 
-                        //Iterate each packet in the frame
-                        foreach (Rtp.RtpPacket packet in packets)
-                        {
-                            //Copy the values before we signal the server
-                            //packet.Channel = transportContext.DataChannel;
-                            packet.SynchronizationSourceIdentifier = SourceId;
-                            packet.Timestamp = transportContext.RtpTimestamp;
-                            //Assign next sequence number
-                            packet.SequenceNumber = transportContext.RecieveSequenceNumber switch
-                            {
-                                ushort.MaxValue => transportContext.RecieveSequenceNumber = 0,
-                                //Increment the sequence number on the transportChannel and assign the result to the packet
-                                _ => ++transportContext.RecieveSequenceNumber,
-                            };
-
-                            //Fire an event so the server sends a packet to all clients connected to this source
-                            if (RtpClient.FrameChangedEventsEnabled is false)
-                                RtpClient.OnRtpPacketReceieved(packet, transportContext);
-
-                            //Put the packet back to ensure the timestamp and other values are correct.
-                            if (Loop) frame.Add(packet);
-
-                            //Update the jitter and timestamp
-                            transportContext.UpdateJitterAndTimestamp(packet);
-
-                            //Todo, should provide access to property or provide a method which updates this property.
-
-                            //Ensure HasSentRtpWithinSendInterval is true
-                            //transportContext.m_LastRtpOut = DateTime.UtcNow;
-                        }
-
-                        packets = null;
-
-                        ++FramesPerSecondCounter;
+                        //Ensure HasSentRtpWithinSendInterval is true
+                        //transportContext.m_LastRtpOut = DateTime.UtcNow;
                     }
 
-                    //If we are to loop images then add it back at the end
-                    if (Loop)
-                    {
-                        Frames.Enqueue(frame);
-                    }
-                    else
-                    {
-                        frame.Dispose();
-                    }
+                    packets = null;
 
-                    RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.BelowNormal;
-
-                    System.Threading.Thread.Sleep(ClockRate);
+                    ++FramesPerSecondCounter;
                 }
-                catch (Exception ex)
+
+                //If we are to loop images then add it back at the end
+                if (Loop)
                 {
-                    if (ex is System.Threading.ThreadAbortException)
-                    {
-                        //Handle the abort
-                        System.Threading.Thread.ResetAbort();
-
-                        Stop();
-
-                        return;
-                    }
-
-                    //TryRaiseex
-
-                    continue;
+                    Frames.Enqueue(frame);
                 }
+                else
+                {
+                    frame.Dispose();
+                }
+
+                RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.BelowNormal;
+
+                System.Threading.Thread.Sleep(ClockRate);
+            }
+            catch (Exception ex)
+            {
+                if (ex is System.Threading.ThreadAbortException)
+                {
+                    //Handle the abort
+                    System.Threading.Thread.ResetAbort();
+
+                    Stop();
+
+                    return;
+                }
+
+                //TryRaiseex
+
+                continue;
             }
         }
     }
