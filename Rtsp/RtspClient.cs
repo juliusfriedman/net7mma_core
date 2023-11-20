@@ -4254,7 +4254,7 @@ namespace Media.Rtsp
                                 else if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false && SharesSocket is false)
                                 {
                                     //If no data was sent yet, send it now.
-                                    if (sent == 0) goto SendData;
+                                    if (message is not null && sent is 0) goto SendData;
 
                                     //Check for non fatal exceptions and continue to wait
                                     if (++attempt <= m_MaximumTransactionAttempts &&
