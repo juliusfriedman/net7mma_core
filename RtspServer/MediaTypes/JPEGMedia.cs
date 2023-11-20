@@ -332,7 +332,6 @@ namespace Media.Rtsp.Server.MediaTypes
             if (this.IsRunning)
             {
                 stopEvent.Set();
-                thread.Abort();
                 WaitForStop();
                 base.Stop();
             }

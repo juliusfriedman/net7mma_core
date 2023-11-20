@@ -253,7 +253,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 reloadEvent = new ManualResetEvent(false);
 
                 // create and start new thread
-                thread = new Thread(new ThreadStart(WorkerThread))
+                thread = new Thread(WorkerThread)
                 {
                     Name = m_Source.ToString()
                 };
@@ -315,7 +315,6 @@ namespace Media.Rtsp.Server.MediaTypes
             if (this.IsRunning)
             {
                 stopEvent.Set();
-                thread.Abort();
                 WaitForStop();
                 base.Stop();
             }
@@ -342,7 +341,7 @@ namespace Media.Rtsp.Server.MediaTypes
             // buffer to read stream
             byte[] buffer = new byte[bufSize];
             // JPEG magic number
-            byte[] jpegMagic = new byte[] { 0xFF, 0xD8, 0xFF };
+            byte[] jpegMagic = [0xFF, 0xD8, 0xFF];
             int jpegMagicLength = 3;
 
             ASCIIEncoding encoding = new ASCIIEncoding();
