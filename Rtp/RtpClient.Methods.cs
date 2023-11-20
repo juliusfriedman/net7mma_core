@@ -392,21 +392,20 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal protected /*virtual*/ TransportContext GetContextBySourceId(int sourceId)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this)) return null;
-
-            RtpClient.TransportContext c = null;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this))
+                return null;
 
             for (int i = TransportContexts.Count - 1; i >= 0; --i)
             {
-                c = TransportContexts[i];
+                RtpClient.TransportContext c = TransportContexts[i];
 
-                if (Common.IDisposedExtensions.IsNullOrDisposed(c) is false && 
-                    c.SynchronizationSourceIdentifier.Equals(sourceId) || c.RemoteSynchronizationSourceIdentifier.Equals(sourceId)) break;
-
-                c = null;
+                if (Common.IDisposedExtensions.IsNullOrDisposed(c) is false &&
+                    (c.SynchronizationSourceIdentifier == sourceId ||
+                     c.RemoteSynchronizationSourceIdentifier == sourceId))
+                    return c;
             }
 
-            return c;
+            return null;
         }
 
         //DataChannel ControlChannel or overload?
