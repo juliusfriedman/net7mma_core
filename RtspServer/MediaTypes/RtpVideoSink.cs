@@ -7,6 +7,7 @@ using Media.Sdp.Lines;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Media.Rtsp.Server.MediaTypes;
 
@@ -20,13 +21,13 @@ public class RtpVideoSink : RtpSink
 
     internal protected ConcurrentLinkedQueueSlim<RtpFrame> Frames = new();
 
-    protected ulong FramesPerSecondCounter = 0;
+    protected ulong FramesCounter = 0;
 
     #endregion
 
     #region Propeties
 
-    public double FramesPerSecond { get { return Math.Max(FramesPerSecondCounter, 1) / Math.Abs(Uptime.TotalSeconds); } }
+    public double FramesPerSecond { get { return Math.Max(Volatile.Read(ref FramesCounter), 1) / Math.Abs(Uptime.TotalSeconds); } }
 
     public virtual int Width { get; protected set; } //EnsureDimensios
 
@@ -147,13 +148,13 @@ public class RtpVideoSink : RtpSink
         }); //This context is always valid from the first rtp packet received
 
         //Make the thread
-        var thread = new System.Threading.Thread(SendPackets)
+        var thread = new Thread(SendPackets)
         {
             //IsBackground = true;
-            //Priority = System.Threading.ThreadPriority.BelowNormal;
+            //Priority = ThreadPriority.BelowNormal;
             Name = nameof(RtpVideoSink) + "-" + Id
         };
-        thread.TrySetApartmentState(System.Threading.ApartmentState.MTA);
+        thread.TrySetApartmentState(ApartmentState.MTA);
 
         IsReady = true;
         State = StreamState.Started;
@@ -187,9 +188,9 @@ public class RtpVideoSink : RtpSink
                 if (Frames.Count is 0 && State is StreamState.Started)
                 {
                     if (RtpClient.IsActive)
-                        RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.Lowest;
+                        RtpClient.m_WorkerThread.Priority = ThreadPriority.Lowest;
 
-                    System.Threading.Thread.Sleep(ClockRate);
+                    Thread.Sleep(ClockRate);
                     continue;
                 }
 
@@ -208,7 +209,7 @@ public class RtpVideoSink : RtpSink
                 if (transportContext is not null)
                 {
                     //Increase priority
-                    RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.AboveNormal;
+                    RtpClient.m_WorkerThread.Priority = ThreadPriority.AboveNormal;
 
                     //Ensure HasRecievedRtpWithinSendInterval is true
                     //transportContext.m_LastRtpIn = DateTime.UtcNow;
@@ -266,7 +267,7 @@ public class RtpVideoSink : RtpSink
 
                     packets = null;
 
-                    ++FramesPerSecondCounter;
+                    Interlocked.Increment(ref FramesCounter);
                 }
 
                 //If we are to loop images then add it back at the end
@@ -279,9 +280,9 @@ public class RtpVideoSink : RtpSink
                     frame.Dispose();
                 }
 
-                RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.BelowNormal;
+                RtpClient.m_WorkerThread.Priority = ThreadPriority.BelowNormal;
 
-                System.Threading.Thread.Sleep(ClockRate);
+                Thread.Sleep(ClockRate);
             }
             catch (Exception)
             {

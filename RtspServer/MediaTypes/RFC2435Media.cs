@@ -37,6 +37,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Media.Rtsp.Server.MediaTypes
 {
@@ -2619,8 +2620,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                 OnFrameDecoded((RFC2435Media.RFC2435Frame)frame);
                             }
 
-                            ++FramesPerSecondCounter;
-
+                            Interlocked.Increment(ref FramesCounter);
                         }
 
                         //If we are to loop images then add it back at the end
