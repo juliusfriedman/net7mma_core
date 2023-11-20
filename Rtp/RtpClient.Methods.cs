@@ -1108,10 +1108,9 @@ namespace Media.Rtp
                 if (m_StopRequested is false && IsActive) return;
 
                 //Create the worker thread
-                m_WorkerThread = new System.Threading.Thread(new System.Threading.ThreadStart(SendReceieve))
+                m_WorkerThread = new System.Threading.Thread(SendReceieve)
                 {
                     Name = "RtpClient-" + InternalId,
-
                     //Start highest.
                     Priority = System.Threading.ThreadPriority.Highest
                 };
@@ -1126,23 +1125,16 @@ namespace Media.Rtp
                 m_WorkerThread.Start();
 
                 //Wait for thread to actually start
-                while (IsActive is false) m_EventReady.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);
+                while (IsActive is false)
+                    m_EventReady.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);
+
                 //Could also use the Join but would have to add logic in the thread to handle this.
                 //m_WorkerThread.Join(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);
-
-                #region Unused Feature [Early Rtcp]
-
-                //Should allow to be overridden by option or otherwise, should not be required.
-
-                //Send the initial senders report, needs to check the SessionDescription to determine if sending is supported..
-                //SendSendersReports();
-
-                //Send the initial receivers report, needs to check the SessionDescription to see if recieve is supported...
-                //SendReceiversReports();
-
-                #endregion
             }
-            catch (System.ObjectDisposedException) { return; }
+            catch (System.ObjectDisposedException)
+            {
+                return;
+            }
             catch (System.Exception ex)
             {
                 Common.ILoggingExtensions.LogException(Logger, ex);
@@ -1157,13 +1149,14 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void Deactivate()
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || false == IsActive) return;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || IsActive is false) return;
 
             SendGoodbyes();
 
             m_StopRequested = true;
 
-            foreach (TransportContext tc in TransportContexts) if (tc.IsActive) tc.DisconnectSockets();
+            foreach (TransportContext tc in TransportContexts)
+                if (tc.IsActive) tc.DisconnectSockets();
 
             Media.Common.Extensions.Thread.ThreadExtensions.TryAbortAndFree(ref m_WorkerThread);
 
@@ -1201,11 +1194,11 @@ namespace Media.Rtp
             context = null;
 
             //The channel of the frame - The Framing Method
-            frameChannel = default(byte);
+            frameChannel = default;
 
             raisedEvent = false;
 
-            buffer = buffer ?? m_Buffer.Array;
+            buffer ??= m_Buffer.Array;
 
             int bufferLength = buffer.Length, bufferOffset = offset;
 
@@ -1214,13 +1207,13 @@ namespace Media.Rtp
             //Assume given enough for sessionRequired
 
             //Todo Determine from Context to use control channel and length. (Check MediaDescription)
-            //NEEDS TO HANDLE CASES WHERE RFC4571 Framing are in play and no $ or Channel are used....            
+            //NEEDS TO HANDLE CASES WHERE RFC4571 Framing are in play and no $ or Channel are used....
             //int sessionRequired = InterleavedOverhead;
 
             if (received <= 0 || sessionRequired < 0 || received < sessionRequired) return -1;
 
             //Look for the frame control octet
-            int startOfFrame = System.Array.IndexOf<byte>(buffer, BigEndianFrameControl, bufferOffset, received);
+            int startOfFrame = System.Array.IndexOf(buffer, BigEndianFrameControl, bufferOffset, received);
 
             //If not found everything belongs to the upper layer
             if (startOfFrame == -1)
@@ -1233,7 +1226,9 @@ namespace Media.Rtp
                 //Indicate the amount of data consumed.
                 return received;
             }
-            else if (startOfFrame > bufferOffset) // If the start of the frame is not at the beginning of the buffer
+
+            // If the start of the frame is not at the beginning of the buffer
+            if (startOfFrame > bufferOffset)
             {
                 //Determine the amount of data which belongs to the upper layer
                 int upperLayerData = startOfFrame - bufferOffset;
@@ -1244,14 +1239,20 @@ namespace Media.Rtp
 
                 raisedEvent = true;
 
-                //Indicate length from offset until next possible frame. (should always be positive, if somehow -1 is returned this will signal a end of buffer to callers)
+                //Indicate length from offset until next possible frame.
+                //(should always be positive, if somehow -1 is returned this will
+                //signal a end of buffer to callers)
 
-                //If there is more data related to upperLayerData it will be evented in the next run. (See RtspClient ProcessInterleaveData notes)
+                //If there is more data related to upperLayerData it will be evented
+                //in the next run. (See RtspClient ProcessInterleaveData notes)
                 return upperLayerData;
             }
 
             //If there is not enough data for a frame header return
-            if (bufferOffset + sessionRequired > bufferLength) return -1;
+            if (bufferOffset + sessionRequired > bufferLength)
+            {
+                return -1;
+            }
 
             //TODO if RFC4571 is specified do check here to avoid reading channel.
 
@@ -2274,7 +2275,7 @@ namespace Media.Rtp
                     bool duplexing, rtpEnabled, rtcpEnabled;
 
                     //Until aborted
-                    while (false.Equals(shouldStop = IsUndisposed is false || m_StopRequested))
+                    while ((shouldStop = IsUndisposed is false || m_StopRequested) is false)
                     {
                         //Keep how much time has elapsed thus far
                         System.TimeSpan taken = System.DateTime.UtcNow - lastOperation;
@@ -2704,16 +2705,6 @@ namespace Media.Rtp
                 }
                 catch (System.Exception ex)
                 {
-                    //if (ex is SocketException)
-                    //{
-                    //    SocketException se = ex as SocketException;
-
-                    //    if (se.SocketErrorCode == SocketError.ConnectionAborted || se.SocketErrorCode == SocketError.ConnectionReset)
-                    //    {
-                    //        return;
-                    //    }
-                    //}
-
                     Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@SendRecieve: " + ex.Message);
 
                     if (critical) System.Threading.Thread.EndCriticalRegion();

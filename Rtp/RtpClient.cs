@@ -3795,21 +3795,20 @@ namespace Media.Rtp
             {
                 if (IsActive is false) return;
 
-                if (value.Equals(m_ThreadEvents)) return;
+                if (value == m_ThreadEvents) return;
 
                 //Update the value.
                 m_ThreadEvents = value;
 
-                if (value == true)
+                if (value is true)
                 {
-                    if (m_EventThread == null || EventsStarted.Equals(DateTime.MinValue))
+                    if (m_EventThread is null || EventsStarted == DateTime.MinValue)
                     {
                         //Create the event thread
-                        m_EventThread = new Thread(new ThreadStart(HandleEvents))
+                        m_EventThread = new Thread(HandleEvents)
                         {
                             //Assign name
                             Name = "RtpClient-Events-" + InternalId,
-
                             //Start highest
                             Priority = ThreadPriority.Highest
                         };
@@ -3820,7 +3819,7 @@ namespace Media.Rtp
                         //Start thread
                         m_EventThread.Start();
                     }
-                    
+
                     //Wait for the start while the value was not changed and the thread is not started.
                     while (m_ThreadEvents && EventsStarted == DateTime.MinValue && m_EventThread is not null)
                         m_EventReady.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);
