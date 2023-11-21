@@ -1619,8 +1619,8 @@ namespace Media.Rtp
                     //Assign jumbo, If a frame was found (Including the null packet)
                     if (frameLength >= Common.Binary.Zero)
                     {
-                        //Determine if a frameHeader was found
-                        hasFrameHeader = frameLength > sessionRequired;
+                        //Determine if a frameHeader was found...
+                        hasFrameHeader = true;
 
                         //Determine how large the packet is
                         jumbo = frameLength > bufferLength;
@@ -1677,13 +1677,13 @@ namespace Media.Rtp
                             using (RFC3550.CommonHeaderBits common = new RFC3550.CommonHeaderBits(buffer, offset + sessionRequired))
                             {
                                 //Check the version...
-                                incompatible = false.Equals(common.Version.Equals(relevent.Version));
+                                incompatible = common.Version.Equals(relevent.Version) is false;
 
                                 //If this is a valid context there must be at least a RtpHeader's worth of data in the buffer. 
                                 //If this was a RtcpPacket with only 4 bytes it wouldn't have a ssrc and wouldn't be valid to be sent.
                                 if (incompatible is false &&
-                                    (frameChannel.Equals(relevent.DataChannel) &&
-                                    remainingInBuffer < Rtp.RtpHeader.Length + sessionRequired)
+                                    frameChannel.Equals(relevent.DataChannel) &&
+                                    remainingInBuffer < Rtp.RtpHeader.Length + sessionRequired
                                     ||
                                     (frameChannel.Equals(relevent.ControlChannel) &&
                                     remainingInBuffer < Rtcp.RtcpHeader.Length + sessionRequired))
