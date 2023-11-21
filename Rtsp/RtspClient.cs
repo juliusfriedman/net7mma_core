@@ -6511,7 +6511,7 @@ namespace Media.Rtsp
                         }
                         else if (SupportedMethods.Contains(RtspMethod.OPTIONS.ToString())) //If at least options is supported
                         {
-                            using (SendOptions(session.Value.ControlLocation == RtspMessage.Wildcard, session.Value.SessionId)) ;
+                            using (SendOptions(session.Value.ControlLocation == RtspMessage.Wildcard, session.Value.SessionId, RtspHeaderFields.Connection.KeepAlive)) ;
                         }
                         else if (SupportedMethods.Contains(RtspMethod.PLAY.ToString())) //If at least PLAY is supported
                         {
