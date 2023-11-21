@@ -404,10 +404,8 @@ namespace Media.Sdp
 
         #region Overrides
 
-        public override int GetHashCode()
-        {
-            return HashCode.Combine(m_Type, m_Parts.GetHashCode());
-        }
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public override int GetHashCode() => HashCode.Combine(m_Type, m_Parts.GetHashCode());
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool Equals(SessionDescriptionLine other)
