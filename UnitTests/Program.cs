@@ -153,7 +153,10 @@ namespace Media.UnitTests
 
             RunTest(RtspClientTests);
 
-            await RunTestAsync(TestServerAsync);
+            RunTest(async () =>
+            {
+                await RunTestAsync(TestServerAsync);
+            });
         }
 
         #region Unit Tests
@@ -2146,6 +2149,8 @@ namespace Media.UnitTests
         /// </summary>
         static async Task TestServerAsync()
         {
+
+            Console.WriteLine(nameof(TestServerAsync));
 
             System.Runtime.GCLatencyMode oldMode = System.Runtime.GCSettings.LatencyMode;
 
@@ -4621,19 +4626,14 @@ a=appversion:1.0");
 
         static void RunTest(Action test, int count = 1, bool waitForGoAhead = true)
         {
+            System.Console.Clear();
+            Console.WriteLine("About to run test: " + test.Method.Name);
+            Console.WriteLine("Press Q to skip or any other key to continue.");
             RunTestAsync(() => { test(); return Task.CompletedTask; }, count, waitForGoAhead).GetAwaiter().GetResult();
         }
 
         static async Task RunTestAsync(Func<Task> test, int count = 1, bool waitForGoAhead = true)
         {
-            System.Console.Clear();
-            ConsoleColor pForeGround = Console.ForegroundColor,
-                        pBackGound = Console.BackgroundColor;
-            Console.BackgroundColor = ConsoleColor.Blue;
-            Console.WriteLine("About to run test: " + test.Method.Name);
-            Console.WriteLine("Press Q to skip or any other key to continue.");
-            Console.BackgroundColor = ConsoleColor.Black;
-
             //If the debugger is attached get a ConsoleKey, the key is Q return.
             if (waitForGoAhead && /*System.Diagnostics.Debugger.IsAttached && */ Console.ReadKey(true).Key == ConsoleKey.Q) return;
             else
@@ -4652,12 +4652,12 @@ a=appversion:1.0");
                         //Decrement remaining
                         --remaining;
 
-                        TraceMessage("Beginning Test '" + testIndex + "'", test.Method.Name);
+                        TraceMessage("Beginning Test '" + testIndex + "'");
 
                         //Run the test
                         await test();
 
-                        TraceMessage("Completed Test'" + testIndex + "'", test.Method.Name);
+                        TraceMessage("Completed Test'" + testIndex + "'");
 
                         //Increment the success counter
                         ++successes;
@@ -4723,11 +4723,6 @@ a=appversion:1.0");
                 }
 
             }
-
-            Console.BackgroundColor = pBackGound;
-
-            Console.ForegroundColor = pForeGround;
-
         }
 
         internal static void TryPrintClientPacket(object sender, bool incomingFlag, Media.Common.IPacket packet, Common.IDisposed context = null, bool writePayload = false)
