@@ -2442,8 +2442,6 @@ namespace Media.Rtsp
                                 //Increment for messages received
                                 ++m_ReceivedMessages;
 
-                                int contentLength = interleaved.ContentLength;
-
                                 //If not playing an interleaved stream, Complete the message if not complete (Should maybe check for Content-Length)
                                 //Idea was to allow `Disposed` message to potentially be completed and then not disposed anymore....
 
@@ -2451,13 +2449,15 @@ namespace Media.Rtsp
                                     SharesSocket is false &&
                                     interleaved.IsComplete is false)
                                 {
-                                    //Take in some bytes from the socket
+                                    //Take in some bytes from the socket or buffer.
                                     int justReceived = interleaved.CompleteFrom(m_RtspSocket, m_Buffer);
 
                                     if (justReceived is 0) break;
 
                                     //Incrment for justReceived
                                     received += justReceived;
+
+                                    int contentLength = interleaved.ContentLength;
 
                                     //Ensure we are not doing to much receiving
                                     if (contentLength >= 0 && received > RtspMessage.MaximumLength + contentLength)
@@ -2503,7 +2503,9 @@ namespace Media.Rtsp
                                 received = interleaved.Length;
 
                                 //If playing and interleaved stream AND the last transmitted message is NOT null and is NOT Complete then attempt to complete it
-                                if (received < length && IDisposedExtensions.IsNullOrDisposed(this) is false && Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) is false /*&& interleaved.StatusLineParsed*/)
+                                if (received < length && 
+                                    IDisposedExtensions.IsNullOrDisposed(this) is false && 
+                                    Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) is false /*&& interleaved.StatusLineParsed*/)
                                 {
                                     //RtspMessage local = m_LastTransmitted;
 
@@ -2511,7 +2513,7 @@ namespace Media.Rtsp
                                     int lastLength = received;
 
                                     //Create a memory segment and complete the message as required from the buffer.
-                                    using Media.Common.MemorySegment memory = new Media.Common.MemorySegment(data, offset, length);
+                                    using var memory = new Media.Common.MemorySegment(data, offset, length);
                                     
                                     //Use the data recieved to complete the message and not the socket
                                     int justReceived = IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) is false ? m_LastTransmitted.CompleteFrom(null, memory) : 0;

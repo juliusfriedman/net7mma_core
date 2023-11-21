@@ -519,7 +519,7 @@ namespace Media.Http
 
                     if (headerEncoding == null) return 0;
 
-                    if (MessageType == HttpMessageType.Request || MessageType == HttpMessageType.Invalid)
+                    if (MessageType == HttpMessageType.Request)
                     {
                         length += headerEncoding.GetByteCount(HttpMethod.ToString());
 
@@ -558,7 +558,11 @@ namespace Media.Http
 
                         length += lineEndsLength;
                     }
-
+                    else
+                    {
+                        length = (int)(m_Buffer?.Length ?? 0);
+                    }
+                    
                     //Should also count headers when body is empty... and then add body length
 
                     if (m_Headers.Count > 0)
@@ -2694,7 +2698,7 @@ namespace Media.Http
             }
 
             //If the status line was not parsed return the number of bytes written, reparse if there are no headers parsed yet.
-            if (ParseStatusLine(MessageType is HttpMessageType.Invalid) || m_StatusLineParsed is false is false) return received;
+            if ((ParseStatusLine(MessageType is HttpMessageType.Invalid) || m_StatusLineParsed) is false) return received;
             else if (m_Buffer is not null && m_Buffer.CanSeek) m_Buffer.Seek(m_HeaderOffset, System.IO.SeekOrigin.Begin); // Seek past the status line.
 
             //Determine if there can be and is a body already
