@@ -6137,20 +6137,21 @@ namespace Media.Rtsp
                 }
             }
             
-            if(m_Playing.Count > 0)
-            {
-                //Filter the contexts which have received no data with in the recieve interval.
-                var contextsWithoutFlow = Client.GetTransportContexts().Where(tc => Common.IDisposedExtensions.IsNullOrDisposed(tc) is false &&
-                    m_Playing.Keys.Contains(tc.MediaDescription) &&
-                    tc.HasReceivedRtpWithinReceiveInterval is false &&
-                    tc.TimeActive > tc.ReceiveInterval);
+            ////If playing then check for context without flow..
+            //if(m_Playing.Count > 0)
+            //{
+            //    //Filter the contexts which have received no data with in the recieve interval.
+            //    var contextsWithoutFlow = Client.GetTransportContexts().Where(tc => Common.IDisposedExtensions.IsNullOrDisposed(tc) is false &&
+            //        m_Playing.Keys.Contains(tc.MediaDescription) &&
+            //        tc.HasReceivedRtpWithinReceiveInterval is false &&
+            //        tc.TimeActive > tc.ReceiveInterval);
 
-                if (contextsWithoutFlow.Any())
-                {
-                    StopPlaying();
-                    StartPlaying();
-                }
-            }
+            //    if (contextsWithoutFlow.Any())
+            //    {
+            //        StopPlaying();
+            //        StartPlaying();
+            //    }
+            //}
 
             //If there is still a timer change it based on the last messages round trip time, should be relative to all messages...
             if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false && m_ProtocolMonitor is not null)

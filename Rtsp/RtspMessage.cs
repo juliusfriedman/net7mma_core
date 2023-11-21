@@ -925,10 +925,7 @@ namespace Media.Rtsp
 
         #region Overrides        
 
-        public override int GetHashCode()
-        {
-            return Created.GetHashCode() ^ (int)((int)RtspMessageType | (int)RtspMethod ^ (int)RtspStatusCode) ^ (string.IsNullOrWhiteSpace(m_Body) ? Length : m_Body.GetHashCode()) ^ (m_Headers.Count ^ CSeq);
-        }
+        public override int GetHashCode() => HashCode.Combine(RtspMessageType, RtspMethod, RtspStatusCode, string.IsNullOrWhiteSpace(m_Body) ? Length : m_Body.GetHashCode(), m_Headers.Count, CSeq);
 
         public override bool Equals(object obj)
         {
