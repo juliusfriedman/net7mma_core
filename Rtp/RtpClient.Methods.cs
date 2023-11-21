@@ -2042,7 +2042,7 @@ namespace Media.Rtp
                     //Could ensure version here to make reception more unified.
 
                     //Just use the payload type to avoid confusion, payload types for Rtcp and Rtp cannot and should not overlap
-                    parseRtcp = false.Equals(parseRtp = false.Equals(Media.Common.IDisposedExtensions.IsNullOrDisposed(GetContextByPayloadType(header.RtpPayloadType))));
+                    parseRtcp = (parseRtp = Media.Common.IDisposedExtensions.IsNullOrDisposed(GetContextByPayloadType(header.RtpPayloadType)) is false) is false;
 
                     //Could also lookup the ssrc
                 }
@@ -2060,34 +2060,17 @@ namespace Media.Rtp
             //If rtcp should be parsed
             if (parseRtcp && mRemaining >= Rtcp.RtcpHeader.Length)
             {
+                //Iterate the packets within the buffer, calling Dispose on each packet
+                foreach (Rtcp.RtcpPacket rtcp in Rtcp.RtcpPacket.GetPackets(memory.Array, offset + index, Common.Binary.Min(ref mRemaining, ref count)))
+                {
+                    //Handle the packet further (could indicate truncated here)
+                    HandleIncomingRtcpPacket(this, rtcp);
 
-                //using (var tempHeader = new Rtp.RtpHeader(memory.Array, offset + index + 4))
-                //{
-                    ////Ensure Rtp...
-                    //if (Common.IDisposedExtensions.IsNullOrDisposed(GetContextBySourceId(tempHeader.SynchronizationSourceIdentifier)))
-                    //{
+                    //Move the offset the length of the packet parsed
+                    index += rtcp.Length;
 
-                        //Iterate the packets within the buffer, calling Dispose on each packet
-                        foreach (Rtcp.RtcpPacket rtcp in Rtcp.RtcpPacket.GetPackets(memory.Array, offset + index, Common.Binary.Min(ref mRemaining, ref count)))
-                        {
-                            //Handle the packet further (could indicate truncated here)
-                            HandleIncomingRtcpPacket(this, rtcp);
-
-                            //Move the offset the length of the packet parsed
-                            index += rtcp.Length;
-
-                            mRemaining -= rtcp.Length;
-                        }
-                    //}
-                    //else
-                    //{
-
-                    //    offset += 4;
-                    //    mRemaining -= 4;
-                    //    goto Rtp;
-
-                    //}
-                //}
+                    mRemaining -= rtcp.Length;
+                }
             }
 
         //Rtp:
