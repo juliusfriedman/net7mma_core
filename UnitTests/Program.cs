@@ -1945,6 +1945,12 @@ namespace Media.UnitTests
 
                                             continue;
                                         }
+                                    case ConsoleKey.W:
+                                        {
+                                            Console.WriteLine($"DisableKeepAliveRequest = {client.DisableKeepAliveRequest = !client.DisableKeepAliveRequest}");
+
+                                            continue;
+                                        }
                                     case ConsoleKey.K:
                                         {
                                             SendKeepAlive(client);
