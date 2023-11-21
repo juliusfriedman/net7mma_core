@@ -46,6 +46,7 @@ using Media.Rtcp;
 using Media.Rtp;
 using Media.Sdp;
 using System.Threading;
+using Media.Common.Extensions.Socket;
 
 namespace Media.Rtsp
 {
@@ -4051,7 +4052,7 @@ namespace Media.Rtsp
                 SendData:
                     //If we can write before the session will end
                     if (IsConnected &&
-                        m_RtspSocket is not null &&
+                        m_RtspSocket.IsNullOrDisposed() is false &&
                         m_RtspSocket.Poll(m_SocketPollMicroseconds >> 4, SelectMode.SelectWrite))
                     {
                         //Send all the data now
@@ -4146,6 +4147,7 @@ namespace Media.Rtsp
                     if (fatal is false &&
                         SharesSocket is false &&
                         IsConnected &&
+                        m_RtspSocket.IsNullOrDisposed() is false &&
                         m_RtspSocket.Poll(m_SocketPollMicroseconds >> 4, SelectMode.SelectRead)/* ||  
                         attempts.Equals(m_MaximumTransactionAttempts) &&
                         message is not null*/)

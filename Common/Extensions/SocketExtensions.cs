@@ -51,7 +51,7 @@ namespace Media.Common.Extensions.Socket
     public static class SocketExtensions
     {
         //Todo, import whats already done and engineer the remaining requirements.
-        
+
         //PlatformSocketOptionManager
 
         //ManagedSocketOptions
@@ -71,7 +71,11 @@ namespace Media.Common.Extensions.Socket
         //    }
         //}
 
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static bool IsNullOrDisposed(this System.Net.Sockets.Socket socket) => socket is null || socket.SafeHandle.IsInvalid | socket.SafeHandle.IsClosed;
+
+
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         public static System.Net.Sockets.Socket ReservePort(System.Net.Sockets.SocketType socketType, System.Net.Sockets.ProtocolType protocol, System.Net.IPAddress localIp, int port)
         {
