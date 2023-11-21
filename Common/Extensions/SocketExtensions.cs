@@ -810,7 +810,7 @@ namespace Media.Common.Extensions.Socket
         public static bool IsTcpStandardUrgency(System.Net.Sockets.Socket socket, bool checkNotUrgent = true)
         {
             //if checkNotUrgent and NotUrgent is set then IsNotUrgent will return false
-            if (checkNotUrgent && false.Equals(IsTcpNotUrgent(socket))) return false;
+            if (checkNotUrgent && IsTcpNotUrgent(socket) is false) return false;
 
             int len = Common.Binary.BytesPerInteger;
 

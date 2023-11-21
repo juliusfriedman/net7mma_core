@@ -2663,7 +2663,7 @@ namespace Media.Concepts.Classes
         public static Number operator +(Number a, Number b)
         {
             if (IsNull(a))
-                if (false.Equals(IsNull(b))) return b;
+                if (IsNull(b) is false) return b;
                 else return (Number)Bitable.SingleZero;
             else return a.MathProvider.Addition(ref a, ref b);
         }
@@ -2672,7 +2672,7 @@ namespace Media.Concepts.Classes
         public static Number operator -(Number a, Number b)
         {
             if (IsNull(a))
-                if (false.Equals(IsNull(b))) return b;
+                if (IsNull(b) is false) return b;
                 else return (Number)Bitable.SingleZero;
             else return a.MathProvider.Subtraction(ref a, ref b);
         }
@@ -2681,7 +2681,7 @@ namespace Media.Concepts.Classes
         public static Number operator /(Number a, Number b)
         {
             if (IsNull(a))
-                if (false.Equals(IsNull(b))) return b;
+                if (IsNull(b) is false) return b;
                 else return (Number)Bitable.SingleZero;
             else return a.MathProvider.Division(ref a, ref b);
         }
@@ -2690,7 +2690,7 @@ namespace Media.Concepts.Classes
         public static Number operator %(Number a, Number b)
         {
             if (IsNull(a))
-                if (false.Equals(IsNull(b))) return b;
+                if (IsNull(b) is false) return b;
                 else return (Number)Bitable.SingleZero;
             else return a.MathProvider.Modulus(ref a, ref b);
         }
@@ -2699,7 +2699,7 @@ namespace Media.Concepts.Classes
         public static Number operator *(Number a, Number b)
         {
             if (IsNull(a))
-                if (false.Equals(IsNull(b))) return b;
+                if (IsNull(b) is false) return b;
                 else return (Number)Bitable.SingleZero;
             else return a.MathProvider.Multiplication(ref a, ref b);
         }

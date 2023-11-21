@@ -430,7 +430,7 @@ namespace Media.Rtp
             {
                 c = TransportContexts[i];
 
-                if (false.Equals(Media.Common.IDisposedExtensions.IsNullOrDisposed(c)) &&
+                if (Common.IDisposedExtensions.IsNullOrDisposed(c) is false &&
                     System.MemoryExtensions.IndexOfAny(channels, c.DataChannel, c.ControlChannel) >= 0) break;
 
                 c = null;
@@ -568,7 +568,7 @@ namespace Media.Rtp
                 foreach (Rtcp.RtcpPacket packet in packets)
                 {
                     //If the data is not contigious
-                    if (false.Equals(packet.IsContiguous()))
+                    if (packet.IsContiguous() is false)
                     {
                         //Just send all packets in their own array by projecting the data (causes an allocation)
                         sent += SendData(System.Linq.Enumerable.ToArray(RFC3550.ToCompoundBytes(packets)), 
@@ -1038,7 +1038,7 @@ namespace Media.Rtp
                 //Check if the packet cannot be sent in place
                 if (ssrc.HasValue && false.Equals(ssrc.Equals(packet.SynchronizationSourceIdentifier))
                     ||
-                    false.Equals(packet.IsContiguous()))
+                    packet.IsContiguous() is false)
                 {
 
                     //If the transportContext is changed to automatically update the timestamp by frequency then use transportContext.RtpTimestamp

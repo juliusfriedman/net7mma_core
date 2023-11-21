@@ -462,7 +462,7 @@ namespace Media.Rtsp
                 }
 
                 //Messages without complete header sections are not complete
-                if (false.Equals(ParseHeaders()) /*&& m_CSeq == -1*/) return false;
+                if (ParseHeaders() is false /*&& m_CSeq == -1*/) return false;
 
                 //Don't check for any required values, only that the end of headers was seen.
                 //if (MessageType == HttpMessageType.Request && CSeq == -1 || //All requests must contain a sequence number
@@ -784,17 +784,17 @@ namespace Media.Rtsp
         //    }
 
         //    //If the status line was not parsed return the number of bytes written, reparse if there are no headers parsed yet.
-        //    if (false.Equals(ParseStatusLine(RtspMessageType == RtspMessageType.Invalid) || false.Equals(m_StatusLineParsed))) return received;
+        //    if (false.Equals(ParseStatusLine(RtspMessageType == RtspMessageType.Invalid) || m_StatusLineParsed) is false) return received;
         //    else if (m_Buffer is not null && m_Buffer.CanSeek) m_Buffer.Seek(m_HeaderOffset, System.IO.SeekOrigin.Begin); // Seek past the status line.
 
         //    //Determine if there can be and is a body already
         //    bool hasNullBody = CanHaveBody && string.IsNullOrEmpty(m_Body);
 
         //    //Force the re-parsing of headers unless the body has started parsing.
-        //    if (false.Equals(ParseHeaders(hasNullBody))) return received;
+        //    if (ParseHeaders(hasNullBody) is false) return received;
 
         //    //Reparse any content-length if it was not already parsed or was a 0 value and the body is still null
-        //    if (m_ContentLength <= 0 && false.Equals(ParseContentLength(hasNullBody))) return received;
+        //    if (m_ContentLength <= 0 && ParseContentLength(hasNullBody) is false) return received;
 
         //    //Http closes the connection when there is no content-length...
 

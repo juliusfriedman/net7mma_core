@@ -837,7 +837,7 @@ namespace Media.Http
                 //Check for Trailer header (maybe TE)
                 string trailerHeader = GetHeader(HttpHeaders.Trailer);
 
-                if (false.Equals(string.IsNullOrWhiteSpace(trailerHeader)) && false.Equals(ContainsHeader(trailerHeader))) return false;
+                if (string.IsNullOrWhiteSpace(trailerHeader) is false && ContainsHeader(trailerHeader) is false) return false;
 
                 //Todo, Must Have Allow header if StatusCode == 405.. technically not valid otherwise but can be complete if not present.
 
@@ -848,7 +848,7 @@ namespace Media.Http
                     bool hasNullBody = string.IsNullOrWhiteSpace(m_Body);
 
                     //Determine if the count of the octets in the body is greater than or equal to the supposed amount
-                    return false.Equals(ParseContentLength(hasNullBody)) && hasNullBody && m_ContentLength > 0 ? m_HeadersParsed : ContentEncoding.GetByteCount(m_Body) >= m_ContentLength;
+                    return ParseContentLength(hasNullBody) is false && hasNullBody && m_ContentLength > 0 ? m_HeadersParsed : ContentEncoding.GetByteCount(m_Body) >= m_ContentLength;
                 }
 
                 //The message is complete
@@ -1618,7 +1618,7 @@ namespace Media.Http
             if (force is false && MessageType.Equals(HttpMessageType.Invalid)) return true; //or the message is complete then return true
 
             //If no headers could be parsed then don't parse the body
-            if (false.Equals(ParseHeaders())) return false;
+            if (ParseHeaders() is false) return false;
 
             //Transfer-Encoding chunked will be present if headers are parsed and the message is chunked.
 

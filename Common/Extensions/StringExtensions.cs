@@ -337,7 +337,7 @@ namespace Media.Common.Extensions.String
             for (int i = 0; i < value.Length; ++i)
             {
                 char c = value[i];
-                if (false.Equals(predicate(c)))
+                if (predicate(c) is false)
                 {
                     sb.Append(c);
                 }

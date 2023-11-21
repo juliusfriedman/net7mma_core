@@ -154,7 +154,7 @@ namespace Media.Rtp
 
             get
             {
-                if (IsDisposed || false.Equals(Header.Padding)) return 0;
+                if (IsDisposed || Header.Padding is false) return 0;
 
                 return Media.RFC3550.ReadPadding(Payload.Array, Payload.Offset + Payload.Count - 1, 1);
             }
