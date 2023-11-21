@@ -1214,7 +1214,7 @@ namespace Media.Common.Extensions.Socket
             while (amount > 0) //poll write 0
             {
                 //Receive it into the buffer at the given offset taking into account what was already received
-                if (socket.Connected) justReceived = socket.Receive(buffer, offset, amount, System.Net.Sockets.SocketFlags.None, out error);
+                if (socket.IsNullOrDisposed() is false) justReceived = socket.Receive(buffer, offset, amount, System.Net.Sockets.SocketFlags.None, out error);
                 else justReceived = 0;
 
                 //Determine how to continue

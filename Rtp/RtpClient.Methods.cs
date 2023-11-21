@@ -33,6 +33,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * 
  * v//
  */
+using Media.Common.Extensions.Socket;
+
 namespace Media.Rtp
 {
     /// <summary>
@@ -1471,7 +1473,7 @@ namespace Media.Rtp
                 //{              
 
                 do received += justRecieved = socket.ReceiveFrom(buffer.Array, buffer.Offset + received, buffer.Count - received, System.Net.Sockets.SocketFlags.None, ref remote);
-                while (received is 0 /*|| justRecieved > 0 && received + justRecieved < pmax*/ && socket.Connected);
+                while (socket.IsNullOrDisposed() is false && received is 0 /*|| justRecieved > 0 && received + justRecieved < pmax && socket.Connected*/);
 
                 ////Lookup the context to determine if the packet will fit
                 //var context = GetContextBySocket(socket);
