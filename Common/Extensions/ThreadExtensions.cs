@@ -57,6 +57,8 @@ namespace Media.Common.Extensions.Thread
                 (thread.ThreadState & (System.Threading.ThreadState.Stopped | System.Threading.ThreadState.Unstarted)) == System.Threading.ThreadState.Running;
         }
 
+        static readonly System.PlatformNotSupportedException ThreadAbortNotSupported = new ("Thread.Abort is not supported. Ensure your thread has stopped.");
+
         /// <summary>
         /// Calls <see cref="Interrupt"/> on the given thread and indicates if the interrupt was received back.
         /// </summary>
@@ -78,7 +80,7 @@ namespace Media.Common.Extensions.Thread
                 //Attempt to join
                 if (thread.Join(timeout) is false)
                 {
-                    throw new System.PlatformNotSupportedException("Thread.Abort is not supported. Ensure your thread has stopped.");
+                    throw ThreadAbortNotSupported;
                 }
 
                 //Reset the state of the thread to indicate success
@@ -101,7 +103,7 @@ namespace Media.Common.Extensions.Thread
                     IsRunning(thread) &&
                     thread.Join(timeout) is false)
                 {
-                    throw new System.PlatformNotSupportedException("Thread.Abort is not supported. Ensure your thread has stopped.");
+                    throw ThreadAbortNotSupported;
                 }
             }
 

@@ -2472,10 +2472,8 @@ namespace Media.Rtsp
                                     //Incrment for justReceived
                                     received += justReceived;
 
-                                    int contentLength = interleaved.ContentLength;
-
                                     //Ensure we are not doing to much receiving
-                                    if (contentLength >= 0 && received > RtspMessage.MaximumLength + contentLength)
+                                    if (received > RtspMessage.MaximumLength)
                                     {
                                         if (Common.IDisposedExtensions.IsNullOrDisposed(interleaved) &&
                                             interleaved.IsPersistent)

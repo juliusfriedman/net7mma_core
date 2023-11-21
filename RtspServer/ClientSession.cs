@@ -1717,7 +1717,7 @@ namespace Media.Rtsp//.Server
                 foreach (RtpClient.TransportContext sourceContext in source.RtpClient.GetTransportContexts())
                 {
                     //Adding the id will stop the packets from being enqueued into the RtpClient
-                    PacketBuffer.Add((int)sourceContext.SynchronizationSourceIdentifier);
+                    PacketBuffer.Add(sourceContext.SynchronizationSourceIdentifier);
                 }
 
                 //Return the response

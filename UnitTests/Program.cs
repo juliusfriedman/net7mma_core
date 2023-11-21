@@ -2150,7 +2150,6 @@ namespace Media.UnitTests
         /// </summary>
         static async Task TestServerAsync()
         {
-
             Console.WriteLine(nameof(TestServerAsync));
 
             System.Runtime.GCLatencyMode oldMode = System.Runtime.GCSettings.LatencyMode;
@@ -2482,7 +2481,7 @@ namespace Media.UnitTests
                                 {
                                     //Streams lookup the packet by the ssrc, this could be changed to use the payload type etc
                                     rtp.SynchronizationSourceIdentifier = rtpDumpAudioStream.SourceId;
-                                    rtpDumpAudioStream.Frames.Enqueue(new RtpFrame { rtp });
+                                    rtpDumpAudioStream.Frames.Enqueue([rtp]);
                                 }
                             }
                         }
