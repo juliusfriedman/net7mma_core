@@ -301,7 +301,7 @@ namespace Media.Rtsp
             if (message.RtspMessageType == RtspMessageType.Invalid) return null;
 
             //Our result in a List
-            List<byte> result = new List<byte>();
+            List<byte> result = new();
 
             //Our RtspMessage base64 encoded
             byte[] messageBytes;
@@ -353,11 +353,14 @@ namespace Media.Rtsp
         public static RtspMessage FromHttpBytes(byte[] message, int offset, Encoding encoding = null, bool bodyOnly = false)
         {
             //Sanity
-            if (message == null) return null;
-            if (offset > message.Length) throw new ArgumentOutOfRangeException("offset");
+            if (message is null) return null;
+
+            if (offset > message.Length) throw new ArgumentOutOfRangeException(nameof(offset));
+
+            if (offset > message.Length) throw new ArgumentOutOfRangeException(nameof(offset));
 
             //Use a default encoding if none was given
-            if (encoding == null) encoding = RtspMessage.DefaultEncoding;
+            if (encoding is null) encoding = RtspMessage.DefaultEncoding;
 
             //Parse the HTTP 
             string Message = encoding.GetString(message, offset, message.Length - offset);
@@ -381,7 +384,7 @@ namespace Media.Rtsp
         {
             if (string.IsNullOrWhiteSpace(data)) throw new InvalidOperationException("data cannot be null or whitespace.");
 
-            if (encoding == null) encoding = RtspMessage.DefaultEncoding;
+            encoding ??= RtspMessage.DefaultEncoding;
 
             return new RtspMessage(encoding.GetBytes(data), 0, encoding);
         }
@@ -444,8 +447,7 @@ namespace Media.Rtsp
         public override bool IsComplete
         {
             get
-            {                
-
+            {
                 //Disposed is complete 
                 if (IsDisposed && IsPersistent is false) return false;
 
@@ -633,7 +635,7 @@ namespace Media.Rtsp
 
             }
 
-            if (includeEmptyLine && m_EncodedLineEnds != null)
+            if (includeEmptyLine && m_EncodedLineEnds is not null)
             {
                 //foreach (byte b in m_HeaderEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
 
@@ -696,7 +698,7 @@ namespace Media.Rtsp
             //Todo THIS MUST NOT HAPPEN MORE THEN 1 time and only if the line ending was used by the headers to indicate the end... seems more approprivate there...
 
             //Ensure no control characters were left from parsing of the header values if more data is available then remains
-            if (existingBodySize == 0 && available > 0 && Array.IndexOf<char>(m_EncodedLineEnds, decoder.GetChars(buffer, position, 1)[0]) >= 0)
+            if (existingBodySize is 0 && available > 0 && Array.IndexOf<char>(m_EncodedLineEnds, decoder.GetChars(buffer, position, 1)[0]) >= 0)
             {
                 ++position;
 
@@ -777,13 +779,13 @@ namespace Media.Rtsp
         //            if (m_Buffer.CanWrite) m_Buffer.Write(buffer.Array, buffer.Offset, received += buffer.Count);
 
         //            //Go to the beginning
-        //            if(m_Buffer.CanSeek) m_Buffer.Seek(0, System.IO.SeekOrigin.Begin);
+        //            if (m_Buffer.CanSeek) m_Buffer.Seek(0, System.IO.SeekOrigin.Begin);
         //        }
         //    }
 
         //    //If the status line was not parsed return the number of bytes written, reparse if there are no headers parsed yet.
-        //    if (false.Equals(ParseStatusLine(RtspMessageType == RtspMessageType.Invalid) || m_StatusLineParsed is false)) return received;
-        //    else if (false.Equals(m_Buffer is null) && m_Buffer.CanSeek) m_Buffer.Seek(m_HeaderOffset, System.IO.SeekOrigin.Begin); // Seek past the status line.
+        //    if (false.Equals(ParseStatusLine(RtspMessageType == RtspMessageType.Invalid) || false.Equals(m_StatusLineParsed))) return received;
+        //    else if (m_Buffer is not null && m_Buffer.CanSeek) m_Buffer.Seek(m_HeaderOffset, System.IO.SeekOrigin.Begin); // Seek past the status line.
 
         //    //Determine if there can be and is a body already
         //    bool hasNullBody = CanHaveBody && string.IsNullOrEmpty(m_Body);
@@ -887,7 +889,7 @@ namespace Media.Rtsp
 
         protected override void OnHeaderAdded(string headerName, string headerValue)
         {
-            if (string.Compare(headerName, Http.HttpHeaders.TransferEncoding, true) == 0) throw new InvalidOperationException("Protocol: " + Protocol + ", does not support TrasferEncoding.");
+            if (string.Compare(headerName, Http.HttpHeaders.TransferEncoding, true) is 0) throw new InvalidOperationException("Protocol: " + Protocol + ", does not support TrasferEncoding.");
 
             base.OnHeaderAdded(headerName, headerValue);
         }
@@ -948,7 +950,7 @@ namespace Media.Rtsp
                 &&
                 other.m_CSeq == m_CSeq
                 &&
-                string.Compare(other.m_Body, m_Body, false) == 0;
+                string.Compare(other.m_Body, m_Body, false) is 0;
                 //&&               
                 //other.Length == Length;
         }
@@ -1033,7 +1035,7 @@ namespace Media.UnitTests
                         if (false == (serialized.RtspStatusCode == request.RtspStatusCode &&
                         serialized.CSeq == request.CSeq &&
                         serialized.Version == request.Version &&
-                        string.Compare(serialized.Body, TestBody, false) == 0) ||
+                        string.Compare(serialized.Body, TestBody, false) is 0) ||
                         false == serialized.IsComplete || false == request.IsComplete)
                         {
                             throw new Exception("Response Serialization Testing Failed With Body!");
@@ -1050,7 +1052,7 @@ namespace Media.UnitTests
                         if (false == (serialized.RtspStatusCode == request.RtspStatusCode &&
                         serialized.CSeq == request.CSeq &&
                         serialized.Version == request.Version &&
-                        string.Compare(serialized.Body, TestBody, false) == 0) ||
+                        string.Compare(serialized.Body, TestBody, false) is 0) ||
                         false == serialized.IsComplete || false == request.IsComplete)
                         {
                             throw new Exception("Response Serialization Testing Failed Without CSeq!");
@@ -1100,7 +1102,7 @@ namespace Media.UnitTests
                             if (false == (serialized.RtspStatusCode == response.RtspStatusCode &&
                             serialized.CSeq == response.CSeq &&
                             serialized.Version == response.Version &&
-                            string.Compare(serialized.Body, response.Body, false) == 0) ||
+                            string.Compare(serialized.Body, response.Body, false) is 0) ||
                             false == serialized.IsComplete || false == response.IsComplete)
                             {
                                 throw new Exception("Response Serialization Testing Failed With Body!");
@@ -1118,7 +1120,7 @@ namespace Media.UnitTests
                         if (false == (serialized.RtspStatusCode == response.RtspStatusCode &&
                         serialized.CSeq == response.CSeq &&
                         serialized.Version == response.Version &&
-                        string.Compare(serialized.Body, response.Body, false) == 0) ||
+                        string.Compare(serialized.Body, response.Body, false) is 0) ||
                         false == serialized.IsComplete || false == response.IsComplete)
                         {
                             throw new Exception("Response Serialization Testing Failed Without CSeq!");

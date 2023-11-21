@@ -92,7 +92,7 @@ namespace Media.Rtsp.Server.MediaTypes
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set
             {
-                if (RtspClient != null) RtspClient.Credential = value;
+                if (RtspClient is not null) RtspClient.Credential = value;
                 base.SourceCredential = value;
             }
         }
@@ -107,7 +107,7 @@ namespace Media.Rtsp.Server.MediaTypes
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set
             {
-                if (RtspClient != null) RtspClient.AuthenticationScheme = value;
+                if (RtspClient is not null) RtspClient.AuthenticationScheme = value;
                 base.SourceAuthenticationScheme = value;
             }
         }
@@ -174,7 +174,7 @@ namespace Media.Rtsp.Server.MediaTypes
             : this(name, new Uri(sourceLocation), credential, authType, rtpProtocolType, bufferSize, specificMedia.HasValue ? Common.Extensions.Linq.LinqExtensions.Yield(specificMedia.Value) : null, startTime, endTime, perPacket)
         {
             //Check for a null Credential and UserInfo in the Location given.
-            if (credential == null && !string.IsNullOrWhiteSpace(m_Source.UserInfo))
+            if (credential is null && !string.IsNullOrWhiteSpace(m_Source.UserInfo))
             {
                 RtspClient.Credential = Media.Common.Extensions.Uri.UriExtensions.ParseUserInfo(m_Source);
 
@@ -272,7 +272,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             if ((base.IsReady = RtspClient.IsPlaying)) //  && RtspClient.PlayingMedia.Count is equal to what is supposed to be playing
             {
-                RtspClient.Client.ThreadEvents = RtspClient.Client.FrameChangedEventsEnabled = PerPacket == false;
+                RtspClient.Client.ThreadEvents = RtspClient.Client.FrameChangedEventsEnabled = PerPacket is false;
 
                 //RtspClient.Client.IListSockets = true;
 

@@ -65,7 +65,7 @@
              * (i.e. if first 1 at position 7 -> exponent = 2) */
             int exponent = 7;
             //Move to the right and decrement exponent until we hit the 1
-            for (int expMask = 0x4000; (pcm & expMask) == 0; exponent--, expMask >>= 1) { }
+            for (int expMask = 0x4000; (pcm & expMask) is 0; exponent--, expMask >>= 1) { }
 
             /* The last part - the "mantissa"
              * We need to take the four bits after the 1 we just found.

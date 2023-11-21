@@ -95,34 +95,34 @@ namespace Media.Containers.Ogg
 
         public static HeaderType GetHeaderType(Node node)
         {
-            if (node == null) throw new ArgumentNullException("node");
+            if (node is null) throw new ArgumentNullException("node");
             return (HeaderType)node.Identifier[5];
         }
 
         public static long GetGranulePosition(Node node)
         {
-            if (node == null) throw new ArgumentNullException("node");
+            if (node is null) throw new ArgumentNullException("node");
 
             return Common.Binary.Read64(node.Identifier, 6, Media.Common.Binary.IsBigEndian);
         }
 
         public static int GetSerialNumber(Node node)
         {
-            if (node == null) throw new ArgumentNullException("node");
+            if (node is null) throw new ArgumentNullException("node");
 
             return (int)Common.Binary.ReadU32(node.Identifier, 14, Media.Common.Binary.IsBigEndian);
         }
 
         public static int GetSequenceNumber(Node node)
         {
-            if (node == null) throw new ArgumentNullException("node");
+            if (node is null) throw new ArgumentNullException("node");
 
             return (int)Common.Binary.ReadU32(node.Identifier, 18, Media.Common.Binary.IsBigEndian);
         }
 
         public static int GetCrc(Node node)
         {
-            if (node == null) throw new ArgumentNullException("node");
+            if (node is null) throw new ArgumentNullException("node");
 
             return (int)Common.Binary.ReadU32(node.Identifier, 22, Media.Common.Binary.IsBigEndian);
         }
@@ -182,7 +182,7 @@ namespace Media.Containers.Ogg
                 CapturePattern found = (CapturePattern)Common.Binary.ReadU64(page.Identifier, 0, Media.Common.Binary.IsBigEndian);
                 
                 //If contained the found or the unmasked found then return the page
-                if (names == null || names.Count() == 0 || names.Any(n => n == found || n == (CapturePattern)((ulong)found & uint.MaxValue))) yield return page;
+                if (names is null || names.Count() is 0 || names.Any(n => n == found || n == (CapturePattern)((ulong)found & uint.MaxValue))) yield return page;
                 else if( page.DataSize > 0)
                 {
                     //Get the capture pattern from the data
@@ -312,7 +312,7 @@ namespace Media.Containers.Ogg
             {
                 Node next = ReadNext();
 
-                if(next == null) yield break;
+                if(next is null) yield break;
 
                 yield return next;
                 
@@ -333,7 +333,7 @@ namespace Media.Containers.Ogg
         void ParsePages()
         {
 
-            if (m_PageBegins != null || m_PageEnds != null || m_InfoPages != null) return;
+            if (m_PageBegins is not null || m_PageEnds is not null || m_InfoPages is not null) return;
 
             m_PageBegins = new Dictionary<int,Node>();
 
@@ -380,7 +380,7 @@ namespace Media.Containers.Ogg
                     if (pageHeaderType.HasFlag(HeaderType.FirstPage)) m_PageBegins.Add(serial, page);
 
                     //If no begin page was found then we don't need anything
-                    if (m_PageBegins.Count == 0) continue;
+                    if (m_PageBegins.Count is 0) continue;
 
                     //Check for info page which may have comments
                     if (m_InfoPages.Count < m_PageBegins.Count && page.Data[0] == PacketTypeComment) m_InfoPages.Add(serial, page);
@@ -408,7 +408,7 @@ namespace Media.Containers.Ogg
         public override IEnumerable<Track> GetTracks()
         {
 
-            if (m_Tracks != null)
+            if (m_Tracks is not null)
             {
                 foreach (Track track in m_Tracks) yield return track;
                 yield break;
@@ -732,7 +732,7 @@ namespace Media.Containers.Ogg
                                 //3 4:4:4 (see Section 4.4.1).
 
                                 //calculate BitDept from above?
-                                //if(bitDepth == 0) bitDepth = 8;
+                                //if(bitDepth is 0) bitDepth = 8;
                                 //else bitDepth *= 8; //16, 24
                             }
                             break;

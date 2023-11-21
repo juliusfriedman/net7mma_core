@@ -280,7 +280,7 @@ namespace Media.Concepts.Classes.Threading
 
         public void Store(System.Exception e)
         {
-            if (object.ReferenceEquals(e, NilException)) return;
+            if (e is null) return;
 
             Aggregates = System.Linq.Enumerable.Concat(Aggregates, Media.Common.Extensions.Linq.LinqExtensions.Yield(e));
         }
@@ -292,7 +292,7 @@ namespace Media.Concepts.Classes.Threading
         /// <returns>True when handled, otherwise false</returns>
         public bool Handle(System.Exception e)
         {
-            if (object.ReferenceEquals(e, NilException)) return true;
+            if (e is null) return true;
 
             foreach (var ExceptionHandler in ExceptionHandlers)
             {
@@ -390,7 +390,7 @@ namespace Media.Concepts.Classes.Threading
 
         public System.DateTimeOffset Started { get; protected set; }
 
-        readonly static System.DateTimeOffset DefaultDateTimeOffset = default(System.DateTimeOffset);
+        readonly static System.DateTimeOffset DefaultDateTimeOffset = default;
 
         public bool IsStarted { get { return Started.Equals(DefaultDateTimeOffset) is false; } }
 
@@ -469,14 +469,12 @@ namespace Media.Concepts.Classes.Threading
                 {
                     UnderlyingCompressedStack = System.Threading.CompressedStack.Capture();
 
-                    using (var enumerator = Exceptions.GetExceptions())
+                    using var enumerator = Exceptions.GetExceptions();
+                    while (enumerator.MoveNext() && UpdateTokenSource.IsCancellationRequested is false)
                     {
-                        while (enumerator.MoveNext() && UpdateTokenSource.IsCancellationRequested is false)
-                        {
-                            UnderlyingThread.Priority = System.Threading.ThreadPriority.BelowNormal; 
+                        UnderlyingThread.Priority = System.Threading.ThreadPriority.BelowNormal;
 
-                            throw enumerator.Current;
-                        }
+                        throw enumerator.Current;
                     }
                 }
 
@@ -585,7 +583,7 @@ namespace Media.Concepts.Classes.Threading
 
         static void ConfigureFiber(Fiber fiber)
         {
-            if (object.ReferenceEquals(fiber, Nil) || fiber.IsStarted || Common.IDisposedExtensions.IsNullOrDisposed(fiber)) return;
+            if (fiber is null || fiber.IsStarted || Common.IDisposedExtensions.IsNullOrDisposed(fiber)) return;
 
             fiber.UnderlyingThread.TrySetApartmentState(System.Threading.ApartmentState.MTA);
 
@@ -604,7 +602,7 @@ namespace Media.Concepts.Classes.Threading
 
             UnderlyingThreadsPriorityInformation = new ThreadPriorityInformation();
 
-            if (object.ReferenceEquals(ConfigureThread, Nil) is false)
+            if (ConfigureThread is not null)
             {
                 ConfigureThread(UnderlyingThread);
             }
@@ -733,7 +731,7 @@ namespace Media.Concepts.Classes.Threading
 
                 ReadWriteLock.ExitReadLock();
 
-                while (Cursor != null)
+                while (Cursor is not null)
                 {
                     // get its value and a next node
                     ReadWriteLock.EnterReadLock();
@@ -771,7 +769,7 @@ namespace Media.Concepts.Classes.Threading
 
                 if (ReadWriteLock.IsWriteLockHeld) ReadWriteLock.ExitWriteLock();
 
-                if (Holder != null && System.Threading.Monitor.IsEntered(Holder)) System.Threading.Monitor.Exit(Holder);
+                if (Holder is not null && System.Threading.Monitor.IsEntered(Holder)) System.Threading.Monitor.Exit(Holder);
 
                 throw;
             }

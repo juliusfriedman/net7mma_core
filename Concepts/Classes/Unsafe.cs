@@ -63,15 +63,15 @@ namespace Media.Concepts.Classes
         /// <param name="obj"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static System.IntPtr AddressOf(object obj)
+        public static nint AddressOf(object obj)
         {
-            if (obj == null) return System.IntPtr.Zero;
+            if (obj is null) return nint.Zero;
 
             System.TypedReference reference = __makeref(obj);
 
             System.TypedReference* pRef = &reference;
 
-            return (System.IntPtr)pRef; //(&pRef)
+            return (nint)pRef; //(&pRef)
         }
 
         /// <summary>
@@ -81,20 +81,20 @@ namespace Media.Concepts.Classes
         /// <param name="t"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static System.IntPtr AddressOf<T>(T t)
+        public static nint AddressOf<T>(T t)
         {
             System.TypedReference reference = __makeref(t);
 
-            return *(System.IntPtr*)(&reference);
+            return *(nint*)(&reference);
         }
 
         //Basically As / Reinterpret function which is unsafe.
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static System.IntPtr AddressOf<T>(ref T t)
+        public static nint AddressOf<T>(ref T t)
         {
             System.TypedReference reference = __makeref(t);
 
-            return **(System.IntPtr**)(&reference);
+            return **(nint**)(&reference);
         }
 
         #endregion
@@ -108,19 +108,19 @@ namespace Media.Concepts.Classes
         /// <param name="fieldName"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static System.IntPtr OffsetOf(System.Type t, string fieldName)
+        public static nint OffsetOf(System.Type t, string fieldName)
         {
             return System.Runtime.InteropServices.Marshal.OffsetOf(t, fieldName);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static System.IntPtr OffsetOf(object o, string fieldName)
+        public static nint OffsetOf(object o, string fieldName)
         {
             return System.Runtime.InteropServices.Marshal.OffsetOf(o.GetType(), fieldName);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static System.IntPtr OffsetOf<T>(string fieldName)
+        public static nint OffsetOf<T>(string fieldName)
         {
             return System.Runtime.InteropServices.Marshal.OffsetOf(typeof(T).GetType(), fieldName);
         }
@@ -146,7 +146,7 @@ namespace Media.Concepts.Classes
                     elem1 = __makeref(ArrayOfTwoElements<T>.Value[0]),
                     elem2 = __makeref(ArrayOfTwoElements<T>.Value[1]);
 
-            return (uint)((byte*)*(System.IntPtr*)(&elem2) - (byte*)*(System.IntPtr*)(&elem1));
+            return (uint)((byte*)*(nint*)(&elem2) - (byte*)*(nint*)(&elem1));
         }
 
         #endregion
@@ -160,23 +160,23 @@ namespace Media.Concepts.Classes
         /// <param name="address"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static T Read<T>(System.IntPtr address)
+        internal static T Read<T>(nint address)
         {
             T obj = default(T);
 
             System.TypedReference tr = __makeref(obj);
 
-            *(System.IntPtr*)(&tr) = address;
+            *(nint*)(&tr) = address;
 
             return __refvalue(tr, T);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static bool TryRead<T>(System.IntPtr address, ref T t)
+        internal static bool TryRead<T>(nint address, ref T t)
         {
             System.TypedReference tr = __makeref(t);
 
-            *(System.IntPtr*)(&tr) = address;
+            *(nint*)(&tr) = address;
 
             t = __refvalue(tr, T);
 
@@ -191,7 +191,7 @@ namespace Media.Concepts.Classes
         /// <param name="address"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static object Read(System.IntPtr address)
+        static object Read(nint address)
         {
             //Create memory for a boxed object
             object box = default(object);
@@ -204,7 +204,7 @@ namespace Media.Concepts.Classes
             //it sets the first field of the TypedReference (which is a pointer)
             //to the address you give it, then it dereferences the value.
             //Better be 10000% sure that your type T is unmanaged/blittable...
-            *(System.IntPtr*)(&tr) = address;
+            *(nint*)(&tr) = address;
 
             //Using __refvalue
             //return __refvalue(tr, object);
@@ -219,13 +219,13 @@ namespace Media.Concepts.Classes
         #region Write
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static void Write<T>(System.IntPtr address, ref T what) { Write<T>(address, ref what, Unsafe.ArrayOfTwoElements<T>.AddressingDifference()); }
+        internal static void Write<T>(nint address, ref T what) { Write<T>(address, ref what, Unsafe.ArrayOfTwoElements<T>.AddressingDifference()); }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static void Write<T>(System.IntPtr address, ref T what, int size) { Write<T>(address, ref what, ref size); }
+        internal static void Write<T>(nint address, ref T what, int size) { Write<T>(address, ref what, ref size); }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static void Write<T>(System.IntPtr address, ref T what, ref int size) { System.Buffer.MemoryCopy((void*)AddressOf(what), (void*)address, size, size); }
+        internal static void Write<T>(nint address, ref T what, ref int size) { System.Buffer.MemoryCopy((void*)AddressOf(what), (void*)address, size, size); }
 
         #endregion
 
@@ -233,7 +233,7 @@ namespace Media.Concepts.Classes
 
         ////Here for reference, I couldn't get them to work as they advertised.
 
-        //public static T[] Create<T>(System.IntPtr source, int length)
+        //public static T[] Create<T>(nint source, int length)
         //{
         //    T[] output = new T[length];
 
@@ -289,11 +289,11 @@ namespace Media.Concepts.Classes
                     throw new System.InvalidOperationException(string.Format("{0} does not define a StructLayout attribute", type));
                 }
 
-                System.IntPtr sourcePtr = new System.IntPtr(source);
+                nint sourcePtr = new nint(source);
 
                 for (int i = 0; i < length; i++)
                 {
-                    System.IntPtr p = new System.IntPtr((byte*)source + i * sizeInBytes);
+                    nint p = new nint((byte*)source + i * sizeInBytes);
 
                     output[i] = (T)System.Runtime.InteropServices.Marshal.PtrToStructure(p, typeof(T));
                 }
@@ -311,7 +311,7 @@ namespace Media.Concepts.Classes
             T[] result = new T[length];
             for (int i = 0; i < length; i++)
             {
-                System.IntPtr p = new System.IntPtr((byte*)t + (i * tSizeInBytes));
+                nint p = new nint((byte*)t + (i * tSizeInBytes));
                 result[i] = (T)System.Runtime.InteropServices.Marshal.PtrToStructure(p, typeof(T));
             }
 
@@ -351,10 +351,10 @@ namespace Media.Concepts.Classes
 
         //https://blog.adamfurmanek.pl/blog/2016/06/25/custom-memory-allocation-in-c-part-4/
 
-        public static object AllocateAt(int address, System.IntPtr typeHandle)
+        public static object AllocateAt(int address, nint typeHandle)
         {
-            System.Runtime.InteropServices.Marshal.WriteInt32((System.IntPtr)(address), 0);
-            System.Runtime.InteropServices.Marshal.WriteInt32((System.IntPtr)(address + 1 * sizeof(int)), (int)typeHandle);
+            System.Runtime.InteropServices.Marshal.WriteInt32((nint)(address), 0);
+            System.Runtime.InteropServices.Marshal.WriteInt32((nint)(address + 1 * sizeof(int)), (int)typeHandle);
             object createdObject = null;
             unsafe
             {
@@ -364,10 +364,10 @@ namespace Media.Concepts.Classes
             return createdObject;
         }
 
-        public static bool TryAllocateAt<T>(System.IntPtr address, System.IntPtr typeHandle, out T t)
+        public static bool TryAllocateAt<T>(nint address, nint typeHandle, out T t)
         {
-            System.Runtime.InteropServices.Marshal.WriteInt32((System.IntPtr)(address), 0);
-            System.Runtime.InteropServices.Marshal.WriteInt32((System.IntPtr)(address + 1 * sizeof(int)), (int)typeHandle);
+            System.Runtime.InteropServices.Marshal.WriteInt32((nint)(address), 0);
+            System.Runtime.InteropServices.Marshal.WriteInt32((nint)(address + 1 * sizeof(int)), (int)typeHandle);
             t = default(T);
             CommonIntermediateLanguage.InitBlock(address + 1 * sizeof(int), (byte)0, CommonIntermediateLanguage.SizeOf<T>());
             unsafe
@@ -381,7 +381,7 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoOptimization)]
         static object CreateObject() { return new System.Object(); }
 
-        private static System.IntPtr GetAllocMethodAddress()
+        private static nint GetAllocMethodAddress()
         {
             // Get handle to method creating object
             var methodHandle = Common.Extensions.ExpressionExtensions.SymbolExtensions.GetMethodInfo(() => CreateObject()).MethodHandle;
@@ -390,13 +390,13 @@ namespace Media.Concepts.Classes
             System.Runtime.CompilerServices.RuntimeHelpers.PrepareMethod(methodHandle);
 
             // Get address of jitted method
-            System.IntPtr methodAddress = System.Runtime.InteropServices.Marshal.ReadIntPtr(methodHandle.Value, 8);
+            nint methodAddress = System.Runtime.InteropServices.Marshal.ReadIntPtr(methodHandle.Value, 8);
 
             // Call to internal function differs between builds
 #if DEBUG
-	        int offset = System.IntPtr.Size == 8  ? 0x2D : 0x22;
+	        int offset = nint.Size == 8  ? 0x2D : 0x22;
 #else
-            int offset = System.IntPtr.Size == 8 ? 0x1A : 0xE;
+            int offset = nint.Size == 8 ? 0x1A : 0xE;
 #endif
 
             // Read jump offset
@@ -409,7 +409,7 @@ namespace Media.Concepts.Classes
             }
 
             // Calculate absolute address
-            System.IntPtr absoluteAddress = methodAddress + offset + jumpOffset + 1 + 4; // 1 byte for jmp instruction, 4 bytes for relative address
+            nint absoluteAddress = methodAddress + offset + jumpOffset + 1 + 4; // 1 byte for jmp instruction, 4 bytes for relative address
 
             return absoluteAddress;
         }
@@ -430,7 +430,7 @@ namespace Media.Concepts.Classes
   //  };
 
   //          //UnlockPage((IntPtr)defaultAllocAddress);
-  //          System.Runtime.InteropServices.Marshal.Copy(instruction, 0, (System.IntPtr)defaultAllocAddress, instruction.Length);
+  //          System.Runtime.InteropServices.Marshal.Copy(instruction, 0, (nint)defaultAllocAddress, instruction.Length);
   //      }
 
         #endregion
@@ -447,8 +447,8 @@ namespace Media.Concepts.Classes
         //[System.CLSCompliant(false)]
         //public static void MakeTypedReference([System.Runtime.InteropServices.Out]System.TypedReference* result, object target, params System.Reflection.FieldInfo[] fields)
         //{
-        //    System.IntPtr ptr = (System.IntPtr)result;
-        //    System.IntPtr[] flds = new System.IntPtr[fields.Length];
+        //    nint ptr = (nint)result;
+        //    nint[] flds = new nint[fields.Length];
         //    System.Type lastType = target.GetType();
         //    for (int i = 0; i < fields.Length; i++)
         //    {
@@ -478,7 +478,7 @@ namespace Media.Concepts.Classes
         {
             #region Methods
 
-            internal System.IntPtr IntPtr<T>() { return AddressOf<object>(ref Object); }
+            internal nint IntPtr<T>() { return AddressOf<object>(ref Object); }
 
             public static byte[] GetBytes(float[] floats)
             {
@@ -532,7 +532,7 @@ namespace Media.Concepts.Classes
             internal class Pointer
             {
                 [System.Runtime.InteropServices.FieldOffset(0)]
-                public System.IntPtr Value;
+                public nint Value;
             }
 
             internal class Bytes
@@ -632,7 +632,7 @@ namespace Media.Concepts.Classes
             public System.DateTime AsDateTime;
 
             [System.Runtime.InteropServices.FieldOffset(0)]
-            public System.IntPtr AsIntPtr;
+            public nint AsIntPtr;
 
             [System.Runtime.InteropServices.FieldOffset(0)]
             public System.Guid AsGuid;
@@ -681,7 +681,7 @@ namespace Media.Concepts.Classes
         public unsafe static bool IsNegativeZero(ref double d)
         {
             //Make a pointer to the pointer, which when dereferenced can access the result.
-            System.IntPtr value = Unsafe.AddressOf(ref d);
+            nint value = Unsafe.AddressOf(ref d);
 
             //Check for -0.0
             return (*((long*)((int*)&value))).Equals(Common.Binary.NegativeZeroBits);

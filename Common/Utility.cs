@@ -82,7 +82,7 @@ namespace Media
         public static int ContainsBytes(byte[] buffer, ref int start, ref int count, byte[] octets, int octetStart, int octetCount)
         {
             //If the buffer or the octets are null no dice
-            if (buffer == null || octets == null) return -1;
+            if (buffer is null || octets is null) return -1;
 
             //Cache the lengths
             int bufferLength = buffer.Length, octetsLength = octets.Length;
@@ -91,7 +91,7 @@ namespace Media
             if (bufferLength < octetCount || start + octetCount > bufferLength || octetCount > octetsLength) return -1;
 
             //Nothing to search nothing to return, leave start where it was.
-            if (octetCount == 0 && bufferLength == 0 || count == 0) return -1;
+            if (octetCount is 0 && bufferLength is 0 || count is 0) return -1;
 
             //Create the variables we will use in the searching process
             int checkedBytes = 0, matchedBytes = 0, lastPosition = -1;

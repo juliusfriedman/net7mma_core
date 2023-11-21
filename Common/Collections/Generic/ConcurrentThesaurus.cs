@@ -250,7 +250,7 @@ namespace Media.Common.Collections.Generic
         {
             //If the predicates for the key are null then create them with the given value
             if (allocateOnly) predicates = new List<TValue>();
-            else if (predicates == null) predicates = new List<TValue>() { value }; //value may be DefaultValue which maybe null
+            else if (predicates is null) predicates = new List<TValue>() { value }; //value may be DefaultValue which maybe null
             else predicates.Add(value);//Othewise add the value to the predicates which is a reference to the key
 
             //Add the value if not already in the dictionary

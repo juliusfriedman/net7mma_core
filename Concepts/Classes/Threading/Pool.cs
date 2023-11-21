@@ -109,7 +109,7 @@ namespace Media.Concepts.Classes.Threading
                         Lessor.m_Pool[Id] = Lessee;
 
                         //Check if the above water offset was allocated and is of a smaller size, swap them if so the next time the same thread takes a lease it can have the option to use the larger allocation
-                        //if(Lessor.m_Pool[-Id] == null)
+                        //if(Lessor.m_Pool[-Id] is null)
                     }
 
                     //Remove the reference
@@ -356,7 +356,7 @@ namespace Media.Concepts.Classes.Threading
             {
                 ResizePool(this, poolSize << 1);
             }
-            //else if (m_Pool[poolSize] == null)
+            //else if (m_Pool[poolSize] is null)
             //{
             //    m_Pool[poolSize] = EmptyArray;
             //}

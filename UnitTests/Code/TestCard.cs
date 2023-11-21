@@ -221,7 +221,7 @@ public class TestCard
             }
 
             // fire the Event
-            if (ReceivedYUVFrame != null)
+            if (ReceivedYUVFrame is not null)
             {
                 ReceivedYUVFrame((uint)stopwatch.ElapsedMilliseconds, width, height, yuv_frame);
             }
@@ -255,8 +255,8 @@ public class TestCard
             long currentMilliSeconds = timestamp_ms % 1000;
 
             int soundToPlay = 0; // 0 = silence
-            if (((currentSeconds % 60) == 0) && (currentMilliSeconds < 300)) soundToPlay = 1;
-            else if (((currentSeconds % 10) == 0) && (currentMilliSeconds < 100)) soundToPlay = 1;
+            if (((currentSeconds % 60) is 0) && (currentMilliSeconds < 300)) soundToPlay = 1;
+            else if (((currentSeconds % 10) is 0) && (currentMilliSeconds < 100)) soundToPlay = 1;
             else if (((currentSeconds % 10) != 0) && (currentMilliSeconds < 100)) soundToPlay = 2;
             else soundToPlay = 0;
 
@@ -269,7 +269,7 @@ public class TestCard
             }
 
             // Fire the Event
-            if (ReceivedAudioFrame != null)
+            if (ReceivedAudioFrame is not null)
             {
                 ReceivedAudioFrame((uint)stopwatch.ElapsedMilliseconds, audio_frame);
             }

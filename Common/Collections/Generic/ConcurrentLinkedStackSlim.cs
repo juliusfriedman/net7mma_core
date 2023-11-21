@@ -132,7 +132,7 @@ namespace Media.Common.Collections.Generic
         public bool IsEmpty
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Count.Equals(Common.Binary.LongZero); }
+            get { return Count is Common.Binary.LongZero; }
         }
 
         #endregion
@@ -215,7 +215,7 @@ namespace Media.Common.Collections.Generic
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool TryPeek(ref T t)
         {
-            if (Object.ReferenceEquals(First, Node.Null)) return false;
+            if (First is null) return false;
 
             t = First.Value;
 
@@ -242,7 +242,7 @@ namespace Media.Common.Collections.Generic
         {
             //Compare, (Store, Allocate, Store) or (Store, Store, Allocate)
 
-            //if (Object.ReferenceEquals(Last, Node.Null)) First = Last = new Node(ref t);
+            //if (Last is null) First = Last = new Node(ref t);
             //else First = new Node(ref t)
             //{
             //    Next = First
@@ -304,11 +304,11 @@ namespace Media.Common.Collections.Generic
         {
             Node Current = Last;
 
-            while (false.Equals(Object.ReferenceEquals(Current, Node.Null)))
+            while (Current is not null)
             {
                 yield return Current.Value;
 
-                if (Object.ReferenceEquals(System.Threading.Interlocked.Exchange(ref Current, Current.Next), Node.Null)) yield break;
+                if (System.Threading.Interlocked.Exchange(ref Current, Current.Next) is null) yield break;
             }
         }
 
@@ -352,7 +352,7 @@ namespace Media.UnitTests
 
             if (LinkedStack.Count != 1) throw new System.Exception("Count Not 1");
 
-            if (LinkedStack.Last == null) throw new System.Exception("Last is null");
+            if (LinkedStack.Last is null) throw new System.Exception("Last is null");
 
             if (false == LinkedStack.TryPush(ref LastInputOutput)) throw new System.Exception("TryEnqueue Not True");
 
@@ -360,13 +360,13 @@ namespace Media.UnitTests
 
             if (LinkedStack.Count != 2) throw new System.Exception("Count Not 2");
 
-            if (LinkedStack.Last == null) throw new System.Exception("Last is null");
+            if (LinkedStack.Last is null) throw new System.Exception("Last is null");
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void TestsPop()
         {
-            if (LinkedStack == null) throw new System.Exception("LinkedStack is null");
+            if (LinkedStack is null) throw new System.Exception("LinkedStack is null");
 
             if (LinkedStack.IsEmpty) throw new System.Exception("LinkedStack IsEmpty");
 
@@ -374,7 +374,7 @@ namespace Media.UnitTests
 
             if (false == LinkedStack.TryPop(out LastInputOutput)) throw new System.Exception("TryPop Not True");
 
-            if (LinkedStack.Last == null) throw new System.Exception("Last is null");
+            if (LinkedStack.Last is null) throw new System.Exception("Last is null");
 
             if (LinkedStack.IsEmpty) throw new System.Exception("LinkedStack IsEmpty");
 
@@ -385,7 +385,7 @@ namespace Media.UnitTests
             if (false == LinkedStack.TryPop(out LastInputOutput)) throw new System.Exception("TryPop Not True");
 
             //The Last node is always left in place to prevent NRE
-            //if (LinkedStack.Last != null) throw new System.Exception("Last is null");
+            //if (LinkedStack.Last is not null) throw new System.Exception("Last is null");
 
             if (false == LinkedStack.IsEmpty) throw new System.Exception("LinkedStack Not IsEmpty");
 
@@ -469,7 +469,7 @@ namespace Media.UnitTests
 
             dequeueThread.Start();
 
-            while (countOut == 0 && countIn == 0) mre.WaitOne(0);
+            while (countOut is 0 && countIn is 0) mre.WaitOne(0);
 
             while (countOut < Amount)
             {
@@ -672,7 +672,7 @@ namespace Media.UnitTests
 
             System.Linq.ParallelEnumerable.ForAll(popThreads.AsParallel(), t => t.Start());
 
-            while (stackLevelCountOut == 0 && statLevelCountIn == 0) sharedResetEvent.WaitOne(0);
+            while (stackLevelCountOut is 0 && statLevelCountIn is 0) sharedResetEvent.WaitOne(0);
 
             while (stackLevelCountOut < product)
             {

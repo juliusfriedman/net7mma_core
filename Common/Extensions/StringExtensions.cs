@@ -80,9 +80,9 @@ namespace Media.Common.Extensions.String
 
                 int check = length - start;
 
-                if (start > check) throw new System.ArgumentOutOfRangeException("start");
+                if (start > check) throw new System.ArgumentOutOfRangeException(nameof(start));
 
-                if (length > check) throw new System.ArgumentOutOfRangeException("length");
+                if (length > check) throw new System.ArgumentOutOfRangeException(nameof(length));
 
                 System.Collections.Generic.IEnumerable<byte> result = Media.Common.MemorySegment.EmptyBytes;
 
@@ -320,14 +320,14 @@ namespace Media.Common.Extensions.String
                 yield break;
             }
 
-            if (string.IsNullOrEmpty(value) || count == 1 || value.IndexOfAny(separator) is -1)
+            if (string.IsNullOrEmpty(value) || count is 1 || value.IndexOfAny(separator) is not -1)
             {
                 yield return value;
                 yield break;
             }
 
             System.Func<char, bool> predicate;
-            if (separator != null && separator.Length != 0)
+            if (separator is not null && separator.Length != 0)
                 predicate = (c) => Common.Extensions.Array.ArrayExtensions.Contains(separator, c);
             else predicate = char.IsWhiteSpace;
 

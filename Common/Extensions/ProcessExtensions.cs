@@ -54,7 +54,7 @@ namespace Media.Common.Extensions.Process
             process = process ?? System.Diagnostics.Process.GetCurrentProcess();
 
             //Set the flags
-            process.ProcessorAffinity = (System.IntPtr)affinityFlags;
+            process.ProcessorAffinity = (nint)affinityFlags;
 
             //If no threads were specified use the count of threads the process already has.
             if (threads < 0) threads = process.Threads.Count;
@@ -66,7 +66,7 @@ namespace Media.Common.Extensions.Process
                 System.Diagnostics.ProcessThread Thread = process.Threads[i];
 
                 //Set the affinty
-                Thread.ProcessorAffinity = (System.IntPtr)affinityFlags;
+                Thread.ProcessorAffinity = (nint)affinityFlags;
 
                 //If there was an ideal processor indicate such.
                 if(idealProcessor >= 0) Thread.IdealProcessor = idealProcessor;

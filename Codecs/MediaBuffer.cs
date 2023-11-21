@@ -81,7 +81,7 @@ namespace Media.Codec
         //{
         //    base.Dispose();
 
-        //    if (Data != null)
+        //    if (Data is not null)
         //    {
         //        Data.Dispose();
 

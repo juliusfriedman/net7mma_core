@@ -116,8 +116,8 @@ namespace Media.Rtsp.Server.MediaTypes
                     //DRI Present
                     if (Type > 63 && Type < 128) result += DataRestartIntervalHeaderSize;
 
-                    //When FragmentOffset == 0 there is no QTables present.
-                    if (false == (Common.Binary.ReadU24(packet.Payload.Array, offset, Common.Binary.IsLittleEndian) == 0)) return result;
+                    //When FragmentOffset is 0 there is no QTables present.
+                    if (false == (Common.Binary.ReadU24(packet.Payload.Array, offset, Common.Binary.IsLittleEndian) is 0)) return result;
 
                     //Lookup
                     //Common.Binary.ReadBitsMSB(packet.Payload.Array, Common.Binary.BytesToBits(ref offset), NamedFields["FragmentOffset"]);
@@ -202,7 +202,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 uint Quality = packet.Payload.Array[offset++];
 
                 //Q = 0 is reserved.
-                if (Quality == 0)
+                if (Quality is 0)
                 {
                     precision = 0;
 
@@ -250,8 +250,8 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 //If there is Table Data Read it from the payload, Length should never be larger than 128 * tableCount
                 //This could just create the default tables rather than throw an exception.
-                if (Length == 0 && Quality == byte.MaxValue/* && false == allowQualityLengthException*/) throw new InvalidOperationException("RtpPackets MUST NOT contain Q = 255 and Length = 0.");
-                else if (Length == 0 || Length > end - offset)
+                if (Length is 0 && Quality == byte.MaxValue/* && false == allowQualityLengthException*/) throw new InvalidOperationException("RtpPackets MUST NOT contain Q = 255 and Length = 0.");
+                else if (Length is 0 || Length > end - offset)
                 {
                     //If the indicated length is greater than that of the packet taking into account the offset and padding
                     //Or
@@ -361,10 +361,10 @@ namespace Media.Rtsp.Server.MediaTypes
                 RtpJpegHeader.Add((byte)(((height + 7) & ~7) >> 3));
 
                 //If this is the first packet
-                if (fragmentOffset == 0)
+                if (fragmentOffset is 0)
                 {
                     //http://tools.ietf.org/search/rfc2435#section-3.1.7 (Restart Marker header)
-                    if (jpegType >= 63 && dri != null)
+                    if (jpegType >= 63 && dri is not null)
                     {
                         //Create a Rtp Restart Marker, Set first and last
                         RtpJpegHeader.AddRange(CreateRtpJpegDataRestartIntervalMarker(Common.Binary.ReadU16(dri, 0, Common.Binary.IsLittleEndian)));
@@ -376,7 +376,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         int qTablesCount = qTables.Count;
 
                         //Check for a table
-                        if (quality == byte.MaxValue && qTablesCount == 0) throw new InvalidOperationException("Packets MUST NOT contain Q = 255 and Length = 0.");
+                        if (quality == byte.MaxValue && qTablesCount is 0) throw new InvalidOperationException("Packets MUST NOT contain Q = 255 and Length = 0.");
 
                         //Check for overflow
                         if (qTablesCount > ushort.MaxValue) throw Common.Binary.CreateOverflowException("qTables", qTablesCount, ushort.MinValue.ToString(), ushort.MaxValue.ToString());
@@ -511,7 +511,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     result.Add(0x01);//Component Number
 
                     //Set the Horizontal Sampling Factor
-                    result.Add((byte)((jpegType & 1) == 0 ? 0x21 : 0x22));
+                    result.Add((byte)((jpegType & 1) is 0 ? 0x21 : 0x22));
 
                     result.Add(0x00);//Matrix Number (Quant Table Id)?
                     result.Add(0x02);//Component Number
@@ -679,7 +679,7 @@ namespace Media.Rtsp.Server.MediaTypes
             internal static byte[] CreateQuantizationTables(uint type, uint Q, byte precision, bool useRfcQuantizer, bool clamp = true, int maxQ = 100, bool psychoVisualQuantizer = false)
             {
                 //Ensure not the reserved value.
-                if (Q == 0) throw new InvalidOperationException("Q == 0 is reserved.");
+                if (Q is 0) throw new InvalidOperationException("Q is 0 is reserved.");
 
                 //RFC2035 did not specify a quantization table header and uses the values 0 - 127 to define this.
                 //RFC2035 also does not specify what to do with Quality values 100 - 127
@@ -730,7 +730,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     //Would need to refactor to write luma and then write chroma incase one is 16 bit and the other is not..... not very likely
 
                     //8 Bit tables       
-                    if (precision == 0)
+                    if (precision is 0)
                     {
                         //Clamp with Min, Max (Should be written in correct bit order)
                         //Luma
@@ -1045,7 +1045,7 @@ namespace Media.Rtsp.Server.MediaTypes
             {
                 int seed = 100 * (precision ? Common.Binary.ReadU16(table, offset, Common.Binary.IsLittleEndian) : table[offset]) / defaultQuantizers[0];
 
-                return seed == 0 ? 0 : seed > 100 ? 5000 / seed : 100 - (seed >> 1);
+                return seed is 0 ? 0 : seed > 100 ? 5000 / seed : 100 - (seed >> 1);
             }
 
             //Todo, move to JPEG.
@@ -1071,7 +1071,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             #region Constructor
 
-            static RFC2435Frame() { if (JpegCodecInfo == null) throw new NotSupportedException("The system must have a Jpeg Codec installed."); }
+            static RFC2435Frame() { if (JpegCodecInfo is null) throw new NotSupportedException("The system must have a Jpeg Codec installed."); }
 
             /// <summary>
             /// Creates an empty JpegFrame
@@ -1175,11 +1175,11 @@ namespace Media.Rtsp.Server.MediaTypes
                 : this()
             {
                 //Ensure qualityFactor can be stored in a byte
-                if (qualityFactor.HasValue && (qualityFactor > byte.MaxValue || qualityFactor == 0))
+                if (qualityFactor.HasValue && (qualityFactor > byte.MaxValue || qualityFactor is 0))
                     throw Common.Binary.CreateOverflowException("qualityFactor", qualityFactor, 1.ToString(), byte.MaxValue.ToString());
 
                 //Store the constant size of the RtpHeader (12) and sourceList
-                int sourceListSize = sourceList != null ? sourceList.Size : 0, protocolOverhead = Rtp.RtpHeader.Length + sourceListSize,
+                int sourceListSize = sourceList is not null ? sourceList.Size : 0, protocolOverhead = Rtp.RtpHeader.Length + sourceListSize,
                     precisionTableIndex = 0; //The index of the precision table.
 
                 //Ensure some data will fit
@@ -1289,7 +1289,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         if (FunctionCode == Media.Codecs.Image.Jpeg.Markers.Prefix
                             ||
                             // ff00 is the escaped form of 0xff, will never be encountered the way data is read after the SOF
-                            FunctionCode == 0) continue;
+                            FunctionCode is 0) continue;
 
                         //Last Tag
                         if (FunctionCode == Media.Codecs.Image.Jpeg.Markers.EndOfInformation) break;
@@ -1398,7 +1398,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                     //X Number of lines [Width] (2)
                                     Width = Common.Binary.ReadU16(data, ref offset, Common.Binary.IsLittleEndian);
 
-                                    //When width, height == 0, DNL Marker should be present..
+                                    //When width, height is 0, DNL Marker should be present..
 
                                     //Check for SubSampling to set the RtpJpegType from the Luma component
 
@@ -1448,7 +1448,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                                 //Not 2x1 must be flagged
                                                 if ((sampleHFactor != 2 || sampleVFactor != 1))
                                                 {
-                                                    if (tableId == 0) RtpJpegType |= 1;
+                                                    if (tableId is 0) RtpJpegType |= 1;
                                                     else if (tableId > 0 && samplingFactors != RtpJpegTypeSpecific)
                                                     {
                                                         //Experimentally
@@ -1466,7 +1466,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                         //V ! 1x1
                                         if (data[++offset] != 0x11 && data[offset] > 0) RtpJpegTypeSpecific = data[offset];
                                     }
-                                    //else //Nf == 0, There are no defined components
+                                    //else //Nf is 0, There are no defined components
                                     //{
                                     //offset should be equal to CodeSize or undefined data resides.
                                     //}
@@ -1630,7 +1630,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                     //Type 2 or 3 is only a specific MCU
 
                                     //A RtpJpegHeader which must be in the Payload of each Packet (8 Bytes without QTables and RestartInterval)
-                                    //RtpJpegPrecisionTable is the the same when the same qTables are being used and will not be included when QTables.Count == 0
+                                    //RtpJpegPrecisionTable is the the same when the same qTables are being used and will not be included when QTables.Count is 0
                                     //When Ri > 0 an additional 4 bytes occupy the Payload to represent the RST Marker
 
                                     //The quant header only appears in the first packet, remove it.
@@ -1679,7 +1679,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                             //8 for the RtpJpegHeader and this will cause the Marker be to set in the next packet created
                                             bytesPerPacket = (int)streamRemains + Rtp.RtpHeader.Length + profileHeaderSize;
 
-                                            if (sourceList != null) bytesPerPacket += sourceList.Size;
+                                            if (sourceList is not null) bytesPerPacket += sourceList.Size;
 
                                             lastPacket = true;
 
@@ -1700,7 +1700,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                         };
 
                                         //Apply source list
-                                        if (sourceList != null)
+                                        if (sourceList is not null)
                                         {
                                             currentPacket.ContributingSourceCount = sourceList.Count;
                                             sourceList.TryCopyTo(currentPacket.Payload.Array, currentPacket.Payload.Offset);
@@ -1770,7 +1770,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     //Use Payload rather than the array because MemorySegment will fix the offset to start at Payload.Offset
                     //Or
                     //Use packet.Payload.Array and  packet.Payload.Offset + packet.HeaderOctets + 1
-                    return Common.Binary.ReadU24(packet.Payload, packet.HeaderOctets + 1, Common.Binary.IsLittleEndian) == 0;
+                    return Common.Binary.ReadU24(packet.Payload, packet.HeaderOctets + 1, Common.Binary.IsLittleEndian) is 0;
                 }
             }
 
@@ -1874,7 +1874,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 //The idea is that the sender can send the last fragment in the first packet...
                 //The result is that the packet data index is based on the fragmentOffset and the seqeuence number
                 //Meaning that if it rolls over the sequence number still puts it in the right place with respect to where it needs to be.
-                //Senders can send with fragmentOffset == 0 as the last packet with the marker if they so choose.
+                //Senders can send with fragmentOffset is 0 as the last packet with the marker if they so choose.
                 //No OTHER SOFTWARE I KNOW OF PERSONALLY will not work like that.....
                 //Even if they re-order packets correctly.
                 //This is because the FragmentOffset should take precedence with respect to the SeqeuenceNumber
@@ -1989,7 +1989,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     throw new InvalidOperationException("Type numbers 2-5 are reserved and SHOULD NOT be used.  Applications based on RFC 2035 should be updated to indicate the presence of restart markers with type 64 or 65 and the Restart Marker header.");
                 }
 
-                if ((Quality = packet.Payload.Array[offset++]) == 0) throw new InvalidOperationException("Quality == 0 is reserved.");
+                if ((Quality = packet.Payload.Array[offset++]) is 0) throw new InvalidOperationException("Quality is 0 is reserved.");
 
                 //Should round?
 
@@ -1998,12 +1998,12 @@ namespace Media.Rtsp.Server.MediaTypes
                 Width = (ushort)(packet.Payload.Array[offset++] * 8);// in 8 pixel multiples
 
                 //0 values are not specified in the rfc
-                if (Width == 0) Width = MaxWidth;
+                if (Width is 0) Width = MaxWidth;
 
                 Height = (ushort)(packet.Payload.Array[offset++] * 8);// in 8 pixel multiples
 
                 //0 values are not specified in the rfc
-                if (Height == 0) Height = MaxHeight;
+                if (Height is 0) Height = MaxHeight;
 
                 //It is worth noting you can send higher resolution pictures may be sent and these values will simply be ignored in such cases or the receiver will have to know to use a 
                 //divisor other than 8 to obtain the values when decoding
@@ -2058,7 +2058,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 //Todo,
                 //At this point FragmentOffset may have wrapped or been out of order....
-                if (FragmentOffset == 0 && Depacketized.Count == 0)
+                if (FragmentOffset is 0 && Depacketized.Count is 0)
                 {
 
                     //RFC2435 http://tools.ietf.org/search/rfc2435#section-3.1.8
@@ -2146,8 +2146,8 @@ namespace Media.Rtsp.Server.MediaTypes
                             ushort Length = Common.Binary.ReadU16(packet.Payload.Array, ref offset, Common.Binary.IsLittleEndian); //(ushort)(packet.Payload.Array[offset++] << 8 | packet.Payload.Array[offset++]);
 
                             //If there is Table Data Read it from the payload, Length should never be larger than 128 * tableCount
-                            if (Length == 0 && Quality == byte.MaxValue/* && false == allowQualityLengthException*/) throw new InvalidOperationException("RtpPackets MUST NOT contain Q = 255 and Length = 0.");
-                            else if (Length == 0 || Length > end - offset)
+                            if (Length is 0 && Quality == byte.MaxValue/* && false == allowQualityLengthException*/) throw new InvalidOperationException("RtpPackets MUST NOT contain Q = 255 and Length = 0.");
+                            else if (Length is 0 || Length > end - offset)
                             {
                                 //If the indicated length is greater than that of the packet taking into account the offset and padding
                                 //Or
@@ -2194,7 +2194,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 if (/*packet.SequenceNumber == m_HighestSequenceNumber &&*/ packet.Marker)
                 {
                     //Get the last value added if depacketized was not already assigned.
-                    if (depacketized == null) depacketized = Depacketized.Values.Last();
+                    if (depacketized is null) depacketized = Depacketized.Values.Last();
 
                     //Check for EOI and if note present Add it at the FragmentOffset + 1
                     if (depacketized.Array[depacketized.Count - 2] != Media.Codecs.Image.Jpeg.Markers.EndOfInformation)
@@ -2325,7 +2325,7 @@ namespace Media.Rtsp.Server.MediaTypes
         //SourceStream Implementation
         public override void Start()
         {
-            if (RtpClient != null) return;
+            if (RtpClient is not null) return;
 
             //Create a RtpClient so events can be sourced from the Server to many clients without this Client knowing about all participants
             //If this class was used to send directly to one person it would be setup with the receivers address
@@ -2390,7 +2390,7 @@ namespace Media.Rtsp.Server.MediaTypes
             RtpClient.m_WorkerThread.TrySetApartmentState(System.Threading.ApartmentState.MTA);
 
             //If we are watching and there are already files in the directory then add them to the Queue
-            if (m_Watcher != null && false == string.IsNullOrWhiteSpace(base.Source.LocalPath) && System.IO.Directory.Exists(base.Source.LocalPath))
+            if (m_Watcher is not null && false == string.IsNullOrWhiteSpace(base.Source.LocalPath) && System.IO.Directory.Exists(base.Source.LocalPath))
             {
                 //Get all files in the path
                 foreach (string file in System.IO.Directory.GetFiles(base.Source.LocalPath))
@@ -2416,7 +2416,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 }
 
                 //If we have not been stopped already
-                if (/*State != StreamState.Started && */ RtpClient.m_WorkerThread != null)
+                if (/*State != StreamState.Started && */ RtpClient.m_WorkerThread is not null)
                 {
                     //Only ready after all pictures are in the queue
                     IsReady = true;
@@ -2446,7 +2446,7 @@ namespace Media.Rtsp.Server.MediaTypes
 #endif
             base.Stop();
 
-            if (m_Watcher != null)
+            if (m_Watcher is not null)
             {
                 m_Watcher.EnableRaisingEvents = false;
                 m_Watcher.Created -= FileCreated;
@@ -2498,7 +2498,7 @@ namespace Media.Rtsp.Server.MediaTypes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         public virtual void Packetize(System.Drawing.Image image)
         {
-            if (Width == 0 && Height == 0 || Width == image.Width && Height == image.Height)
+            if (Width is 0 && Height is 0 || Width == image.Width && Height == image.Height)
             {
                 Width = image.Width;
 
@@ -2529,7 +2529,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 {
                     try
                     {
-                        if (Frames.Count == 0 && State == StreamState.Started)
+                        if (Frames.Count is 0 && State == StreamState.Started)
                         {
                             if (RtpClient.IsActive) RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.Lowest;
 
@@ -2549,7 +2549,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         Rtp.RtpClient.TransportContext transportContext = RtpClient.GetContextBySourceId(frame.SynchronizationSourceIdentifier);
 
                         //If there is a context
-                        if (transportContext != null)
+                        if (transportContext is not null)
                         {
                             //Increase priority
                             RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.AboveNormal;
@@ -2925,7 +2925,7 @@ namespace Media.UnitTests
                 using (var jpegStream = new System.IO.FileStream(fileName, System.IO.FileMode.Open))
                 {
 
-                    if (f != null) if (!f.IsDisposed) f.Dispose();
+                    if (f is not null) if (!f.IsDisposed) f.Dispose();
 
                     f = null;
 

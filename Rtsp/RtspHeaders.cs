@@ -415,19 +415,18 @@ namespace Media.Rtsp
             bool? interleaved, byte? dataChannel, byte? controlChannel, 
             string mode = null) //string[] others?
         {
-            if (string.IsNullOrWhiteSpace(connectionType)) throw new ArgumentNullException("connectionType");
+            if (string.IsNullOrWhiteSpace(connectionType)) throw new ArgumentNullException(nameof(connectionType));
 
-            if (unicast.HasValue && multicast.HasValue && unicast.Value == multicast.Value) throw new InvalidOperationException("unicast and multicast cannot have the same value.");
+            if (unicast.HasValue && multicast.HasValue && unicast.Value == multicast.Value)
+                throw new InvalidOperationException("unicast and multicast cannot have the same value.");
 
-            StringBuilder builder = null;
+            StringBuilder builder = new();
 
             try
             {
-                builder = new StringBuilder();
-
                 builder.Append(connectionType);
 
-                if (source != null)
+                if (source is not null)
                 {
                     builder.Append(SemiColon);
 
@@ -436,14 +435,14 @@ namespace Media.Rtsp
                     builder.Append(source);
                 }
 
-                if (unicast.HasValue && unicast.Value == true)
+                if (unicast.HasValue && unicast.Value)
                 {
                     builder.Append(SemiColon);
 
                     //todo, put in static grammar
                     builder.Append("unicast");
                 }
-                else if (multicast.HasValue && multicast.Value == true)
+                else if (multicast.HasValue && multicast.Value)
                 {
                     builder.Append(SemiColon);
 
@@ -496,7 +495,7 @@ namespace Media.Rtsp
 
                 //
 
-                if (interleaved.HasValue && interleaved.Value == true)
+                if (interleaved.HasValue && interleaved.Value)
                 {
                     builder.Append(SemiColon);
 
@@ -617,9 +616,7 @@ namespace Media.Rtsp
                                 }
                             case "seq":
                                 {
-                                    int parsed;
-
-                                    if (int.TryParse(subParts[1].Trim(), out parsed))
+                                    if (int.TryParse(subParts[1].Trim(), out int parsed))
                                     {
                                         seq = parsed;
                                     }
@@ -628,10 +625,7 @@ namespace Media.Rtsp
                                 }
                             case "rtptime":
                                 {
-
-                                    int parsed;
-
-                                    if (int.TryParse(subParts[1].Trim(), out parsed))
+                                    if (int.TryParse(subParts[1].Trim(), out int parsed))
                                     {
                                         rtpTime = parsed;
                                     }
@@ -642,9 +636,7 @@ namespace Media.Rtsp
                                 {
                                     string ssrcPart = subParts[1].Trim();
 
-                                    uint id;
-
-                                    if (false == uint.TryParse(ssrcPart, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out id) &&
+                                    if (false == uint.TryParse(ssrcPart, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out uint id) &&
                                         false == uint.TryParse(ssrcPart, System.Globalization.NumberStyles.HexNumber, System.Globalization.CultureInfo.InvariantCulture, out id))
                                     {
                                         Media.Common.TaggedExceptionExtensions.RaiseTaggedException(ssrcPart, "See Tag. Cannot Parse a ssrc datum as given.");
@@ -689,7 +681,7 @@ namespace Media.Rtsp
         {
             StringBuilder result = new StringBuilder();
 
-            if (url != null)
+            if (url is not null)
             {
                 result.Append("url=");
 
@@ -797,9 +789,7 @@ namespace Media.Rtsp
                         if (partsLength > 1)
                         {
                             //attempt to calulcate it from the given value
-                            double delaySeconds = double.NaN;
-
-                            if (double.TryParse(parts[1].Trim(), out delaySeconds))
+                            if (double.TryParse(parts[1].Trim(), out double delaySeconds))
                             {
                                 //Set the value of the servers delay
                                 delay = TimeSpan.FromSeconds(delaySeconds);

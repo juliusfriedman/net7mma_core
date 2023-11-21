@@ -138,7 +138,7 @@ namespace Media.Containers.Mpeg
             {
                 Container.Node next = ReadNext();
 
-                if (next == null) yield break;
+                if (next is null) yield break;
 
                 yield return next;
 
@@ -192,7 +192,7 @@ namespace Media.Containers.Mpeg
                 ushort esInfoLength = Common.Binary.ReadU16(node.Data, offset, Common.Binary.IsLittleEndian);
 
                 //Get a array containing the info
-                Common.MemorySegment esData = esInfoLength == 0 ? Media.Common.MemorySegment.Empty : new Common.MemorySegment(node.Data.Array, offset, esInfoLength); //node.Data.Skip(offset).Take(esInfoLength).ToArray();
+                Common.MemorySegment esData = esInfoLength is 0 ? Media.Common.MemorySegment.Empty : new Common.MemorySegment(node.Data.Array, offset, esInfoLength); //node.Data.Skip(offset).Take(esInfoLength).ToArray();
 
                 //Create the entry
                 var entry = new Tuple<byte, Common.MemorySegment>(esType, esData);

@@ -180,9 +180,9 @@ namespace Media.Concepts.Classes.v
         {
             get
             {
-                return Prototype is null ? 
-                    Void : object.ReferenceEquals(Prototype.Delegation, null) 
-                        ? Void : Prototype.Delegation.SystemDelegate ?? Void;
+                return Prototype is null
+                    ? Void
+                    : (Prototype.Delegation?.SystemDelegate ?? Void);
             }
         }
 
@@ -197,11 +197,13 @@ namespace Media.Concepts.Classes.v
         /// <param name="other"></param>
         internal protected AbstractValidator(AbstractValidator other)
         {
-            if (object.ReferenceEquals(other, NilValidator)) Prototype = new Prototype();
-            else Prototype = new Prototype()
-            {
-                Delegation = other.Prototype.Delegation
-            };
+            if (other is null)
+                Prototype = new Prototype();
+            else
+                Prototype = new Prototype()
+                {
+                    Delegation = other.Prototype.Delegation
+                };
         }
     }
 

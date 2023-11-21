@@ -330,14 +330,14 @@ namespace Media.Concepts.Math
         [System.CLSCompliant(false)]
         public static ulong Divide(ulong aH, ulong aL, ulong b, out ulong resultHi, out ulong remainder)
         {
-            if (aH == 0)
+            if (aH is 0)
             {
                 // 64/64-bit division: use compiler intrinsic
                 resultHi = 0;
                 remainder = aL % b;
                 return aL / b;
             }
-            if ((b >> 32) == 0)
+            if ((b >> 32) is 0)
             {
                 // 128/32-bit division
                 uint bL = (uint)b;
@@ -368,7 +368,7 @@ namespace Media.Concepts.Math
                 // There are obvious machine-language optimizations here...
                 // I hope the JIT is smart enough to see them.
                 a4 = (uint)(aH >> 32);
-                if (a4 == 0)
+                if (a4 is 0)
                     r = result4 = 0;
                 else
                 {
@@ -398,7 +398,7 @@ namespace Media.Concepts.Math
                 int iterations = 128;
 
                 // Optimization 1: skip loop iterations that have no effect
-                if ((aH >> 32) == 0)
+                if ((aH >> 32) is 0)
                 {
                     aH = ShiftLeftFast(aH, ref aL, 32);
                     iterations -= 32;
@@ -455,7 +455,7 @@ namespace Media.Concepts.Math
                     if (remainder < oldR || remainder >= b)
                     {
                         remainder -= b;
-                        if (++aL == 0) // aL overflowed?
+                        if (++aL is 0) // aL overflowed?
                             ++aH;
                     }
                 }
@@ -672,7 +672,7 @@ namespace Media.Concepts.Math
 
         private static ulong Increment(ulong resultHi, ref ulong resultLo)
         {
-            if (++resultLo == 0)
+            if (++resultLo is 0)
                 ++resultHi;
             return resultHi;
         }
@@ -685,7 +685,7 @@ namespace Media.Concepts.Math
         public static void Negate(ref long aH, ref ulong aL)
         {
             aH = ~aH;
-            if ((aL = (ulong)(-(long)aL)) == 0)
+            if ((aL = (ulong)(-(long)aL)) is 0)
                 aH++;
         }
         public static long SignExtend(long a)

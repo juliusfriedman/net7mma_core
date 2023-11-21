@@ -170,7 +170,7 @@ namespace Media.Rtp
             if (sizeInBytes > 0) LengthInWords = (ushort)(sizeInBytes / MinimumSize); //10 = 2.5 becomes (3 words => 12 bytes)
 
             //If the data is not null and the size in bytes a positive value
-            if (data != null && sizeInBytes > 0)
+            if (data is not null && sizeInBytes > 0)
             {
                 //Copy the data from to the binary taking only the amount of bytes which can be read within the bounds of the vector.
                 Array.Copy(data, offset, m_MemorySegment.Array, 0, Math.Min(data.Length, sizeInBytes));
@@ -187,7 +187,7 @@ namespace Media.Rtp
         public RtpExtension(byte[] binary, int offset, int count, bool shouldDispose = true)
             : base(shouldDispose)
         {
-            if (binary == null) throw new ArgumentNullException("binary");
+            if (binary is null) throw new ArgumentNullException("binary");
             else if (binary.Length < MinimumSize) throw InvalidExtension;
 
             //Atleast 4 octets are contained in binary
@@ -203,7 +203,7 @@ namespace Media.Rtp
             : base(shouldDispose)
         {
 
-            if (rtpPacket == null) throw new ArgumentNullException("rtpPacket");
+            if (rtpPacket is null) throw new ArgumentNullException("rtpPacket");
 
             //Calulcate the amount of ContributingSourceListOctets
             int sourceListOctets = rtpPacket.ContributingSourceListOctets;
@@ -314,7 +314,7 @@ namespace Media.UnitTests
             using (Media.Rtp.RtpExtension rtpExtension = testPacket.GetExtension())
             {
 
-                if (rtpExtension == null) throw new Exception("Extension is null");
+                if (rtpExtension is null) throw new Exception("Extension is null");
 
                 if (false == rtpExtension.IsComplete) throw new Exception("Extension is not complete");
 
@@ -441,7 +441,7 @@ namespace Media.UnitTests
             using (Media.Rtp.RtpExtension rtpExtension = testPacket.GetExtension())
             {
 
-                if (rtpExtension == null) throw new Exception("Extension is null");
+                if (rtpExtension is null) throw new Exception("Extension is null");
 
                 if (false == rtpExtension.IsComplete) throw new Exception("Extension is not complete");
 

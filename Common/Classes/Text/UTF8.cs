@@ -96,9 +96,9 @@ namespace Media.Common
                 //1100001 1
 #if NATIVE
                 //Copies the byte but skips the bounds checks.
-                while (((reverse ? Common.Binary.ReverseU8(System.Runtime.InteropServices.Marshal.ReadByte(System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<byte>(buffer, start))) : System.Runtime.InteropServices.Marshal.ReadByte(System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<byte>(buffer, start))) & SurrogateMask) == 0) start++;
+                while (((reverse ? Common.Binary.ReverseU8(System.Runtime.InteropServices.Marshal.ReadByte(System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<byte>(buffer, start))) : System.Runtime.InteropServices.Marshal.ReadByte(System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<byte>(buffer, start))) & SurrogateMask) is 0) start++;
 #else
-                while (((reverse ? (Common.Binary.ReverseU8(ref buffer[start])) : buffer[start]) & SurrogateMask) == 0 && start < --count) ++start;
+                while (((reverse ? (Common.Binary.ReverseU8(ref buffer[start])) : buffer[start]) & SurrogateMask) is 0 && start < --count) ++start;
 #endif
                 return count > 0;
             }

@@ -153,7 +153,7 @@ namespace Media.Http
             //foreach (var content in contents)
             //{
             //    //Don't append null items or items without any data
-            //    if (content == null || Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(content.Item4)) continue;
+            //    if (content is null || Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(content.Item4)) continue;
 
             //    //Output Headers of Content part
 
@@ -235,7 +235,7 @@ namespace Media.Http
         {
             if (string.IsNullOrWhiteSpace(data)) throw new InvalidOperationException("data cannot be null or whitespace.");
 
-            if (encoding == null) encoding = HttpMessage.DefaultEncoding;
+            if (encoding is null) encoding = HttpMessage.DefaultEncoding;
 
             return new HttpMessage(encoding.GetBytes(data), 0, encoding);
         }
@@ -517,7 +517,7 @@ namespace Media.Http
 
                     System.Text.Encoding headerEncoding = m_HeaderEncoding;
 
-                    if (headerEncoding == null) return 0;
+                    if (headerEncoding is null) return 0;
 
                     if (MessageType == HttpMessageType.Request)
                     {
@@ -525,7 +525,7 @@ namespace Media.Http
 
                         length += whitespaceLength;
 
-                        length += headerEncoding.GetByteCount(Location == null ? HttpMessage.Wildcard.ToString() : Location.ToString());
+                        length += headerEncoding.GetByteCount(Location is null ? HttpMessage.Wildcard.ToString() : Location.ToString());
 
                         length += whitespaceLength;
 
@@ -974,7 +974,7 @@ namespace Media.Http
 
             //use the supplied encoding if present.
             if (contentEncoding is not null &&
-                object.ReferenceEquals(contentEncoding,ContentEncoding) is false)
+                object.ReferenceEquals(contentEncoding, ContentEncoding) is false)
             {
                 //Set the Content-Encoding header
                 ContentEncoding = contentEncoding;
@@ -1321,7 +1321,7 @@ namespace Media.Http
                         headerValue.Append(rawLine);
 
                         //Stop parsing when an exception occurs (even if more data remains)
-                        //if (encountered != null) break;
+                        //if (encountered is not null) break;
 
                         //Do update the position to the position of the buffer
                         //position = m_Buffer.Position; //don't use justRead, BinaryReader and ReadChars is another great function (Fallback encoder may backtrack, may also decide output buffer is too small based on the same back track)
@@ -1402,7 +1402,7 @@ namespace Media.Http
                 //}
 
                 //There may be control characters from the last header still in the buffer, (ParseBody handles this)            
-                if(m_Buffer is not null && m_Buffer.CanSeek) m_Buffer.Seek(position, System.IO.SeekOrigin.Begin);
+                if (m_Buffer is not null && m_Buffer.CanSeek) m_Buffer.Seek(position, System.IO.SeekOrigin.Begin);
 
                 //Check that an end header section was seen or that the delemit was encountered
                 return (m_HeadersParsed = emptyLine >= 2 || sawDelemit) && (IsDisposed is false || IsPersistent);
@@ -1593,7 +1593,7 @@ namespace Media.Http
                 //Check for the requested encoding
                 contentEncoding = contentEncoding.Trim();
 
-                System.Text.EncodingInfo requested = System.Text.Encoding.GetEncodings().FirstOrDefault(e => string.Compare(e.Name, contentEncoding, false, System.Globalization.CultureInfo.InvariantCulture) == 0);
+                System.Text.EncodingInfo requested = System.Text.Encoding.GetEncodings().FirstOrDefault(e => string.Compare(e.Name, contentEncoding, false, System.Globalization.CultureInfo.InvariantCulture) is 0);
 
                 if (requested is not null) contentDecoder = requested.GetEncoding();
                 else if (raiseWhenNotFound) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(contentEncoding, "The given message was encoded in a Encoding which is not present on this system and no fallback encoding was acceptible to decode the message. The tag has been set the value of the requested encoding");
@@ -1626,7 +1626,7 @@ namespace Media.Http
             if (CanHaveBody is false) return true;
 
             //If there was no buffer or an unreadable buffer then no parsing can occur
-            if (m_Buffer == null || m_Buffer.CanRead is false) return false;
+            if (m_Buffer is null || m_Buffer.CanRead is false) return false;
 
             //Quite possibly should be long
             int max = (int)m_Buffer.Length;
@@ -1652,7 +1652,7 @@ namespace Media.Http
             //Get the decoder to use for the body
             Encoding decoder = ParseContentEncoding(false, FallbackToDefaultEncoding);
 
-            if (decoder == null) return false;
+            if (decoder is null) return false;
 
             int existingBodySize = decoder.GetByteCount(m_Body);
 
@@ -1666,7 +1666,7 @@ namespace Media.Http
             byte[] buffer = m_Buffer.GetBuffer();
 
             //Ensure no control characters were left from parsing of the header values if more data is available then remains
-            if (existingBodySize == 0 && available > 0 && Array.IndexOf<char>(m_EncodedLineEnds, decoder.GetChars(buffer, position, 1)[0]) >= 0)
+            if (existingBodySize is 0 && available > 0 && Array.IndexOf<char>(m_EncodedLineEnds, decoder.GetChars(buffer, position, 1)[0]) >= 0)
             {
                 ++position;
 
@@ -1790,7 +1790,7 @@ namespace Media.Http
                 }
                 else //Content-Length style message
                 {
-                    if (existingBodySize == 0)
+                    if (existingBodySize is 0)
                         m_Body = decoder.GetString(buffer, position, Media.Common.Binary.Min(ref available, ref remaining));
                     else                     //Append to the existing body
                         m_Body += decoder.GetString(buffer, position, Media.Common.Binary.Min(ref available, ref remaining));
@@ -1823,7 +1823,7 @@ namespace Media.Http
         public virtual string ToEncodedString()
         {
             if (IsDisposed && IsPersistent is false) goto Exit;
-            if(HeaderEncoding is not null) try
+            if (HeaderEncoding is not null) try
             {
                 return HeaderEncoding.GetString(Prepare(true, true, false, false).ToArray())
                 +
@@ -2309,12 +2309,12 @@ namespace Media.Http
 
                 sequence = Enumerable.Concat(sequence, whiteSpace);
 
-                //foreach (byte b in headerEncoding.GetBytes(Location == null ? HttpMessage.Wildcard.ToString() : Location.ToString())) yield return b;
+                //foreach (byte b in headerEncoding.GetBytes(Location is null ? HttpMessage.Wildcard.ToString() : Location.ToString())) yield return b;
 
                 //UriEncode - bool optional? Uri Encoding? (RFC, PunyCode, Raw, etc) 
                 //See also https://github.com/dotnet/corefxlab/blob/8cd063a1e163a0db906343bb5ba1b53c02eb83d6/src/System.Text.Encodings.Web.Utf8/UrlEncoder.cs
 
-                uriEncoding = uriEncoding ?? headerEncoding;
+                uriEncoding ??= headerEncoding;
 
                 string uri = Location is null ? HttpMessage.Wildcard.ToString() : Location.OriginalString;
 
@@ -2378,9 +2378,10 @@ namespace Media.Http
                 }
             }
 
-            //if (includeEmptyLine && m_EncodedLineEnds != null) foreach (byte b in headerEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
+            //if (includeEmptyLine && m_EncodedLineEnds is not null) foreach (byte b in headerEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
 
-            if (includeEmptyLine && m_EncodedLineEnds is not null) sequence = Enumerable.Concat(sequence, headerEncoding.GetBytes(m_EncodedLineEnds));
+            if (includeEmptyLine && m_EncodedLineEnds is not null)
+                sequence = Enumerable.Concat(sequence, headerEncoding.GetBytes(m_EncodedLineEnds));
 
             headerEncoding = null;
 
@@ -2420,7 +2421,8 @@ namespace Media.Http
                 sequence = Enumerable.Concat(sequence, PrepareHeader(header.Key, header.Value));
             }
 
-            if (includeEmptyLine && m_EncodedLineEnds is not null) sequence = Enumerable.Concat(sequence, m_HeaderEncoding.GetBytes(m_EncodedLineEnds)); //foreach (byte b in m_HeaderEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
+            if (includeEmptyLine && m_EncodedLineEnds is not null)
+                sequence = Enumerable.Concat(sequence, m_HeaderEncoding.GetBytes(m_EncodedLineEnds)); //foreach (byte b in m_HeaderEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
 
             return sequence;
         }
@@ -2449,7 +2451,8 @@ namespace Media.Http
                 sequence = Enumerable.Concat(sequence, PrepareHeader(header.Key, header.Value));
             }
 
-            if (includeEmptyLine && m_EncodedLineEnds is not null) sequence = Enumerable.Concat(sequence, m_HeaderEncoding.GetBytes(m_EncodedLineEnds)); //foreach (byte b in m_HeaderEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
+            if (includeEmptyLine && m_EncodedLineEnds is not null)
+                sequence = Enumerable.Concat(sequence, m_HeaderEncoding.GetBytes(m_EncodedLineEnds)); //foreach (byte b in m_HeaderEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
 
             return sequence;
         }
@@ -2530,7 +2533,8 @@ namespace Media.Http
 
             //includeEmptyLine = m_ContentLength < 0;
 
-            if (includeEmptyLine && m_EncodedLineEnds is not null) sequence = Enumerable.Concat(sequence, ContentEncoding.GetBytes(m_EncodedLineEnds));  //foreach (byte b in m_HeaderEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
+            if (includeEmptyLine && m_EncodedLineEnds is not null)
+                sequence = Enumerable.Concat(sequence, ContentEncoding.GetBytes(m_EncodedLineEnds));  //foreach (byte b in m_HeaderEncoding.GetBytes(m_EncodedLineEnds)) yield return b;
 
             return sequence;
         }
@@ -2601,9 +2605,9 @@ namespace Media.Http
 
         public override bool Equals(object obj)
         {
-            if (object.ReferenceEquals(this, obj)) return true;
+            if (ReferenceEquals(this, obj)) return true;
 
-            return obj is HttpMessage http && Equals(http);
+            return obj is HttpMessage m && Equals(m);
         }
 
         #endregion
@@ -2698,8 +2702,10 @@ namespace Media.Http
             }
 
             //If the status line was not parsed return the number of bytes written, reparse if there are no headers parsed yet.
-            if ((ParseStatusLine(MessageType is HttpMessageType.Invalid) || m_StatusLineParsed) is false) return received;
-            else if (m_Buffer is not null && m_Buffer.CanSeek) m_Buffer.Seek(m_HeaderOffset, System.IO.SeekOrigin.Begin); // Seek past the status line.
+            if ((ParseStatusLine(MessageType is HttpMessageType.Invalid) || m_StatusLineParsed) is false) 
+                return received;
+            else if (m_Buffer is not null && m_Buffer.CanSeek) 
+                m_Buffer.Seek(m_HeaderOffset, System.IO.SeekOrigin.Begin); // Seek past the status line.
 
             //Determine if there can be and is a body already
             bool hasNullBody = CanHaveBody && string.IsNullOrEmpty(m_Body);
@@ -2889,7 +2895,7 @@ namespace Media.UnitTests
                     {
                         if (false == (serialized.HttpStatusCode == request.HttpStatusCode &&
                         serialized.Version == request.Version &&
-                        string.Compare(serialized.Body, TestBody, false) == 0) ||
+                        string.Compare(serialized.Body, TestBody, false) is 0) ||
                         false == serialized.IsComplete || false == request.IsComplete)
                         {
                             throw new Exception("Response Serialization Testing Failed With Body!");
@@ -2902,7 +2908,7 @@ namespace Media.UnitTests
                     {
                         if (false == (serialized.HttpStatusCode == request.HttpStatusCode &&
                         serialized.Version == request.Version &&
-                        string.Compare(serialized.Body, TestBody, false) == 0) ||
+                        string.Compare(serialized.Body, TestBody, false) is 0) ||
                         false == serialized.IsComplete || false == request.IsComplete)
                         {
                             throw new Exception("Response Serialization Testing Failed Without CSeq!");
@@ -2949,7 +2955,7 @@ namespace Media.UnitTests
                         {
                             if (false == (serialized.HttpStatusCode == response.HttpStatusCode &&
                             serialized.Version == response.Version &&
-                            string.Compare(serialized.Body, response.Body, false) == 0) ||
+                            string.Compare(serialized.Body, response.Body, false) is 0) ||
                             false == serialized.IsComplete || false == response.IsComplete)
                             {
                                 throw new Exception("Response Serialization Testing Failed With Body!");
@@ -2963,7 +2969,7 @@ namespace Media.UnitTests
                     {
                         if (false == (serialized.HttpStatusCode == response.HttpStatusCode &&
                         serialized.Version == response.Version &&
-                        string.Compare(serialized.Body, response.Body, false) == 0) ||
+                        string.Compare(serialized.Body, response.Body, false) is 0) ||
                         false == serialized.IsComplete || false == response.IsComplete)
                         {
                             throw new Exception("Response Serialization Testing Failed Without CSeq!");

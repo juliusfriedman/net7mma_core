@@ -114,7 +114,7 @@ namespace Media.Concepts.Classes.GC
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return false.Equals(CurrentResult is null) && System.Threading.Monitor.IsEntered(CurrentResult);
+                return (CurrentResult is not null) && System.Threading.Monitor.IsEntered(CurrentResult);
             }
         }
 
@@ -123,7 +123,7 @@ namespace Media.Concepts.Classes.GC
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return false.Equals(ControlationThread is null) && ControlationThread.IsAlive;
+                return (ControlationThread is not null) && ControlationThread.IsAlive;
             }
         }
 
@@ -147,7 +147,7 @@ namespace Media.Concepts.Classes.GC
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void Suspend()
         {
-           if(IsAlive) ControlationThread.Suspend();
+           if (IsAlive) ControlationThread.Suspend();
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

@@ -117,7 +117,7 @@ namespace Media.Codecs.Audio
             if (sampleOffset < 0 || sampleOffset >= SampleCount)
                 throw new ArgumentOutOfRangeException(nameof(sampleOffset), "Sample offset is out of range.");
 
-            if (component == null)
+            if (component is null)
                 throw new ArgumentNullException(nameof(component));
 
             int componentIndex = Array.IndexOf(MediaFormat.Components, component);

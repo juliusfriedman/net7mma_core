@@ -346,7 +346,7 @@ namespace Media.UnitTests
                         //Check SendersInformation
                         System.Diagnostics.Debug.Assert(p.SendersInformation.Count() == Rtcp.SendersReport.SendersInformationSize, "Unexpected SendersInformation Count");
 
-                        System.Diagnostics.Debug.Assert(p.SendersInformation.All(s => s == 0), "Unexpected SendersInformation Data");
+                        System.Diagnostics.Debug.Assert(p.SendersInformation.All(s => s is 0), "Unexpected SendersInformation Data");
 
                         //Check IsComplete
                         System.Diagnostics.Debug.Assert(p.IsComplete, "IsComplete must be true.");
@@ -364,14 +364,14 @@ namespace Media.UnitTests
                         System.Diagnostics.Debug.Assert(p.PaddingOctets == PaddingCounter, "Unexpected PaddingOctets");
 
                         //Check all data in the padding but not the padding octet itself.
-                        System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b == 0), "Unexpected PaddingData");
+                        System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b is 0), "Unexpected PaddingData");
 
                         //Verify all IReportBlock
                         foreach (Rtcp.IReportBlock rb in p)
                         {
-                            System.Diagnostics.Debug.Assert(rb.BlockIdentifier == 0, "Unexpected ChunkIdentifier");
+                            System.Diagnostics.Debug.Assert(rb.BlockIdentifier is 0, "Unexpected ChunkIdentifier");
 
-                            System.Diagnostics.Debug.Assert(rb.BlockData.All(b => b == 0), "Unexpected BlockData");
+                            System.Diagnostics.Debug.Assert(rb.BlockData.All(b => b is 0), "Unexpected BlockData");
 
                             System.Diagnostics.Debug.Assert(rb.Size == Media.Rtcp.ReportBlock.ReportBlockSize, "Unexpected Size");
                         }
@@ -394,9 +394,9 @@ namespace Media.UnitTests
                             //Verify all IReportBlock
                             foreach (Rtcp.IReportBlock rb in s)
                             {
-                                System.Diagnostics.Debug.Assert(rb.BlockIdentifier == 0, "Unexpected ChunkIdentifier");
+                                System.Diagnostics.Debug.Assert(rb.BlockIdentifier is 0, "Unexpected ChunkIdentifier");
 
-                                System.Diagnostics.Debug.Assert(rb.BlockData.All(b => b == 0), "Unexpected BlockData");
+                                System.Diagnostics.Debug.Assert(rb.BlockData.All(b => b is 0), "Unexpected BlockData");
 
                                 System.Diagnostics.Debug.Assert(rb.Size == Media.Rtcp.ReportBlock.ReportBlockSize, "Unexpected Size");
                             }
@@ -411,7 +411,7 @@ namespace Media.UnitTests
                             System.Diagnostics.Debug.Assert(s.PaddingData.SequenceEqual(p.PaddingData), "Unexpected PaddingData");
 
                             //Check SendersInformation
-                            System.Diagnostics.Debug.Assert(s.SendersInformation.Count() == Rtcp.SendersReport.SendersInformationSize && s.SendersInformation.All(o => o == 0), "Unexpected SendersInformation");
+                            System.Diagnostics.Debug.Assert(s.SendersInformation.Count() == Rtcp.SendersReport.SendersInformationSize && s.SendersInformation.All(o => o is 0), "Unexpected SendersInformation");
                         }
                     }
                 }

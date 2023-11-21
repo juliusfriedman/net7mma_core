@@ -108,7 +108,7 @@ namespace Media.Sdp
             {
                 result = Parse(sdpLines, ref index);
 
-                return result != null;
+                return result is not null;
             }
             catch
             {
@@ -255,7 +255,7 @@ namespace Media.Sdp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal void SetPart(int index, string value)
         {
-            if (value == null) value = string.Empty;
+            if (value is null) value = string.Empty;
 
             if (m_Parts.Count > index) m_Parts[index] = value;
         }
@@ -302,7 +302,7 @@ namespace Media.Sdp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public SessionDescriptionLine(SessionDescriptionLine other, bool reference = true, string seperator = null)
         {
-            if (other == null) throw new ArgumentNullException();
+            if (other is null) throw new ArgumentNullException();
 
             m_Encoding = other.m_Encoding;
 
@@ -426,9 +426,7 @@ namespace Media.Sdp
             //System.Object
             if (object.ReferenceEquals(this, obj)) return true;
 
-            if ((obj is SessionDescriptionLine) is false) return false;
-
-            return Equals(obj as SessionDescriptionLine);
+            return obj is SessionDescriptionLine l && Equals(l);
         }
 
         //ToString should be implemented by GetEnumerator and String.Join(string.Empty, GetEnumerator)

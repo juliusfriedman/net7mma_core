@@ -34,9 +34,15 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * v//
  */
 
+using Media.Common;
+using Media.Rtp;
+using Media.Rtsp.Server.Loggers;
+using Media.Rtsp.Server.MediaTypes;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Net;
@@ -90,17 +96,20 @@ namespace Media.Rtsp
             if (reconfigure is false)
             {
                 //Ensure the address can be re-used
-                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableAddressReuse(socket));
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    Media.Common.Extensions.Socket.SocketExtensions.EnableAddressReuse(socket));
 
                 //Windows >= 10 and Some Unix
-                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableUnicastPortReuse(socket));
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    Media.Common.Extensions.Socket.SocketExtensions.EnableUnicastPortReuse(socket));
             }
 
             //Tcp confgiuration
             if (socket.ProtocolType == ProtocolType.Tcp)
             {
                 // Set option that allows socket to close gracefully without lingering.
-                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableLinger(socket));
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    Media.Common.Extensions.Socket.SocketExtensions.DisableLinger(socket));
 
                 //Windows options
                 if (Common.Extensions.OperatingSystemExtensions.IsWindows)
@@ -109,27 +118,34 @@ namespace Media.Rtsp
                     //Media.Common.Extensions.Socket.SocketExtensions.EnableTcpTimestamp(socket);
 
                     //Retransmit for 0 sec
-                    Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableTcpRetransmissions(socket));
+                    Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                        Media.Common.Extensions.Socket.SocketExtensions.DisableTcpRetransmissions(socket));
 
                     // Enable No Syn Retries
-                    Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpNoSynRetries(socket));
+                    Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                        Media.Common.Extensions.Socket.SocketExtensions.EnableTcpNoSynRetries(socket));
 
                     // Enable CongestionAlgorithm
-                    Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpCongestionAlgorithm(socket));
+                    Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                        Media.Common.Extensions.Socket.SocketExtensions.EnableTcpCongestionAlgorithm(socket));
 
                     // Set OffloadPreferred
-                    Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.SetTcpOffloadPreference(socket));
+                    Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                        Media.Common.Extensions.Socket.SocketExtensions.SetTcpOffloadPreference(socket));
                 }
 
                 //If both send and receieve buffer size are 0 then there is no coalescing when socket's algorithm is disabled
-                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableTcpNagelAlgorithm(socket));
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    Media.Common.Extensions.Socket.SocketExtensions.DisableTcpNagelAlgorithm(socket));
                 //socket.NoDelay = true;
 
                 //Allow more than one byte of urgent data
-                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpExpedited(socket));
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    Media.Common.Extensions.Socket.SocketExtensions.EnableTcpExpedited(socket));
 
                 //Receive any urgent data in the normal data stream
-                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpOutOfBandDataInLine(socket));
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    Media.Common.Extensions.Socket.SocketExtensions.EnableTcpOutOfBandDataInLine(socket));  
 
                 //Todo, MaxSegmentSize
             }
@@ -159,15 +175,11 @@ namespace Media.Rtsp
             {
                 //Caulcate the poll timeout. use one tick causes higher cpu for now but reduces poll collisions.
                 //10 ticks / 1μs  is missing data in high bandwidth environments with receive buffer = 0
-
                 double InterframeGapμs = Media.Common.Extensions.NetworkInterface.NetworkInterfaceExtensions.GetInterframeGapMicroseconds(Media.Common.Extensions.NetworkInterface.NetworkInterfaceExtensions.GetNetworkInterface(prototype));
 
-                System.TimeSpan InterframeGap = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.FromMicroseconds(InterframeGapμs);
+                TimeSpan InterframeGap = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.FromMicroseconds(InterframeGapμs);
 
                 interFrameGap = (int)InterframeGapμs;
-
-                //(int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);  
-                //(int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond);  
 
                 //Use 1/10 th of the total inter packet gap
                 interFrameGap /= 10;
@@ -241,7 +253,7 @@ namespace Media.Rtsp
         /// </summary>
         readonly ConcurrentDictionary<Guid, ClientSession> m_Sessions = new();
 
-        readonly ManualResetEventSlim m_AcceptSignal = new ManualResetEventSlim(false, DefaultReceiveTimeout);
+        readonly ManualResetEventSlim m_AcceptSignal = new(false, DefaultReceiveTimeout);
 
         /// <summary>
         /// The thread allocated to handle socket communication
@@ -299,8 +311,8 @@ namespace Media.Rtsp
             protected set
             {
                 //Once set higher it cannot be set lower...
-                if (value < m_Version) throw new ArgumentOutOfRangeException(); 
-                
+                if (value < m_Version) throw new ArgumentOutOfRangeException(nameof(value));
+
                 m_Version = value;
             }
         }
@@ -420,18 +432,10 @@ namespace Media.Rtsp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return false == IsDisposed &&
-                    false == m_StopRequested &&
+                return IsDisposed is false &&
+                    m_StopRequested is false &&
                     m_Started.HasValue &&
-                     m_ServerThread != null;
-
-                #region Unused IsRunning
-
-                //Applied from
-                //https://msdn.microsoft.com/en-us/library/system.threading.threadstate%28v=vs.110%29.aspx
-                //(m_ServerThread.ThreadState & (ThreadState.Stopped | ThreadState.Unstarted)) == 0;
-
-                #endregion
+                    m_ServerThread is not null;
             }
         }
 
@@ -451,7 +455,7 @@ namespace Media.Rtsp
         public IPEndPoint LocalEndPoint
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return IsRunning && m_TcpServerSocket != null && m_TcpServerSocket.IsBound ? m_TcpServerSocket.LocalEndPoint as IPEndPoint : null; }
+            get { return IsRunning && m_TcpServerSocket is not null && m_TcpServerSocket.IsBound ? m_TcpServerSocket.LocalEndPoint as IPEndPoint : null; }
         }
 
         //Todo make sure name is correct.
@@ -485,8 +489,8 @@ namespace Media.Rtsp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {                
-                if (TotalStreamCount == 0) return 0;
-                return MediaStreams.Where(s => s.State == Media.Rtsp.Server.SourceMedia.StreamState.Started && s.IsReady == true).Count();
+                if (TotalStreamCount is 0) return 0;
+                return MediaStreams.Count(s => s.State == Media.Rtsp.Server.SourceMedia.StreamState.Started && s.IsReady);
             }
         }
         
@@ -520,7 +524,12 @@ namespace Media.Rtsp
                 //This also excludes http sources right now :(
                 //This will eventually be different and subsequently easier to determine. (For instance if you wanted only rtsp or rtmp or something else).
                 //IMedia should expose this in some aspect.
-                return MediaStreams.OfType<RtpSource>().Sum(s => false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(s.RtpClient)) ? s.RtpClient.TotalBytesSent + s.RtpClient.TotalBytesReceieved : 0);
+                return MediaStreams
+                    .OfType<RtpSource>()
+                    .Sum(s =>
+                        Common.IDisposedExtensions.IsNullOrDisposed(s.RtpClient) is false
+                        ? s.RtpClient.TotalBytesSent + s.RtpClient.TotalBytesReceieved
+                        : 0);
             }
         }
 
@@ -603,9 +612,9 @@ namespace Media.Rtsp
 
         public void AddRequestHandler(RtspMethod method, RtspRequestHandler handler)
         {
-            Exception any;
-
-            if (Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryAdd(m_RequestHandlers, method, handler, out any) is false)
+            //Todo, use Concurrent
+            if (Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions
+                .TryAdd(m_RequestHandlers, method, handler, out Exception any) is false)
             {
                 Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Custom Handler already registered", any);
             }
@@ -629,9 +638,9 @@ namespace Media.Rtsp
 
         public void RemoveRequestHandler(RtspMethod method)
         {
-            Exception any;
-
-            if (Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryRemove(m_RequestHandlers, method, out any) is false)
+            //ToDo, use Concurrent
+            if (Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions
+                .TryRemove(m_RequestHandlers, method, out Exception any) is false)
             {
                 Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Custom Handler already removed", any);
             }
@@ -666,9 +675,9 @@ namespace Media.Rtsp
             
             m_ServerPort = listenEndPoint.Port;
 
-            RequiredCredentials = new CredentialCache();            
+            RequiredCredentials = new CredentialCache();
 
-            ConfigureThread = ConfigureRtspServerThread;            
+            ConfigureThread = ConfigureRtspServerThread;
 
             //Todo, NetworkInterface should be notified on various events...
             //Todo, ConfigureRtspServerSocket should be called again when the interface has been reset or the speed changes.
@@ -688,8 +697,7 @@ namespace Media.Rtsp
         //Testing with external requests... could also be used for in bound requests but state would be needed to seperate the logic
         protected virtual void ProcessHttpRtspRequest(IAsyncResult iar)
         {
-
-            if (object.ReferenceEquals(iar,null) is false) return;
+            if (iar is null) return;
 
             var context = m_HttpListner.EndGetContext(iar);
 
@@ -697,7 +705,7 @@ namespace Media.Rtsp
 
             if (context is null) return;
 
-            if (context.Request.AcceptTypes.Any(t => string.Compare(t, "application/x-rtsp-tunnelled") == 0))
+            if (context.Request.AcceptTypes.Any(t => string.Compare(t, "application/x-rtsp-tunnelled") is 0))
             {
                 if (context.Request.HasEntityBody)
                 {
@@ -715,7 +723,7 @@ namespace Media.Rtsp
                         }
 
                         //Ensure the message is really Rtsp
-                        RtspMessage request = new RtspMessage(System.Convert.FromBase64String(context.Request.ContentEncoding.GetString(buffer)));
+                        RtspMessage request = new(System.Convert.FromBase64String(context.Request.ContentEncoding.GetString(buffer)));
 
                         //Check for validity
                         if (request.RtspMessageType != RtspMessageType.Invalid)
@@ -733,7 +741,7 @@ namespace Media.Rtsp
                 }
                 else //No body
                 {
-                    RtspMessage request = new RtspMessage(RtspMessageType.Request)
+                    RtspMessage request = new(RtspMessageType.Request)
                     {
                         Location = new Uri(RtspMessage.ReliableTransportScheme + "://" + context.Request.LocalEndPoint.Address.ToString() +  context.Request.RawUrl),
                         RtspMethod = RtspMethod.DESCRIBE
@@ -757,7 +765,7 @@ namespace Media.Rtsp
 
             //Todo, use HttpClient / HttpServer
 
-            //if (m_HttpListner == null)
+            //if (m_HttpListner is null)
             //{
             //    try
             //    {
@@ -788,7 +796,7 @@ namespace Media.Rtsp
         {
             //Should be a list of EndPoints.
 
-            if (m_UdpServerSocket == null)
+            if (m_UdpServerSocket is null)
             {
                 try
                 {
@@ -816,7 +824,7 @@ namespace Media.Rtsp
         public void DisableHttpTransport()
         {
             //Existing sessions will still be active
-            if (m_HttpListner != null)
+            if (m_HttpListner is not null)
             {
                 m_HttpListner.Stop();
                 m_HttpListner.Close();
@@ -827,7 +835,7 @@ namespace Media.Rtsp
         public void DisableUnreliableTransport()
         {
             //Existing sessions will still be active
-            if (m_UdpServerSocket != null)
+            if (m_UdpServerSocket is not null)
             {
                 m_UdpServerSocket.Shutdown(SocketShutdown.Both);
                 m_UdpServerSocket.Dispose();
@@ -841,31 +849,6 @@ namespace Media.Rtsp
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal bool TryAddSession(ClientSession session) => m_Sessions.TryAdd(session.Id, session);
-        //{
-        //    Exception any = null;
-
-        //    try
-        //    {
-        //        Common.ILoggingExtensions.Log(Logger, "Adding Client: " + session.Id);
-
-        //        if (Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryAdd(m_Sessions, session.Id, session, out any))
-        //        {
-        //            session.m_Contained = this;
-        //        }
-
-        //        return Object.ReferenceEquals(session.m_Contained, this);
-        //    }
-        //    catch(Exception ex)
-        //    {
-        //        any = ex;
-
-        //        return false;
-        //    }
-        //    finally
-        //    {
-        //        Common.ILoggingExtensions.LogException(Logger, any);
-        //    }
-        //}
 
         /// <summary>
         /// Disposes and tries to remove the session from the Clients Collection.
@@ -874,44 +857,13 @@ namespace Media.Rtsp
         /// <returns>True if the session was disposed</returns>
         internal bool TryDisposeAndRemoveSession(ClientSession session)
         {
+            if (session is null) return false;
+
             var result = m_Sessions.TryRemove(session.Id, out var localSession);
             if (result) localSession.Dispose();
+
             return result;
         }
-        //{
-        //    if (session == null) return false;
-
-        //    Exception any = null;
-        //    try
-        //    {
-        //        //If the session was not disposed
-        //        if (Common.IDisposedExtensions.IsNullOrDisposed(session) is false)
-        //        {
-        //            //indicate the session is disposing
-        //            Common.ILoggingExtensions.Log(Logger, "Disposing Client: " + session.Id + " @ " + DateTime.UtcNow);
-
-        //            //Dispose the session
-        //            session.Dispose();
-        //        }
-
-        //        //If the client was already removed indicate this in the logs
-        //        if (false.Equals(Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryRemove(m_Sessions, session.Id, out any))) Common.ILoggingExtensions.Log(Logger, "Client Already Removed(" + session.Id + ")");
-
-        //        //Indicate success
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        any = ex;
-
-        //        //Indicate if a failure occured
-        //        return Common.IDisposedExtensions.IsNullOrDisposed(session);
-        //    }
-        //    finally
-        //    {
-        //        Common.ILoggingExtensions.LogException(Logger, any);
-        //    }
-        //}
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal bool ContainsSession(ClientSession session) => m_Sessions.ContainsKey(session.Id);
@@ -939,20 +891,21 @@ namespace Media.Rtsp
         internal IEnumerable<ClientSession> GetSessions(string rtspSessionId)
         {
             //If there was no id then nothing can be returned
-            if (string.IsNullOrWhiteSpace(rtspSessionId)) return Enumerable.Empty<ClientSession>();
+            if (string.IsNullOrWhiteSpace(rtspSessionId))
+                return Enumerable.Empty<ClientSession>();
 
             //Trim the id given to ensure no whitespace is present.
             rtspSessionId = rtspSessionId.Trim();
 
             //Return all clients which match the given id.
-            return Clients.Where(c => string.Equals (rtspSessionId, c.SessionId));
+            return Clients.Where(c => string.Equals(rtspSessionId, c.SessionId));
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal IEnumerable<ClientSession> GetSessions(System.IntPtr handle)
+        internal IEnumerable<ClientSession> GetSessions(nint handle)
         {
             //Return all clients which match the given handle.
-            return Clients.Where(c => c.IsDisconnected is false && object.ReferenceEquals(c.m_RtspSocket, null) is false && c.m_RtspSocket.Handle == handle);
+            return Clients.Where(c => c.IsDisconnected is false && c.m_RtspSocket is not null && c.m_RtspSocket.Handle == handle);
         }     
 
         #endregion
@@ -979,7 +932,7 @@ namespace Media.Rtsp
             {
                 Common.ILoggingExtensions.LogException(Logger, ex);
 
-                //If we are listening start the stram
+                //If we are listening start the stream
                 if (IsRunning && ContainsMedia(stream.Id))
                 {
                     stream.Start();
@@ -1015,9 +968,9 @@ namespace Media.Rtsp
             {
                 Media.Rtsp.Server.IMedia source = GetStream(streamId);
 
-                if (source != null && stop) source.Stop();
+                if (source is not null && stop) source.Stop();
 
-                if (RequiredCredentials != null)
+                if (RequiredCredentials is not null)
                 {
                     RemoveCredential(source, "Basic");
                     RemoveCredential(source, "Digest");
@@ -1036,8 +989,7 @@ namespace Media.Rtsp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public Media.Rtsp.Server.IMedia GetStream(Guid streamId)
         {
-            Media.Rtsp.Server.IMedia result;
-            m_MediaStreams.TryGetValue(streamId, out result);
+            m_MediaStreams.TryGetValue(streamId, out Server.IMedia result);
             return result;
         }
 
@@ -1051,7 +1003,7 @@ namespace Media.Rtsp
 
             string streamBase = null, streamName = null;
 
-            streamBase = mediaLocation.Segments.Any(s=>(s.IndexOf("live", StringComparison.InvariantCultureIgnoreCase) >= 0)) ? "live" : "archive";
+            streamBase = mediaLocation.Segments.Any(s => s.Contains("live", StringComparison.InvariantCultureIgnoreCase)) ? "live" : "archive";
 
             streamName = mediaLocation.Segments.Last().Replace("/", string.Empty).Trim();
 
@@ -1059,12 +1011,16 @@ namespace Media.Rtsp
 
             //todo, give out track name for further retrival e.g. when playing or setting up it would be easier to reuse this value than to parse again.
 
-            int trackId, symbolIndex;
+            int symbolIndex;
 
-            if (string.IsNullOrWhiteSpace(streamName)) streamName = mediaLocation.Segments[mediaLocation.Segments.Length - 1].Replace("/", string.Empty).Trim();
-            else if ((symbolIndex = streamName.IndexOf('=')) >= 0 && int.TryParse(Media.Common.ASCII.ExtractNumber(streamName, symbolIndex, streamName.Length), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out trackId) 
-                     ||
-                     Enum.TryParse<Sdp.MediaType>(streamName, out mediaType)) streamName = mediaLocation.Segments[mediaLocation.Segments.Length - 2].Replace("/", string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(streamName))
+                streamName = mediaLocation.Segments[mediaLocation.Segments.Length - 1].Replace("/", string.Empty).Trim();
+            else
+                if ((symbolIndex = streamName.IndexOf('=')) >= 0 &&
+                    int.TryParse(Media.Common.ASCII.ExtractNumber(streamName, symbolIndex, streamName.Length), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out int trackId) 
+                    ||
+                    Enum.TryParse(streamName, out mediaType))
+                streamName = mediaLocation.Segments[mediaLocation.Segments.Length - 2].Replace("/", string.Empty).Trim();
 
             //If either the streamBase or the streamName is null or Whitespace then return null (no stream)
             if (string.IsNullOrWhiteSpace(streamBase) || string.IsNullOrWhiteSpace(streamName)) return null;
@@ -1077,11 +1033,10 @@ namespace Media.Rtsp
                 foreach (Media.Rtsp.Server.IMedia stream in MediaStreams)
                 {
                     //To lower is used to prevent certain issues
-
                     diff = string.Compare(stream.Name, streamName, StringComparison.InvariantCultureIgnoreCase);
 
                     //If the name matches the streamName or stream Id then we found it
-                    if (diff == 0)
+                    if (diff is 0)
                     {
                         found = stream;
 
@@ -1091,7 +1046,7 @@ namespace Media.Rtsp
                     //Check the Id
                     diff = string.Compare(stream.Id.ToString(), streamName, StringComparison.InvariantCultureIgnoreCase);
 
-                    if (diff == 0)
+                    if (diff is 0)
                     {
                         found = stream;
 
@@ -1099,14 +1054,13 @@ namespace Media.Rtsp
                     }
 
                     //Try aliases of streams
-                    if (found == null)
+                    if (found is null)
                     {
                         foreach (string alias in stream.Aliases)
                         {
-
                             diff = string.Compare(alias.ToLowerInvariant(), streamName, StringComparison.InvariantCultureIgnoreCase);
 
-                            if (diff == 0)
+                            if (diff is 0)
                             {
                                 found = stream;
 
@@ -1117,10 +1071,9 @@ namespace Media.Rtsp
                     }
 
                     //Try by media description?
-
                 }
             }
-            else if(streamBase == "archive")
+            else if (streamBase == "archive")
             {
                 //Check MediaStreams for existing ArchivedMedia, if found return.
 
@@ -1136,6 +1089,7 @@ namespace Media.Rtsp
 
                 //Return found
             }
+
             //else if (streamBase == "playback") //maynot be needed if handled in archiver
             //{
             //    //Check existing archives being played back, there should be a property in the Archiver to seperate these.
@@ -1226,48 +1180,6 @@ namespace Media.Rtsp
                     TryDisposeAndRemoveSession(session);
                 }
             });
-
-            //foreach (ClientSession session in Clients)
-            //{
-            //    if (session == null) continue;
-
-            //    //Check for inactivity at the RtspLevel first and then the RtpLevel.
-            //    if (session.Created > maintenanceStarted
-            //        || //Or if the LastRequest was created after maintenanceStarted
-            //        false.Equals(session.LastRequest == null) && session.LastRequest.Created > maintenanceStarted
-            //        || //Or if the LastResponse was created after maintenanceStarted
-            //        false.Equals(session.LastResponse == null) && session.LastResponse.Created > maintenanceStarted
-            //        || //Or if there were no resources released
-            //        session.IsDisconnected is false && false == session.ReleaseUnusedResources())
-            //    {
-            //        //Do not attempt to perform any disconnection of the session
-            //        continue;
-            //    }
-
-            //    //The session is disposed OR
-            //    if (IDisposedExtensions.IsNullOrDisposed(session) || session.IsDisconnected
-            //        &&
-            //        //If the session has an attached source but no client OR the RtpClient is disposed or not active
-            //        session.Playing.Count >= 0 && (IDisposedExtensions.IsNullOrDisposed(session.m_RtpClient) || false.Equals(session.m_RtpClient.IsActive))
-            //        ||//There was no last request
-            //        session.LastRequest == null
-            //        ||//OR there is a last request AND
-            //        (false.Equals(session.LastRequest == null)
-            //        && //The last request was created longer ago than required to keep clients active
-            //        (maintenanceStarted - session.LastRequest.Created) > RtspClientInactivityTimeout)
-            //        ||//There was no last response
-            //        session.LastResponse == null
-            //        || //OR there is a last response AND
-            //        (false.Equals(session.LastResponse == null)
-            //        && //The last response was transferred longer ago than required to keep clients active
-            //        session.LastResponse.Transferred.HasValue 
-            //        && (maintenanceStarted - session.LastResponse.Transferred) > RtspClientInactivityTimeout))
-                    
-            //    {
-            //        //Dispose the session
-            //        TryDisposeAndRemoveSession(session);
-            //    }
-            //}
         }
 
 
@@ -1279,9 +1191,7 @@ namespace Media.Rtsp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal void RestartFaultedStreams()
         {
-
-
-            MediaStreams.Where(s => s.State == RtspSource.StreamState.Started && s.IsReady == false).AsParallel().ForAll((stream) =>
+            MediaStreams.Where(s => s.State == RtspSource.StreamState.Started && s.IsReady is false).AsParallel().ForAll((stream) =>
             {
                 Common.ILoggingExtensions.Log(Logger, "Stopping Stream: " + stream.Name + " Id=" + stream.Id);
 
@@ -1296,25 +1206,7 @@ namespace Media.Rtsp
                     stream.Start();
                 }
             });
-
-            //foreach (Media.Rtsp.Server.IMedia stream in MediaStreams.Where(s => s.State == RtspSource.StreamState.Started && s.IsReady == false))
-            //{
-
-            //    Common.ILoggingExtensions.Log(Logger, "Stopping Stream: " + stream.Name + " Id=" + stream.Id);
-
-            //    //Ensure Stopped
-            //    stream.Stop();
-
-            //    if (IsRunning)
-            //    {
-            //        Common.ILoggingExtensions.Log(Logger, "Starting Stream: " + stream.Name + " Id=" + stream.Id);
-
-            //        //try to start it again
-            //        stream.Start();
-            //    }
-                
-            //}
-        }        
+        }
 
         /// <summary>
         /// Starts the RtspServer and listens for requests.
@@ -1411,7 +1303,7 @@ namespace Media.Rtsp
         {
             if (m_Maintaining || IsDisposed || m_StopRequested) return;
 
-            if (IsRunning && false == m_Maintaining)
+            if (IsRunning && m_Maintaining is false)
             {
                 m_Maintaining = true;
 
@@ -1436,7 +1328,7 @@ namespace Media.Rtsp
 
                         m_Maintaining = false;
 
-                        if (IsRunning && m_Maintainer != null)
+                        if (IsRunning && m_Maintainer is not null)
                         {
                             TimeSpan dueTime = TimeSpan.FromTicks(RtspClientInactivityTimeout.Ticks >> 2);
                             TimeSpan period = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan;
@@ -1455,7 +1347,7 @@ namespace Media.Rtsp
                 {
                     Common.ILoggingExtensions.LogException(Logger, ex);
 
-                    m_Maintaining = m_Maintainer != null;
+                    m_Maintaining = m_Maintainer is not null;
                 }
             }
         }
@@ -1514,10 +1406,7 @@ namespace Media.Rtsp
             if (m_TcpServerSocket is not null)
             {
                 //Dispose the socket if not leaving it open...
-                if (leaveOpen is false)
-                {
-                    m_TcpServerSocket.Dispose();
-                }
+                if (leaveOpen is false) m_TcpServerSocket.Dispose();
 
                 m_TcpServerSocket = null;
             }
@@ -1604,6 +1493,7 @@ namespace Media.Rtsp
         internal void AcceptLoop()
         {
             SocketAsyncEventArgs lastAccept = null;
+
             var eventArgs = new SocketAsyncEventArgs();
             eventArgs.Completed += ProcessAccept;
 
@@ -1614,7 +1504,7 @@ namespace Media.Rtsp
 
             int timeOut, halfTimeout;
 
-        Begin:            
+        Begin:
 
             try
             {
@@ -1630,13 +1520,15 @@ namespace Media.Rtsp
                 //While running
                 while (IsRunning)
                 {
-                    if (m_StopRequested) break;
+                    if (m_StopRequested)
+                        break;
                     else if (m_Sessions.Count < m_MaximumSessions)
                     {
                         //If not already accepting
-                        if (lastAccept == null)
+                        if (lastAccept is null)
                         {
                             eventArgs.AcceptSocket = null;
+
                             //Start a thread accepting [with a 0 size buffer] or use the thread pool to process the accept.
                             if (!m_TcpServerSocket.AcceptAsync(eventArgs))
                                 ThreadPool.QueueUserWorkItem((o) => ProcessAccept(m_TcpServerSocket, eventArgs));
@@ -1647,36 +1539,7 @@ namespace Media.Rtsp
                         }
 
                         //Ensure lowest priority
-                        System.Threading.Thread.CurrentThread.Priority = ThreadPriority.Lowest;
-
-                        #region Unused[Using Wait Handle]
-
-                        ////use the handle on the already allocated result which was obtained by calling BeginAccept.
-                        //using (WaitHandle handle = lastAccept.AsyncWaitHandle)
-                        //{
-                        //    //Wait half the timeout using the event
-                        //    while (IsRunning && lastAccept.IsCompleted is false && false.Equals(handle.WaitOne(halfTimeout)))
-                        //    {
-
-                        //        if (accept.Wait(halfTimeout)) break;
-
-                        //        ////Don't wait longer than the full timeout
-                        //        //if (((int)(DateTime.UtcNow - lastAcceptStarted).TotalMilliseconds) >= timeOut)
-                        //        //{
-                        //        //    //Force the accept thread to end now
-                        //        //    System.Net.Sockets.Socket stale = m_TcpServerSocket.EndAccept(lastAccept);
-
-                        //        //    //If there is a socket
-                        //        //    if (stale is not null)
-                        //        //    {
-                        //        //        //Dispose it
-                        //        //        stale.Dispose();
-                        //        //    }
-                        //        //}
-                        //    }
-                        //}
-
-                        #endregion
+                        Thread.CurrentThread.Priority = ThreadPriority.Lowest;
 
                         //While running and not completed, wait timeOut
                         while (IsRunning)
@@ -1691,14 +1554,16 @@ namespace Media.Rtsp
                         lastAccept = null;
 
                         //Ensure below normal priorty
-                        System.Threading.Thread.CurrentThread.Priority = ThreadPriority.BelowNormal;
+                        Thread.CurrentThread.Priority = ThreadPriority.BelowNormal;
 
                     }
                     else
                     {
                         //Try to defer to another thread and if not possible sleep
-                        if(false.Equals(System.Threading.Thread.Yield())) System.Threading.Thread.Sleep(timeOut);
-                        else System.Threading.Thread.Sleep(halfTimeout);
+                        if (Thread.Yield() is false)
+                            Thread.Sleep(timeOut);
+                        else
+                            Thread.Sleep(halfTimeout);
                     }
                 }
             }
@@ -1774,14 +1639,12 @@ namespace Media.Rtsp
                 {
                     //The clientSocket is obtained from the EndAccept call, possibly bytes ready from the accept
                     //They are not discarded just not receieved until the first receive.
-                    if (server.IsBound && IsRunning && clientSocket != null)
+                    if (server.IsBound && IsRunning && clientSocket is not null)
                     {
                         //Configuring the server?
                         //ConfigureRtspServerSocket(server, out interframeGap, ref reconfigure, clientSocket);
-
                         reconfigure = true;
                         ConfigureRtspServerSocket(clientSocket, out interframeGap, ref reconfigure, null);
-
                     }
                 }
                 else
@@ -1796,25 +1659,25 @@ namespace Media.Rtsp
                 if (m_Sessions.Count >= m_MaximumSessions || IsRunning is false)
                 {
                     //If there is a logger then indicate what is happening
-                    Common.ILoggingExtensions.Log(Logger, "Accepted Socket @ " + clientSocket.LocalEndPoint + " From: " + clientSocket.RemoteEndPoint + " Disposing. ConnectedClient=" + m_Sessions.Count);
+                    Common.ILoggingExtensions.Log(Logger,
+                        "Accepted Socket @ " + clientSocket.LocalEndPoint + " From: " + clientSocket.RemoteEndPoint + " Disposing. ConnectedClient=" + m_Sessions.Count);
 
                     //Could send a response 429 or 453...
 
                     //Todo, keep the message allocated?
                     //use a temporary message
-                    using (RtspMessage tempMsg = new Rtsp.RtspMessage(RtspMessageType.Response, this.Version)
+                    using (RtspMessage tempMsg = new(RtspMessageType.Response, Version)
                     {
                         StatusCode = 429, //https://tools.ietf.org/html/rfc6585
                         ReasonPhrase = "Shutting Down / Too Many Clients", //Check count again to give specific reason
                         //Body = "We only alllow " + m_MaximumConnections + " to this server..."
                     })
                     {
-
                         //Check count again to give specific time..
                         //https://www.ietf.org/mail-archive/web/mmusic/current/msg08350.html
 
                         //Tell the clients when they should attempt to retry again.
-                        tempMsg.AppendOrSetHeader(RtspHeaders.RetryAfter, ((int)(RtspClientInactivityTimeout.TotalSeconds)).ToString());
+                        tempMsg.AppendOrSetHeader(RtspHeaders.RetryAfter, ((int)RtspClientInactivityTimeout.TotalSeconds).ToString());
 
                         //If the session is too much just send out normally.
                         clientSocket.Send(tempMsg.ToBytes());
@@ -1832,7 +1695,7 @@ namespace Media.Rtsp
                 ThreadPool.QueueUserWorkItem((o) =>
                 {
                     //Allocate a session, copy 12 bytes + into the stack
-                    ClientSession session = new ClientSession(this, clientSocket, null, true, interframeGap, true);
+                    ClientSession session = new(this, clientSocket, null, true, interframeGap, true);
 
                     //Try to add it now
                     bool added = TryAddSession(session);
@@ -1852,7 +1715,7 @@ namespace Media.Rtsp
             catch (Exception ex)
             {
                 //If there is a logger log the exception
-                Common.ILoggingExtensions.LogException(Logger, ex);                
+                Common.ILoggingExtensions.LogException(Logger, ex);
             }
         }
 
@@ -1883,9 +1746,8 @@ namespace Media.Rtsp
                 //If we received any application layer data
                 if (received > 0)
                 {
-
                     //If there is no session return or the session was just disposed
-                    if (IDisposedExtensions.IsNullOrDisposed(session) || object.ReferenceEquals(session.m_RtspSocket, null)) return;
+                    if (IDisposedExtensions.IsNullOrDisposed(session) || session.m_RtspSocket is null) return;
 
                     //Let the client propagate the message if the socket is shared
                     if (session.SharesSocket)
@@ -1914,7 +1776,8 @@ namespace Media.Rtsp
                 Common.ILoggingExtensions.LogException(Logger, ex);
 
                 //if a socket exception occured then handle it.
-                if (IDisposedExtensions.IsNullOrDisposed(session) is false && ex is SocketException) HandleClientSocketException((SocketException)ex, session);                                     
+                if (IDisposedExtensions.IsNullOrDisposed(session) is false && ex is SocketException se)
+                    HandleClientSocketException(se, session);
             }
         }
 
@@ -1953,7 +1816,7 @@ namespace Media.Rtsp
                         }
 
                     } //Otherwise if LastRequest is not disposed then attempt completion with the invalid data
-                    else if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(session.LastRequest)))
+                    else if (Common.IDisposedExtensions.IsNullOrDisposed(session.LastRequest) is false)
                     {
                         //Indicate a CompleteFrom is occuring
                         Media.Common.ILoggingExtensions.Log(Logger, "Session:" + session.Id + " Attempting to complete previous mesage with buffer of " + data.Count + " bytes.");
@@ -2037,7 +1900,7 @@ namespace Media.Rtsp
                 case SocketError.TimedOut:
                     {
                         //If there is still a socket
-                        if (object.ReferenceEquals(cs.m_RtspSocket, null) is false)
+                        if (cs.m_RtspSocket is not null)
                         {
                             //Clients interleaving shouldn't time out ever
                             if (cs.m_RtspSocket.ProtocolType == ProtocolType.Tcp)
@@ -2076,7 +1939,7 @@ namespace Media.Rtsp
                 default:
                     {                        
                         if (cs.IsDisposed is false &&
-                            object.ReferenceEquals(cs.m_RtspSocket, null) is false)
+                            cs.m_RtspSocket.IsNullOrDisposed() is false)
                         {
                             if (cs.IsDisconnected = cs.m_RtspSocket.Poll(cs.m_SocketPollMicroseconds, SelectMode.SelectWrite) && cs.m_RtspSocket.Poll(cs.m_SocketPollMicroseconds, SelectMode.SelectRead))
                             {
@@ -2097,19 +1960,20 @@ namespace Media.Rtsp
         /// <param name="ar">The asynch result</param>
         internal void ProcessSendComplete(object sender, SocketAsyncEventArgs e)
         {
+            if (sender is null) return;
+
+            if (e.SocketError != SocketError.Success) return;
+
+            ClientSession session = (ClientSession)e.UserToken;
+
             unchecked
             {
-                if (sender is null) return;
-
-                if (e.SocketError != SocketError.Success) return;
-
-                ClientSession session = (ClientSession)e.UserToken;
-
                 try
                 {
-
                     //Don't do anything if the session cannot be acted on.
-                    if (IDisposedExtensions.IsNullOrDisposed(session) || session.IsDisconnected || session.HasRuningServer is false) return;
+                    if (IDisposedExtensions.IsNullOrDisposed(session) ||
+                        session.IsDisconnected ||
+                        session.HasRuningServer is false) return;
 
                     //Ensure the bytes were completely sent..
                     int sent = e.BytesTransferred;
@@ -2139,14 +2003,6 @@ namespace Media.Rtsp
                             //Start sending the rest of the data
                             session.SendRtspData(session.m_SendBuffer, sent, remains);
                         }
-
-                        #region Unused [Handle remaining data with SocketFlags.Partial]
-
-                        //Don't even get me started on Partial ...
-
-                        //session.LastSend = session.m_RtspSocket.BeginSendTo(session.m_SendBuffer, sent, remains, SocketFlags.Partial, session.RemoteEndPoint, new AsyncCallback(ProcessSendComplete), session);
-
-                        #endregion
                     }
                 }
                 catch (Exception ex)
@@ -2154,7 +2010,8 @@ namespace Media.Rtsp
                     Common.ILoggingExtensions.LogException(Logger, ex);
 
                     //handle the socket exception
-                    if (IDisposedExtensions.IsNullOrDisposed(session) is false && ex is SocketException) HandleClientSocketException((SocketException)ex, session);
+                    if (IDisposedExtensions.IsNullOrDisposed(session) is false && ex is SocketException se)
+                        HandleClientSocketException(se, session);
                 }
             }
         }
@@ -2179,11 +2036,13 @@ namespace Media.Rtsp
                 if (IDisposedExtensions.IsNullOrDisposed(request) || IDisposedExtensions.IsNullOrDisposed(session))
                 {
                     return;
-                }//Ensure the session is added to the connected clients if it has not been already.
-                else if (session.m_Contained is null) TryAddSession(session);
+                }
+
+                //Ensure the session is added to the connected clients if it has not been already.
+                if (session.m_Contained is null) TryAddSession(session);
                 
                 //Check for session moved from another process.
-                //else if (session.m_Contained != null && session.m_Contained != this) return;
+                //else if (session.m_Contained is not null && session.m_Contained != this) return;
 
                 //Turtle power!
                 if (request.MethodString.Equals("REGISTER", StringComparison.OrdinalIgnoreCase))
@@ -2199,7 +2058,7 @@ namespace Media.Rtsp
                 //All requests need the CSeq
                 if (request.ContainsHeader(RtspHeaders.CSeq) is false)
                 {
-                    //if(request.HeaderCount == 0)
+                    //if(request.HeaderCount is 0)
 
                     //Send back a BadRequest.
                     ProcessInvalidRtspRequest(session, Rtsp.RtspStatusCode.BadRequest, null, sendResponse);
@@ -2304,7 +2163,8 @@ namespace Media.Rtsp
 
 
                 //Dispose any last request.
-                if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(session.LastRequest))) session.LastRequest.Dispose();
+                if (Common.IDisposedExtensions.IsNullOrDisposed(session.LastRequest) is false)
+                    session.LastRequest.Dispose();
 
                 //Todo, CAS needs field...
 
@@ -2620,9 +2480,10 @@ namespace Media.Rtsp
                     //@ProcessRtspMessage
                     //ValidateIncomingMessage() ->
 
-                    if (false.Equals(message.ContainsHeader(RtspHeaders.Server))) message.SetHeader(RtspHeaders.Server, ServerName);
+                    if (message.ContainsHeader(RtspHeaders.Server) is false)
+                        message.SetHeader(RtspHeaders.Server, ServerName);
 
-                    //if (false.Equals(message.ContainsHeader(RtspHeaders.Date))) message.SetHeader(RtspHeaders.Date, DateTime.UtcNow.ToString("r"));
+                    //if (message.ContainsHeader(RtspHeaders.Date) is false) message.SetHeader(RtspHeaders.Date, DateTime.UtcNow.ToString("r"));
 
                     //12.4 Allow
                     if (message.RtspStatusCode == RtspStatusCode.MethodNotAllowed && 
@@ -2658,8 +2519,8 @@ namespace Media.Rtsp
                            delay      =  *(DIGIT) [ "." *(DIGIT) ]
                          */
 
-                    if (false.Equals(message.ContainsHeader(RtspHeaders.Timestamp)) &&
-                        false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(session.LastRequest)) &&
+                    if (message.ContainsHeader(RtspHeaders.Timestamp) is false &&
+                        Common.IDisposedExtensions.IsNullOrDisposed(session.LastRequest) is false &&
                         session.LastRequest.ContainsHeader(RtspHeaders.Timestamp))
                     {
                         ////Apparently not joined with ;
@@ -2681,12 +2542,12 @@ namespace Media.Rtsp
                     {
                         //Add the timeout header if there was a session header.
                         if (RtspClientInactivityTimeout > TimeSpan.Zero &&
-                            false.Equals(sess.Contains(RtspHeaderFields.Session.Timeout)))
+                            sess.Contains(RtspHeaderFields.Session.Timeout) is false)
                         {
                             message.AppendOrSetHeader(RtspHeaders.Session, RtspHeaderFields.Session.Timeout + "=" + (((int)(RtspClientInactivityTimeout.TotalSeconds)) >> 1).ToString());
                         }
                     }
-                    else if(string.IsNullOrWhiteSpace(session.SessionId) is false)
+                    else if (string.IsNullOrWhiteSpace(session.SessionId) is false)
                     {
                         message.SetHeader(RtspHeaders.Session, session.SessionId + ";" +
                             RtspHeaderFields.Session.Timeout + "=" + (((int)(RtspClientInactivityTimeout.TotalSeconds)) >> 1).ToString());
@@ -2696,7 +2557,8 @@ namespace Media.Rtsp
                     //if (session.m_RtspSocket.ProtocolType == ProtocolType.Tcp && session.Attached.Count > 0) response.SetHeader("Ignore", "$0\09\r\n$\0:\0");
 
                     //Dispose the last response
-                    if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(session.LastResponse))) session.LastResponse.Dispose();
+                    if (Common.IDisposedExtensions.IsNullOrDisposed(session.LastResponse) is false)
+                        session.LastResponse.Dispose();
 
                     //Todo
                     //Content-Encoding should be the same as the request's if possible..
@@ -2705,9 +2567,11 @@ namespace Media.Rtsp
                     Media.Common.ILoggingExtensions.Log(Logger, message.ToString());
 
                     //If sending a response
-                    if (sendResponse) session.SendRtspData((session.LastResponse = message).ToBytes());
+                    if (sendResponse)
+                        session.SendRtspData((session.LastResponse = message).ToBytes());
                     //Otherwise just update the property
-                    else session.LastResponse = message;
+                    else
+                        session.LastResponse = message;
 
                     //Indicate the session is not disconnected
                     //Indicate the last response was sent now.
@@ -2716,8 +2580,10 @@ namespace Media.Rtsp
                 else
                 {
                     //Test the connectivity and start another receive
-                    if (session.m_RtspSocket.Available is 0) session.SendRtspData(Media.Common.MemorySegment.EmptyBytes);
-                    else session.StartReceive();
+                    if (session.m_RtspSocket.Available is 0)
+                        session.SendRtspData(Media.Common.MemorySegment.EmptyBytes);
+                    else
+                        session.StartReceive();
                 }
             }
             catch (Exception ex)
@@ -2725,7 +2591,8 @@ namespace Media.Rtsp
                 Common.ILoggingExtensions.LogException(Logger, ex);
 
                 //if a socket exception occured then handle it.
-                if (Common.IDisposedExtensions.IsNullOrDisposed(session) is false && ex is SocketException) HandleClientSocketException((SocketException)ex, session);
+                if (Common.IDisposedExtensions.IsNullOrDisposed(session) is false && ex is SocketException se)
+                    HandleClientSocketException(se, session);
             }            
         }
 
@@ -2810,15 +2677,15 @@ namespace Media.Rtsp
                 string authenticateHeader = null;
 
                 //Check for Digest first - Todo Finish implementation
-                if (object.ReferenceEquals(requiredCredential = RequiredCredentials.GetCredential(sourceLocation, RtspHeaderFields.Authorization.Digest), null) is false)
+                if ((requiredCredential = RequiredCredentials.GetCredential(sourceLocation, RtspHeaderFields.Authorization.Digest)) is not null)
                 {
-                    //Might need to store values qop nc, cnonce and nonce in session storage for later retrival                    
+                    //Might need to store values qop nc, cnonce and nonce in session storage for later retrival
 
                     //Should use auth-int and qop
 
                     authenticateHeader = string.Format(System.Globalization.CultureInfo.InvariantCulture, "Digest username={0},realm={1},nonce={2},cnonce={3}", requiredCredential.UserName, (string.IsNullOrWhiteSpace(requiredCredential.Domain) ? ServerName : requiredCredential.Domain), (((long)Utility.Random.Next(int.MaxValue)) << 32 | (long)(Utility.Random.Next(int.MaxValue))).ToString("X"), Utility.Random.Next(int.MaxValue).ToString("X"));
                 }
-                else if (object.ReferenceEquals(requiredCredential = RequiredCredentials.GetCredential(sourceLocation, RtspHeaderFields.Authorization.Basic), null) is false)
+                else if ((requiredCredential = RequiredCredentials.GetCredential(sourceLocation, RtspHeaderFields.Authorization.Basic)) is not null)
                 {
                     authenticateHeader = "Basic realm=\"" + (string.IsNullOrWhiteSpace(requiredCredential.Domain) ? ServerName : requiredCredential.Domain + '"');
                 }
@@ -2844,9 +2711,9 @@ namespace Media.Rtsp
                 //}
 
                 ////should check to ensure wrong type was not used e.g. basic in place of digest...
-                //if (string.Compare(authType, RtspHeaderFields.Authorization.Digest, true) == 0)
+                //if (string.Compare(authType, RtspHeaderFields.Authorization.Digest, true) is 0)
                 //{
-                //    //if (session.Storage["nOnce"] != null)
+                //    //if (session.Storage["nOnce"] is not null)
                 //    //{
                 //    //    //Increment NonceCount
                 //    //}
@@ -3036,7 +2903,7 @@ namespace Media.Rtsp
             //foreach (Sdp.MediaDescription md in found.SessionDescription.MediaDescriptions)
             //{
             //    Sdp.SessionDescriptionLine attributeLine = md.Lines.Where(l => l.Type == 'a' && l.Parts.Any(p => p.Contains("control"))).FirstOrDefault();
-            //    if (attributeLine != null) 
+            //    if (attributeLine is not null) 
             //    {
             //        string actualTrack = attributeLine.Parts.Where(p => p.Contains("control")).First().Replace("control:", string.Empty);
             //        if(actualTrack == track || actualTrack.Contains(track))
@@ -3216,7 +3083,7 @@ namespace Media.Rtsp
                 //10.4 SETUP says we would have to bundle pipelined requests.
                 //That is contradictory.
 
-                //if (session.Playing.Count == 0) session.SessionId = null;
+                //if (session.Playing.Count is 0) session.SessionId = null;
 
                 string connectionHeader = request[RtspHeaders.Connection];
 
@@ -3258,7 +3125,7 @@ namespace Media.Rtsp
                 string connectionHeader = request[RtspHeaders.Connection];
 
                 if (string.IsNullOrWhiteSpace(connectionHeader) is false &&
-                    connectionHeader.IndexOf(RtspHeaderFields.Connection.Close,  StringComparison.OrdinalIgnoreCase) >= 0)
+                    connectionHeader.Contains(RtspHeaderFields.Connection.Close, StringComparison.OrdinalIgnoreCase))
                 {
                     TryDisposeAndRemoveSession(session);
                 }
@@ -3316,7 +3183,6 @@ namespace Media.Rtsp
         /// <returns>True if authroized, otherwise false</returns>
         public virtual bool AuthenticateRequest(RtspMessage request, Uri sourceLocation)
         {
-
             if (Common.IDisposedExtensions.IsNullOrDisposed(request)) return false; //throw new ArgumentNullException("request");
 
             if (sourceLocation is null) return false;
@@ -3337,7 +3203,7 @@ namespace Media.Rtsp
                 authType = "basic";
 
                 //if source is null then the use of the request.location will have to work.
-                //Uri loc = source == null ? request.Location : source.ServerLocation;
+                //Uri loc = source is null ? request.Location : source.ServerLocation;
 
                 //Try *
                 //requiredCredential = RequiredCredentials.GetCredential(source.ServerLocation, "*");
@@ -3348,7 +3214,7 @@ namespace Media.Rtsp
                 requiredCredential = RequiredCredentials.GetCredential(sourceLocation, authType);
 
                 //If there was nothing for basic then try digest
-                if (requiredCredential is null) requiredCredential = RequiredCredentials.GetCredential(sourceLocation, authType = "digest");
+                requiredCredential ??= RequiredCredentials.GetCredential(sourceLocation, authType = "digest");
             }
             else
             {
@@ -3381,7 +3247,7 @@ namespace Media.Rtsp
                 
 
                 //If the SourceAuthenticationScheme is Basic and the header contains the BASIC indication then validiate using BASIC authentication
-                if (authType.IndexOf(RtspHeaderFields.Authorization.Basic, StringComparison.OrdinalIgnoreCase) >= 0)
+                if (authType.Contains(RtspHeaderFields.Authorization.Basic, StringComparison.OrdinalIgnoreCase))
                 {
                     //realm may be present? 
                     //Basic realm="''" dasfhadfhsaghf
@@ -3393,9 +3259,9 @@ namespace Media.Rtsp
                     parts = authHeader.Split(':');
 
                     //If enough return the determination by comparison as the result
-                    return parts.Length > 1 && (parts[0].Equals(requiredCredential.UserName) && parts[1].Equals(requiredCredential.Password));
+                    return parts.Length > 1 && parts[0].Equals(requiredCredential.UserName) && parts[1].Equals(requiredCredential.Password);
                 }
-                else if (authType.IndexOf(RtspHeaderFields.Authorization.Digest, StringComparison.OrdinalIgnoreCase) >= 0)
+                else if (authType.Contains(RtspHeaderFields.Authorization.Digest, StringComparison.OrdinalIgnoreCase))
                 {
                     //http://tools.ietf.org/html/rfc2617
                     //Digest RFC2617
@@ -3622,10 +3488,10 @@ namespace Media.Rtsp
 
             yield return m_TcpServerSocket;
 
-            if (m_UdpServerSocket != null) yield return m_UdpServerSocket;
+            if (m_UdpServerSocket is not null) yield return m_UdpServerSocket;
 
             //Get socket using reflection?
-            //if (m_HttpListner != null) yield return m_HttpListner.;
+            //if (m_HttpListner is not null) yield return m_HttpListner.;
 
             //ClientSession should be a CollectionType which implements ISocketReference
             //This logic should then appear in that collection.

@@ -161,7 +161,7 @@ namespace Media.Codec
             Size = bitsPerComponent * components;
 
             //Creates each component
-            for (int i = 0; i < components; ++i) Components[i] = new MediaComponent( componentIds != null ? componentIds[i] : (byte)i, bitsPerComponent);
+            for (int i = 0; i < components; ++i) Components[i] = new MediaComponent( componentIds is not null ? componentIds[i] : (byte)i, bitsPerComponent);
         }
 
         public MediaFormat(MediaType mediaType, Common.Binary.ByteOrder byteOrder, DataLayout dataLayout, int components, int[] componentSizes, byte[] componentIds, bool shouldDispose = true)
@@ -217,7 +217,7 @@ namespace Media.Codec
             if (dataLayout == Media.Codec.DataLayout.Unknown) throw new System.ArgumentException("dataLayout", "Cannot be Unknown");
             DataLayout = dataLayout;
 
-            if (components == null) throw new System.ArgumentNullException("components");
+            if (components is null) throw new System.ArgumentNullException("components");
 
             //Assign the components
             Components = System.Linq.Enumerable.ToArray<MediaComponent>(components);
@@ -248,7 +248,7 @@ namespace Media.Codec
         /// <summary>
         /// Indicates if there are an even amount of bits in the format.
         /// </summary>
-        public bool IsAligned { get { return Size % Common.Binary.BitsPerByte == 0; } }
+        public bool IsAligned { get { return Size % Common.Binary.BitsPerByte is 0; } }
 
         /// <summary>
         /// Gets the component at the given index.
@@ -314,7 +314,7 @@ namespace Media.Codec
 
         public int IndexOf(MediaComponent component)
         {
-            if (component == null) throw new System.ArgumentNullException();
+            if (component is null) throw new System.ArgumentNullException();
 
             return System.Array.IndexOf(Components, component);
         }

@@ -117,14 +117,14 @@ namespace Media.Containers.Nut
 
         public static bool IsFrame(Node node)
         {
-            if (node == null) throw new ArgumentNullException("node");
+            if (node is null) throw new ArgumentNullException("node");
 
             return node.Identifier[0] == default(byte);
         }
 
         public static bool IsNutNode(Node node)
         {
-            if (node == null) throw new ArgumentNullException("node");
+            if (node is null) throw new ArgumentNullException("node");
 
             return node.Identifier[0] == NutByte;
         }
@@ -132,7 +132,7 @@ namespace Media.Containers.Nut
         public static FrameFlags GetFrameFlags(NutReader reader, Node node)
         {
 
-            if(node == null) throw new ArgumentNullException("node");
+            if(node is null) throw new ArgumentNullException("node");
 
             if (!IsFrame(node)) return FrameFlags.Unknown;
 
@@ -141,7 +141,7 @@ namespace Media.Containers.Nut
 
         public static int GetStreamId(Node node)
         {
-            if (node == null) throw new ArgumentNullException("node");
+            if (node is null) throw new ArgumentNullException("node");
 
             if (!IsFrame(node)) return -1;
 
@@ -150,7 +150,7 @@ namespace Media.Containers.Nut
 
         public static byte[] GetFrameHeader(NutReader reader, Node node)
         {
-            if (node == null) throw new ArgumentNullException("node");
+            if (node is null) throw new ArgumentNullException("node");
 
             if (!IsFrame(node)) return Media.Common.MemorySegment.EmptyBytes;
 
@@ -252,7 +252,7 @@ namespace Media.Containers.Nut
 
             foreach (var tag in this)
             {
-                if (names == null || names.Count() == 0 || names.Contains((StartCode)Common.Binary.ReadU64(tag.Identifier, 0, Common.Binary.IsLittleEndian)))
+                if (names is null || names.Count() is 0 || names.Contains((StartCode)Common.Binary.ReadU64(tag.Identifier, 0, Common.Binary.IsLittleEndian)))
                     yield return tag;
 
                 count -= tag.TotalSize;
@@ -307,7 +307,7 @@ namespace Media.Containers.Nut
         {
             get
             {
-                if (m_FileIdString == null) ParseFileIdString();
+                if (m_FileIdString is null) ParseFileIdString();
                 return m_FileIdString;
             }
         }
@@ -338,7 +338,7 @@ namespace Media.Containers.Nut
         {
             get
             {
-                if (m_TimeBases == null) ParseMainHeader();
+                if (m_TimeBases is null) ParseMainHeader();
                 return m_TimeBases;
             }
         }
@@ -400,7 +400,7 @@ namespace Media.Containers.Nut
         {
             get
             {
-                if (m_EllisionHeaders == null) ParseMainHeader();
+                if (m_EllisionHeaders is null) ParseMainHeader();
                 return m_EllisionHeaders;
             }
         }
@@ -411,7 +411,7 @@ namespace Media.Containers.Nut
         {
             get
             {
-                if (m_HeaderOptions == null) ParseMainHeader();
+                if (m_HeaderOptions is null) ParseMainHeader();
                 return m_HeaderOptions;
             }
         }
@@ -441,7 +441,7 @@ namespace Media.Containers.Nut
 
                 int timeBaseCount = (int)DecodeVariableLength(stream, out bytesRead);
 
-                if (timeBaseCount == 0) throw new InvalidOperationException("No Timebase");
+                if (timeBaseCount is 0) throw new InvalidOperationException("No Timebase");
 
                 m_TimeBases = new List<long>(timeBaseCount);
 
@@ -491,7 +491,7 @@ namespace Media.Containers.Nut
                     {
                         if (tmp_size > tmp_mul) throw new InvalidOperationException("count underflow");
                         count = tmp_mul - tmp_size;
-                        if (count == 0) throw new InvalidOperationException("count is 0");
+                        if (count is 0) throw new InvalidOperationException("count is 0");
                     }
 
                     if (tmp_fields > 6)
@@ -512,7 +512,7 @@ namespace Media.Containers.Nut
                     //for (int j = 8; j < tmp_fields; ++j) tmp_res = DecodeLength(stream, out bytesRead);
                     while (tmp_fields-- > 8) DecodeVariableLength(stream, out bytesRead);
 
-                    if (count == 0 || i + count > MaximumHeaderOptions) throw new InvalidOperationException("Invalid count for header: " + i + ", count: " + count);
+                    if (count is 0 || i + count > MaximumHeaderOptions) throw new InvalidOperationException("Invalid count for header: " + i + ", count: " + count);
 
                     //Read the HeaderOption (should also be bounded by length?)
                     for (int j = 0; j < count && i < MaximumHeaderOptions; j++, i++)
@@ -796,7 +796,7 @@ namespace Media.Containers.Nut
             {
                 Node result = ReadNext();
 
-                if (result == null) yield break;
+                if (result is null) yield break;
 
                 yield return result;                
 
@@ -810,7 +810,7 @@ namespace Media.Containers.Nut
 
         void ParseStreamPackages()
         {
-            if (m_StreamPackages != null) return;
+            if (m_StreamPackages is not null) return;
 
             m_StreamPackages = new Dictionary<int, Node>();
 
@@ -859,7 +859,7 @@ namespace Media.Containers.Nut
 
         public override IEnumerable<Track> GetTracks()
         {
-            if (m_Tracks != null)
+            if (m_Tracks is not null)
             {
                 foreach (Track track in m_Tracks) yield return track;
                 yield break;

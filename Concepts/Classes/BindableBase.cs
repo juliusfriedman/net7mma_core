@@ -80,7 +80,7 @@ namespace Media.Common
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChangedEventHandler eventHandler = this.PropertyChanged;
-            if (eventHandler != null)
+            if (eventHandler is not null)
             {
                 eventHandler(this, new PropertyChangedEventArgs(propertyName));
             }

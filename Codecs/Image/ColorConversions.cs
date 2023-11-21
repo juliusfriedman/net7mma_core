@@ -62,7 +62,7 @@ namespace Media.Codecs.Image
             {
                 get
                 {
-                    if (lookupTable == null) Initialize();
+                    if (lookupTable is null) Initialize();
                     return lookupTable;
                 }
             }
@@ -74,7 +74,7 @@ namespace Media.Codecs.Image
             {
                 get
                 {
-                    return lookupTable != null;
+                    return lookupTable is not null;
                 }
             }
 
@@ -250,173 +250,149 @@ namespace Media.Codecs.Image
 
         const int OT = 112, M = 129, X = 66, Q = 25, Z = 18, B = -38, C = 74, D = 94;
 
-        public static unsafe byte[] BGRA2YUV420Managed(int width, int height, System.IntPtr scan0)
+        public static unsafe byte[] BGRA2YUV420Managed(int width, int height, nint scan0)
         {
             //Parrallel
-            try
+            int frameSize = width * height;
+            int chromasize = frameSize / 4;
+
+            int yIndex = 0;
+            int uIndex = frameSize;
+            int vIndex = frameSize + chromasize;
+            byte[] yuv = new byte[frameSize * 3 / 2];
+
+            uint* rgbValues = (uint*)scan0.ToPointer();
+
+            int index = 0;
+
+            unchecked
             {
-                int frameSize = width * height;
-                int chromasize = frameSize / 4;
-
-                int yIndex = 0;
-                int uIndex = frameSize;
-                int vIndex = frameSize + chromasize;
-                byte[] yuv = new byte[frameSize * 3 / 2];
-
-                uint* rgbValues = (uint*)scan0.ToPointer();
-
-                int index = 0;
-
-                unchecked
+                for (int j = 0; j < height; j++)
                 {
-                    for (int j = 0; j < height; j++)
+                    for (int i = 0; i < width; i++)
                     {
-                        for (int i = 0; i < width; i++)
+                        uint B = (rgbValues[index] & 0xff000000) >> 24;
+                        uint G = (rgbValues[index] & 0xff0000) >> 16;
+                        uint R = (rgbValues[index] & 0xff00) >> 8;
+                        //uint a = (rgbValues[index] & 0xff) >> 0;
+
+                        //int yuvC = Utility.RgbYuv.GetYuv(Common.Binary.ReverseU32(rgbValues[index]));
+
+                        uint Y = (uint)(((X * R + M * G + Q * B + sbyte.MaxValue) >> E) + S);
+                        uint U = (uint)(((B * R - C * G + OT * B + sbyte.MaxValue) >> E) + sbyte.MaxValue);
+                        uint V = (uint)(((OT * R - D * G - Z * B + sbyte.MaxValue) >> E) + sbyte.MaxValue);
+
+                        yuv[yIndex++] = Common.Binary.Clamp((byte)Y, (byte)0, byte.MaxValue);// (byte)((yuvC & 0xff0000) >> 16); //
+
+                        // > 0 && IsEven
+                        //If Common.Binary.IsPowerOfTwo(j) && Common.Binary.IsPowerOfTwo(index)
+                        if (Common.Binary.IsEven(ref j) && Common.Binary.IsEven(ref index))
                         {
-                            uint B = (rgbValues[index] & 0xff000000) >> 24;
-                            uint G = (rgbValues[index] & 0xff0000) >> 16;
-                            uint R = (rgbValues[index] & 0xff00) >> 8;
-                            //uint a = (rgbValues[index] & 0xff) >> 0;
-
-                            //int yuvC = Utility.RgbYuv.GetYuv(Common.Binary.ReverseU32(rgbValues[index]));
-
-                            uint Y = (uint)(((X * R + M * G + Q * B + sbyte.MaxValue) >> E) + S);
-                            uint U = (uint)(((B * R - C * G + OT * B + sbyte.MaxValue) >> E) + sbyte.MaxValue);
-                            uint V = (uint)(((OT * R - D * G - Z * B + sbyte.MaxValue) >> E) + sbyte.MaxValue);
-
-                            yuv[yIndex++] = Common.Binary.Clamp((byte)Y, (byte)0, byte.MaxValue);// (byte)((yuvC & 0xff0000) >> 16); //
-
-                            // > 0 && IsEven
-                            //If Common.Binary.IsPowerOfTwo(j) && Common.Binary.IsPowerOfTwo(index)
-                            if (Common.Binary.IsEven(ref j) && Common.Binary.IsEven(ref index))
-                            {
-                                yuv[uIndex++] = Common.Binary.Clamp((byte)U, (byte)0, byte.MaxValue);//(byte)((yuvC  & 0xff00) >> 8);//
-                                yuv[vIndex++] = Common.Binary.Clamp((byte)V, (byte)0, byte.MaxValue);// (byte)((yuvC & 0xff) >> 0);//
-                            }
-
-                            index++;
+                            yuv[uIndex++] = Common.Binary.Clamp((byte)U, (byte)0, byte.MaxValue);//(byte)((yuvC  & 0xff00) >> 8);//
+                            yuv[vIndex++] = Common.Binary.Clamp((byte)V, (byte)0, byte.MaxValue);// (byte)((yuvC & 0xff) >> 0);//
                         }
-                    }
 
-                    return yuv;
+                        index++;
+                    }
                 }
 
-            }
-            catch
-            {
-                throw;
+                return yuv;
             }
         }
 
-        public static unsafe byte[] ARGB2YUV420Managed(int width, int height, System.IntPtr scan0)
+        public static unsafe byte[] ARGB2YUV420Managed(int width, int height, nint scan0)
         {
             //Parrallel
-            try
+            int frameSize = width * height;
+            int chromasize = frameSize / 4;
+
+            int yIndex = 0;
+            int uIndex = frameSize;
+            int vIndex = frameSize + chromasize;
+            byte[] yuv = new byte[frameSize * 3 / 2];
+
+            uint* rgbValues = (uint*)scan0.ToPointer();
+
+            int index = 0;
+
+            unchecked
             {
-                int frameSize = width * height;
-                int chromasize = frameSize / 4;
-
-                int yIndex = 0;
-                int uIndex = frameSize;
-                int vIndex = frameSize + chromasize;
-                byte[] yuv = new byte[frameSize * 3 / 2];
-
-                uint* rgbValues = (uint*)scan0.ToPointer();
-
-                int index = 0;
-
-                unchecked
+                for (int j = 0; j < height; j++)
                 {
-                    for (int j = 0; j < height; j++)
+                    for (int i = 0; i < width; i++)
                     {
-                        for (int i = 0; i < width; i++)
+                        //uint A = (rgbValues[index] & 0xff000000) >> 24;
+                        uint R = (rgbValues[index] & 0xff0000) >> 16;
+                        uint G = (rgbValues[index] & 0xff00) >> 8;
+                        uint B = (rgbValues[index] & 0xff) >> 0;
+
+                        //int yuvC = Utility.RgbYuv.GetYuv(Common.Binary.ReverseU32(rgbValues[index]));
+
+                        uint Y = (uint)(((X * R + M * G + Q * B + sbyte.MaxValue) >> E) + S);
+                        uint U = (uint)(((B * R - C * G + OT * B + sbyte.MaxValue) >> E) + sbyte.MaxValue);
+                        uint V = (uint)(((OT * R - D * G - Z * B + sbyte.MaxValue) >> E) + sbyte.MaxValue);
+
+                        yuv[yIndex++] = Common.Binary.Clamp((byte)Y, (byte)0, byte.MaxValue);// (byte)((yuvC & 0xff0000) >> 16); //
+
+                        // > 0 && IsEven
+                        //If Common.Binary.IsPowerOfTwo(j) && Common.Binary.IsPowerOfTwo(index)
+                        if (Common.Binary.IsEven(ref j) && Common.Binary.IsEven(ref index))
                         {
-                            //uint A = (rgbValues[index] & 0xff000000) >> 24;
-                            uint R = (rgbValues[index] & 0xff0000) >> 16;
-                            uint G = (rgbValues[index] & 0xff00) >> 8;
-                            uint B = (rgbValues[index] & 0xff) >> 0;
-
-                            //int yuvC = Utility.RgbYuv.GetYuv(Common.Binary.ReverseU32(rgbValues[index]));
-
-                            uint Y = (uint)(((X * R + M * G + Q * B + sbyte.MaxValue) >> E) + S);
-                            uint U = (uint)(((B * R - C * G + OT * B + sbyte.MaxValue) >> E) + sbyte.MaxValue);
-                            uint V = (uint)(((OT * R - D * G - Z * B + sbyte.MaxValue) >> E) + sbyte.MaxValue);
-
-                            yuv[yIndex++] = Common.Binary.Clamp((byte)Y, (byte)0, byte.MaxValue);// (byte)((yuvC & 0xff0000) >> 16); //
-
-                            // > 0 && IsEven
-                            //If Common.Binary.IsPowerOfTwo(j) && Common.Binary.IsPowerOfTwo(index)
-                            if (Common.Binary.IsEven(ref j) && Common.Binary.IsEven(ref index))
-                            {
-                                yuv[uIndex++] = Common.Binary.Clamp((byte)U, (byte)0, byte.MaxValue);//(byte)((yuvC  & 0xff00) >> 8);//
-                                yuv[vIndex++] = Common.Binary.Clamp((byte)V, (byte)0, byte.MaxValue);// (byte)((yuvC & 0xff) >> 0);//
-                            }
-
-                            index++;
+                            yuv[uIndex++] = Common.Binary.Clamp((byte)U, (byte)0, byte.MaxValue);//(byte)((yuvC  & 0xff00) >> 8);//
+                            yuv[vIndex++] = Common.Binary.Clamp((byte)V, (byte)0, byte.MaxValue);// (byte)((yuvC & 0xff) >> 0);//
                         }
-                    }
 
-                    return yuv;
+                        index++;
+                    }
                 }
 
-            }
-            catch
-            {
-                throw;
+                return yuv;
             }
         }
 
-        public static unsafe byte[] RGBToYUV420Managed(int width, int height, System.IntPtr scan0)
+        public static unsafe byte[] RGBToYUV420Managed(int width, int height, nint scan0)
         {
             //Parrallel
-            try
+            int frameSize = width * height;
+            int chromasize = frameSize / 4;
+
+            int yIndex = 0;
+            int uIndex = frameSize;
+            int vIndex = frameSize + chromasize;
+            byte[] yuv = new byte[frameSize * 3 / 2];
+
+            byte* rgbValues = (byte*)scan0.ToPointer();
+
+            int index = 0;
+
+            unchecked
             {
-                int frameSize = width * height;
-                int chromasize = frameSize / 4;
 
-                int yIndex = 0;
-                int uIndex = frameSize;
-                int vIndex = frameSize + chromasize;
-                byte[] yuv = new byte[frameSize * 3 / 2];
-
-                byte* rgbValues = (byte*)scan0.ToPointer();
-
-                int index = 0;
-
-                unchecked
+                for (int j = 0; j < height; j++)
                 {
-
-                    for (int j = 0; j < height; j++)
+                    for (int i = 0; i < width; i++)
                     {
-                        for (int i = 0; i < width; i++)
+                        uint R = rgbValues[index++];
+                        uint G = rgbValues[index++];
+                        uint B = rgbValues[index++];
+
+                        //int yuvC = Utility.RgbYuv.GetYuv(Common.Binary.ReverseU32(rgbValues[index]));
+
+                        uint Y = (uint)(((X * R + M * G + Q * B + sbyte.MaxValue) >> E) + S);
+                        uint U = (uint)(((B * R - C * G + OT * B + sbyte.MaxValue) >> E) + sbyte.MaxValue);
+                        uint V = (uint)(((OT * R - D * G - Z * B + sbyte.MaxValue) >> E) + sbyte.MaxValue);
+
+                        yuv[yIndex++] = Common.Binary.Clamp((byte)Y, (byte)0, byte.MaxValue);// (byte)((yuvC & 0xff0000) >> 16); //
+
+                        if (Common.Binary.IsEven(ref j) && Common.Binary.IsEven(ref index))
                         {
-                            uint R = rgbValues[index++];
-                            uint G = rgbValues[index++];
-                            uint B = rgbValues[index++];
-
-                            //int yuvC = Utility.RgbYuv.GetYuv(Common.Binary.ReverseU32(rgbValues[index]));
-
-                            uint Y = (uint)(((X * R + M * G + Q * B + sbyte.MaxValue) >> E) + S);
-                            uint U = (uint)(((B * R - C * G + OT * B + sbyte.MaxValue) >> E) + sbyte.MaxValue);
-                            uint V = (uint)(((OT * R - D * G - Z * B + sbyte.MaxValue) >> E) + sbyte.MaxValue);
-
-                            yuv[yIndex++] = Common.Binary.Clamp((byte)Y, (byte)0, byte.MaxValue);// (byte)((yuvC & 0xff0000) >> 16); //
-
-                            if (Common.Binary.IsEven(ref j) && Common.Binary.IsEven(ref index))
-                            {
-                                yuv[uIndex++] = Common.Binary.Clamp((byte)U, (byte)0, byte.MaxValue);//(byte)((yuvC  & 0xff00) >> 8);//
-                                yuv[vIndex++] = Common.Binary.Clamp((byte)V, (byte)0, byte.MaxValue);// (byte)((yuvC & 0xff) >> 0);//
-                            }
+                            yuv[uIndex++] = Common.Binary.Clamp((byte)U, (byte)0, byte.MaxValue);//(byte)((yuvC  & 0xff00) >> 8);//
+                            yuv[vIndex++] = Common.Binary.Clamp((byte)V, (byte)0, byte.MaxValue);// (byte)((yuvC & 0xff) >> 0);//
                         }
                     }
-
-                    return yuv;
                 }
 
-            }
-            catch
-            {
-                throw;
+                return yuv;
             }
         }
 

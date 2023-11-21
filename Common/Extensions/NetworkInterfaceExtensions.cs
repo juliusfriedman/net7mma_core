@@ -47,7 +47,7 @@ namespace Media.Common.Extensions.NetworkInterface
         /// <returns>The <see cref="System.Net.NetworkInformation.NetworkInterface"/> associated with the address or the default if none were found.</returns>
         public static System.Net.NetworkInformation.NetworkInterface GetNetworkInterface(System.Net.IPAddress localAddress)
         {
-            if (localAddress == null) throw new System.ArgumentNullException();
+            if (localAddress is null) throw new System.ArgumentNullException();
 
             bool isMulticast = Common.Extensions.IPAddress.IPAddressExtensions.IsMulticast(localAddress);
 
@@ -105,7 +105,7 @@ namespace Media.Common.Extensions.NetworkInterface
         /// <returns>If any, the interfaces which correspond to the given criteria.</returns>
         public static System.Collections.Generic.IEnumerable<System.Net.NetworkInformation.NetworkInterface> GetNetworkInterface(System.Net.NetworkInformation.OperationalStatus status, params System.Net.NetworkInformation.NetworkInterfaceType[] interfaceTypes)
         {
-            if(interfaceTypes == null) yield break;
+            if(interfaceTypes is null) yield break;
 
             foreach (System.Net.NetworkInformation.NetworkInterface networkInterface in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
             {
@@ -190,7 +190,7 @@ namespace Media.Common.Extensions.NetworkInterface
         /// <returns></returns>
         public static double GetInterframeGapNanoseconds(this System.Net.NetworkInformation.NetworkInterface networkInterface)
         {
-            if(networkInterface == null) return 0;
+            if(networkInterface is null) return 0;
 
             return CaulculateInterframeGapNanoseconds(networkInterface.Speed);
         }
@@ -208,7 +208,7 @@ namespace Media.Common.Extensions.NetworkInterface
         public static System.Net.IPAddress GetFirstMulticastIPAddress(System.Net.NetworkInformation.NetworkInterface networkInterface, System.Net.Sockets.AddressFamily addressFamily)
         {
             //Filter interfaces which are not usable.
-            if (networkInterface == null || 
+            if (networkInterface is null || 
                 false == networkInterface.SupportsMulticast ||
                 networkInterface.OperationalStatus != System.Net.NetworkInformation.OperationalStatus.Up)// The interface is not up (should probably ignore...?)
             {
@@ -219,7 +219,7 @@ namespace Media.Common.Extensions.NetworkInterface
             System.Net.NetworkInformation.IPInterfaceProperties interfaceProperties = networkInterface.GetIPProperties();
 
             //If there are no IPInterfaceProperties then try the next interface
-            if (interfaceProperties == null) return null;
+            if (interfaceProperties is null) return null;
 
             //Iterate for each Multicast IP bound to the interface
             foreach (System.Net.NetworkInformation.MulticastIPAddressInformation multicastIpInfo in interfaceProperties.MulticastAddresses)
@@ -235,7 +235,7 @@ namespace Media.Common.Extensions.NetworkInterface
         public static System.Net.IPAddress GetFirstUnicastIPAddress(System.Net.NetworkInformation.NetworkInterface networkInterface, System.Net.Sockets.AddressFamily addressFamily)
         {            
             //Filter interfaces which are not usable.
-            if (networkInterface == null || 
+            if (networkInterface is null || 
                 networkInterface.OperationalStatus != System.Net.NetworkInformation.OperationalStatus.Up)// The interface is not up
             {
                 return System.Net.IPAddress.None;
@@ -245,7 +245,7 @@ namespace Media.Common.Extensions.NetworkInterface
             System.Net.NetworkInformation.IPInterfaceProperties interfaceProperties = networkInterface.GetIPProperties();
 
             //If there are no IPInterfaceProperties then try the next interface
-            if (interfaceProperties == null) return null;
+            if (interfaceProperties is null) return null;
 
             //Iterate for each Unicast IP bound to the interface
             foreach (System.Net.NetworkInformation.UnicastIPAddressInformation unicastIpInfo in interfaceProperties.UnicastAddresses)

@@ -149,7 +149,7 @@ namespace Media
         /// <returns>The sequence of bytes which represent the compound RtcpPacket.</returns>
         public static IEnumerable<byte> ToCompoundBytes(IEnumerable<RtcpPacket> packets)
         {
-            if (packets == null) throw new ArgumentNullException("packets");
+            if (packets is null) throw new ArgumentNullException("packets");
             else if (packets.Count() < 2) goto PreparePackets; //Only a single packet can just be prepared.
             
             RtcpPacket first = packets.First();
@@ -335,8 +335,8 @@ namespace Media
                 int firstPayloadType = currentPacket.PayloadType;
 
                 //The first packet in a compound packet needs to be validated
-                if (parsedPackets == 0 && !IsValidRtcpHeader(currentPacket.Header, currentPacket.Version)) yield break;
-                else if (currentPacket.Version != version || skipUnknownTypes && RtcpPacket.GetImplementationForPayloadType((byte)currentPacket.PayloadType) == null) yield break;
+                if (parsedPackets is 0 && !IsValidRtcpHeader(currentPacket.Header, currentPacket.Version)) yield break;
+                else if (currentPacket.Version != version || skipUnknownTypes && RtcpPacket.GetImplementationForPayloadType((byte)currentPacket.PayloadType) is null) yield break;
                 
                 //Count the packets parsed
                 ++parsedPackets;
@@ -385,12 +385,12 @@ namespace Media
 
         public static int ReadPadding(byte[] buffer, int offset, int count)
         {
-            if (count <= 0 || buffer == null) return 0;
+            if (count <= 0 || buffer is null) return 0;
 
             int dataLength = buffer.Length;
 
             //If there are no more bytes to parse we cannot continue
-            if (dataLength == 0 || offset > dataLength) return 0;
+            if (dataLength is 0 || offset > dataLength) return 0;
 
             /*
               If the padding bit is set, the packet contains one or more
@@ -578,7 +578,7 @@ namespace Media
                     RtpMaxSeq = (ushort)sequenceNumber;
 
                     //If no more probation is required then reset the coutners and indicate the packet is in state
-                    if (RtpProbation == 0)
+                    if (RtpProbation is 0)
                     {
                         ResetRtpValidationCounters(ref sequenceNumber, ref RtpBaseSeq, ref RtpMaxSeq, ref RtpBadSeq, ref RtpSeqCycles, ref RtpReceivedPrior, ref RtpPacketsRecieved);
 
@@ -674,7 +674,7 @@ namespace Media
 
             int lost_interval = expected_interval - received_interval;
 
-            if (expected_interval == 0 || lost_interval <= 0)
+            if (expected_interval is 0 || lost_interval <= 0)
             {
                 fraction = 0;
             }
@@ -953,7 +953,7 @@ namespace Media
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-                //Example 223 & 32 == 0
+                //Example 223 & 32 is 0
                 //Where 32 == PaddingMask and 223 == (11011111) Binary and would indicate a version 3 header with no padding, extension set and 15 CC
                 get { return (First8Bits & PaddingMask) > 0; }
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1307,9 +1307,7 @@ namespace Media
             {
                 if (System.Object.ReferenceEquals(this, obj)) return true;
 
-                if (false.Equals((obj is CommonHeaderBits))) return false;
-
-                return Equals(obj as CommonHeaderBits);
+                return obj is CommonHeaderBits b && Equals(b);
             }
 
             #endregion
@@ -1438,7 +1436,7 @@ namespace Media
             public SourceList(Media.Rtp.RtpHeader header, byte[] buffer, int offset = 0, bool shouldDispose = true)
                 : base(shouldDispose)
             {
-                if (header == null) throw new ArgumentNullException("header");
+                if (header is null) throw new ArgumentNullException("header");
 
                 if (header.IsCompressed) throw new NotSupportedException();
 
@@ -1447,7 +1445,7 @@ namespace Media
 
                 if (m_SourceCount > 0)
                 {
-                    if (buffer == null) throw new ArgumentNullException("buffer");
+                    if (buffer is null) throw new ArgumentNullException("buffer");
 
                     //Source lists are only inserted by a mixer and come directly after the header and would be present in the payload,
                     //before the RtpExtension (if present) and before the RtpPacket's actual binary data
@@ -1543,7 +1541,7 @@ namespace Media
             public bool IsComplete
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return false == IsDisposed && m_SourceCount * Binary.BytesPerInteger >= Size; }
+                get { return IsDisposed is false && m_SourceCount * Binary.BytesPerInteger >= Size; }
             }
 
             uint IEnumerator<uint>.Current
@@ -1776,7 +1774,7 @@ namespace Media
             [CLSCompliant(false)]
             public bool TryCopyTo(IList<uint> list, int index = 0)
             {
-                if (list == null || list.IsReadOnly) return false;
+                if (list is null || list.IsReadOnly) return false;
                 try
                 {
                     CheckDisposed();

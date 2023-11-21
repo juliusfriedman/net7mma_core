@@ -50,7 +50,7 @@ namespace Media.Concepts.Classes
         public bool Enabled
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Timer != null && Timer.Enabled; }
+            get { return Timer is not null && Timer.Enabled; }
         }
 
         public double ElapsedTicks
@@ -185,7 +185,7 @@ namespace Media.Concepts.Classes
 
         protected override void Dispose(bool disposing)
         {
-            if (IsDisposed || false == disposing || false == ShouldDispose) return;
+            if (IsDisposed || disposing is false || ShouldDispose is false) return;
 
             Stop();
 
@@ -234,7 +234,7 @@ namespace Media.UnitTests
                     //sw.Timer.m_Counter.Join(0);
                 }
 
-                //while (sw.ElapsedNanoseconds == 0.0 && sw.Elapsed == System.TimeSpan.Zero)
+                //while (sw.ElapsedNanoseconds is 0.0 && sw.Elapsed == System.TimeSpan.Zero)
                 //{
                 //    sw.Timer.m_Clock.NanoSleep(0);
 

@@ -142,7 +142,7 @@ namespace Media.Containers.Mpeg
             {
                 byte[] packet = new byte[PacketLength];
                 
-                //packet.Header.PayloadUnitStartIndicator = (index == 0);
+                //packet.Header.PayloadUnitStartIndicator = (index is 0);
                 
                 //packet.Header.PayloadExist = true;
 

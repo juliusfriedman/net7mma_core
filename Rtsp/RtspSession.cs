@@ -37,15 +37,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #endregion
 using Media.Common;
 using Media.Rtp;
-using System.Linq;
+using Media.Sdp;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using static Media.Http.HeaderFields;
-using static Media.Rtsp.RtspClient;
-using System.Collections.Generic;
 using System.Threading;
-using Media.Sdp;
+using static Media.Rtsp.RtspClient;
 
 namespace Media.Rtsp
 {
@@ -55,20 +54,6 @@ namespace Media.Rtsp
     /// <remarks>Todo, Unify by creating Session and HttpSession to wit this type shall derive hence forth</remarks>
     public class RtspSession : SuppressedFinalizerDisposable
     {
-
-        #region Statics
-
-        public static void CreateSession(RtspClient parent, bool shouldDispose = true)
-        {
-            if (parent == null) throw new ArgumentNullException(nameof(parent));
-            RtspSession result = new RtspSession(parent, shouldDispose);
-
-            
-            
-        }
-
-        #endregion
-
         #region Fields
 
         readonly RtspClient m_Client;
@@ -78,16 +63,16 @@ namespace Media.Rtsp
         /// <summary>
         /// The remote RtspEndPoint
         /// </summary>
-        EndPoint m_RemoteRtsp;
+        readonly EndPoint m_RemoteRtsp;
 
         /// <summary>
         /// The protcol in which Rtsp data will be transpored from the server
         /// </summary>
-        ProtocolType m_RtpProtocol;
+        readonly ProtocolType m_RtpProtocol;
 
         internal RtpClient m_RtpClient;
 
-        ClientProtocolType m_RtspProtocol;
+        readonly ClientProtocolType m_RtspProtocol;
 
         RtspMessage m_LastTransmitted;
 
@@ -103,7 +88,7 @@ namespace Media.Rtsp
         /// <summary>
         /// The remote IPAddress to which the Location resolves via Dns
         /// </summary>
-        IPAddress m_RemoteIP;
+        readonly IPAddress m_RemoteIP;
 
         /// <summary>
         /// Keep track of certain values.
@@ -143,7 +128,7 @@ namespace Media.Rtsp
         /// <summary>
         /// The buffer this client uses for all requests 4MB * 2 by default.
         /// </summary>
-        internal Common.MemorySegment m_Buffer;        
+        internal Common.MemorySegment m_Buffer;
 
         /// <summary>
         /// The value passed to the <see cref="DateTime.ToString"/> method when <see cref="DateRequests"/> is true.
@@ -785,7 +770,7 @@ namespace Media.Rtsp
         public int SocketReadTimeout
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket == null ? -1 : m_RtspSocket.ReceiveTimeout; }
+            get { return Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket is null ? -1 : m_RtspSocket.ReceiveTimeout; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set { if (Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket is null) return; m_RtspSocket.ReceiveTimeout = value; }
         }
@@ -796,7 +781,7 @@ namespace Media.Rtsp
         public int SocketWriteTimeout
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket == null ? -1 : m_RtspSocket.SendTimeout; }
+            get { return Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket is null ? -1 : m_RtspSocket.SendTimeout; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set { if (Common.IDisposedExtensions.IsNullOrDisposed(this) || m_RtspSocket is null) return; m_RtspSocket.SendTimeout = value; }
         }
@@ -862,7 +847,7 @@ namespace Media.Rtsp
         {
             LastRequest = request;
 
-            if (response != null)
+            if (response is not null)
             {
                 ParseSessionIdAndTimeout(LastResponse = response);
             }
@@ -899,9 +884,6 @@ namespace Media.Rtsp
                         offset = 0, length = 0,
                         startSequenceNumber = -1;
 
-                    //Wait for the smallest amount of time possible.
-                    //int pollTime = (int)(Common.Extensions.NetworkInterface.NetworkInterfaceExtensions.GetInterframeGapMicroseconds(Common.Extensions.NetworkInterface.NetworkInterfaceExtensions.GetNetworkInterface(m_RtspSocket)) + Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(m_ConnectionTime)); //(int)Math.Round(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(m_RtspSessionTimeout) / Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMillisecond, MidpointRounding.ToEven)
-
                     //Half of the session timeout in milliseconds
                     int halfTimeout = (int)(m_RtspSessionTimeout.TotalMilliseconds / 2);
 
@@ -919,14 +901,17 @@ namespace Media.Rtsp
                     #region useClientProtocolVersion
 
                     //Ensure the request version matches the protocol version of the client if enforceVersion is true.
-                    if (useClientProtocolVersion && (message.Version == ProtocolVersion) is false) message.Version = ProtocolVersion;
+                    if (useClientProtocolVersion && (message.Version == ProtocolVersion) is false)
+                        message.Version = ProtocolVersion;
 
                     #endregion
 
                     #region Additional Headers
 
                     //Use any additional headers if given
-                    if (AdditionalHeaders.Count > 0) foreach (var additional in AdditionalHeaders) message.AppendOrSetHeader(additional.Key, additional.Value);
+                    if (AdditionalHeaders.Count > 0)
+                        foreach (var additional in AdditionalHeaders)
+                            message.AppendOrSetHeader(additional.Key, additional.Value);
 
                     #endregion
 
@@ -936,8 +921,10 @@ namespace Media.Rtsp
                     //Store the result - 1
 
                     //Todo, use session...
-                    if (message.ContainsHeader(RtspHeaders.CSeq).Equals(fatal)) startSequenceNumber += sequenceNumber = message.CSeq = NextClientSequenceNumber();
-                    else startSequenceNumber += sequenceNumber = message.CSeq;
+                    if (message.ContainsHeader(RtspHeaders.CSeq).Equals(fatal))
+                        startSequenceNumber += sequenceNumber = message.CSeq = NextClientSequenceNumber();
+                    else
+                        startSequenceNumber += sequenceNumber = message.CSeq;
 
                     #endregion
 
@@ -1351,7 +1338,7 @@ namespace Media.Rtsp
 
                                 ////Ensure the client transport is connected if previously playing and it has since disconnected.
                                 //if (IsPlaying &&
-                                //    m_RtpClient != null &&
+                                //    m_RtpClient is not null &&
                                 //    false == m_RtpClient.IsActive) m_RtpClient.Activate();
                             }
 
@@ -1391,8 +1378,8 @@ namespace Media.Rtsp
 
                             //If we have a message to send and did not send it then goto send.
                             //message.Transferred.HasValue
-                            if (message is not null &&
-                                sent is 0) goto Send;
+                            if (message is not null && sent is 0)
+                                goto Send;
 
                             //Receive again
                             goto Receive;
@@ -1637,7 +1624,7 @@ namespace Media.Rtsp
                                                 string value = sessionHeaderParts.LastOrDefault(p => false.Equals(string.IsNullOrWhiteSpace(p)));
 
                                                 //If we dont have an exiting id then this is valid if the header was completely recieved only.
-                                                if (false.Equals(string.IsNullOrWhiteSpace(value)) &&
+                                                if (string.IsNullOrWhiteSpace(value) is false &&
                                                     string.IsNullOrWhiteSpace(SessionId) ||
                                                     false.Equals(string.Compare(value, SessionId) is Common.Binary.Zero))
                                                 {
@@ -1681,9 +1668,7 @@ namespace Media.Rtsp
 
                                     if (CalculateServerDelay)
                                     {
-                                        string timestamp;
-
-                                        RtspHeaders.TryParseTimestamp(m_LastTransmitted[RtspHeaders.Timestamp], out timestamp, out m_LastServerDelay);
+                                        RtspHeaders.TryParseTimestamp(m_LastTransmitted[RtspHeaders.Timestamp], out string timestamp, out m_LastServerDelay);
 
                                         timestamp = null;
                                     }
@@ -1737,7 +1722,7 @@ namespace Media.Rtsp
                 }
 
                 //Return the result
-                //return message != null && m_LastTransmitted != null && message.CSeq == m_LastTransmitted.CSeq ? m_LastTransmitted : null;
+                //return message is not null && m_LastTransmitted is not null && message.CSeq == m_LastTransmitted.CSeq ? m_LastTransmitted : null;
                 return m_LastTransmitted;
 
             }//Unchecked
@@ -1895,7 +1880,7 @@ namespace Media.Rtsp
                     else uri = uri.Substring(11);
                 }
 
-                string qop = baseParts.Where(p => string.Compare(RtspHeaderFields.Authorization.Attributes.QualityOfProtection, p, true) == 0).FirstOrDefault();
+                string qop = baseParts.Where(p => string.Compare(RtspHeaderFields.Authorization.Attributes.QualityOfProtection, p, true) is 0).FirstOrDefault();
 
                 if (string.IsNullOrWhiteSpace(qop) is false)
                 {
@@ -1951,7 +1936,7 @@ namespace Media.Rtsp
 
             if (action is null) return;
 
-            foreach (RtspClientAction handler in action.GetInvocationList())
+            foreach (RtspClientAction handler in action.GetInvocationList().Cast<RtspClientAction>())
             {
                 try { handler(this.m_Client, EventArgs.Empty); }
                 catch (Exception e)
@@ -1985,7 +1970,7 @@ namespace Media.Rtsp
             if (m_RtspSocket is not null)
             {
                 //If LeaveOpen was false and the socket is not shared.
-                if (force || (LeaveOpen is false && SharesSocket is false))
+                if (force || LeaveOpen is false && SharesSocket is false)
                 {
                     #region The Great Debate on Closing
 
@@ -2029,7 +2014,7 @@ namespace Media.Rtsp
 
             if (action is null) return;
 
-            foreach (RtspClientAction handler in action.GetInvocationList())
+            foreach (RtspClientAction handler in action.GetInvocationList().Cast<RtspClientAction>())
             {
                 try { handler(this.m_Client, EventArgs.Empty); }
                 catch (Exception e)
@@ -2052,7 +2037,7 @@ namespace Media.Rtsp
 
             if (action is null) return;
 
-            foreach (RequestHandler handler in action.GetInvocationList())
+            foreach (RequestHandler handler in action.GetInvocationList().Cast<RequestHandler>())
             {
                 try { handler(this.m_Client, request); }
                 catch (Exception e)
@@ -2075,7 +2060,7 @@ namespace Media.Rtsp
 
             if (action is null) return;
 
-            foreach (ResponseHandler handler in action.GetInvocationList())
+            foreach (ResponseHandler handler in action.GetInvocationList().Cast<ResponseHandler>())
             {
                 try { handler(this.m_Client, request, response); }
                 catch (Exception e)
@@ -2182,7 +2167,7 @@ namespace Media.Rtsp
                             {
                                 int timeoutStart = 1 + timeoutPart.IndexOf(Media.Sdp.SessionDescription.EqualsSign);
 
-                                if (timeoutStart >= 0 && int.TryParse(timeoutPart.Substring(timeoutStart), out timeoutStart))
+                                if (timeoutStart >= 0 && int.TryParse(timeoutPart.AsSpan(timeoutStart), out timeoutStart))
                                 {
                                     if (timeoutStart > 0)
                                     {
@@ -2225,9 +2210,7 @@ namespace Media.Rtsp
                 if (indexOfDelay >= 0)
                 {
                     //attempt to calculate it from the given value
-                    double delay = double.NaN;
-
-                    if (double.TryParse(timestampHeader.Substring(indexOfDelay + 6).TrimEnd(), out delay))
+                    if (double.TryParse(timestampHeader.Substring(indexOfDelay + 6).TrimEnd(), out double delay))
                     {
                         //Set the value of the servers delay
                         LastServerDelay = System.TimeSpan.FromSeconds(delay);
@@ -2244,9 +2227,7 @@ namespace Media.Rtsp
                     if (parts.Length > 1)
                     {
                         //attempt to calulcate it from the given value
-                        double delay = double.NaN;
-
-                        if (double.TryParse(parts[1].Trim(), out delay))
+                        if (double.TryParse(parts[1].Trim(), out double delay))
                         {
                             //Set the value of the servers delay
                             LastServerDelay = System.TimeSpan.FromSeconds(delay);
@@ -2581,12 +2562,12 @@ namespace Media.Rtsp
         /// </summary>
         protected override void Dispose(bool disposing)
         {
-            if (false == disposing || false == ShouldDispose) return;
+            if (disposing is false || ShouldDispose is false) return;
 
             base.Dispose(ShouldDispose);
 
             //If there is a LastRequest
-            if (LastRequest != null)
+            if (LastRequest is not null)
             {
                 //It is no longer persistent
                 using (LastRequest) LastRequest.IsPersistent = false;
@@ -2596,7 +2577,7 @@ namespace Media.Rtsp
             }
 
             //If there is a LastResponse
-            if(LastResponse != null)
+            if(LastResponse is not null)
             { 
                 //It is no longer persistent
                 using (LastResponse) LastResponse.IsPersistent = false;
@@ -2616,7 +2597,7 @@ namespace Media.Rtsp
             }
 
             //If there is a MediaDescription
-            //if (MediaDescription != null)
+            //if (MediaDescription is not null)
             //{
             //    //Call dispose
             //    //MediaDescription.Dispose();
@@ -2626,7 +2607,7 @@ namespace Media.Rtsp
             //}
 
             //If there is a Context
-            if (Context != null)
+            if (Context is not null)
             {
                 //Call dispose
                 //Context.Dispose();

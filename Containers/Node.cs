@@ -93,42 +93,42 @@ namespace Media.Container
 
         public static bool TotalSizeEquals(Node a, Node b)
         {
-            return a == b || a != null && b != null && a.TotalSize == b.TotalSize;
+            return a == b || a is not null && b is not null && a.TotalSize == b.TotalSize;
         }
 
         public static bool DataSizeEquals(Node a, Node b)
         {
-            return a == b || a != null && b != null && a.DataSize == b.DataSize;
+            return a == b || a is not null && b is not null && a.DataSize == b.DataSize;
         }
 
         public static bool IdentifierEquals(Node a, Node b)
         {
-            return a == b || a != null && b != null && a.Identifier == b.Identifier;
+            return a == b || a is not null && b is not null && a.Identifier == b.Identifier;
         }
 
         public static bool IdentifierSizeEquals(Node a, Node b)
         {
-            return a == b || a != null && b != null && a.IdentifierSize == b.IdentifierSize;
+            return a == b || a is not null && b is not null && a.IdentifierSize == b.IdentifierSize;
         }
 
         public static bool MasterEquals(Node a, Node b)
         {
-            return a == b || a != null && b != null && a.Master == b.Master;
+            return a == b || a is not null && b is not null && a.Master == b.Master;
         }
 
         public static bool IsCompleteEquals(Node a, Node b)
         {
-            return a == b || a != null && b != null && a.IsComplete == b.IsComplete;
+            return a == b || a is not null && b is not null && a.IsComplete == b.IsComplete;
         }
 
         public static bool DataReferenceEquals(Node a, Node b)
         {
-            return a == b || a != null && b != null && Object.ReferenceEquals(a.m_Data, b.m_Data);
+            return a == b || a is not null && b is not null && Object.ReferenceEquals(a.m_Data, b.m_Data);
         }
 
         public static bool DataEquals(Node a, Node b)
         {
-            return a == b || a != null && b != null && a.DataAssigned && a.m_Data.SequenceEqual(b.m_Data);
+            return a == b || a is not null && b is not null && a.DataAssigned && a.m_Data.SequenceEqual(b.m_Data);
         }
 
         #endregion
@@ -179,7 +179,7 @@ namespace Media.Container
         /// <summary>
         /// Indicates if the instance was disposed or if the <see cref="Master"/> Disposed AND <see cref="DataAssigned"/> is <see cref="False"/>
         /// </summary>
-        public override bool IsDisposed { get { return base.IsDisposed || false == DataAssigned && Master != null && Master.IsDisposed; } }
+        public override bool IsDisposed { get { return base.IsDisposed || false == DataAssigned && Master is not null && Master.IsDisposed; } }
 
         #endregion
 
@@ -205,7 +205,7 @@ namespace Media.Container
             get
             {
                 if (DataAssigned) return m_Data;
-                else if (IsDisposed || DataSize <= 0 || Master.BaseStream == null) return Media.Common.MemorySegment.Empty;
+                else if (IsDisposed || DataSize <= 0 || Master.BaseStream is null) return Media.Common.MemorySegment.Empty;
 
                 //If data is larger then a certain amount then it may just make sense to return the data itself?
                 m_Data = new(new byte[DataSize]);
@@ -225,7 +225,7 @@ namespace Media.Container
         /// <summary>
         /// Indicates if <see cref="Data"/> has been assigned.
         /// </summary>
-        public bool DataAssigned { get { return m_Data != null; } }
+        public bool DataAssigned { get { return m_Data is not null; } }
 
         /// <summary>
         /// Provides a <see cref="System.IO.MemoryStream"/> to <see cref="Data"/>
@@ -247,8 +247,8 @@ namespace Media.Container
         public Node(IMediaContainer master, byte[] identifier, int lengthSize, long offset, byte[] data, bool shouldDispose = true)
             : base(shouldDispose)
         {
-            if (master == null) throw new ArgumentNullException("master");
-            if (identifier == null) throw new ArgumentNullException("identifier");
+            if (master is null) throw new ArgumentNullException("master");
+            if (identifier is null) throw new ArgumentNullException("identifier");
             Master = master;
             DataOffset = offset;
             Identifier = identifier;
@@ -271,8 +271,8 @@ namespace Media.Container
         public Node(IMediaContainer master, byte[] identifier, int lengthSize, long offset, long size, bool complete, bool shouldDispose = true)
             :base(shouldDispose)
         {
-            if (master == null) throw new ArgumentNullException("master");
-            if (identifier == null) throw new ArgumentNullException("identifier");
+            if (master is null) throw new ArgumentNullException("master");
+            if (identifier is null) throw new ArgumentNullException("identifier");
             Master = master;
             DataOffset = offset;
             Identifier = identifier;
@@ -306,7 +306,7 @@ namespace Media.Container
         Node(Node n, bool shouldDispose = true)
             :base(shouldDispose)
         {
-            if (n == null) throw new ArgumentNullException();
+            if (n is null) throw new ArgumentNullException();
             Master = n.Master;
             DataOffset = n.DataOffset;
             Identifier = n.Identifier;
@@ -326,7 +326,7 @@ namespace Media.Container
         Node(Node n, bool selfReference, int offset = 0, bool shouldDispose = true)
             : this(n, shouldDispose)
         {
-            if(n != null && n.DataSize > 0 && n.DataAssigned)
+            if(n is not null && n.DataSize > 0 && n.DataAssigned)
             {
                 if (selfReference) m_Data = n.m_Data;
                 else
@@ -355,7 +355,7 @@ namespace Media.Container
         /// </summary>
         public void UpdateData()
         {
-            if (!IsDisposed && DataSize > 0 && m_Data != null && DataOffset >= 0)
+            if (!IsDisposed && DataSize > 0 && m_Data is not null && DataOffset >= 0)
             {
                 Master.WriteAt(DataOffset, m_Data.Array, m_Data.Offset, (int)DataSize);
                 return;

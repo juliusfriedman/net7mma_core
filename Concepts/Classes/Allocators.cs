@@ -61,21 +61,21 @@ namespace Media.Concepts.Classes
         /// </summary>
         /// <param name="size"></param>
         /// <returns></returns>
-        System.IntPtr Allocate(long size);
+        nint Allocate(long size);
 
         /// <summary>
         /// Releases memory
         /// </summary>
         /// <param name="pointer"></param>
         /// <param name="size"></param>
-        void Release(System.IntPtr pointer, long size);
+        void Release(nint pointer, long size);
 
         /// <summary>
         /// Sets the <see cref="Privileges"/> on the pointer
         /// </summary>
         /// <param name="pointer"></param>
         /// <param name="permissions"></param>
-        Privileges SetPrivileges(System.IntPtr pointer, Privileges privileges);
+        Privileges SetPrivileges(nint pointer, Privileges privileges);
     }
 
     /// <summary>
@@ -88,14 +88,14 @@ namespace Media.Concepts.Classes
         /// </summary>
         /// <param name="size"></param>
         /// <returns></returns>
-        System.IntPtr Allocate(int size);
+        nint Allocate(int size);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="p"></param>
         /// <param name="size"></param>
-        void Free(System.IntPtr p, int size);
+        void Free(nint p, int size);
     }
 
     #endregion
@@ -111,28 +111,28 @@ namespace Media.Concepts.Classes
     public class UnmanagedAllocator : IStorageAllocator
     {
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public System.IntPtr Allocate(long size)
+        public nint Allocate(long size)
         {
             //Unsafe.AddressOf(ref size);
             return System.Runtime.InteropServices.Marshal.AllocHGlobal((int)size);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public void Release(System.IntPtr pointer, long size)
+        public void Release(nint pointer, long size)
         {
             System.Runtime.InteropServices.Marshal.FreeHGlobal(pointer);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public Privileges SetPrivileges(System.IntPtr pointer, Privileges privileges)
+        public Privileges SetPrivileges(nint pointer, Privileges privileges)
         {
             throw new System.NotImplementedException();
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static void Resize<T>(System.IntPtr pointer, int newElementCount)
+        public unsafe static void Resize<T>(nint pointer, int newElementCount)
         {
-            System.Runtime.InteropServices.Marshal.ReAllocHGlobal(pointer, new System.IntPtr(Unsafe.ArrayOfTwoElements<T>.AddressingDifference() * newElementCount));
+            System.Runtime.InteropServices.Marshal.ReAllocHGlobal(pointer, new nint(Unsafe.ArrayOfTwoElements<T>.AddressingDifference() * newElementCount));
         }
     }
 
@@ -143,22 +143,22 @@ namespace Media.Concepts.Classes
     /// <typeparam name="T"></typeparam>
     public class AlignedAllocator<T> : IStorageAllocator where T : new()
     {
-        public System.IntPtr Allocate(long size)
+        public nint Allocate(long size)
         {
             System.Collections.Generic.LinkedList<T> candidates = new System.Collections.Generic.LinkedList<T>();
 
-            System.IntPtr pointer = System.IntPtr.Zero;
+            nint pointer = nint.Zero;
 
             bool continue_ = true;
 
-            size += System.Runtime.InteropServices.Marshal.SizeOf(typeof(T)) % System.IntPtr.Size;
+            size += System.Runtime.InteropServices.Marshal.SizeOf(typeof(T)) % nint.Size;
 
-            int wide = System.IntPtr.Size * 8; // 32 or 64
+            int wide = nint.Size * 8; // 32 or 64
 
             while (continue_)
             {
                 //If there is no size make a new object which allocated 12 or more bytes to make a gap, next allocation should be aligned.
-                if (size == 0)
+                if (size is 0)
                 {
                     object gap = new object();
                 }
@@ -175,13 +175,13 @@ namespace Media.Concepts.Classes
                 //System.TypedReference trResult = __makeref(candidates.Last.Value);
 
                 ////Make a pointer to the local reference
-                //System.IntPtr localReferenceResult = *(System.IntPtr*)(&trResult);
+                //nint localReferenceResult = *(nint*)(&trResult);
 
                 //}
 
                 #endregion
 
-                pointer = Concepts.Classes.CommonIntermediateLanguage.As<T, System.IntPtr>(candidates.Last.Value);
+                pointer = Concepts.Classes.CommonIntermediateLanguage.As<T, nint>(candidates.Last.Value);
 
                 #region Unused
 
@@ -193,7 +193,7 @@ namespace Media.Concepts.Classes
 
                 #endregion
 
-                continue_ = (pointer.ToInt64() & System.IntPtr.Size - 1) != 0 || (pointer.ToInt64() % wide) == 24;
+                continue_ = (pointer.ToInt64() & nint.Size - 1) != 0 || (pointer.ToInt64() % wide) == 24;
 
                 #region Unused
 
@@ -205,12 +205,12 @@ namespace Media.Concepts.Classes
             return pointer;
         }
 
-        public void Release(System.IntPtr pointer, long size)
+        public void Release(nint pointer, long size)
         {
             //GC Managed
         }
 
-        public Privileges SetPrivileges(System.IntPtr pointer, Privileges privileges)
+        public Privileges SetPrivileges(nint pointer, Privileges privileges)
         {
             throw new System.NotImplementedException();
         }
@@ -243,7 +243,7 @@ namespace Media.Concepts.Classes
             {
                 long result = 0;
 
-                foreach (System.IntPtr pointer in Allocations.Keys)
+                foreach (nint pointer in Allocations.Keys)
                 {
                     System.Collections.Generic.IEnumerable<long> sizes;
 
@@ -260,10 +260,10 @@ namespace Media.Concepts.Classes
             }
         }
 
-        Media.Common.Collections.Generic.ConcurrentThesaurus<System.IntPtr, long> Allocations = new Common.Collections.Generic.ConcurrentThesaurus<System.IntPtr, long>();
+        Media.Common.Collections.Generic.ConcurrentThesaurus<nint, long> Allocations = new Common.Collections.Generic.ConcurrentThesaurus<nint, long>();
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        System.IntPtr IStorageAllocator.Allocate(long size)
+        nint IStorageAllocator.Allocate(long size)
         {
             throw new System.NotImplementedException();
 
@@ -271,7 +271,7 @@ namespace Media.Concepts.Classes
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        void IStorageAllocator.Release(System.IntPtr pointer, long size)
+        void IStorageAllocator.Release(nint pointer, long size)
         {
             throw new System.NotImplementedException();
 
@@ -287,7 +287,7 @@ namespace Media.Concepts.Classes
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        Privileges IStorageAllocator.SetPrivileges(System.IntPtr pointer, Privileges privileges)
+        Privileges IStorageAllocator.SetPrivileges(nint pointer, Privileges privileges)
         {
             throw new System.NotImplementedException();
         }

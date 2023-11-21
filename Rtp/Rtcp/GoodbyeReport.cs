@@ -157,7 +157,7 @@ namespace Media.Rtcp
         }
 
         public GoodbyeReport(int version, int ssrc, Media.RFC3550.SourceList sourcesLeaving, byte[] reasonForLeaving)
-            : this(version, 0, ssrc, sourcesLeaving == null ? Media.RFC3550.SourceList.Empty : sourcesLeaving, reasonForLeaving)
+            : this(version, 0, ssrc, sourcesLeaving is null ? Media.RFC3550.SourceList.Empty : sourcesLeaving, reasonForLeaving)
         {
 
         }
@@ -325,13 +325,13 @@ namespace Media.Rtcp
         /// <param name="count"></param>
         internal virtual protected void Add(RFC3550.SourceList sourceList, int offset, int count)
         {
-            if (sourceList == null) return;
+            if (sourceList is null) return;
 
             if (IsReadOnly) throw new InvalidOperationException("A RFC3550.SourceList cannot be added when IsReadOnly is true.");
 
             int reportBlocksRemaining = ReportBlocksRemaining;
 
-            if (reportBlocksRemaining == 0) throw new InvalidOperationException("A RtcpReport can only hold 31 ReportBlocks");
+            if (reportBlocksRemaining is 0) throw new InvalidOperationException("A RtcpReport can only hold 31 ReportBlocks");
 
             //Add the bytes to the payload and set the LengthInWordsMinusOne and increase the BlockCount
             
@@ -433,7 +433,7 @@ namespace Media.UnitTests
                                 //Use the SourceList
                                 using (Media.RFC3550.SourceList sourceList = p.GetSourceList())
                                 {
-                                    System.Diagnostics.Debug.Assert(sourceList.IsComplete == true, "SourceList.IsComplete");
+                                    System.Diagnostics.Debug.Assert(sourceList.IsComplete, "SourceList.IsComplete");
 
                                     System.Diagnostics.Debug.Assert(expectedSourceListSize == sourceList.Size, "Unexpected SourceList Size");
 
@@ -465,7 +465,7 @@ namespace Media.UnitTests
                             System.Diagnostics.Debug.Assert(p.PaddingOctets == PaddingCounter, "Unexpected PaddingOctets");
 
                             //Check all data in the padding but not the padding octet itself.
-                            System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b == 0), "Unexpected PaddingData");
+                            System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b is 0), "Unexpected PaddingData");
 
                             //Add remaining amount of reports to test the Add method
 

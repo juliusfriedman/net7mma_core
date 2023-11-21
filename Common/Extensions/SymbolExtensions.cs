@@ -333,7 +333,7 @@ namespace Media.UnitTests
 
             setter.Invoke(testClass, new[] { "Test" });
 
-            if (false == (string.Compare(testClass.Test, "Test") == 0)) throw new System.Exception("Did not invoke setter");
+            if (false == (string.Compare(testClass.Test, "Test") is 0)) throw new System.Exception("Did not invoke setter");
 
             System.Console.WriteLine(".Test => " + testClass.Test);
 
@@ -345,7 +345,7 @@ namespace Media.UnitTests
 
             setter.Invoke(testClass, new[] { "Test" });
 
-            if (false == (string.Compare(testClass.Test, "Test") == 0)) throw new System.Exception("Did not invoke setter");
+            if (false == (string.Compare(testClass.Test, "Test") is 0)) throw new System.Exception("Did not invoke setter");
 
             System.Console.WriteLine(".Test => " + testClass.Test);
 

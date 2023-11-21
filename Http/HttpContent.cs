@@ -25,7 +25,7 @@ namespace Media.Http
         public HttpContent(string name, bool shouldDispose = true)
             :base(shouldDispose)
         {
-            if (name == null) throw new ArgumentNullException("name");
+            if (name is null) throw new ArgumentNullException("name");
 
             ContentName = name;
         }
@@ -39,7 +39,7 @@ namespace Media.Http
         
         public BinaryContent(Common.MemorySegment data, string name = null) : base(name)
         {
-            if (data == null || data.Count == 0) throw new ArgumentException("data cannot be null or empty");
+            if (data is null || data.Count is 0) throw new ArgumentException("data cannot be null or empty");
 
             Data = data;
         }
@@ -64,7 +64,7 @@ namespace Media.Http
 
         public StreamContent(System.IO.Stream stream)
         {
-            if (stream == null) throw new ArgumentNullException();
+            if (stream is null) throw new ArgumentNullException();
 
             Stream = stream;
         }
@@ -126,18 +126,18 @@ namespace Media.Http
 
         public MultipartContent(Common.MemorySegment boundary)
         {
-            if (boundary == null || boundary.Count == 0) throw new ArgumentException("boundary cannot be null or empty");
+            if (boundary is null || boundary.Count is 0) throw new ArgumentException("boundary cannot be null or empty", nameof(boundary));
 
             Boundary = boundary;
         }
 
         public readonly Common.MemorySegment Boundary;
 
-        public readonly List<HttpContent> Contents = new List<HttpContent>();
+        public readonly List<HttpContent> Contents = new();
 
         public void Add(HttpContent content)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(content)) throw new ArgumentException("content cannot be null or disposed");
+            if (Common.IDisposedExtensions.IsNullOrDisposed(content)) throw new ArgumentException("content cannot be null or disposed", nameof(content));
             Contents.Add(content);
         }
 

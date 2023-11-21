@@ -26,13 +26,13 @@ public class RiffWriter : MediaFileWriter
     //TODO, should not write when added, only when flushed etc
     public void AddChunk(Chunk chunk)
     {
-        if (chunk == null)
+        if (chunk is null)
             throw new ArgumentNullException(nameof(chunk));
 
         chunks.Add(chunk);
         chunk.DataOffset = Position;
         
-        if(chunk.Length == 0)
+        if(chunk.Length is 0)
             chunk.Length = (int)chunk.DataSize;
         else if (Binary.IsOdd(chunk.Length))
             chunk.Length++;

@@ -73,7 +73,7 @@ namespace Media.Rtsp.Server.MediaTypes
             public static byte[] CreateSingleTimeAggregationUnit(int? DON = null, params byte[][] nals)
             {
 
-                if (nals == null || nals.Count() == 0) throw new InvalidOperationException("Must have at least one nal");
+                if (nals is null || nals.Count() is 0) throw new InvalidOperationException("Must have at least one nal");
 
                 //Get the data required which consists of the Length and the nal.
                 IEnumerable<byte> data = nals.SelectMany(n => Common.Binary.GetBytes((short)n.Length, Common.Binary.IsLittleEndian).Concat(n));
@@ -91,7 +91,7 @@ namespace Media.Rtsp.Server.MediaTypes
             public static byte[] CreateMultiTimeAggregationUnit(int DON, byte dond, int tsOffset, params byte[][] nals)
             {
 
-                if (nals == null || nals.Count() == 0) throw new InvalidOperationException("Must have at least one nal");
+                if (nals is null || nals.Count() is 0) throw new InvalidOperationException("Must have at least one nal");
 
                 //Get the data required which consists of the Length and the nal.
                 IEnumerable<byte> data = nals.SelectMany(n =>
@@ -120,7 +120,7 @@ namespace Media.Rtsp.Server.MediaTypes
             public static byte[] CreateMultiTimeAggregationUnit(int DON, byte dond, short tsOffset, params byte[][] nals)
             {
 
-                if (nals == null || nals.Count() == 0) throw new InvalidOperationException("Must have at least one nal");
+                if (nals is null || nals.Count() is 0) throw new InvalidOperationException("Must have at least one nal");
 
                 //Get the data required which consists of the Length and the nal.
                 IEnumerable<byte> data = nals.SelectMany(n =>
@@ -268,7 +268,7 @@ namespace Media.Rtsp.Server.MediaTypes
             /// <param name="DON">The Decoder Ordering Number (timestamp)</param>
             public virtual void Packetize(byte[] nal, int mtu = 1500, int? DON = null) //sequenceNumber
             {
-                if (nal == null) return;
+                if (nal is null) return;
 
                 int nalLength = nal.Length;
 
@@ -324,7 +324,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         }
 
                         //FU - B has DON at the very beginning of each 
-                        if (fragmentType == Media.Codecs.Video.H264.NalUnitType.FragmentationUnitB)// && Count == 0)// highestSequenceNumber == 0)
+                        if (fragmentType == Media.Codecs.Video.H264.NalUnitType.FragmentationUnitB)// && Count is 0)// highestSequenceNumber is 0)
                         {
                             //byte[] DONBytes = new byte[2];
                             //Common.Binary.Write16(DONBytes, 0, Common.Binary.IsLittleEndian, (short)DON);
@@ -696,7 +696,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                                 //Should be optional
                                 //Don't emit empty fragments
-                                //if (fragment_size == 0) return;
+                                //if (fragment_size is 0) return;
 
                                 //Reconstruct the nal header
                                 //Use the first 3 bits of the first byte and last 5 bites of the FU Header
@@ -783,7 +783,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     //case Media.Codecs.Video.H264.NalUnitType.SequenceParameterSetSubset:// 15 (6190)
                     //    {
                     //        //Check if first nal in Access Unit m_ContainedNalTypes[0] == Media.Codecs.Video.H264.NalUnitType.SequenceParameterSetSubset;
-                    //        if (m_Buffer.Position == 0) goto case Media.Codecs.Video.H264.NalUnitType.SequenceParameterSet;
+                    //        if (m_Buffer.Position is 0) goto case Media.Codecs.Video.H264.NalUnitType.SequenceParameterSet;
 
                     //        //Handle without extra byte
                     //        goto default;
@@ -803,7 +803,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     //case Media.Codecs.Video.H264.NalUnitType.SliceExtension:20  (6190)
                     //    {
                     //        //Write the extra 0 byte to the Buffer (could also check for a contained slice header to eliminate the possibility of needing to check?)
-                    //        if (m_Buffer.Position == 0 && isFirstVclInPrimaryCodedPicture()) goto case Media.Codecs.Video.H264.NalUnitType.AccessUnitDelimiter;
+                    //        if (m_Buffer.Position is 0 && isFirstVclInPrimaryCodedPicture()) goto case Media.Codecs.Video.H264.NalUnitType.AccessUnitDelimiter;
 
                     //        //Handle as normal
                     //        goto default;
@@ -934,7 +934,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         public override void Start()
         {
-            if (RtpClient != null) return;
+            if (RtpClient is not null) return;
 
             base.Start();
 
@@ -1030,7 +1030,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         public override void Dispose()
         {
-            if (encoder != null)
+            if (encoder is not null)
             {
                 encoder.Dispose();
                 encoder = null;

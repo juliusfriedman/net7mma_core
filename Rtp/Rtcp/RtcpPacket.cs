@@ -217,7 +217,7 @@ namespace Media.Rtcp
         public RtcpPacket(RtcpHeader header, MemorySegment payload, bool shouldDispose = true)
             : base(shouldDispose)
         {
-            if (header == null) throw new ArgumentNullException("header");
+            if (header is null) throw new ArgumentNullException("header");
 
             //The instance owns the header
             m_OwnsHeader = shouldDispose;
@@ -357,7 +357,7 @@ namespace Media.Rtcp
         public RtcpPacket(int version, int payloadType, int padding, int blockCount, int ssrc, int lengthInWords, byte[] payload, int index, int count, bool shouldDispose = true)
             :this(version, payloadType, padding, ssrc, blockCount, lengthInWords, shouldDispose)
         {
-            if (count == 0) return;
+            if (count is 0) return;
 
             int lowerBound = payload.GetLowerBound(0), upperBound = payload.GetUpperBound(0);
 
@@ -564,7 +564,7 @@ namespace Media.Rtcp
             throw new NotImplementedException();
 
             //Would have to check existing Padding, if the same then return,
-            //If less padding would have to be removed && if == 0 then Padding = false.
+            //If less padding would have to be removed && if is 0 then Padding = false.
             //If greater then padding would have to be added up to 255 respecting what is already present
         }
 
@@ -588,7 +588,7 @@ namespace Media.Rtcp
 
             if (newBytes <= 0) return;
 
-           if (m_OwnedOctets == null)
+           if (m_OwnedOctets is null)
             {
                 m_OwnedOctets = octets.Skip(offset).Take(newBytes).ToArray();
 
@@ -706,7 +706,7 @@ namespace Media.Rtcp
 
                 int padding = PaddingOctets;
 
-                if (padding == 0) return Common.MemorySegment.Empty;
+                if (padding is 0) return Common.MemorySegment.Empty;
 
                 return new Common.MemorySegment(Payload.Array, (Payload.Offset + Payload.Count) - padding, padding);
             }
@@ -765,7 +765,7 @@ namespace Media.Rtcp
             //Needs to account for buffer or socket.
 
             //Calulcate the amount of octets remaining in the RtcpPacket including the header
-            int octetsRemaining = ((ushort)(Header.LengthInWordsMinusOne + 1)) * 4 - Length, offset = Payload != null ? Payload.Count : 0;
+            int octetsRemaining = ((ushort)(Header.LengthInWordsMinusOne + 1)) * 4 - Length, offset = Payload is not null ? Payload.Count : 0;
 
             if (octetsRemaining > 0)
             {
@@ -773,7 +773,7 @@ namespace Media.Rtcp
                 if (Payload.Count < octetsRemaining)
                 {
                     //Allocte the memory for the required data
-                    if (m_OwnedOctets == null) m_OwnedOctets = new byte[octetsRemaining];
+                    if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
                     else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
                 }
 
@@ -1008,7 +1008,7 @@ namespace Media.Rtcp
         {
             if (System.Object.ReferenceEquals(this, obj)) return true;
 
-            return obj is RtcpPacket rtcp && Equals(rtcp);
+            return obj is RtcpPacket p && Equals(p);
         }
 
         //Packet equals...
@@ -1116,7 +1116,7 @@ namespace Media.UnitTests
                                         System.Diagnostics.Debug.Assert(p.BlockCount == ReportBlockCounter, "Unexpected BlockCount");
 
                                         //Check the SynchronizationSourceIdentifier
-                                        System.Diagnostics.Debug.Assert(p.SynchronizationSourceIdentifier == 0 || p.SynchronizationSourceIdentifier == 7, "Unexpected SynchronizationSourceIdentifier");
+                                        System.Diagnostics.Debug.Assert(p.SynchronizationSourceIdentifier is 0 || p.SynchronizationSourceIdentifier == 7, "Unexpected SynchronizationSourceIdentifier");
 
                                         //Check the LengthInWordsMinusOne, should not be 0 when padding is used...
                                         System.Diagnostics.Debug.Assert(p.Header.LengthInWordsMinusOne == ushort.MaxValue, "Unexpected LengthInWordsMinusOne");
@@ -1153,7 +1153,7 @@ namespace Media.UnitTests
                                             System.Diagnostics.Debug.Assert(s.BlockCount == ReportBlockCounter, "Unexpected BlockCount");
 
                                             //Check the SynchronizationSourceIdentifier, we specified 0 for the length in words...
-                                            //s.SynchronizationSourceIdentifier == 0 || 
+                                            //s.SynchronizationSourceIdentifier is 0 || 
                                             System.Diagnostics.Debug.Assert(s.SynchronizationSourceIdentifier == p.SynchronizationSourceIdentifier, "Unexpected SynchronizationSourceIdentifier");
 
                                             //Check the LengthInWordsMinusOne

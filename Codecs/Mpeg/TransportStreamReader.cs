@@ -131,7 +131,7 @@ namespace Media.Containers.Mpeg
         /// <summary>
         /// Gets a value which indicates if the units are standard 188 byte length
         /// </summary>
-        public bool IsStandardTransportStream { get { return UnitOverhead == 0; } }
+        public bool IsStandardTransportStream { get { return UnitOverhead is 0; } }
 
         /// <summary>
         /// Gets the size in bytes of each TransportStreamUnit including any header which preceeds the TransportStreamUnit.
@@ -161,7 +161,7 @@ namespace Media.Containers.Mpeg
 
             foreach (var tsUnit in this)
             {
-                if (names == null || names.Count() == 0 || names.Contains(GetPacketIdentifier(this, tsUnit.Identifier)))
+                if (names is null || names.Count() is 0 || names.Contains(GetPacketIdentifier(this, tsUnit.Identifier)))
                 {
                     yield return tsUnit;
 
@@ -259,7 +259,7 @@ namespace Media.Containers.Mpeg
                 Container.Node next = ReadNext();
 
                 //No more units stops the enumeration
-                if (next == null) yield break;
+                if (next is null) yield break;
 
                 //Return the unit for external handling
                 yield return next;

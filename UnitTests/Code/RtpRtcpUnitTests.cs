@@ -241,7 +241,7 @@ namespace Media.UnitTests
                 using (Media.Rtp.RtpExtension rtpExtension = testPacket.GetExtension())
                 {
 
-                    if (rtpExtension == null) throw new Exception("Extension is null");
+                    if (rtpExtension is null) throw new Exception("Extension is null");
 
                     if (!rtpExtension.IsComplete) throw new Exception("Extension is not complete");
 
@@ -374,7 +374,7 @@ namespace Media.UnitTests
                 using (Media.Rtp.RtpExtension rtpExtension = testPacket.GetExtension())
                 {
 
-                    if (rtpExtension == null) throw new Exception("Extension is null");
+                    if (rtpExtension is null) throw new Exception("Extension is null");
 
                     if (!rtpExtension.IsComplete) throw new Exception("Extension is not complete");
 
@@ -413,14 +413,14 @@ namespace Media.UnitTests
             Media.Rtcp.RtcpPacket p = new Media.Rtcp.RtcpPacket(new Media.Rtcp.RtcpHeader(0, 0, false, 0), Enumerable.Empty<byte>());
 
             //Check the Padding bit after modification
-            System.Diagnostics.Debug.Assert(p.SynchronizationSourceIdentifier == 0, "SynchronizationSourceIdentifier should equal 0");
+            System.Diagnostics.Debug.Assert(p.SynchronizationSourceIdentifier is 0, "SynchronizationSourceIdentifier should equal 0");
 
             //Set a values
             p.SynchronizationSourceIdentifier = 7;
 
             //Value should be in memory but the LengthInWords is not correctly set.
 
-            System.Diagnostics.Debug.Assert(p.SynchronizationSourceIdentifier == 0, "SynchronizationSourceIdentifier should equal 0");
+            System.Diagnostics.Debug.Assert(p.SynchronizationSourceIdentifier is 0, "SynchronizationSourceIdentifier should equal 0");
 
             p.SetLengthInWordsMinusOne();
 
@@ -551,13 +551,13 @@ namespace Media.UnitTests
             if (rtcpPacket.PaddingOctets > 0) throw invalidPadding;
 
             //Ensure the packet is complete
-            if (rtcpPacket.IsComplete == false) throw incompleteFalse;
+            if (rtcpPacket.IsComplete is false) throw incompleteFalse;
 
             //Add nothing to the payload
             rtcpPacket.AddBytesToPayload(Media.RFC3550.CreatePadding(0), 0, 0);
 
             //Ensure the packet is complete
-            if (rtcpPacket.IsComplete == false) throw incompleteFalse;
+            if (rtcpPacket.IsComplete is false) throw incompleteFalse;
 
             //Check for some invalid value
             if (rtcpPacket.PaddingOctets > 0) throw invalidPadding;
@@ -585,7 +585,7 @@ namespace Media.UnitTests
                 if (rtcpPacket.PaddingOctets != paddingAmount) throw invalidPadding;
 
                 //Ensure the packet is complete
-                if (rtcpPacket.IsComplete == false) throw incompleteFalse;
+                if (rtcpPacket.IsComplete is false) throw incompleteFalse;
 
                 //Write information for the test to the console
                 Console.WriteLine(string.Format(TestingFormat, "Packet Length", rtcpPacket.Length));

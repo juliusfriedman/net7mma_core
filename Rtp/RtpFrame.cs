@@ -413,7 +413,7 @@ namespace Media.Rtp
         public bool HasDepacketized
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Depacketized == null ? false : Depacketized.Count > 0; }
+            get { return Depacketized is null ? false : Depacketized.Count > 0; }
         }
 
         /// <summary>
@@ -422,7 +422,7 @@ namespace Media.Rtp
         public bool HasBuffer
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return false == (m_Buffer == null) && m_Buffer.CanRead; }
+            get { return false == (m_Buffer is null) && m_Buffer.CanRead; }
         }
 
         /// <summary>
@@ -441,7 +441,7 @@ namespace Media.Rtp
         public virtual bool IsComplete
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return false == IsDisposed && false == IsMissingPackets && HasMarker; }
+            get { return IsDisposed is false && false == IsMissingPackets && HasMarker; }
         }
 
         //Todo, for Rtcp feedback one would need the sequence numbers of the missing packets...
@@ -466,7 +466,7 @@ namespace Media.Rtp
                     //Single packet only
                     case 1: return false;
                     //Skip the range check for 2 packets
-                    case 2: return ((short)(m_LowestSequenceNumber - m_HighestSequenceNumber) != -1); //(should be same as 1 + (short)((m_LowestSequenceNumber - m_HighestSequenceNumber)) == 0 but saves an additional addition)
+                    case 2: return ((short)(m_LowestSequenceNumber - m_HighestSequenceNumber) != -1); //(should be same as 1 + (short)((m_LowestSequenceNumber - m_HighestSequenceNumber)) is 0 but saves an additional addition)
                     //2 or more packets, cache the m_LowestSequenceNumber and check all packets to be sequential starting at offset 1
                     default: RtpPacket p; for (int nextSeq = m_LowestSequenceNumber == ushort.MaxValue ? ushort.MinValue : m_LowestSequenceNumber + 1, i = 1; i < count; ++i)
                         {
@@ -505,7 +505,7 @@ namespace Media.Rtp
         public int Count
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Packets == null ? 0 : Packets.Count; }
+            get { return Packets is null ? 0 : Packets.Count; }
         }
 
         /// <summary>
@@ -1026,7 +1026,7 @@ namespace Media.Rtp
             int i = IndexOf(ref sequenceNumber);
 
             //> Count
-            if (i < 0 || Packets == null) return null;
+            if (i < 0 || Packets is null) return null;
 
             //Get the packet
             RtpPacket p = Packets[i];
@@ -1091,7 +1091,7 @@ namespace Media.Rtp
                     }
                 default:
                     {
-                        //Skip the access of the array for all cases but when the sequence was == to the m_LowestSequenceNumber (i == 0)
+                        //Skip the access of the array for all cases but when the sequence was == to the m_LowestSequenceNumber (i is 0)
                         if(i is 0) //(sequenceNumber == m_LowestSequenceNumber)
                         {
                             m_LowestSequenceNumber = Packets[0].SequenceNumber; //First
@@ -1144,7 +1144,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void Clear()
         {
-            if (Packets == null) return;
+            if (Packets is null) return;
 
             //////Multiple threads adding packets would not effect count but removing definitely would...
             ////Packets.Clear();
@@ -1325,7 +1325,7 @@ namespace Media.Rtp
             //    Common.MemorySegment value = pair.Value;
 
             //    //if null, disposed or empty skip
-            //    if (Common.IDisposedExtensions.IsNullOrDisposed(value) || value.Count == 0) continue;
+            //    if (Common.IDisposedExtensions.IsNullOrDisposed(value) || value.Count is 0) continue;
 
             //    //Write it to the Buffer
             //    m_Buffer.Write(value.Array, value.Offset, value.Count);
@@ -1353,7 +1353,7 @@ namespace Media.Rtp
                 Common.MemorySegment value = pair.Value;
 
                 //if null, disposed or empty skip
-                if (Common.IDisposedExtensions.IsNullOrDisposed(value) || value.Count == 0) continue;
+                if (Common.IDisposedExtensions.IsNullOrDisposed(value) || value.Count is 0) continue;
 
                 //Write it to the Buffer
                 System.Array.Copy(value.Array, value.Offset, buffer, offset, value.Count);
@@ -1384,7 +1384,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal protected void FreeDepacketizedMemory(bool force = false)
         {
-            if (Depacketized == null) return;
+            if (Depacketized is null) return;
 
             //iterate each key in Depacketized
             foreach (KeyValuePair<double, Common.MemorySegment> pair in Depacketized)
@@ -1512,9 +1512,7 @@ namespace Media.Rtp
         {
             if (System.Object.ReferenceEquals(this, obj)) return true;
 
-            if (false.Equals((obj is RtpFrame))) return false;
-
-            return Equals(obj as RtpFrame);
+            return obj is RtpFrame f && Equals(f);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1822,7 +1820,7 @@ namespace Media.Rtp
     //            {
     //                //join
 
-    //                if (current == null) current = packet;
+    //                if (current is null) current = packet;
     //                else
     //                {
 
@@ -1942,7 +1940,7 @@ namespace Media.UnitTests
             using (Media.Rtp.RtpFrame frame = new Media.Rtp.RtpFrame())
             {
 
-                if (frame.SpecifiedPayloadType) throw new Exception("Frame must have SpecifiedPayloadType == false when not set in constructor.");
+                if (frame.SpecifiedPayloadType) throw new Exception("Frame must have SpecifiedPayloadType is false when not set in constructor.");
 
                 if (frame.HasMarker) throw new Exception("Frame must not have marker when empty");
 
@@ -2204,23 +2202,23 @@ namespace Media.UnitTests
                 //Remove a non existing packet
                 using (Media.Rtp.RtpPacket packet = frame.Remove(1))
                 {
-                    if (packet != null) throw new Exception("Packet is not null");
+                    if (packet is not null) throw new Exception("Packet is not null");
                 }
 
                 //Remove three existing packets
                 using (Media.Rtp.RtpPacket packet = frame.Remove(ushort.MaxValue))
                 {
-                    if(packet == null || packet.SequenceNumber != ushort.MaxValue) throw new Exception("Packet is null");
+                    if(packet is null || packet.SequenceNumber != ushort.MaxValue) throw new Exception("Packet is null");
                 }
 
                 using (Media.Rtp.RtpPacket packet = frame.Remove(ushort.MinValue))
                 {
-                    if (packet == null || packet.SequenceNumber != ushort.MinValue) throw new Exception("Packet is null");
+                    if (packet is null || packet.SequenceNumber != ushort.MinValue) throw new Exception("Packet is null");
                 }
 
                 using (Media.Rtp.RtpPacket packet = frame.Remove(ushort.MaxValue - 1))
                 {
-                    if (packet == null || packet.SequenceNumber != ushort.MaxValue - 1) throw new Exception("Packet is null");
+                    if (packet is null || packet.SequenceNumber != ushort.MaxValue - 1) throw new Exception("Packet is null");
                 }
 
                 if (false == frame.IsEmpty) throw new Exception("Frame is not empty");

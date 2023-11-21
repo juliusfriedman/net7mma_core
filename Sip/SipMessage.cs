@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Sip
 {
@@ -22,11 +19,11 @@ namespace Media.Sip
         //String which identifies a Http Request or Response
         public new const string MessageIdentifier = "SIP";
 
-        public static SipMessage FromString(string data, System.Text.Encoding encoding = null)
+        public static new SipMessage FromString(string data, System.Text.Encoding encoding = null)
         {
             if (string.IsNullOrWhiteSpace(data)) throw new InvalidOperationException("data cannot be null or whitespace.");
 
-            if (encoding == null) encoding = SipMessage.DefaultEncoding;
+            if (encoding is null) encoding = SipMessage.DefaultEncoding;
 
             return new SipMessage(encoding.GetBytes(data), 0, encoding);
         }
@@ -207,7 +204,7 @@ namespace Media.Sip
 
         protected override void OnHeaderAdded(string headerName, string headerValue)
         {
-            if (string.Compare(headerName, Http.HttpHeaders.TransferEncoding, true) == 0) throw new InvalidOperationException("Protocol: " + Protocol + ", does not support TrasferEncoding.");
+            if (string.Compare(headerName, Http.HttpHeaders.TransferEncoding, true) is 0) throw new InvalidOperationException("Protocol: " + Protocol + ", does not support TrasferEncoding.");
 
             base.OnHeaderAdded(headerName, headerValue);
         }

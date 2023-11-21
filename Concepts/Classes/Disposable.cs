@@ -104,7 +104,7 @@ namespace Media.Concepts.Classes
 
                     Dispose(disposing);
 
-                    if (DisposedEvent != null) DisposedEvent(this, System.EventArgs.Empty);
+                    if (DisposedEvent is not null) DisposedEvent(this, System.EventArgs.Empty);
                 }
 
             }

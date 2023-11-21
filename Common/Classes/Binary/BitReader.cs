@@ -154,7 +154,7 @@
         public BitReader(System.IO.Stream source, Binary.BitOrder bitOrder, int cacheSize = 32, bool leaveOpen = false)
             : base(true)
         {
-            if (source == null) throw new System.ArgumentNullException("source");
+            if (source is null) throw new System.ArgumentNullException("source");
 
             m_BaseStream = source;
 
@@ -266,7 +266,7 @@
                 bytesRead = m_BaseStream.Read(m_ByteCache.Array, m_ByteCache.Offset + m_ByteIndex + bytesRead, bytesToRead);
 
                 //Check for EOF
-                if (bytesRead == 0) break;
+                if (bytesRead is 0) break;
 
                 //Adjust for the bytesRead
                 bytesToRead -= bytesRead;               
@@ -695,7 +695,7 @@
 
         public override void Dispose()
         {
-            if (IsDisposed || false == ShouldDispose) return;
+            if (IsDisposed || ShouldDispose is false) return;
 
             base.Dispose();
 

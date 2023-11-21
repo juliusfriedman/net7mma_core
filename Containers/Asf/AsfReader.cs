@@ -146,7 +146,7 @@ namespace Media.Containers.Asf
 
         public static string ToTextualConvention(byte[] identifier, int offset = 0)
         {
-            if (identifier == null) return Media.Common.Extensions.String.StringExtensions.UnknownString;
+            if (identifier is null) return Media.Common.Extensions.String.StringExtensions.UnknownString;
 
             Guid id = offset > 0 || identifier.Length > 16 ? new Guid(identifier.Skip(offset).Take(IdentifierSize).ToArray()) : new Guid(identifier);
 
@@ -177,7 +177,7 @@ namespace Media.Containers.Asf
 
             foreach (var asfObject in this)
             {
-                if (names == null || names.Count() == 0 || names.Contains(new Guid(asfObject.Identifier.Take(IdentifierSize).ToArray())))
+                if (names is null || names.Count() is 0 || names.Contains(new Guid(asfObject.Identifier.Take(IdentifierSize).ToArray())))
                 {
                     yield return asfObject;
                     continue;
@@ -200,7 +200,7 @@ namespace Media.Containers.Asf
         //    {
         //        count -= asfObject.TotalSize;
 
-        //        if (names == null || names.Count() == 0 || names.Contains(new Guid(asfObject.Identifier.Take(IdentifierSize).ToArray())))
+        //        if (names is null || names.Count() is 0 || names.Contains(new Guid(asfObject.Identifier.Take(IdentifierSize).ToArray())))
         //        {
         //            yield return asfObject;
         //        }
@@ -265,7 +265,7 @@ namespace Media.Containers.Asf
             {
                 Node next = ReadNext();
 
-                if (next == null) yield break;
+                if (next is null) yield break;
                 
                 yield return next;
                 
@@ -418,7 +418,7 @@ namespace Media.Containers.Asf
             using (var fileProperties = ReadObject(Identifier.FilePropertiesObject, Root.DataOffset))
             {
 
-                if (fileProperties == null) throw new InvalidOperationException("FilePropertiesObject not found");
+                if (fileProperties is null) throw new InvalidOperationException("FilePropertiesObject not found");
 
                 //FileId
                 int offset = IdentifierSize;
@@ -480,7 +480,7 @@ namespace Media.Containers.Asf
         {
             get
             {
-                if (m_Title == null) ParseContentDescription();
+                if (m_Title is null) ParseContentDescription();
                 return m_Title;
             }
         }
@@ -489,7 +489,7 @@ namespace Media.Containers.Asf
         {
             get
             {
-                if (m_Author == null) ParseContentDescription();
+                if (m_Author is null) ParseContentDescription();
                 return m_Author;
             }
         }
@@ -498,7 +498,7 @@ namespace Media.Containers.Asf
         {
             get
             {
-                if (m_Copyright == null) ParseContentDescription();
+                if (m_Copyright is null) ParseContentDescription();
                 return m_Copyright;
             }
         }
@@ -507,7 +507,7 @@ namespace Media.Containers.Asf
         {
             get
             {
-                if (m_Comment == null) ParseContentDescription();
+                if (m_Comment is null) ParseContentDescription();
                 return m_Comment;
             }
         }
@@ -516,7 +516,7 @@ namespace Media.Containers.Asf
         {
             get
             {
-                if (m_Rating == null) ParseContentDescription();
+                if (m_Rating is null) ParseContentDescription();
                 return m_Rating;
             }
         }
@@ -525,7 +525,7 @@ namespace Media.Containers.Asf
         {
             using (var contentDescription = ReadObject(Identifier.ContentDescriptionObject, Root.DataOffset))
             {
-                if(contentDescription != null && contentDescription.DataSize > 2)
+                if(contentDescription is not null && contentDescription.DataSize > 2)
                 {
                     int offset = 2, len = Common.Binary.Read16(contentDescription.Data, offset, Media.Common.Binary.IsBigEndian), remaining = (int)contentDescription.DataSize;
                     remaining -= 2;
@@ -622,7 +622,7 @@ namespace Media.Containers.Asf
 
         public override IEnumerable<Track> GetTracks()
         {
-            if (m_Tracks != null)
+            if (m_Tracks is not null)
             {
                 foreach (Track track in m_Tracks) yield return track;
                 yield break;

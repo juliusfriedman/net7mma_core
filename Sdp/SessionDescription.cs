@@ -170,7 +170,7 @@ namespace Media.Sdp
                             if (false.Equals(string.IsNullOrWhiteSpace(startTimeString)) && string.Compare(startTimeString, "now", StringComparison.OrdinalIgnoreCase) != 0) start = startTimeString.IndexOf(Colon) >= 0 ? TimeSpan.Parse(startTimeString, System.Globalization.CultureInfo.InvariantCulture) : TimeSpan.FromSeconds(double.Parse(startTimeString, System.Globalization.CultureInfo.InvariantCulture));
 
                             //If both strings were the same don't parse again.
-                            if (string.Compare(startTimeString, endTimeString) == 0) end = start;
+                            if (string.Compare(startTimeString, endTimeString) is 0) end = start;
                             else if (false.Equals(string.IsNullOrWhiteSpace(endTimeString))) end = startTimeString.IndexOf(Colon) >= 0 ? TimeSpan.Parse(endTimeString, System.Globalization.CultureInfo.InvariantCulture) : TimeSpan.FromSeconds(double.Parse(endTimeString, System.Globalization.CultureInfo.InvariantCulture));
 
                             return true;
@@ -207,7 +207,7 @@ namespace Media.Sdp
                             }
 
                             //Parse and determine the end time
-                            if (string.Compare(startTimeString, endTimeString) == 0) end = start;
+                            if (string.Compare(startTimeString, endTimeString) is 0) end = start;
                             else if (false.Equals( string.IsNullOrWhiteSpace(endTimeString)) && DateTime.TryParseExact(startTimeString, clockFormat, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out date))
                             {
                                 //Time in the past
@@ -375,7 +375,7 @@ namespace Media.Sdp
 
                 if (string.IsNullOrWhiteSpace(value)) throw new InvalidOperationException("The SessionOriginatorLine is required to have a non-null and non-empty value.");
 
-                bool hadValueWithSetVersion = m_OriginatorLine is not null && m_OriginatorLine.SessionVersion.Equals(Common.Binary.LongZero) is false;
+                bool hadValueWithSetVersion = m_OriginatorLine is not null && m_OriginatorLine.SessionVersion is not Common.Binary.LongZero;
 
                 if (hadValueWithSetVersion && 
                     string.Compare(value, m_OriginatorLine.ToString(), StringComparison.InvariantCultureIgnoreCase) is 0) return;
@@ -401,14 +401,14 @@ namespace Media.Sdp
             {
                 if (IsDisposed) return;
 
-                if (m_NameLine is not null && 
-                    string.Compare(value, m_NameLine.SessionName, StringComparison.InvariantCultureIgnoreCase) is 0) return;
+                if (object.ReferenceEquals(m_NameLine, null).Equals(false) && 
+                    string.Compare(value, m_NameLine.SessionName, StringComparison.InvariantCultureIgnoreCase).Equals(0)) return;
 
                 var token = BeginUpdate();
 
                 m_NameLine = new Lines.SessionNameLine(value);
 
-                EndUpdate(token, DocumentVersion.Equals(Common.Binary.LongZero) is false);
+                EndUpdate(token, DocumentVersion is Common.Binary.LongZero is false);
             }
         }
 
@@ -428,9 +428,11 @@ namespace Media.Sdp
             {
                 if (IsDisposed || UnderModification) return;
 
-                if (string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException();
+                if (string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException(nameof(value));
 
-                if (m_OriginatorLine is null || string.Compare(value, m_OriginatorLine.SessionId, StringComparison.InvariantCultureIgnoreCase) is 0) return;
+                if (m_OriginatorLine is null ||
+                    string.Compare(value, m_OriginatorLine.SessionId, StringComparison.InvariantCultureIgnoreCase) is 0)
+                    return;
 
                 var token = BeginUpdate();
 
@@ -540,8 +542,10 @@ namespace Media.Sdp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set
             {
-                if (IsDisposed || UnderModification) return;
-                else if (value is null)
+                if (IsDisposed || UnderModification)
+                    return;
+
+                if (value is null)
                 {
                     var token = BeginUpdate();
 
@@ -567,8 +571,10 @@ namespace Media.Sdp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set
             {
-                if (IsDisposed || UnderModification) return;
-                else if (value is null)
+                if (IsDisposed || UnderModification)
+                    return;
+
+                if (value is null)
                 {
                     var token = BeginUpdate();
 
@@ -1111,12 +1117,10 @@ namespace Media.Sdp
 
         public void UpdateVersion(System.Threading.CancellationToken token)
         {
+            if (token.Equals(m_UpdateTokenSource.Token) is false)
+                throw new InvalidOperationException("Must obtain the CancellationToken from a call to BeginUpdate.");
 
-            if (token.Equals(m_UpdateTokenSource.Token) is false) throw new InvalidOperationException("Must obtain the CancellationToken from a call to BeginUpdate.");
-
-            if(token.IsCancellationRequested is false
-                &&
-                object.ReferenceEquals(m_OriginatorLine , null) is false)
+            if (token.IsCancellationRequested is false && m_OriginatorLine is not null)
             {
                 ++m_OriginatorLine.SessionVersion;
             }
@@ -1192,7 +1196,7 @@ namespace Media.Sdp
             //System.Object
             if (object.ReferenceEquals(this, obj)) return true;
 
-            return obj is SessionDescription sdp && Equals(sdp);
+            return obj is SessionDescription sd && Equals(sd);
         }
 
         /// <summary>
@@ -1205,9 +1209,9 @@ namespace Media.Sdp
         {
             //Should have a ToStringBuilder so this can be cached?
 
-            StringBuilder buffer = new StringBuilder();
+            StringBuilder buffer = new();
 
-            if(m_SessionVersionLine is not null) buffer.Append(m_SessionVersionLine.ToString());
+            if (m_SessionVersionLine is not null) buffer.Append(m_SessionVersionLine.ToString());
 
             if (m_OriginatorLine is not null) buffer.Append(m_OriginatorLine.ToString());
 
@@ -1402,7 +1406,7 @@ namespace Media.Sdp
                 controlPart = controlPart.Split(Media.Sdp.SessionDescription.ColonSplit, 2, StringSplitOptions.RemoveEmptyEntries).Last();
 
                 //if unqualified then there is no aggregate control.
-                if (controlPart == SessionDescription.WildcardString && baseUri == null) return false;
+                if (controlPart == SessionDescription.WildcardString && baseUri is null) return false;
 
                 //The control uri may be in the control part
 
@@ -1439,7 +1443,7 @@ namespace Media.Sdp
         //E.g. This index can be used in GetTimeDescription(index)
         public static int GetIndexFor(this SessionDescription sdp, TimeDescription td)
         {
-            //if (sdp == null || td == null) return -1;
+            //if (sdp is null || td is null) return -1;
             if (Common.IDisposedExtensions.IsNullOrDisposed(sdp) || Common.IDisposedExtensions.IsNullOrDisposed(td)) return -1;
 
             return sdp.m_TimeDescriptions.IndexOf(td);

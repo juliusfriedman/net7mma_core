@@ -222,7 +222,7 @@ namespace Media.RtpTools
             }
         }
 
-        public bool IsRtcp { get { return PacketLength == 0; } }
+        public bool IsRtcp { get { return PacketLength is 0; } }
 
         public short PacketLength
         {

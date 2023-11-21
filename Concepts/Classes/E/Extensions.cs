@@ -58,7 +58,7 @@ namespace Media.Concepts.Classes.E
         /// <returns></returns>
         public static bool operator ==(Extensions a, object b)
         {
-            return a == null ? b == null : a.Equals(b);
+            return a is null ? b is null : a.Equals(b);
         }
 
         /// <summary>
@@ -97,16 +97,14 @@ namespace Media.Concepts.Classes.E
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public unsafe bool Equals(Extensions other)
         {
-            return object.ReferenceEquals(this, NilExtensions) ? object.ReferenceEquals(other, NilExtensions) : Unsafe.AddressOf(this) == Unsafe.AddressOf(other);
+            return this is null ? other is null : Unsafe.AddressOf(this) == Unsafe.AddressOf(other);
         }
 
         public override bool Equals(object obj)
         {
             if (object.ReferenceEquals(this, obj)) return true;
 
-            if ((obj is Extensions) is false) return false;
-
-            return Equals(obj as Extensions);
+            return obj is Extensions e && Equals(e);
         }
 
         //Todo, @IHashCode{}:ICode{},IHash{}

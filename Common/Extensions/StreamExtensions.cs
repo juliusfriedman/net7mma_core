@@ -76,19 +76,19 @@ namespace Media.Common.Extensions.Stream
 
             internal protected override void Dispose(bool disposing)
             {
-                base.Dispose(disposing || ResponseOutputStream == null || false == ResponseOutputStream.CanRead);
+                base.Dispose(disposing || ResponseOutputStream is null || false == ResponseOutputStream.CanRead);
 
-                if (false == ShouldDispose) return;
+                if (ShouldDispose is false) return;
 
                 //HandleDisposing(this, ds.Dispose);
 
-                if (Location != null) Location = null;
+                if (Location is not null) Location = null;
 
-                if (Response != null) { Response.Dispose(); Response = null; }
+                if (Response is not null) { Response.Dispose(); Response = null; }
 
-                if (Request != null) { Request.Dispose(); Request = null; }
+                if (Request is not null) { Request.Dispose(); Request = null; }
 
-                if (ResponseOutputStream != null)
+                if (ResponseOutputStream is not null)
                 {
                     ResponseOutputStream.Dispose(); 
                     
@@ -101,7 +101,7 @@ namespace Media.Common.Extensions.Stream
             internal DownloadAdapter(System.Uri location)
                 : base(false)
             {
-                if ((Location = location) == null) throw new System.ArgumentNullException("location");
+                if ((Location = location) is null) throw new System.ArgumentNullException("location");
 
                 //var request = (System.Net.HttpWebRequest)System.Net.HttpWebRequest.Create(Location);
 
@@ -122,7 +122,7 @@ namespace Media.Common.Extensions.Stream
             {
                 Expire();  
 
-                if (ResponseOutputStream != null && ResponseOutputStream.CanRead)
+                if (ResponseOutputStream is not null && ResponseOutputStream.CanRead)
                 {
                     Dispose();
                 }
@@ -154,14 +154,14 @@ namespace Media.Common.Extensions.Stream
 
             //    protected override void Dispose(bool disposing)
             //    {
-            //        if (disposing && Disposing != null) Disposing(this, Dispose);
+            //        if (disposing && Disposing is not null) Disposing(this, Dispose);
 
             //        base.Dispose(disposing);
             //    }
 
             //    void HandleDisposing(object sender, Action t)
             //    {
-            //        if (t != null) t();
+            //        if (t is not null) t();
 
             //        if (this == sender) Disposing -= HandleDisposing;
             //    }
@@ -189,7 +189,7 @@ namespace Media.Common.Extensions.Stream
                 public DisposableHttpWebRequest(System.Net.HttpWebRequest request)
                     : base(false)
                 {
-                    if (request == null) throw new System.ArgumentNullException("request");
+                    if (request is null) throw new System.ArgumentNullException("request");
 
                     try
                     {
@@ -208,7 +208,7 @@ namespace Media.Common.Extensions.Stream
 
                 //void HandleDisposing(object sender, Action t)
                 //{
-                //    if (t != null) t();
+                //    if (t is not null) t();
 
                 //    if (false == (sender == this)) return;
 
@@ -222,13 +222,13 @@ namespace Media.Common.Extensions.Stream
                 public DisposableHttpWebRequest(System.Net.HttpWebRequest request, System.Net.WebProxy proxy, System.Net.NetworkCredential credentials, System.Collections.Specialized.NameValueCollection headers, System.Net.CookieCollection cookies)
                     : this(request)
                 {
-                    if(proxy != null) Request.Proxy = proxy;
+                    if(proxy is not null) Request.Proxy = proxy;
 
-                    if (headers != null) Request.Headers.Add(headers);
+                    if (headers is not null) Request.Headers.Add(headers);
 
-                    if (cookies != null)Request.CookieContainer.Add(cookies);
+                    if (cookies is not null)Request.CookieContainer.Add(cookies);
 
-                    if (credentials != null) Request.Credentials = credentials;
+                    if (credentials is not null) Request.Credentials = credentials;
                 }
 
                 public DisposableHttpWebRequest(System.Uri location, System.Net.WebProxy proxy, System.Net.NetworkCredential credentials, System.Collections.Specialized.NameValueCollection headers, System.Net.CookieCollection cookies) : 
@@ -236,27 +236,27 @@ namespace Media.Common.Extensions.Stream
 
                 internal protected override void Dispose(bool disposing)
                 {
-                    base.Dispose(disposing || false == (ResponseStream != null && ResponseStream.CanRead));
+                    base.Dispose(disposing || false == (ResponseStream is not null && ResponseStream.CanRead));
 
-                    if (false == ShouldDispose) return;
+                    if (ShouldDispose is false) return;
 
                     //HandleDisposing(this, ds.Dispose);
 
-                    if (Request != null)
+                    if (Request is not null)
                     {
                         Request.Abort();
 
                         Request = null;
                     }
 
-                    if (ResponseStream != null)
+                    if (ResponseStream is not null)
                     {
                         ResponseStream.Dispose();
 
                         ResponseStream = null;
                     }
 
-                    if (Response != null)
+                    if (Response is not null)
                     {
                         Response.Dispose();
 
@@ -294,7 +294,7 @@ namespace Media.Common.Extensions.Stream
 
                 //void HandleDisposing(object sender, Action t)
                 //{
-                //    if(t != null) t();
+                //    if(t is not null) t();
 
                 //    ds.Disposing -= HandleDisposing;
 
@@ -303,7 +303,7 @@ namespace Media.Common.Extensions.Stream
 
                 protected override void Dispose(bool disposing)
                 {
-                    Composed.Dispose(disposing || false == (ResponseStream != null && ResponseStream.CanRead));
+                    Composed.Dispose(disposing || false == (ResponseStream is not null && ResponseStream.CanRead));
 
                     if (false == Composed.ShouldDispose) return;
 
@@ -311,7 +311,7 @@ namespace Media.Common.Extensions.Stream
 
                     base.Dispose(disposing);
 
-                    if (ResponseStream != null)
+                    if (ResponseStream is not null)
                     {
                         ResponseStream.Dispose();
 
@@ -340,7 +340,7 @@ namespace Media.Common.Extensions.Stream
             //Credential
             public static DownloadAdapter HttpWebRequestDownload(System.Uri location, System.Net.WebProxy proxy = null, System.Net.NetworkCredential credentials = null, System.Collections.Specialized.NameValueCollection headers = null, System.Net.CookieCollection cookies = null)
             {
-                if (location == null) throw new System.ArgumentNullException("location");
+                if (location is null) throw new System.ArgumentNullException("location");
                 else if (false == location.OriginalString.StartsWith(System.Uri.UriSchemeHttp)) throw new System.InvalidOperationException("location must start with System.Uri.UriSchemeHttp");
 
                 using (var request = new DisposableHttpWebRequest(location, proxy, credentials, headers, cookies))
@@ -349,7 +349,7 @@ namespace Media.Common.Extensions.Stream
                     {
                         Request = request,
                         Response = request.Response,
-                        MaximumLength = request.Response == null ? 0 : request.Response.ContentLength,
+                        MaximumLength = request.Response is null ? 0 : request.Response.ContentLength,
                         ResponseOutputStream = request.ResponseStream
                     };
                 }
@@ -357,11 +357,11 @@ namespace Media.Common.Extensions.Stream
 
             public static DownloadAdapter WebClientDownload(System.Uri location, System.Net.NetworkCredential credential = null)
             {
-                if (location == null) throw new System.ArgumentNullException("location");
+                if (location is null) throw new System.ArgumentNullException("location");
 
                 using (WebClientEx webClient = new WebClientEx(location))
                 {
-                    if (credential != null) webClient.Credentials = credential;
+                    if (credential is not null) webClient.Credentials = credential;
 
                     var d = new DownloadAdapter(location);
 
@@ -370,7 +370,7 @@ namespace Media.Common.Extensions.Stream
                         d.Request = webClient;
                         d.ResponseOutputStream = webClient.ResponseStream;
                         
-                        if (webClient.ResponseHeaders != null)
+                        if (webClient.ResponseHeaders is not null)
                         {
                             string contentLength = webClient.ResponseHeaders["Content-Length"];
 
@@ -406,7 +406,7 @@ namespace Media.Common.Extensions.Stream
 
             bool ITransactionResult.IsTransactionDone
             {
-                get { return IsDisposed || LifetimeElapsed || ResponseOutputStream != null && false == ResponseOutputStream.CanRead; }
+                get { return IsDisposed || LifetimeElapsed || ResponseOutputStream is not null && false == ResponseOutputStream.CanRead; }
             }
 
             //Since there are no events it might make sense to have a percentage property and also a remaining property
@@ -502,7 +502,7 @@ namespace Media.Common.Extensions.Stream
 
             protected override void Dispose(bool disposing)
             {
-                if (disposing && adapter != null)
+                if (disposing && adapter is not null)
                 {
                     adapter.Dispose();
                     adapter = null;
@@ -533,7 +533,7 @@ namespace Media.Common.Extensions.Stream
             {
                 result = HttpWebRequestDownload(location, proxy, credential);
 
-                return result != null;
+                return result is not null;
             }
             catch (System.Exception ex)
             {
@@ -558,7 +558,7 @@ namespace Media.Common.Extensions.Stream
             {
                 result = FileDownload(location, credential);
 
-                return result != null;
+                return result is not null;
             }
             catch (System.Exception ex)
             {
@@ -583,7 +583,7 @@ namespace Media.Common.Extensions.Stream
             {
                 result = WebClientDownload(location, credential);
 
-                return result != null;
+                return result is not null;
             }
             catch (System.Exception ex)
             {
@@ -630,7 +630,7 @@ namespace Media.Common.Extensions.Stream
 
             static void HandleCompleted(object sender, ITransactionResult e)
             {
-                if (e != null && e is TransactionBase)
+                if (e is not null && e is TransactionBase)
                 {
                     TransactionBase tb = e as TransactionBase;
 
@@ -644,12 +644,12 @@ namespace Media.Common.Extensions.Stream
 
             static void HandleRead(object sender, ITransactionResult e)
             {
-                //if (e == null && false == sct is TransactionBase) return;
+                //if (e is null && false == sct is TransactionBase) return;
             }
 
             static void HandleWrite(object sender, ITransactionResult e)
             {
-                if (e != null && e is TransactionBase)
+                if (e is not null && e is TransactionBase)
                 {
                     TransactionBase tb = ((TransactionBase)e);
 
@@ -661,7 +661,7 @@ namespace Media.Common.Extensions.Stream
 
             static void HandleCancelled(object sender, ITransactionResult e)
             {
-                if (e != null && e is TransactionBase)
+                if (e is not null && e is TransactionBase)
                 {
                     TransactionBase tb = ((TransactionBase)e);//e as TransactionBase;
 
@@ -673,9 +673,9 @@ namespace Media.Common.Extensions.Stream
 
             internal protected static void RaiseTransactionCompleted(TransactionBase tb, object sender = null)
             {
-                var evt = tb != null ? tb.TransactionCompleted : null;
+                var evt = tb is not null ? tb.TransactionCompleted : null;
 
-                if (evt == null) return;
+                if (evt is null) return;
                 
                 evt(sender, tb);
 
@@ -686,9 +686,9 @@ namespace Media.Common.Extensions.Stream
 
             internal protected static void RaiseTransactionWrite(TransactionBase tb, object sender = null)
             {
-                var evt = tb != null ? tb.TransactionWrite : null;
+                var evt = tb is not null ? tb.TransactionWrite : null;
 
-                if (evt == null) return;
+                if (evt is null) return;
 
                 evt(sender, tb);
 
@@ -699,9 +699,9 @@ namespace Media.Common.Extensions.Stream
 
             internal protected static void RaiseTransactionRead(TransactionBase tb, object sender = null)
             {
-                var evt = tb != null ? tb.TransactionRead : null;
+                var evt = tb is not null ? tb.TransactionRead : null;
 
-                if (evt == null) return;
+                if (evt is null) return;
 
                 evt(sender, tb);
 
@@ -712,9 +712,9 @@ namespace Media.Common.Extensions.Stream
 
             internal protected static void RaiseTransactionCancelled(TransactionBase tb, object sender = null)
             {
-                var evt = tb != null ? tb.TransactionCancelled : null;
+                var evt = tb is not null ? tb.TransactionCancelled : null;
 
-                if (evt == null) return;
+                if (evt is null) return;
 
                 evt(sender, tb);
 
@@ -768,7 +768,7 @@ namespace Media.Common.Extensions.Stream
           
             public virtual bool IsCompleted
             {
-                get { return IsTransactionCanceled || IsTransactionDone || AsyncTransactionResult != null && AsyncTransactionResult.IsCompleted; }
+                get { return IsTransactionCanceled || IsTransactionDone || AsyncTransactionResult is not null && AsyncTransactionResult.IsCompleted; }
             }
 
             #endregion
@@ -809,20 +809,20 @@ namespace Media.Common.Extensions.Stream
 
                 base.Dispose(disposing);
 
-                if (false == ShouldDispose) return;
+                if (ShouldDispose is false) return;
 
                 Cancel();
 
-                if (AsyncResult != null) AsyncResult = null;
+                if (AsyncResult is not null) AsyncResult = null;
 
-                if (TransactionRead != null)
+                if (TransactionRead is not null)
                 {
                     TransactionRead -= TransactionBase.HandleRead;
 
                     TransactionRead = null;
                 }
 
-                if (TransactionWrite != null)
+                if (TransactionWrite is not null)
                 {
                     TransactionWrite -= TransactionBase.HandleWrite;
 
@@ -830,14 +830,14 @@ namespace Media.Common.Extensions.Stream
                 }
 
                 //Could happen in handler
-                if (TransactionCompleted != null)
+                if (TransactionCompleted is not null)
                 {
                     TransactionCompleted -= TransactionBase.HandleCompleted;
 
                     TransactionCompleted = null;
                 }
 
-                if (TransactionCancelled != null)
+                if (TransactionCancelled is not null)
                 {
                     TransactionCancelled -= TransactionBase.HandleCancelled;
 
@@ -851,7 +851,7 @@ namespace Media.Common.Extensions.Stream
 
             protected virtual void Cancel()
             {
-                if (false == IsCompleted && CancelTokenSource != null)
+                if (false == IsCompleted && CancelTokenSource is not null)
                 {
                     CancelTokenSource.Cancel();
 
@@ -1012,7 +1012,7 @@ namespace Media.Common.Extensions.Stream
 
                                 TransactionBase.RaiseTransactionWrite(this);
 
-                                if (false == IsTransactionCanceled && false == IsDisposed) AsyncResult = Source.BeginRead(Memory.Array, Memory.Offset, Memory.Count, ReadFunction, this);
+                                if (false == IsTransactionCanceled && IsDisposed is false) AsyncResult = Source.BeginRead(Memory.Array, Memory.Offset, Memory.Count, ReadFunction, this);
 
                                 return;
                             }
@@ -1031,7 +1031,7 @@ namespace Media.Common.Extensions.Stream
 
             protected internal override void Dispose(bool disposing)
             {
-                if (disposing && Memory != null)
+                if (disposing && Memory is not null)
                 {
                     Memory.Dispose();
                     Memory = null;

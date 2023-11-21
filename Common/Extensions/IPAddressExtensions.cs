@@ -42,9 +42,9 @@ namespace Media.Common.Extensions.IPAddress
     {
         private static void CheckIPVersion(System.Net.IPAddress ipAddress, System.Net.IPAddress mask, out byte[] addressBytes, out byte[] maskBytes)
         {
-            if (ipAddress == null) throw new System.ArgumentNullException("ipAddress");
+            if (ipAddress is null) throw new System.ArgumentNullException("ipAddress");
         
-            if (mask == null) throw new System.ArgumentNullException("mask");
+            if (mask is null) throw new System.ArgumentNullException("mask");
 
             addressBytes = ipAddress.GetAddressBytes();
 
@@ -141,7 +141,7 @@ namespace Media.Common.Extensions.IPAddress
 
         public static bool IsMulticast(this System.Net.IPAddress ipAddress)
         {
-            if (ipAddress == null) return false;
+            if (ipAddress is null) return false;
 
             byte[] addressBytes;
 

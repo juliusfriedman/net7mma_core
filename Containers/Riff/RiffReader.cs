@@ -149,7 +149,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
     public static bool HasSubType(Node chunk)
     {
 
-        if (chunk == null) throw new ArgumentNullException("chunk");
+        if (chunk is null) throw new ArgumentNullException("chunk");
 
         FourCharacterCode fourCC = (FourCharacterCode)ToFourCC(chunk.Identifier[0], chunk.Identifier[1], chunk.Identifier[2], chunk.Identifier[3]);
 
@@ -171,7 +171,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
     public static bool HasSubType(byte[] chunk, int offset = 0)
     {
-        if (chunk == null) throw new ArgumentNullException(nameof(chunk));
+        if (chunk is null) throw new ArgumentNullException(nameof(chunk));
 
         if (chunk.Length - offset < 4) throw new ArgumentOutOfRangeException(nameof(offset));
 
@@ -182,7 +182,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
     public static FourCharacterCode GetSubType(Node chunk)
     {
-        if (chunk == null) throw new ArgumentNullException("chunk");
+        if (chunk is null) throw new ArgumentNullException("chunk");
 
         return (FourCharacterCode)(HasSubType(chunk) ? ToFourCC(chunk.Identifier[4], chunk.Identifier[5], chunk.Identifier[6], chunk.Identifier[7]) : ToFourCC(chunk.Identifier[0], chunk.Identifier[1], chunk.Identifier[2], chunk.Identifier[3]));
     }
@@ -225,7 +225,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
         foreach (var chunk in this)
         {
-            if (names == null || names.Count() == 0 || names.Contains(Common.Binary.Read32(chunk.Identifier, 0, Media.Common.Binary.IsBigEndian)))
+            if (names is null || names.Count() is 0 || names.Contains(Common.Binary.Read32(chunk.Identifier, 0, Media.Common.Binary.IsBigEndian)))
             {
                 yield return chunk;
                 continue;
@@ -273,7 +273,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
         get
         {
             //Call Root to call ReadNext which sets m_Needs64BitInfo.Value the first time.
-            if (false == m_Needs64BitInfo.HasValue) return Root != null && m_Needs64BitInfo.Value;
+            if (false == m_Needs64BitInfo.HasValue) return Root is not null && m_Needs64BitInfo.Value;
 
             //Return the known value.
             return m_Needs64BitInfo.Value;
@@ -356,13 +356,13 @@ public class RiffReader : MediaFileStream, IMediaContainer
         {
             Node next = ReadNext();
 
-            if (next == null) yield break;
+            if (next is null) yield break;
                            
             yield return next;
 
             if (m_Needs64BitInfo.Value && //If the file needs information from the ds64 node
                 //The value must not have been read before and not found to be 0
-                m_DataSize == 0 && 
+                m_DataSize is 0 && 
                 //There must be at least 28 bytes in a junk / ds64 chunk
                 next.DataSize >= 28 &&
                 //This is the ds64 chunk
@@ -371,7 +371,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
                 m_DataSize = (ulong)Common.Binary.Read64(next.Data, MinimumSize, Media.Common.Binary.IsBigEndian);
 
-                //if this is found to be == 0 then what?
+                //if this is found to be is 0 then what?
 
                 /*
                  struct DataSize64Chunk // declare DataSize64Chunk structure
@@ -445,7 +445,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
     {
         using (var iditChunk = ReadChunk(FourCharacterCode.IDIT, Root.Offset))
         {
-            if (iditChunk != null)
+            if (iditChunk is not null)
             {
                 //Store the creation time.
                 DateTime createdDateTime = FileInfo.CreationTimeUtc;
@@ -743,7 +743,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
         using (var chunk = ReadChunk(FourCharacterCode.fmt, Root.Offset))
         {
-            if (chunk == null) throw new InvalidOperationException("no 'fmt' Chunk found");
+            if (chunk is null) throw new InvalidOperationException("no 'fmt' Chunk found");
 
             m_Format = Common.Binary.Read16(chunk.Data, 0, Common.Binary.IsBigEndian);
             m_NumChannels = Common.Binary.Read16(chunk.Data, 2, Common.Binary.IsBigEndian);
@@ -834,7 +834,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
         //Must be present!
         using (var headerChunk = ReadChunk(FourCharacterCode.avih, Root.Offset))
         {
-            if (headerChunk == null) throw new InvalidOperationException("no 'avih' Chunk found");
+            if (headerChunk is null) throw new InvalidOperationException("no 'avih' Chunk found");
 
             int offset = 0;
 
@@ -881,7 +881,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
     public override IEnumerable<Track> GetTracks()
     {
 
-        if (m_Tracks != null)
+        if (m_Tracks is not null)
         {
             foreach (Track track in m_Tracks) yield return track;
             yield break;
@@ -1011,7 +1011,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
                         {
                             using (var strf = ReadChunk(FourCharacterCode.strf, strhChunk.Offset))
                             {
-                                if (strf != null)
+                                if (strf is not null)
                                 {
                                     //BitmapInfoHeader
                                     //Read 32 Width
@@ -1039,7 +1039,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
                             using (var strf = ReadChunk(FourCharacterCode.strf, strhChunk.Offset))
                             {
-                                if (strf != null)
+                                if (strf is not null)
                                 {
                                     //WaveFormat (EX) 
                                     codecIndication = strf.Data.Take(2).ToArray();
@@ -1057,7 +1057,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
                 using (var strn = ReadChunk(FourCharacterCode.strn, strhChunk.Offset))
                 {
-                    if (strn != null) trackName = Encoding.UTF8.GetString(strn.Data.Array, 8, (int)(strn.DataSize - 8));
+                    if (strn is not null) trackName = Encoding.UTF8.GetString(strn.Data.Array, 8, (int)(strn.DataSize - 8));
 
                     //Variable BitRate must also take into account the size of each chunk / nBlockAlign * duration per frame.
 

@@ -76,16 +76,16 @@ namespace Media.Container
             {
                 if (false == final) return; 
                 
-                if (fs != null)
+                if (fs is not null)
                 {
                     fs.Dispose(); 
                     
                     fs = null;
                 }
                 
-                if (args != null) args = null;
+                if (args is not null) args = null;
 
-                if (sharedFinalizer != null) sharedFinalizer = null;
+                if (sharedFinalizer is not null) sharedFinalizer = null;
             };
 
             args = new object[] { fs, new System.Uri(fileName), access, false, sharedFinalizer };
@@ -104,7 +104,7 @@ namespace Media.Container
                     MediaFileStream created = (MediaFileStream)derivedType.GetConstructor(ConstructorTypes).Invoke(args);
 
                     using(var rootNode = created.Root)
-                        if (rootNode != null && rootNode.IsComplete)
+                        if (rootNode is not null && rootNode.IsComplete)
                     {
                         args = null;
 
@@ -214,7 +214,7 @@ namespace Media.Container
         //Could also use FileOptions.DeleteOnClose, Could also just have an Extension method.
         void DeleteFromFileInfoIfExists()
         {
-            if (/*false == IsDisposed && */ FileInfo is not null && FileInfo.Exists) FileInfo.Delete();
+            if (/*IsDisposed is false && */ FileInfo is not null && FileInfo.Exists) FileInfo.Delete();
         }
 
         bool TryDeleteFromFileInfoIfExists()
@@ -253,7 +253,7 @@ namespace Media.Container
             ////};
             
             //Wait for the end of the transaction or the root to be valid
-            //Buffering && Root == null
+            //Buffering && Root is null
             while (result.IsTransactionDone is false && Root is null) result.AsyncWaitHandle.WaitOne(0);
         }
 
@@ -333,7 +333,7 @@ namespace Media.Container
                 m_NodeCachingPolicy = n;
 
             if (eraseCache)
-                if (m_NodeCache != null)
+                if (m_NodeCache is not null)
                     m_NodeCache.Clear();
                 else
                     m_NodeCache = new SortedDictionary<long, Node>();
@@ -343,7 +343,7 @@ namespace Media.Container
 
         public void RemoveCachingPolicy(NodeAction n)
         {
-            if(m_NodeCachingPolicy != null) m_NodeCachingPolicy -= n;
+            if(m_NodeCachingPolicy is not null) m_NodeCachingPolicy -= n;
         }
 
         public delegate bool NodeAction(Node n);
@@ -364,11 +364,11 @@ namespace Media.Container
 
         protected virtual void CacheNode(Node n, bool useInstance = false, bool keepData = false, bool checkSelf = true)
         {
-            if (n == null) throw new ArgumentNullException("n");
+            if (n is null) throw new ArgumentNullException("n");
 
             if (checkSelf && n.Master != this) throw new InvalidOperationException("n.Master is not this => [MediaFileStream] instance.");
 
-            if (m_NodeCache == null) throw new ArgumentNullException("No Caching Polocy");
+            if (m_NodeCache is null) throw new ArgumentNullException("No Caching Polocy");
 
             m_NodeCache.Add(n.Offset, useInstance ? n : keepData ? Node.CreateNodeWithDataReference(n) : Node.CreateNodeFrom(n));
         }
@@ -410,7 +410,7 @@ namespace Media.Container
             
             base.Close();
             
-            if(AfterClose != null) AfterClose();
+            if(AfterClose is not null) AfterClose();
 
             FileInfo = null;
         }
@@ -518,7 +518,7 @@ namespace Media.Container
         /// <param name="count">The amount of bytes to skip.</param>
         /// <returns><see cref="Position"/></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
-        public virtual long Skip(long count) { return count /*<=*/== 0 ? Position : Position += count; } //Should also work in reverse... and without the branch although if == 0 is a good check
+        public virtual long Skip(long count) { return count /*<=*/== 0 ? Position : Position += count; } //Should also work in reverse... and without the branch although if is 0 is a good check
 
         /// <summary>
         /// using a new FileStream with ReadOnly access a seek to the given position is performed and a subsequent read at the given position is performed.
@@ -532,7 +532,7 @@ namespace Media.Container
         public virtual int ReadAt(long position, byte[] buffer, int offset, int count) { return ReadAt(position, buffer, offset, count, true); }
         public virtual int ReadAt(long position, byte[] buffer, int offset, int count, bool refreshFileInfo = true)
         {
-            if (count == 0) return 0;
+            if (count is 0) return 0;
 
             using (var stream = new System.IO.FileStream(Name, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
             {
@@ -557,7 +557,7 @@ namespace Media.Container
         public virtual void WriteAt(long position, byte[] buffer, int offset, int count) { WriteAt(position, buffer, offset, count, true); }
         public virtual void WriteAt(long position, byte[] buffer, int offset, int count, bool refreshFileInfo = true)
         {
-            if (count == 0) return;
+            if (count is 0) return;
             using (var stream = new System.IO.FileStream(Name, System.IO.FileMode.Open, System.IO.FileAccess.Write, System.IO.FileShare.ReadWrite))
             {
                 if (position != stream.Seek(position, System.IO.SeekOrigin.Begin)) throw new InvalidOperationException("Unable to obtain the given position");

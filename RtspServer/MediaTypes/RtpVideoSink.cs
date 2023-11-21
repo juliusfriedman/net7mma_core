@@ -205,11 +205,11 @@ public class RtpVideoSink : RtpSink
                 Rtp.RtpClient.TransportContext transportContext =
                     RtpClient.GetContextBySourceId(frame.SynchronizationSourceIdentifier);
 
-                //If there is a context
-                if (transportContext is not null)
-                {
-                    //Increase priority
-                    RtpClient.m_WorkerThread.Priority = ThreadPriority.AboveNormal;
+                    //If there is a context
+                    if (transportContext is not null)
+                    {
+                        //Increase priority
+                        RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.AboveNormal;
 
                     //Ensure HasRecievedRtpWithinSendInterval is true
                     //transportContext.m_LastRtpIn = DateTime.UtcNow;

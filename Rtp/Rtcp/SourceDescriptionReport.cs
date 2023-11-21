@@ -265,7 +265,7 @@ namespace Media.Rtcp
                 //if(Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(data, out dataLength)) return;
 
                 //If any data is given
-                if (data != null)
+                if (data is not null)
                 {
                     //Determine the length of the available data
                     int dataLength = data.Length;
@@ -415,7 +415,7 @@ namespace Media.Rtcp
 
             protected override void Dispose(bool disposing)
             {
-                if (false == disposing || false == ShouldDispose) return;
+                if (disposing is false || ShouldDispose is false) return;
 
                 base.Dispose(ShouldDispose);
 
@@ -481,7 +481,7 @@ namespace Media.Rtcp
             internal SourceDescriptionItemList(SourceDescriptionChunk parent, bool shouldDispose = true)
                 : base(shouldDispose)
             {
-                if (parent == null) throw new ArgumentNullException("parent");
+                if (parent is null) throw new ArgumentNullException("parent");
 
                 ChunkData = parent.ChunkData.Skip(SourceDescriptionChunk.IdentifierSize);
 
@@ -511,7 +511,7 @@ namespace Media.Rtcp
             internal SourceDescriptionItemList(IEnumerable<SourceDescriptionItem> items, bool shouldDispose = true)
                 : base(shouldDispose)
             {
-                if (items == null) throw new ArgumentNullException("items");
+                if (items is null) throw new ArgumentNullException("items");
 
                 //using an enumerator on the items given
                 using (IEnumerator<SourceDescriptionItem> enumerator = items.GetEnumerator())
@@ -591,8 +591,8 @@ namespace Media.Rtcp
             /// </summary>
             public bool AtEndOfList
             {
-                //get { return ChunkDataOffset > ChunkData.Count() || StartedEnumeration && CurrentItem.ItemType == 0; }
-                get { return ItemIndex < m_Count || StartedEnumeration && CurrentItem.ItemType == 0; }
+                //get { return ChunkDataOffset > ChunkData.Count() || StartedEnumeration && CurrentItem.ItemType is 0; }
+                get { return ItemIndex < m_Count || StartedEnumeration && CurrentItem.ItemType is 0; }
             }
 
             public int Size { get { return ChunkData.Count(); } }
@@ -644,10 +644,10 @@ namespace Media.Rtcp
             public bool MoveNext()
             {
                 //If the enumerator is disposed or AtEndOfList is true
-                if (false == IsDisposed && false == AtEndOfList)
+                if (IsDisposed is false && false == AtEndOfList)
                 {
                     //Dipose the current item
-                    if (StartedEnumeration && CurrentItem != null)
+                    if (StartedEnumeration && CurrentItem is not null)
                     {
                         Current.Dispose();
 
@@ -726,7 +726,7 @@ namespace Media.Rtcp
             /// <returns></returns>
             public bool TryCopyTo(IList<SourceDescriptionItem> destination)
             {
-                if (destination == null) throw new ArgumentNullException("destination");
+                if (destination is null) throw new ArgumentNullException("destination");
 
                 if (IsDisposed) return false;
 
@@ -1021,14 +1021,14 @@ namespace Media.Rtcp
 
             protected override void Dispose(bool disposing)
             {
-                if (false == disposing || false == ShouldDispose) return;
+                if (disposing is false || ShouldDispose is false) return;
 
                 base.Dispose(ShouldDispose);
 
                 //use as or no check is ness cause of cast..
                 IDisposable chunkData = (IDisposable)m_ChunkData;
 
-                if (chunkData != null)
+                if (chunkData is not null)
                 {
                     chunkData.Dispose();
 
@@ -1163,7 +1163,7 @@ namespace Media.Rtcp
         public override int ReportBlockOctets
         {
             //The Header may have a ssrc, the ssrc is in the header
-            get { return false == IsDisposed && HasReports ? Payload.Count - PaddingOctets + Header.Size - RtcpHeader.Length : 0; }
+            get { return IsDisposed is false && HasReports ? Payload.Count - PaddingOctets + Header.Size - RtcpHeader.Length : 0; }
         }
 
         #endregion
@@ -1179,22 +1179,22 @@ namespace Media.Rtcp
 
         internal virtual protected void Add(SourceDescriptionChunk chunk, bool pad)
         {
-            if (chunk == null) return;
+            if (chunk is null) return;
 
             if (IsReadOnly) throw new InvalidOperationException("A SourceDescription Chunk cannot be added when IsReadOnly is true.");
 
-            if (ReportBlocksRemaining == 0) throw new InvalidOperationException("A RtcpReport can only hold 31 ReportBlocks");
+            if (ReportBlocksRemaining is 0) throw new InvalidOperationException("A RtcpReport can only hold 31 ReportBlocks");
 
             int chunkSize = chunk.Size;
 
             //if there was no data in the chunk then there is nothing more to add.
-            if (chunkSize == 0) return;
+            if (chunkSize is 0) return;
 
-            //The octets which will be added to the payload consist of the ChunkData without the octets of the ChunkIdentifier in cases where BlockCount == 0
+            //The octets which will be added to the payload consist of the ChunkData without the octets of the ChunkIdentifier in cases where BlockCount is 0
             IEnumerable<byte> chunkData = chunk.ChunkData;
 
             //In the first SourceDescriptionChunk added to a SourceDescription the header contains the BlockIdentifier. 
-            if (BlockCount++ == 0)
+            if (BlockCount++ is 0)
             {
                 //Set the value in the header
                 Header.SendersSynchronizationSourceIdentifier = chunk.ChunkIdentifer;
@@ -1241,7 +1241,7 @@ namespace Media.Rtcp
 
         public bool Remove(SourceDescriptionChunk chunk)
         {
-            if (chunk == null || IsReadOnly || BlockCount == 0) return false;
+            if (chunk is null || IsReadOnly || BlockCount is 0) return false;
 
             //Determine where in the payload the chunk resides.
             int chunkOffset = 0, chunkIndex = 0;
@@ -1269,7 +1269,7 @@ namespace Media.Rtcp
             if (false == contained) return false;
 
             //If the chunk is overlapped in the header
-            if (chunkIndex == 0)
+            if (chunkIndex is 0)
             {
                 //Remove only the octets in the Payload which would correspond to the chunk which does no include the identifier
                 m_OwnedOctets = m_OwnedOctets.Skip(chunk.Size - SourceDescriptionChunk.IdentifierSize).ToArray();
@@ -1298,7 +1298,7 @@ namespace Media.Rtcp
         /// <returns>The pointer to the enumerator implemenation.</returns>
         public IEnumerator<SourceDescriptionChunk> GetChunkEnumerator()
         {
-            if (m_Chunks == null) m_Chunks = GetChunkIterator();
+            if (m_Chunks is null) m_Chunks = GetChunkIterator();
 
             return m_Chunks.GetEnumerator();
         }
@@ -1406,7 +1406,7 @@ namespace Media.Rtcp
 
                 IDisposable chunks = (IDisposable)m_Chunks;
 
-                if (chunks != null)
+                if (chunks is not null)
                 {
                     chunks.Dispose();
 
@@ -1557,7 +1557,7 @@ namespace Media.UnitTests
                             System.Diagnostics.Debug.Assert(p.PaddingOctets == PaddingCounter, "Unexpected PaddingOctets");
 
                             //Check all data in the padding but not the padding octet itself.
-                            System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b == 0), "Unexpected PaddingData");
+                            System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b is 0), "Unexpected PaddingData");
 
                             //Iterate for the amount of reports to add.
                             if (ItemLength > 0)
@@ -1588,7 +1588,7 @@ namespace Media.UnitTests
                             System.Diagnostics.Debug.Assert(p.PaddingOctets == PaddingCounter, "Unexpected PaddingOctets");
 
                             //Check all data in the padding but not the padding octet itself.
-                            System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b == 0), "Unexpected PaddingData");
+                            System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b is 0), "Unexpected PaddingData");
 
 
                             //TODO

@@ -59,13 +59,13 @@ namespace Media.Rtsp.Server.MediaTypes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void SendData(byte[] data, int offset = 0, int length = -1)
         {
-            //if (RtspClient != null)//...
+            //if (RtspClient is not null)//...
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void EnqueData(byte[] data, int offset = 0, int length = -1)
         {
-            //if (RtspClient != null) //...
+            //if (RtspClient is not null) //...
         }
     }
 }

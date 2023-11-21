@@ -90,11 +90,11 @@ namespace Media.Concepts.Experimental
                 try
                 {
                     T current = base.Current;
-                    if(current != null) try { OnCurrentRead(); }
+                    if(current is not null) try { OnCurrentRead(); }
                     catch (Exception _) { ex = _; }
                     return base.Current;
                 }
-                finally { if (ex != null) throw ex; }
+                finally { if (ex is not null) throw ex; }
             }
             internal protected set
             {
@@ -644,13 +644,13 @@ namespace Media.Concepts.Experimental
             get
             {
                 List<T> found = FindSegmentForIndex(ref index);
-                if (found != null) return found[System.Math.Min(found.Count - 1, index)];
+                if (found is not null) return found[System.Math.Min(found.Count - 1, index)];
                 else return default(T);
             }
             set
             {
                 List<T> found = FindSegmentForIndex(ref index);
-                if (found != null) found[index] = value;
+                if (found is not null) found[index] = value;
             }
         }
 
@@ -671,7 +671,7 @@ namespace Media.Concepts.Experimental
         public void RemoveRange(int start, int count)
         {
             List<T> found = FindSegmentForIndex(ref start);
-            if (found == null) return;
+            if (found is null) return;
             while (--count > 0) found.RemoveAt(start);
         }
 
@@ -796,7 +796,7 @@ namespace Media.Concepts.Experimental
             if (offset < 0) throw new ArgumentOutOfRangeException("offset must refer to a location within the buffer.");
             else if (count + offset > Length) throw new ArgumentOutOfRangeException("count must refer to a location within the buffer with respect to offset.");
 
-            if (count == 0) return Enumerable.Empty<byte>();
+            if (count is 0) return Enumerable.Empty<byte>();
             buffer = buffer ?? new byte[count];
             int len = count;
             while ((len -= m_Stream.Read(buffer, offset, count)) > 0
@@ -830,7 +830,7 @@ namespace Media.Concepts.Experimental
 
         internal protected long CoreIndexOf(IEnumerable<byte> items, int start = -1, int count = -1)
         {
-            if (m_Stream == null || m_Disposed || items == null || items == Enumerable.Empty<byte>() || count == 0) return -1;
+            if (m_Stream is null || m_Disposed || items is null || items == Enumerable.Empty<byte>() || count is 0) return -1;
             if (count == -1) count = items.Count();
 
             if (!Initialized && !MoveNext()) return -1;
@@ -850,7 +850,7 @@ namespace Media.Concepts.Experimental
                 }
                 else start = (int)m_Stream.Position;
                 //While there is an itemPointer
-                while (itemPointer != null)
+                while (itemPointer is not null)
                 {
                     int j = count;
                     while (itemPointer.Current == Current && (--j > 0))
@@ -858,7 +858,7 @@ namespace Media.Concepts.Experimental
                         if (!itemPointer.MoveNext()) break;
                     }
                     //The match is complete
-                    if (j == 0)
+                    if (j is 0)
                     {
                         //If CanSeek and moved the position and we will go back to where we were
                         //if (m_Stream.CanSeek && position != Position) m_Stream.Seek(position, System.IO.SeekOrigin.Begin); //Curent and Begin need to be aware...
@@ -1112,7 +1112,7 @@ namespace Media.Concepts.Experimental
             get
             {
                 if (m_Disposed) return null;
-                if (m_CurrentStream == null) m_CurrentStream = m_Enumerator.Current;
+                if (m_CurrentStream is null) m_CurrentStream = m_Enumerator.Current;
                 return m_CurrentStream;
             }
         }
@@ -1179,7 +1179,7 @@ namespace Media.Concepts.Experimental
 
         public LinkedStream(IEnumerable<EnumerableByteStream> streams)
         {
-            if (streams == null) streams = Enumerable.Empty<EnumerableByteStream>();
+            if (streams is null) streams = Enumerable.Empty<EnumerableByteStream>();
             m_Streams = streams;
             m_Enumerator = GetEnumerator();
             m_Enumerator.MoveNext();
@@ -1224,7 +1224,7 @@ namespace Media.Concepts.Experimental
 
             LinkedStream result = new LinkedStream(new EnumerableByteStream(new System.IO.MemoryStream()));
 
-            if (count == 0) return result;
+            if (count is 0) return result;
 
             while (absoluteIndex > 0)
             {
@@ -1312,7 +1312,7 @@ namespace Media.Concepts.Experimental
 
         bool MoveNext()
         {
-            if (m_Disposed || m_Streams == null || m_Enumerator == null) return false;
+            if (m_Disposed || m_Streams is null || m_Enumerator is null) return false;
             //If the current stream can seek it's not a big deal to reset it now also
             //if (m_CurrentStream.CanSeek) m_CurrentStream.Seek(0, System.IO.SeekOrigin.Begin);
             m_AbsolutePosition += (ulong)(m_CurrentStream.Count - m_CurrentStream.Position); //Cumulate the position of the non seeking stream - what was already read
@@ -1448,7 +1448,7 @@ namespace Media.Concepts.Experimental
         void IDisposable.Dispose()
         {
             m_Disposed = true;
-            if (m_Streams != null) m_Streams = null;
+            if (m_Streams is not null) m_Streams = null;
             m_StreamIndex = -1;
             base.Dispose();
         }

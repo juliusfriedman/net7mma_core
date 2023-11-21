@@ -39,14 +39,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //http://stackoverflow.com/questions/1804433/issue-with-binaryreader-readchars
 
 using System;
-using System.Linq;
 
 namespace Media.Common.Extensions.Encoding
 {
     [CLSCompliant(true)]
     public static class EncodingExtensions
     {
-        public static readonly char[] EmptyChar = new char[0];
+        public static readonly char[] EmptyChar = System.Array.Empty<char>();
 
         #region GetByteCount
 
@@ -60,7 +59,7 @@ namespace Media.Common.Extensions.Encoding
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int GetByteCount(this System.Text.Encoding encoding, params char[] chars)
         {
-            if (encoding == null) encoding = System.Text.Encoding.Default;
+            if (encoding is null) encoding = System.Text.Encoding.Default;
 
             return encoding.GetByteCount(chars);
         }
@@ -85,9 +84,7 @@ namespace Media.Common.Extensions.Encoding
         {
             int intCount = (int)count, intOffset = (int)offset, intRead = 0;
 
-            System.Exception any;
-
-            bool readResult = ReadDelimitedDataFrom(encoding, buffer, delimits, intOffset, intCount, out result, out intRead, out any, includeDelimits);
+            bool readResult = ReadDelimitedDataFrom(encoding, buffer, delimits, intOffset, intCount, out result, out intRead, out System.Exception any, includeDelimits);
 
             read = intRead;
 
@@ -106,7 +103,7 @@ namespace Media.Common.Extensions.Encoding
             //Todo, check for large delemits and use a hash or always use a hash.
             //System.Collections.Generic.HashSet<char> delimitsC = new System.Collections.Generic.HashSet<char>(delimits);
 
-            if (delimits == null) delimits = EmptyChar;
+            if (delimits is null) delimits = EmptyChar;
 
             int max;
 
@@ -126,16 +123,16 @@ namespace Media.Common.Extensions.Encoding
             bool sawDelimit = false;
 
             //Make the builder
-            System.Text.StringBuilder builder = new System.Text.StringBuilder();
+            System.Text.StringBuilder builder = new();
 
             //Use default..
-            if (encoding == null) encoding = System.Text.Encoding.Default;
+            encoding ??= System.Text.Encoding.Default;
 
             System.Text.Decoder decoder = encoding.GetDecoder();
 
             //int charCount = decoder.GetCharCount(buffer, offset, count);
 
-            //if(charCount == 0) return true;
+            //if(charCount is 0) return true;
 
             int toRead, delemitsLength = delimits.Length;
 
@@ -192,7 +189,7 @@ namespace Media.Common.Extensions.Encoding
                 if (charsUsed > 0) builder.Append(results, 0, charsUsed);
             } while (count > 0 && sawDelimit is false);
 
-            if (builder == null)
+            if (builder is null)
             {
                 result = null;
 
@@ -233,9 +230,9 @@ namespace Media.Common.Extensions.Encoding
             //Todo, check for large delemits and use a hash or always use a hash.
             //System.Collections.Generic.HashSet<char> delimitsC = new System.Collections.Generic.HashSet<char>(delimits);
 
-            if (delimits == null) delimits = EmptyChar;
+            if (delimits is null) delimits = EmptyChar;
 
-            if (stream == null || stream.CanRead is false || count is Common.Binary.Zero)
+            if (stream is null || stream.CanRead is false || count is Common.Binary.Zero)
             {
                 result = null;
 
@@ -248,7 +245,7 @@ namespace Media.Common.Extensions.Encoding
             if (at >= stream.Length) return false;
 
             //Use default..
-            if (encoding == null) encoding = System.Text.Encoding.Default;
+            if (encoding is null) encoding = System.Text.Encoding.Default;
 
             System.Text.StringBuilder builder = null;
 
@@ -305,14 +302,14 @@ namespace Media.Common.Extensions.Encoding
 
         Done:
 
-            if (builder == null)
+            if (builder is null)
             {
                 result = null;
 
                 return sawDelimit;
             }
 
-            result = builder.Length == 0 ? string.Empty : builder.ToString();
+            result = builder.Length is 0 ? string.Empty : builder.ToString();
 
             builder = null;
 
@@ -382,7 +379,7 @@ namespace Media.Common.Extensions.Encoding
         /// <returns>The encoded data.</returns>
         public static char[] GetChars(this System.Text.Encoding encoding, params byte[] toEncode)
         {
-            if(toEncode == null) throw new ArgumentNullException("toEncode");
+            if(toEncode is null) throw new ArgumentNullException("toEncode");
 
             //int firstDimension = toEncode.Rank -1;
 
@@ -390,7 +387,7 @@ namespace Media.Common.Extensions.Encoding
             int toEncodeLength = toEncode.GetUpperBound(0); 
 
             //If 0 then return the empty char array
-            if (toEncodeLength == 0) return EmptyChar;
+            if (toEncodeLength is 0) return EmptyChar;
 
             //GetChars using the first element and the length
             return GetChars(encoding, toEncode, toEncode.GetLowerBound(0), toEncodeLength);
@@ -408,7 +405,7 @@ namespace Media.Common.Extensions.Encoding
         public static char[] GetChars(this System.Text.Encoding encoding, byte[] toEncode, int offset, int count)
         {
             //Use default..
-            if (encoding == null) encoding = System.Text.Encoding.Default;
+            if (encoding is null) encoding = System.Text.Encoding.Default;
 
             return encoding.GetChars(toEncode, offset, count);
         }
@@ -421,7 +418,7 @@ namespace Media.Common.Extensions.Encoding
         /// <returns>The encoded data.</returns>
         public static char[] GetChars(this System.Text.Decoder decoder, params byte[] toEncode)
         {
-            if (toEncode == null) throw new ArgumentNullException("toEncode");
+            if (toEncode is null) throw new ArgumentNullException("toEncode");
 
             //int firstDimension = toEncode.Rank -1;
 
@@ -429,7 +426,7 @@ namespace Media.Common.Extensions.Encoding
             int toEncodeLength = toEncode.GetUpperBound(0);
 
             //If 0 then return the empty char array
-            if (toEncodeLength == 0) return EmptyChar;
+            if (toEncodeLength is 0) return EmptyChar;
 
             //GetChars using the first element and the length
             return GetChars(decoder, toEncode, toEncode.GetLowerBound(0), toEncodeLength);
@@ -447,7 +444,7 @@ namespace Media.Common.Extensions.Encoding
         public static char[] GetChars(this System.Text.Decoder decoder, byte[] toEncode, int offset, int count)
         {
             //Use default..
-            if (decoder == null) decoder = System.Text.Encoding.Default.GetDecoder();
+            if (decoder is null) decoder = System.Text.Encoding.Default.GetDecoder();
 
             return decoder.GetChars(toEncode, offset, count);
         }

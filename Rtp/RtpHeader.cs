@@ -602,7 +602,7 @@ namespace Media.Rtp
         {
             if (System.Object.ReferenceEquals(this, obj)) return true;
 
-            return obj is RtpHeader header && Equals(header);
+            return obj is RtpHeader h && Equals(h);
         }
 
         #endregion

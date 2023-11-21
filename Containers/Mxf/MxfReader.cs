@@ -425,14 +425,14 @@ namespace Media.Containers.Mxf
 
         public static Category GetCategory(Node node)
         {
-            if (node == null) throw new ArgumentNullException("node");
+            if (node is null) throw new ArgumentNullException("node");
 
             return (Category)node.Identifier[4];
         }
 
         public static PartitionKind GetPartitionKind(Node node)
         {
-            if (node == null) throw new ArgumentNullException("node");
+            if (node is null) throw new ArgumentNullException("node");
 
             //Should check node starts with ParitionPack...
             //if (false == CompareUL(node.Identifier, UniversalLabel.PartitionPack.ToByteArray())) return PartitionKind.Unknown;
@@ -443,7 +443,7 @@ namespace Media.Containers.Mxf
         //Should check node starts with ParitionPack?
         public static PartitionStatus GetPartitionStatus(Node node)
         {
-            if (node == null) throw new ArgumentNullException("node");
+            if (node is null) throw new ArgumentNullException("node");
 
             //Should check node starts with ParitionPack...
             //if (false == CompareUL(node.Identifier, UniversalLabel.PartitionPack.ToByteArray())) return PartitionStatus.Unknown;
@@ -463,7 +463,7 @@ namespace Media.Containers.Mxf
 
         static bool CompareUL(byte[] aBytes, byte[] bBytes, bool compareRegistry = false, bool compareVersion = false, bool compareKind = false)
         {
-            if (aBytes == null) return bBytes == null;
+            if (aBytes is null) return bBytes is null;
 
             //Use the hash code if exact
             if (compareRegistry && compareVersion && compareKind) return aBytes.GetHashCode() == bBytes.GetHashCode();
@@ -491,7 +491,7 @@ namespace Media.Containers.Mxf
 
         public static string ToTextualConvention(byte[] identifier, int offset = 0)
         {
-            if (identifier == null) return Media.Common.Extensions.String.StringExtensions.UnknownString;
+            if (identifier is null) return Media.Common.Extensions.String.StringExtensions.UnknownString;
 
             string result;
 
@@ -548,7 +548,7 @@ namespace Media.Containers.Mxf
             {
                 length &= ~MultiByteLength;
 
-                if (length == 0) throw new InvalidOperationException("BER32 Indefinite Length Not Supported. Use DER Form.");
+                if (length is 0) throw new InvalidOperationException("BER32 Indefinite Length Not Supported. Use DER Form.");
 
                 if (length > 8) throw new InvalidOperationException("BER32 Lengths larger than 8 are Not Supported.");
 
@@ -726,7 +726,7 @@ namespace Media.Containers.Mxf
             using (var headerPartition = Root)
             {
 
-                if (headerPartition == null) return;
+                if (headerPartition is null) return;
 
                 int offset = 0;
 
@@ -895,7 +895,7 @@ namespace Media.Containers.Mxf
         {
             using (var preface = ReadObject(UniversalLabel.Preface, true, Root.DataOffset + Root.DataSize))
             {
-                if (preface == null) return;
+                if (preface is null) return;
 
                 int offset = 0, lenth = (int)(preface.DataSize);
 
@@ -988,7 +988,7 @@ namespace Media.Containers.Mxf
         {
             get
             {
-                if (m_CompanyName == null) ParseIdentification();
+                if (m_CompanyName is null) ParseIdentification();
                 return m_CompanyName ?? string.Empty;
             }
         }
@@ -997,7 +997,7 @@ namespace Media.Containers.Mxf
         {
             get
             {
-                if (m_ProductName == null) ParseIdentification();
+                if (m_ProductName is null) ParseIdentification();
                 return m_ProductName ?? string.Empty;
             }
         }
@@ -1006,7 +1006,7 @@ namespace Media.Containers.Mxf
         {
             get
             {
-                if (m_ProductVersion == null) ParseIdentification();
+                if (m_ProductVersion is null) ParseIdentification();
                 return m_ProductVersion ?? string.Empty;
             }
         }
@@ -1015,7 +1015,7 @@ namespace Media.Containers.Mxf
         {
             get
             {
-                if (m_Platform == null) ParseIdentification();
+                if (m_Platform is null) ParseIdentification();
                 return m_Platform ?? string.Empty;
             }
         }
@@ -1046,7 +1046,7 @@ namespace Media.Containers.Mxf
         {
             using (var identification = ReadObject(UniversalLabel.Identification, true, Root.DataOffset + Root.DataSize))
             {
-                if (identification == null) return;
+                if (identification is null) return;
                 int offset = 0, lenth = (int)(identification.DataSize);
 
                 while (offset < lenth)
@@ -1115,7 +1115,7 @@ namespace Media.Containers.Mxf
 
                 }
 
-                if (m_Platform == null) m_Platform = string.Empty;
+                if (m_Platform is null) m_Platform = string.Empty;
 
                 if (false == m_IdentificationModificationDate.HasValue
                     //Important?
@@ -1150,7 +1150,7 @@ namespace Media.Containers.Mxf
             using (var materialPackage = ReadObject(UniversalLabel.MaterialPackage, true, Root.DataOffset + Root.DataSize))
             {
 
-                if (materialPackage == null) return;
+                if (materialPackage is null) return;
 
                 int offset = 0, lenth = (int)(materialPackage.DataSize);
 
@@ -1277,13 +1277,13 @@ namespace Media.Containers.Mxf
 
             Position = offset;
 
-            bool exact = (ignoreRegistry == ignoreVersion == ignoreType) == true;
+            bool exact = (ignoreRegistry == ignoreVersion == ignoreType);
 
             foreach (var mxfObject in this)
             {
                 Guid objectId = new Guid(mxfObject.Identifier);
 
-                if (names == null || names.Count() == 0 || (exact ? names.Contains(objectId) : names.Any(n => CompareUL(n, objectId, ignoreRegistry, ignoreVersion, ignoreType))))
+                if (names is null || names.Count() is 0 || (exact ? names.Contains(objectId) : names.Any(n => CompareUL(n, objectId, ignoreRegistry, ignoreVersion, ignoreType))))
                     yield return mxfObject;
 
                 count -= mxfObject.TotalSize;
@@ -1319,7 +1319,7 @@ namespace Media.Containers.Mxf
             {
                 Node next = ReadNext();
                 
-                if (next == null) yield break;
+                if (next is null) yield break;
 
                 yield return next;
 
@@ -1339,7 +1339,7 @@ namespace Media.Containers.Mxf
         /// </summary>
         void ParseGenericDescriptors()
         {
-            if (m_TrackDescriptors != null) return;
+            if (m_TrackDescriptors is not null) return;
 
             int offsetStart = 0, trackId = -1;
 
@@ -1408,7 +1408,7 @@ namespace Media.Containers.Mxf
         public override IEnumerable<Track> GetTracks()
         {
 
-            if (m_Tracks != null)
+            if (m_Tracks is not null)
             {
                 foreach (Track track in m_Tracks) yield return track;
                 yield break;
@@ -1630,7 +1630,7 @@ namespace Media.Containers.Mxf
                                         ++i;
 
                                         //Component [ARGB, argb, F, YCBR]
-                                        if(descriptor.Data[++localOffset] == 0) break;
+                                        if(descriptor.Data[++localOffset] is 0) break;
                                         
                                         //Bits per component
                                         bitDepth += descriptor.Data[localOffset++];
@@ -1690,7 +1690,7 @@ namespace Media.Containers.Mxf
                 }
 
                 //Do not yield Timecode Tracks or duplicate entries
-                if (trackNumber == 0 || lastTrackNumber == trackNumber) continue;
+                if (trackNumber is 0 || lastTrackNumber == trackNumber) continue;
 
                 //Try to use the trackName if needed and we can
                 if (mediaType == Sdp.MediaType.unknown && false == string.IsNullOrWhiteSpace(trackName)) switch (trackName)

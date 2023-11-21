@@ -4,7 +4,7 @@
 
     //Useful for holding onto frame for longer than one cycle.
     //Could be used from the application during the FrameChangedEvent when 'final' is set to true.
-    //E.g. when final == true, =>
+    //E.g. when final, =>
     //Common.BaseDisposable.SetShouldDispose(frame, false, false);
     //JitterBuffer.Add(frame);
     //Could also be used by the RtpPacketRecieved event when not using FrameChangedEvents.

@@ -725,7 +725,7 @@ namespace Media.Concepts.Classes
         [System.CLSCompliant(false)]
         public bool IsNull(ref Bitable a) { return Processor.IsNull(ref a); }
 
-        public bool IsZero(Bitable a) { return System.Linq.Enumerable.All(a.Memory, (b => b == 0)); }
+        public bool IsZero(Bitable a) { return System.Linq.Enumerable.All(a.Memory, (b => b is 0)); }
 
         public bool IsNullOrZero(ref Number a) { return IsNull(a) || IsZero(a); }
 
@@ -1280,7 +1280,7 @@ namespace Media.Concepts.Classes
         {
             //Todo, align size with Machine
 
-            if (other.Memory != null)
+            if (other.Memory is not null)
             {
                 Memory = new byte[other.Count];
 
@@ -1665,7 +1665,7 @@ namespace Media.Concepts.Classes
 
         public static bool operator ==(Bitable a, Bitable b)
         {
-            return b is null ? a is null : a.Equals(b);
+            return b is null ? a is null : b.Equals(a);
         }
 
         public static bool operator !=(Bitable a, Bitable b)

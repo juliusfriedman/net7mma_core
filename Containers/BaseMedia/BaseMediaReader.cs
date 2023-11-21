@@ -152,9 +152,9 @@ namespace Media.Containers.BaseMedia
 
         public static string ToEncodedFourCharacterCode(Encoding encoding, byte[] identifier, int offset, int count)
         {
-            if (encoding == null) throw new ArgumentNullException("encoding");
+            if (encoding is null) throw new ArgumentNullException("encoding");
 
-            if (identifier == null) throw new ArgumentNullException("identifier");
+            if (identifier is null) throw new ArgumentNullException("identifier");
 
             if (offset + count > identifier.Length) throw new ArgumentOutOfRangeException("offset and count must relfect a position within identifier.");
 
@@ -216,7 +216,7 @@ namespace Media.Containers.BaseMedia
 
             foreach (var box in this)
             {
-                if (names == null || names.Count() == 0 || names.Contains(ToUTF8FourCharacterCode(box.Identifier)))
+                if (names is null || names.Count() is 0 || names.Contains(ToUTF8FourCharacterCode(box.Identifier)))
                 {
                     yield return box;
                 }
@@ -336,7 +336,7 @@ namespace Media.Containers.BaseMedia
                 length -= BytesPerUUID;
             }
 
-            //If the length == 0 then the size should be limited to the previous parent box length for seeking.
+            //If the length is 0 then the size should be limited to the previous parent box length for seeking.
             //Could keep a instance variable m_ParentRemains := Remaining
             //Could decrement it for every node encountered while IsParentBox is false.
             //Otherwise m_ParentRemains := length - MinimumSize
@@ -369,7 +369,7 @@ namespace Media.Containers.BaseMedia
             {
                 Node next = ReadNext();
 
-                if (next == null) yield break;
+                if (next is null) yield break;
 
                 yield return next;
 
@@ -487,7 +487,7 @@ namespace Media.Containers.BaseMedia
         {
             get
             {
-                if (m_Matrix == null) ParseMovieHeader();
+                if (m_Matrix is null) ParseMovieHeader();
                 return m_Matrix;
             }
         }
@@ -510,7 +510,7 @@ namespace Media.Containers.BaseMedia
             //Obtain the timeScale and duration from the LAST? mdhd box, can do but is more latent if the file is large...
             using (var mediaHeader = ReadBox("mvhd", Root.Offset)) // ReadBoxes(Root.Offset, "mvhd").LastOrDefault())
             {
-                if (mediaHeader == null) throw new InvalidOperationException("Cannot find 'mvhd' box.");
+                if (mediaHeader is null) throw new InvalidOperationException("Cannot find 'mvhd' box.");
 
                 int offset = 0;
 
@@ -581,7 +581,7 @@ namespace Media.Containers.BaseMedia
         public override IEnumerable<Track> GetTracks() //bool enabled tracks only?
         {
 
-            if (m_Tracks != null)
+            if (m_Tracks is not null)
             {
                 foreach (Track track in m_Tracks) yield return track;
                 yield break;
@@ -728,7 +728,7 @@ namespace Media.Containers.BaseMedia
 
                                     inPreview = ((flags & 3) == flags);
 
-                                    if (version == 0)
+                                    if (version is 0)
                                     {
                                         created = Common.Binary.ReadU32(rawData, ref offset, Common.Binary.IsLittleEndian);
 
@@ -750,7 +750,7 @@ namespace Media.Containers.BaseMedia
                                     offset += 4;
 
                                     //Get Duration
-                                    if (version == 0)
+                                    if (version is 0)
                                     {
                                         duration = Common.Binary.ReadU32(rawData, ref offset, Common.Binary.IsLittleEndian);
                                     }
@@ -797,7 +797,7 @@ namespace Media.Containers.BaseMedia
 
                                     ulong mediaCreated, mediaModified, timescale, mediaduration;
 
-                                    if (version == 0)
+                                    if (version is 0)
                                     {
 
                                         mediaCreated = Common.Binary.ReadU32(rawData, ref offset, Common.Binary.IsLittleEndian);
@@ -881,7 +881,7 @@ namespace Media.Containers.BaseMedia
                                                         if (-2 == waveFormatId)
                                                         {
                                                             //var waveAtom = ReadBox("wave", sampleDescriptionBox.Offset);
-                                                            //if (waveAtom != null)
+                                                            //if (waveAtom is not null)
                                                             //{
                                                             //    flags = Common.Binary.Read24(waveAtom.Raw, 9, Common.Binary.IsLittleEndian);
                                                             //    //Extrack from flags?
@@ -911,7 +911,7 @@ namespace Media.Containers.BaseMedia
                                                         }
 
                                                         //else 16 more if version == 1
-                                                        //else 2 more if version == 0
+                                                        //else 2 more if version is 0
 
                                                         //@ esds for mp4a
 
@@ -995,7 +995,7 @@ namespace Media.Containers.BaseMedia
 
                                     int count = Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian);
 
-                                    if (defaultSize == 0)
+                                    if (defaultSize is 0)
                                     {
                                         for (int i = 0; i < count && offset < length; ++i)
                                         {
@@ -1118,7 +1118,7 @@ namespace Media.Containers.BaseMedia
                 ulong sampleCount = (ulong)stSizes.Count;
 
                 //If there are no samples defined and there are entries in the sample to time atom
-                if (sampleCount == 0 && sttsEntries.Count > 0)
+                if (sampleCount is 0 && sttsEntries.Count > 0)
                 {
                     //Use the count of entries from the sample to time atom as the count of samples.
                     sampleCount = (ulong)sttsEntries.Count;
@@ -1164,10 +1164,10 @@ namespace Media.Containers.BaseMedia
 
         public override Common.SegmentStream GetSample(Track track, out TimeSpan sampleDuration)
         {
-            if (track == null)
+            if (track is null)
                 throw new ArgumentNullException(nameof(track));
 
-            if (track.SampleCount == 0)
+            if (track.SampleCount is 0)
             {
                 sampleDuration = TimeSpan.Zero;
                 return null;
@@ -1202,7 +1202,7 @@ namespace Media.Containers.BaseMedia
                 sampleIndex++;
             }
 
-            if (currentTimescale == 0)
+            if (currentTimescale is 0)
             {
                 // Track has reached the end, set duration to zero and return null
                 sampleDuration = TimeSpan.Zero;

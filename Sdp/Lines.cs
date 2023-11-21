@@ -57,7 +57,7 @@ namespace Media.Sdp
             {
                 get
                 {
-                    if (false.Equals(m_AttributeParts is null)) return m_AttributeParts;
+                    if (m_AttributeParts is not null) return m_AttributeParts;
 
                     //Todo, should be contigious to all derived parts which do not occur within m_Parts
                     m_AttributeParts = new string[2];
@@ -264,7 +264,7 @@ namespace Media.Sdp
 
                 result = -1;
 
-                if (line == null || line.m_Type != Sdp.Lines.SessionBandwidthLine.BandwidthType || line.m_Parts.Count <= 0) return false;
+                if (line is null || line.m_Type != Sdp.Lines.SessionBandwidthLine.BandwidthType || line.m_Parts.Count <= 0) return false;
 
                 string[] tokens = line.m_Parts[0].Split(Media.Sdp.SessionDescription.ColonSplit, StringSplitOptions.RemoveEmptyEntries);
 
@@ -495,7 +495,7 @@ namespace Media.Sdp
             {
                 get
                 {
-                    if (m_ConnectionParts != null) return m_ConnectionParts;
+                    if (m_ConnectionParts is not null) return m_ConnectionParts;
 
                     if (string.IsNullOrWhiteSpace(ConnectionAddress)) return Enumerable.Empty<string>();
 
@@ -517,7 +517,7 @@ namespace Media.Sdp
                 {
                     if (string.IsNullOrWhiteSpace(ConnectionAddress)) return null;
 
-                    if (m_ConnectionParts is null) m_ConnectionParts = ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
+                    m_ConnectionParts ??= ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
 
                     //Should verify that the string contains a . and is not shorter/longer than x, y...
                     return m_ConnectionParts[0];
@@ -551,7 +551,7 @@ namespace Media.Sdp
                 {
                     if (string.IsNullOrWhiteSpace(ConnectionAddress)) return false;
 
-                    if (m_ConnectionParts is null) m_ConnectionParts = ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
+                    m_ConnectionParts ??= ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
 
                     return m_ConnectionParts.Length > 1;
                 }
@@ -565,10 +565,10 @@ namespace Media.Sdp
                 get
                 {
                     //Should not be present for IPv6 Addresses
+                    if (string.IsNullOrWhiteSpace(ConnectionAddress))
+                        return 0;
 
-                    if (string.IsNullOrWhiteSpace(ConnectionAddress)) return 0;
-
-                    if (m_ConnectionParts is null) m_ConnectionParts = ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
+                    m_ConnectionParts ??= ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
 
                     if (m_ConnectionParts.Length > 1)
                     {
@@ -610,7 +610,7 @@ namespace Media.Sdp
             //    {
             //        if (string.IsNullOrWhiteSpace(ConnectionAddress)) return false;
 
-            //        if (m_ConnectionParts == null) m_ConnectionParts = ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
+            //        if (m_ConnectionParts is null) m_ConnectionParts = ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
 
             //        return m_ConnectionParts.Length > 2;
             //    }
@@ -623,9 +623,10 @@ namespace Media.Sdp
             {
                 get
                 {
-                    if (string.IsNullOrWhiteSpace(ConnectionAddress)) return 1;
+                    if (string.IsNullOrWhiteSpace(ConnectionAddress))
+                        return 1;
 
-                    if (m_ConnectionParts is null) m_ConnectionParts = ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
+                    m_ConnectionParts ??= ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
 
                     if (m_ConnectionParts.Length > 2)
                     {
@@ -2044,7 +2045,8 @@ namespace Media.Sdp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    if (false.Equals(m_InformationParts is null)) return m_InformationParts;
+                    if (m_InformationParts is not null)
+                        return m_InformationParts;
 
                     string attributeValue = AttributeValue;
 
@@ -2227,7 +2229,8 @@ namespace Media.Sdp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    if (false.Equals(m_EncodingParameters is null)) return m_EncodingParameters;
+                    if (m_EncodingParameters is not null)
+                        return m_EncodingParameters;
 
                     if (string.IsNullOrWhiteSpace(EncodingParametersToken)) return Enumerable.Empty<string>();
 
@@ -2473,7 +2476,7 @@ namespace Media.Sdp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    if (false.Equals(m_FormatSpecificParameters is null)) return m_FormatSpecificParameters;
+                    if (m_FormatSpecificParameters is not null) return m_FormatSpecificParameters;
 
                     if (string.IsNullOrWhiteSpace(FormatSpecificParameterToken)) return Enumerable.Empty<string>();
 

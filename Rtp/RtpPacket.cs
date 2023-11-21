@@ -96,7 +96,12 @@ namespace Media.Rtp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-            get { if (IsDisposed || Payload.Count is 0) return 0; return Binary.Clamp(Header.ContributingSourceCount * 4, 0, 60)/* Math.Min(60, Math.Max(0, Header.ContributingSourceCount * 4))*/; }
+            get
+            {
+                if (IsDisposed || Payload.Count is 0) return 0;
+                
+                return Binary.Clamp(Header.ContributingSourceCount * 4, 0, 60);
+            }
         }
 
         /// <summary>
@@ -110,9 +115,14 @@ namespace Media.Rtp
 
             get
             {
-                if (IsDisposed || Payload.Count is 0 || Header.Extension is false) return 0;
+                if (IsDisposed || Payload.Count is 0 || Header.Extension is false)
+                    return 0;
 
-                using (RtpExtension extension = GetExtension()) return Common.IDisposedExtensions.IsNullOrDisposed(extension) is false ? extension.Size : 0;
+                using RtpExtension extension = GetExtension();
+
+                return Common.IDisposedExtensions.IsNullOrDisposed(extension) is false
+                    ? extension.Size
+                    : 0;
             }
         }
 
@@ -124,7 +134,13 @@ namespace Media.Rtp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-            get { if (IsDisposed || Payload.Count is 0) return 0; return ContributingSourceListOctets + ExtensionOctets; }
+            get
+            {
+                if (IsDisposed || Payload.Count is 0)
+                    return 0;
+                
+                return ContributingSourceListOctets + ExtensionOctets;
+            }
         }
 
         /// <summary>
@@ -136,7 +152,12 @@ namespace Media.Rtp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-            get { if (IsDisposed || Header.Padding is false) return 0; return Media.RFC3550.ReadPadding(Payload.Array, Payload.Offset + Payload.Count - 1, 1); }
+            get
+            {
+                if (IsDisposed || false.Equals(Header.Padding)) return 0;
+
+                return Media.RFC3550.ReadPadding(Payload.Array, Payload.Offset + Payload.Count - 1, 1);
+            }
         }
 
         /// <summary>
@@ -148,7 +169,6 @@ namespace Media.Rtp
         {
             get
             {
-
                 if (IsDisposed) return false;
 
                 if (Header.IsCompressed) return true;
@@ -165,16 +185,19 @@ namespace Media.Rtp
                 if (octetsContained < 0) return false;
 
                 //Check the Extension bit in the header, if set the RtpExtension must be complete
-                if (Header.Extension) using (RtpExtension extension = GetExtension())
+                if (Header.Extension)
+                    using (RtpExtension extension = GetExtension())
                     {
-                        if (extension == null || extension.IsComplete is false) return false;
+                        if (extension is null || extension.IsComplete is false)
+                            return false;
 
                         //Reduce the number of octets in the payload by the number of octets which make up the extension
                         octetsContained -= extension.Size;
                     }
 
                 //If there is no padding there must be at least 0 octetsContained.
-                if (Header.Padding is false) return octetsContained >= 0;
+                if (Header.Padding is false)
+                    return octetsContained >= 0;
 
                 //Otherwise calulcate the amount of padding in the Payload
                 int paddingOctets = PaddingOctets;
@@ -190,7 +213,6 @@ namespace Media.Rtp
         public int Length
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-
             get { return IsDisposed ? 0 : RtpHeader.Length + Payload.Count; }
         }
 
@@ -202,13 +224,14 @@ namespace Media.Rtp
             get
             {
                 //Proably don't have to check...
-                if (IsDisposed || Payload.Count is 0) return Media.Common.MemorySegment.Empty;
+                if (IsDisposed || Payload.Count is 0)
+                    return Media.Common.MemorySegment.Empty;
 
                 int nonPayloadOctets = HeaderOctets, padding = PaddingOctets;
 
-                //return Payload.Skip(nonPayloadOctets).Take(IsComplete ? Payload.Count - (nonPayloadOctets + PaddingOctets) : -1);
-
-                return nonPayloadOctets > Payload.Count ? Payload : new Common.MemorySegment(Payload.Array, (Payload.Offset + nonPayloadOctets), Payload.Count - (nonPayloadOctets + padding));
+                return nonPayloadOctets > Payload.Count
+                    ? Payload
+                    : new Common.MemorySegment(Payload.Array, (Payload.Offset + nonPayloadOctets), Payload.Count - (nonPayloadOctets + padding));
             }
         }
 
@@ -221,7 +244,6 @@ namespace Media.Rtp
         public IEnumerable<byte> PayloadData
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-
             get { return PayloadDataSegment; }
         }
 
@@ -230,7 +252,8 @@ namespace Media.Rtp
             get
             {
                 //Maybe should provide the incomplete data...
-                if (IsDisposed || false == IsComplete) return Media.Common.MemorySegment.Empty;
+                if (IsDisposed || false == IsComplete)
+                    return Media.Common.MemorySegment.Empty;
 
                 //return Payload.Reverse().Take(PaddingOctets).Reverse();
 
@@ -247,7 +270,6 @@ namespace Media.Rtp
         public IEnumerable<byte> PaddingData
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-
             get { return PaddingDataSegment; }
         }
 
@@ -260,7 +282,8 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         internal protected virtual void AddBytesToPayload(IEnumerable<byte> octets, int offset = 0, int count = int.MaxValue)
         {
-            if (IsReadOnly) throw new InvalidOperationException("Can only set the AddBytesToPayload when IsReadOnly is false.");
+            if (IsReadOnly)
+                throw new InvalidOperationException("Can only set the AddBytesToPayload when IsReadOnly is false.");
 
             //Build a seqeuence from the existing octets and the data in the ReportBlock
 
@@ -268,7 +291,7 @@ namespace Media.Rtp
 
             if (newBytes <= 0) return;
 
-            if (m_OwnedOctets == null)
+            if (m_OwnedOctets is null)
             {
                 m_OwnedOctets = octets.Skip(offset).Take(newBytes).ToArray();
 
@@ -331,7 +354,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public RtpPacket(RtpHeader header, IEnumerable<byte> octets, bool shouldDispose = true) : base(shouldDispose)
         {
-            if (header == null) throw new ArgumentNullException("header");
+            if (header is null) throw new ArgumentNullException("header");
 
             //Assign the header (maybe referenced elsewhere, when dispose is called the given header will be disposed.)
             Header = header;
@@ -354,7 +377,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public RtpPacket(RtpHeader header, MemorySegment payload, bool shouldDispose = true) : base(shouldDispose)
         {
-            if (header == null) throw new ArgumentNullException("header");
+            if (header is null) throw new ArgumentNullException("header");
 
             Header = header;
 
@@ -371,7 +394,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public RtpPacket(byte[] buffer, int offset, int count, bool shouldDispose = true) : base(shouldDispose)
         {
-            if (buffer == null || buffer.Length == 0 || count <= 0) throw new ArgumentException("Must have data in a RtpPacket");
+            if (buffer is null || buffer.Length is 0 || count <= 0) throw new ArgumentException("Must have data in a RtpPacket");
 
             m_OwnedOctets = new byte[count];
 
@@ -542,7 +565,7 @@ namespace Media.Rtp
         public bool IsReadOnly
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return false == m_OwnsHeader || m_OwnedOctets == null; }
+            get { return false == m_OwnsHeader || m_OwnedOctets is null; }
         }
 
         #endregion
@@ -563,7 +586,7 @@ namespace Media.Rtp
         [CLSCompliant(false)]
         public RtpExtension GetExtension()
         {
-            return false == IsDisposed && Header.Extension && (Payload.Count - ContributingSourceListOctets) > RtpExtension.MinimumSize ? new RtpExtension(this) : null;
+            return IsDisposed is false && Header.Extension && (Payload.Count - ContributingSourceListOctets) > RtpExtension.MinimumSize ? new RtpExtension(this) : null;
         }
 
         /// <summary>
@@ -702,7 +725,7 @@ namespace Media.Rtp
                 //octetsRemaining = Binary.Min(payloadCount, sourceListOctets);
 
                 //Allocte the memory for the required data
-                if (m_OwnedOctets == null) m_OwnedOctets = new byte[octetsRemaining];
+                if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
                 else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
 
                 System.Net.Sockets.SocketError error;
@@ -738,7 +761,7 @@ namespace Media.Rtp
                 if (octetsRemaining > 0) 
                 {
                     //Allocte the memory for the extension header
-                    if (m_OwnedOctets == null) m_OwnedOctets = new byte[octetsRemaining];
+                    if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
                     else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
 
                     System.Net.Sockets.SocketError error;
@@ -764,7 +787,7 @@ namespace Media.Rtp
                 //Use a RtpExtension instance to read the Extension Header and data.
                 using (RtpExtension extension = GetExtension())
                 {
-                    if (extension != null && false == extension.IsComplete)
+                    if (extension is not null && false == extension.IsComplete)
                     {
                         //Cache the size of the RtpExtension (not including the Flags and LengthInWords [The Extension Header])
                         extensionSize = extension.Size - RtpExtension.MinimumSize;
@@ -776,7 +799,7 @@ namespace Media.Rtp
                         if (octetsRemaining > 0 && octetsRemaining < extensionSize)
                         {
                             //Allocte the memory for the required data
-                            if (m_OwnedOctets == null) m_OwnedOctets = new byte[octetsRemaining];
+                            if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
                             else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
 
                             System.Net.Sockets.SocketError error;
@@ -811,7 +834,7 @@ namespace Media.Rtp
                 if (octetsRemaining > 0)
                 {
                     //Allocte the memory for the required data
-                    if (m_OwnedOctets == null) m_OwnedOctets = new byte[octetsRemaining];
+                    if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
                     else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
 
                     offset = payloadCount;
@@ -907,9 +930,9 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            if (System.Object.ReferenceEquals(this, obj)) return true;
+            if (ReferenceEquals(this, obj)) return true;
 
-            return obj is RtpPacket rtp && Equals(rtp);
+            return obj is RtpPacket p && Equals(p);
         }
 
         //Packet equals...
@@ -950,7 +973,9 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool IsContiguous()
         {
-            return Header.IsContiguous() && Header.SegmentToLast10Bytes.Array == Payload.Array && Header.SegmentToLast10Bytes.Offset + Header.SegmentToLast10Bytes.Count == Payload.Offset;
+            return Header.IsContiguous() &&
+                Header.SegmentToLast10Bytes.Array == Payload.Array &&
+                Header.SegmentToLast10Bytes.Offset + Header.SegmentToLast10Bytes.Count == Payload.Offset;
         }
 
         #endregion
@@ -975,16 +1000,16 @@ namespace Media.Rtp
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public bool TryGetBuffers(out System.Collections.Generic.IList<System.ArraySegment<byte>> buffer)
+        public bool TryGetBuffers(out IList<ArraySegment<byte>> buffer)
         {
             if (IsDisposed)
             {
-                buffer = default(System.Collections.Generic.IList<System.ArraySegment<byte>>);
+                buffer = default;
 
                 return false;
             }
 
-            buffer = new System.Collections.Generic.List<ArraySegment<byte>>()
+            buffer = new List<ArraySegment<byte>>()
             {
                 Common.MemorySegmentExtensions.ToByteArraySegment(Header.First16Bits.m_Memory),
                 Common.MemorySegmentExtensions.ToByteArraySegment(Header.SegmentToLast10Bytes),

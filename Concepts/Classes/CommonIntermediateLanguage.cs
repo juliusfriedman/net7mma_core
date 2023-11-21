@@ -100,7 +100,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 //        //public static bool HasElements(Array array) { return !Null(array) && array.Length > 0; }
 
-//        //public static bool Null(Object o) { return o == null; }
+//        //public static bool Null(Object o) { return o is null; }
 
 //        //static string[] LineSplits = new string[] { Environment.NewLine };
 
@@ -175,7 +175,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //        //            {
 //        //                //Determine the type
 //        //                Type result = Type.GetType(noted.Substring(0, notationIndex + 1).Trim());
-//        //                if (result != null)
+//        //                if (result is not null)
 //        //                {
 //        //                    members = result.GetMember(noted.Substring(notationIndex + 2).Trim());//Skip .
 //        //                    return typeof(MemberInfo);
@@ -252,7 +252,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //        //{
 
 //        //    ///Use the current assembly
-//        //    if (assembly == null) assembly = Assembly.GetExecutingAssembly();
+//        //    if (assembly is null) assembly = Assembly.GetExecutingAssembly();
 
 //        //    //The methods real name
 //        //    string dynamicName = methodName + returnType.ToString();
@@ -305,7 +305,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //        //            labels.Add(code.Substring(0, qualifierIndex), generator.DefineLabel());
 //        //            continue;
 //        //        }
-//        //        else if (qualifierIndex == 0) Utility.BreakIfAttached();
+//        //        else if (qualifierIndex is 0) Utility.BreakIfAttached();
 
 //        //        //Split into tokens
 //        //        string[] tokens = code.Split(TokenSplits, StringSplitOptions.RemoveEmptyEntries);
@@ -317,7 +317,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //        //        OpCode opCode = Lookup[tokens[0]];
 
 //        //        //No OpCode found
-//        //        if (opCode == null)
+//        //        if (opCode is null)
 //        //        {
 //        //            Utility.BreakIfAttached();
 //        //            continue;
@@ -349,7 +349,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //        //        valueType = GetType(anyValue, out unsigned, out members, out callingConvention);
 
 //        //        //Determine if instructions follow
-//        //        if (opCode != null && !string.IsNullOrEmpty(anyValue))
+//        //        if (opCode is not null && !string.IsNullOrEmpty(anyValue))
 //        //        {
 //        //            if (opCode.Name == "goto") //Check for a label first
 //        //            {
@@ -378,7 +378,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //        //                ParameterInfo[] parameters = methodInfo.GetParameters();
 
 //        //                //Emit call with parameters
-//        //                if (methodInfo == null)
+//        //                if (methodInfo is null)
 //        //                {
 //        //                    //No Method Info
 //        //                    Utility.BreakIfAttached();
@@ -631,11 +631,11 @@ namespace Media.Concepts.Classes
     {
         public static System.Type TypeOfVoid = typeof(void);
 
-        public static System.Type TypeOfIntPtr = typeof(System.IntPtr);
+        public static System.Type TypeOfIntPtr = typeof(nint);
 
-        static readonly System.Action<System.IntPtr, byte, int> InitblkDelegate;
+        static readonly System.Action<nint, byte, int> InitblkDelegate;
 
-        static readonly System.Action<System.IntPtr, System.IntPtr, int> CpyblkDelegate;
+        static readonly System.Action<nint, nint, int> CpyblkDelegate;
 
         //static readonly System.Func<System.Type, int> SizeOfDelegate;
 
@@ -643,15 +643,15 @@ namespace Media.Concepts.Classes
 
         //Should be IntPtr, int, IntPtr, int...
 
-        //static readonly System.Func<System.IntPtr, int, byte[], int> CallIndirectDelegate1;
+        //static readonly System.Func<nint, int, byte[], int> CallIndirectDelegate1;
 
-        static readonly System.Action<System.IntPtr> CallIndirectPointerStdCall;
+        static readonly System.Action<nint> CallIndirectPointerStdCall;
 
-        static readonly System.Func<System.IntPtr, System.IntPtr> CallIndirectPointerIntPtr;
+        static readonly System.Func<nint, nint> CallIndirectPointerIntPtr;
 
-        static readonly System.Func<System.IntPtr, ulong> CallIndirectPointerULongStdCall, CallIndirectPointerULongThisCall, CallIndirectPointerULongCdelc, CallIndirectPointerULongFastCall;
+        static readonly System.Func<nint, ulong> CallIndirectPointerULongStdCall, CallIndirectPointerULongThisCall, CallIndirectPointerULongCdelc, CallIndirectPointerULongFastCall;
 
-        static readonly System.Func<System.IntPtr, uint> CallIndirectPointerUIntStdCall;
+        static readonly System.Func<nint, uint> CallIndirectPointerUIntStdCall;
 
         //https://msdn.microsoft.com/ja-jp/windows/ms693373(v=vs.110)
         /*
@@ -670,9 +670,9 @@ namespace Media.Concepts.Classes
 
         [System.CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static void IndirectCall(System.IntPtr ptr)
+        public static void IndirectCall(nint ptr)
         {
-            if (ptr == System.IntPtr.Zero) return;
+            if (ptr == nint.Zero) return;
 
             CallIndirectPointerStdCall(ptr);
         }
@@ -680,9 +680,9 @@ namespace Media.Concepts.Classes
         [System.CLSCompliant(false)]
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static void CallIndirect(System.IntPtr ptr, out ulong result)
+        public static void CallIndirect(nint ptr, out ulong result)
         {
-            if (ptr == System.IntPtr.Zero)
+            if (ptr == nint.Zero)
             {
                 result = ulong.MinValue;
 
@@ -697,11 +697,11 @@ namespace Media.Concepts.Classes
         [System.CLSCompliant(false)]
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static void CallIndirect(System.IntPtr ptr, out System.IntPtr result)
+        public static void CallIndirect(nint ptr, out nint result)
         {
-            if (ptr == System.IntPtr.Zero)
+            if (ptr == nint.Zero)
             {
-                result = System.IntPtr.Zero;
+                result = nint.Zero;
 
                 return;
             }
@@ -719,9 +719,9 @@ namespace Media.Concepts.Classes
         /// <param name="result">The variable which receives the result</param>
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal unsafe static void CallIndirect<T>(System.IntPtr ptr, ref T result)
+        internal unsafe static void CallIndirect<T>(nint ptr, ref T result)
         {
-            if (ptr == System.IntPtr.Zero)
+            if (ptr == nint.Zero)
             {
                 return;
             }
@@ -729,7 +729,7 @@ namespace Media.Concepts.Classes
             result = default(T);
 
             //The result in most cases is actually the value not a pointer to it...
-            System.IntPtr resultPointer;
+            nint resultPointer;
 
             //Get the address of the result or the result itself.
             CallIndirect(ptr, out resultPointer);
@@ -741,7 +741,7 @@ namespace Media.Concepts.Classes
             System.TypedReference resultReference = __makeref(result);
 
             //Make a pointer to the local reference
-            //System.IntPtr localPointer = *(System.IntPtr*)(&resultReference);
+            //nint localPointer = *(nint*)(&resultReference);
 
             //Make a pointer to the pointer, which when dereferenced can access the result.
             //int* sourcePointer = (int*)&resultPointer;
@@ -750,7 +750,7 @@ namespace Media.Concepts.Classes
             System.Buffer.MemoryCopy((void*)&resultPointer, (void*)&resultReference, size, size);
 
             //Also works but allocates a new instance
-            //result = As<System.IntPtr, T>(resultPointer);
+            //result = As<nint, T>(resultPointer);
         }
 
         /// <summary>
@@ -776,10 +776,10 @@ namespace Media.Concepts.Classes
             System.TypedReference trResult = __makeref(result);
 
             //Make a pointer to the local reference
-            //System.IntPtr localReferenceSource = *(System.IntPtr*)(&trSource);
+            //nint localReferenceSource = *(nint*)(&trSource);
 
             //Make a pointer to the local reference
-            //System.IntPtr localReferenceResult = *(System.IntPtr*)(&trResult);
+            //nint localReferenceResult = *(nint*)(&trResult);
 
             //Make a pointer to the pointer, which when dereferenced can access the result.
             //int* sourcePointer = (int*)&trSource;
@@ -797,7 +797,7 @@ namespace Media.Concepts.Classes
         [System.CLSCompliant(false)]
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static ulong CallIndirect(System.IntPtr ptr) // ref
+        public static ulong CallIndirect(nint ptr) // ref
         {
             ulong result;
 
@@ -810,9 +810,9 @@ namespace Media.Concepts.Classes
 
         //[System.CLSCompliant(false)]
         //[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        //public static uint CallIndirect(System.IntPtr ptr)
+        //public static uint CallIndirect(nint ptr)
         //{
-        //    if (ptr == null) return uint.MinValue;
+        //    if (ptr is null) return uint.MinValue;
 
         //    return CallIndirectDelegate3(ptr);
         //}
@@ -820,7 +820,7 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized | System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static CommonIntermediateLanguage()
         {
-            if (InitblkDelegate != null | CpyblkDelegate != null) return;
+            if (InitblkDelegate is not null | CpyblkDelegate is not null) return;
 
             System.Type CommonIntermediaLanguageType = typeof(CommonIntermediateLanguage);
 
@@ -836,7 +836,7 @@ namespace Media.Concepts.Classes
             generator.Emit(System.Reflection.Emit.OpCodes.Initblk);
             generator.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-            InitblkDelegate = (System.Action<System.IntPtr, byte, int>)initBlkMethod.CreateDelegate(typeof(System.Action<System.IntPtr, byte, int>));
+            InitblkDelegate = (System.Action<nint, byte, int>)initBlkMethod.CreateDelegate(typeof(System.Action<nint, byte, int>));
 
             #endregion
 
@@ -854,7 +854,7 @@ namespace Media.Concepts.Classes
              generator.Emit(System.Reflection.Emit.OpCodes.Cpblk);
              generator.Emit(System.Reflection.Emit.OpCodes.Ret);             
 
-             CpyblkDelegate = (System.Action<System.IntPtr, System.IntPtr, int>)cpyBlkMethod.CreateDelegate(typeof(System.Action<System.IntPtr, System.IntPtr, int>));
+             CpyblkDelegate = (System.Action<nint, nint, int>)cpyBlkMethod.CreateDelegate(typeof(System.Action<nint, nint, int>));
 
             #endregion
 
@@ -873,7 +873,7 @@ namespace Media.Concepts.Classes
                  typeof(int), new System.Type[] { typeof(int), typeof(byte[]) });
              generator.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-             CallIndirectDelegate1 = (System.Func<System.IntPtr, int, byte[], int>)calliMethod.CreateDelegate(typeof(System.Func<System.IntPtr, int, byte[], int>));*/
+             CallIndirectDelegate1 = (System.Func<nint, int, byte[], int>)calliMethod.CreateDelegate(typeof(System.Func<nint, int, byte[], int>));*/
 
              //--- IntPtr
 
@@ -886,7 +886,7 @@ namespace Media.Concepts.Classes
              generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.StdCall, TypeOfIntPtr, System.Type.EmptyTypes);
              generator.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-             CallIndirectPointerIntPtr = (System.Func<System.IntPtr, System.IntPtr>)calliMethod.CreateDelegate(typeof(System.Func<System.IntPtr, System.IntPtr>));
+             CallIndirectPointerIntPtr = (System.Func<nint, nint>)calliMethod.CreateDelegate(typeof(System.Func<nint, nint>));
 
              //--- void
 
@@ -899,7 +899,7 @@ namespace Media.Concepts.Classes
              generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.StdCall, TypeOfVoid, System.Type.EmptyTypes);
              generator.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-             CallIndirectPointerStdCall = (System.Action<System.IntPtr>)calliMethod.CreateDelegate(typeof(System.Action<System.IntPtr>));            
+             CallIndirectPointerStdCall = (System.Action<nint>)calliMethod.CreateDelegate(typeof(System.Action<nint>));            
 
             //--- uint
 
@@ -913,7 +913,7 @@ namespace Media.Concepts.Classes
              generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.StdCall, typeof(uint), System.Type.EmptyTypes);
              generator.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-             CallIndirectPointerUIntStdCall = (System.Func<System.IntPtr, uint>)calliMethod.CreateDelegate(typeof(System.Func<System.IntPtr, uint>));
+             CallIndirectPointerUIntStdCall = (System.Func<nint, uint>)calliMethod.CreateDelegate(typeof(System.Func<nint, uint>));
 
 
              //--- ulong
@@ -927,7 +927,7 @@ namespace Media.Concepts.Classes
              generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.ThisCall, typeof(ulong), System.Type.EmptyTypes);
              generator.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-             CallIndirectPointerULongThisCall = (System.Func<System.IntPtr, ulong>)calliMethod.CreateDelegate(typeof(System.Func<System.IntPtr, ulong>));
+             CallIndirectPointerULongThisCall = (System.Func<nint, ulong>)calliMethod.CreateDelegate(typeof(System.Func<nint, ulong>));
 
              calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_Cdecl_ulong",
                    System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
@@ -938,7 +938,7 @@ namespace Media.Concepts.Classes
              generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.Cdecl, typeof(ulong), System.Type.EmptyTypes);
              generator.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-             CallIndirectPointerULongCdelc = (System.Func<System.IntPtr, ulong>)calliMethod.CreateDelegate(typeof(System.Func<System.IntPtr, ulong>));
+             CallIndirectPointerULongCdelc = (System.Func<nint, ulong>)calliMethod.CreateDelegate(typeof(System.Func<nint, ulong>));
 
              calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_FastCall_ulong",
                     System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
@@ -949,7 +949,7 @@ namespace Media.Concepts.Classes
              generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.FastCall, typeof(ulong), System.Type.EmptyTypes);
              generator.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-             CallIndirectPointerULongFastCall = (System.Func<System.IntPtr, ulong>)calliMethod.CreateDelegate(typeof(System.Func<System.IntPtr, ulong>));
+             CallIndirectPointerULongFastCall = (System.Func<nint, ulong>)calliMethod.CreateDelegate(typeof(System.Func<nint, ulong>));
 
              calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_StdCall_ulong",
                   System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
@@ -960,7 +960,7 @@ namespace Media.Concepts.Classes
              generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.StdCall, typeof(ulong), System.Type.EmptyTypes);
              generator.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-             CallIndirectPointerULongStdCall = (System.Func<System.IntPtr, ulong>)calliMethod.CreateDelegate(typeof(System.Func<System.IntPtr, ulong>));
+             CallIndirectPointerULongStdCall = (System.Func<nint, ulong>)calliMethod.CreateDelegate(typeof(System.Func<nint, ulong>));
 
             #endregion
 
@@ -1125,13 +1125,13 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static unsafe void InitBlock(byte* array, byte what, int len)
         {
-            InitblkDelegate((System.IntPtr)array, what, len);
+            InitblkDelegate((nint)array, what, len);
         }
 
         [System.CLSCompliant(false)]
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static unsafe void InitBlock(System.IntPtr array, byte what, int len)
+        public static unsafe void InitBlock(nint array, byte what, int len)
         {
             InitblkDelegate(array, what, len);
         }
@@ -1180,7 +1180,7 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static unsafe void CopyBlock(byte* src, byte* dst, int len) //CopyBlock
         {
-            CpyblkDelegate((System.IntPtr)dst, (System.IntPtr)src, len);
+            CpyblkDelegate((nint)dst, (nint)src, len);
         }
 
         //Note that 4.6 Has System.Buffer.MemoryCopy 
@@ -1212,7 +1212,7 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int GetSize<T>() where T : class
         {
-            System.IntPtr methodTable = typeof(T).TypeHandle.Value;
+            nint methodTable = typeof(T).TypeHandle.Value;
             return GetSize(methodTable);
         }
 
@@ -1250,7 +1250,7 @@ namespace Media.Concepts.Classes
             string s = string.Empty;
             fixed (char* t = s)
             {
-                return (int)((int)(System.IntPtr)t - (int)Unsafe.AddressOf<string>(ref s));
+                return (int)((int)(nint)t - (int)Unsafe.AddressOf<string>(ref s));
             }
         }
 

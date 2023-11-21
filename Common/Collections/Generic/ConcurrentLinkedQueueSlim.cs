@@ -155,7 +155,7 @@ namespace Media.Common.Collections.Generic
             //    Value = default(T)
             //};
 
-            //if (queue == null) return;
+            //if (queue is null) return;
 
             ////If the queue was empty
             //if (queue.IsEmpty)
@@ -218,7 +218,7 @@ namespace Media.Common.Collections.Generic
         public bool IsEmpty
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Count.Equals(Common.Binary.LongZero); }
+            get { return Count is Common.Binary.LongZero; }
         }
 
         #endregion
@@ -311,7 +311,7 @@ namespace Media.Common.Collections.Generic
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool TryPeek(ref T t)
         {
-            if (Object.ReferenceEquals(First, Node.Null)) return false;
+            if (First is null) return false;
 
             t = First.Value;
 
@@ -341,7 +341,7 @@ namespace Media.Common.Collections.Generic
             //Node pnew = new Node(ref t);
             //First = System.Threading.Interlocked.Exchange<Node>(ref Last, pnew).Next = pnew;
 
-            //if (/*Count.Equals(Common.Binary.LongZero) ||*/ Object.ReferenceEquals(First, Node.Null)) 
+            //if (/*Count is Common.Binary.LongZero ||*/ First is null)) 
             //else Last = Last.Next = new Node(ref t);
 
             switch (System.Threading.Interlocked.Read(ref m_Count))
@@ -400,11 +400,11 @@ namespace Media.Common.Collections.Generic
         {
             Node Current = First ?? Last;
 
-            while (false.Equals(Object.ReferenceEquals(Current, Node.Null)))
+            while (Current is not null)
             {
                 yield return Current.Value;
 
-                if (Object.ReferenceEquals(System.Threading.Interlocked.Exchange(ref Current, Current.Next), Node.Null)) yield break;
+                if (System.Threading.Interlocked.Exchange(ref Current, Current.Next) is null) yield break;
             }
         }
 
@@ -449,9 +449,9 @@ namespace Media.UnitTests
 
             if (LinkedQueue.Count != 1) throw new System.Exception("Count Not 1");
 
-            if (LinkedQueue.First == null) throw new System.Exception("First is null");
+            if (LinkedQueue.First is null) throw new System.Exception("First is null");
 
-            if (LinkedQueue.Last == null) throw new System.Exception("Last is null");
+            if (LinkedQueue.Last is null) throw new System.Exception("Last is null");
 
             if (false == LinkedQueue.TryEnqueue(ref LastInputOutput)) throw new System.Exception("TryEnqueue Not True");
 
@@ -459,9 +459,9 @@ namespace Media.UnitTests
 
             if (LinkedQueue.Count != 2) throw new System.Exception("Count Not 2");
 
-            if (LinkedQueue.First == null) throw new System.Exception("First is null");
+            if (LinkedQueue.First is null) throw new System.Exception("First is null");
 
-            if (LinkedQueue.Last == null) throw new System.Exception("Last is null");
+            if (LinkedQueue.Last is null) throw new System.Exception("Last is null");
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -469,7 +469,7 @@ namespace Media.UnitTests
         {
             List<System.Exception> exceptions = new List<Exception>();
 
-            if (LinkedQueue == null) exceptions.Add(new System.Exception("LinkedQueue is null"));
+            if (LinkedQueue is null) exceptions.Add(new System.Exception("LinkedQueue is null"));
 
             if (exceptions.Count > 0) throw new System.Exception("Errors Occured", new System.Exception(string.Join(Environment.NewLine, exceptions.Select(e => e.Message))));
 
@@ -479,9 +479,9 @@ namespace Media.UnitTests
 
             if (false == LinkedQueue.TryDequeue(out LastInputOutput)) exceptions.Add(new System.Exception("TryDequeue Not True"));
 
-            if (LinkedQueue.First == null) exceptions.Add(new System.Exception("First is null"));
+            if (LinkedQueue.First is null) exceptions.Add(new System.Exception("First is null"));
 
-            if (LinkedQueue.Last == null) exceptions.Add(new System.Exception("Last is null"));
+            if (LinkedQueue.Last is null) exceptions.Add(new System.Exception("Last is null"));
 
             if (LinkedQueue.IsEmpty) exceptions.Add(new System.Exception("LinkedQueue IsEmpty," + LinkedQueue.Count));
 
@@ -491,10 +491,10 @@ namespace Media.UnitTests
 
             if (false == LinkedQueue.TryDequeue(out LastInputOutput)) exceptions.Add(new System.Exception("TryDequeue Not True"));
 
-            //if (LinkedQueue.First != null) exceptions.Add(new System.Exception("First is null");
+            //if (LinkedQueue.First is not null) exceptions.Add(new System.Exception("First is null");
 
             //The Last node is always left in place to prevent NRE
-            //if (LinkedQueue.Last != null) exceptions.Add(new System.Exception("Last is null");
+            //if (LinkedQueue.Last is not null) exceptions.Add(new System.Exception("Last is null");
 
             if (false == LinkedQueue.IsEmpty) exceptions.Add(new System.Exception("LinkedQueue Not IsEmpty," + LinkedQueue.Count));
 
@@ -580,7 +580,7 @@ namespace Media.UnitTests
 
             dequeueThread.Start();
 
-            while (countOut == 0 && countIn == 0) mre.WaitOne(0);
+            while (countOut is 0 && countIn is 0) mre.WaitOne(0);
 
             while (countOut < Amount)
             {
@@ -600,10 +600,10 @@ namespace Media.UnitTests
 
                         if (false == LinkedQueue.IsEmpty)
                         {
-                            if(LinkedQueue.Last != null)
+                            if(LinkedQueue.Last is not null)
                                 System.Console.WriteLine("Enumerate Last: " + LinkedQueue.Last.Value);
 
-                            if (LinkedQueue.First != null)
+                            if (LinkedQueue.First is not null)
                                 System.Console.WriteLine("Enumerate First: " + LinkedQueue.First.Value);
 
                             //Increases test time by 10 and keeps the main thread busy
@@ -786,7 +786,7 @@ namespace Media.UnitTests
             
             System.Linq.ParallelEnumerable.ForAll(dequeueThreads.AsParallel(), t => t.Start());
 
-            while (stackLevelCountOut == 0 && statLevelCountIn == 0) sharedResetEvent.WaitOne(0);
+            while (stackLevelCountOut is 0 && statLevelCountIn is 0) sharedResetEvent.WaitOne(0);
 
             while (stackLevelCountOut < product)
             {

@@ -280,7 +280,7 @@ namespace Media.Concepts.Classes
 
             System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;
 
-            while (false.Equals(m_Enabled.Equals(uint.MinValue)) && m_Ops == 0)
+            while (false.Equals(m_Enabled.Equals(uint.MinValue)) && m_Ops is 0)
             {
                 if (System.Threading.Thread.CurrentThread.Equals(m_Counter))
                 {
@@ -315,7 +315,7 @@ namespace Media.Concepts.Classes
 
         protected override void Dispose(bool disposing)
         {
-            if (IsDisposed || false == disposing || false == ShouldDispose) return;
+            if (IsDisposed || disposing is false || ShouldDispose is false) return;
 
             base.Dispose(disposing);
             

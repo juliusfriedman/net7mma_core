@@ -260,7 +260,7 @@ namespace Media.Sdp
 
         public string ToString(SessionDescription sdp = null)
         {
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = new();
             
             builder.Append(TimeDescriptionLine.ToString());
             
@@ -309,8 +309,8 @@ namespace Media.Sdp
     //Could be Extension methods
 
     //Should be has started?
-    //public bool IsLive { get { return RepeatTimes.Count == 0 && StartTime == 0; } }
+    //public bool IsLive { get { return RepeatTimes.Count is 0 && StartTime is 0; } }
 
     //Maybe should not be for less than 0
-    //public bool IsContinious { get { return RepeatTimes.Count == 0 && StopTime <= 0; } }
+    //public bool IsContinious { get { return RepeatTimes.Count is 0 && StopTime <= 0; } }
 }

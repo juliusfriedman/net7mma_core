@@ -108,13 +108,13 @@
 
 ////    //        //Validate and set the remaining properties, each given array must have the correct amount of elements.
 
-////    //        if (planes == null || planes.Length < ComponentCount) throw new ArgumentOutOfRangeException("planes", string.Format("Must be have {0} elements.", ComponentCount));
+////    //        if (planes is null || planes.Length < ComponentCount) throw new ArgumentOutOfRangeException("planes", string.Format("Must be have {0} elements.", ComponentCount));
 ////    //        this.Planes = planes;
 
-////    //        if (widths == null || widths.Length < ComponentCount) throw new ArgumentOutOfRangeException("widths", string.Format("Must be have {0} elements.", ComponentCount));
+////    //        if (widths is null || widths.Length < ComponentCount) throw new ArgumentOutOfRangeException("widths", string.Format("Must be have {0} elements.", ComponentCount));
 ////    //        this.Widths = widths;
 
-////    //        if (heights == null || heights.Length < ComponentCount) throw new ArgumentOutOfRangeException("heights", string.Format("Must be have {0} elements.", ComponentCount));
+////    //        if (heights is null || heights.Length < ComponentCount) throw new ArgumentOutOfRangeException("heights", string.Format("Must be have {0} elements.", ComponentCount));
 ////    //        this.Heights = heights;
 ////    //    }
 

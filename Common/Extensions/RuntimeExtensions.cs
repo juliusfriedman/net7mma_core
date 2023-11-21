@@ -61,7 +61,7 @@ namespace Media.Common.Extensions
         public static bool IsMono
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return MonoType != null; }
+            get { return MonoType is not null; }
         }
 
         internal static readonly System.Type MonoMacType = System.Type.GetType("MonoMac");
@@ -69,7 +69,7 @@ namespace Media.Common.Extensions
         public static bool IsMonoMac
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return MonoMacType != null; }
+            get { return MonoMacType is not null; }
         }
 
         internal static readonly bool isiOS =
@@ -100,7 +100,7 @@ namespace Media.Common.Extensions
         public static bool IsWatchKit
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return WatchKitType != null; }
+            get { return WatchKitType is not null; }
         }
 
         //IsRyuJit - http://stackoverflow.com/questions/22422021/how-do-i-verify-that-ryujit-is-jitting-my-app

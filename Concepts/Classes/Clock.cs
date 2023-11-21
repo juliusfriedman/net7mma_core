@@ -179,7 +179,7 @@ namespace Media.Concepts.Classes
 
         protected override void Dispose(bool disposing)
         {
-            if (false == disposing | false == ShouldDispose | IsDisposed) return;
+            if (disposing is false | ShouldDispose is false | IsDisposed) return;
 
             try
             {
@@ -250,7 +250,7 @@ namespace Media.Concepts.Classes
                 {
                     while (--nanos >= 2)
                     {
-                        /* if(--nanos % 2 == 0) */
+                        /* if(--nanos % 2 is 0) */
                         NanoSleep((long)0); //nanos -= 1 + (ops / (ulong)AverageOperationsPerTick);// *10;
                     }
                 }
@@ -282,7 +282,7 @@ namespace Media.UnitTests
             System.Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
             //There must be a static clock
-            if (staticClock == null) throw new System.InvalidOperationException("There is no static Clock.");
+            if (staticClock is null) throw new System.InvalidOperationException("There is no static Clock.");
 
             //The static clock also has JIT overhead
 
@@ -322,7 +322,7 @@ namespace Media.UnitTests
             System.Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
             //There must be a static clock
-            if (staticClock == null) throw new System.InvalidOperationException("There is no static Clock.");
+            if (staticClock is null) throw new System.InvalidOperationException("There is no static Clock.");
 
             //Call Dispose on the staticClock, just to test it
             staticClock.Dispose();

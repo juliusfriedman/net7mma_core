@@ -92,7 +92,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public SegmentStream(IList<Common.MemorySegment> existing)
         {
-            if (existing == null) throw new ArgumentNullException();
+            if (existing is null) throw new ArgumentNullException();
 
             //Use the existing list
             Segments = existing;
@@ -342,7 +342,7 @@ namespace Media.Common
         {
             if (IsDisposed) return;
 
-            if (destination == null) throw new ArgumentNullException();
+            if (destination is null) throw new ArgumentNullException();
 
             int toCopy = 0;
 
@@ -463,19 +463,19 @@ namespace Media.Common
         public override bool CanRead
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return false == IsDisposed; }
+            get { return IsDisposed is false; }
         }
 
         public override bool CanSeek
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return false == IsDisposed; }
+            get { return IsDisposed is false; }
         }
 
         public override bool CanWrite
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return false == IsDisposed; }
+            get { return IsDisposed is false; }
         }
 
         public override void Flush()
@@ -627,7 +627,7 @@ namespace Media.Common
 
             if (count <= 0 || m_Position >= m_Count) return 0;
 
-            //if (WorkingSegment == null) WorkingSegment = Segments[m_Index];
+            //if (WorkingSegment is null) WorkingSegment = Segments[m_Index];
 
             int total = 0, toCopy;
 
@@ -776,7 +776,7 @@ namespace Media.Common
                         }
                         else if (offset <= 0)
                         {
-                            //Should use End style when offset < 0 but not == 0...
+                            //Should use End style when offset < 0 but not is 0...
 
                             WorkingSegment = Segments[(m_Index = 0)];
 
@@ -788,7 +788,7 @@ namespace Media.Common
                         if (offset < m_Position)
                         {
                             //If at the first byte in a new segment go to the last segment
-                            if (m_Cursor.Equals(Common.Binary.LongZero))
+                            if (m_Cursor is Common.Binary.LongZero)
                             {
                                 WorkingSegment = Segments[--m_Index];
 
@@ -872,7 +872,7 @@ namespace Media.Common
                 case System.IO.SeekOrigin.Current:
                     {
                         //If there is no change in offset return the position
-                        if (offset.Equals(Common.Binary.LongZero)) return m_Position;
+                        if (offset is Common.Binary.LongZero) return m_Position;
 
                         //When offset < 0
                         if (offset < Common.Binary.LongZero)

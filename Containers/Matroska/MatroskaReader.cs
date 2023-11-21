@@ -633,7 +633,7 @@ namespace Media.Containers.Matroska
             Byte mask = 0x80, id_length = 1;
             
             // Figure out the size in bytes
-            while (id_length <= 4 && (header_byte & mask) == 0)
+            while (id_length <= 4 && (header_byte & mask) is 0)
             {
                 id_length++;
                 mask >>= 1;
@@ -668,7 +668,7 @@ namespace Media.Containers.Matroska
             Byte mask = 0x80, size_length = 1;
 
             // Figure out the size in bytes (Should check MaxSize in the header)
-            while (size_length <= 8 && (header_byte & mask) == 0)
+            while (size_length <= 8 && (header_byte & mask) is 0)
             {
                 size_length++;
                 mask >>= 1;
@@ -728,7 +728,7 @@ namespace Media.Containers.Matroska
 
             foreach (var element in this)
             {
-                if (identifiers == null || identifiers .Count () == 0 || identifiers.Contains(Common.Binary.Read32(element.Identifier, 0, Common.Binary.IsLittleEndian)))
+                if (identifiers is null || identifiers .Count () is 0 || identifiers.Contains(Common.Binary.Read32(element.Identifier, 0, Common.Binary.IsLittleEndian)))
                 {
                     yield return element;
                     continue;
@@ -764,7 +764,7 @@ namespace Media.Containers.Matroska
             while (Remaining > 2)
             {
                 Node next = ReadNext();
-                if (next == null) yield break;
+                if (next is null) yield break;
                 yield return next;
 
                 //Decode the Id
@@ -800,7 +800,7 @@ namespace Media.Containers.Matroska
 
             using (var ebml = Root)
             {
-                if(ebml != null) using (var stream = ebml.DataStream)
+                if(ebml is not null) using (var stream = ebml.DataStream)
                 {
                     long offset = stream.Position, streamLength = stream.Length;
 
@@ -891,7 +891,7 @@ namespace Media.Containers.Matroska
             using (var matroskaSegmentInfo = ReadElement(Identifier.SegmentInfo, Root.DataOffset))
             {
 
-                if (matroskaSegmentInfo != null) using (var stream = matroskaSegmentInfo.DataStream)
+                if (matroskaSegmentInfo is not null) using (var stream = matroskaSegmentInfo.DataStream)
                 {
 
                     long offset = stream.Position, streamLength = stream.Length;
@@ -983,9 +983,9 @@ namespace Media.Containers.Matroska
 
             if (!m_Created.HasValue) m_Created = FileInfo.CreationTimeUtc;
 
-            if (m_MuxingApp == null) m_MuxingApp = string.Empty;
+            if (m_MuxingApp is null) m_MuxingApp = string.Empty;
 
-            if (m_WritingApp == null) m_WritingApp = string.Empty;
+            if (m_WritingApp is null) m_WritingApp = string.Empty;
 
             //Not in spec....
             m_Modified = FileInfo.LastWriteTimeUtc;
@@ -1018,7 +1018,7 @@ namespace Media.Containers.Matroska
         {
             get
             {
-                if (m_MuxingApp == null) ParseSegmentInfo();
+                if (m_MuxingApp is null) ParseSegmentInfo();
                 return m_TimeCodeScale;
             }
         }
@@ -1027,7 +1027,7 @@ namespace Media.Containers.Matroska
         {
             get
             {
-                if (m_MuxingApp == null) ParseSegmentInfo();
+                if (m_MuxingApp is null) ParseSegmentInfo();
                 return m_MuxingApp;
             }
         }
@@ -1036,7 +1036,7 @@ namespace Media.Containers.Matroska
         {
             get
             {
-                if (m_WritingApp == null) ParseSegmentInfo();
+                if (m_WritingApp is null) ParseSegmentInfo();
                 return m_WritingApp;
             }
         }
@@ -1105,7 +1105,7 @@ namespace Media.Containers.Matroska
         {
             get
             {
-                if (m_DocType == null) ParseEbmlHeader();
+                if (m_DocType is null) ParseEbmlHeader();
                 return m_DocType;
             }
         }
@@ -1125,7 +1125,7 @@ namespace Media.Containers.Matroska
         {
             get
             {
-                if (m_Title == null) ParseSegmentInfo();
+                if (m_Title is null) ParseSegmentInfo();
                 return m_Title;
             }
         }
@@ -1145,7 +1145,7 @@ namespace Media.Containers.Matroska
         public override IEnumerable<Track> GetTracks()
         {
 
-            if (m_Tracks != null)
+            if (m_Tracks is not null)
             {
                 foreach (Track track in m_Tracks) yield return track;
                 yield break;
@@ -1352,7 +1352,7 @@ namespace Media.Containers.Matroska
                     //Need to find all CueTimes to accurately describe duration and start time and sample count...
                     // is WONDERFUL                    
                     //Only do this one time for now...
-                    if(sampleCount == 0) foreach (var elem in ReadElements(trackEntryElement.DataOffset, Identifier.Cues))
+                    if(sampleCount is 0) foreach (var elem in ReadElements(trackEntryElement.DataOffset, Identifier.Cues))
                     {
                         using (var cueStream = elem.DataStream)
                         {

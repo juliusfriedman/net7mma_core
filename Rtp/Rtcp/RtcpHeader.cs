@@ -313,7 +313,7 @@ namespace Media.Rtcp
             :base(shouldDispose)
         {
             //If the octets reference is null throw an exception
-            if (octets == null) throw new ArgumentNullException("octets");
+            if (octets is null) throw new ArgumentNullException("octets");
 
             //Determine the length of the array
             int octetsLength = octets.Length, availableOctets = octetsLength - offset;
@@ -322,7 +322,7 @@ namespace Media.Rtcp
             if (offset > octetsLength) throw new ArgumentOutOfRangeException("offset", "Cannot be greater than the length of octets");
 
             //Check for the amount of octets required to build a RtcpHeader given by the delination of the offset
-            if (octetsLength == 0 || availableOctets < RtcpHeader.Length) throw new ArgumentException("octets must contain at least 4 elements given the deleniation of the offset parameter.", "octets");
+            if (octetsLength is 0 || availableOctets < RtcpHeader.Length) throw new ArgumentException("octets must contain at least 4 elements given the deleniation of the offset parameter.", "octets");
 
             //Read a managed representation of the first two octets which are stored in Big ByteOrder / Network Byte Order
             First16Bits = new Media.RFC3550.CommonHeaderBits(octets, offset);
@@ -368,7 +368,7 @@ namespace Media.Rtcp
 
                 SegmentToLast6Bytes = new Common.MemorySegment(Last6Bytes, 0, 6, shouldDispose);
 
-                if (other.Last6Bytes != null)
+                if (other.Last6Bytes is not null)
                 {
                     other.Last6Bytes.CopyTo(Last6Bytes, 0);
                 }
@@ -428,7 +428,7 @@ namespace Media.Rtcp
             SegmentToLast6Bytes = new Common.MemorySegment(Last6Bytes, 0, 6);
             
             //The default value must be set into the LengthInWords field otherwise it will reflect 0
-            if(blockCount == 0) LengthInWordsMinusOne = RtcpHeader.MaximumLengthInWords; // ushort (0 - 1)
+            if(blockCount is 0) LengthInWordsMinusOne = RtcpHeader.MaximumLengthInWords; // ushort (0 - 1)
         }
 
         /// <summary>
@@ -600,9 +600,9 @@ namespace Media.Rtcp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            if(System.Object.ReferenceEquals(this, obj)) return true;
+            if (System.Object.ReferenceEquals(this, obj)) return true;
 
-            return obj is RtcpHeader header && Equals(header);
+            return obj is RtcpHeader h && Equals(h);
         }
 
         #endregion

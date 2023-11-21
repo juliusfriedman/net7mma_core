@@ -23,7 +23,7 @@ public class BaseMediaWriter : MediaFileWriter
 
     public void AddBox(Mp4Box box)
     {
-        if (box == null)
+        if (box is null)
             throw new ArgumentNullException(nameof(box));
 
         boxes.Add(box);

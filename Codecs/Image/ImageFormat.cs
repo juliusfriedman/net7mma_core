@@ -349,7 +349,7 @@ namespace Media.Codecs.Image
         public ImageFormat(ImageFormat other, int[] sampling, params Codec.MediaComponent[] components)
             : base(other, other.ByteOrder, other.DataLayout, components) //: this(other,  components)
         {
-            if (sampling == null) throw new System.ArgumentNullException("sampling");
+            if (sampling is null) throw new System.ArgumentNullException("sampling");
 
             if (sampling.Length < Components.Length) throw new System.ArgumentOutOfRangeException("sampling", "Must have the same amount of elements as Components");
 
@@ -369,11 +369,11 @@ namespace Media.Codecs.Image
         public ImageFormat(ImageFormat other, int[] widths, int[] heights, params Codec.MediaComponent[] components)
             : base(other, other.ByteOrder, other.DataLayout, components) //: this(other,  components)
         {
-            if (widths == null) throw new System.ArgumentNullException("widths");
+            if (widths is null) throw new System.ArgumentNullException("widths");
 
             if (widths.Length < Components.Length) throw new System.ArgumentOutOfRangeException("widths", "Must have the same amount of elements as Components");
 
-            if (heights == null) throw new System.ArgumentNullException("heights");
+            if (heights is null) throw new System.ArgumentNullException("heights");
 
             if (heights.Length < Components.Length) throw new System.ArgumentOutOfRangeException("widths", "Must have the same amount of elements as Components");
 
@@ -385,7 +385,7 @@ namespace Media.Codecs.Image
         public ImageFormat(Codec.MediaFormat format)
             : base(format)
         {
-            if (format == null) throw new System.ArgumentNullException("format");
+            if (format is null) throw new System.ArgumentNullException("format");
 
             if (format.MediaType != Codec.MediaType.Image) throw new System.ArgumentException("format.MediaType", "Must be Codec.MediaType.Image.");
         }
@@ -398,14 +398,14 @@ namespace Media.Codecs.Image
 
         public Codec.MediaComponent AlphaComponent { get { return GetComponentById(AlphaChannelId); } }
 
-        public bool HasAlphaComponent { get { return AlphaComponent != null; } }
+        public bool HasAlphaComponent { get { return AlphaComponent is not null; } }
 
         public bool IsPremultipliedWithAplha
         {
             get
             {
                 Codec.MediaComponent alphaComponent = AlphaComponent;
-                return alphaComponent!= null && alphaComponent.Id == PreMultipliedAlphaChannelId;
+                return alphaComponent is not null && alphaComponent.Id == PreMultipliedAlphaChannelId;
             }
         }
 
@@ -506,7 +506,7 @@ namespace Media.Codecs.Image
 
     //        Log2ChromaWidth = log2ChromaWidth;
 
-    //        if (components == null || components.Length < Components) throw new System.ArgumentException("components", "Must be present and have the length indicated by numberOfComponents.");
+    //        if (components is null || components.Length < Components) throw new System.ArgumentException("components", "Must be present and have the length indicated by numberOfComponents.");
     //        ComponentDescriptions = components;
     //    }
 
@@ -531,12 +531,12 @@ namespace Media.Codecs.Image
     //{
     //    public static bool HasAlpha(this PixelFormat pf)
     //    {
-    //        return pf != null && pf.Flags.HasFlag(PixelFormatFlags.Alpha);
+    //        return pf is not null && pf.Flags.HasFlag(PixelFormatFlags.Alpha);
     //    }
 
     //    public static bool IsPlanar(this PixelFormat pf)
     //    {
-    //        return pf != null && pf.Flags.HasFlag(PixelFormatFlags.Planar);
+    //        return pf is not null && pf.Flags.HasFlag(PixelFormatFlags.Planar);
     //    }
 
     //    public static bool IsPacked(this PixelFormat pf)

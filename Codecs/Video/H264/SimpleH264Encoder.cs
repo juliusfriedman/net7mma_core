@@ -148,7 +148,7 @@ public class SimpleH264Encoder : IDisposable
         {
             bool bemulationpreventionexecuted = false;
 
-            if (m_pOutFile == null)
+            if (m_pOutFile is null)
             {
                 throw new System.Exception("Error: out file is NULL");
             }
@@ -164,7 +164,7 @@ public class SimpleH264Encoder : IDisposable
                 throw new System.Exception("Error: NO bytes to save");
             }
 
-            if (bemulationprevention == true)
+            if (bemulationprevention)
             {
                 //Emulation prevention will be used:
                 /*As per h.264 spec,
@@ -217,7 +217,7 @@ public class SimpleH264Encoder : IDisposable
                 }
             }
 
-            if (bemulationpreventionexecuted == false)
+            if (bemulationpreventionexecuted is false)
             {
                 //No emulation prevention was used
 
@@ -261,7 +261,7 @@ public class SimpleH264Encoder : IDisposable
             //Used to add NAL header stream
             //Remember: NAL header is byte oriented
 
-            if (bDoAlign == true)
+            if (bDoAlign)
             {
                 dobytealign();
             }
@@ -369,7 +369,7 @@ public class SimpleH264Encoder : IDisposable
         public void addbyte(byte cByte)
         {
             //Byte alignment optimization
-            if ((m_nLastbitinbuffer % 8) == 0)
+            if ((m_nLastbitinbuffer % 8) is 0)
             {
                 addbytetostream(cByte);
             }
@@ -484,7 +484,7 @@ public class SimpleH264Encoder : IDisposable
         //Free the allocated video frame mem
         private void free_video_src_frame()
         {
-            if (m_frame.yuv420pframe.pYCbCr != null)
+            if (m_frame.yuv420pframe.pYCbCr is not null)
             {
                 //C++ TO C# CONVERTER TODO TASK: The memory management function 'free' has no equivalent in C#:
                 //			free(m_frame.yuv420pframe.pYCbCr);
@@ -499,7 +499,7 @@ public class SimpleH264Encoder : IDisposable
         //Alloc mem to store a video frame
         private void alloc_video_src_frame()
         {
-            if (m_frame.yuv420pframe.pYCbCr != null)
+            if (m_frame.yuv420pframe.pYCbCr is not null)
             {
                 throw new System.Exception("Error: null values in frame");
             }
@@ -816,7 +816,7 @@ public class SimpleH264Encoder : IDisposable
         //Returns the frame pointer to load the video frame
         public byte[] GetFramePtr()
         {
-            if (m_frame.yuv420pframe.pYCbCr == null)
+            if (m_frame.yuv420pframe.pYCbCr is null)
             {
                 throw new System.Exception("Error: video frame is null (not initialized)");
             }
@@ -980,7 +980,7 @@ public class SimpleH264Encoder : IDisposable
 
     public void Dispose()
     {
-        if (h264encoder != null)
+        if (h264encoder is not null)
         {
             h264encoder.Dispose();
             h264encoder = null;

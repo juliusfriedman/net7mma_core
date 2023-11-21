@@ -168,7 +168,7 @@ namespace Media.Rtcp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-            get { return false == IsDisposed && HasReports ? ReportBlock.ReportBlockSize * Header.BlockCount : 0; }
+            get { return IsDisposed is false && HasReports ? ReportBlock.ReportBlockSize * Header.BlockCount : 0; }
         }
 
         //Todo Segment properties an inline
@@ -299,17 +299,17 @@ namespace Media.Rtcp
         /// <param name="reportBlock">The IReportBlock instance to add.</param>
         public virtual void Add(IReportBlock reportBlock)
         {
-            if (reportBlock == null) return;
+            if (reportBlock is null) return;
 
             if (IsReadOnly) throw new InvalidOperationException("The RtcpReport can only be modified when IsReadOnly is false.");
 
-            if (ReportBlocksRemaining == 0) throw new InvalidOperationException("A RtcpReport can only hold 31 ReportBlocks");
+            if (ReportBlocksRemaining is 0) throw new InvalidOperationException("A RtcpReport can only hold 31 ReportBlocks");
 
             //Determine the size of the block
             int reportBlockSize = reportBlock.Size;
 
             //If there is nothing being added then there is nothing to do.
-            if(reportBlockSize == 0) return;
+            if(reportBlockSize is 0) return;
 
             //Increase the BlockCount
             ++BlockCount;
@@ -323,7 +323,7 @@ namespace Media.Rtcp
 
         public virtual bool Remove(IReportBlock reportBlock)
         {
-            if (reportBlock == null) throw new ArgumentNullException("reportBlock");
+            if (reportBlock is null) throw new ArgumentNullException("reportBlock");
 
             if (IsReadOnly) throw new InvalidOperationException("The RtcpReport can only be modified when IsReadOnly is false.");
 

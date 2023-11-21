@@ -134,7 +134,7 @@ namespace Media.Codecs.Image
 
         public void SaveBitmap(Stream stream)
         {
-            if (stream == null)
+            if (stream is null)
                 throw new ArgumentNullException(nameof(stream));
 
             int width = Width;
@@ -252,7 +252,7 @@ namespace Media.Codecs.Image
                 case Media.Codec.DataLayout.SemiPlanar:
                     int yPlaneWidth = PlaneWidth(componentIndex);
                     // Non interleaved plane
-                    if (componentIndex == 0)
+                    if (componentIndex is 0)
                     {
                         offset += (y * yPlaneWidth + x) * component.Length;
                         break;
@@ -671,7 +671,7 @@ namespace Media.UnitTests
                     for (int componentIndex = 0; componentIndex < imageFormat.Length; componentIndex++)
                     {
                         int expectedOffset;
-                        if (componentIndex == 0) // Y component
+                        if (componentIndex is 0) // Y component
                         {
                             expectedOffset = y * image.Width + x;
                         }
@@ -881,7 +881,7 @@ namespace Media.UnitTests
                 {
                     fixed (byte* ptr = rgbImage.Data.Array)
                     {
-                        yuvImage = new Codecs.Image.Image(Yuv420P, testWidth, testHeight, Media.Codecs.Image.ColorConversions.RGBToYUV420Managed(rgbImage.Width, rgbImage.Height, (System.IntPtr)ptr));
+                        yuvImage = new Codecs.Image.Image(Yuv420P, testWidth, testHeight, Media.Codecs.Image.ColorConversions.RGBToYUV420Managed(rgbImage.Width, rgbImage.Height, (nint)ptr));
                     }
 
                 }
