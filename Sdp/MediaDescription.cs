@@ -290,7 +290,7 @@ namespace Media.Sdp
         //}
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode() { return MediaDescriptionLine.GetHashCode() ^ m_Lines.GetHashCode(); }
+        public override int GetHashCode() => HashCode.Combine(MediaDescriptionLine.GetHashCode(), m_Lines.GetHashCode());
 
         public static bool operator ==(MediaDescription a, SessionDescriptionLine b)
         {
@@ -336,16 +336,11 @@ namespace Media.Sdp
 
         public override bool Equals(object obj)
         {
-            if (obj is MediaDescription) return (obj as MediaDescription) == this;
-            if (obj is Sdp.Lines.SessionMediaDescriptionLine) return Equals((obj as Sdp.Lines.SessionMediaDescriptionLine));
-            if (obj is SessionDescriptionLine) return m_Lines.Contains(obj as SessionDescriptionLine);
+            if (obj is MediaDescription md) return md == this;
+            if (obj is Sdp.Lines.SessionMediaDescriptionLine sdml) return Equals(sdml);
+            if (obj is SessionDescriptionLine sdl) return m_Lines.Contains(sdl);
             return false;
         }
-
-        //public override int GetHashCode()
-        //{
-        //    return m_Lines.GetHashCode() | base.GetHashCode();
-        //}
 
         public override string ToString()
         {
