@@ -2503,7 +2503,7 @@ namespace Media.Rtsp
                                 received = interleaved.Length;
 
                                 //If playing and interleaved stream AND the last transmitted message is NOT null and is NOT Complete then attempt to complete it
-                                if (received < length && false.Equals(IDisposedExtensions.IsNullOrDisposed(this)) && Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) is false /*&& interleaved.StatusLineParsed*/)
+                                if (received < length && IDisposedExtensions.IsNullOrDisposed(this) is false && Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) is false /*&& interleaved.StatusLineParsed*/)
                                 {
                                     //RtspMessage local = m_LastTransmitted;
 
@@ -2511,32 +2511,31 @@ namespace Media.Rtsp
                                     int lastLength = received;
 
                                     //Create a memory segment and complete the message as required from the buffer.
-                                    using (Media.Common.MemorySegment memory = new Media.Common.MemorySegment(data, offset, length))
+                                    using Media.Common.MemorySegment memory = new Media.Common.MemorySegment(data, offset, length);
+                                    
+                                    //Use the data recieved to complete the message and not the socket
+                                    int justReceived = IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) is false ? m_LastTransmitted.CompleteFrom(null, memory) : 0;
+
+                                    //If anything was received
+                                    if (justReceived > 0)
                                     {
-                                        //Use the data recieved to complete the message and not the socket
-                                        int justReceived = false == IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) ? m_LastTransmitted.CompleteFrom(null, memory) : 0;
+                                        //Account for what was just recieved.
+                                        received += justReceived;
 
-                                        //If anything was received
-                                        if (justReceived > 0)
-                                        {
-                                            //Account for what was just recieved.
-                                            received += justReceived;
+                                        //No data was actually consumed don't raise another event.
+                                        if (IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) is false && lastLength.Equals(received)) received = 0;
+                                    }
 
-                                            //No data was actually consumed don't raise another event.
-                                            if (IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) is false && lastLength.Equals(received)) received = 0;
-                                        }
+                                    //handle the completion of a request sent by the server if allowed.
+                                    if (received > 0 &&
+                                        IDisposedExtensions.IsNullOrDisposed(interleaved) is false &&
+                                        interleaved.RtspMessageType is RtspMessageType.Request
+                                        /* && InUse is false*/) //dont handle if waiting for a resposne...
+                                    {
+                                        //Process the pushed message
+                                        ProcessServerSentRequest(interleaved);
 
-                                        //handle the completion of a request sent by the server if allowed.
-                                        if (received > 0 &&
-                                            false.Equals(IDisposedExtensions.IsNullOrDisposed(interleaved)) &&
-                                            interleaved.RtspMessageType == RtspMessageType.Request
-                                            /* && InUse is false*/) //dont handle if waiting for a resposne...
-                                        {
-                                            //Process the pushed message
-                                            ProcessServerSentRequest(interleaved);
-
-                                            //then continue
-                                        }
+                                        //then continue
                                     }
                                 }
                                 
@@ -2558,8 +2557,8 @@ namespace Media.Rtsp
                                     //Thus allowing threads blocked by it to proceed.
                                     m_InterleaveEvent.Set();
                                 } //Otherwise
-                                else if (false.Equals(IDisposedExtensions.IsNullOrDisposed(interleaved)) &&
-                                    interleaved.RtspMessageType == RtspMessageType.Response) //and was a response
+                                else if (IDisposedExtensions.IsNullOrDisposed(interleaved) is false &&
+                                    interleaved.RtspMessageType is RtspMessageType.Response) //and was a response
                                 {
                                     //Otherwise indicate a message has been received now. (for responses only)
                                     Received(interleaved, null);
