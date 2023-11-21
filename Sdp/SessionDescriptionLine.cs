@@ -406,7 +406,7 @@ namespace Media.Sdp
 
         public override int GetHashCode()
         {
-            return m_Type ^ m_Parts.GetHashCode();
+            return HashCode.Combine(m_Type, m_Parts.GetHashCode());
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
