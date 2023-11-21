@@ -5715,7 +5715,7 @@ namespace Media.Rtsp
                                         if (Common.IDisposedExtensions.IsNullOrDisposed(created) is false)
                                         {
                                             //created's Rtp and Rtcp Socket could be changed right here...
-                                            if (m_RtspSocket is not null) created.Initialize(m_RtspSocket, m_RtspSocket);
+                                            if (m_RtspSocket.IsNullOrDisposed() is false) created.Initialize(m_RtspSocket, m_RtspSocket);
 
                                             //Test using a new socket
                                             //if (m_RtspSocket != null) created.Initialize((IPEndPoint)m_RtspSocket.LocalEndPoint, (IPEndPoint)m_RtspSocket.RemoteEndPoint);
@@ -6031,8 +6031,7 @@ namespace Media.Rtsp
                     //Monitor the protocol for incoming messages
                     if (SharesSocket is false && 
                         InUse is false && 
-                        m_RtspSocket is not null && 
-                        m_RtspSocket.Connected && 
+                        m_RtspSocket.IsNullOrDisposed() is false &&
                         m_RtspSocket.Poll(m_SocketPollMicroseconds, SelectMode.SelectRead))
                     {
                         DisableKeepAliveRequest = true;

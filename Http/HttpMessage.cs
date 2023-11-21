@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Media.Common;
+using Media.Common.Extensions.Socket;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Http
 {
@@ -2652,8 +2653,8 @@ namespace Media.Http
         {
             if (IsDisposed && IsPersistent is false) return 0;
 
-            bool hasSocket = socket is not null,
-                 hasBuffer = buffer.IsDisposed is false && buffer.Count > 0;
+            bool hasSocket = socket.IsNullOrDisposed() is false,
+                 hasBuffer = Common.IDisposedExtensions.IsNullOrDisposed(buffer) is false && buffer.Count > 0;
 
             //If there is no socket or no data available in the buffer nothing can be done
             if (hasSocket is false && hasBuffer is false)
@@ -2666,33 +2667,30 @@ namespace Media.Http
 
             int received = 0;
 
-            if (hasSocket is false)
+            //Create the buffer if it was null
+            if (m_Buffer is null || m_Buffer.CanWrite is false)
             {
-                //Create the buffer if it was null
-                if (m_Buffer is null || m_Buffer.CanWrite is false)
-                {
-                    m_Buffer = new System.IO.MemoryStream();
+                m_Buffer = new System.IO.MemoryStream();
 
-                    m_HeaderOffset = 0;
-                }
-                else
-                {
-                    //Otherwise prepare to append the buffer
-                    m_Buffer.Seek(0, System.IO.SeekOrigin.End);
+                m_HeaderOffset = 0;
+            }
+            else
+            {
+                //Otherwise prepare to append the buffer
+                m_Buffer.Seek(0, System.IO.SeekOrigin.End);
 
-                    //Update the length
-                    m_Buffer.SetLength(m_Buffer.Length + buffer.Count);
-                }
+                //Update the length
+                m_Buffer.SetLength(m_Buffer.Length + buffer.Count);
+            }
 
-                //If there was a buffer
-                if (Common.IDisposedExtensions.IsNullOrDisposed(buffer) is false && buffer.Count > 0)
-                {
-                    //Write the new data
-                    m_Buffer.Write(buffer.Array, buffer.Offset, received += buffer.Count);
+            //If there was a buffer
+            if (Common.IDisposedExtensions.IsNullOrDisposed(buffer) is false && buffer.Count > 0)
+            {
+                //Write the new data
+                m_Buffer.Write(buffer.Array, buffer.Offset, received += buffer.Count);
 
-                    //Go to the beginning
-                    m_Buffer.Seek(0, System.IO.SeekOrigin.Begin);
-                }
+                //Go to the beginning
+                m_Buffer.Seek(0, System.IO.SeekOrigin.Begin);
             }
 
             //If the status line was not parsed return the number of bytes written, reparse if there are no headers parsed yet.
