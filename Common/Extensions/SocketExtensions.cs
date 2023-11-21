@@ -1215,7 +1215,7 @@ namespace Media.Common.Extensions.Socket
             {
                 //Receive it into the buffer at the given offset taking into account what was already received
                 if (socket.IsNullOrDisposed() is false) justReceived = socket.Receive(buffer, offset, amount, System.Net.Sockets.SocketFlags.None, out error);
-                else justReceived = 0;
+                else break;
 
                 //Determine how to continue
                 switch (error)
