@@ -73,7 +73,6 @@ namespace Media.Rtcp
             int? ssrc = null, //Todo, should be Enumerable
             bool shouldDispose = true)
         {
-
             //array.GetLowerBound(0) for VB, UpperBound(0) is then the index of the last element
             int lowerBound = 0, upperBound = array.Length; 
 
@@ -92,40 +91,38 @@ namespace Media.Rtcp
             while (remains >= RtcpHeader.Length)
             {
                 //Get the header of the packet to verify if it is wanted or not
-                using (var header = new RtcpHeader(new Common.MemorySegment(array, offset, remains, shouldDispose), shouldDispose))
+                using var header = new RtcpHeader(new Common.MemorySegment(array, offset, remains, shouldDispose), shouldDispose);
+                
+                //Determine how long the header was
+                int headerSize = header.Size;
+
+                //Determine the amount of bytes in the packet NOT INCLUDING the RtcpHeader (Which may be 0 or 65535)
+                //16384 is the maximum value which should occupy the LengthInWordsMinusOne in a single IP RTCP packet
+                //Values over this such as 65535 will be truncated to 0 when added with 1 when the result type is not bound to ushort
+
+                //When LengthInWordsMinusOne == 0 this means there should only be the header, 0 + 1 = 1 * 4 = 4
+
+                int lengthInBytes = headerSize > remains ? 0 : Binary.MachineWordsToBytes((ushort)(header.LengthInWordsMinusOne + 1));
+
+                //Create a packet using the existing header and the bytes left in the packet
+                using RtcpPacket newPacket = new RtcpPacket(header, lengthInBytes == 0 ? MemorySegment.Empty : new MemorySegment(array, offset + headerSize, Binary.Clamp(lengthInBytes - headerSize, 0, remains - headerSize)), shouldDispose);
+
+                lengthInBytes = headerSize + newPacket.Payload.Count;
+
+                remains -= lengthInBytes;
+
+                offset += lengthInBytes;
+
+                //Check for the optional parameters before returning the packet
+                if (payloadType.HasValue && payloadType.Value != header.PayloadType ||  // Check for the given payloadType if provided
+                    ssrc.HasValue && ssrc.Value != header.SendersSynchronizationSourceIdentifier) //Check for the given ssrc if provided
                 {
-                    //Determine how long the header was
-                    int headerSize = header.Size;
-
-                    //Determine the amount of bytes in the packet NOT INCLUDING the RtcpHeader (Which may be 0 or 65535)
-                    //16384 is the maximum value which should occupy the LengthInWordsMinusOne in a single IP RTCP packet
-                    //Values over this such as 65535 will be truncated to 0 when added with 1 when the result type is not bound to ushort
-
-                    //When LengthInWordsMinusOne == 0 this means there should only be the header, 0 + 1 = 1 * 4 = 4
-
-                    int lengthInBytes = headerSize > remains ? 0 : Binary.MachineWordsToBytes((ushort)(header.LengthInWordsMinusOne + 1)); 
-
-                    //Create a packet using the existing header and the bytes left in the packet
-                    using (RtcpPacket newPacket = new RtcpPacket(header, lengthInBytes == 0 ? MemorySegment.Empty : new MemorySegment(array, offset + headerSize, Binary.Clamp(lengthInBytes - headerSize, 0, remains - headerSize)), shouldDispose))
-                    {
-                        lengthInBytes = headerSize + newPacket.Payload.Count;
-
-                        remains -= lengthInBytes;
-
-                        offset += lengthInBytes;
-
-                        //Check for the optional parameters before returning the packet
-                        if (payloadType.HasValue && payloadType.Value != header.PayloadType ||  // Check for the given payloadType if provided
-                            ssrc.HasValue && ssrc.Value != header.SendersSynchronizationSourceIdentifier) //Check for the given ssrc if provided
-                        {
-                            //Skip the packet
-                            continue;
-                        }
-                        
-                        //Yield the packet, disposed afterwards
-                        yield return newPacket;
-                    }
+                    //Skip the packet
+                    continue;
                 }
+
+                //Yield the packet, disposed afterwards
+                yield return newPacket;
             }
 
             //Done parsing

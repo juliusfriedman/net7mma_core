@@ -2037,15 +2037,14 @@ namespace Media.Rtp
                 // 209 - 223 is cited in the above as well as below
                 //RTCP packet types in the ranges 1-191 and 224-254 SHOULD only be used when other values have been exhausted.
 
-                using (Media.RFC3550.CommonHeaderBits header = new Media.RFC3550.CommonHeaderBits(memory))
-                {
-                    //Could ensure version here to make reception more unified.
+                using Media.RFC3550.CommonHeaderBits header = new Media.RFC3550.CommonHeaderBits(memory);
+                
+                //Could ensure version here to make reception more unified.
 
-                    //Just use the payload type to avoid confusion, payload types for Rtcp and Rtp cannot and should not overlap
-                    parseRtcp = (parseRtp = Media.Common.IDisposedExtensions.IsNullOrDisposed(GetContextByPayloadType(header.RtpPayloadType)) is false) is false;
+                //Just use the payload type to avoid confusion, payload types for Rtcp and Rtp cannot and should not overlap
+                parseRtcp = (parseRtp = Media.Common.IDisposedExtensions.IsNullOrDisposed(GetContextByPayloadType(header.RtpPayloadType)) is false) is false;
 
-                    //Could also lookup the ssrc
-                }
+                //Could also lookup the ssrc
             }
 
             //If the packet was truncated then it may be necessary to remove atleast the 'Padding' bit if it was set.
@@ -2073,23 +2072,22 @@ namespace Media.Rtp
                 }
             }
 
-        //Rtp:
+            //Rtp:
 
             //If rtp is parsed
             if (parseRtp && mRemaining >= RtpHeader.Length)
             {
                 //Use the packet to call Dispose.
-                using (RtpPacket rtp = new RtpPacket(memory.Array, offset + index, Common.Binary.Min(ref mRemaining, ref count)))
-                {
-                    //Handle the packet further  (could indicate truncated here)
-                    HandleIncomingRtpPacket(this, rtp);
+                using RtpPacket rtp = new RtpPacket(memory.Array, offset + index, Common.Binary.Min(ref mRemaining, ref count));
 
-                    //Move the index past the length of the packet
-                    index += rtp.Length;
+                //Handle the packet further  (could indicate truncated here)
+                HandleIncomingRtpPacket(this, rtp);
 
-                    //Calculate the amount of octets remaining in the segment.
-                    mRemaining -= rtp.Length;
-                }
+                //Move the index past the length of the packet
+                index += rtp.Length;
+
+                //Calculate the amount of octets remaining in the segment.
+                mRemaining -= rtp.Length;
             }
 
             //If not all data was consumed
