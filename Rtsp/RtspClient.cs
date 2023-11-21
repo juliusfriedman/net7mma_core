@@ -6607,9 +6607,7 @@ namespace Media.Rtsp
                         {
                             //Ensure still in playing
                             if (Common.IDisposedExtensions.IsNullOrDisposed(context) is false &&
-                                m_Playing.ContainsKeys(context.MediaDescription) is false || context.HasAnyRecentActivity) continue;
-
-                            int requestCseq;
+                                m_Playing.ContainsKey(context.MediaDescription) is false || context.HasAnyRecentActivity) continue;
 
                             //Send a pause request if not already paused and the server supports PAUSE and there has been any activity on the context
                             if (supportPause)

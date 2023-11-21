@@ -2160,16 +2160,11 @@ namespace Media.Rtsp//.Server
                     response.CSeq = request.CSeq;
             }
             //Request is null, check the statusCode, if not BadRequest check for a LastRequest and use that CSeq.
-            else if (statusCode is not RtspStatusCode.BadRequest && 
-                Common.IDisposedExtensions.IsNullOrDisposed(LastRequest) is false && 
+            else if (statusCode is not RtspStatusCode.BadRequest &&
+                Common.IDisposedExtensions.IsNullOrDisposed(LastRequest) is false &&
                 LastRequest.CSeq >= 0)
                 response.CSeq = LastRequest.CSeq;
 
-                if (false.Equals(statusCode == RtspStatusCode.BadRequest)) response.CSeq = request.CSeq;
-            }//Request is null, check the statusCode, if not BadRequest check for a LastRequest and use that CSeq.
-            else if (false.Equals(statusCode == RtspStatusCode.BadRequest) && 
-                Common.IDisposedExtensions.IsNullOrDisposed(LastRequest) is false && 
-                LastRequest.CSeq >= 0) response.CSeq = LastRequest.CSeq;
             //Otherwise no CSeq is provided in response...
 
             //Include any reason phrase.
