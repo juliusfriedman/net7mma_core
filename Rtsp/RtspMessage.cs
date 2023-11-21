@@ -456,7 +456,7 @@ namespace Media.Rtsp
                     m_Buffer is not null &&  // Be parsing the StatusLine
                     m_Buffer.Length <= MinimumStatusLineSize) return false;
 
-                if (false.Equals(string.IsNullOrWhiteSpace(ParsedProtocol)) && false.Equals(ParsedProtocol.Equals(Protocol, StringComparison.OrdinalIgnoreCase)))
+                if (string.IsNullOrWhiteSpace(ParsedProtocol) is false && ParsedProtocol.Equals(Protocol, StringComparison.OrdinalIgnoreCase) is false)
                 {
                     return base.IsComplete;
                 }
