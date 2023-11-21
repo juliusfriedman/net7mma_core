@@ -6507,7 +6507,7 @@ namespace Media.Rtsp
                         if (SupportedMethods.Contains(RtspMethod.GET_PARAMETER.ToString()))
                         {
                             //Need the message itself to update the session..
-                            using (SendGetParameter(null, null, session.Value.SessionId, false)) ;
+                            using (SendGetParameter(null, null, session.Value.SessionId, RtspHeaderFields.Connection.KeepAlive, false)) ;
                         }
                         else if (SupportedMethods.Contains(RtspMethod.OPTIONS.ToString())) //If at least options is supported
                         {
@@ -6820,7 +6820,7 @@ namespace Media.Rtsp
             DisableKeepAliveRequest = false;
         }
 
-        public RtspMessage SendGetParameter(string body = null, string contentType = null, string sessionId = null, bool force = false)
+        public RtspMessage SendGetParameter(string body = null, string contentType = null, string sessionId = null, string connection = null, bool force = false)
         {
             //…Content-type: application/x-rtsp-packetpair for WMS
 
@@ -6838,6 +6838,8 @@ namespace Media.Rtsp
                 if (false.Equals(string.IsNullOrWhiteSpace(contentType))) get.SetHeader(RtspHeaders.ContentType, contentType);
 
                 if (false.Equals(string.IsNullOrWhiteSpace(sessionId))) get.SetHeader(RtspHeaders.Session, sessionId);
+
+                if (false.Equals(string.IsNullOrWhiteSpace(connection))) get.SetHeader(RtspHeaders.Connection, connection);
 
                 return SendRtspMessage(get);
             }
