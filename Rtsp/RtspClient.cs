@@ -6136,10 +6136,20 @@ namespace Media.Rtsp
                     }
                 }
             }
-            else if(m_Playing.Count > 0)
+            
+            if(m_Playing.Count > 0)
             {
-                StopPlaying();
-                StartPlaying();
+                //Filter the contexts which have received absolutely NO data.
+                var contextsWithoutFlow = Client.GetTransportContexts().Where(tc => Common.IDisposedExtensions.IsNullOrDisposed(tc) is false &&
+                    m_Playing.Keys.Contains(tc.MediaDescription) &&
+                    tc.HasReceivedRtpWithinReceiveInterval is false &&
+                    tc.TimeActive > tc.ReceiveInterval);
+
+                if (contextsWithoutFlow.Any())
+                {
+                    StopPlaying();
+                    StartPlaying();
+                }
             }
 
             //If there is still a timer change it based on the last messages round trip time, should be relative to all messages...

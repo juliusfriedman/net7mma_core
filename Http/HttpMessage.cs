@@ -2694,8 +2694,8 @@ namespace Media.Http
             }
 
             //If the status line was not parsed return the number of bytes written, reparse if there are no headers parsed yet.
-            if (false.Equals(ParseStatusLine(MessageType == HttpMessageType.Invalid) || m_StatusLineParsed is false)) return received;
-            else if (false.Equals(m_Buffer is null) && m_Buffer.CanSeek) m_Buffer.Seek(m_HeaderOffset, System.IO.SeekOrigin.Begin); // Seek past the status line.
+            if (ParseStatusLine(MessageType is HttpMessageType.Invalid) || m_StatusLineParsed is false is false) return received;
+            else if (m_Buffer is not null && m_Buffer.CanSeek) m_Buffer.Seek(m_HeaderOffset, System.IO.SeekOrigin.Begin); // Seek past the status line.
 
             //Determine if there can be and is a body already
             bool hasNullBody = CanHaveBody && string.IsNullOrEmpty(m_Body);
@@ -2707,10 +2707,10 @@ namespace Media.Http
             //We don't have to reparse the headers unless the whole message is in the buffer, we can guess this by checking the length of the m_Buffer.Length to be >= Length
             //This is not reliable since the buffer could be larger than the length and still not have all data...
 
-            if (false.Equals(ParseHeaders(hasNullBody))) return received;
+            if (ParseHeaders(hasNullBody) is false) return received;
 
             //Reparse any content-length if it was not already parsed or was a 0 value and the body is still null
-            if (m_ContentLength <= 0 && false == ParseContentLength(hasNullBody)) return received;
+            if (m_ContentLength <= 0 && ParseContentLength(hasNullBody) is false) return received;
 
             //Http closes the connection when there is no content-length...
 
@@ -2727,7 +2727,7 @@ namespace Media.Http
                 int remaining;
 
                 //If there are remaining octetes then complete the HttpMessage
-                if (false.Equals(ParseBody(out remaining, false)) && remaining > 0)
+                if (ParseBody(out remaining, false) is false && remaining > 0)
                 {
                     //Store the error
                     System.Net.Sockets.SocketError error = System.Net.Sockets.SocketError.SocketError;
