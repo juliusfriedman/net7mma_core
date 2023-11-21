@@ -1294,7 +1294,7 @@ namespace Media
             }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            public override int GetHashCode() { return (short)this; }
+            public override int GetHashCode() => (short)this;
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public bool Equals(CommonHeaderBits other)

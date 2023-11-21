@@ -1017,12 +1017,12 @@ namespace Media.Rtcp
         //Packet equals...
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode() { return Created.GetHashCode() ^ Header.GetHashCode(); }
+        public override int GetHashCode() => HashCode.Combine(Header.GetHashCode(), Payload.GetHashCode());
 
         #endregion
 
         #region Operators
-        
+
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(RtcpPacket a, RtcpPacket b)
         {

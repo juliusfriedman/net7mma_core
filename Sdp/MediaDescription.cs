@@ -336,7 +336,7 @@ namespace Media.Sdp
 
         public override bool Equals(object obj)
         {
-            if (obj is MediaDescription md) return md == this;
+            if (obj is MediaDescription md) return md.Equals(this);
             if (obj is Sdp.Lines.SessionMediaDescriptionLine sdml) return Equals(sdml);
             if (obj is SessionDescriptionLine sdl) return m_Lines.Contains(sdl);
             return false;

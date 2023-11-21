@@ -915,7 +915,7 @@ namespace Media.Rtp
         //Packet equals...
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode() { return Created.GetHashCode() ^ Header.GetHashCode(); }        
+        public override int GetHashCode() => HashCode.Combine(Header.GetHashCode(), Payload.GetHashCode());
 
         /// <summary>
         /// Copies all of the data in the packet to the given destination. The amount of bytes copied is given by <see cref="Length"/>

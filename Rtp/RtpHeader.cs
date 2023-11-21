@@ -587,7 +587,7 @@ namespace Media.Rtp
         /// </summary>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode() { return First16Bits ^ SynchronizationSourceIdentifier; }
+        public override int GetHashCode() => HashCode.Combine(First16Bits.GetHashCode(), SynchronizationSourceIdentifier);
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool Equals(RtpHeader other)

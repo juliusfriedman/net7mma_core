@@ -586,7 +586,7 @@ namespace Media.Rtcp
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public override int GetHashCode() { return First16Bits ^ SendersSynchronizationSourceIdentifier; }
+        public override int GetHashCode() => HashCode.Combine(First16Bits.GetHashCode(), SendersSynchronizationSourceIdentifier);
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool Equals(RtcpHeader other)
