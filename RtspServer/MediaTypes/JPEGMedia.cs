@@ -270,7 +270,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 stopEvent = new ManualResetEvent(false);
 
                 // create and start new thread
-                thread = new Thread(new ThreadStart(WorkerThread))
+                thread = new Thread(WorkerThread)
                 {
                     Name = m_Source.ToString() // mainly for debugging
                 };
@@ -332,7 +332,6 @@ namespace Media.Rtsp.Server.MediaTypes
             if (this.IsRunning)
             {
                 stopEvent.Set();
-                thread.Abort();
                 WaitForStop();
                 base.Stop();
             }
@@ -458,10 +457,6 @@ namespace Media.Rtsp.Server.MediaTypes
                         if ((msec > 0) && (stopEvent.WaitOne(msec, false)))
                             break;
                     }
-                }
-                catch (ThreadAbortException)
-                {
-                    break;
                 }
                 catch (Exception)
                 {

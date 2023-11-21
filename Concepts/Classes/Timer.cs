@@ -94,7 +94,7 @@ namespace Media.Concepts.Classes
         void Count()
         {
             //Todo, make JumpExpression ... along with TypedReferenceExpression
-            //System.Action ShouldStop = () => if (false.Equals(m_Enabled.Equals(uint.MinValue))) goto Approximate; System.Threading.Thread.ResetAbort();
+            //System.Action ShouldStop = () => if (false.Equals(m_Enabled.Equals(uint.MinValue))) goto Approximate;
 
             System.Threading.Thread Event = null;
 
@@ -227,8 +227,7 @@ namespace Media.Concepts.Classes
             }
             catch (System.SystemException se)
             {
-                if (se is System.Threading.ThreadAbortException) System.Threading.Thread.ResetAbort();
-                else if (se is System.Threading.ThreadInterruptedException | false.Equals(m_Enabled.Equals(uint.MinValue))) goto Approximate;
+                if (se is System.Threading.ThreadInterruptedException | false.Equals(m_Enabled.Equals(uint.MinValue))) goto Approximate;
                 else if (se is System.OutOfMemoryException)
                 {
                     if ((ulong)Producer.Count > approximate) Producer.Clear();
@@ -322,15 +321,7 @@ namespace Media.Concepts.Classes
             
             Stop(); 
 
-            try { m_Counter.Abort(m_Frequency); }
-            catch (System.Threading.ThreadAbortException) { System.Threading.Thread.ResetAbort(); }
-            catch { }
-            finally
-            {
-                Tick = null;
-            }
-
-            
+            Tick = null;
         }
 
     }

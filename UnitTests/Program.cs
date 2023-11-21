@@ -44,6 +44,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using UnitTests.Code;
 
 namespace Media.UnitTests
@@ -139,7 +140,7 @@ namespace Media.UnitTests
         /// </summary>
         /// <param name="args"></param>
         [MTAThread]
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             //Run the main tests
             foreach (Action test in LogicTests) RunTest(test);
@@ -152,7 +153,7 @@ namespace Media.UnitTests
 
             RunTest(RtspClientTests);
 
-            RunTest(TestServer);
+            await RunTestAsync(TestServerAsync);
         }
 
         #region Unit Tests
@@ -2143,7 +2144,7 @@ namespace Media.UnitTests
         /// <summary>
         /// Tests the Media.RtspServer by creating a server, loading/exposing a stream and waiting for a keypress to terminate
         /// </summary>
-        static void TestServer()
+        static async Task TestServerAsync()
         {
 
             System.Runtime.GCLatencyMode oldMode = System.Runtime.GCSettings.LatencyMode;
@@ -2166,7 +2167,7 @@ namespace Media.UnitTests
                 Console.WriteLine("Server Starting on: " + serverIp);
 
                 //Setup a Media.RtspServer on serverPort
-                using (Media.Rtsp.RtspServer server = new Media.Rtsp.RtspServer(serverIp, serverPort)
+                await using (Media.Rtsp.RtspServer server = new Media.Rtsp.RtspServer(serverIp, serverPort)
                 {
                     Logger = new Media.Rtsp.Server.Loggers.RtspServerConsoleLogger(),
                     ClientSessionLogger = new Media.Rtsp.Server.Loggers.RtspServerConsoleLogger()
@@ -2482,13 +2483,13 @@ namespace Media.UnitTests
                     }));                    
 
                     //Start the server
-                    server.Start();
+                    await server.StartAsync();
 
                     //Start the other thread
                     rtpToolThread.Start();
 
                     //Wait for the server to start.
-                    while (server.IsRunning is false) System.Threading.Thread.Sleep(0);
+                    while (server.IsRunning is false) await Task.Delay(0);
 
                     //Start taking pictures of the desktop and making packets in a seperate thread.
                     captureThread.Priority = System.Threading.ThreadPriority.BelowNormal;
@@ -2752,15 +2753,13 @@ namespace Media.UnitTests
                                         },
                                         sources.FirstOrDefault().SessionDescription.MediaDescriptions.FirstOrDefault(),
                                         new Sdp.SessionDescriptionLine("a=control:*"),
-                                        new Sdp.SessionDescriptionLine("a=sendonly"),
+                                        new Sdp.SessionDescriptionLine("a=recvonly"),
                                         new Sdp.SessionDescriptionLine("a=type:broadcast")
                                     };
 
-                                    var compositeSource = new Media.Rtsp.Server.MediaTypes.RtpVideoSink("Composite", null);
+                                    var compositeSource = new Media.Rtsp.Server.MediaTypes.RtpVideoSink("Composite", compositeSession);
 
                                     compositeSource.Start();
-
-                                    compositeSource.SessionDescription = compositeSession;
 
                                     if (!server.TryAddMedia(compositeSource))
                                     {
@@ -2879,7 +2878,7 @@ namespace Media.UnitTests
 
                     Console.WriteLine("Stopping Server");
 
-                    server.Stop();
+                    await server.StopAsync();
 
                     Console.WriteLine("Server Stopped");
                 }
@@ -4622,6 +4621,11 @@ a=appversion:1.0");
 
         static void RunTest(Action test, int count = 1, bool waitForGoAhead = true)
         {
+            RunTestAsync(() => { test(); return Task.CompletedTask; }, count, waitForGoAhead).GetAwaiter().GetResult();
+        }
+
+        static async Task RunTestAsync(Func<Task> test, int count = 1, bool waitForGoAhead = true)
+        {
             System.Console.Clear();
             ConsoleColor pForeGround = Console.ForegroundColor,
                         pBackGound = Console.BackgroundColor;
@@ -4651,7 +4655,7 @@ a=appversion:1.0");
                         TraceMessage("Beginning Test '" + testIndex + "'", test.Method.Name);
 
                         //Run the test
-                        test();
+                        await test();
 
                         TraceMessage("Completed Test'" + testIndex + "'", test.Method.Name);
 
@@ -4702,7 +4706,7 @@ a=appversion:1.0");
                 {
                     case ConsoleKey.W:
                         {
-                            RunTest(test, 1, false);
+                            await RunTestAsync(test, 1, false).ConfigureAwait(false);
                             return;
                         }
                     case ConsoleKey.D:

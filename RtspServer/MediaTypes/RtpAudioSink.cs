@@ -165,18 +165,8 @@ public class RtpAudioSink : RtpSink
 
                     System.Threading.Thread.Sleep(ClockRate);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    if (ex is System.Threading.ThreadAbortException)
-                    {
-                        //Handle the abort
-                        System.Threading.Thread.ResetAbort();
-
-                        Stop();
-
-                        return;
-                    }
-                    
                     continue;
                 }
             }
@@ -194,16 +184,6 @@ public class RtpAudioSink : RtpSink
         //If this class was used to send directly to one person it would be setup with the recievers address
         RtpClient = new RtpClient();
 
-        SessionDescription = new SessionDescription(0, "v√ƒ", Name)
-        {
-            new SessionConnectionLine()
-            {
-                ConnectionNetworkType = SessionConnectionLine.InConnectionToken,
-                ConnectionAddressType = SessionDescription.WildcardString,
-                ConnectionAddress = System.Net.IPAddress.Any.ToString()
-            }
-        };
-
         //Add a MediaDescription to our Sdp on any available port for RTP/AVP Transport using the PayloadType            
         var mediaDescription = new MediaDescription(MediaType.audio,
             RtpClient.RtpAvpProfileIdentifier,  //Any port...
@@ -214,17 +194,27 @@ public class RtpAudioSink : RtpSink
             new SessionDescriptionLine("a=control:trackID=audio")
         };
 
-        //Add the MediaDescription
-        SessionDescription.Add(mediaDescription);
+        SessionDescription = new SessionDescription(0, "v√ƒ", Name)
+        {
+            new SessionConnectionLine()
+            {
+                ConnectionNetworkType = SessionConnectionLine.InConnectionToken,
+                ConnectionAddressType = SessionDescription.WildcardString,
+                ConnectionAddress = System.Net.IPAddress.Any.ToString()
+            },
 
-        //Indicate control to each media description contained
-        SessionDescription.Add(new SessionDescriptionLine("a=control:*"));
+            //Add the MediaDescription
+            mediaDescription,
 
-        //Ensure the session members know they can only receive
-        SessionDescription.Add(new SessionDescriptionLine("a=sendonly")); //recvonly?
+            //Indicate control to each media description contained
+            new SessionDescriptionLine("a=control:*"),
 
-        //that this a broadcast.
-        SessionDescription.Add(new SessionDescriptionLine("a=type:broadcast"));
+            //Ensure the session members know they can only receive
+            new SessionDescriptionLine("a=recvonly"),
+
+            //that this a broadcast.
+            new SessionDescriptionLine("a=type:broadcast")
+        };
 
         //Add a Interleave (We are not sending Rtcp Packets becaues the Server is doing that) We would use that if we wanted to use this AudioStream without the server.            
         //See the notes about having a Generic.Dictionary to support various tracks

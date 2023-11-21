@@ -37,6 +37,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Media.Rtsp.Server.MediaTypes
 {
@@ -2351,7 +2352,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 new Sdp.SessionDescriptionLine("a=control:*"),
 
                 //Ensure the session members know they can only receive
-                new Sdp.SessionDescriptionLine("a=sendonly"), //recvonly?
+                new Sdp.SessionDescriptionLine("a=recvonly"),
 
                 //that this a broadcast.
                 new Sdp.SessionDescriptionLine("a=type:broadcast")
@@ -2619,8 +2620,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                 OnFrameDecoded((RFC2435Media.RFC2435Frame)frame);
                             }
 
-                            ++FramesPerSecondCounter;
-
+                            Interlocked.Increment(ref FramesCounter);
                         }
 
                         //If we are to loop images then add it back at the end
@@ -2637,18 +2637,8 @@ namespace Media.Rtsp.Server.MediaTypes
 
                         System.Threading.Thread.Sleep(ClockRate);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        if (ex is System.Threading.ThreadAbortException)
-                        {
-                            //Handle the abort
-                            System.Threading.Thread.ResetAbort();
-
-                            Stop();
-
-                            return;
-                        }
-
                         //TryRaiseex
 
                         continue;

@@ -42,10 +42,10 @@ using System.Linq;
 using Media.Common;
 using System.Net;
 using System.Net.Sockets;
-using Media.Rtcp;
 using Media.Rtp;
 using Media.Sdp;
 using System.Threading;
+using System.Threading.Tasks;
 using Media.Common.Extensions.Socket;
 
 namespace Media.Rtsp
@@ -57,7 +57,6 @@ namespace Media.Rtsp
     /// </summary>
     public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISocketReference
     {
-
         //Todo use SocketConfiguration
         /// <summary>
         /// Handle the configuration required for the given socket
@@ -65,17 +64,19 @@ namespace Media.Rtsp
         /// <param name="socket"></param>
         internal static void ConfigureRtspSocket(Socket socket)
         {
-            if (socket is null) throw new ArgumentNullException("Socket");
+            ArgumentNullException.ThrowIfNull(socket);
 
             //Xamarin's .net implementation on Android suffers from nuances that neither core nor mono suffer from.
             //If this option fails to be set there the socket can't be used easily.
-            if (false.Equals(Media.Common.Extensions.RuntimeExtensions.IsAndroid))
+            if (Media.Common.Extensions.RuntimeExtensions.IsAndroid is false)
             {
                 //Ensure the address can be re-used
-                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableAddressReuse(socket));
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    Media.Common.Extensions.Socket.SocketExtensions.EnableAddressReuse(socket));
 
                 //Windows >= 10 and Some Unix
-                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableUnicastPortReuse(socket));
+                Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    Media.Common.Extensions.Socket.SocketExtensions.EnableUnicastPortReuse(socket));
             }
 
             //It was reported that Mono on iOS has a bug with SendBufferSize, ReceiveBufferSize and by looking further possibly SetSocketOption in general...
@@ -83,47 +84,60 @@ namespace Media.Rtsp
             //SendBufferSize,ReceiveBufferSize and SetSocketOption is supposedly fixed in the latest versions but still do too much option verification...
 
             //Don't buffer send.
-            Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => socket.SendBufferSize = 0);
+            Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                socket.SendBufferSize = 0);
 
             //Don't buffer receive.
-            Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => socket.ReceiveBufferSize = 0);
+            Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                socket.ReceiveBufferSize = 0);
 
             //Dont fragment for ip4, ip6 does ptmud
-            if (socket.AddressFamily == AddressFamily.InterNetwork) Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => socket.DontFragment = true);
+            if (socket.AddressFamily == AddressFamily.InterNetwork)
+                Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    socket.DontFragment = true);
 
             //Rtsp over Tcp
             if (socket.ProtocolType == ProtocolType.Tcp)
             {
                 // Set option that allows socket to close gracefully without lingering.
-                Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableLinger(socket));
+                Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    Media.Common.Extensions.Socket.SocketExtensions.DisableLinger(socket));
 
                 //Allow more than one byte of urgent data, maybe not supported on the stack.
-                Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpExpedited(socket));
+                Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    Media.Common.Extensions.Socket.SocketExtensions.EnableTcpExpedited(socket));
 
                 //Receive any out of band data in the normal data stream, maybe not supported on the stack
-                Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpOutOfBandDataInLine(socket));
+                Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    Media.Common.Extensions.Socket.SocketExtensions.EnableTcpOutOfBandDataInLine(socket));
 
                 //If both send and receieve buffer size are 0 then there is no coalescing when nagle's algorithm is disabled
-                Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableTcpNagelAlgorithm(socket));
+                Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    Media.Common.Extensions.Socket.SocketExtensions.DisableTcpNagelAlgorithm(socket));
 
                 //Handle options which are known to be different per Operating System
                 if (Common.Extensions.OperatingSystemExtensions.IsWindows)
                 {
                     //Retransmit for 0 sec.
-                    Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableTcpRetransmissions(socket));
+                    Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                        Media.Common.Extensions.Socket.SocketExtensions.DisableTcpRetransmissions(socket));
 
                     // Enable No Syn Retries
-                    Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.EnableTcpNoSynRetries(socket));
+                    Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                        Media.Common.Extensions.Socket.SocketExtensions.EnableTcpNoSynRetries(socket));
 
                     // Set OffloadPreferred
-                    Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.SetTcpOffloadPreference(socket));
+                    Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                        Media.Common.Extensions.Socket.SocketExtensions.SetTcpOffloadPreference(socket));
 
                     //Done in ProcessEndConnect based on ConnectionTime
                     //Enable Congestion Algorithm (when there is not enough bandwidth this sometimes helps)
-                    //Media.Common.Extensions.Socket.SocketExtensions.EnableTcpCongestionAlgorithm(socket);
+                    //Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    //    Media.Common.Extensions.Socket.SocketExtensions.EnableTcpCongestionAlgorithm(socket));
 
                     // For network debugging
-                    //Media.Common.Extensions.Socket.SocketExtensions.EnableTcpTimestamp(socket);                   
+                    //Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() =>
+                    //    Media.Common.Extensions.Socket.SocketExtensions.EnableTcpTimestamp(socket));                   
                 }
             }
         }
@@ -2602,8 +2616,7 @@ namespace Media.Rtsp
         /// <summary>
         /// Increments and returns the current <see cref="ClientSequenceNumber"/>
         /// </summary>
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
-        internal int NextClientSequenceNumber() { return ++m_CSeq; }
+        internal int NextClientSequenceNumber() { return Interlocked.Increment(ref m_CSeq); }
 
         //Determine if throwing exceptions are proper here.
         //Should have end time also?
@@ -3322,8 +3335,7 @@ namespace Media.Rtsp
                 m_BeginConnect = DateTime.UtcNow;
 
                 //Handle the connection attempt (Assumes there is already a RemoteRtsp value)
-                ProcessEndConnect(null);
-
+                ProcessEndConnect(state: null);
             }
             catch (Exception ex)
             {
@@ -3346,67 +3358,9 @@ namespace Media.Rtsp
         {
             //Todo,
             //IConnection
-
             if (m_RemoteRtsp is null) throw new InvalidOperationException("A remote end point must be assigned");
 
-            //Todo, BeginConnect will allow the amount of time to be specified and then you can cancel the connect if it doesn't finish within that time.
-            //System.Net.Sockets.Socket s = new Socket(m_RtspSocket.SocketType, m_RtspSocket.ProtocolType);
-
-            //bool async = false;
-
-            //bool fail = false;
-
-            //var cc = s.BeginConnect(m_RemoteRtsp, new AsyncCallback((iar)=>{
-
-            //    if (iar == null || iar.IsCompleted is false || s == null) return;                    
-
-            //    if(s.Connected) s.EndConnect(iar);
-
-            //    if (async)
-            //    {
-            //        if (s.Connected is false) s.Dispose();
-
-            //        s = null;
-            //    }
-            //    else
-            //    {
-            //        async = true;
-
-            //        m_RtspSocket.Dispose();
-
-            //        m_RtspSocket = s;
-            //    }
-            //}), null);
-
-            //ThreadPool.QueueUserWorkItem((_) =>
-            //{
-            //    while (async is false) if (DateTime.UtcNow - m_BeginConnect.Value > Common.Extensions.TimeSpan.TimeSpanExtensions.OneSecond)
-            //        {
-            //            async = true;
-
-            //            fail = true;
-
-            //            using (cc.AsyncWaitHandle)
-            //            {
-            //                s.Dispose();
-
-            //                m_RtspSocket.Dispose();
-            //            }
-
-            //            s = null;
-            //        }
-            //        else System.Threading.Thread.Yield();
-            //});
-
-            //if (async is false && cc.IsCompleted is false)
-            //{
-                //Try to connect.
-                m_RtspSocket.Connect(m_RemoteRtsp);
-
-            //    async = true;
-            //}
-
-            //if (fail) return;
+            m_RtspSocket.Connect(m_RemoteRtsp);
 
             //Sample the clock after connecting
             m_EndConnect = DateTime.UtcNow;
@@ -3465,12 +3419,6 @@ namespace Media.Rtsp
             //Raise the Connected event.
             OnConnected();
         }
-
-        //handle exception, really needs to know what type of operation this was also.(read or write)
-        //virtual void HandleSocketException(SocketException exception, bool wasReading, wasWriting)
-        //{
-
-        //}
 
         /// <summary>
         /// If <see cref="IsConnected"/> nothing occurs.

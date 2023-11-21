@@ -139,23 +139,6 @@ namespace Media.Concepts.Classes.Threading
             thread.Priority = (System.Threading.ThreadPriority)RunningPriority;
         }
 
-
-        /// <summary>
-        /// Sets the Priority to <see cref="AbortPriority"/> and call Abort
-        /// </summary>
-        /// <param name="thread"></param>
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public void RaiseAbort(System.Threading.Thread thread)
-        {
-            if (thread is null || thread.ThreadState.HasFlag(System.Threading.ThreadState.Aborted) || thread.ThreadState.HasFlag(System.Threading.ThreadState.AbortRequested)) return;
-
-            thread.Priority = (System.Threading.ThreadPriority)AbortPriority;
-
-            try { thread.Abort(); }
-            catch (System.Threading.ThreadAbortException) { System.Threading.Thread.ResetAbort(); }
-            catch { throw; }
-        }
-
         /// <summary>
         /// Sets the Priority and calls Join.
         /// </summary>
