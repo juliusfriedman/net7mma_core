@@ -45,6 +45,7 @@ using Media.Rtp;
 using Media.Rtcp;
 using Media.Rtsp.Server.MediaTypes;
 using System.Threading;
+using Media.Common.Extensions.Socket;
 
 namespace Media.Rtsp//.Server
 {
@@ -469,7 +470,7 @@ namespace Media.Rtsp//.Server
                     if (ex is SocketException se) m_Server.HandleClientSocketException(se, this);
 
                     //if not disposed mark disconnected
-                    IsDisconnected = m_RtspSocket is null || IsDisposed || HasRuningServer is false;
+                    IsDisconnected = m_RtspSocket.IsNullOrDisposed() || IsDisposed || HasRuningServer is false;
                 }
             }
         }
