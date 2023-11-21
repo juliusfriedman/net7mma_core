@@ -6139,7 +6139,7 @@ namespace Media.Rtsp
             
             if(m_Playing.Count > 0)
             {
-                //Filter the contexts which have received absolutely NO data.
+                //Filter the contexts which have received no data with in the recieve interval.
                 var contextsWithoutFlow = Client.GetTransportContexts().Where(tc => Common.IDisposedExtensions.IsNullOrDisposed(tc) is false &&
                     m_Playing.Keys.Contains(tc.MediaDescription) &&
                     tc.HasReceivedRtpWithinReceiveInterval is false &&
