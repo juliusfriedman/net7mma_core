@@ -798,6 +798,27 @@ namespace Media.UnitTests
                 },
                 new
                 {
+                    Uri = "rtsp://8.15.251.101:1935/rtplive/R2_052",
+                    Creds = default(System.Net.NetworkCredential),
+                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                    Type = System.Net.AuthenticationSchemes.None
+                },
+                new
+                {
+                    Uri = "rtsp://8.15.251.101:1935/rtplive/R2_057",
+                    Creds = default(System.Net.NetworkCredential),
+                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                    Type = System.Net.AuthenticationSchemes.None
+                },
+                new
+                {
+                    Uri = "rtsp://8.15.251.101:1935/rtplive/R2_058",
+                    Creds = default(System.Net.NetworkCredential),
+                    Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
+                    Type = System.Net.AuthenticationSchemes.None
+                },
+                new
+                {
                     Uri = "rtsp://8.15.251.101:1935/rtplive/R2_059",
                     Creds = default(System.Net.NetworkCredential),
                     Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
