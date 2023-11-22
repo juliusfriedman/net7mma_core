@@ -2164,12 +2164,12 @@ namespace Media.Rtp
                         if (m_EventReady.IsSet is false)
                         {
                             //Wait for the event signal half of the amount of time
-                            if (false.Equals(m_EventReady.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick)))
+                            if (m_EventReady.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick) is false)
                             {
                                 //Todo, ThreadInfo.
 
                                 //Check if not already below normal priority
-                                if (false.Equals(System.Threading.Thread.CurrentThread.Priority == System.Threading.ThreadPriority.Lowest))
+                                if (System.Threading.Thread.CurrentThread.Priority is not System.Threading.ThreadPriority.Lowest)
                                 {
                                     //Relinquish priority
                                     System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;
