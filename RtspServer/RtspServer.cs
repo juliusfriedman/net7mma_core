@@ -593,7 +593,7 @@ namespace Media.Rtsp
 
         //Should support multiple handlers per method, use ConcurrentThesarus
 
-        internal readonly Dictionary<RtspMethod, RtspRequestHandler> m_RequestHandlers = new Dictionary<RtspMethod, RtspRequestHandler>();
+        internal readonly ConcurrentDictionary<RtspMethod, RtspRequestHandler> m_RequestHandlers = new ();
 
         public bool TryAddRequestHandler(RtspMethod method, RtspRequestHandler handler)
         {
@@ -613,11 +613,10 @@ namespace Media.Rtsp
 
         public void AddRequestHandler(RtspMethod method, RtspRequestHandler handler)
         {
-            //Todo, use Concurrent
-            if (Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions
-                .TryAdd(m_RequestHandlers, method, handler, out Exception any) is false)
+            if (m_RequestHandlers
+                .TryAdd(method, handler) is false)
             {
-                Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Custom Handler already registered", any);
+                Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Custom Handler already registered");
             }
         }
 
@@ -639,11 +638,10 @@ namespace Media.Rtsp
 
         public void RemoveRequestHandler(RtspMethod method)
         {
-            //ToDo, use Concurrent
-            if (Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions
-                .TryRemove(m_RequestHandlers, method, out Exception any) is false)
+            if (m_RequestHandlers
+                .TryRemove(method, out var handler) is false)
             {
-                Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Custom Handler already removed", any);
+                Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Custom Handler already removed");
             }
         }
 
