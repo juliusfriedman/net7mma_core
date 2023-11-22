@@ -155,7 +155,7 @@ namespace Media.UnitTests
 
             RunTest(async () =>
             {
-                await RunTestAsync(TestServerAsync, nameof(TestServerAsync));
+                await RunTestAsync(TestServerAsync).ConfigureAwait(false);
             });
         }
 
@@ -4629,10 +4629,10 @@ a=appversion:1.0");
             System.Console.Clear();
             Console.WriteLine("About to run test: " + test.Method.Name);
             Console.WriteLine("Press Q to skip or any other key to continue.");
-            RunTestAsync(() => { test(); return Task.CompletedTask; }, test.Method.Name, count, waitForGoAhead).GetAwaiter().GetResult();
+            RunTestAsync(() => { test(); return Task.CompletedTask; }, count, waitForGoAhead).GetAwaiter().GetResult();
         }
 
-        static async Task RunTestAsync(Func<Task> test, string testMethodName, int count = 1, bool waitForGoAhead = true)
+        static async Task RunTestAsync(Func<Task> test, int count = 1, bool waitForGoAhead = true)
         {
             //If the debugger is attached get a ConsoleKey, the key is Q return.
             if (waitForGoAhead && /*System.Diagnostics.Debugger.IsAttached && */ Console.ReadKey(true).Key == ConsoleKey.Q) return;
@@ -4652,12 +4652,12 @@ a=appversion:1.0");
                         //Decrement remaining
                         --remaining;
 
-                        TraceMessage("Beginning Test '" + testIndex + "'" + testMethodName);
+                        TraceMessage("Beginning Test '" + testIndex + "'");
 
                         //Run the test
                         await test().ConfigureAwait(false);
 
-                        TraceMessage("Completed Test'" + testIndex + "'" + testMethodName);
+                        TraceMessage("Completed Test'" + testIndex + "'");
 
                         //Increment the success counter
                         ++successes;
@@ -4706,7 +4706,7 @@ a=appversion:1.0");
                 {
                     case ConsoleKey.W:
                         {
-                            await RunTestAsync(test, testMethodName, 1, false).ConfigureAwait(false);
+                            await RunTestAsync(test, 1, false).ConfigureAwait(false);
                             return;
                         }
                     case ConsoleKey.D:

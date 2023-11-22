@@ -2652,7 +2652,7 @@ namespace Media.Rtp
                                     //}
                                 }
 
-                                if (Common.IDisposedExtensions.IsNullOrDisposed(sendContext) || Common.IDisposedExtensions.IsNullOrDisposed(sendContext.Goodbye) is false) goto Done;
+                                if (Common.IDisposedExtensions.IsNullOrDisposed(sendContext) || sendContext.Goodbye is not null) goto Done;
 
                                 //Send the packet using the context's SynchronizationSourceIdentifier
                                 if (SendRtpPacket(packet, sendContext, out lastError, sendContext.SynchronizationSourceIdentifier) >= packet.Length /* && lastError == SocketError.Success*/)

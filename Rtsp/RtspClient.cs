@@ -3990,6 +3990,7 @@ namespace Media.Rtsp
                     //TCP RST occurs when the ACK is missed so keep the window open.
                     if (IsConnected &&
                         SharesSocket is false &&
+                        m_RtspSocket.IsNullOrDisposed() is false &&
                         m_RtspSocket.Poll(m_SocketPollMicroseconds >> 4, SelectMode.SelectRead) /*&& m_RtspSocket.Available > 0*/)
                     {
                         //Receive if data is actually available.
