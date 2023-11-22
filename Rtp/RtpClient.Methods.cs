@@ -2140,7 +2140,7 @@ namespace Media.Rtp
                     }
 
                     //Free whatever was used now that the event is handled.
-                    //if(false == tuple.Item2.ShouldDispose) Common.BaseDisposable.SetShouldDispose(tuple.Item2, true, true);
+                    //if (false == tuple.Frame.ShouldDispose) Common.BaseDisposable.SetShouldDispose(tuple.Frame, true, true);
                 }
             }
         }

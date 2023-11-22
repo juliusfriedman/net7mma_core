@@ -4153,9 +4153,10 @@ namespace Media.Rtp
             get
             {
                 return IDisposedExtensions.IsNullOrDisposed(this) is false &&
-                    Started.Equals(DateTime.MinValue) is false && 
+                    Started != DateTime.MinValue && 
                     m_WorkerThread is not null &&
-                    (m_WorkerThread.IsAlive || m_StopRequested is false);
+                    m_StopRequested is false &&
+                    m_WorkerThread.IsAlive;
             }
         }
 
