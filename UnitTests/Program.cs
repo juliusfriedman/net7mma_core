@@ -153,10 +153,9 @@ namespace Media.UnitTests
 
             RunTest(RtspClientTests);
 
-            RunTest(async () =>
-            {
-                await RunTestAsync(TestServerAsync).ConfigureAwait(false);
-            });
+            RunTest(TestServer);
+
+            async void TestServer() => await RunTestAsync(TestServerAsync).ConfigureAwait(false);
         }
 
         #region Unit Tests
@@ -828,10 +827,12 @@ namespace Media.UnitTests
             {
                 Media.Rtsp.RtspClient.ClientProtocolType? proto = TestObject.Proto;
 
+                double protocolVersion = 1.0;
+
             TestStart:
                 try
                 {
-                    TestRtspClient(TestObject.Uri, TestObject.Creds, proto);
+                    TestRtspClient(TestObject.Uri, TestObject.Creds, proto, null, protocolVersion);
                 }
                 catch (Exception ex)
                 {
@@ -1504,7 +1505,7 @@ namespace Media.UnitTests
             System.IO.File.Delete(currentPath + @"\ShortDump.rtpdump");
         }
 
-        static void TestRtspClient(string location, System.Net.NetworkCredential cred = null, Media.Rtsp.RtspClient.ClientProtocolType? protocol = null, System.Net.AuthenticationSchemes? authenticationScheme = System.Net.AuthenticationSchemes.None)
+        static void TestRtspClient(string location, System.Net.NetworkCredential cred = null, Media.Rtsp.RtspClient.ClientProtocolType? protocol = null, System.Net.AuthenticationSchemes? authenticationScheme = System.Net.AuthenticationSchemes.None, double protocolVersion = 1.0)
         {
             //For display
             int emptyFrames = 0, incompleteFrames = 0, rtspInterleaved = 0, totalFrames = 0;
@@ -1535,6 +1536,8 @@ namespace Media.UnitTests
                 if (cred is not null) client.Credential = cred;
 
                 if (authenticationScheme is not null) client.AuthenticationScheme = authenticationScheme.Value;
+
+                client.ProtocolVersion = protocolVersion;
 
                 //FileInfo to represent the log
                 System.IO.FileInfo rtspLog = new System.IO.FileInfo("rtspLog" + DateTime.UtcNow.ToFileTimeUtc() + ".log.txt");

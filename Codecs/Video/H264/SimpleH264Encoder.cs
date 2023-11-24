@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Media.Common;
+using System;
 using System.Collections.Generic;
 
 // Simple H264 Encoder
@@ -23,7 +24,7 @@ public class SimpleH264Encoder : IDisposable
     /*!
      It is used to create the h264 bit oriented stream, it contains different functions that helps you to create the h264 compliant stream (bit oriented, exp golomb coder)
      */
-    public class CJOCh264bitstream : System.IDisposable
+    public class CJOCh264bitstream : CommonDisposable
     {
         private const int BUFFER_SIZE_BITS = 24; //! Buffer size in bits used for emulation prevention
                                                  //C++ TO C# CONVERTER NOTE: The following #define macro was replaced in-line:
@@ -246,9 +247,10 @@ public class SimpleH264Encoder : IDisposable
         }
 
         //! Destructor
-        public virtual void Dispose()
+        public override void Dispose()
         {
             close();
+            base.Dispose();
         }
 
         //! Add 4 bytes to h264 bistream without taking into acount the emulation prevention. Used to add the NAL header to the h264 bistream
@@ -921,6 +923,8 @@ public class SimpleH264Encoder : IDisposable
     // Raw SPS with no Size Header and no 00 00 00 01 headers
     public byte[] GetRawSPS()
     {
+        if (h264encoder.IsDisposed) return Array.Empty<byte>();
+
         byte[] sps_with_header = h264encoder.sps;
         byte[] sps = new byte[sps_with_header.Length - 4];
         System.Array.Copy(sps_with_header, 4, sps, 0, sps.Length);
@@ -929,6 +933,8 @@ public class SimpleH264Encoder : IDisposable
 
     public byte[] GetRawPPS()
     {
+        if (h264encoder.IsDisposed) return Array.Empty<byte>();
+
         byte[] pps_with_header = h264encoder.pps;
         byte[] pps = new byte[pps_with_header.Length - 4];
         System.Array.Copy(pps_with_header, 4, pps, 0, pps.Length);
@@ -937,6 +943,8 @@ public class SimpleH264Encoder : IDisposable
 
     public byte[] CompressFrame(byte[] yuv_data)
     {
+        if (h264encoder.IsDisposed) return Array.Empty<byte>();
+
         byte[] image = h264encoder.GetFramePtr();
         // copy over the YUV image
         System.Array.Copy(yuv_data, image, image.Length);

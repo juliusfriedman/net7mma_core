@@ -2701,8 +2701,6 @@ namespace Media.Rtsp
                     }
             }
 
-       
-
             //Not a HashSet to allow duplicates...
             List<MediaDescription> setupMedia = new List<MediaDescription>();
 
