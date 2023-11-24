@@ -336,7 +336,7 @@ namespace Media.Http
             {
                 HttpMethod parsed = HttpMethod.UNKNOWN;
 
-                if (false.Equals(string.IsNullOrWhiteSpace(MethodString))) Enum.TryParse<HttpMethod>(MethodString, true, out parsed);
+                if (string.IsNullOrWhiteSpace(MethodString) is false) Enum.TryParse<HttpMethod>(MethodString, true, out parsed);
 
                 return parsed;
             }
@@ -549,7 +549,7 @@ namespace Media.Http
 
                         length += headerEncoding.GetByteCount(((int)HttpStatusCode).ToString());
 
-                        if (false.Equals(string.IsNullOrWhiteSpace(m_ReasonPhrase)))
+                        if (string.IsNullOrWhiteSpace(m_ReasonPhrase) is false)
                         {
                             length += whitespaceLength;
 
@@ -1359,7 +1359,7 @@ namespace Media.Http
                     else
                     {
                         //If there was a previous header and value being prepared
-                        if (false.Equals(string.IsNullOrWhiteSpace(headerName)))
+                        if (string.IsNullOrWhiteSpace(headerName) is false)
                         {
                             //Set the value
                             SetHeader(headerName, headerValue.ToString().Trim());
@@ -1391,7 +1391,7 @@ namespace Media.Http
                 }
 
                 //If there is a non null value for headerName the headerValue has not been written
-                if (false.Equals(string.IsNullOrWhiteSpace(headerName)))
+                if (string.IsNullOrWhiteSpace(headerName) is false)
                 {
                     SetHeader(headerName, headerValue.ToString().Trim());
                 }
@@ -1588,7 +1588,7 @@ namespace Media.Http
             System.Text.Encoding contentDecoder = m_ContentDecoder ?? m_HeaderEncoding;
 
             //If there was a content-Encoding header then set it now;
-            if (false.Equals(string.IsNullOrWhiteSpace(contentEncoding)))
+            if (string.IsNullOrWhiteSpace(contentEncoding) is false)
             {
                 //Check for the requested encoding
                 contentEncoding = contentEncoding.Trim();

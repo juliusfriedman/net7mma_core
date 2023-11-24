@@ -2366,7 +2366,7 @@ namespace Media.Rtsp
                             {
                                 RtspSession related;
 
-                                if (false.Equals(string.IsNullOrWhiteSpace(session)) && m_Sessions.TryGetValue(session, out related))
+                                if (string.IsNullOrWhiteSpace(session) is false && m_Sessions.TryGetValue(session, out related))
                                 {
                                     related.UpdatePushedMessages(toProcess, serverResponse);
 
@@ -2581,7 +2581,7 @@ namespace Media.Rtsp
                                     //Todo, Event => CloseRequested...
                                     ////string connection = m_LastTransmitted.GetHeader(RtspHeaders.Connection);
 
-                                    ////if (false.Equals(string.IsNullOrWhiteSpace(connection)) && connection.IndexOf("close", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                                    ////if (string.IsNullOrWhiteSpace(connection) is false && connection.IndexOf("close", StringComparison.InvariantCultureIgnoreCase) >= 0)
                                     ////{
                                     ////    Disconnect(true);
 
@@ -2647,6 +2647,9 @@ namespace Media.Rtsp
                 Media.Common.TaggedExceptionExtensions.RaiseTaggedException(SupportedMethods, "SupportedMethods does not allow Describe and SessionDescription is null. See Tag with SupportedMessages.");
             }
 
+            //Determine if any context was present or created.
+            bool hasContext = false, triedAgain = false;
+
         Describe:
             RtspStatusCode currentStatusCode = RtspStatusCode.Unknown;
             try
@@ -2674,6 +2677,7 @@ namespace Media.Rtsp
             {
                 //Can't get a response to the DESCRIBE
                 Common.ILoggingExtensions.LogException(Logger, ex);
+                triedAgain = true;
             }
 
             if (IsConnected is false || Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
@@ -2684,7 +2688,11 @@ namespace Media.Rtsp
             {
                 default:
                     {
-                        if (Common.IDisposedExtensions.IsNullOrDisposed(SessionDescription)) goto Describe;
+                        if (Common.IDisposedExtensions.IsNullOrDisposed(SessionDescription))
+                        {
+                            if (triedAgain) return;
+                            goto Describe;
+                        }
                         break;
                     }
                     case RtspStatusCode.Unauthorized:
@@ -2693,8 +2701,7 @@ namespace Media.Rtsp
                     }
             }
 
-            //Determine if any context was present or created.
-            bool hasContext = false, triedAgain = false;
+       
 
             //Not a HashSet to allow duplicates...
             List<MediaDescription> setupMedia = new List<MediaDescription>();
@@ -2880,7 +2887,7 @@ namespace Media.Rtsp
 
                                     int retry;
 
-                                    if (false.Equals(string.IsNullOrWhiteSpace(retryAfter)) && int.TryParse(Media.Common.ASCII.ExtractNumber(retryAfter), out retry))
+                                    if (string.IsNullOrWhiteSpace(retryAfter) is false && int.TryParse(Media.Common.ASCII.ExtractNumber(retryAfter), out retry))
                                     {
 
                                         //Warning, long sleep possible, should give the application the change to decide
@@ -3009,7 +3016,7 @@ namespace Media.Rtsp
 
                                     int retry;
 
-                                    if (false.Equals(string.IsNullOrWhiteSpace(retryAfter)) && int.TryParse(Media.Common.ASCII.ExtractNumber(retryAfter), out retry))
+                                    if (string.IsNullOrWhiteSpace(retryAfter) is false && int.TryParse(Media.Common.ASCII.ExtractNumber(retryAfter), out retry))
                                     {
                                         System.Threading.Thread.Sleep(System.TimeSpan.FromSeconds(retry));
                                     }
@@ -3503,7 +3510,7 @@ namespace Media.Rtsp
             }
 
             //Determine if we need to do anything
-            if (IsPlaying && false.Equals(string.IsNullOrWhiteSpace(m_SessionId)))
+            if (IsPlaying && string.IsNullOrWhiteSpace(m_SessionId) is false)
             {
                 //Send the Teardown
                 try
@@ -4537,7 +4544,7 @@ namespace Media.Rtsp
                                         string sessionHeader = m_LastTransmitted[RtspHeaders.Session];
 
                                         //If there is a session header it may contain the option timeout
-                                        if (false.Equals(string.IsNullOrWhiteSpace(sessionHeader)))
+                                        if (string.IsNullOrWhiteSpace(sessionHeader) is false)
                                         {
                                             //Check for session and timeout
 
@@ -4552,7 +4559,7 @@ namespace Media.Rtsp
                                             if (headerPartsLength > 0)
                                             {
                                                 //Trim it of whitespace
-                                                string value = sessionHeaderParts.LastOrDefault(p => false.Equals(string.IsNullOrWhiteSpace(p)));
+                                                string value = sessionHeaderParts.LastOrDefault(p => string.IsNullOrWhiteSpace(p) is false);
 
                                                 //If we dont have an exiting id then this is valid if the header was completely recieved only.
                                                 if (string.IsNullOrWhiteSpace(value) is false &&
@@ -4632,7 +4639,7 @@ namespace Media.Rtsp
                                     //Todo, Event => CloseRequested...
                                     ////string connection = m_LastTransmitted.GetHeader(RtspHeaders.Connection);
 
-                                    ////if (false.Equals(string.IsNullOrWhiteSpace(connection)) && connection.IndexOf("close", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                                    ////if (string.IsNullOrWhiteSpace(connection) is false && connection.IndexOf("close", StringComparison.InvariantCultureIgnoreCase) >= 0)
                                     ////{
                                     ////    Disconnect(true);
 
@@ -4683,7 +4690,7 @@ namespace Media.Rtsp
                 IsPersistent = true,
             })
             {
-                if (false.Equals(string.IsNullOrWhiteSpace(sessionId))) options.SetHeader(RtspHeaders.Session, sessionId);
+                if (string.IsNullOrWhiteSpace(sessionId) is false) options.SetHeader(RtspHeaders.Session, sessionId);
 
                 bool isClosing = string.IsNullOrWhiteSpace(connection) is false;
 
@@ -4697,7 +4704,7 @@ namespace Media.Rtsp
                     string publicMethods = response[RtspHeaders.Public];
 
                     //If there is Not such a header then return the response
-                    if (false.Equals(string.IsNullOrWhiteSpace(publicMethods)))
+                    if (string.IsNullOrWhiteSpace(publicMethods) is false)
                     {
                         //Process values in the Public header.
                         foreach (string method in publicMethods.Split(RtspHeaders.Comma))
@@ -4710,7 +4717,7 @@ namespace Media.Rtsp
                     string allowedMethods = response[RtspHeaders.Allow];
 
                     //If there is Not such a header then return the response
-                    if (false.Equals(string.IsNullOrWhiteSpace(allowedMethods)))
+                    if (string.IsNullOrWhiteSpace(allowedMethods) is false)
                     {
                         //Process values in the Public header.
                         foreach (string method in allowedMethods.Split(RtspHeaders.Comma))
@@ -4724,7 +4731,7 @@ namespace Media.Rtsp
                     string supportedFeatures = response[RtspHeaders.Supported];
 
                     //If there is Not such a header then return the response
-                    if (false.Equals(string.IsNullOrWhiteSpace(supportedFeatures)))
+                    if (string.IsNullOrWhiteSpace(supportedFeatures) is false)
                     {
                         //Process values in the Public header.
                         foreach (string method in supportedFeatures.Split(RtspHeaders.Comma))
@@ -5075,7 +5082,7 @@ namespace Media.Rtsp
 
                 sessionId = sessionId ?? m_SessionId;
 
-                if (false.Equals(string.IsNullOrWhiteSpace(sessionId))) teardown.SetHeader(RtspHeaders.Session, sessionId);
+                if (string.IsNullOrWhiteSpace(sessionId) is false) teardown.SetHeader(RtspHeaders.Session, sessionId);
 
                 //Calling on stopping here indicates all sessions end...
                 //SHould get the session by id and then use it's media description in the event.
@@ -6175,7 +6182,7 @@ namespace Media.Rtsp
 
                 //Maybe should not be set if no start or end time is given.
                 if (startTime.HasValue || endTime.HasValue) play.SetHeader(RtspHeaders.Range, RtspHeaders.RangeHeader(startTime, endTime, rangeType));
-                else if (false.Equals(string.IsNullOrWhiteSpace(rangeType))) //otherwise is a non null or whitespace string was given for rangeType
+                else if (string.IsNullOrWhiteSpace(rangeType) is false) //otherwise is a non null or whitespace string was given for rangeType
                 {
                     //Use the given rangeType string verbtaim.
                     play.SetHeader(RtspHeaders.Range, rangeType);
@@ -6781,11 +6788,11 @@ namespace Media.Rtsp
                 Body = body ?? string.Empty
             })
             {
-                if (false.Equals(string.IsNullOrWhiteSpace(contentType))) get.SetHeader(RtspHeaders.ContentType, contentType);
+                if (string.IsNullOrWhiteSpace(contentType) is false) get.SetHeader(RtspHeaders.ContentType, contentType);
 
-                if (false.Equals(string.IsNullOrWhiteSpace(sessionId))) get.SetHeader(RtspHeaders.Session, sessionId);
+                if (string.IsNullOrWhiteSpace(sessionId) is false) get.SetHeader(RtspHeaders.Session, sessionId);
 
-                if (false.Equals(string.IsNullOrWhiteSpace(connection))) get.SetHeader(RtspHeaders.Connection, connection);
+                if (string.IsNullOrWhiteSpace(connection) is false) get.SetHeader(RtspHeaders.Connection, connection);
 
                 return SendRtspMessage(get);
             }
@@ -6803,9 +6810,9 @@ namespace Media.Rtsp
                 Body = body ?? string.Empty
             })
             {
-                if (false.Equals(string.IsNullOrWhiteSpace(contentType))) set.SetHeader(RtspHeaders.ContentType, contentType);
+                if (string.IsNullOrWhiteSpace(contentType) is false) set.SetHeader(RtspHeaders.ContentType, contentType);
 
-                if (false.Equals(string.IsNullOrWhiteSpace(sessionId))) set.SetHeader(RtspHeaders.Session, sessionId);
+                if (string.IsNullOrWhiteSpace(sessionId) is false) set.SetHeader(RtspHeaders.Session, sessionId);
 
                 return SendRtspMessage(set);
             }

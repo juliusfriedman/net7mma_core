@@ -1606,12 +1606,12 @@ namespace Media.Rtsp
                                         string sessionHeader = m_LastTransmitted[RtspHeaders.Session];
 
                                         //If there is a session header it may contain the option timeout
-                                        if (false.Equals(string.IsNullOrWhiteSpace(sessionHeader)))
+                                        if (string.IsNullOrWhiteSpace(sessionHeader) is false)
                                         {
                                             //Check for session and timeout
 
                                             //Get the values
-                                            string[] sessionHeaderParts = sessionHeader.Split(RtspHeaders.SemiColon); //Only 2 sub strings...
+                                            string[] sessionHeaderParts = sessionHeader.Split(RtspHeaders.SemiColon, 2, StringSplitOptions.RemoveEmptyEntries); //Only 2 sub strings...
 
                                             //RtspHeaders.ParseHeader(sessionHeader);
 
@@ -1621,7 +1621,7 @@ namespace Media.Rtsp
                                             if (headerPartsLength > 0)
                                             {
                                                 //Trim it of whitespace
-                                                string value = sessionHeaderParts.LastOrDefault(p => false.Equals(string.IsNullOrWhiteSpace(p)));
+                                                string value = sessionHeaderParts.LastOrDefault(p => string.IsNullOrWhiteSpace(p) is false);
 
                                                 //If we dont have an exiting id then this is valid if the header was completely recieved only.
                                                 if (string.IsNullOrWhiteSpace(value) is false &&
@@ -1690,7 +1690,7 @@ namespace Media.Rtsp
                                     //Todo, Event => CloseRequested...
                                     ////string connection = m_LastTransmitted.GetHeader(RtspHeaders.Connection);
 
-                                    ////if (false.Equals(string.IsNullOrWhiteSpace(connection)) && connection.IndexOf("close", StringComparison.InvariantCultureIgnoreCase) >= 0)
+                                    ////if (string.IsNullOrWhiteSpace(connection) is false && connection.IndexOf("close", StringComparison.InvariantCultureIgnoreCase) >= 0)
                                     ////{
                                     ////    Disconnect(true);
 
