@@ -1211,49 +1211,51 @@ namespace Media.Rtp
 
             if (received <= 0 || sessionRequired < 0 || received < sessionRequired) return -1;
 
-            //Look for the frame control octet
-            int startOfFrame = System.Array.IndexOf(buffer, BigEndianFrameControl, bufferOffset, received);
-
-            //If not found everything belongs to the upper layer
-            if (startOfFrame == -1)
+            //When there was something to delemit the frames then we can do a quick search for it.
+            if(sessionRequired >= InterleavedOverhead)
             {
-                //System.Diagnostics.Debug.WriteLine("Interleaving: " + received);
-                OnOutOfBandData(buffer, bufferOffset, received);
+                //Look for the frame control octet
+                int startOfFrame = System.Array.IndexOf(buffer, BigEndianFrameControl, bufferOffset, received);
 
-                raisedEvent = true;
+                //If not found everything belongs to the upper layer
+                if (startOfFrame == -1)
+                {
+                    //System.Diagnostics.Debug.WriteLine("Interleaving: " + received);
+                    OnOutOfBandData(buffer, bufferOffset, received);
 
-                //Indicate the amount of data consumed.
-                return received;
+                    raisedEvent = true;
+
+                    //Indicate the amount of data consumed.
+                    return received;
+                }
+
+                // If the start of the frame is not at the beginning of the buffer
+                if (startOfFrame > bufferOffset)
+                {
+                    //Determine the amount of data which belongs to the upper layer
+                    int upperLayerData = startOfFrame - bufferOffset;
+
+                    //System.Diagnostics.Debug.WriteLine("Moved To = " + startOfFrame + " Of = " + received + " - Bytes = " + upperLayerData + " = " + Encoding.ASCII.GetString(m_Buffer, mOffset, startOfFrame - mOffset));                
+
+                    OnOutOfBandData(buffer, bufferOffset, upperLayerData);
+
+                    raisedEvent = true;
+
+                    //Indicate length from offset until next possible frame.
+                    //(should always be positive, if somehow -1 is returned this will
+                    //signal a end of buffer to callers)
+
+                    //If there is more data related to upperLayerData it will be evented
+                    //in the next run. (See RtspClient ProcessInterleaveData notes)
+                    return upperLayerData;
+                }
+
+                //If there is not enough data for a frame header return
+                if (bufferOffset + sessionRequired > bufferLength)
+                {
+                    return -1;
+                }
             }
-
-            // If the start of the frame is not at the beginning of the buffer
-            if (startOfFrame > bufferOffset)
-            {
-                //Determine the amount of data which belongs to the upper layer
-                int upperLayerData = startOfFrame - bufferOffset;
-
-                //System.Diagnostics.Debug.WriteLine("Moved To = " + startOfFrame + " Of = " + received + " - Bytes = " + upperLayerData + " = " + Encoding.ASCII.GetString(m_Buffer, mOffset, startOfFrame - mOffset));                
-
-                OnOutOfBandData(buffer, bufferOffset, upperLayerData);
-
-                raisedEvent = true;
-
-                //Indicate length from offset until next possible frame.
-                //(should always be positive, if somehow -1 is returned this will
-                //signal a end of buffer to callers)
-
-                //If there is more data related to upperLayerData it will be evented
-                //in the next run. (See RtspClient ProcessInterleaveData notes)
-                return upperLayerData;
-            }
-
-            //If there is not enough data for a frame header return
-            if (bufferOffset + sessionRequired > bufferLength)
-            {
-                return -1;
-            }
-
-            //TODO if RFC4571 is specified do check here to avoid reading channel.
 
             //The amount of data needed for the frame comes from TryReadFrameHeader
             bool isInterleaved = sessionRequired >= InterleavedOverhead;
@@ -1646,7 +1648,7 @@ namespace Media.Rtp
             //TODO handle receiving when no $ and Channel is presenent... e.g. RFC4571
             //Would only be 2 then...
 
-            int sessionRequired = TransportContexts.Min(tc => tc.MinimumPacketSize);
+            int sessionRequired = /*TransportContexts.Any() ? TransportContexts.Min(tc => tc.MinimumPacketSize) :*/ InterleavedOverhead;
 
             //Todo, we allow a buffer to be given so we must also check if its changed to null...
 
@@ -1841,7 +1843,7 @@ namespace Media.Rtp
                                         }
 
                                         //the context by payload type is null is not discovering the identity check the SSRC.
-                                        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(GetContextByPayloadType(common.RtpPayloadType))) /*&& relevent.InDiscovery is false*/)
+                                        if (Common.IDisposedExtensions.IsNullOrDisposed(GetContextByPayloadType(common.RtpPayloadType)) is false /*&& relevent.InDiscovery is false*/)
                                         {
                                             using (Rtp.RtpHeader header = new RtpHeader(buffer, offset + sessionRequired))
                                             {
@@ -2003,7 +2005,7 @@ namespace Media.Rtp
 
                     //Todo, don't waste allocations on 0
                     //Parse the data in the buffer
-                    using (Common.MemorySegment memory = hasFrameHeader ? new Common.MemorySegment(buffer, offset + sessionRequired, Common.Binary.Min(ref frameLength, ref remainingInBuffer) - sessionRequired) : new Common.MemorySegment(buffer, offset, remainingInBuffer))
+                    using (Common.MemorySegment memory = hasFrameHeader ? new Common.MemorySegment(buffer, offset + sessionRequired, Common.Binary.Min(frameLength - sessionRequired, remainingInBuffer)) : new Common.MemorySegment(buffer, offset, remainingInBuffer))
                     {
                         registerX = memory.Count;
 
