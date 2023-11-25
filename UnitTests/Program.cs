@@ -3517,8 +3517,10 @@ a=appversion:1.0");
                         {
                             DumpTrack(track);
 
-                            while (track.Position < track.Duration)
-                                reader.GetSample(track, out var pts);
+                            Common.SegmentStream sample = null;
+
+                            while (track.Position < track.Duration && sample != null)
+                                sample = reader.GetSample(track, out var pts);
                         }
                     }
 
