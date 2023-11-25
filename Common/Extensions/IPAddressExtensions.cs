@@ -71,21 +71,21 @@ namespace Media.Common.Extensions.IPAddress
             return new System.Net.IPAddress(resultBytes);
         }
 
-        private static System.Net.IPAddress emptyIpv4 = System.Net.IPAddress.Parse("0.0.0.0");
-        private static System.Net.IPAddress intranetMask1v4 = System.Net.IPAddress.Parse("10.255.255.255");
-        private static System.Net.IPAddress intranetMask2v4 = System.Net.IPAddress.Parse("172.16.0.0");
-        private static System.Net.IPAddress intranetMask3v4 = System.Net.IPAddress.Parse("172.31.255.255");
-        private static System.Net.IPAddress intranetMask4v4 = System.Net.IPAddress.Parse("192.168.255.255");
+        private static readonly System.Net.IPAddress emptyIpv4 = System.Net.IPAddress.Parse("0.0.0.0");
+        private static readonly System.Net.IPAddress intranetMask1v4 = System.Net.IPAddress.Parse("10.255.255.255");
+        private static readonly System.Net.IPAddress intranetMask2v4 = System.Net.IPAddress.Parse("172.16.0.0");
+        private static readonly System.Net.IPAddress intranetMask3v4 = System.Net.IPAddress.Parse("172.31.255.255");
+        private static readonly System.Net.IPAddress intranetMask4v4 = System.Net.IPAddress.Parse("192.168.255.255");
 
         //Should check if ipV6 is even supported before defining them.
         //Shoul be null and then in Static constructor should check =>
         //System.Net.Sockets.Socket.OSSupportsIPv6 or try GetIPv6Properties().Index > -999 from the networkInterface...
 
-        private static System.Net.IPAddress emptyIpv6 = System.Net.IPAddress.IPv6Any;
-        private static System.Net.IPAddress intranetMask1v6 = System.Net.IPAddress.Parse("::ffff:10.255.255.255");
-        private static System.Net.IPAddress intranetMask2v6 = System.Net.IPAddress.Parse("::ffff:172.16.0.0");
-        private static System.Net.IPAddress intranetMask3v6 = System.Net.IPAddress.Parse("::ffff:172.31.255.255");
-        private static System.Net.IPAddress intranetMask4v6 = System.Net.IPAddress.Parse("::ffff:192.168.255.255");
+        private static readonly System.Net.IPAddress emptyIpv6 = System.Net.IPAddress.IPv6Any;
+        private static readonly System.Net.IPAddress intranetMask1v6 = System.Net.IPAddress.Parse("::ffff:10.255.255.255");
+        private static readonly System.Net.IPAddress intranetMask2v6 = System.Net.IPAddress.Parse("::ffff:172.16.0.0");
+        private static readonly System.Net.IPAddress intranetMask3v6 = System.Net.IPAddress.Parse("::ffff:172.31.255.255");
+        private static readonly System.Net.IPAddress intranetMask4v6 = System.Net.IPAddress.Parse("::ffff:192.168.255.255");
 
         /// <summary>
         /// Retuns true if the ip address is one of the following
@@ -228,9 +228,9 @@ namespace Media.Common.Extensions.IPAddress
 
         public static System.Net.IPAddress MapToIPv4(this System.Net.IPAddress addr)
         {
-            if (addr.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6) throw new System.ArgumentException("Must pass an IPv6 address to MapToIPv4");
-
-            return MapToIPv4(addr.GetAddressBytes());
+            return addr.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6
+                ? throw new System.ArgumentException("Must pass an IPv6 address to MapToIPv4")
+                : MapToIPv4(addr.GetAddressBytes());
         }
 
         //The last 4 bytes correspond to the IP6 address if map bytes are filled

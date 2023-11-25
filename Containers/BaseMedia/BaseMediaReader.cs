@@ -54,8 +54,7 @@ namespace Media.Containers.BaseMedia
     //https://dvcs.w3.org/hg/html-media/raw-file/tip/media-source/isobmff-byte-stream-format.html
     public class BaseMediaReader : MediaFileStream
     {
-
-        static DateTime IsoBaseDateUtc = new(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly DateTime IsoBaseDateUtc = new(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         //Todo Make Generic.Dictionary and have a ToTextualConvention that tries the Generic.Dictionary first. (KnownParents)        
 
@@ -130,8 +129,7 @@ namespace Media.Containers.BaseMedia
         //Could also track in reader.
 
         public const string UserDefined = "uuid";
-
-        const int BytesPerUUID = 16;
+        private const int BytesPerUUID = 16;
 
         public static byte[] IsoUUIDTemplate = new byte[] {
                                                             0x00, 0x00, 0x00, 0x00, /*XXXX*/
@@ -139,11 +137,8 @@ namespace Media.Containers.BaseMedia
                                                             0x80, 0x00, 0x00, 0xAA,
                                                             0x00, 0x39, 0x9B, 0x71
                                                            };
-
-        const int TemplateSize = 12;
-
-
-        const int MinimumSize = IdentifierSize + LengthSize, IdentifierSize = 4, LengthSize = IdentifierSize;
+        private const int TemplateSize = 12;
+        private const int MinimumSize = IdentifierSize + LengthSize, IdentifierSize = 4, LengthSize = IdentifierSize;
 
         public static string ToUTF8FourCharacterCode(byte[] identifier, int offset = 0, int count = 4)
         {
@@ -152,13 +147,13 @@ namespace Media.Containers.BaseMedia
 
         public static string ToEncodedFourCharacterCode(Encoding encoding, byte[] identifier, int offset, int count)
         {
-            if (encoding is null) throw new ArgumentNullException("encoding");
-
-            if (identifier is null) throw new ArgumentNullException("identifier");
-
-            if (offset + count > identifier.Length) throw new ArgumentOutOfRangeException("offset and count must relfect a position within identifier.");
-
-            return encoding.GetString(identifier, offset, count);
+            return encoding is null
+                ? throw new ArgumentNullException("encoding")
+                : identifier is null
+                ? throw new ArgumentNullException("identifier")
+                : offset + count > identifier.Length
+                ? throw new ArgumentOutOfRangeException("offset and count must relfect a position within identifier.")
+                : encoding.GetString(identifier, offset, count);
         }
 
         public static bool IsUserDefinedNode(BaseMediaReader reader, Node node)
@@ -416,8 +411,7 @@ namespace Media.Containers.BaseMedia
 
         public override string ToTextualConvention(Node node)
         {
-            if (node.Master.Equals(this)) return BaseMediaReader.ToUTF8FourCharacterCode(node.Identifier);
-            return base.ToTextualConvention(node);
+            return node.Master.Equals(this) ? BaseMediaReader.ToUTF8FourCharacterCode(node.Identifier) : base.ToTextualConvention(node);
         }
 
         public bool HasProtection
@@ -427,7 +421,7 @@ namespace Media.Containers.BaseMedia
             get { return ReadBoxes(Root.DataOffset, "ipro", "sinf").Count() >= 1; }
         }
 
-        DateTime? m_Created, m_Modified;
+        private DateTime? m_Created, m_Modified;
 
         public DateTime Created
         {
@@ -447,9 +441,8 @@ namespace Media.Containers.BaseMedia
             }
         }
 
-        ulong? m_TimeScale;
-
-        TimeSpan? m_Duration;
+        private ulong? m_TimeScale;
+        private TimeSpan? m_Duration;
 
         public TimeSpan Duration
         {
@@ -460,7 +453,7 @@ namespace Media.Containers.BaseMedia
             }
         }
 
-        float? m_PlayRate, m_Volume;
+        private float? m_PlayRate, m_Volume;
 
         public float PlayRate
         {
@@ -480,7 +473,7 @@ namespace Media.Containers.BaseMedia
             }
         }
 
-        byte[] m_Matrix;
+        private byte[] m_Matrix;
 
         public byte[] Matrix
         {
@@ -491,7 +484,7 @@ namespace Media.Containers.BaseMedia
             }
         }
 
-        int? m_NextTrackId;
+        private int? m_NextTrackId;
 
         public int NextTrackId
         {
@@ -575,7 +568,7 @@ namespace Media.Containers.BaseMedia
             get { return ReadBoxes(Root.Offset, "stco", "co64").FirstOrDefault(); }
         }
 
-        List<Track> m_Tracks;
+        private List<Track> m_Tracks;
 
         public override IEnumerable<Track> GetTracks() //bool enabled tracks only?
         {
@@ -749,14 +742,9 @@ namespace Media.Containers.BaseMedia
                                     offset += 4;
 
                                     //Get Duration
-                                    if (version is 0)
-                                    {
-                                        duration = Common.Binary.ReadU32(rawData, ref offset, Common.Binary.IsLittleEndian);
-                                    }
-                                    else
-                                    {
-                                        duration = Common.Binary.ReadU64(rawData, ref offset, Common.Binary.IsLittleEndian);
-                                    }
+                                    duration = version is 0
+                                        ? Common.Binary.ReadU32(rawData, ref offset, Common.Binary.IsLittleEndian)
+                                        : Common.Binary.ReadU64(rawData, ref offset, Common.Binary.IsLittleEndian);
 
                                     if (duration == 4294967295L) duration = ulong.MaxValue;
 

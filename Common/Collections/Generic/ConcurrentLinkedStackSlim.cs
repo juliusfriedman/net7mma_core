@@ -107,7 +107,7 @@ namespace Media.Common.Collections.Generic
         /// <summary>
         /// The count of contained nodes
         /// </summary>
-        long m_Count = 0;
+        private long m_Count = 0;
 
         //Todo
         //Capacity, ICollection
@@ -298,7 +298,7 @@ namespace Media.Common.Collections.Generic
         /// </summary>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        IEnumerator<T> GetEnumerator()
+        private IEnumerator<T> GetEnumerator()
         {
             Node Current = Last;
 
@@ -329,13 +329,10 @@ namespace Media.UnitTests
     /// </summary>
     internal class ConcurrentLinkedStackSlimTests
     {
-        readonly Media.Common.Collections.Generic.ConcurrentLinkedStackSlim<long> LinkedStack = new();
-
-        long LastInputOutput = 0;
-
-        int Amount = 100;
-
-        int ThreadCount = Environment.ProcessorCount;
+        private readonly Media.Common.Collections.Generic.ConcurrentLinkedStackSlim<long> LinkedStack = new();
+        private long LastInputOutput = 0;
+        private readonly int Amount = 100;
+        private readonly int ThreadCount = Environment.ProcessorCount;
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void TestsPush()

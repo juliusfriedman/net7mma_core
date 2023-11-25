@@ -144,13 +144,9 @@ namespace Media.Rtcp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool IsValid(int? version = 0, int? payloadType = 0, bool? padding = false)
         {
-            if (version.HasValue && version != Version) return false;
-
-            if (payloadType.HasValue && payloadType != PayloadType) return false;
-
-            if (padding.HasValue && Padding != padding) return false;
-
-            return true;
+            return version.HasValue && version != Version
+                ? false
+                : payloadType.HasValue && payloadType != PayloadType ? false : !padding.HasValue || Padding == padding;
         }
 
         /// <summary>
@@ -467,7 +463,7 @@ namespace Media.Rtcp
         #region Instance Methods
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void Synchronize(ref byte[] source)
+        protected internal void Synchronize(ref byte[] source)
         {
 
             //Should check IsContiguous
@@ -598,9 +594,7 @@ namespace Media.Rtcp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            if (System.Object.ReferenceEquals(this, obj)) return true;
-
-            return obj is RtcpHeader h && Equals(h);
+            return object.ReferenceEquals(this, obj) ? true : obj is RtcpHeader h && Equals(h);
         }
 
         #endregion

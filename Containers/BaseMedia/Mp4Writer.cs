@@ -335,7 +335,7 @@ namespace Media.UnitTests
             Console.WriteLine("MP4 file written successfully: " + outputFilePath);
         }
 
-        static void WriteAudioData(Mp4Writer writer, int sampleRate, int channels, int bitsPerSample)
+        private static void WriteAudioData(Mp4Writer writer, int sampleRate, int channels, int bitsPerSample)
         {
             MdatBox mdatBox = new(writer);
 

@@ -198,9 +198,7 @@ namespace Media.Sdp
                             if (string.IsNullOrWhiteSpace(startTimeString) is false && DateTime.TryParseExact(startTimeString, clockFormat, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime date))
                             {
                                 //Time in the past
-                                if (now > date) start = now - date;
-                                //Future?
-                                else start = date - now;
+                                start = now > date ? now - date : date - now;
 
                                 //Ensure UTC
                                 date = DateTime.SpecifyKind(date, DateTimeKind.Utc);
@@ -211,9 +209,7 @@ namespace Media.Sdp
                             else if (false.Equals(string.IsNullOrWhiteSpace(endTimeString)) && DateTime.TryParseExact(startTimeString, clockFormat, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out date))
                             {
                                 //Time in the past
-                                if (now > date) end = now - date;
-                                //Future?
-                                else end = date - now;
+                                end = now > date ? now - date : date - now;
 
                                 //Ensure UTC
                                 date = DateTime.SpecifyKind(date, DateTimeKind.Utc);
@@ -322,17 +318,15 @@ namespace Media.Sdp
         //Should be done in constructor of a new 
         //Todo, could allow a local dictionary where certain types are cached.
         //Todo, check if readonly is applicable.
-        internal protected Media.Sdp.Lines.SessionVersionLine m_SessionVersionLine;
-        internal protected Media.Sdp.Lines.SessionOriginLine m_OriginatorLine;
-        internal protected Media.Sdp.Lines.SessionNameLine m_NameLine;
+        protected internal Media.Sdp.Lines.SessionVersionLine m_SessionVersionLine;
+        protected internal Media.Sdp.Lines.SessionOriginLine m_OriginatorLine;
+        protected internal Media.Sdp.Lines.SessionNameLine m_NameLine;
 
-        internal readonly protected List<MediaDescription> m_MediaDescriptions = [];
-        internal readonly protected List<TimeDescription> m_TimeDescriptions = [];
-        internal readonly protected List<SessionDescriptionLine> m_Lines = [];
-
-        System.Threading.ManualResetEventSlim m_Update = new(true);
-
-        System.Threading.CancellationTokenSource m_UpdateTokenSource = new();
+        protected internal readonly List<MediaDescription> m_MediaDescriptions = [];
+        protected internal readonly List<TimeDescription> m_TimeDescriptions = [];
+        protected internal readonly List<SessionDescriptionLine> m_Lines = [];
+        private readonly System.Threading.ManualResetEventSlim m_Update = new(true);
+        private readonly System.Threading.CancellationTokenSource m_UpdateTokenSource = new();
 
         #endregion
 
@@ -604,7 +598,7 @@ namespace Media.Sdp
                 return this;
             }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set
+            protected internal set
             {
                 if (UnderModification) return;
 
@@ -1192,9 +1186,7 @@ namespace Media.Sdp
         public override bool Equals(object obj)
         {
             //System.Object
-            if (object.ReferenceEquals(this, obj)) return true;
-
-            return obj is SessionDescription sd && Equals(sd);
+            return object.ReferenceEquals(this, obj) ? true : obj is SessionDescription sd && Equals(sd);
         }
 
         /// <summary>
@@ -1432,18 +1424,18 @@ namespace Media.Sdp
         //E.g. This index can be used in GetMediaDescription(index)
         public static int GetIndexFor(this SessionDescription sdp, MediaDescription md)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(sdp) || Common.IDisposedExtensions.IsNullOrDisposed(md)) return -1;
-
-            return sdp.m_MediaDescriptions.IndexOf(md);
+            return Common.IDisposedExtensions.IsNullOrDisposed(sdp) || Common.IDisposedExtensions.IsNullOrDisposed(md)
+                ? -1
+                : sdp.m_MediaDescriptions.IndexOf(md);
         }
 
         //E.g. This index can be used in GetTimeDescription(index)
         public static int GetIndexFor(this SessionDescription sdp, TimeDescription td)
         {
             //if (sdp is null || td is null) return -1;
-            if (Common.IDisposedExtensions.IsNullOrDisposed(sdp) || Common.IDisposedExtensions.IsNullOrDisposed(td)) return -1;
-
-            return sdp.m_TimeDescriptions.IndexOf(td);
+            return Common.IDisposedExtensions.IsNullOrDisposed(sdp) || Common.IDisposedExtensions.IsNullOrDisposed(td)
+                ? -1
+                : sdp.m_TimeDescriptions.IndexOf(td);
         }
 
         //GetMediaDescriptionFor

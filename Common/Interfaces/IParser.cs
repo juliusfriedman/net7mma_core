@@ -55,7 +55,7 @@ namespace Media.Common.Interfaces
     /// <summary>
     /// An interface which represents a parser which is <see cref="ICompletable"/>
     /// </summary>
-    interface IParser : ICompletable
+    internal interface IParser : ICompletable
     {
         /// <summary>
         /// Called when the state changes
@@ -71,9 +71,8 @@ namespace Media.Common.Interfaces
     /// </summary>
     internal class BasicParser : IParser
     {
-        const uint Zero = 0, Distortion = uint.MaxValue, Evolution = 1, Juxtaposition = 2, Complete = int.MaxValue;
-
-        uint State = Zero;
+        private const uint Zero = 0, Distortion = uint.MaxValue, Evolution = 1, Juxtaposition = 2, Complete = int.MaxValue;
+        private uint State = Zero;
 
         public DimensionInformationDelegation OnUnknownData { get; protected set; }
 

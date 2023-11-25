@@ -131,7 +131,7 @@ namespace Media.Codecs.Audio
     public class AudioTransformer : AudioTransformation
     {
         // The upsampling or downsampling factor
-        private int sampleRateFactor;
+        private readonly int sampleRateFactor;
 
         public AudioTransformer(AudioBuffer source, AudioBuffer destination, int sampleRateFactor, Codec.TransformationQuality quality = Codec.TransformationQuality.Unspecified, bool shouldDispose = true)
             : base(source, destination, quality, shouldDispose)

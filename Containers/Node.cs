@@ -195,7 +195,7 @@ namespace Media.Container
         /// </summary>
         public long DataSize;
 
-        internal protected MemorySegment m_Data;
+        protected internal MemorySegment m_Data;
 
         /// <summary>
         /// The binary data of the contained in the Node (without (<see cref="Identifier"/> and (<see cref="LengthSize"/>))
@@ -303,7 +303,7 @@ namespace Media.Container
         /// Creates a shallow copy of the node without the data
         /// </summary>
         /// <param name="n"></param>
-        Node(Node n, bool shouldDispose = true)
+        private Node(Node n, bool shouldDispose = true)
             : base(shouldDispose)
         {
             if (n is null) throw new ArgumentNullException();
@@ -323,7 +323,7 @@ namespace Media.Container
         /// <param name="n">The source <see cref="Node"/></param>
         /// <param name="ndc">How to assign <see cref="Data"/></param>
         /// <param name="offset">The optional offset in <see cref="Data"/> to start the copy. (The length of the copy operation is given by <see cref="DataSize"/> minus this parameter) </param>
-        Node(Node n, bool selfReference, int offset = 0, bool shouldDispose = true)
+        private Node(Node n, bool selfReference, int offset = 0, bool shouldDispose = true)
             : this(n, shouldDispose)
         {
             if (n is not null && n.DataSize > 0 && n.DataAssigned)

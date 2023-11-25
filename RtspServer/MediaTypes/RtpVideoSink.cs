@@ -17,9 +17,9 @@ public class RtpVideoSink : RtpSink
 
     //Should be moved to SourceStream? Should have Fps and calculate for developers?
     //Should then be a TimeSpan or Frequency
-    internal protected int ClockRate = 9;//kHz //90 dekahertz
+    protected internal int ClockRate = 9;//kHz //90 dekahertz
 
-    internal protected ConcurrentLinkedQueueSlim<RtpFrame> Frames = new();
+    protected internal ConcurrentLinkedQueueSlim<RtpFrame> Frames = new();
 
     protected ulong FramesCounter = 0;
 

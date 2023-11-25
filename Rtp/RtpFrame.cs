@@ -114,7 +114,7 @@ namespace Media.Rtp
         /// <summary>
         /// The maximum amount of packets which can be contained in a frame
         /// </summary>
-        internal protected int MaxPackets = 1024;
+        protected internal int MaxPackets = 1024;
 
         /// <summary>
         /// Indicates if Add operations will ensure that all packets added have the same <see cref="RtpPacket.PayloadType"/>
@@ -135,7 +135,7 @@ namespace Media.Rtp
         /// <summary>
         /// Updating the SequenceNumber of a contained packet can still cause unintended results.
         /// </summary>
-        internal readonly protected List<RtpPacket> Packets;
+        protected internal readonly List<RtpPacket> Packets;
 
         //Could use List if Add is replaced with Insert and index given by something like => Abs(Clamp(n, 0, Min(n - count) + Max(n - count))) or IndexOf(n)
         //Also needs a Dictionary to be able to maintain state of remove operations...
@@ -148,7 +148,7 @@ namespace Media.Rtp
         /// <summary>
         /// After a single RtpPacket is <see cref="Depacketize">depacketized</see> it will be placed into this list with the appropriate index.
         /// </summary>
-        internal protected readonly SortedList<double, Common.MemorySegment> Depacketized;
+        protected internal readonly SortedList<double, Common.MemorySegment> Depacketized;
 
         #region Todo
 
@@ -178,9 +178,8 @@ namespace Media.Rtp
         {
             #region Fields
 
-            RtpPacket m_Packet;
-
-            readonly List<Media.Common.MemorySegment> Parts;
+            private readonly RtpPacket m_Packet;
+            private readonly List<Media.Common.MemorySegment> Parts;
 
             internal int DecodingOrder;
 
@@ -188,7 +187,7 @@ namespace Media.Rtp
 
             #region Constructor
 
-            PaD(PaD pad, bool shouldDispose = true)
+            private PaD(PaD pad, bool shouldDispose = true)
                 : base(shouldDispose)
             {
                 if (Common.IDisposedExtensions.IsNullOrDisposed(pad)) throw new InvalidOperationException("pad is NullOrDisposed");
@@ -198,7 +197,7 @@ namespace Media.Rtp
                 Parts = pad.Parts;
             }
 
-            PaD(RtpPacket packet)
+            private PaD(RtpPacket packet)
                 : base(packet.ShouldDispose)
             {
                 if (Common.IDisposedExtensions.IsNullOrDisposed(packet)) throw new InvalidOperationException("packet is NullOrDisposed");
@@ -295,7 +294,7 @@ namespace Media.Rtp
         /// <summary>
         /// Useful for depacketization.. might not need a field as buffer can be created on demand from SegmentStream, just need to determine if every call to Buffer should maintain position or not.
         /// </summary>
-        internal protected Common.SegmentStream m_Buffer;
+        protected internal Common.SegmentStream m_Buffer;
 
         #endregion
 
@@ -362,7 +361,7 @@ namespace Media.Rtp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return m_Ssrc; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set
+            protected internal set
             {
                 m_Ssrc = value;
 
@@ -378,7 +377,7 @@ namespace Media.Rtp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return m_Timestamp; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { m_Timestamp = value; }
+            protected internal set { m_Timestamp = value; }
         }
 
         /// <summary>
@@ -386,7 +385,7 @@ namespace Media.Rtp
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        internal protected RtpPacket this[int index]
+        protected internal RtpPacket this[int index]
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return Packets[index]; }
@@ -927,14 +926,14 @@ namespace Media.Rtp
         internal bool Contains(ref int sequenceNumber) { return IndexOf(ref sequenceNumber) >= 0; }
 
         [CLSCompliant(false)]
-        internal protected int IndexOf(int sequenceNumber) { return IndexOf(ref sequenceNumber); }
+        protected internal int IndexOf(int sequenceNumber) { return IndexOf(ref sequenceNumber); }
 
         /// <summary>
         /// Indicates if the RtpFrame contains a RtpPacket based on the given sequence number.
         /// </summary>
         /// <param name="sequenceNumber">The sequence number to check</param>
         /// <returns>The index of the packet is contained, otherwise -1.</returns>
-        internal protected int IndexOf(ref int sequenceNumber)
+        protected internal int IndexOf(ref int sequenceNumber)
         {
             int count = Count;
 
@@ -947,9 +946,7 @@ namespace Media.Rtp
                     }
                 case 2:
                     {
-                        if (m_LowestSequenceNumber == sequenceNumber) return 0;
-
-                        return m_HighestSequenceNumber == sequenceNumber ? 1 : -1;
+                        return m_LowestSequenceNumber == sequenceNumber ? 0 : m_HighestSequenceNumber == sequenceNumber ? 1 : -1;
                     }
                 //Only optimal if sequenceNumber is @ 1 otherwise default cases may be faster, this saves 2 additional range changes
                 case 3:
@@ -1123,7 +1120,7 @@ namespace Media.Rtp
         /// <summary>
         /// Empties the RtpFrame by clearing the underlying List of contained RtpPackets
         /// </summary>
-        internal protected void RemoveAllPackets() //bool disposeBuffer
+        protected internal void RemoveAllPackets() //bool disposeBuffer
         {
             //Packets.Clear();
 
@@ -1193,7 +1190,7 @@ namespace Media.Rtp
         /// Disposes all contained packets. 
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void DisposeAllPackets()
+        protected internal void DisposeAllPackets()
         {
             //System.Linq.ParallelEnumerable.ForAll(Packets.AsParallel(), (t) => t.Dispose());
 
@@ -1308,7 +1305,7 @@ namespace Media.Rtp
         /// Disposes any existing buffer. Creates a new buffer.
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void PrepareBuffer() //bool, persist, action pre pre write, post write
+        protected internal void PrepareBuffer() //bool, persist, action pre pre write, post write
         {
             //Ensure there is something to write to the buffer
             if (HasDepacketized is false) return;
@@ -1372,7 +1369,7 @@ namespace Media.Rtp
         /// <summary>
         /// virtual so it's easy to keep the same API, not really needed though since Dispose is also overridable.
         /// </summary>
-        internal virtual protected void DisposeBuffer()
+        protected internal virtual void DisposeBuffer()
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(m_Buffer)) return;
 
@@ -1383,7 +1380,7 @@ namespace Media.Rtp
 
         //Todo, would be handled with other collection via remove...
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void FreeDepacketizedMemory(bool force = false)
+        protected internal void FreeDepacketizedMemory(bool force = false)
         {
             if (Depacketized is null) return;
 
@@ -1424,7 +1421,7 @@ namespace Media.Rtp
         //    return GetPacketKey(ref key);
         //}
 
-        internal protected void FreeDepacketizedMemory(short key, bool force = false)
+        protected internal void FreeDepacketizedMemory(short key, bool force = false)
         {
             int k = key;
 
@@ -1438,7 +1435,7 @@ namespace Media.Rtp
         /// <param name="key"></param>
         /// <param name="force"></param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void FreeDepacketizedMemory(ref int key, ref bool force)
+        protected internal void FreeDepacketizedMemory(ref int key, ref bool force)
         {
             //Needs a method to virtually determine the key of the packet.
             if (Depacketized.ContainsKey(key))
@@ -1511,9 +1508,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            if (System.Object.ReferenceEquals(this, obj)) return true;
-
-            return obj is RtpFrame f && Equals(f);
+            return object.ReferenceEquals(this, obj) ? true : obj is RtpFrame f && Equals(f);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

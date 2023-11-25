@@ -56,29 +56,25 @@ namespace Media.Rtsp
     {
         #region Fields
 
-        readonly RtspClient m_Client;
+        private readonly RtspClient m_Client;
 
         //Todo, ensure used from session and remove from client level.
 
         /// <summary>
         /// The remote RtspEndPoint
         /// </summary>
-        readonly EndPoint m_RemoteRtsp;
+        private readonly EndPoint m_RemoteRtsp;
 
         /// <summary>
         /// The protcol in which Rtsp data will be transpored from the server
         /// </summary>
-        readonly ProtocolType m_RtpProtocol;
+        private readonly ProtocolType m_RtpProtocol;
 
         internal RtpClient m_RtpClient;
-
-        readonly ClientProtocolType m_RtspProtocol;
-
-        RtspMessage m_LastTransmitted;
-
-        AuthenticationSchemes m_AuthenticationScheme;
-
-        string m_UserAgent = "ASTI RTSP Client", m_AuthorizationHeader;
+        private readonly ClientProtocolType m_RtspProtocol;
+        private RtspMessage m_LastTransmitted;
+        private AuthenticationSchemes m_AuthenticationScheme;
+        private string m_UserAgent = "ASTI RTSP Client", m_AuthorizationHeader;
 
         /// <summary>
         /// The socket used for Rtsp Communication
@@ -88,7 +84,7 @@ namespace Media.Rtsp
         /// <summary>
         /// The remote IPAddress to which the Location resolves via Dns
         /// </summary>
-        readonly IPAddress m_RemoteIP;
+        private readonly IPAddress m_RemoteIP;
 
         /// <summary>
         /// Keep track of certain values.
@@ -178,7 +174,7 @@ namespace Media.Rtsp
         /// The Uri to which RtspMessages must be addressed within the session.
         /// Typically this is the same as Location in the RtspClient but under NAT a different address may be used here.
         /// </summary>
-        public System.Uri ControlLocation { get; internal protected set; }
+        public System.Uri ControlLocation { get; protected internal set; }
 
         public Sdp.SessionDescription SessionDescription { get; protected set; }
 
@@ -193,7 +189,7 @@ namespace Media.Rtsp
         /// randomly and MUST be at least eight octets long to make guessing it
         /// more difficult. (See Section 16.)
         /// </summary>
-        public string SessionId { get; internal protected set; }
+        public string SessionId { get; protected internal set; }
 
         /// <summary>
         /// The time in which a request must be sent to keep the session active.
@@ -205,7 +201,7 @@ namespace Media.Rtsp
         /// </summary>
         /// Should be either a object or a derived class, should not be required due to raw or other transport, could be ISocketReference
         /// Notes that a session can share one or more context's
-        public Rtp.RtpClient.TransportContext Context { get; internal protected set; }
+        public Rtp.RtpClient.TransportContext Context { get; protected internal set; }
 
         //public Sdp.MediaDescription MediaDescription { get; protected set; } => {Context.MediaDescription;}
 
@@ -400,17 +396,17 @@ namespace Media.Rtsp
         /// <summary>
         /// Determines if a request must be sent periodically to keep the session and any underlying connection alive
         /// </summary>
-        public bool EnableKeepAliveRequest { get; internal protected set; }
+        public bool EnableKeepAliveRequest { get; protected internal set; }
 
         /// <summary>
         /// The last RtspMessage sent
         /// </summary>
-        public RtspMessage LastRequest { get; internal protected set; }
+        public RtspMessage LastRequest { get; protected internal set; }
 
         /// <summary>
         /// The last RtspMessage received
         /// </summary>
-        public RtspMessage LastResponse { get; internal protected set; }
+        public RtspMessage LastResponse { get; protected internal set; }
 
         /// <summary>
         /// The amount of time taken from when the LastRequest was sent to when the LastResponse was created.
@@ -423,12 +419,12 @@ namespace Media.Rtsp
         /// <summary>
         /// The last RtspMessage recieved from the remote source
         /// </summary>
-        public RtspMessage LastInboundRequest { get; internal protected set; }
+        public RtspMessage LastInboundRequest { get; protected internal set; }
 
         /// <summary>
         /// The last RtspMessage sent in response to a RtspMessage received from the remote source
         /// </summary>
-        public RtspMessage LastInboundResponse { get; internal protected set; }
+        public RtspMessage LastInboundResponse { get; protected internal set; }
 
         /// <summary>
         /// The amount of time taken from when the LastInboundRequest was received to when the LastInboundResponse was Transferred.
@@ -1284,8 +1280,7 @@ namespace Media.Rtsp
                                     //Todo, this isn't really needed once there is a thread monitoring the protocol.
                                     //Right now it probably isn't really needed either.
                                     //Raise the exception (may be success to notify timer thread...)
-                                    if (Common.IDisposedExtensions.IsNullOrDisposed(message)) throw new SocketException((int)error);
-                                    else return m_LastTransmitted;
+                                    return Common.IDisposedExtensions.IsNullOrDisposed(message) ? throw new SocketException((int)error) : m_LastTransmitted;
                                 }
 
                                 break;
@@ -1638,14 +1633,7 @@ namespace Media.Rtsp
                                                         if (timeoutStart >= Common.Binary.Zero && int.TryParse(sessionHeaderParts[1].Substring(timeoutStart), out timeoutStart))
                                                         {
                                                             //Should already be set...
-                                                            if (timeoutStart <= Common.Binary.Zero)
-                                                            {
-                                                                m_RtspSessionTimeout = DefaultSessionTimeout;
-                                                            }
-                                                            else
-                                                            {
-                                                                m_RtspSessionTimeout = TimeSpan.FromSeconds(timeoutStart);
-                                                            }
+                                                            m_RtspSessionTimeout = timeoutStart <= Common.Binary.Zero ? DefaultSessionTimeout : TimeSpan.FromSeconds(timeoutStart);
                                                         }
                                                     }
                                                 }
@@ -1875,8 +1863,7 @@ namespace Media.Rtsp
 
                 if (string.IsNullOrWhiteSpace(uri) is false)
                 {
-                    if (rfc2069) uri = uri.Substring(4);
-                    else uri = uri.Substring(11);
+                    uri = rfc2069 ? uri.Substring(4) : uri.Substring(11);
                 }
 
                 string qop = baseParts.Where(p => string.Compare(RtspHeaderFields.Authorization.Attributes.QualityOfProtection, p, true) is 0).FirstOrDefault();
@@ -1913,7 +1900,7 @@ namespace Media.Rtsp
         /// DisconnectsSockets, Connects and optionally reconnects the Transport if reconnectClient is true.
         /// </summary>
         /// <param name="reconnectClient"></param>
-        internal protected virtual void Reconnect(bool reconnectClient = true)
+        protected internal virtual void Reconnect(bool reconnectClient = true)
         {
             DisconnectSocket();
 
@@ -1927,7 +1914,7 @@ namespace Media.Rtsp
         public event RtspClientAction OnConnect;
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void OnConnected()
+        protected internal void OnConnected()
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
 
@@ -2028,7 +2015,7 @@ namespace Media.Rtsp
         public event RequestHandler OnRequest;
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void Requested(RtspMessage request)
+        protected internal void Requested(RtspMessage request)
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
 
@@ -2051,7 +2038,7 @@ namespace Media.Rtsp
         public event ResponseHandler OnResponse; // = m_LastTransmitted...
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void Received(RtspMessage request, RtspMessage response)
+        protected internal void Received(RtspMessage request, RtspMessage response)
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(this)) return;
 

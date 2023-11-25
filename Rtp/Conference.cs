@@ -71,7 +71,7 @@ namespace Media.Rtp
         
          */
 
-        Conference() { throw new System.NotImplementedException("See comments"); }
+        private Conference() { throw new System.NotImplementedException("See comments"); }
 
         //When adding a client iterate all SourceContext and set SendRtcpReports = false;
         //Attach event for RtcpPacket reception and then determine here what to send and to who

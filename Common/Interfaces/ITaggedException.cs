@@ -13,9 +13,9 @@ namespace Media.Common
         Exception InnerException { get; } //CurrentException
 
         /// <summary>
-        /// The <see cref="System.Object"/> which corresponds to the underlying exception.
+        /// The <see cref="object"/> which corresponds to the underlying exception.
         /// </summary>
-        Object Tag { get; }
+        object Tag { get; }
     }
 
     //ITaggedExceptionExtensions

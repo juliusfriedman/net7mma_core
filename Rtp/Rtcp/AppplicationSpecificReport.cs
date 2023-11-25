@@ -226,9 +226,9 @@ namespace Media.Rtcp
         /// <returns>The newly created instance.</returns>
         public ApplicationSpecificReport Clone(bool reference)
         {
-            if (reference) return new ApplicationSpecificReport(Header, Payload);
-
-            return new ApplicationSpecificReport(Header.Clone(), Prepare().ToArray());
+            return reference
+                ? new ApplicationSpecificReport(Header, Payload)
+                : new ApplicationSpecificReport(Header.Clone(), Prepare().ToArray());
         }
 
         #endregion

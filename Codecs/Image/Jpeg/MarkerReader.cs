@@ -10,11 +10,9 @@ namespace Media.Codecs.Image.Jpeg
     //Should allow marker reading on it's own outside of the RFC2435 class to decouple logic.
     public class MarkerReader : IDisposable
     {
-
-        System.IO.Stream jpegStream;
-
-        int streamOffset, streamLength;
-
+        private System.IO.Stream jpegStream;
+        private int streamOffset;
+        private readonly int streamLength;
         public Marker current;
 
         public IEnumerable<Marker> ReadMarkers()

@@ -36,38 +36,33 @@ namespace Media.Rtsp.Server.MediaTypes
             /// <returns></returns>
             internal static byte[] GetDeltaTime(uint delta)
             {
-                if (delta >= 0x0FFFFFFF) return Media.Common.MemorySegment.EmptyBytes;
-
-                if ( /* delta > 0 && */ delta <= 0x7F)
-                    return new[]
+                return delta >= 0x0FFFFFFF
+                    ? Media.Common.MemorySegment.EmptyBytes
+                    : delta <= 0x7F
+                    ? (new[]
                            {
                                (byte) (delta & 0x7F),
-                           };
-
-                else if ( /* delta > 0x7F && */ delta <= 0x3FFF)
-                    return new[]
+                           })
+                    : delta <= 0x3FFF
+                    ? (new[]
                            {
                                (byte) (((delta & 0x3F80) >> 7) | 0x80),
                                (byte) (delta & 0x7F),
-                           };
-
-                else if ( /* delta > 0x3FFF && */ delta <= 0x001FFFFF)
-                    return new[]
+                           })
+                    : delta <= 0x001FFFFF
+                    ? (new[]
                            {
                                (byte) (((delta & 0x1FC000) >> 14) | 0x80),
                                (byte) (((delta & 0x3F80) >> 7) | 0x80),
                                (byte) (delta & 0x7F),
-                           };
-
-
-                else /* if (delta > 0x1FFFFFF && delta <= 0x0FFFFFFFF) */
-                    return new[]
+                           })
+                    : (new[]
                            {
                                (byte) (((delta & 0xFE00000) >> 21) | 0x80),
                                (byte) (((delta & 0x1FC000) >> 14) | 0x80),
                                (byte) (((delta & 0x3F80) >> 7) | 0x80),
                                (byte) (delta & 0x7F),
-                           };
+                           });
             }
 
             #endregion

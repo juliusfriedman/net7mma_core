@@ -11,11 +11,9 @@ namespace Media.Concepts.Classes
 
     public class ClockedBus : Bus
     {
-        long FrequencyHz, Maximum, End;
-
-        readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<byte[]> Input = new(), Output = new();
-
-        readonly double m_Bias;
+        private long FrequencyHz, Maximum, End;
+        private readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<byte[]> Input = new(), Output = new();
+        private readonly double m_Bias;
 
         public ClockedBus(long frequencyHz, double bias = 1.5)
         {
@@ -72,11 +70,15 @@ namespace Media.Concepts.Classes
             base.Dispose();
         }
 
-        long sample = 0, steps = 0, count = 0, avg = 0, elapsed = 0, cache = 1;
+        private long sample = 0;
+        private long steps = 0;
+        private long count = 0;
+        private long avg = 0;
+        private long elapsed = 0;
+        private readonly long cache = 1;
+        private bool inv;
 
-        bool inv;
-
-        void Clock_Tick(ref long ticks)
+        private void Clock_Tick(ref long ticks)
         {
             if (ShouldDispose is false && IsDisposed is false)
             {

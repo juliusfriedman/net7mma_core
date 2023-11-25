@@ -64,9 +64,9 @@ namespace Media.Codec
         /// <returns></returns>
         public static MediaFormat Planar(MediaFormat other)
         {
-            if (other.DataLayout == DataLayout.Planar) return other;
-
-            return new MediaFormat(other.MediaType, other.ByteOrder, DataLayout.Planar, other.Components);
+            return other.DataLayout == DataLayout.Planar
+                ? other
+                : new MediaFormat(other.MediaType, other.ByteOrder, DataLayout.Planar, other.Components);
         }
 
         /// <summary>
@@ -76,9 +76,9 @@ namespace Media.Codec
         /// <returns></returns>
         public static MediaFormat Packed(MediaFormat other)
         {
-            if (other.DataLayout == DataLayout.Packed) return other;
-
-            return new MediaFormat(other.MediaType, other.ByteOrder, DataLayout.Packed, other.Components);
+            return other.DataLayout == DataLayout.Packed
+                ? other
+                : new MediaFormat(other.MediaType, other.ByteOrder, DataLayout.Packed, other.Components);
         }
 
         /// <summary>
@@ -88,9 +88,9 @@ namespace Media.Codec
         /// <returns></returns>
         public static MediaFormat SemiPlanar(MediaFormat other)
         {
-            if (other.DataLayout == DataLayout.SemiPlanar) return other;
-
-            return new MediaFormat(other.MediaType, other.ByteOrder, DataLayout.SemiPlanar, other.Components);
+            return other.DataLayout == DataLayout.SemiPlanar
+                ? other
+                : new MediaFormat(other.MediaType, other.ByteOrder, DataLayout.SemiPlanar, other.Components);
         }
 
         #endregion
@@ -312,9 +312,7 @@ namespace Media.Codec
 
         public int IndexOf(MediaComponent component)
         {
-            if (component is null) throw new System.ArgumentNullException();
-
-            return System.Array.IndexOf(Components, component);
+            return component is null ? throw new System.ArgumentNullException() : System.Array.IndexOf(Components, component);
         }
 
         public MediaComponent GetComponentById(byte id)

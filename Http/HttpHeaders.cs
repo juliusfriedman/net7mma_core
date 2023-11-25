@@ -11,11 +11,11 @@ namespace Media.Http
 
         public const char HyphenSign = (char)Common.ASCII.HyphenSign, SemiColon = (char)Common.ASCII.SemiColon, Comma = (char)Common.ASCII.Comma;
 
-        internal protected static string[] TimeSplit = new string[] { HyphenSign.ToString(), SemiColon.ToString() };
+        protected internal static string[] TimeSplit = new string[] { HyphenSign.ToString(), SemiColon.ToString() };
 
-        internal protected static char[] SpaceSplit = new char[] { (char)Common.ASCII.Space, Comma };
+        protected internal static char[] SpaceSplit = new char[] { (char)Common.ASCII.Space, Comma };
 
-        internal protected static char[] ValueSplit = new char[] { (char)Common.ASCII.EqualsSign, SemiColon };
+        protected internal static char[] ValueSplit = new char[] { (char)Common.ASCII.EqualsSign, SemiColon };
 
         public const string Allow = "Allow";
         public const string Accept = "Accept";
@@ -71,7 +71,7 @@ namespace Media.Http
         public const string Via = "Via";
         public const string WWWAuthenticate = "WWW-Authenticate";
 
-        internal protected HttpHeaders() { }
+        protected internal HttpHeaders() { }
 
         //Could move to HeaderFields to avoid the duplicate name ...
 
@@ -155,7 +155,7 @@ namespace Media.Http
         public static string DigestAuthorizationHeader(Encoding encoding, HttpMethod method, Uri location, System.Net.NetworkCredential credential, string qopPart = null, string ncPart = null, string nOncePart = null, string cnOncePart = null, string opaquePart = null, bool rfc2069 = false, string algorithmPart = null, string bodyPart = null) { return AuthorizationHeader(encoding, method.ToString(), location, System.Net.AuthenticationSchemes.Digest, credential, qopPart, ncPart, nOncePart, cnOncePart, opaquePart, rfc2069, algorithmPart, bodyPart); }
 
         //string method
-        internal protected static string AuthorizationHeader(Encoding encoding, string methodString, Uri location, System.Net.AuthenticationSchemes scheme, System.Net.NetworkCredential credential, string qopPart = null, string ncPart = null, string nOncePart = null, string cnOncePart = null, string opaquePart = null, bool rfc2069 = false, string algorithmPart = null, string bodyPart = null)
+        protected internal static string AuthorizationHeader(Encoding encoding, string methodString, Uri location, System.Net.AuthenticationSchemes scheme, System.Net.NetworkCredential credential, string qopPart = null, string ncPart = null, string nOncePart = null, string cnOncePart = null, string opaquePart = null, bool rfc2069 = false, string algorithmPart = null, string bodyPart = null)
         {
             string result = string.Empty;
 
@@ -185,7 +185,7 @@ namespace Media.Http
 
                         string usernamePart = credential.UserName,
                            realmPart = credential.Domain ?? "//",
-                           uriPart = location is not null && location.IsAbsoluteUri ? location.AbsoluteUri : new String((char)Common.ASCII.BackSlash, 1);
+                           uriPart = location is not null && location.IsAbsoluteUri ? location.AbsoluteUri : new string((char)Common.ASCII.BackSlash, 1);
 
                         if (string.IsNullOrWhiteSpace(nOncePart))
                         {
@@ -196,8 +196,7 @@ namespace Media.Http
                         //Need to look at this again
                         if (false == string.IsNullOrWhiteSpace(qopPart))
                         {
-                            if (false == string.IsNullOrWhiteSpace(ncPart)) ncPart = (int.Parse(ncPart) + 1).ToString();
-                            else ncPart = "00000001";
+                            ncPart = false == string.IsNullOrWhiteSpace(ncPart) ? (int.Parse(ncPart) + 1).ToString() : "00000001";
 
                             if (string.IsNullOrWhiteSpace(cnOncePart)) cnOncePart = Utility.Random.Next(int.MaxValue).ToString("X");
                         }

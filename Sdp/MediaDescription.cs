@@ -58,7 +58,7 @@ namespace Media.Sdp
         #region Fields
 
         //Created from the m= which is the first line, this is a computed line and not found in Lines.
-        internal protected readonly Lines.SessionMediaDescriptionLine MediaDescriptionLine;
+        protected internal readonly Lines.SessionMediaDescriptionLine MediaDescriptionLine;
 
         /// <summary>
         /// The MediaType of the MediaDescription
@@ -120,7 +120,7 @@ namespace Media.Sdp
             {
                 return MediaDescriptionLine.MediaFormat;
             }
-            internal protected set
+            protected internal set
             {
                 MediaDescriptionLine.MediaFormat = value;
             }
@@ -135,7 +135,7 @@ namespace Media.Sdp
             {
                 return MediaDescriptionLine.PayloadTypes;
             }
-            internal protected set
+            protected internal set
             {
                 //m_MediaDescriptionLine.PayloadTypes = m_MediaDescriptionLine.PayloadTypes.Concat(value);
 
@@ -335,10 +335,11 @@ namespace Media.Sdp
 
         public override bool Equals(object obj)
         {
-            if (obj is MediaDescription md) return md.Equals(this);
-            if (obj is Sdp.Lines.SessionMediaDescriptionLine sdml) return Equals(sdml);
-            if (obj is SessionDescriptionLine sdl) return m_Lines.Contains(sdl);
-            return false;
+            return obj is MediaDescription md
+                ? md.Equals(this)
+                : obj is Sdp.Lines.SessionMediaDescriptionLine sdml
+                ? Equals(sdml)
+                : obj is SessionDescriptionLine sdl ? m_Lines.Contains(sdl) : false;
         }
 
         public override string ToString()
@@ -596,9 +597,7 @@ namespace Media.Sdp
             //Needs a better way to get the index of the media description
             int index = sessionDescription.GetIndexFor(mediaDescription);  //Array.IndexOf(sessionDescription.MediaDescriptions.ToArray(), mediaDescription);
 
-            if (index == -1 || index >= sessionDescription.TimeDescriptionsCount) return null;
-
-            return sessionDescription.GetTimeDescription(index);
+            return index == -1 || index >= sessionDescription.TimeDescriptionsCount ? null : sessionDescription.GetTimeDescription(index);
         }
 
         //Should have a date when or should return the date playable, which would then be used by another method to compare against a time.

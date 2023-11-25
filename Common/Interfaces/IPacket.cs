@@ -143,8 +143,7 @@ namespace Media.Common
         /// <returns>Null if the packet was not yet sent, otherwise the amount of time</returns>
         public static TimeSpan? GetConverganceTime(this IPacket packet)
         {
-            if (false == packet.Transferred.HasValue) return null;
-            return packet.Transferred.Value - packet.Created;
+            return false == packet.Transferred.HasValue ? null : packet.Transferred.Value - packet.Created;
         }
     }
 

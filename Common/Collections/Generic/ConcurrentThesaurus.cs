@@ -75,7 +75,7 @@ namespace Media.Common.Collections.Generic
     {
         #region Static
 
-        static TValue DefaultValue = default;
+        private static TValue DefaultValue = default;
 
         #endregion
 
@@ -83,7 +83,7 @@ namespace Media.Common.Collections.Generic
 
         //Todo, allow the IList type to be specified or changed internally.
 
-        readonly ConcurrentDictionary<TKey, IList<TValue>> Dictionary;
+        private readonly ConcurrentDictionary<TKey, IList<TValue>> Dictionary;
 
         public int Count { get { return Dictionary.Count; } }
 

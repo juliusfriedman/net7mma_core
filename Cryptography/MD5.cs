@@ -48,11 +48,11 @@ namespace Media.Cryptography
 
         #region Fields
 
-        byte[] _data;
-        ABCDStruct _abcd;
-        long _totalLength;
-        int _dataSize;
-        byte[] HashValue;
+        private byte[] _data;
+        private ABCDStruct _abcd;
+        private long _totalLength;
+        private int _dataSize;
+        private byte[] HashValue;
 
         #endregion
 
@@ -71,7 +71,7 @@ namespace Media.Cryptography
 
         #region Private - Instance
 
-        void Initialize()
+        private void Initialize()
         {
             _data = new byte[AlignValue];
             _totalLength = _dataSize = Zero;
@@ -163,15 +163,18 @@ namespace Media.Cryptography
 
         public static string GetHashString(byte[] input)
         {
-            if (null == input) throw new System.ArgumentNullException("input", "Unable to calculate hash over null input data");
-            return new StringBuilder(new String(Encoding.UTF8.GetChars(GetHash(input)))).ToString();
+            return null == input
+                ? throw new System.ArgumentNullException("input", "Unable to calculate hash over null input data")
+                : new StringBuilder(new string(Encoding.UTF8.GetChars(GetHash(input)))).ToString();
         }
 
         public static string GetHashString(string input, Encoding encoding)
         {
-            if (null == input) throw new System.ArgumentNullException("input", "Unable to calculate hash over null input data");
-            if (null == encoding) throw new System.ArgumentNullException("encoding", "Unable to calculate hash over a string without a default encoding. Consider using the GetHashString(string) overload to use UTF8 Encoding");
-            return GetHashString(encoding.GetBytes(input));
+            return null == input
+                ? throw new System.ArgumentNullException("input", "Unable to calculate hash over null input data")
+                : null == encoding
+                ? throw new System.ArgumentNullException("encoding", "Unable to calculate hash over a string without a default encoding. Consider using the GetHashString(string) overload to use UTF8 Encoding")
+                : GetHashString(encoding.GetBytes(input));
         }
 
         public static string GetHashString(string input)
@@ -303,7 +306,7 @@ namespace Media.Cryptography
         }
 
         //
-        internal static byte[] GetHashFinalBlock(byte[] input, int ibStart, int cbSize, ref ABCDStruct ABCD, Int64 len)
+        internal static byte[] GetHashFinalBlock(byte[] input, int ibStart, int cbSize, ref ABCDStruct ABCD, long len)
         {
             byte[] working = new byte[HashAlignValue];
             byte[] length = new byte[BitsInByte];

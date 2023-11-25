@@ -138,7 +138,7 @@ namespace Media.RtpTools.RtpDump
         /// <summary>
         /// Reads the Binary File Identifier '#!rtpplay..' and the RD_hdr_t.
         /// </summary>
-        void ReadFileHeader()
+        private void ReadFileHeader()
         {
             //If identifier has not been read and the format is unknown or non text
             if (m_FileIdentifier is null && RtpDumpExtensions.HasFileHeader(m_Format))
@@ -159,7 +159,7 @@ namespace Media.RtpTools.RtpDump
         /// Attempts to read the binary file header at the current position of the reader, the header is determined to be persent by 'peeking' and if present and thus determines if the file is Binary or Ascii in the process.
         /// If the file header has already been read then this function will not read anything
         /// </summary>
-        void ReadBinaryFileIdentifier()
+        private void ReadBinaryFileIdentifier()
         {
             if (m_FileIdentifier is not null) return;
 
@@ -219,7 +219,7 @@ namespace Media.RtpTools.RtpDump
 
         }
 
-        void ReadBinaryFileHeader()
+        private void ReadBinaryFileHeader()
         {
             //Read the 16 byte binary header here which contains data redundant of the firstLine.
             //This will be the last RD_hdr_t in the file.
@@ -571,32 +571,31 @@ namespace Media.RtpTools.RtpDump
         #region Fields
 
         //The format the DumpWriter is writing in
-        FileFormat m_Format;
+        private readonly FileFormat m_Format;
 
         //The file header of the Dump being written
-        Common.MemorySegment m_FileIdentifier, m_FileHeader;
-
-        System.IO.BinaryWriter m_Writer;
+        private Common.MemorySegment m_FileIdentifier, m_FileHeader;
+        private System.IO.BinaryWriter m_Writer;
 
         /// <summary>
         /// The ip and port which is realted to all entries being written if not explicitly given when creating or writing an entry.
         /// </summary>
-        System.Net.IPEndPoint m_Source;
+        private readonly System.Net.IPEndPoint m_Source;
 
         /// <summary>
         /// The date and time in which the first entry was created in the resulting file being written.
         /// </summary>
-        System.DateTime m_Start;
+        private readonly System.DateTime m_Start;
 
         /// <summary>
         /// Indicates if any required file header was written by this instance, will be true if the stream was modified.
         /// </summary>
-        bool m_WroteHeader;
+        private bool m_WroteHeader;
 
         /// <summary>
         /// A cached count of the amount of <see cref="RtpToolEntry"/> instances written to the underlying stream by this RtpDumpWriter.
         /// </summary>
-        int m_ItemsWritten = 0;
+        private int m_ItemsWritten = 0;
 
         #endregion
 
@@ -868,7 +867,7 @@ namespace Media.RtpTools.RtpDump
         /// </summary>
         public void Close()
         {
-            if (m_Writer is not null) m_Writer.Dispose();
+            m_Writer?.Dispose();
         }
 
         /// <summary>

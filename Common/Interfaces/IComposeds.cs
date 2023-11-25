@@ -115,7 +115,7 @@ namespace Media.Common.Interfaces
     /// <typeparam name="T">The type</typeparam>
     public class Composed/*Element*/<T> : IComposed<T>
     {
-        T m_Composed;
+        private readonly T m_Composed;
 
         public Composed(T t)
         {

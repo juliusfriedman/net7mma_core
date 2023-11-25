@@ -102,9 +102,7 @@ namespace Media.Concepts.Classes.E
 
         public override bool Equals(object obj)
         {
-            if (object.ReferenceEquals(this, obj)) return true;
-
-            return obj is Extensions e && Equals(e);
+            return object.ReferenceEquals(this, obj) ? true : obj is Extensions e && Equals(e);
         }
 
         //Todo, @IHashCode{}:ICode{},IHash{}

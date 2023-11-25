@@ -9,18 +9,17 @@ namespace Media.Containers.Mpeg
     /// <notes>
     /// Needs BitWriter to ensure writing is effecient on all architectures.
     /// </notes>
-    class TransportStreamWriter
+    internal class TransportStreamWriter
     {
 
         #region Fields
 
-        int m_PacketsWritten;
-
-        int m_BytesWritten;
+        private readonly int m_PacketsWritten;
+        private readonly int m_BytesWritten;
 
         //
 
-        private Dictionary<ushort, int> m_continuityCounter = [];
+        private readonly Dictionary<ushort, int> m_continuityCounter = [];
 
         private double m_systemTimeClock; // In seconds (to avoid integer precision issues)
 

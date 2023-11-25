@@ -59,10 +59,10 @@ namespace Media.Rtp
         //Collection to handle the dispatch of events.
         //Notes that Collections.Concurrent.Queue may be better suited for this in production until the ConcurrentLinkedQueue has been thoroughly engineered and tested.
         //The context, the item, final, recieved
-        readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<(RtpClient.TransportContext Context, Common.BaseDisposable Packet, bool Final, bool Received)> m_EventData = new();
+        private readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<(RtpClient.TransportContext Context, Common.BaseDisposable Packet, bool Final, bool Received)> m_EventData = new();
 
         //Todo, LinkedQueue and Clock.
-        readonly System.Threading.ManualResetEventSlim m_EventReady = new(false, 100); //should be caluclated based on memory and speed. SpinWait uses 10 as a default.
+        private readonly System.Threading.ManualResetEventSlim m_EventReady = new(false, 100); //should be caluclated based on memory and speed. SpinWait uses 10 as a default.
 
         //Outgoing Packets, Not a Queue because you cant re-order a Queue (in place) and you can't take a range from the Queue (in a single operation)
         //Those things aside, ordering is not performed here and only single packets are iterated and would eliminate the need for removing after the operation.

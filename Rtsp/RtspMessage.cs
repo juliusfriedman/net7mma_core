@@ -380,7 +380,7 @@ namespace Media.Rtsp
             return new RtspMessage(rtspMessage);
         }
 
-        public new static RtspMessage FromString(string data, System.Text.Encoding encoding = null)
+        public static new RtspMessage FromString(string data, System.Text.Encoding encoding = null)
         {
             if (string.IsNullOrWhiteSpace(data)) throw new InvalidOperationException("data cannot be null or whitespace.");
 
@@ -393,7 +393,7 @@ namespace Media.Rtsp
 
         #region Fields
 
-        int m_CSeq = -1;
+        private int m_CSeq = -1;
 
         //long m_RawLength = 0;
 
@@ -547,7 +547,7 @@ namespace Media.Rtsp
         /// <summary>
         /// Reserved
         /// </summary>
-        internal protected RtspMessage() : base(RtspMessage.MessageIdentifier) { }
+        protected internal RtspMessage() : base(RtspMessage.MessageIdentifier) { }
 
         /// <summary>
         /// Constructs a RtspMessage
@@ -860,7 +860,7 @@ namespace Media.Rtsp
         //    return received;
         //}
 
-        internal protected virtual bool ParseSequenceNumber(bool force = false)
+        protected internal virtual bool ParseSequenceNumber(bool force = false)
         {
             //If the message is disposed then no parsing can occur
             if (IsDisposed && IsPersistent is false) return false;

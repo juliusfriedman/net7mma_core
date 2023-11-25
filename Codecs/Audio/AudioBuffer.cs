@@ -40,7 +40,7 @@ namespace Media.Codecs.Audio
         /// <param name="sampleRate">The rate at which the audio will be played each second (hZ)</param>
         /// <param name="bitsPerComponent">The amount of bits </param>
         /// <returns>The amount of bytes required.</returns>
-        static int CalculateSize(int numberOfSamples, int channels, int sampleRate, int bitsPerComponent)
+        private static int CalculateSize(int numberOfSamples, int channels, int sampleRate, int bitsPerComponent)
         {
             return Math.Abs(numberOfSamples * (sampleRate / (Common.Binary.BitsToBytes(bitsPerComponent) * channels)));
         }
@@ -213,10 +213,9 @@ namespace Media.Codecs.Audio
             int bytesPerSample = AudioFormat.Length;
             int offset = CalculateSampleDataOffset(sampleIndex, channel);
 
-            if (offset + bytesPerSample > Data.Count)
-                throw new ArgumentException("The requested sample data is outside the bounds of the buffer.");
-
-            return new MemorySegment(Data.Array, Data.Offset + offset, bytesPerSample);
+            return offset + bytesPerSample > Data.Count
+                ? throw new ArgumentException("The requested sample data is outside the bounds of the buffer.")
+                : new MemorySegment(Data.Array, Data.Offset + offset, bytesPerSample);
         }
 
         #endregion

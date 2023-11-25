@@ -182,16 +182,16 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
     public static FourCharacterCode GetSubType(Node chunk)
     {
-        if (chunk is null) throw new ArgumentNullException("chunk");
-
-        return (FourCharacterCode)(HasSubType(chunk) ? ToFourCC(chunk.Identifier[4], chunk.Identifier[5], chunk.Identifier[6], chunk.Identifier[7]) : ToFourCC(chunk.Identifier[0], chunk.Identifier[1], chunk.Identifier[2], chunk.Identifier[3]));
+        return chunk is null
+            ? throw new ArgumentNullException("chunk")
+            : (FourCharacterCode)(HasSubType(chunk) ? ToFourCC(chunk.Identifier[4], chunk.Identifier[5], chunk.Identifier[6], chunk.Identifier[7]) : ToFourCC(chunk.Identifier[0], chunk.Identifier[1], chunk.Identifier[2], chunk.Identifier[3]));
     }
 
     public static FourCharacterCode GetSubType(byte[] chunk, int offset = 0)
     {
-        if (chunk.Length - offset < 4) throw new ArgumentOutOfRangeException(nameof(offset));
-
-        return (FourCharacterCode)(HasSubType(chunk) ? ToFourCC(chunk[offset + 4], chunk[offset + 5], chunk[offset + 6], chunk[offset + 7]) : ToFourCC(chunk[offset + 0], chunk[offset + 1], chunk[offset + 2], chunk[offset + 3]));
+        return chunk.Length - offset < 4
+            ? throw new ArgumentOutOfRangeException(nameof(offset))
+            : (FourCharacterCode)(HasSubType(chunk) ? ToFourCC(chunk[offset + 4], chunk[offset + 5], chunk[offset + 6], chunk[offset + 7]) : ToFourCC(chunk[offset + 0], chunk[offset + 1], chunk[offset + 2], chunk[offset + 3]));
     }
 
     #endregion        
@@ -251,7 +251,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
     }
 
     //Typically found in the ds64 chunk.
-    ulong m_DataSize;
+    private ulong m_DataSize;
 
     /// <summary>
     /// Gets the size to use when a node with length == 0xFFFFFFFF is found.
@@ -259,11 +259,11 @@ public class RiffReader : MediaFileStream, IMediaContainer
     public long DataSize
     {
         get { return (long)m_DataSize; }
-        internal protected set { m_DataSize = (ulong)value; }
+        protected internal set { m_DataSize = (ulong)value; }
     }
 
     //Determined by the first call to ReadNext.
-    bool? m_Needs64BitInfo;
+    private bool? m_Needs64BitInfo;
 
     /// <summary>
     /// Indicates if the file has a header chunk which has additional information about the data contained.
@@ -278,7 +278,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
             //Return the known value.
             return m_Needs64BitInfo.Value;
         }
-        internal protected set
+        protected internal set
         {
             m_Needs64BitInfo = value;
         }
@@ -416,12 +416,10 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
     public override string ToTextualConvention(Container.Node node)
     {
-        if (node.Master.Equals(this)) return RiffReader.ToFourCharacterCode(node.Identifier);
-        return base.ToTextualConvention(node);
+        return node.Master.Equals(this) ? RiffReader.ToFourCharacterCode(node.Identifier) : base.ToTextualConvention(node);
     }
 
-
-    DateTime? m_Created, m_Modified;
+    private DateTime? m_Created, m_Modified;
 
     public DateTime Created
     {
@@ -441,7 +439,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
         }
     }
 
-    void ParseIdentity()
+    private void ParseIdentity()
     {
         using (var iditChunk = ReadChunk(FourCharacterCode.IDIT, Root.Offset))
         {
@@ -478,8 +476,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
                         }
                     }
 
-                    if (partsLength > 1) day = int.Parse(parts[2]);
-                    else day = FileInfo.CreationTimeUtc.Day;
+                    day = partsLength > 1 ? int.Parse(parts[2]) : FileInfo.CreationTimeUtc.Day;
 
                     if (partsLength > 2)
                     {
@@ -490,8 +487,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
                     }
                     else time = FileInfo.CreationTimeUtc.TimeOfDay;
 
-                    if (partsLength > 4) year = int.Parse(parts[4]);
-                    else year = FileInfo.CreationTimeUtc.Year;
+                    year = partsLength > 4 ? int.Parse(parts[4]) : FileInfo.CreationTimeUtc.Year;
 
                     m_Created = new DateTime(year, createdDateTime.Month, day, time.Hours, time.Minutes, time.Seconds, DateTimeKind.Utc);
                 }
@@ -503,9 +499,8 @@ public class RiffReader : MediaFileStream, IMediaContainer
         m_Modified = FileInfo.LastWriteTimeUtc;
     }
 
-    int? m_MicroSecPerFrame, m_Format, m_SampleRate, m_BitsPerSample, m_NumChannels, m_MaxBytesPerSec, m_PaddingGranularity, m_Flags, m_TotalFrames, m_InitialFrames, m_Streams, m_SuggestedBufferSize, m_Width, m_Height, m_Reserved;
-
-    FourCharacterCode? m_Type, m_SubType;
+    private int? m_MicroSecPerFrame, m_Format, m_SampleRate, m_BitsPerSample, m_NumChannels, m_MaxBytesPerSec, m_PaddingGranularity, m_Flags, m_TotalFrames, m_InitialFrames, m_Streams, m_SuggestedBufferSize, m_Width, m_Height, m_Reserved;
+    private FourCharacterCode? m_Type, m_SubType;
 
     public FourCharacterCode? Type
     {
@@ -716,7 +711,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
         }
     }
 
-    internal protected void ParseFmt()
+    protected internal void ParseFmt()
     {
         /*
         The "WAVE" format consists of two subchunks: "fmt " and "data":
@@ -761,7 +756,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
     }
 
-    internal protected void ParseData(Container.Node node)
+    protected internal void ParseData(Container.Node node)
     {
         /*
         The "data" subchunk contains the size of the data and the actual sound:
@@ -829,7 +824,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
     //void ParseOdmlHeader() { /*Total Number of Frames in File?*/ }
 
-    void ParseAviHeader()
+    private void ParseAviHeader()
     {
         //Must be present!
         using (var headerChunk = ReadChunk(FourCharacterCode.avih, Root.Offset))
@@ -876,7 +871,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
     //Offset 
     //Size
 
-    IEnumerable<Track> m_Tracks;
+    private IEnumerable<Track> m_Tracks;
 
     public override IEnumerable<Track> GetTracks()
     {

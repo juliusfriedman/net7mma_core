@@ -405,9 +405,9 @@ namespace Media.Containers.Mxf
 
         #region Constants
 
-        const int IdentifierSize = 16, MinimumSizeLength = 1, MinimumSize = IdentifierSize + MinimumSizeLength, UniqueIdBytes = 12, MultiByteLength = 0x80; //128
+        private const int IdentifierSize = 16, MinimumSizeLength = 1, MinimumSize = IdentifierSize + MinimumSizeLength, UniqueIdBytes = 12, MultiByteLength = 0x80; //128
 
-        const string PictureTrack = "Picture Track", AudioTrack = "Audio Track", TextTrack = "Text Track", TimecodeTrack = "Timecode Track", DataTrack = "Data Track";
+        private const string PictureTrack = "Picture Track", AudioTrack = "Audio Track", TextTrack = "Text Track", TimecodeTrack = "Timecode Track", DataTrack = "Data Track";
 
         #endregion
 
@@ -425,9 +425,7 @@ namespace Media.Containers.Mxf
 
         public static Category GetCategory(Node node)
         {
-            if (node is null) throw new ArgumentNullException("node");
-
-            return (Category)node.Identifier[4];
+            return node is null ? throw new ArgumentNullException("node") : (Category)node.Identifier[4];
         }
 
         public static PartitionKind GetPartitionKind(Node node)
@@ -451,17 +449,17 @@ namespace Media.Containers.Mxf
             return (PartitionStatus)node.Identifier[14];
         }
 
-        static bool CompareUL(Guid a, Guid b, bool compareRegistry = false, bool compareVersion = false, bool compareKind = false)
+        private static bool CompareUL(Guid a, Guid b, bool compareRegistry = false, bool compareVersion = false, bool compareKind = false)
         {
             if (a == default) return b == default;
 
             //Use the hash code if exact
-            if (compareRegistry && compareVersion && compareKind) return a.GetHashCode() == b.GetHashCode();
-
-            return CompareUL(a.ToByteArray(), b.ToByteArray(), compareRegistry, compareVersion, compareKind);
+            return compareRegistry && compareVersion && compareKind
+                ? a.GetHashCode() == b.GetHashCode()
+                : CompareUL(a.ToByteArray(), b.ToByteArray(), compareRegistry, compareVersion, compareKind);
         }
 
-        static bool CompareUL(byte[] aBytes, byte[] bBytes, bool compareRegistry = false, bool compareVersion = false, bool compareKind = false)
+        private static bool CompareUL(byte[] aBytes, byte[] bBytes, bool compareRegistry = false, bool compareVersion = false, bool compareKind = false)
         {
             if (aBytes is null) return bBytes is null;
 
@@ -522,8 +520,7 @@ namespace Media.Containers.Mxf
 
         public override string ToTextualConvention(Container.Node node)
         {
-            if (node.Master.Equals(this)) return MxfReader.ToTextualConvention(node.Identifier);
-            return base.ToTextualConvention(node);
+            return node.Master.Equals(this) ? MxfReader.ToTextualConvention(node.Identifier) : base.ToTextualConvention(node);
         }
 
 
@@ -573,7 +570,7 @@ namespace Media.Containers.Mxf
         /// <summary>
         /// Holds a cache of all Fields in the Identifiers static type
         /// </summary>
-        static Dictionary<Guid, string> IdentifierLookup;
+        private static readonly Dictionary<Guid, string> IdentifierLookup;
 
         static MxfReader()
         {
@@ -592,9 +589,8 @@ namespace Media.Containers.Mxf
 
         public MxfReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { }
 
-        int? m_RunInSize, m_MajorVersion, m_MinorVersion, m_IndexByteCount, m_KagSize;
-
-        Guid? m_OperationalPattern;
+        private int? m_RunInSize, m_MajorVersion, m_MinorVersion, m_IndexByteCount, m_KagSize;
+        private Guid? m_OperationalPattern;
 
         public Version HeaderVersion
         {
@@ -626,7 +622,7 @@ namespace Media.Containers.Mxf
         public bool HasIndex { get { return IndexByteCount > 0; } }
 
         //6.5 Run-In Sequence
-        void ReadRunIn()
+        private void ReadRunIn()
         {
             if (false == m_RunInSize.HasValue)
             {
@@ -718,7 +714,7 @@ namespace Media.Containers.Mxf
         //    }
         //}
 
-        void ParseHeader()
+        private void ParseHeader()
         {
             long position = Position;
 
@@ -868,9 +864,8 @@ namespace Media.Containers.Mxf
             Position = position;
         }
 
-        DateTime? m_PrefaceLastModifiedDate;
-
-        short? m_PrefaceVersion;
+        private DateTime? m_PrefaceLastModifiedDate;
+        private short? m_PrefaceVersion;
 
         public short PrefaceVersion
         {
@@ -890,7 +885,7 @@ namespace Media.Containers.Mxf
             }
         }
 
-        void ParsePreface()
+        private void ParsePreface()
         {
             using (var preface = ReadObject(UniversalLabel.Preface, true, Root.DataOffset + Root.DataSize))
             {
@@ -981,7 +976,7 @@ namespace Media.Containers.Mxf
             }
         }
 
-        string m_CompanyName, m_ProductName, m_ProductVersion, m_Platform;
+        private string m_CompanyName, m_ProductName, m_ProductVersion, m_Platform;
 
         public string CompanyName
         {
@@ -1019,7 +1014,7 @@ namespace Media.Containers.Mxf
             }
         }
 
-        Guid? m_ProductUID;
+        private Guid? m_ProductUID;
 
         public Guid ProductUID
         {
@@ -1030,7 +1025,7 @@ namespace Media.Containers.Mxf
             }
         }
 
-        DateTime? m_IdentificationModificationDate;
+        private DateTime? m_IdentificationModificationDate;
 
         public DateTime IdentificationModificationDate
         {
@@ -1041,7 +1036,7 @@ namespace Media.Containers.Mxf
             }
         }
 
-        void ParseIdentification()
+        private void ParseIdentification()
         {
             using (var identification = ReadObject(UniversalLabel.Identification, true, Root.DataOffset + Root.DataSize))
             {
@@ -1124,7 +1119,7 @@ namespace Media.Containers.Mxf
             }
         }
 
-        DateTime? m_MaterialCreationDate, m_MaterialModifiedDate;
+        private DateTime? m_MaterialCreationDate, m_MaterialModifiedDate;
 
         public DateTime Created
         {
@@ -1144,7 +1139,7 @@ namespace Media.Containers.Mxf
             }
         }
 
-        void ParseMaterialPackage()
+        private void ParseMaterialPackage()
         {
             using (var materialPackage = ReadObject(UniversalLabel.MaterialPackage, true, Root.DataOffset + Root.DataSize))
             {
@@ -1306,9 +1301,9 @@ namespace Media.Containers.Mxf
 
             long length = DecodeVariableLength(this, out int sizeLength);
 
-            if (sizeLength < MinimumSizeLength) throw new InvalidOperationException("Cannot Decode Length");
-
-            return new Node(this, identifier, sizeLength, Position, length, length <= Remaining);
+            return sizeLength < MinimumSizeLength
+                ? throw new InvalidOperationException("Cannot Decode Length")
+                : new Node(this, identifier, sizeLength, Position, length, length <= Remaining);
         }
 
         public override IEnumerator<Node> GetEnumerator()
@@ -1325,17 +1320,17 @@ namespace Media.Containers.Mxf
             }
         }
 
-        List<Track> m_Tracks;
+        private List<Track> m_Tracks;
 
         /// <summary>
         /// Provides a lookup of a (Related/Linked)TrackId to a GenericDescriptor
         /// </summary>
-        Common.Collections.Generic.ConcurrentThesaurus<int, Node> m_TrackDescriptors;
+        private Common.Collections.Generic.ConcurrentThesaurus<int, Node> m_TrackDescriptors;
 
         /// <summary>
         /// Obtains information which describes all tracks in the container
         /// </summary>
-        void ParseGenericDescriptors()
+        private void ParseGenericDescriptors()
         {
             if (m_TrackDescriptors is not null) return;
 

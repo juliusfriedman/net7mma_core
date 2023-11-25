@@ -65,10 +65,8 @@ namespace Media.Rtsp.Server.MediaTypes
             #region Static
 
             public static byte[] FullStartSequence = new byte[] { 0x00, 0x00, 0x00, 0x01 };
-
-            static readonly Common.MemorySegment FullStartSequenceSegment = new(FullStartSequence, 0, 4, false);
-
-            static readonly Common.MemorySegment ShortStartSequenceSegment = new(FullStartSequence, 1, 3, false);
+            private static readonly Common.MemorySegment FullStartSequenceSegment = new(FullStartSequence, 0, 4, false);
+            private static readonly Common.MemorySegment ShortStartSequenceSegment = new(FullStartSequence, 1, 3, false);
 
             public static byte[] CreateSingleTimeAggregationUnit(int? DON = null, params byte[][] nals)
             {
@@ -79,11 +77,9 @@ namespace Media.Rtsp.Server.MediaTypes
                 IEnumerable<byte> data = nals.SelectMany(n => Common.Binary.GetBytes((short)n.Length, Common.Binary.IsLittleEndian).Concat(n));
 
                 //STAP - B has DON at the very beginning
-                if (DON.HasValue)
-                {
-                    data = Media.Common.Extensions.Linq.LinqExtensions.Yield(Media.Codecs.Video.H264.NalUnitType.SingleTimeAggregationB).Concat(Common.Binary.GetBytes((short)DON, Common.Binary.IsLittleEndian)).Concat(data);
-                }//STAP - A
-                else data = Media.Common.Extensions.Linq.LinqExtensions.Yield(Media.Codecs.Video.H264.NalUnitType.SingleTimeAggregationA).Concat(data);
+                data = DON.HasValue
+                    ? Media.Common.Extensions.Linq.LinqExtensions.Yield(Media.Codecs.Video.H264.NalUnitType.SingleTimeAggregationB).Concat(Common.Binary.GetBytes((short)DON, Common.Binary.IsLittleEndian)).Concat(data)
+                    : Media.Common.Extensions.Linq.LinqExtensions.Yield(Media.Codecs.Video.H264.NalUnitType.SingleTimeAggregationA).Concat(data);
 
                 return data.ToArray();
             }
@@ -181,7 +177,7 @@ namespace Media.Rtsp.Server.MediaTypes
             //May be kept in a state or InformationClass eventually, would allow for other options to be kept also.
 
             //Should use HashSet? (would not allow counting of types but isn't really needed)
-            internal protected readonly List<byte> m_ContainedNalTypes;
+            protected internal readonly List<byte> m_ContainedNalTypes;
 
             #endregion
 
@@ -397,7 +393,7 @@ namespace Media.Rtsp.Server.MediaTypes
             /// <param name="containsSlice"></param>
             /// <param name="isIdr"></param>
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected virtual void ProcessPacket(Rtp.RtpPacket packet, bool ignoreForbiddenZeroBit = true, bool fullStartCodes = false)
+            protected internal virtual void ProcessPacket(Rtp.RtpPacket packet, bool ignoreForbiddenZeroBit = true, bool fullStartCodes = false)
             {
                 //If the packet is null or disposed then do not process it.
                 if (Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
@@ -760,7 +756,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             //}
 
-            internal protected void DepacketizeStartCode(ref int addIndex, ref byte nalHeader, bool fullStartCodes = false)
+            protected internal void DepacketizeStartCode(ref int addIndex, ref byte nalHeader, bool fullStartCodes = false)
             {
                 //Determine the type of Nal
                 byte nalType = (byte)(nalHeader & Common.Binary.FiveBitMaxValue);
@@ -911,7 +907,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         //profile_idc, profile_iop, level_idc
 
-        internal protected SimpleH264Encoder encoder;
+        protected internal SimpleH264Encoder encoder;
 
         #endregion
 
@@ -1046,11 +1042,11 @@ namespace Media.Rtsp.Server.MediaTypes
     {
         public static bool Contains(this Media.Rtsp.Server.MediaTypes.RFC6184Media.RFC6184Frame frame, params byte[] nalTypes)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(frame)) return false;
-
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(nalTypes)) return false;
-
-            return frame.m_ContainedNalTypes.Any(n => nalTypes.Contains(n));
+            return Common.IDisposedExtensions.IsNullOrDisposed(frame)
+                ? false
+                : Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(nalTypes)
+                ? false
+                : frame.m_ContainedNalTypes.Any(n => nalTypes.Contains(n));
         }
 
         public static bool IsKeyFrame(this Media.Rtsp.Server.MediaTypes.RFC6184Media.RFC6184Frame frame)

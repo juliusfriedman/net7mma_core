@@ -8,10 +8,9 @@
 
         public static bool IsOverride(this System.Reflection.MethodBase methodBase)
         {
-            if (!(methodBase is System.Reflection.MethodInfo methodInfo))
-                return false;
-
-            return methodInfo.GetBaseDefinition().DeclaringType != methodInfo.DeclaringType;
+            return !(methodBase is System.Reflection.MethodInfo methodInfo)
+                ? false
+                : methodInfo.GetBaseDefinition().DeclaringType != methodInfo.DeclaringType;
         }
     }
 }

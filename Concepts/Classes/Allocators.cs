@@ -130,7 +130,7 @@ namespace Media.Concepts.Classes
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static void Resize<T>(nint pointer, int newElementCount)
+        public static unsafe void Resize<T>(nint pointer, int newElementCount)
         {
             System.Runtime.InteropServices.Marshal.ReAllocHGlobal(pointer, new nint(Unsafe.ArrayOfTwoElements<T>.AddressingDifference() * newElementCount));
         }
@@ -221,17 +221,17 @@ namespace Media.Concepts.Classes
     /// </summary>
     public abstract class MemoryAllocator : IStorageAllocator
     {
-        Privileges DefaultPrivileges;
+        private readonly Privileges DefaultPrivileges;
 
         /// <summary>
         /// The maxmium size of bytes the MemoryAllocator will allocate before throwing a <see cref="System.OutOfMemoryException."/>
         /// </summary>
-        long MaximumSize;
+        private readonly long MaximumSize;
 
         /// <summary>
         /// 
         /// </summary>
-        byte Alignment, Displacement;
+        private readonly byte Alignment, Displacement;
 
         /// <summary>
         /// 
@@ -259,7 +259,7 @@ namespace Media.Concepts.Classes
             }
         }
 
-        Media.Common.Collections.Generic.ConcurrentThesaurus<nint, long> Allocations = [];
+        private readonly Media.Common.Collections.Generic.ConcurrentThesaurus<nint, long> Allocations = [];
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         nint IStorageAllocator.Allocate(long size)
@@ -295,7 +295,7 @@ namespace Media.Concepts.Classes
     /// <summary>
     /// Provides a platform aware memory allocator.
     /// </summary>
-    abstract public class PlatformMemoryAllocator : MemoryAllocator
+    public abstract class PlatformMemoryAllocator : MemoryAllocator
     {
 
     }

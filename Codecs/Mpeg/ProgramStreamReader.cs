@@ -227,8 +227,7 @@ namespace Media.Containers.Mpeg
 
         public override string ToTextualConvention(Container.Node node)
         {
-            if (node.Master.Equals(this)) return ProgramStreamReader.ToTextualConvention(node.Identifier);
-            return base.ToTextualConvention(node);
+            return node.Master.Equals(this) ? ProgramStreamReader.ToTextualConvention(node.Identifier) : base.ToTextualConvention(node);
         }
 
         //Find a Pack Header?
@@ -253,7 +252,7 @@ namespace Media.Containers.Mpeg
             get { throw new NotImplementedException(); }
         }
 
-        double? m_SystemClockRate;
+        private double? m_SystemClockRate;
 
         /// <summary>
         /// Decodes the SystemClockRate found in the Root node.
@@ -349,7 +348,7 @@ namespace Media.Containers.Mpeg
             scr = (((high * 0x10000) * 0x10000) + low) / 90000.0;
         }
 
-        System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<bool, ushort, Container.Node>> m_StreamBoundEntries = new();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<bool, ushort, Container.Node>> m_StreamBoundEntries = new();
 
         protected virtual void ParseSystemsHeader(Container.Node node)
         {

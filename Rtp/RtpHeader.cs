@@ -479,7 +479,7 @@ namespace Media.Rtp
         /// </summary>
         /// <param name="source"></param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void Synchronize(ref byte[] source)
+        protected internal void Synchronize(ref byte[] source)
         {
             //Should check IsContiguous
 
@@ -598,9 +598,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            if (System.Object.ReferenceEquals(this, obj)) return true;
-
-            return obj is RtpHeader h && Equals(h);
+            return object.ReferenceEquals(this, obj) ? true : obj is RtpHeader h && Equals(h);
         }
 
         #endregion

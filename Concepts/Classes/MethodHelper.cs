@@ -105,7 +105,7 @@ namespace Media.Concepts.Classes
             System.Console.WriteLine("TEST2");
         }
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Target targetInstance = new();
 
@@ -201,11 +201,11 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// Default flags used for <see cref="Redirect"/>
         /// </summary>
-        static BindingFlags DefaultBindingFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
+        private static readonly BindingFlags DefaultBindingFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
 
         #region Private
 
-        static IntPtr GetDynamicMethodRuntimeHandle(MethodBase method)
+        private static IntPtr GetDynamicMethodRuntimeHandle(MethodBase method)
         {
             if (method is System.Reflection.Emit.DynamicMethod)
             {
@@ -225,7 +225,7 @@ namespace Media.Concepts.Classes
             return method.MethodHandle.Value;
         }
 
-        static Type GetMethodReturnType(MethodBase method)
+        private static Type GetMethodReturnType(MethodBase method)
         {
             MethodInfo methodInfo = method as MethodInfo;
 
@@ -238,7 +238,7 @@ namespace Media.Concepts.Classes
             return methodInfo.ReturnType;
         }
 
-        static bool MethodSignaturesEqual(MethodBase x, MethodBase y)
+        private static bool MethodSignaturesEqual(MethodBase x, MethodBase y)
         {
             if (x.CallingConvention != y.CallingConvention)
             {
@@ -342,7 +342,7 @@ namespace Media.Concepts.Classes
         /// <param name="srcAdr"></param>
         /// <param name="dest"></param>
         /// <param name="codeSize">The optional amount of bytes to copy from <paramref name="srcAdr"/> to <paramref name="dest"/></param>
-        public unsafe static void Patch(IntPtr srcAdr, MethodBase dest, int codeSize = 0)
+        public static unsafe void Patch(IntPtr srcAdr, MethodBase dest, int codeSize = 0)
         {
             IntPtr destAdr = GetMethodAddress(dest);
             if (IntPtr.Size == 8)

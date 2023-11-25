@@ -57,12 +57,12 @@
         /// <summary>
         /// The <typeparam name="T">element</typeparam>
         /// </summary>
-        internal protected T Key;
+        protected internal T Key;
 
         /// <summary>
         /// The <see cref="Sentinel"/>
         /// </summary>
-        public Sentinel Sentient { get; internal protected set; }
+        public Sentinel Sentient { get; protected internal set; }
 
         bool Common.Interfaces.ITryGet<T>.TryGet(out T t)
         {

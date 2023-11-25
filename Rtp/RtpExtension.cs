@@ -75,7 +75,7 @@ namespace Media.Rtp
         /// <summary>
         /// Reference to the binary data which is thought to contain the RtpExtension.
         /// </summary>
-        readonly Common.MemorySegment m_MemorySegment;
+        private readonly Common.MemorySegment m_MemorySegment;
 
         #endregion
 
@@ -132,7 +132,10 @@ namespace Media.Rtp
         public bool IsComplete
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { if (IsDisposed) return false; return m_MemorySegment.Count >= Size; }
+            get
+            {
+                return IsDisposed ? false : m_MemorySegment.Count >= Size;
+            }
         }
 
         /// <summary>
@@ -218,7 +221,7 @@ namespace Media.Rtp
 
         #endregion
 
-        IEnumerable<byte> GetEnumerableImplementation()
+        private IEnumerable<byte> GetEnumerableImplementation()
         {
             return m_MemorySegment;//.Array.Skip(m_MemorySegment.Offset).Take(Size);
         }

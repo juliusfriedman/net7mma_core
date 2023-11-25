@@ -136,9 +136,9 @@ namespace Media.Common
 
         public static string ExtractPrecisionNumber(string input, char sign = (char)Common.ASCII.Period)
         {
-            if (string.IsNullOrWhiteSpace(input)) throw new System.InvalidOperationException("input cannot be null or consist only of whitespace.");
-
-            return ASCII.ExtractPrecisionNumber(input, 0, input.Length, sign);
+            return string.IsNullOrWhiteSpace(input)
+                ? throw new System.InvalidOperationException("input cannot be null or consist only of whitespace.")
+                : ASCII.ExtractPrecisionNumber(input, 0, input.Length, sign);
         }
 
         public static string ExtractPrecisionNumber(string input, int offset, int length, char sign = (char)Common.ASCII.Period)
@@ -148,9 +148,9 @@ namespace Media.Common
 
         public static string ExtractNumber(string input, char? sign = null)
         {
-            if (string.IsNullOrWhiteSpace(input)) throw new System.InvalidOperationException("input cannot be null or consist only of whitespace.");
-
-            return ASCII.ExtractNumber(input, 0, input.Length, sign);
+            return string.IsNullOrWhiteSpace(input)
+                ? throw new System.InvalidOperationException("input cannot be null or consist only of whitespace.")
+                : ASCII.ExtractNumber(input, 0, input.Length, sign);
         }
 
         public static string ExtractNumber(string input, int offset, int length, char? sign = null)
@@ -212,34 +212,22 @@ namespace Media.Common
 
         public static byte ToLower(byte ch)
         {
-            if (ch >= (byte)'A' && ch <= (byte)'Z')
-                return (byte)(ch - ((byte)'A' - (byte)'a'));
-            else
-                return ch;
+            return ch >= (byte)'A' && ch <= (byte)'Z' ? (byte)(ch - ((byte)'A' - (byte)'a')) : ch;
         }
 
         public static byte ToUpper(byte ch)
         {
-            if (ch >= (byte)'a' && ch <= (byte)'z')
-                return (byte)(ch - ((byte)'a' - (byte)'A'));
-            else
-                return ch;
+            return ch >= (byte)'a' && ch <= (byte)'z' ? (byte)(ch - ((byte)'a' - (byte)'A')) : ch;
         }
 
         public static bool IsLowerAlpha(byte ch)
         {
-            if (ch >= (byte)'a' && ch <= (byte)'z')
-                return true;
-            else
-                return false;
+            return ch >= (byte)'a' && ch <= (byte)'z';
         }
 
         public static bool IsUpperAlpha(byte ch)
         {
-            if (ch >= (byte)'A' && ch <= (byte)'Z')
-                return true;
-            else
-                return false;
+            return ch >= (byte)'A' && ch <= (byte)'Z';
         }
 
         public static bool IsAlpha(byte ch)
@@ -249,18 +237,12 @@ namespace Media.Common
 
         public static bool IsBackspace(byte ch)
         {
-            if (ch == 26)
-                return true;
-
-            return false;
+            return ch == 26;
         }
 
         public static bool IsNumeric(byte ch)
         {
-            if (ch >= (byte)'0' && ch <= (byte)'9')
-                return true;
-            else
-                return false;
+            return ch >= (byte)'0' && ch <= (byte)'9';
         }
 
         public static bool IsWhiteSpace(byte ch)

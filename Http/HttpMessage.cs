@@ -87,9 +87,7 @@ namespace Media.Http
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static string CreateReasonPhrase(HttpStatusCode code, bool includeSpaces = false)
         {
-            if (includeSpaces is false) return code.ToString();
-
-            return Common.Extensions.String.StringExtensions.AddSpacesBeforeCapitols(code.ToString());
+            return includeSpaces is false ? code.ToString() : Common.Extensions.String.StringExtensions.AddSpacesBeforeCapitols(code.ToString());
         }
     }
 
@@ -200,7 +198,7 @@ namespace Media.Http
         public static string VersionFormat = "0.0";
 
         //System encoded 'Carriage Return' => \r and 'New Line' => \n
-        internal protected const string CRLF = "\r\n";
+        protected internal const string CRLF = "\r\n";
 
         //The scheme of Uri's of RtspMessage's
         public const string TransportScheme = "http"; //System.Uri.UriSchemeHttp;
@@ -218,16 +216,16 @@ namespace Media.Http
         public const string MessageIdentifier = "HTTP";
 
         //String which can be used to delimit a HttpMessage for preprocessing
-        internal protected static string[] HeaderLineSplit = new string[] { CRLF };
+        protected internal static string[] HeaderLineSplit = new string[] { CRLF };
 
         //String which is used to split Header values of the HttpMessage
-        internal protected static char[] HeaderNameValueSplit = new char[] { (char)Common.ASCII.Colon };
+        protected internal static char[] HeaderNameValueSplit = new char[] { (char)Common.ASCII.Colon };
 
         //String which is used to split Header values of the HttpMessage
-        internal protected static char[] SpaceSplit = new char[] { (char)Common.ASCII.Space };
+        protected internal static char[] SpaceSplit = new char[] { (char)Common.ASCII.Space };
 
         //Should be instance variable and calulcated from Protocol
-        internal protected static int MinimumStatusLineSize = 9; //'HTTP/X.X ' 
+        protected internal static int MinimumStatusLineSize = 9; //'HTTP/X.X ' 
 
         public static readonly Encoding DefaultEncoding = System.Text.Encoding.UTF8;
 
@@ -248,14 +246,13 @@ namespace Media.Http
 
         protected bool m_StatusLineParsed, m_HeadersParsed;
 
-        internal protected char[] m_EncodedLineEnds = Media.Common.UTF8.LineEndingCharacters,
+        protected internal char[] m_EncodedLineEnds = Media.Common.UTF8.LineEndingCharacters,
             m_EncodedWhiteSpace = Media.Common.UTF8.WhiteSpaceCharacters,
             m_EncodedForwardSlash = Media.Common.UTF8.ForwardSlashCharacters,
             m_EncodedColon = Media.Common.UTF8.ColonCharacters,
             m_EncodedSemiColon = Media.Common.UTF8.SemiColonCharacters,
             m_EncodedComma = Media.Common.UTF8.CommaCharacters;
-
-        string m_HeaderFormat = DefaultHeaderFormat, m_StringWhiteSpace, m_StringEndLine, m_StringColon, m_StringSemiColon, m_StringComma;
+        private string m_HeaderFormat = DefaultHeaderFormat, m_StringWhiteSpace, m_StringEndLine, m_StringColon, m_StringSemiColon, m_StringComma;
 
         //Should expose string in format for outside parsing...
 
@@ -266,7 +263,7 @@ namespace Media.Http
         /// <summary>
         /// The body of the message
         /// </summary>
-        internal protected string m_ReasonPhrase, m_Body = string.Empty;
+        protected internal string m_ReasonPhrase, m_Body = string.Empty;
 
         //Todo, Should be a Thesarus to support duplicates.
         //Todo, Should use EqualityComparer of String with OrdinalIgnoreCase!!
@@ -274,7 +271,7 @@ namespace Media.Http
         /// <summary>
         /// Generic.Dictionary containing the headers of the HttpMessage
         /// </summary>
-        readonly protected Dictionary<string, string> m_Headers = [], m_EntityHeaders = [];
+        protected readonly Dictionary<string, string> m_Headers = [], m_EntityHeaders = [];
 
         //readonly protected Dictionary<intString, string> m_Headers = new Dictionary<intString, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -384,7 +381,7 @@ namespace Media.Http
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return m_HeaderFormat; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set
+            protected internal set
             {
                 if (string.IsNullOrWhiteSpace(value)) throw new InvalidOperationException("The Header Format must not be null or consist only of Whitespace");
 
@@ -433,7 +430,7 @@ namespace Media.Http
         /// <summary>
         /// Indicates the UserAgent of this HttpRquest
         /// </summary>
-        public String UserAgent
+        public string UserAgent
         {
             get { return GetHeader(HttpHeaders.UserAgent); }
             set { if (string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException(); SetHeader(HttpHeaders.UserAgent, value); }
@@ -602,9 +599,7 @@ namespace Media.Http
                 }
                 catch
                 {
-                    if (IsDisposed) return 0;
-
-                    return length;
+                    return IsDisposed ? 0 : length;
                 }
             }
         }
@@ -690,7 +685,7 @@ namespace Media.Http
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get;
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set;
+            protected internal set;
         }
 
         /// <summary>
@@ -706,7 +701,7 @@ namespace Media.Http
                 return m_ContentLength;
             }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set
+            protected internal set
             {
                 //Use the unsigned representation
                 SetHeader(HttpHeaders.ContentLength, ((uint)(m_ContentLength = value)).ToString());
@@ -1061,7 +1056,7 @@ namespace Media.Http
         #region Methods
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        void CacheStrings()
+        private void CacheStrings()
         {
             m_StringWhiteSpace = m_HeaderEncoding.GetString(m_HeaderEncoding.GetBytes(m_EncodedWhiteSpace));
 
@@ -1082,7 +1077,7 @@ namespace Media.Http
             m_Buffer = null;
         }
 
-        virtual protected bool ParseStatusLine(bool force = false)
+        protected virtual bool ParseStatusLine(bool force = false)
         {
 
             if (IsDisposed && IsPersistent is false) return m_StatusLineParsed;
@@ -1246,7 +1241,7 @@ namespace Media.Http
             return m_StatusLineParsed = sawDelemit && false.Equals(MessageType == HttpMessageType.Invalid);
         }
 
-        virtual protected bool ParseHeaders(bool force = false)
+        protected virtual bool ParseHeaders(bool force = false)
         {
             try
             {
@@ -1408,7 +1403,7 @@ namespace Media.Http
             catch { return false; }
         }
 
-        virtual protected bool ParseTrailer()
+        protected virtual bool ParseTrailer()
         {
             try
             {
@@ -1538,7 +1533,7 @@ namespace Media.Http
             catch { return false; }
         }
 
-        internal protected virtual bool ParseContentLength(bool force = false)
+        protected internal virtual bool ParseContentLength(bool force = false)
         {
             if (IsDisposed && IsPersistent is false) return false;
 
@@ -1570,7 +1565,7 @@ namespace Media.Http
         /// </summary>
         /// <param name="raiseWhenNotFound">If true and the requested encoding cannot be found an exception will be thrown.</param>
         /// <returns>The <see cref="System.Text.Encoding"/> requested or the <see cref="System.Text.Encoding.Default"/> if the reqeusted could not be found.</returns>
-        internal protected virtual Encoding ParseContentEncoding(bool force = false, bool raiseWhenNotFound = false)
+        protected internal virtual Encoding ParseContentEncoding(bool force = false, bool raiseWhenNotFound = false)
         {
             //If the message is disposed then no parsing can occur
             if (IsDisposed && IsPersistent is false) return null;
@@ -1603,7 +1598,7 @@ namespace Media.Http
         }
 
         //Todo, could be unified to not require RtspMessage to overload...
-        internal protected virtual bool ParseBody(out int remaining, bool force = false) //bool requireContentLength = true
+        protected internal virtual bool ParseBody(out int remaining, bool force = false) //bool requireContentLength = true
         {
             remaining = 0;
 
@@ -1803,18 +1798,15 @@ namespace Media.Http
             return false;
         }
 
-        internal protected virtual bool ParseBody(bool force = false)
+        protected internal virtual bool ParseBody(bool force = false)
         {
-            if (IsDisposed && IsPersistent is false) return false;
-
-
-            return ParseBody(out int remains, force);
+            return IsDisposed && IsPersistent is false ? false : ParseBody(out int remains, force);
         }
 
         /// <summary>
-        /// Creates a '<see cref="System.String"/>' representation of the HttpMessage including all binary data contained.
+        /// Creates a '<see cref="string"/>' representation of the HttpMessage including all binary data contained.
         /// </summary>
-        /// <returns>A <see cref="System.String"/> which contains the entire message itself in the encoding of the HttpMessage</returns>
+        /// <returns>A <see cref="string"/> which contains the entire message itself in the encoding of the HttpMessage</returns>
         public virtual string ToEncodedString()
         {
             if (IsDisposed && IsPersistent is false) goto Exit;
@@ -2051,16 +2043,12 @@ namespace Media.Http
 
         public virtual bool ContainsHeader(string name)
         {
-            if (IsDisposed && IsPersistent is false) return false;
-
-            return ContainsHeader(name, out _);
+            return IsDisposed && IsPersistent is false ? false : ContainsHeader(name, out _);
         }
 
         public virtual bool ContainsEntityHeader(string name)
         {
-            if (IsDisposed && IsPersistent is false) return false;
-
-            return ContainsEntityHeader(name, out _);
+            return IsDisposed && IsPersistent is false ? false : ContainsEntityHeader(name, out _);
         }
 
         /// <summary>
@@ -2451,7 +2439,7 @@ namespace Media.Http
         /// <param name="name"></param>
         /// <param name="value"></param>
         /// <returns>The bytes which are encoded in <see cref="m_HeaderEncoding"/></returns>
-        internal protected virtual IEnumerable<byte> PrepareHeader(string name, string value)
+        protected internal virtual IEnumerable<byte> PrepareHeader(string name, string value)
         {
             return PrepareHeaderWithFormat(name, value, m_HeaderFormat);
         }
@@ -2463,7 +2451,7 @@ namespace Media.Http
         /// <param name="value"></param>
         /// <param name="format"></param>
         /// <returns></returns>
-        internal protected virtual IEnumerable<byte> PrepareHeaderWithFormat(string name, string value, string format)
+        protected internal virtual IEnumerable<byte> PrepareHeaderWithFormat(string name, string value, string format)
         {
             if (IsDisposed && false == IsPersistent) return Common.MemorySegment.Empty;
 
@@ -2528,7 +2516,7 @@ namespace Media.Http
         }
 
         //CookieCollection or CookieEnumerator
-        IEnumerable<HttpCookie> GetCookies()
+        private IEnumerable<HttpCookie> GetCookies()
         {
             throw new NotImplementedException();
         }
@@ -2574,9 +2562,9 @@ namespace Media.Http
             //Fast path doesn't show true equality.
             //other.Created != Created
 
-            if (other is null) return false;
-
-            return other.MessageType == MessageType
+            return other is null
+                ? false
+                : other.MessageType == MessageType
                 &&
                 other.Version.Equals(Version)
                 &&
@@ -2593,9 +2581,7 @@ namespace Media.Http
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(this, obj)) return true;
-
-            return obj is HttpMessage m && Equals(m);
+            return ReferenceEquals(this, obj) ? true : obj is HttpMessage m && Equals(m);
         }
 
         #endregion
@@ -2771,7 +2757,7 @@ namespace Media.Http
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        int ParseChunk(ref int offset, int length) //out string extensions
+        private int ParseChunk(ref int offset, int length) //out string extensions
         {
             //Top:
             if (length <= 0) return -1;

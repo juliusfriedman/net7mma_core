@@ -140,7 +140,7 @@ namespace Media.Common
         //    }
         //}
 
-        void Raise(bool force, params object[] args)
+        private void Raise(bool force, params object[] args)
         {
             if (Enabled || force)
             {
@@ -149,16 +149,16 @@ namespace Media.Common
             }
         }
 
-        void Disable() { Enabled = false; }
+        private void Disable() { Enabled = false; }
 
-        void Enable() { Enabled = true; }
+        private void Enable() { Enabled = true; }
 
-        void Toggle() { if (Enabled) Disable(); else Enable(); }
+        private void Toggle() { if (Enabled) Disable(); else Enable(); }
     }
 
     internal class Consumable<T> : Eventbase
     {
-        public T Consumed { get; internal protected set; }
+        public T Consumed { get; protected internal set; }
 
         public Consumable(T t, bool enabled)
             : base(t, enabled)
@@ -211,12 +211,12 @@ namespace Media.Common
             Signature = signature;
         }
 
-        System.Collections.IList GetInvocationList()
+        private System.Collections.IList GetInvocationList()
         {
             return Event.GetInvocationList();
         }
 
-        void Fire(System.Reflection.ParameterInfo[] optional = null)
+        private void Fire(System.Reflection.ParameterInfo[] optional = null)
         {
             Common.EventReferenceInformationExtensions.Consume(this, Consumed, optional);
         }

@@ -70,19 +70,21 @@ namespace Media.Common.Collections.Generic
         /// <summary>
         /// the internal buffer
         /// </summary>
-        T[] _buffer;
+        private readonly T[] _buffer;
+
         /// <summary>
         /// The all-over position within the ring buffer. The position 
         /// increases continously by adding new items to the buffer. This 
         /// value is needed to calculate the current relative position within the 
         /// buffer.
         /// </summary>
-        int _position;
+        private int _position;
+
         /// <summary>
         /// The current version of the buffer, this is required for a correct 
         /// exception handling while enumerating over the items of the buffer.
         /// </summary>
-        long _version;
+        private long _version;
 
         /// <summary>
         /// Gets or sets an item for a specified position within the ring buffer.
@@ -189,9 +191,7 @@ namespace Media.Common.Collections.Generic
             long version = _version;
             for (int i = 0; i < Count; ++i)
             {
-                if (version != _version)
-                    throw new System.InvalidOperationException("Collection changed");
-                yield return this[i];
+                yield return version != _version ? throw new System.InvalidOperationException("Collection changed") : this[i];
             }
         }
 

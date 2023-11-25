@@ -21,7 +21,7 @@ public class RiffWriter : MediaFileWriter
         AddChunk(new HeaderChunk(this, type, subType, 0));
     }
 
-    internal protected void WriteFourCC(FourCharacterCode fourCC) => WriteInt32LittleEndian((int)fourCC);
+    protected internal void WriteFourCC(FourCharacterCode fourCC) => WriteInt32LittleEndian((int)fourCC);
 
     //TODO, should not write when added, only when flushed etc
     public void AddChunk(Chunk chunk)

@@ -11,14 +11,14 @@ namespace Media.Container
     {
         #region Statics
 
-        const string CurrentWorkingDirectory = ".", ParentDirectory = "..";
+        private const string CurrentWorkingDirectory = ".", ParentDirectory = "..";
 
         public static System.IO.FileInfo GetCurrentWorkingDirectory()
         {
             return new System.IO.FileInfo(CurrentWorkingDirectory);
         }
 
-        static Dictionary<string, MediaFileStream> m_ExtensionMap = [];
+        private static readonly Dictionary<string, MediaFileStream> m_ExtensionMap = [];
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         public static bool TryRegisterExtension(string extenstion, MediaFileStream implementation)
@@ -51,9 +51,8 @@ namespace Media.Container
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         public static IEnumerable<string> GetRegisteredExtensions() { return m_ExtensionMap.Keys; }
 
-        static Type MediaFileStreamType = typeof(MediaFileStream);
-
-        static Type[] ConstructorTypes = new Type[] { typeof(Microsoft.Win32.SafeHandles.SafeFileHandle), typeof(System.Uri), typeof(System.IO.FileAccess), typeof(bool), typeof(System.Action) }; //new Type[] { typeof(string), typeof(System.IO.FileAccess) };
+        private static readonly Type MediaFileStreamType = typeof(MediaFileStream);
+        private static readonly Type[] ConstructorTypes = new Type[] { typeof(Microsoft.Win32.SafeHandles.SafeFileHandle), typeof(System.Uri), typeof(System.IO.FileAccess), typeof(bool), typeof(System.Action) }; //new Type[] { typeof(string), typeof(System.IO.FileAccess) };
 
         public static MediaFileStream GetCompatbileImplementation(string fileName, AppDomain domain = null, System.IO.FileMode mode = System.IO.FileMode.Open, System.IO.FileAccess access = System.IO.FileAccess.ReadWrite)
         {
@@ -135,13 +134,12 @@ namespace Media.Container
 
         #region Fields
 
-        bool m_Disposed, m_ShouldDispose = true;
+        private bool m_Disposed, m_ShouldDispose = true;
+        private readonly Uri m_Source;
 
-        readonly Uri m_Source;
+        protected internal System.IO.FileInfo FileInfo;
 
-        internal protected System.IO.FileInfo FileInfo;
-
-        internal protected long m_Position, m_Length;
+        protected internal long m_Position, m_Length;
 
         #endregion
 
@@ -209,15 +207,15 @@ namespace Media.Container
 
         //event BufferingComplete
 
-        readonly Action AfterClose;
+        private readonly Action AfterClose;
 
         //Could also use FileOptions.DeleteOnClose, Could also just have an Extension method.
-        void DeleteFromFileInfoIfExists()
+        private void DeleteFromFileInfoIfExists()
         {
             if (/*IsDisposed is false && */ FileInfo is not null && FileInfo.Exists) FileInfo.Delete();
         }
 
-        bool TryDeleteFromFileInfoIfExists()
+        private bool TryDeleteFromFileInfoIfExists()
         {
             try { DeleteFromFileInfoIfExists(); return true; }
             catch { return false; }
@@ -289,7 +287,7 @@ namespace Media.Container
             };
         }
 
-        void IStreamCopyTransactionResultCompleted(object sender, Common.Extensions.Stream.StreamExtensions.ITransactionResult t)
+        private void IStreamCopyTransactionResultCompleted(object sender, Common.Extensions.Stream.StreamExtensions.ITransactionResult t)
         {
             Buffering = false;
 
@@ -348,16 +346,15 @@ namespace Media.Container
 
         public delegate bool NodeAction(Node n);
 
-        NodeAction m_NodeCachingPolicy;
+        private NodeAction m_NodeCachingPolicy;
+        private SortedDictionary<long, Node> m_NodeCache;
 
-        SortedDictionary<long, Node> m_NodeCache;
-
-        bool TryCacheNodeInstance(Node n)
+        private bool TryCacheNodeInstance(Node n)
         {
             return TryCacheNode(n, true, true, true);
         }
 
-        bool IgnoreNode(Node n)
+        private bool IgnoreNode(Node n)
         {
             return true;
         }
@@ -582,10 +579,10 @@ namespace Media.Container
         public virtual void Append(byte[] buffer, int offset, int count) { WriteAt(Length, buffer, offset, count); }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
-        internal protected long GetPosition() { return Position; }
+        protected internal long GetPosition() { return Position; }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
-        internal protected long GetLength() { return Length; }
+        protected internal long GetLength() { return Length; }
 
         #endregion
 

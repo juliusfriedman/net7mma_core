@@ -62,7 +62,7 @@ namespace Media.UnitTests
         /// <summary>
         /// The UnitTests which will be run to test the implemenation logic
         /// </summary>
-        static Action[] LogicTests = new Action[] {
+        private static readonly Action[] LogicTests = new Action[] {
             TestInvocations,
             //Experimental Classes (Should not be used in real code)
             TestStopWatch,
@@ -134,7 +134,7 @@ namespace Media.UnitTests
         /// <summary>
         /// This is where the Tests.Program is currently running.
         /// </summary>
-        static string executingAssemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
+        private static readonly string executingAssemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
 
         /// <summary>
         /// The entry point of the unit testing application
@@ -233,7 +233,7 @@ namespace Media.UnitTests
 
         #region http://stackoverflow.com/questions/37077434/async-version-of-generic-extensions?noredirect=1#comment61700684_37077434
 
-        static void _TestLogicForBeginInvoke(byte[] i)
+        private static void _TestLogicForBeginInvoke(byte[] i)
         {
 
             System.Console.WriteLine("Delegate0=>" + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(i, out int local) ? "0" : local.ToString()));
@@ -259,7 +259,7 @@ namespace Media.UnitTests
             System.Console.WriteLine("Delegate0=>" + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(i, out local) ? "0" : local.ToString()));
         }
 
-        static void _TestLogicForBeginInvoke(ref byte[] i)
+        private static void _TestLogicForBeginInvoke(ref byte[] i)
         {
             _TestOtherLogicForBeginInvoke(i);
 
@@ -283,7 +283,7 @@ namespace Media.UnitTests
             System.Console.WriteLine("Delegate1=>" + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(i, out local) ? "0" : local.ToString()));
         }
 
-        static void _TestOtherLogicForBeginInvoke(byte[] i)
+        private static void _TestOtherLogicForBeginInvoke(byte[] i)
         {
 
             System.Console.WriteLine("Delegate2=>" + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(i, out int local) ? "0" : local.ToString()));
@@ -293,7 +293,7 @@ namespace Media.UnitTests
             System.Console.WriteLine("Tested2");
         }
 
-        static void _Callback(IAsyncResult iar)
+        private static void _Callback(IAsyncResult iar)
         {
             System.Console.WriteLine("Callback.CompletedSynchronously " + iar.CompletedSynchronously);
 
@@ -327,7 +327,7 @@ namespace Media.UnitTests
         /// This is because the call and it's stack were already prepared and is possibly more efficient then using the cleanup and restore just to do the same logic which would be able 
         /// to be performed by retaining the state.
         /// </summary>
-        static void TestInvocations()
+        private static void TestInvocations()
         {
             TestInvocations(false);
 
@@ -342,7 +342,7 @@ namespace Media.UnitTests
         /// Arrays can only communicate data to or from the caller within the version of the array given to a call without the `ref` annotation.
         /// </summary>
         /// <param name="useLocal"></param>
-        static void TestInvocations(bool useLocal = false)
+        private static void TestInvocations(bool useLocal = false)
         {
             //Callback is written after Tested and NotDone.
             System.Action<byte[]> call = new(_TestLogicForBeginInvoke);
@@ -983,7 +983,7 @@ namespace Media.UnitTests
             }
         }
 
-        static void TestRtpClient()
+        private static void TestRtpClient()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RtpClientUnitTests), TypeOfVoid);
 
@@ -999,7 +999,7 @@ namespace Media.UnitTests
         /// <summary>
         /// Tests the RtpClient.
         /// </summary>
-        static void TestRtpClient(bool tcp = true)
+        private static void TestRtpClient(bool tcp = true)
         {
 
             //Notes need to set EndTime on each context.
@@ -1213,7 +1213,7 @@ namespace Media.UnitTests
             }
         }
 
-        static void TestRtpDumpReader(string path, Media.RtpTools.FileFormat? knownFormat = null)
+        private static void TestRtpDumpReader(string path, Media.RtpTools.FileFormat? knownFormat = null)
         {
             //Always use an unknown format for the reader allows each item to be formatted differently
             using (Media.RtpTools.RtpDump.DumpReader reader = new(path, knownFormat))
@@ -1304,7 +1304,7 @@ namespace Media.UnitTests
         /// </summary>
         /// <param name="path">The path to write the packets to</param>
         /// <param name="format">The format the packets should be written in</param>
-        static void TestRtpDumpWriter(string path, Media.RtpTools.FileFormat format)
+        private static void TestRtpDumpWriter(string path, Media.RtpTools.FileFormat format)
         {
             System.Net.IPEndPoint testingEndPoint = new(System.Net.IPAddress.Any, 7);
 
@@ -1360,7 +1360,7 @@ namespace Media.UnitTests
             }//Done writing packets with the writer
         }
 
-        static void TestRtpTools()
+        private static void TestRtpTools()
         {
             string currentPath = System.IO.Path.GetDirectoryName(executingAssemblyLocation);
 
@@ -1501,7 +1501,7 @@ namespace Media.UnitTests
             System.IO.File.Delete(currentPath + @"\ShortDump.rtpdump");
         }
 
-        static void TestRtspClient(string location, System.Net.NetworkCredential cred = null, Media.Rtsp.RtspClient.ClientProtocolType? protocol = null, System.Net.AuthenticationSchemes? authenticationScheme = System.Net.AuthenticationSchemes.None, double protocolVersion = 1.0)
+        private static void TestRtspClient(string location, System.Net.NetworkCredential cred = null, Media.Rtsp.RtspClient.ClientProtocolType? protocol = null, System.Net.AuthenticationSchemes? authenticationScheme = System.Net.AuthenticationSchemes.None, double protocolVersion = 1.0)
         {
             //For display
             int emptyFrames = 0, incompleteFrames = 0, rtspInterleaved = 0, totalFrames = 0;
@@ -1709,10 +1709,9 @@ namespace Media.UnitTests
 
                                 if (request is not null)
                                 {
-                                    if (request.RtspMessageType == Media.Rtsp.RtspMessageType.Request)
-                                        output = "Client Received Server Sent " + request.RtspMessageType + " :" + request.ToString();
-                                    else
-                                        output = "Client Received " + request.RtspMessageType + " :" + request.ToString();
+                                    output = request.RtspMessageType == Media.Rtsp.RtspMessageType.Request
+                                        ? "Client Received Server Sent " + request.RtspMessageType + " :" + request.ToString()
+                                        : "Client Received " + request.RtspMessageType + " :" + request.ToString();
                                 }
 
                                 logWriter.Log(output);
@@ -2084,9 +2083,9 @@ namespace Media.UnitTests
                                 Media.Rtsp.RtspMessage one = null, two = null;
 
                                 //Send a few requests just because
-                                if (client.SupportedMethods.Contains(Media.Rtsp.RtspMethod.GET_PARAMETER.ToString()))
-                                    one = client.SendGetParameter();
-                                else one = client.SendOptions(true);
+                                one = client.SupportedMethods.Contains(Media.Rtsp.RtspMethod.GET_PARAMETER.ToString())
+                                    ? client.SendGetParameter()
+                                    : client.SendOptions(true);
 
                                 if (one is not null) Console.WriteLine(one);
 
@@ -2168,7 +2167,7 @@ namespace Media.UnitTests
         /// <summary>
         /// Tests the Media.RtspServer by creating a server, loading/exposing a stream and waiting for a keypress to terminate
         /// </summary>
-        static async Task TestServerAsync()
+        private static async Task TestServerAsync()
         {
             Console.WriteLine(nameof(TestServerAsync));
 
@@ -2930,7 +2929,7 @@ namespace Media.UnitTests
         /// <summary>
         /// Tests the Rtp and Media.RtspClient in various modes (Against the server)
         /// </summary>
-        static void SubTestLoad(Media.Rtsp.RtspServer server, string streamUri = null, int runs = 100, int recieveByteLimit = 0, int sessionTimeoutSeconds = 1800)
+        private static void SubTestLoad(Media.Rtsp.RtspServer server, string streamUri = null, int runs = 100, int recieveByteLimit = 0, int sessionTimeoutSeconds = 1800)
         {
             //100 times about a GB in total
 
@@ -2945,14 +2944,9 @@ namespace Media.UnitTests
                 if (server.UdpEnabled) dop /= 2;
                 dop /= 2;//Tcp
 
-                if (string.IsNullOrWhiteSpace(streamUri))
-                {
-                    streamUri = server.m_ServerIP + ":" + server.m_ServerPort + "/live/" + server.MediaStreams.Skip(Utility.Random.Next(0, server.MediaStreams.Count())).First().Name;
-                }
-                else
-                {
-                    streamUri = server.LocalEndPoint.ToString() + "/live/" + streamUri;
-                }
+                streamUri = string.IsNullOrWhiteSpace(streamUri)
+                    ? server.m_ServerIP + ":" + server.m_ServerPort + "/live/" + server.MediaStreams.Skip(Utility.Random.Next(0, server.MediaStreams.Count())).First().Name
+                    : server.LocalEndPoint.ToString() + "/live/" + streamUri;
 
                 allowHttp = server.HttpEnabled;
 
@@ -3079,7 +3073,7 @@ namespace Media.UnitTests
         }
 
         //Should be seperate file with more tests with known types, audio and video and also known values in the data e.g. audio unit size and length, video unit size and length.
-        static void TestRFC3640AudioFrame()
+        private static void TestRFC3640AudioFrame()
         {
             //The data contained in x Packets, each packet in this example has a marker.
             byte[][] packetBytes = new byte[][]
@@ -3168,7 +3162,7 @@ namespace Media.UnitTests
             if (System.IO.File.Exists(outputFileName)) System.IO.File.Delete(outputFileName);
         }
 
-        static void TestRFC6184VideoFrame()
+        private static void TestRFC6184VideoFrame()
         {
             //The data contained in x Packets
             byte[][] packetBytes = new byte[][]
@@ -3326,7 +3320,7 @@ namespace Media.UnitTests
         /// <summary>
         /// Performs the Unit Tests for the SessionDescriptionProtocol classes
         /// </summary>
-        static void TestSdp()
+        private static void TestSdp()
         {
             #region Old Way of `testing`
 
@@ -3474,7 +3468,7 @@ a=appversion:1.0");
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(SDPUnitTests), TypeOfVoid);
         }
 
-        static void TestContainerImplementations()
+        private static void TestContainerImplementations()
         {
 
             string localPath = System.IO.Path.GetDirectoryName(executingAssemblyLocation);
@@ -4159,12 +4153,12 @@ a=appversion:1.0");
             #endregion
         }
 
-        static void TestBaseMediaWriters()
+        private static void TestBaseMediaWriters()
         {
             Media.UnitTests.Mp4WriterUnitTests.WriteMp4AudioTest();
         }
 
-        static void TestRiffWriter()
+        private static void TestRiffWriter()
         {
             Media.Containers.Riff.UnitTests.WriteManaged();
             Media.Containers.Riff.UnitTests.WriteRaw();
@@ -4175,23 +4169,23 @@ a=appversion:1.0");
         /// <summary>
         /// Performs the Unit Tests for the Media.Common.Extensions.Encoding.EncodingExtensions class
         /// </summary>
-        static void TestEncodingExtensions()
+        private static void TestEncodingExtensions()
         {
             //Perform the tests
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.EncodingExtensionsTests), TypeOfVoid);
         }
 
-        static void TestMachine()
+        private static void TestMachine()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.MachineUnitTests), TypeOfVoid);
         }
 
-        static void TestExpressionExtensions()
+        private static void TestExpressionExtensions()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.SymbolExtensionsUnitTests), TypeOfVoid);
         }
 
-        static void TestHardware()
+        private static void TestHardware()
         {
             //--- Hardware.Intrinsics
 
@@ -4331,7 +4325,7 @@ a=appversion:1.0");
             }
         }
 
-        static void TestUnsafe()
+        private static void TestUnsafe()
         {
             //--- CommonIntermediateLanguage / Unsafe
 
@@ -4376,7 +4370,7 @@ a=appversion:1.0");
             //Concepts.Classes.Generic<int>.Write(ref test);
         }
 
-        static void TestMath()
+        private static void TestMath()
         {
             uint expect = uint.MinValue;
 
@@ -4401,12 +4395,12 @@ a=appversion:1.0");
             if (false.Equals(expect.Equals(quotient))) throw new System.Exception();
         }
 
-        static void TestGenericArray()
+        private static void TestGenericArray()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.GenericArrayTests), TypeOfVoid);
         }
 
-        static void TestPool()
+        private static void TestPool()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.PoolTests), TypeOfVoid);
         }
@@ -4414,7 +4408,7 @@ a=appversion:1.0");
         /// <summary>
         /// 
         /// </summary>
-        static void TestTimer()
+        private static void TestTimer()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.TimerTests), TypeOfVoid);
         }
@@ -4422,7 +4416,7 @@ a=appversion:1.0");
         /// <summary>
         /// 
         /// </summary>
-        static void TestClock()
+        private static void TestClock()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.ClockTests), TypeOfVoid);
         }
@@ -4430,7 +4424,7 @@ a=appversion:1.0");
         /// <summary>
         /// 
         /// </summary>
-        static void TestStopWatch()
+        private static void TestStopWatch()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.StopWatchTests), TypeOfVoid);
         }
@@ -4438,7 +4432,7 @@ a=appversion:1.0");
         /// <summary>
         /// 
         /// </summary>
-        static void TestRtpFrame()
+        private static void TestRtpFrame()
         {
 
             //Perform the tests
@@ -4448,13 +4442,13 @@ a=appversion:1.0");
         /// <summary>
         /// 
         /// </summary>
-        static void TestRFC2435JpegFrame()
+        private static void TestRFC2435JpegFrame()
         {
             //Perform the tests
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RFC2435UnitTest), TypeOfVoid);
         }
 
-        static void TestNtp()
+        private static void TestNtp()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.NetworkTimeProtocolUnitTests), TypeOfVoid);
         }
@@ -4462,7 +4456,7 @@ a=appversion:1.0");
         /// <summary>
         /// 
         /// </summary>
-        static void TestRtpRtcp()
+        private static void TestRtpRtcp()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RtpHeaderUnitTests), TypeOfVoid);
 
@@ -4491,7 +4485,7 @@ a=appversion:1.0");
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(RtpRtcpTests), TypeOfVoid);
         }
 
-        static void TestCryptography()
+        private static void TestCryptography()
         {
             //Todo
             //Test md5 against c# version and test vectors.
@@ -4499,7 +4493,7 @@ a=appversion:1.0");
 
         }
 
-        static void TestSegmentStream()
+        private static void TestSegmentStream()
         {
             //Todo, test the SegmentStream
         }
@@ -4507,13 +4501,13 @@ a=appversion:1.0");
         /// <summary>
         /// 
         /// </summary>
-        static void TestRtspMessage()
+        private static void TestRtspMessage()
         {
             //Perform the tests
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RtspMessgeUnitTests), TypeOfVoid);
         }
 
-        static void TestSipMessage()
+        private static void TestSipMessage()
         {
             //Perform the tests
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.SipMessgeUnitTests), TypeOfVoid);
@@ -4522,7 +4516,7 @@ a=appversion:1.0");
         /// <summary>
         /// 
         /// </summary>
-        static void TestHttpMessage()
+        private static void TestHttpMessage()
         {
             //Perform the tests
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.HttpMessgeUnitTests), TypeOfVoid);
@@ -4558,7 +4552,7 @@ a=appversion:1.0");
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.ConcurrentLinkedStackSlimTests), TypeOfVoid);
         }
 
-        static void TestCodec()
+        private static void TestCodec()
         {
             //Other types from Codec
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RFC2361UnitTests), TypeOfVoid);
@@ -4566,12 +4560,12 @@ a=appversion:1.0");
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.MediaBufferUnitTests), TypeOfVoid);
         }
 
-        static void TestAudioBuffer()
+        private static void TestAudioBuffer()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.AudioUnitTests), TypeOfVoid);
         }
 
-        static void TestImageBuffer()
+        private static void TestImageBuffer()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.ImageUnitTests), TypeOfVoid);
         }
@@ -4580,11 +4574,11 @@ a=appversion:1.0");
 
         #region Methods (To Support Unit Tests)
 
-        static Type TypeOfVoid = typeof(void);
+        private static readonly Type TypeOfVoid = typeof(void);
 
-        static void CreateInstanceAndInvokeAllMethodsWithReturnType(Type instanceType, Type returnType, bool writeNames = true)
+        private static void CreateInstanceAndInvokeAllMethodsWithReturnType(Type instanceType, Type returnType, bool writeNames = true)
         {
-            Object typedInstance = instanceType.IsAbstract ? null : Activator.CreateInstance(instanceType);
+            object typedInstance = instanceType.IsAbstract ? null : Activator.CreateInstance(instanceType);
 
             //Write the name if desired
             if (writeNames) writeInfo("Running all tests within: " + instanceType.Name);
@@ -4606,7 +4600,7 @@ a=appversion:1.0");
             typedInstance = null;
         }
 
-        static void writeError(Exception ex)
+        private static void writeError(Exception ex)
         {
             Console.BackgroundColor = ConsoleColor.Red;
             Console.WriteLine("Test Failed!");
@@ -4615,7 +4609,7 @@ a=appversion:1.0");
             Console.BackgroundColor = ConsoleColor.Black;
         }
 
-        static void writeInfo(string message, ConsoleColor? backgroundColor = null, ConsoleColor? foregroundColor = null)
+        private static void writeInfo(string message, ConsoleColor? backgroundColor = null, ConsoleColor? foregroundColor = null)
         {
 
             ConsoleColor? previousBackgroundColor = null, previousForegroundColor = null;
@@ -4645,7 +4639,7 @@ a=appversion:1.0");
             }
         }
 
-        static void TraceMessage(string message,
+        private static void TraceMessage(string message,
           [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
           [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
           [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
@@ -4657,7 +4651,7 @@ a=appversion:1.0");
             Console.WriteLine(string.Format(TestingFormat, message, memberName ?? "No MethodName Provided"));
         }
 
-        static void RunTest(Action test, int count = 1, bool waitForGoAhead = true)
+        private static void RunTest(Action test, int count = 1, bool waitForGoAhead = true)
         {
             System.Console.Clear();
             Console.WriteLine("About to run test: " + test.Method.Name);
@@ -4665,7 +4659,7 @@ a=appversion:1.0");
             RunTestAsync(() => { test(); return Task.CompletedTask; }, count, waitForGoAhead).GetAwaiter().GetResult();
         }
 
-        static async Task RunTestAsync(Func<Task> test, int count = 1, bool waitForGoAhead = true)
+        private static async Task RunTestAsync(Func<Task> test, int count = 1, bool waitForGoAhead = true)
         {
             //If the debugger is attached get a ConsoleKey, the key is Q return.
             if (waitForGoAhead && /*System.Diagnostics.Debugger.IsAttached && */ Console.ReadKey(true).Key == ConsoleKey.Q) return;
@@ -4779,16 +4773,11 @@ a=appversion:1.0");
                 {
                     if (Media.Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
-                    if (packet.IsComplete) Console.ForegroundColor = ConsoleColor.Blue;
-                    else Console.ForegroundColor = ConsoleColor.Red;
+                    Console.ForegroundColor = packet.IsComplete ? ConsoleColor.Blue : ConsoleColor.Red;
 
                     Media.Rtp.RtpClient client = context is not null ? null : ((Media.Rtp.RtpClient)sender);
 
-                    Media.Rtp.RtpClient.TransportContext matched = null;
-
-                    if (client is not null) matched = client.GetContextForPacket(rtpPacket);
-                    else matched = (Media.Rtp.RtpClient.TransportContext)context;
-
+                    RtpClient.TransportContext matched = client is not null ? client.GetContextForPacket(rtpPacket) : (Media.Rtp.RtpClient.TransportContext)context;
                     if (matched is null)
                     {
 
@@ -4827,7 +4816,7 @@ a=appversion:1.0");
                 {
                     bool complete = rtcpPacket.IsComplete;
 
-                    if (complete) if (rtcpPacket.Transferred.HasValue) Console.ForegroundColor = ConsoleColor.Green; else Console.ForegroundColor = ConsoleColor.DarkGreen;
+                    if (complete) Console.ForegroundColor = rtcpPacket.Transferred.HasValue ? ConsoleColor.Green : ConsoleColor.DarkGreen;
                     else if (Media.Common.IDisposedExtensions.IsNullOrDisposed(rtcpPacket)) return;
                     else Console.ForegroundColor = ConsoleColor.Yellow;
 
@@ -4894,7 +4883,7 @@ a=appversion:1.0");
 
         }
 
-        static void PrintRtcpInformation(Media.Rtcp.RtcpPacket p)
+        private static void PrintRtcpInformation(Media.Rtcp.RtcpPacket p)
         {
             Console.BackgroundColor = ConsoleColor.Blue;
             TryPrintClientPacket(null, true, p);

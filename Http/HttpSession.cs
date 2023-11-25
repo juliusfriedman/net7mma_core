@@ -1,6 +1,6 @@
 ﻿namespace Media.Http
 {
-    class HttpSession
+    internal class HttpSession
     {
         //See RtspSession and adapt.
     }

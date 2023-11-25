@@ -89,11 +89,11 @@ namespace Media.Codecs.Audio
         {
             int otherComponentsLength = other.Components.Length;
 
-            if (otherComponentsLength == 1) return other;
-
-            if (componentIndex > otherComponentsLength || componentCount + componentIndex > otherComponentsLength) throw new System.ArgumentOutOfRangeException("componentIndex");
-
-            return new AudioFormat(other.SampleRate, other.IsSigned, other.ByteOrder, other.DataLayout, System.Linq.Enumerable.Skip(other.Components, componentIndex).Take(componentCount));
+            return otherComponentsLength == 1
+                ? other
+                : componentIndex > otherComponentsLength || componentCount + componentIndex > otherComponentsLength
+                ? throw new System.ArgumentOutOfRangeException("componentIndex")
+                : new AudioFormat(other.SampleRate, other.IsSigned, other.ByteOrder, other.DataLayout, System.Linq.Enumerable.Skip(other.Components, componentIndex).Take(componentCount));
         }
 
         public static AudioFormat Packed(AudioFormat other)
@@ -202,7 +202,7 @@ namespace Media.Codecs.Audio
         /// Clones an AudioFormat
         /// </summary>
         /// <param name="format">The AudioFormat to clone</param>
-        internal protected AudioFormat(AudioFormat format)
+        protected internal AudioFormat(AudioFormat format)
             : this(format.SampleRate, format.IsSigned, format.ByteOrder, format.DataLayout)
         {
 

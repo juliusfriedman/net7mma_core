@@ -191,7 +191,7 @@ namespace Media.Concepts.Classes
         /// <param name="address"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static object Read(nint address)
+        private static object Read(nint address)
         {
             //Create memory for a boxed object
             object box = default;
@@ -248,7 +248,7 @@ namespace Media.Concepts.Classes
         //http://stackoverflow.com/questions/621493/c-sharp-unsafe-value-type-array-to-byte-array-conversions/3577227#3577227
 
         [System.CLSCompliant(false)]
-        public unsafe static T[] Create<T>(void* source, int length)
+        public static unsafe T[] Create<T>(void* source, int length)
         {
             System.Type type = typeof(T);
 
@@ -306,7 +306,7 @@ namespace Media.Concepts.Classes
             return output;
         }
 
-        static unsafe T[] MakeArray<T>(void* t, int length, int tSizeInBytes) where T : struct
+        private static unsafe T[] MakeArray<T>(void* t, int length, int tSizeInBytes) where T : struct
         {
             T[] result = new T[length];
             for (int i = 0; i < length; i++)
@@ -379,7 +379,7 @@ namespace Media.Concepts.Classes
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoOptimization)]
-        static object CreateObject() { return new System.Object(); }
+        private static object CreateObject() { return new object(); }
 
         private static nint GetAllocMethodAddress()
         {
@@ -557,19 +557,19 @@ namespace Media.Concepts.Classes
             internal System.Array Array;
 
             [System.Runtime.InteropServices.FieldOffset(0)]
-            internal System.Char[] CharArray;
+            internal char[] CharArray;
 
             [System.Runtime.InteropServices.FieldOffset(0)]
-            internal System.Byte[] ByteArray;
+            internal byte[] ByteArray;
 
             [System.Runtime.InteropServices.FieldOffset(0)]
-            internal System.Single[] FloatArray;
+            internal float[] FloatArray;
 
             [System.Runtime.InteropServices.FieldOffset(0)]
-            internal System.Object Object;
+            internal object Object;
 
             [System.Runtime.InteropServices.FieldOffset(0)]
-            internal System.String String;
+            internal string String;
 
             //Probably only need one of these.
 
@@ -680,13 +680,13 @@ namespace Media.Concepts.Classes
         }
 
         [System.CLSCompliant(false)]
-        public unsafe static bool IsNegativeZero(double* d) //ref
+        public static unsafe bool IsNegativeZero(double* d) //ref
         {
             //Check for -0.0
             return (*((long*)(d))).Equals(Common.Binary.NegativeZeroBits);
         }
 
-        public unsafe static bool IsNegativeZero(ref double d)
+        public static unsafe bool IsNegativeZero(ref double d)
         {
             //Make a pointer to the pointer, which when dereferenced can access the result.
             nint value = Unsafe.AddressOf(ref d);
@@ -831,7 +831,7 @@ namespace Media.Concepts.Classes
         /// <param name="index"></param>
         /// <param name="newValue"></param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static bool UnsafeTryModifyString(string toModify, int index, char newValue)
+        public static unsafe bool UnsafeTryModifyString(string toModify, int index, char newValue)
         {
             try
             {
@@ -846,7 +846,7 @@ namespace Media.Concepts.Classes
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static void UnsafeModifyString(string toModify, ref int index, ref char newValue)
+        public static unsafe void UnsafeModifyString(string toModify, ref int index, ref char newValue)
         {
             fixed (char* str = toModify)
             {
@@ -957,7 +957,7 @@ namespace Media.Concepts.Classes
                 private readonly UnsafeList<R> _list;
                 private int _index;
                 private R _current;
-                private int size;
+                private readonly int size;
 
                 public CustomEnumerator(UnsafeList<R> list)
                 {

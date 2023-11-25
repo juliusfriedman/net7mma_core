@@ -74,7 +74,7 @@ namespace Media.Common
         /// <summary>
         /// ISO 8859-1 characters with the most-significant bit set are represented as 1100001x 10xxxxxx. (See RFC 2279 [21])
         /// </summary>
-        const byte SurrogateMask = 0xC3; //11000011
+        private const byte SurrogateMask = 0xC3; //11000011
 
         /// <summary>
         /// Checks the first two bits and the last two bits of each byte while moving the count to the correct position while doing so.

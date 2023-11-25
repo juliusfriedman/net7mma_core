@@ -56,7 +56,7 @@ namespace Media.Containers.Mcf
 
         #region Constants
 
-        const int MinimumSize = 8,
+        private const int MinimumSize = 8,
             HeaderSize = 0x1400, TypeHeaderSize = 160, ActualHeaderSize = 864, ExtendedInfoSize = 3072, ContentSpecificInfoSize = 1024,
             TrackEntrySize = 0x240, ClusterSize = 16, FooterSize = 4, BlockHeaderSize = 10;
 

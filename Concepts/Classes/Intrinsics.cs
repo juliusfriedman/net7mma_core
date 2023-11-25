@@ -73,7 +73,7 @@ namespace Media.Concepts.Hardware
         /// Stub method which is used for fallback
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        internal static System.UInt64 Fallback_ULong()
+        internal static ulong Fallback_ULong()
         {
             return 0;
         }
@@ -166,7 +166,7 @@ namespace Media.Concepts.Hardware
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        void NotSupported()
+        private void NotSupported()
         {
             //Todo, Make EntryPoint a PlatformMethod or store the PlatformMethod for fallback instead of the PlatformFallbackDelegate.
             //EntryPoint.VirtualFree();
@@ -210,7 +210,7 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// The method which is used when the EntryPoint is not suitable to run in the current platform.
         /// </summary>
-        System.Delegate PlatformFallback;
+        private readonly System.Delegate PlatformFallback;
 
         /// <summary>
         /// The state of the intrinsic
@@ -284,8 +284,9 @@ namespace Media.Concepts.Hardware
                 System.Reflection.MethodInfo existingFallback = System.Reflection.IntrospectionExtensions.GetTypeInfo(GetType()).GetMethod(name, bindingFlags);
 
                 //If none exists create one, otherwise use the existing method
-                if (existingFallback is null) fallback = System.Delegate.CreateDelegate(entryPoint.ReturnType, this, name);
-                else fallback = System.Delegate.CreateDelegate(entryPoint.ReturnType, this, existingFallback);
+                fallback = existingFallback is null
+                    ? System.Delegate.CreateDelegate(entryPoint.ReturnType, this, name)
+                    : System.Delegate.CreateDelegate(entryPoint.ReturnType, this, existingFallback);
             }
 
             if (Common.IDisposedExtensions.IsNullOrDisposed(entryPoint)) throw new System.InvalidOperationException("entryPoint, IsNullOrDisposed.");
@@ -346,7 +347,7 @@ namespace Media.Concepts.Hardware
         /// </summary>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static ulong DiagnosticStopWatchGetTimestamp()
+        private static ulong DiagnosticStopWatchGetTimestamp()
         {
             return unchecked((ulong)System.Diagnostics.Stopwatch.GetTimestamp());
         }
@@ -356,7 +357,7 @@ namespace Media.Concepts.Hardware
         /// </summary>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        static ulong Replacement()
+        private static ulong Replacement()
         {
             return 0;
         }
@@ -388,7 +389,7 @@ namespace Media.Concepts.Hardware
             }
         }
 
-        static byte[] x86CodeBytes = new byte[]
+        private static readonly byte[] x86CodeBytes = new byte[]
             {
                 0x0F, 0x31, // rdtsc
                 0xC3, // ret
@@ -397,7 +398,7 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// Pipeline aware
         /// </summary>
-        static byte[] x86Rdtscp = new byte[]
+        private static readonly byte[] x86Rdtscp = new byte[]
             {
                 0x0F, 0x01, 0xF9, //rdtscp
                 0xC3 //ret
@@ -406,7 +407,7 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// Serialized with Cpuid
         /// </summary>
-        static byte[] x86RdtscCpuid = new byte[]
+        private static readonly byte[] x86RdtscCpuid = new byte[]
             {
                0x53, //push ebx
                0x31, 0xC0, //xor eax,eax
@@ -422,7 +423,7 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// Raw call
         /// </summary>
-        static byte[] x64CodeBytes =
+        private static readonly byte[] x64CodeBytes =
             {
                 0x0F, 0x31, // rdtsc
                 0x48, 0xC1, 0xE2, 0x20, // shl rdx,20h 
@@ -433,7 +434,7 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// Pipeline aware
         /// </summary>
-        static byte[] x64Rdtscp = new byte[]
+        private static readonly byte[] x64Rdtscp = new byte[]
             {
                 0x0F, 0x01, 0xF9, //rdtscp
                 0x48, 0xC1, 0xE2, 0x20, // shl rdx, 20h
@@ -444,7 +445,7 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// Serialized with Cpuid
         /// </summary>
-        static byte[] x64RdtscCpuid = new byte[]
+        private static readonly byte[] x64RdtscCpuid = new byte[]
             {
                 0x53, //push rbx
                 0x31, 0xC0, //xor eax,eax
@@ -533,7 +534,7 @@ namespace Media.Concepts.Hardware
 
                     entryPoint.InstructionPointer = WindowsEntryPoint.VirtualAlloc(
                       entryPoint.InstructionPointer, //Use whatever CodePointer was already
-                      new System.UIntPtr((uint)codeSize), //The determined size
+                      new nuint((uint)codeSize), //The determined size
                       WindowsEntryPoint.AllocationType.Commit | WindowsEntryPoint.AllocationType.Reserve, //The flags
                       WindowsEntryPoint.MemoryProtection.ExecuteReadWrite //The permissions              
                     );
@@ -693,7 +694,7 @@ namespace Media.Concepts.Hardware
         /// When implemented in a derived class, allows the caller to compile an intrinsic
         /// </summary>
         /// <param name="machine">Indicates if the compilation is for the current machine</param>
-        internal protected abstract void Compile(bool machine = true);
+        protected internal abstract void Compile(bool machine = true);
         //{
         //    State = IntrinsicState.Compiled;
         //}
@@ -754,7 +755,7 @@ namespace Media.Concepts.Hardware
         /// <remarks>
         /// <see href="https://msdn.microsoft.com/en-us/library/ff648663.aspx#c08618429_020">MSDN</see> to understand luring is possible.
         /// </remarks>
-        const string Kernel32 = "kernel32.dll";
+        private const string Kernel32 = "kernel32.dll";
 
         /// <summary>
         /// 
@@ -813,7 +814,7 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.InteropServices.DllImport(Kernel32, SetLastError = true)]
-        internal static extern nint VirtualAlloc(nint lpAddress, System.UIntPtr dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
+        internal static extern nint VirtualAlloc(nint lpAddress, nuint dwSize, AllocationType flAllocationType, MemoryProtection flProtect);
 
         /// <summary>
         /// 
@@ -825,7 +826,7 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.InteropServices.DllImport(Kernel32)]
-        internal static extern bool VirtualFree(nint lpAddress, System.UInt32 dwSize, FreeType dwFreeType);
+        internal static extern bool VirtualFree(nint lpAddress, uint dwSize, FreeType dwFreeType);
 
         /// <summary>
         /// 
@@ -853,7 +854,7 @@ namespace Media.Concepts.Hardware
 
             InstructionPointer = VirtualAlloc(
               InstructionPointer, //Use whatever CodePointer was already
-              new System.UIntPtr((uint)codeSize), //The determined size
+              new nuint((uint)codeSize), //The determined size
               AllocationType.Commit | AllocationType.Reserve, //The flags
               MemoryProtection.ExecuteReadWrite //The permissions              
             );
@@ -934,11 +935,9 @@ namespace Media.Concepts.Hardware
             return (nint)(pointer & ~(PAGE_SIZE - 1));
         }
 
-        static System.Type MonoPosix = System.Type.GetType("Mono.Posix");
-
-        static System.Reflection.Assembly Assembly = MonoPosix.Assembly;
-
-        static System.Type Syscall = Assembly.GetType("Mono.Unix.Native.Syscall");
+        private static readonly System.Type MonoPosix = System.Type.GetType("Mono.Posix");
+        private static readonly System.Reflection.Assembly Assembly = MonoPosix.Assembly;
+        private static readonly System.Type Syscall = Assembly.GetType("Mono.Unix.Native.Syscall");
 
         //Errno is set after calling these functions.
         //Note that Errno is first read from Marshal.GetLastWin32Error and then converted with NativeConvert.
@@ -958,39 +957,38 @@ namespace Media.Concepts.Hardware
 
         //public static long sysconf (SysconfName name)
 
-        static System.Type MmapProts = Assembly.GetType("Mono.Unix.Native.MmapProts");
-
-        static System.Type MmapFlags = Assembly.GetType("Mono.Unix.Native.MmapFlags");
+        private static readonly System.Type MmapProts = Assembly.GetType("Mono.Unix.Native.MmapProts");
+        private static readonly System.Type MmapFlags = Assembly.GetType("Mono.Unix.Native.MmapFlags");
 
         //MmapProts.Execute
-        static int mmapProtsExecute = (int)MmapProts.GetField("PROT_EXEC").GetValue(null);
+        private static readonly int mmapProtsExecute = (int)MmapProts.GetField("PROT_EXEC").GetValue(null);
 
         //MmapProts.Read
-        static int mmapProtsRead = (int)MmapProts.GetField("PROT_READ").GetValue(null);
+        private static readonly int mmapProtsRead = (int)MmapProts.GetField("PROT_READ").GetValue(null);
 
         //MmapProts.Write
-        static int mmapProtsWrite = (int)MmapProts.GetField("PROT_WRITE").GetValue(null);
+        private static readonly int mmapProtsWrite = (int)MmapProts.GetField("PROT_WRITE").GetValue(null);
 
         internal static int MmapProtsExecuteReadWrite = mmapProtsExecute | mmapProtsRead | mmapProtsWrite;
 
         internal static int MmapProtsExecuteWrite = mmapProtsExecute | mmapProtsWrite;
 
         //MmapFlags.Private
-        static int mmapFlagsPrivate = (int)MmapFlags.GetField("MAP_PRIVATE").GetValue(null);
+        private static readonly int mmapFlagsPrivate = (int)MmapFlags.GetField("MAP_PRIVATE").GetValue(null);
 
         //MmapFlags.Anonymous
-        static int mmapFlagsAnonymous = (int)MmapFlags.GetField("MAP_ANONYMOUS").GetValue(null);
+        private static readonly int mmapFlagsAnonymous = (int)MmapFlags.GetField("MAP_ANONYMOUS").GetValue(null);
 
         internal static int MmapFlagsAnonymousPrivate = mmapFlagsAnonymous | mmapFlagsPrivate;
 
         //Create the MmapProts parameter (EXECUTE | READ | WRITE)
-        static object mmapProtsExecuteReadWrite = System.Enum.ToObject(MmapProts, MmapProtsExecuteReadWrite);
+        private static readonly object mmapProtsExecuteReadWrite = System.Enum.ToObject(MmapProts, MmapProtsExecuteReadWrite);
 
         //Create the MmapProts parameter (EXECUTE | WRITE)
-        static object mmapProtsExecuteWrite = System.Enum.ToObject(MmapProts, MmapProtsExecuteWrite);
+        private static readonly object mmapProtsExecuteWrite = System.Enum.ToObject(MmapProts, MmapProtsExecuteWrite);
 
         //Create the MmapFlags parameter (ANONYMOUS | PRIVATE)
-        static object mmapFlagsAnonymousPrivate = System.Enum.ToObject(MmapFlags, MmapFlagsAnonymousPrivate);
+        private static readonly object mmapFlagsAnonymousPrivate = System.Enum.ToObject(MmapFlags, MmapFlagsAnonymousPrivate);
 
         internal static System.Func<nint, ulong, int, int, int, long, nint> _Mmap;
 
@@ -1272,7 +1270,7 @@ namespace Media.Concepts.Hardware
             internal delegate uint ReadCpuTypeDelegate();
 
             //Should return is 0 if cpuid is supported
-            byte[] x86CodeBytes = new byte[]{
+            private readonly byte[] x86CodeBytes = new byte[]{
                 0x9C, // pushf   ;Save EFLAGS
                 0x9C, // pushf   ;Store EFLAGS
                 0x81, 0xF4, 0x00, 0x00, 0x20, 0x00, //xor esp,0x200000 ;Invert the ID bit in stored EFLAGS
@@ -1301,12 +1299,11 @@ namespace Media.Concepts.Hardware
             1c: c3                      ret
              
              */
-            byte[] x64CodeBytes = new byte[] { 0x9C, 0x67, 0x8F, 0x00, 0x89, 0xC8, 0x31, 0x04, 0x25, 0x00, 0x00, 0x20, 0x00, 0x67, 0xFF, 0x30, 0x9D, 0x9C, 0x67, 0x8F, 0x00, 0x31, 0xC1, 0x75, 0x05, 0xB8, 0x00, 0x00, 0x00, 0x00, 0xC3 };
-
-            ReadCpuTypeDelegate FunctionPointer;
+            private readonly byte[] x64CodeBytes = new byte[] { 0x9C, 0x67, 0x8F, 0x00, 0x89, 0xC8, 0x31, 0x04, 0x25, 0x00, 0x00, 0x20, 0x00, 0x67, 0xFF, 0x30, 0x9D, 0x9C, 0x67, 0x8F, 0x00, 0x31, 0xC1, 0x75, 0x05, 0xB8, 0x00, 0x00, 0x00, 0x00, 0xC3 };
+            private ReadCpuTypeDelegate FunctionPointer;
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected override void Compile(bool machine = true)
+            protected internal override void Compile(bool machine = true)
             {
                 //If building for the machine
                 if (machine)
@@ -1843,7 +1840,7 @@ namespace Media.Concepts.Hardware
                 /// <summary>
                 /// The backing field for <see cref="Function"/>
                 /// </summary>
-                uint function;
+                private uint function;
 
                 #endregion
 
@@ -1917,12 +1914,11 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static bool IsSupported(PlatformIntrinsic intrinsic)
             {
-                if (Common.IDisposedExtensions.IsNullOrDisposed(intrinsic) || CpuId.GetMaximumFeatureLevel() == -1) return false;
-
-
-                if (false == System.Enum.TryParse<CpuId.CpuIdFeature>(intrinsic.GetType().Name, true, out CpuIdFeature feature)) return false;
-
-                return CpuId.Supports(feature);
+                return Common.IDisposedExtensions.IsNullOrDisposed(intrinsic) || CpuId.GetMaximumFeatureLevel() == -1
+                    ? false
+                    : false == System.Enum.TryParse<CpuId.CpuIdFeature>(intrinsic.GetType().Name, true, out CpuIdFeature feature)
+                    ? false
+                    : CpuId.Supports(feature);
             }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -2005,26 +2001,22 @@ namespace Media.Concepts.Hardware
                 //return false;
             }
 
-            static byte[] CpuIdBuffer = new byte[16];
-
-            static int MaximumFeatureLevel = 0;
-
-            static int MaximumExtendedFeatureLevel = -2147483648;
-
-            static string VendorString = null;
-
-            static string ProcessorBrandString = null;
+            private static byte[] CpuIdBuffer = new byte[16];
+            private static int MaximumFeatureLevel = 0;
+            private static int MaximumExtendedFeatureLevel = -2147483648;
+            private static string VendorString = null;
+            private static string ProcessorBrandString = null;
 
             /// <summary>
             /// Key => First 32 bits is the level, last 32 bits is the subLeaf
             /// Value => Results from cpuid
             /// </summary>
-            readonly static System.Collections.Generic.Dictionary<ulong, Common.MemorySegment> CpuIdResults = [];
+            private static readonly System.Collections.Generic.Dictionary<ulong, Common.MemorySegment> CpuIdResults = [];
 
             /// <summary>
             /// 
             /// </summary>
-            readonly static System.Collections.Generic.Dictionary<CpuIdFeature, CpuIdFeatureAttribute> FeatureInformation = [];
+            private static readonly System.Collections.Generic.Dictionary<CpuIdFeature, CpuIdFeatureAttribute> FeatureInformation = [];
 
             //const int InfoSize = 16;
 
@@ -2298,12 +2290,9 @@ namespace Media.Concepts.Hardware
                         {
                             maximumExtendedFeatureLevel = CpuId.GetMaximumExtendedFeatureLevel();
 
-                            if (maximumExtendedFeatureLevel >= -2147483640)
-                            {
-                                return (int)Common.Binary.ReadBits(CpuId.RetrieveInformation(-2147483640).Array, 0, 24, false) + 1;
-                            }
-
-                            return 0;
+                            return maximumExtendedFeatureLevel >= -2147483640
+                                ? (int)Common.Binary.ReadBits(CpuId.RetrieveInformation(-2147483640).Array, 0, 24, false) + 1
+                                : 0;
                         }
                     case VendorStrings.GenuineIntel:
                         {
@@ -2321,58 +2310,42 @@ namespace Media.Concepts.Hardware
 
             internal static int GetStepping()
             {
-                if (CpuId.GetMaximumFeatureLevel() < 1) return 0;
-
-                return (int)Common.Binary.ReadBits(RetrieveInformation(1).Array, 0, 4, false);
+                return CpuId.GetMaximumFeatureLevel() < 1 ? 0 : (int)Common.Binary.ReadBits(RetrieveInformation(1).Array, 0, 4, false);
             }
 
             internal static int GetModelFamily()
             {
-                if (CpuId.GetMaximumFeatureLevel() < 1) return 0;
-
-                return (int)Common.Binary.ReadBits(RetrieveInformation(1).Array, 4, 4, false);
+                return CpuId.GetMaximumFeatureLevel() < 1 ? 0 : (int)Common.Binary.ReadBits(RetrieveInformation(1).Array, 4, 4, false);
             }
 
             public static int GetModel()
             {
-                if (GetMaximumFeatureLevel() < 1) return 0;
-
-                return (int)Common.Binary.ReadBits(RetrieveInformation(1).Array, 7, 3, false);
+                return GetMaximumFeatureLevel() < 1 ? 0 : (int)Common.Binary.ReadBits(RetrieveInformation(1).Array, 7, 3, false);
             }
 
             public static int GetFamily()
             {
-                if (CpuId.GetMaximumFeatureLevel() < 1) return 0;
-
-                return (int)Common.Binary.ReadBits(CpuId.RetrieveInformation(1).Array, 8, 4, false);
+                return CpuId.GetMaximumFeatureLevel() < 1 ? 0 : (int)Common.Binary.ReadBits(CpuId.RetrieveInformation(1).Array, 8, 4, false);
             }
 
             public static int GetProcessorType()
             {
-                if (CpuId.GetMaximumFeatureLevel() < 1) return 0;
-
-                return (int)Common.Binary.ReadBits(CpuId.RetrieveInformation(1).Array, 12, 2, false);
+                return CpuId.GetMaximumFeatureLevel() < 1 ? 0 : (int)Common.Binary.ReadBits(CpuId.RetrieveInformation(1).Array, 12, 2, false);
             }
 
             public static int GetExtendedModel()
             {
-                if (CpuId.GetMaximumFeatureLevel() < 1) return 0;
-
-                return (int)Common.Binary.ReadBits(CpuId.RetrieveInformation(1).Array, 16, 3, false);
+                return CpuId.GetMaximumFeatureLevel() < 1 ? 0 : (int)Common.Binary.ReadBits(CpuId.RetrieveInformation(1).Array, 16, 3, false);
             }
 
             public static int GetExtendedFamily()
             {
-                if (CpuId.GetMaximumFeatureLevel() < 1) return 0;
-
-                return (int)Common.Binary.ReadBits(CpuId.RetrieveInformation(1).Array, 20, 7, false);
+                return CpuId.GetMaximumFeatureLevel() < 1 ? 0 : (int)Common.Binary.ReadBits(CpuId.RetrieveInformation(1).Array, 20, 7, false);
             }
 
             internal static int GetExtendedModelFamily()
             {
-                if (CpuId.GetMaximumFeatureLevel() < 1) return 0;
-
-                return (int)Common.Binary.ReadBits(CpuId.RetrieveInformation(1).Array, 16, 11, false);
+                return CpuId.GetMaximumFeatureLevel() < 1 ? 0 : (int)Common.Binary.ReadBits(CpuId.RetrieveInformation(1).Array, 16, 11, false);
             }
 
             public static int GetDisplayModel()
@@ -2399,9 +2372,7 @@ namespace Media.Concepts.Hardware
             /// <returns></returns>
             public static long ProcessorInformation()
             {
-                if (CpuId.GetMaximumFeatureLevel() == -1) return -1;
-
-                return Common.Binary.Read64(CpuId.RetrieveInformation(0).Array, 0, false);
+                return CpuId.GetMaximumFeatureLevel() == -1 ? -1 : Common.Binary.Read64(CpuId.RetrieveInformation(0).Array, 0, false);
             }
 
             #region Level 1
@@ -2812,7 +2783,7 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <param name="buffer"></param>
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static void Fallback(byte[] buffer)
+            private static void Fallback(byte[] buffer)
             {
                 var (Eax, Ebx, Ecx, Edx) = System.Runtime.Intrinsics.X86.X86Base.CpuId(Common.Binary.Read32(buffer, 0, false), Common.Binary.Read32(buffer, 4, false));
                 Common.Binary.Write32(buffer, 0, false, Eax);
@@ -2835,10 +2806,10 @@ namespace Media.Concepts.Hardware
 
             #region Fields
 
-            CpuIdExDelegate CpuIdEx;
+            private CpuIdExDelegate CpuIdEx;
 
             //edi = buffer
-            byte[] x86CodeBytes = new byte[] { 
+            private readonly byte[] x86CodeBytes = new byte[] { 
                                         //Make a new call frame might can omit 
                  0x55,                  // push        ebp  
                  0x8B, 0xEC,            // mov         ebp,esp
@@ -2861,7 +2832,7 @@ namespace Media.Concepts.Hardware
 
 
             // rcx is buffer
-            byte[] x64CodeBytes = {
+            private readonly byte[] x64CodeBytes = {
                 0x53,                   // push   rbx (ebx is the lower half of rbx)            
                                         //Save buffer address to r9
                 0x49, 0x89, 0xC9,       // mov    r9,rcx
@@ -2897,7 +2868,7 @@ namespace Media.Concepts.Hardware
             #region Methods
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected override void Compile(bool machine = false)
+            protected internal override void Compile(bool machine = false)
             {
                 //Determine based on the State
                 switch (State)
@@ -3012,7 +2983,7 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <returns></returns>
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            static ulong Fallback()
+            private static ulong Fallback()
             {
                 return unchecked((ulong)System.Diagnostics.Stopwatch.GetTimestamp());
             }
@@ -3049,8 +3020,7 @@ namespace Media.Concepts.Hardware
             internal delegate ulong TimestampDelegate();
 
             internal TimestampDelegate ReadTimestampDelegate;
-
-            byte[] x86CodeBytes = new byte[]
+            private readonly byte[] x86CodeBytes = new byte[]
             {
                 0x0F, 0x31, // rdtsc
                 0xC3, // ret
@@ -3059,7 +3029,7 @@ namespace Media.Concepts.Hardware
             /// <summary>
             /// Pipeline aware
             /// </summary>
-            byte[] x86Rdtscp = new byte[]
+            private readonly byte[] x86Rdtscp = new byte[]
             {
                 0x0F, 0x01, 0xF9, //rdtscp
                 0xC3 //ret
@@ -3068,7 +3038,7 @@ namespace Media.Concepts.Hardware
             /// <summary>
             /// Serialized with Cpuid
             /// </summary>
-            byte[] x86RdtscCpuid = new byte[]
+            private readonly byte[] x86RdtscCpuid = new byte[]
             {
                0x53, //push ebx
                0x31, 0xC0, //xor eax,eax
@@ -3086,7 +3056,7 @@ namespace Media.Concepts.Hardware
             /// <summary>
             /// Raw call
             /// </summary>
-            byte[] x64CodeBytes =
+            private readonly byte[] x64CodeBytes =
             {
                 0x0F, 0x31, // rdtsc
                 //0x48, 0xC1, 0xE2, 0x20, // shl rdx,20h 
@@ -3097,7 +3067,7 @@ namespace Media.Concepts.Hardware
             /// <summary>
             /// Pipeline aware
             /// </summary>
-            byte[] x64Rdtscp = new byte[]
+            private readonly byte[] x64Rdtscp = new byte[]
             {
                 0x0F, 0x01, 0xF9, //rdtscp
                 //0x48, 0xC1, 0xE2, 0x20, // shl rdx, 20h
@@ -3108,7 +3078,7 @@ namespace Media.Concepts.Hardware
             /// <summary>
             /// Serialized with Cpuid
             /// </summary>
-            byte[] x64RdtscCpuid = new byte[]
+            private readonly byte[] x64RdtscCpuid = new byte[]
             {
                 0x53, //push rbx
                 0x31, 0xC0, //xor eax,eax
@@ -3131,7 +3101,7 @@ namespace Media.Concepts.Hardware
             }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected override void Compile(bool machine = true)
+            protected internal override void Compile(bool machine = true)
             {
                 //If building for the machine
                 if (machine)
@@ -3321,7 +3291,7 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <param name="s"></param>
             /// <returns></returns>
-            static ulong Fallback(ref byte s)
+            private static ulong Fallback(ref byte s)
             {
                 //s = 0;
 
@@ -3340,7 +3310,7 @@ namespace Media.Concepts.Hardware
             /// <summary>
             /// Calls rdrand on the rax
             /// </summary>
-            byte[] x64CodeBytes = new byte[]{
+            private readonly byte[] x64CodeBytes = new byte[]{
                 0x48, 0x0F, 0xC7, 0xF0, // rexw rdrand rax 
                 0x67, 0x0F, 0x92, 0x01, // setb BYTE PTR [rcx] (set rcx = 1 when carry was set)
                 0xC3  // ret
@@ -3349,7 +3319,7 @@ namespace Media.Concepts.Hardware
             /// <summary>
             /// Calls rdrand on the eax
             /// </summary>
-            byte[] x86CodeBytes = new byte[]{
+            private readonly byte[] x86CodeBytes = new byte[]{
                 0x0F, 0xC7, 0xF0, // rdrand eax 
                 0x0F, 0x92, 0x01, // setb BYTE PTR [ecx] (set ecx = 1 when carry was set)
                 0xC3  // ret
@@ -3381,7 +3351,7 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <param name="machine"></param>
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected override void Compile(bool machine = true)
+            protected internal override void Compile(bool machine = true)
             {
                 //Determine based on the State
                 switch (State)
@@ -3690,7 +3660,7 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <param name="s"></param>
             /// <returns></returns>
-            static ulong Fallback(ref byte s)
+            private static ulong Fallback(ref byte s)
             {
                 //s = 0;
 
@@ -3701,14 +3671,13 @@ namespace Media.Concepts.Hardware
 
             #region Fields
 
-            byte[] x86CodeBytes =
+            private readonly byte[] x86CodeBytes =
             {
                 0x0F, 0xC7, 0xF8, // rdseed eax
                 0x0F, 0x92, 0x01, // setb BYTE PTR [ecx]
                 0xC3 // ret
             };
-
-            byte[] x64CodeBytes = new byte[]
+            private readonly byte[] x64CodeBytes = new byte[]
             {
                 0x48, 0x0F, 0xC7, 0xF8, // rexw rdseed rax
                 0x0F, 0x92, 0x01, // setb BYTE PTR [rcx]
@@ -3743,7 +3712,7 @@ namespace Media.Concepts.Hardware
             /// </summary>
             /// <param name="machine"></param>
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected override void Compile(bool machine = true)
+            protected internal override void Compile(bool machine = true)
             {
                 //Determine based on the State
                 switch (State)

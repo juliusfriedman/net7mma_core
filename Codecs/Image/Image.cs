@@ -10,7 +10,7 @@ namespace Media.Codecs.Image
 {
     public class Image : Media.Codec.MediaBuffer
     {
-        const float DefaultDpi = 96.0f;
+        private const float DefaultDpi = 96.0f;
 
         #region Statics
 
@@ -180,16 +180,12 @@ namespace Media.Codecs.Image
 
         public int PlaneWidth(int plane)
         {
-            if (plane >= MediaFormat.Components.Length) return -1;
-
-            return Width >> ImageFormat.Widths[plane];
+            return plane >= MediaFormat.Components.Length ? -1 : Width >> ImageFormat.Widths[plane];
         }
 
         public int PlaneHeight(int plane)
         {
-            if (plane >= MediaFormat.Components.Length) return -1;
-
-            return Height >> ImageFormat.Heights[plane];
+            return plane >= MediaFormat.Components.Length ? -1 : Height >> ImageFormat.Heights[plane];
         }
 
         /// <summary>
@@ -199,9 +195,7 @@ namespace Media.Codecs.Image
         /// <returns></returns>
         public int PlaneSize(int plane)
         {
-            if (plane >= MediaFormat.Components.Length) return -1;
-
-            return (PlaneWidth(plane) + PlaneHeight(plane)) * ImageFormat.Size;
+            return plane >= MediaFormat.Components.Length ? -1 : (PlaneWidth(plane) + PlaneHeight(plane)) * ImageFormat.Size;
         }
 
         /// <summary>
@@ -211,9 +205,7 @@ namespace Media.Codecs.Image
         /// <returns></returns>
         public int PlaneLength(int plane)
         {
-            if (plane >= MediaFormat.Components.Length) return -1;
-
-            return Common.Binary.BitsToBytes(PlaneSize(plane));
+            return plane >= MediaFormat.Components.Length ? -1 : Common.Binary.BitsToBytes(PlaneSize(plane));
         }
 
         /// <summary>
@@ -670,16 +662,9 @@ namespace Media.UnitTests
                 {
                     for (int componentIndex = 0; componentIndex < imageFormat.Length; componentIndex++)
                     {
-                        int expectedOffset;
-                        if (componentIndex is 0) // Y component
-                        {
-                            expectedOffset = y * image.Width + x;
-                        }
-                        else // UV components
-                        {
-                            expectedOffset = (image.Width * image.Height) + ((y / 2) * (image.Width / 2) + (x / 2)) * imageFormat.Components[componentIndex].Length;
-                        }
-
+                        int expectedOffset = componentIndex is 0
+                            ? y * image.Width + x
+                            : (image.Width * image.Height) + ((y / 2) * (image.Width / 2) + (x / 2)) * imageFormat.Components[componentIndex].Length;
                         int calculatedOffset = image.CalculateComponentDataOffset(x, y, componentIndex);
 
                         if (expectedOffset != calculatedOffset) throw new InvalidOperationException();

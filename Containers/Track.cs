@@ -91,42 +91,42 @@ namespace Media.Container
 
         //EncryptedTrack... or IsEncrypted...
 
-        public Node Header { get; internal protected set; }
+        public Node Header { get; protected internal set; }
 
-        public long Offset { get; internal protected set; }
+        public long Offset { get; protected internal set; }
 
-        public int Id { get; internal protected set; }
+        public int Id { get; protected internal set; }
 
-        public string Name { get; internal protected set; }
+        public string Name { get; protected internal set; }
 
         //public readonly string Language; //Useful?
 
         //FourCC?
-        public byte[] CodecIndication { get; internal protected set; }
+        public byte[] CodecIndication { get; protected internal set; }
 
-        public double Rate { get; internal protected set; }
+        public double Rate { get; protected internal set; }
 
-        public int Width { get; internal protected set; }
+        public int Width { get; protected internal set; }
 
-        public int Height { get; internal protected set; }
+        public int Height { get; protected internal set; }
 
         //Todo, use common type not Sdp?
 
-        public Sdp.MediaType MediaType { get; internal protected set; }
+        public Sdp.MediaType MediaType { get; protected internal set; }
 
-        public TimeSpan Duration { get; internal protected set; }
+        public TimeSpan Duration { get; protected internal set; }
 
-        public DateTime Created { get; internal protected set; }
+        public DateTime Created { get; protected internal set; }
 
-        public DateTime Modified { get; internal protected set; }
+        public DateTime Modified { get; protected internal set; }
 
-        public long SampleCount { get; internal protected set; }
+        public long SampleCount { get; protected internal set; }
 
-        public byte Channels { get; internal protected set; }
+        public byte Channels { get; protected internal set; }
 
-        public byte BitDepth { get; internal protected set; }
+        public byte BitDepth { get; protected internal set; }
 
-        public bool Enabled { get; internal protected set; }
+        public bool Enabled { get; protected internal set; }
 
         /// <summary>
         /// Used to adjust the sample which is retrieved next.

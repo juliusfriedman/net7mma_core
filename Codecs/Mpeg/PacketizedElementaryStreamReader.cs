@@ -210,8 +210,9 @@ namespace Media.Containers.Mpeg
 
         public override string ToTextualConvention(Container.Node node)
         {
-            if (node.Master.Equals(this)) return PacketizedElementaryStreamReader.ToTextualConvention(node.Identifier);
-            return base.ToTextualConvention(node);
+            return node.Master.Equals(this)
+                ? PacketizedElementaryStreamReader.ToTextualConvention(node.Identifier)
+                : base.ToTextualConvention(node);
         }
 
         public override Container.Node Root

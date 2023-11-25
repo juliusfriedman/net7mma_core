@@ -283,7 +283,7 @@ namespace Media.Common
                 this.ShiftClass = actualShift;
             }
 
-            Shift ShiftClass;
+            private readonly Shift ShiftClass;
 
             public override int Left(int value, int amount)
             {

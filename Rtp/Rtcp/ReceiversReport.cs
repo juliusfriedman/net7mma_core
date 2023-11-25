@@ -54,7 +54,7 @@ namespace Media.Rtcp
     {
         #region Constants and Statics
 
-        new public const int PayloadType = 201;
+        public new const int PayloadType = 201;
 
         #endregion
 

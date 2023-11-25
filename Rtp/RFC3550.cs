@@ -430,15 +430,17 @@ namespace Media
 
         /// <summary>
         /// Generates a sequence of null octets (0x00) terminated with the given value
-        /// Throws an OverflowException if amount is greater than <see cref="Byte.MaxValue"/>
+        /// Throws an OverflowException if amount is greater than <see cref="byte.MaxValue"/>
         /// </summary>
         /// <param name="amount">The amount of padding to create</param>
         /// <returns>The seqeuence containing indicated padding</returns>
         public static IEnumerable<byte> CreatePadding(int amount) //int? codeAmount
         {
-            if (amount <= 0) return Enumerable.Empty<byte>();
-            if (amount > byte.MaxValue) throw Common.Binary.CreateOverflowException("amount", amount, byte.MinValue.ToString(), byte.MaxValue.ToString());
-            return Enumerable.Concat(Enumerable.Repeat(default(byte), amount - 1), Media.Common.Extensions.Linq.LinqExtensions.Yield(((byte)amount)));
+            return amount <= 0
+                ? Enumerable.Empty<byte>()
+                : amount > byte.MaxValue
+                ? throw Common.Binary.CreateOverflowException("amount", amount, byte.MinValue.ToString(), byte.MaxValue.ToString())
+                : Enumerable.Concat(Enumerable.Repeat(default(byte), amount - 1), Media.Common.Extensions.Linq.LinqExtensions.Yield(((byte)amount)));
         }
 
         #endregion
@@ -512,7 +514,7 @@ namespace Media
         //Values required for updating sequence number would be kept in state class and UpdateSequenceNumber on context would call the state would call this function...
 
         //The point at which rollover occurs on the SequenceNumber
-        const uint RTP_SEQ_MOD = (1 << 16); //65536
+        private const uint RTP_SEQ_MOD = (1 << 16); //65536
 
         public const int DefaultMaxDropout = 500, DefaultMaxMisorder = 100, DefaultMinimumSequentalRtpPackets = 2;
 
@@ -673,14 +675,7 @@ namespace Media
 
             int lost_interval = expected_interval - received_interval;
 
-            if (expected_interval is 0 || lost_interval <= 0)
-            {
-                fraction = 0;
-            }
-            else
-            {
-                fraction = (uint)((lost_interval << 8) / expected_interval);
-            }
+            fraction = expected_interval is 0 || lost_interval <= 0 ? 0 : (uint)((lost_interval << 8) / expected_interval);
         }
 
 
@@ -1304,9 +1299,7 @@ namespace Media
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public override bool Equals(object obj)
             {
-                if (System.Object.ReferenceEquals(this, obj)) return true;
-
-                return obj is CommonHeaderBits b && Equals(b);
+                return object.ReferenceEquals(this, obj) ? true : obj is CommonHeaderBits b && Equals(b);
             }
 
             #endregion
@@ -1383,16 +1376,15 @@ namespace Media
             /// <summary>
             /// The memory which contains the SourceList
             /// </summary>
-            readonly Common.MemorySegment m_Binary = Common.MemorySegment.Empty;
-
-            int m_CurrentOffset, //The current offset in parsing the binary
-                m_SourceCount, //The amount of ContributingSources to read given from the CC nybble in a RtpHeader
-                m_Read;//The amount of ContributingSources read so far.
+            private readonly Common.MemorySegment m_Binary = Common.MemorySegment.Empty;
+            private int m_CurrentOffset;
+            private readonly int m_SourceCount;
+            private int m_Read;
 
             /// <summary>
             /// The current source item.
             /// </summary>
-            uint m_CurrentSource;
+            private uint m_CurrentSource;
 
             #endregion
 
@@ -1550,8 +1542,7 @@ namespace Media
                 {
                     //CheckDisposed();
                     //if (m_CurrentOffset == m_Binary.Offset) throw new InvalidOperationException("Enumeration has not started yet.");
-                    if (m_Read <= 0) throw new InvalidOperationException("Enumeration has not started yet.");
-                    return m_CurrentSource;
+                    return m_Read <= 0 ? throw new InvalidOperationException("Enumeration has not started yet.") : m_CurrentSource;
                 }
             }
 
@@ -1563,8 +1554,7 @@ namespace Media
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    if (m_Read <= 0) throw new InvalidOperationException("Enumeration has not started yet.");
-                    return (int)m_CurrentSource;
+                    return m_Read <= 0 ? throw new InvalidOperationException("Enumeration has not started yet.") : (int)m_CurrentSource;
                 }
             }
 

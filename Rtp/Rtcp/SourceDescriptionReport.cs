@@ -198,19 +198,19 @@ namespace Media.Rtcp
             /// <summary>
             /// Any octets which are owned by this instance when created
             /// </summary>
-            readonly byte[] m_OwnedOctets;
+            private readonly byte[] m_OwnedOctets;
 
             /// <summary>
             /// A reference to the octets which contain the data of this instance. (Including ItemType and ItemLength)
             /// </summary>
-            internal protected readonly IEnumerable<byte> Data;
+            protected internal readonly IEnumerable<byte> Data;
 
             #endregion
 
             #region Constructor
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            SourceDescriptionItem(SourceDescriptionItem existing, bool doNotCopy, bool shouldDispose = true)
+            private SourceDescriptionItem(SourceDescriptionItem existing, bool doNotCopy, bool shouldDispose = true)
                 : base(shouldDispose)
             {
 
@@ -447,12 +447,12 @@ namespace Media.Rtcp
             /// Not readonly incase a need for the methods Add, Insert or Remove are required.
             /// Would then need to Implement IList, not impossible but not required. Most of the work is done with the IEnumerator implemenation anyway.
             /// </remarks>
-            byte[] m_OwnedOctets;
+            private byte[] m_OwnedOctets;
 
             /// <summary>
             /// The amount of <see cref="SourceDescriptionItem"/>'s known to be in the List
             /// </summary>
-            int m_Count;
+            private int m_Count;
 
             //The data from which the SourceDescriptionItem's are parsed.
             public readonly IEnumerable<byte> ChunkData;
@@ -988,7 +988,7 @@ namespace Media.Rtcp
                 return new SourceDescriptionItemList(this);
             }
 
-            IEnumerable<SourceDescriptionItem> GetEnumerableImplementation()
+            private IEnumerable<SourceDescriptionItem> GetEnumerableImplementation()
             {
                 return GetSourceDescriptionItemList();
             }
@@ -1043,7 +1043,7 @@ namespace Media.Rtcp
 
         #region Constants and Statics
 
-        new public const int PayloadType = 202;
+        public new const int PayloadType = 202;
 
         #endregion
 
@@ -1110,7 +1110,7 @@ namespace Media.Rtcp
         /// <summary>
         /// The cached Enumerable containing the pointer to the sequence of SourceDescriptionChunk contained in this instance.
         /// </summary>
-        IEnumerable<SourceDescriptionChunk> m_Chunks;
+        private IEnumerable<SourceDescriptionChunk> m_Chunks;
 
         #endregion
 
@@ -1177,7 +1177,7 @@ namespace Media.Rtcp
             else base.Add(reportBlock);
         }
 
-        internal virtual protected void Add(SourceDescriptionChunk chunk, bool pad)
+        protected internal virtual void Add(SourceDescriptionChunk chunk, bool pad)
         {
             if (chunk is null) return;
 

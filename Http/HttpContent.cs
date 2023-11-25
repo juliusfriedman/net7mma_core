@@ -87,7 +87,7 @@ namespace Media.Http
 
 
         //Should store in response ?
-        static MultipartContent Read(HttpClient client, HttpMessage message)
+        private static MultipartContent Read(HttpClient client, HttpMessage message)
         {
             string boundary = message.GetHeader(HttpHeaders.ContentType).Split(';').FirstOrDefault(s => s.StartsWith("boundary")).Substring(9);
 
@@ -111,7 +111,7 @@ namespace Media.Http
             return result;
         }
 
-        static StreamContent Stream(HttpClient client, HttpMessage request, System.IO.Stream backing)
+        private static StreamContent Stream(HttpClient client, HttpMessage request, System.IO.Stream backing)
         {
             StreamContent result = new(backing ?? new System.IO.MemoryStream(client.Buffer.Array));
 

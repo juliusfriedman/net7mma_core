@@ -12,8 +12,7 @@
         internal readonly System.IO.Stream m_BaseStream;
 
         internal Binary.BitOrder m_BitOrder = Binary.SystemBitOrder;
-
-        int m_ByteIndex = 0, m_BitIndex = 0;
+        private int m_ByteIndex = 0, m_BitIndex = 0;
 
         internal bool m_LeaveOpen;
 
@@ -87,7 +86,7 @@
         public Common.Binary.BitOrder BitOrder { get { return m_BitOrder; } set { m_BitOrder = value; } }
 
         /// <summary>
-        /// Gets or Sets the current <see cref="System.Byte"/> in the <see cref="Buffer"/> based on the <see cref="ByteIndex"/>
+        /// Gets or Sets the current <see cref="byte"/> in the <see cref="Buffer"/> based on the <see cref="ByteIndex"/>
         /// </summary>
         public byte CurrentByte
         {

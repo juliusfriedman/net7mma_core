@@ -68,9 +68,8 @@ namespace Media.Rtcp
 
         #region Fields
 
-        readonly Common.MemorySegment Memory = Common.MemorySegment.Empty;
-
-        readonly byte[] m_OwnedOctets;
+        private readonly Common.MemorySegment Memory = Common.MemorySegment.Empty;
+        private readonly byte[] m_OwnedOctets;
 
         #endregion
 
@@ -211,7 +210,7 @@ namespace Media.Rtcp
         /// <summary>
         /// Allocates 24 octets to represent this ReportBlock instance.
         /// </summary>
-        ReportBlock(bool shouldDispose = true)
+        private ReportBlock(bool shouldDispose = true)
             : base(shouldDispose)
         {
             m_OwnedOctets = new byte[ReportBlockSize];

@@ -47,9 +47,8 @@ namespace Media.Containers.Asf
     /// </summary>
     public class AsfReader : MediaFileStream, IMediaContainer
     {
-        static DateTime BaseDate = new(1601, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
-
-        const int IdentifierSize = 16, LengthSize = 8, HeaderObjectReservedDataSize = 6, MinimumSize = IdentifierSize + LengthSize;
+        private static readonly DateTime BaseDate = new(1601, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+        private const int IdentifierSize = 16, LengthSize = 8, HeaderObjectReservedDataSize = 6, MinimumSize = IdentifierSize + LengthSize;
 
         public static class Identifier
         {
@@ -134,7 +133,7 @@ namespace Media.Containers.Asf
         /// <summary>
         /// Holds a cache of all Fields in the Identifiers static type
         /// </summary>
-        static Dictionary<Guid, string> IdentifierLookup;
+        private static readonly Dictionary<Guid, string> IdentifierLookup;
 
         static AsfReader()
         {
@@ -282,7 +281,7 @@ namespace Media.Containers.Asf
             get { return ReadObject(Identifier.HeaderObject); }
         }
 
-        long? m_FileSize, m_NumberOfPackets, m_PlayTime, m_SendTime, m_Ignore, m_PreRoll, m_Flags, m_MinimumPacketSize, m_MaximumPacketSize, m_MaximumBitRate;
+        private long? m_FileSize, m_NumberOfPackets, m_PlayTime, m_SendTime, m_Ignore, m_PreRoll, m_Flags, m_MinimumPacketSize, m_MaximumPacketSize, m_MaximumBitRate;
 
         public long FileSize
         {
@@ -391,7 +390,7 @@ namespace Media.Containers.Asf
             }
         }
 
-        DateTime? m_Created, m_Modified;
+        private DateTime? m_Created, m_Modified;
 
 
         public DateTime Created
@@ -412,7 +411,7 @@ namespace Media.Containers.Asf
             }
         }
 
-        void ParseFileProperties()
+        private void ParseFileProperties()
         {
             using (var fileProperties = ReadObject(Identifier.FilePropertiesObject, Root.DataOffset))
             {
@@ -473,7 +472,7 @@ namespace Media.Containers.Asf
             m_Modified = FileInfo.LastWriteTimeUtc;
         }
 
-        string m_Title, m_Author, m_Copyright, m_Comment, m_Rating;
+        private string m_Title, m_Author, m_Copyright, m_Comment, m_Rating;
 
         public string Title
         {
@@ -520,7 +519,7 @@ namespace Media.Containers.Asf
             }
         }
 
-        void ParseContentDescription()
+        private void ParseContentDescription()
         {
             using (var contentDescription = ReadObject(Identifier.ContentDescriptionObject, Root.DataOffset))
             {
@@ -617,7 +616,7 @@ namespace Media.Containers.Asf
             get { return ReadObject(Identifier.FilePropertiesObject, Root.DataOffset); }
         }
 
-        List<Track> m_Tracks;
+        private List<Track> m_Tracks;
 
         public override IEnumerable<Track> GetTracks()
         {
@@ -877,8 +876,7 @@ namespace Media.Containers.Asf
 
         public override string ToTextualConvention(Node node)
         {
-            if (node.Master.Equals(this)) return AsfReader.ToTextualConvention(node.Identifier);
-            return base.ToTextualConvention(node);
+            return node.Master.Equals(this) ? AsfReader.ToTextualConvention(node.Identifier) : base.ToTextualConvention(node);
         }
 
         public override Common.SegmentStream GetSample(Track track, out TimeSpan duration)

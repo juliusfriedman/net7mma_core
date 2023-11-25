@@ -280,7 +280,7 @@ namespace Media.Concepts.Classes
 
     //[System.Runtime.CompilerServices.UnsafeValueType]
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit)]
-    struct PseudoArrayHeader //Implement Finalize to have the updates from the implicit copy propagate to the source.
+    internal struct PseudoArrayHeader //Implement Finalize to have the updates from the implicit copy propagate to the source.
     {
         #region Constructor
 
@@ -400,7 +400,7 @@ namespace Media.Concepts.Classes
         internal object m_Object;
 
         [System.Runtime.InteropServices.FieldOffset(8)]
-        internal System.String m_String;
+        internal string m_String;
 
         [System.Runtime.InteropServices.FieldOffset(8)]
         internal System.Array m_Array;
@@ -453,12 +453,12 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// Defines the byte offset from the start of a <see cref="String"/> to the first character in the string.
         /// </summary>
-        static int ByteOffsetToStringData = -Common.Binary.BytesToMachineWords(System.Runtime.CompilerServices.RuntimeHelpers.OffsetToStringData);
+        private static readonly int ByteOffsetToStringData = -Common.Binary.BytesToMachineWords(System.Runtime.CompilerServices.RuntimeHelpers.OffsetToStringData);
 
         /// <summary>
         /// Defines the Pointer to null
         /// </summary>
-        static unsafe void* NullPtr = null;
+        private static unsafe void* NullPtr = null;
 
         /// <summary>
         /// Creates an Empty generic array
@@ -479,11 +479,11 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// The 12 - 16 bytes which reside directly at offset 0. (possibly 20 - 24)
         /// </summary>
-        PseudoArrayHeader m_Header; //Todo, could store source element size, still must convert when reading if sizes are different.
+        private PseudoArrayHeader m_Header; //Todo, could store source element size, still must convert when reading if sizes are different.
 
         //4 - 8 + bytes (IntPtr), maybe null for strings or pointer types, duplicate of reference stored in header.
         /*readonly */
-        T[] m_Source; // = Unsafe.ReinterpretCast<System.Array, T[]>(m_Header.m_Array);
+        private readonly T[] m_Source; // = Unsafe.ReinterpretCast<System.Array, T[]>(m_Header.m_Array);
 
         //All implict reads are stored here for whatever purpose necessary, especially if they need to be sychronized or their header has been modified.
         internal readonly System.Collections.Generic.HashSet<T[]> Allocations = [];
@@ -718,9 +718,9 @@ namespace Media.Concepts.Classes
         }
 
         /// <summary>
-        /// A <see cref="System.Object"/> case of the <see cref="Source"/>
+        /// A <see cref="object"/> case of the <see cref="Source"/>
         /// </summary>
-        public System.Object OriginalObject
+        public object OriginalObject
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return m_Header.m_Object; }
@@ -965,7 +965,7 @@ namespace Media.Concepts.Classes
         /// <param name="array"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static implicit operator T[](Array<T> array)
+        public static unsafe implicit operator T[](Array<T> array)
         {
             //Maybe faster to use Array.Empty<T>() and resize.
 
@@ -1113,7 +1113,7 @@ namespace Media.Concepts.Classes
         /// <param name="array"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static nint ComputeMaxAddress(Array<T> array)
+        private static nint ComputeMaxAddress(Array<T> array)
         {
             return System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(array.m_Header.m_Array, array.m_Header.m_Length);
         }
@@ -1125,7 +1125,7 @@ namespace Media.Concepts.Classes
         /// <returns></returns>
         /// <remarks>Was branchless before ...</remarks>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static nint ComputeBaseAddress(Array<T> array)
+        private static nint ComputeBaseAddress(Array<T> array)
         {
             //Requires a cmp because the array cannot be null.
             //Could proably work around this by always storing an array in the m_Object field which contains the object...
@@ -1209,7 +1209,7 @@ namespace Media.Concepts.Classes
         /// <param name="index"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static T UnsafeRead(Array<T> array, ref int index)
+        public static unsafe T UnsafeRead(Array<T> array, ref int index)
         {
             //ComputeAddress(array) + ComputeElementAddress(array, ref index)
             //return Unsafe.Read<T>(ComputeAddress(array) + Unsafe.ArrayOfTwoElements<T>.AddressingDifference() * index);
@@ -1231,7 +1231,7 @@ namespace Media.Concepts.Classes
         /// <param name="index"></param>
         /// <param name="value"></param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static void UnsafeWrite(Array<T> array, int index, ref T value)
+        public static unsafe void UnsafeWrite(Array<T> array, int index, ref T value)
         {
             //UnsafeWrite(array.m_Source, array.m_Offset + index, ref value);
             //Unsafe.Write<T>(System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<T>(array.m_Source, array.m_Offset + index), ref value);
@@ -1257,7 +1257,7 @@ namespace Media.Concepts.Classes
         //What would be done in a IDisposable pattern or otherwise is to copy the array header to the offset of the first desired element and change the length in that header.
         //This causes 12 - 16 bytes to be wasted so those bytes need to be swapped out somewhere so they can be put back on dispose.
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static T[] ArrayTest(Array<T> array)
+        private static T[] ArrayTest(Array<T> array)
         {
             //Rebase the array at an index...
             //Use fixed and unsafe to determine the overhead of the array then copy those bytes + the desired length.
@@ -1365,9 +1365,7 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            if (obj is not Array<T> array) return false;
-
-            return GetHashCode() == array.GetHashCode();
+            return obj is not Array<T> array ? false : GetHashCode() == array.GetHashCode();
         }
 
         #endregion

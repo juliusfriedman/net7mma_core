@@ -196,7 +196,7 @@ namespace Media.Rtsp
 
         #region Fields
 
-        DateTime? m_Started;
+        private DateTime? m_Started;
 
         /// <summary>
         /// The port the RtspServer is listening on, defaults to 554
@@ -210,55 +210,54 @@ namespace Media.Rtsp
         /// <summary>
         /// The socket used for recieving RtspRequests
         /// </summary>
-        Socket m_TcpServerSocket, m_UdpServerSocket;
+        private Socket m_TcpServerSocket, m_UdpServerSocket;
 
         /// <summary>
         /// The maximum number of clients allowed to be connected at one time.
         /// </summary>
-        int m_MaximumSessions = short.MaxValue; //32767
+        private int m_MaximumSessions = short.MaxValue; //32767
 
         /// <summary>
         /// The amount of clients to allow in the Accept stte
         /// </summary>
-        int m_MaximumConnections = -1;
+        private int m_MaximumConnections = -1;
 
         /// <summary>
         /// The version of the Rtsp protocol in use by the server
         /// </summary>
-        double m_Version = 1.0;
+        private double m_Version = 1.0;
 
         /// <summary>
         /// The HttpListner used for handling Rtsp over Http
         /// Todo, use Socket on Designated Port
         /// </summary>
-        HttpListener m_HttpListner;
+        private HttpListener m_HttpListner;
 
         /// <summary>
         /// The endpoint the server is listening on
         /// </summary>
-        EndPoint m_ServerEndPoint;
+        private readonly EndPoint m_ServerEndPoint;
 
         /// <summary>
         /// The dictionary containing all streams the server is aggregrating
         /// </summary>
-        ConcurrentDictionary<Guid, Media.Rtsp.Server.IMedia> m_MediaStreams = new();
+        private readonly ConcurrentDictionary<Guid, Media.Rtsp.Server.IMedia> m_MediaStreams = new();
 
         /// <summary>
         /// The dictionary containing all the clients the server has sessions assocaited with
         /// </summary>
-        readonly ConcurrentDictionary<Guid, ClientSession> m_Sessions = new();
-
-        readonly ManualResetEventSlim m_AcceptSignal = new(false, DefaultReceiveTimeout);
+        private readonly ConcurrentDictionary<Guid, ClientSession> m_Sessions = new();
+        private readonly ManualResetEventSlim m_AcceptSignal = new(false, DefaultReceiveTimeout);
 
         /// <summary>
         /// The thread allocated to handle socket communication
         /// </summary>
-        Thread m_ServerThread;
+        private Thread m_ServerThread;
 
         /// <summary>
         /// Indicates to the ServerThread a stop has been requested
         /// </summary>
-        bool m_StopRequested, m_Maintaining;
+        private bool m_StopRequested, m_Maintaining;
 
         //Handles the Restarting of streams which needs to be and disconnects clients which are inactive.
         internal Timer m_Maintainer;
@@ -484,8 +483,7 @@ namespace Media.Rtsp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (TotalStreamCount is 0) return 0;
-                return MediaStreams.Count(s => s.State == Media.Rtsp.Server.SourceMedia.StreamState.Started && s.IsReady);
+                return TotalStreamCount is 0 ? 0 : MediaStreams.Count(s => s.State == Media.Rtsp.Server.SourceMedia.StreamState.Started && s.IsReady);
             }
         }
 
@@ -683,9 +681,8 @@ namespace Media.Rtsp
 
         #region Enable and Disable Alternate Transport Protocols
 
-        int m_HttpPort = -1;
-
-        int m_SocketPollMicroSeconds;
+        private readonly int m_HttpPort = -1;
+        private int m_SocketPollMicroSeconds;
 
         //Testing with external requests... could also be used for in bound requests but state would be needed to seperate the logic
         protected virtual void ProcessHttpRtspRequest(IAsyncResult iar)
@@ -781,7 +778,7 @@ namespace Media.Rtsp
          */
 
         //Impove this...
-        int m_UdpPort = -1;
+        private int m_UdpPort = -1;
 
         //Should allow multiple endpoints for any type of service.
 
@@ -1345,7 +1342,7 @@ namespace Media.Rtsp
         }
 
         //Should allow to be set in constructor...
-        readonly bool m_LeaveOpen;
+        private readonly bool m_LeaveOpen;
 
         /// <summary>
         /// Stops recieving RtspRequests and stops streaming all contained streams
@@ -2885,10 +2882,9 @@ namespace Media.Rtsp
 
             int symbolIndex;
 
-            Sdp.MediaDescription mediaDescription;
-
-            if ((symbolIndex = track.IndexOf('=')) >= 0 && int.TryParse(Media.Common.ASCII.ExtractNumber(track, symbolIndex, track.Length), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out int trackId)) mediaDescription = found.SessionDescription.GetMediaDescription(trackId - 1);
-            else mediaDescription = found.SessionDescription.MediaDescriptions.FirstOrDefault(md => string.Compare(track, md.MediaType.ToString(), true, System.Globalization.CultureInfo.InvariantCulture) is 0);
+            Sdp.MediaDescription mediaDescription = (symbolIndex = track.IndexOf('=')) >= 0 && int.TryParse(Media.Common.ASCII.ExtractNumber(track, symbolIndex, track.Length), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out int trackId)
+                ? found.SessionDescription.GetMediaDescription(trackId - 1)
+                : found.SessionDescription.MediaDescriptions.FirstOrDefault(md => string.Compare(track, md.MediaType.ToString(), true, System.Globalization.CultureInfo.InvariantCulture) is 0);
 
             ////Find the MediaDescription for the request based on the track variable
             //foreach (Sdp.MediaDescription md in found.SessionDescription.MediaDescriptions)

@@ -95,7 +95,7 @@
         /// 
         /// </summary>
         /// <remarks>Should be properties or methods</remarks>
-        System.Numerics.Vector3 Real, Imaginary;
+        private System.Numerics.Vector3 Real, Imaginary;
 
         /// <summary>
         /// `e`
@@ -109,7 +109,7 @@
         /// <param name="f"></param>
         /// <param name="imaginary"></param>
         /// <returns></returns>
-        static public System.Numerics.Vector3 Measure(S s, Frequencies.IFrequency f, out System.Numerics.Vector3 imaginary)
+        public static System.Numerics.Vector3 Measure(S s, Frequencies.IFrequency f, out System.Numerics.Vector3 imaginary)
         {
             System.Numerics.Vector3 measure = new(f.TotalMegahertz * s.Energy.TotalJoules);
 
@@ -125,7 +125,7 @@
         /// <param name="f"></param>
         /// <param name="imaginary"></param>
         /// <returns></returns>
-        static public S Entangle(S s, Frequencies.IFrequency f, out System.Numerics.Vector3 imaginary)
+        public static S Entangle(S s, Frequencies.IFrequency f, out System.Numerics.Vector3 imaginary)
         {
             imaginary = s.Real;
 

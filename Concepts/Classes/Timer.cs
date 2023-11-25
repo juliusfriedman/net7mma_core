@@ -52,8 +52,7 @@ namespace Media.Concepts.Classes
         internal System.TimeSpan m_Frequency;
 
         internal ulong m_Ops = 0, m_Ticks = 0;
-
-        long m_Enabled;
+        private long m_Enabled;
 
         internal System.DateTimeOffset m_Started;
 
@@ -86,12 +85,12 @@ namespace Media.Concepts.Classes
 
         //
 
-        readonly internal Clock m_Clock = new();
+        internal readonly Clock m_Clock = new();
 
-        readonly internal Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<long> Producer;
+        internal readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<long> Producer;
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        void Count()
+        private void Count()
         {
             //Todo, make JumpExpression ... along with TypedReferenceExpression
             //System.Action ShouldStop = () => if (false.Equals(m_Enabled.Equals(uint.MinValue))) goto Approximate;
@@ -302,7 +301,7 @@ namespace Media.Concepts.Classes
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        void Change(System.TimeSpan interval, System.TimeSpan dueTime)
+        private void Change(System.TimeSpan interval, System.TimeSpan dueTime)
         {
             System.Threading.Interlocked.Exchange(ref m_Enabled, uint.MinValue);
 
@@ -311,7 +310,7 @@ namespace Media.Concepts.Classes
             System.Threading.Interlocked.Exchange(ref m_Enabled, uint.MaxValue);
         }
 
-        delegate void ElapsedEvent(object sender, object args);
+        private delegate void ElapsedEvent(object sender, object args);
 
         protected override void Dispose(bool disposing)
         {

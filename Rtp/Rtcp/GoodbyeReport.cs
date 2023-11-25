@@ -243,9 +243,7 @@ namespace Media.Rtcp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (IsDisposed || false == HasReasonForLeaving) return Enumerable.Empty<byte>();
-
-                return ExtensionData.Skip(1).Take(ReasonForLeavingLength);
+                return IsDisposed || false == HasReasonForLeaving ? Enumerable.Empty<byte>() : ExtensionData.Skip(1).Take(ReasonForLeavingLength);
             }
         }
 
@@ -322,7 +320,7 @@ namespace Media.Rtcp
         /// <param name="sourceList"></param>
         /// <param name="offset"></param>
         /// <param name="count"></param>
-        internal virtual protected void Add(RFC3550.SourceList sourceList, int offset, int count)
+        protected internal virtual void Add(RFC3550.SourceList sourceList, int offset, int count)
         {
             if (sourceList is null) return;
 

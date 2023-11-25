@@ -58,8 +58,7 @@ namespace Media.Concepts.Classes
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (Timer.Frequency <= Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick) return Units;
-                else return Units * Timer.Frequency.Ticks;
+                return Timer.Frequency <= Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick ? Units : Units * Timer.Frequency.Ticks;
             }
         }
 
@@ -68,8 +67,9 @@ namespace Media.Concepts.Classes
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (Timer.Frequency <= Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick) return Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalNanoseconds(Timer.Frequency) / Units;
-                else return Units * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalNanoseconds(Timer.Frequency);
+                return Timer.Frequency <= Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick
+                    ? Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalNanoseconds(Timer.Frequency) / Units
+                    : Units * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalNanoseconds(Timer.Frequency);
             }
         }
 
@@ -79,8 +79,9 @@ namespace Media.Concepts.Classes
             get
             {
                 //return Units * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(Timer.Frequency);
-                if (Timer.Frequency <= Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond) return Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(Timer.Frequency) / Units;
-                else return Units * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(Timer.Frequency);
+                return Timer.Frequency <= Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond
+                    ? Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(Timer.Frequency) / Units
+                    : Units * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(Timer.Frequency);
             }
         }
 
@@ -90,8 +91,9 @@ namespace Media.Concepts.Classes
             get
             {
                 //return Units * Timer.Frequency.TotalMilliseconds;
-                if (Timer.Frequency <= Common.Extensions.TimeSpan.TimeSpanExtensions.OneMillisecond) return Timer.Frequency.TotalMilliseconds / Units;
-                else return Units * Timer.Frequency.TotalMilliseconds;
+                return Timer.Frequency <= Common.Extensions.TimeSpan.TimeSpanExtensions.OneMillisecond
+                    ? Timer.Frequency.TotalMilliseconds / Units
+                    : Units * Timer.Frequency.TotalMilliseconds;
             }
         }
 
@@ -101,8 +103,9 @@ namespace Media.Concepts.Classes
             get
             {
                 //return Units * Timer.Frequency.TotalSeconds;
-                if (Timer.Frequency <= Common.Extensions.TimeSpan.TimeSpanExtensions.OneMillisecond) return Timer.Frequency.TotalSeconds / Units;
-                else return Units * Timer.Frequency.TotalSeconds;
+                return Timer.Frequency <= Common.Extensions.TimeSpan.TimeSpanExtensions.OneMillisecond
+                    ? Timer.Frequency.TotalSeconds / Units
+                    : Units * Timer.Frequency.TotalSeconds;
             }
         }
 
@@ -175,7 +178,7 @@ namespace Media.Concepts.Classes
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        void Count(ref long count) { unchecked { ++Units; } }
+        private void Count(ref long count) { unchecked { ++Units; } }
 
         /// <summary>
         /// Constructs an instance

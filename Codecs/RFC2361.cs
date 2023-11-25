@@ -28,7 +28,7 @@
         }
 #endif
 
-        const string TemplateGuidString = "00000000-0000-0010-8000-00AA00389B71";
+        private const string TemplateGuidString = "00000000-0000-0010-8000-00AA00389B71";
 
         public static readonly System.Guid TemplateGuid = new(TemplateGuidString);
 

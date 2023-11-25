@@ -36,7 +36,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 namespace Media.RtpTools
 {
-    class RtpMix
+    internal class RtpMix
     {
         //Todo
     }

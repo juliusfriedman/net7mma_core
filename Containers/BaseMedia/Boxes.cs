@@ -1287,12 +1287,9 @@ public class TkhdBox : FullBox
     public TkhdBox(BaseMediaWriter writer, ushort version, uint flags)
         : base(writer, Encoding.ASCII.GetBytes("tkhd"), (byte)version, flags)
     {
-        if (version is 0)
-            Data = new(new byte[84]);
-        else if (version == 1)
-            Data = new(new byte[92]);
-        else
-            throw new ArgumentException("Invalid version. Version must be 0 or 1.");
+        Data = version is 0
+            ? new(new byte[84])
+            : version == 1 ? new(new byte[92]) : throw new ArgumentException("Invalid version. Version must be 0 or 1.");
 
         Version = (byte)version;
         Flags = flags;

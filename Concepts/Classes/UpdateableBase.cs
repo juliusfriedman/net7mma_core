@@ -51,9 +51,8 @@ namespace Media.Concepts.Classes
 
         #region Fields
 
-        readonly System.Threading.ManualResetEventSlim m_ResetEvent;
-
-        readonly System.Threading.CancellationTokenSource m_TokenSource;
+        private readonly System.Threading.ManualResetEventSlim m_ResetEvent;
+        private readonly System.Threading.CancellationTokenSource m_TokenSource;
 
         #endregion
 

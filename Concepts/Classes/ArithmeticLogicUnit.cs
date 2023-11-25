@@ -8,7 +8,7 @@ namespace Media.Concepts.Classes
     [System.CLSCompliant(false)]
     public static class ArithmeticLogicUnit
     {
-        const int Mask = 1 << 30;
+        private const int Mask = 1 << 30;
 
         public static uint Adder(uint Addend_One, uint Addend_Two)
         {

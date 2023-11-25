@@ -673,7 +673,7 @@ namespace Media.Rtp
             #endregion
 
             //The EndPoints connected to (once connected don't need the Ports unless 0 is used to determine the port)
-            internal protected EndPoint LocalRtp, LocalRtcp, RemoteRtp, RemoteRtcp;
+            protected internal EndPoint LocalRtp, LocalRtcp, RemoteRtp, RemoteRtcp;
 
             //bytes and packet counters
             internal long RfcRtpBytesSent, RfcRtpBytesRecieved,
@@ -721,12 +721,12 @@ namespace Media.Rtp
             /// <summary>
             /// Keeps track of any failures which occur when sending or receieving data.
             /// </summary>
-            internal protected int m_FailedRtpTransmissions, m_FailedRtcpTransmissions, m_FailedRtpReceptions, m_FailedRtcpReceptions;
+            protected internal int m_FailedRtpTransmissions, m_FailedRtcpTransmissions, m_FailedRtpReceptions, m_FailedRtcpReceptions;
 
             /// <summary>
             /// Used to ensure data is quantified as packets which are allowed.
             /// </summary>
-            int m_MimumPacketSize = RtpHeader.Length - RtcpHeader.Length, m_MaximumPacketSize = ushort.MaxValue;
+            private int m_MimumPacketSize = RtpHeader.Length - RtcpHeader.Length, m_MaximumPacketSize = ushort.MaxValue;
 
             /// <summary>
             /// To allow multiple receivers as set by <see cref="MaximumRemoteIdentities"/>
@@ -813,7 +813,7 @@ namespace Media.Rtp
             /// <summary>
             /// Sets or gets the applications-specific state associated with the TransportContext.
             /// </summary>
-            public Object ApplicationContext
+            public object ApplicationContext
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get;
@@ -959,7 +959,7 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get;
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                internal protected set;
+                protected internal set;
             }
 
             public RtpFrame LastFrame
@@ -968,7 +968,7 @@ namespace Media.Rtp
                 get;
 
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                internal protected set;
+                protected internal set;
             }
 
             //for testing purposes
@@ -989,7 +989,7 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get;
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                internal protected set;
+                protected internal set;
             }
 
             /// <summary>
@@ -1000,7 +1000,7 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get;
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                internal protected set;
+                protected internal set;
             }
 
             /// <summary>
@@ -1014,17 +1014,9 @@ namespace Media.Rtp
 
                     //Should be looking at the thread...
 
-                    if (IsRtpEnabled)
-                    {
-                        return RtpSocket is not null && LocalRtp is not null;
-                    }
-
-                    if (IsRtcpEnabled)
-                    {
-                        return RtcpSocket is not null && LocalRtcp is not null;
-                    }
-
-                    return false;
+                    return IsRtpEnabled
+                        ? RtpSocket is not null && LocalRtp is not null
+                        : IsRtcpEnabled ? RtcpSocket is not null && LocalRtcp is not null : false;
                 }
             }
 
@@ -1061,9 +1053,7 @@ namespace Media.Rtp
 
                     long totalRtcp = TotalRtcpBytesSent + TotalRtcpBytesReceieved;
 
-                    if (totalRtcp is Common.Binary.LongZero) return false;
-
-                    return totalRtcp >= totalReceived / maximumRtcpBandwidthPercentage;
+                    return totalRtcp is Common.Binary.LongZero ? false : totalRtcp >= totalReceived / maximumRtcpBandwidthPercentage;
                 }
             }
 
@@ -1116,7 +1106,7 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get { return m_StartTime; }
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                internal protected set { m_StartTime = value; }
+                protected internal set { m_StartTime = value; }
             }
 
             /// <summary>
@@ -1127,7 +1117,7 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get { return m_EndTime; }
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                internal protected set { m_EndTime = value; }
+                protected internal set { m_EndTime = value; }
             }
 
             public TimeSpan MediaDuration
@@ -1291,7 +1281,7 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get;
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                internal protected set;
+                protected internal set;
             }
 
             /// <summary>
@@ -1303,7 +1293,7 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get;
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                internal protected set;
+                protected internal set;
             }
 
             /// <summary>
@@ -1314,7 +1304,7 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get;
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                internal protected set;
+                protected internal set;
             }
 
             /// <summary>
@@ -1352,9 +1342,9 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    if (IDisposedExtensions.IsNullOrDisposed(this)) return false;
-
-                    return (IsRtpEnabled && IsRtcpEnabled) && (LocalMultiplexing || RemoteMultiplexing);
+                    return IDisposedExtensions.IsNullOrDisposed(this)
+                        ? false
+                        : (IsRtpEnabled && IsRtcpEnabled) && (LocalMultiplexing || RemoteMultiplexing);
                 }
             }
 
@@ -1533,7 +1523,7 @@ namespace Media.Rtp
                 get { return (short)m_SequenceNumber; }
 
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                internal protected set { m_SequenceNumber = (ushort)value; }
+                protected internal set { m_SequenceNumber = (ushort)value; }
             }
 
             public int SendSequenceNumber
@@ -1541,7 +1531,7 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get { return (short)m_LastSentSequenceNumber; }
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                internal protected set { m_LastSentSequenceNumber = (ushort)value; }
+                protected internal set { m_LastSentSequenceNumber = (ushort)value; }
             }
 
             public int RtpTimestamp
@@ -1675,7 +1665,7 @@ namespace Media.Rtp
             /// The value will also be different than <see cref="RemoteSynchronizationSourceIdentifier"/>.
             /// </summary>
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected void AssignIdentity(int seed = SendersReport.PayloadType)
+            protected internal void AssignIdentity(int seed = SendersReport.PayloadType)
             {
                 if (SynchronizationSourceIdentifier is Common.Binary.Zero)
                 {
@@ -3562,7 +3552,7 @@ namespace Media.Rtp
         /// </summary>
         /// <param name="frame">The frame to raise the RtpFrameHandler with</param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void OnRtpFrameChanged(RtpFrame frame = null, TransportContext tc = null, bool final = false)
+        protected internal void OnRtpFrameChanged(RtpFrame frame = null, TransportContext tc = null, bool final = false)
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(this) ||
                 FrameChangedEventsEnabled is false) return;
@@ -3781,7 +3771,7 @@ namespace Media.Rtp
         /// </summary>
         /// <param name="packet">The packet to handle</param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void OnRtpPacketSent(RtpPacket packet, TransportContext tc = null)
+        protected internal void OnRtpPacketSent(RtpPacket packet, TransportContext tc = null)
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(this) ||
                 OutgoingRtpPacketEventsEnabled is false) return;
@@ -3828,7 +3818,7 @@ namespace Media.Rtp
         /// </summary>
         /// <param name="packet">The packet to handle</param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void OnRtcpPacketSent(RtcpPacket packet, TransportContext tc = null)
+        protected internal void OnRtcpPacketSent(RtcpPacket packet, TransportContext tc = null)
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(this) ||
                 OutgoingRtcpPacketEventsEnabled is false) return;
@@ -3884,7 +3874,7 @@ namespace Media.Rtp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get;
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set;
+            protected internal set;
         }
 
         /// <summary>
@@ -4207,10 +4197,7 @@ namespace Media.Rtp
                     return false;
 
                 long totalRtcp = TotalRtcpBytesSent + TotalRtcpBytesReceieved;
-                if (totalRtcp is Common.Binary.LongZero)
-                    return false;
-
-                return totalRtcp >= totalReceived / averageMaximumRtcpBandwidthPercentage;
+                return totalRtcp is Common.Binary.LongZero ? false : totalRtcp >= totalReceived / averageMaximumRtcpBandwidthPercentage;
             }
         }
 
@@ -4291,7 +4278,7 @@ namespace Media.Rtp
                 UriParser.Register(new HttpStyleUriParser(), RtpProtcolScheme, 9670);
         }
 
-        RtpClient(bool shouldDispose = true)
+        private RtpClient(bool shouldDispose = true)
             : base(shouldDispose)
         {
             AverageMaximumRtcpBandwidthPercentage = DefaultReportInterval.TotalSeconds;

@@ -69,8 +69,8 @@ namespace Media.Concepts.Experimental
     {
         #region Properties
 
-        public DateTime Started { get; internal protected set; }
-        public DateTime Ended { get; internal protected set; }
+        public DateTime Started { get; protected internal set; }
+        public DateTime Ended { get; protected internal set; }
         public Iterator Parent { get; protected set; }
 
         public IEnumerable<T> Enumerable { get; protected set; }
@@ -95,7 +95,7 @@ namespace Media.Concepts.Experimental
                 }
                 finally { if (ex is not null) throw ex; }
             }
-            internal protected set
+            protected internal set
             {
                 try { base.t = value; }
                 finally { CurrentAssigned(this); }
@@ -129,7 +129,7 @@ namespace Media.Concepts.Experimental
 
         public Iterator(IEnumerable<T> enumerable, int index, int count) : base(enumerable, index, count) { AssignEvents(this); Enumerable = enumerable; Enumerator = Enumerable.GetEnumerator(); }
 
-        static void AssignEvents(Iterator<T> iterator)
+        private static void AssignEvents(Iterator<T> iterator)
         {
             iterator.PostDecrement += IteratorPostDecrement;
             iterator.PostIncrement += IteratorPostIncrement;
@@ -143,47 +143,47 @@ namespace Media.Concepts.Experimental
             iterator.End += IteratorEnd;
         }
 
-        static void IteratorEnd(Iterator sender)
+        private static void IteratorEnd(Iterator sender)
         {
             (sender as Iterator<T>).Ended = DateTime.UtcNow;
         }
 
-        static void IteratorBegin(Iterator sender)
+        private static void IteratorBegin(Iterator sender)
         {
             (sender as Iterator<T>).Started = DateTime.UtcNow;
         }
 
-        static void IteratorPostIncrement(Iterator sender)
+        private static void IteratorPostIncrement(Iterator sender)
         {
             //Reserved
         }
 
-        static void IteratorCurrentRead(Iterator sender)
+        private static void IteratorCurrentRead(Iterator sender)
         {
             //Reserved
         }
 
-        static void IteratorCurrentAssigned(Iterator sender)
+        private static void IteratorCurrentAssigned(Iterator sender)
         {
             //Reserved
         }
 
-        static void IteratorPreIncrement(Iterator sender)
+        private static void IteratorPreIncrement(Iterator sender)
         {
             //Reserved
         }
 
-        static void IteratorPreDecrement(Iterator sender)
+        private static void IteratorPreDecrement(Iterator sender)
         {
             //Reserved
         }
 
-        static void IteratorPostDecrement(Iterator sender)
+        private static void IteratorPostDecrement(Iterator sender)
         {
             //Reserved
         }
 
-        static void IteratorPostIncrment(Iterator sender)
+        private static void IteratorPostIncrment(Iterator sender)
         {
             //Reserved
         }
@@ -251,7 +251,7 @@ namespace Media.Concepts.Experimental
             PreIncrement(this);
         }
 
-        internal protected void OnPostIncrement()
+        protected internal void OnPostIncrement()
         {
             PostIncrement(this);
         }
@@ -261,27 +261,27 @@ namespace Media.Concepts.Experimental
             PreDecrement(this);
         }
 
-        internal protected void OnPostDecrement()
+        protected internal void OnPostDecrement()
         {
             PostDecrement(this);
         }
 
-        internal protected void OnSiblingIncrement()
+        protected internal void OnSiblingIncrement()
         {
             SiblingIncrement(this);
         }
 
-        internal protected void OnSiblingDecrement()
+        protected internal void OnSiblingDecrement()
         {
             SiblingDecrement(this);
         }
 
-        internal protected void OnCurrentRead()
+        protected internal void OnCurrentRead()
         {
             CurrentRead(this);
         }
 
-        internal protected void OnCurrentAssigned()
+        protected internal void OnCurrentAssigned()
         {
             CurrentAssigned(this);
         }
@@ -382,13 +382,13 @@ namespace Media.Concepts.Experimental
     /// <typeparam name="T"></typeparam>
     public class EnumerableSegment<T> : IEnumerable<T>, IEnumerator<T>
     {
-        internal protected bool m_Disposed;
+        protected internal bool m_Disposed;
 
         //The T currently associated with the Current property
-        internal protected T t;
+        protected internal T t;
 
         //The place values indicating where the EnumerableSegment starts and stops
-        internal protected readonly int VirtualIndex, VirtualCount;
+        protected internal readonly int VirtualIndex, VirtualCount;
 
         /// <summary>
         /// The current index of the EnumerableSegment where the Current property was retrieved from if enumerating this class in a index based fashion.
@@ -402,8 +402,11 @@ namespace Media.Concepts.Experimental
 
         public virtual T Current
         {
-            get { if (Index == -1) throw new InvalidOperationException("Enumeration has not started call MoveNext"); return t; }
-            internal protected set { t = value; }
+            get
+            {
+                return Index == -1 ? throw new InvalidOperationException("Enumeration has not started call MoveNext") : t;
+            }
+            protected internal set { t = value; }
         }
 
         void IDisposable.Dispose()
@@ -417,8 +420,7 @@ namespace Media.Concepts.Experimental
         /// <returns></returns>
         public virtual bool MoveNext()
         {
-            if (m_Disposed) return false;
-            else return ++Index <= VirtualCount;
+            return m_Disposed ? false : ++Index <= VirtualCount;
         }
 
         /// <summary>
@@ -426,13 +428,15 @@ namespace Media.Concepts.Experimental
         /// </summary>
         object System.Collections.IEnumerator.Current
         {
-            get { if (Index < 0) throw new InvalidOperationException("Enumeration has not started call MoveNext"); return t; }
+            get
+            {
+                return Index < 0 ? throw new InvalidOperationException("Enumeration has not started call MoveNext") : (object)t;
+            }
         }
 
         bool System.Collections.IEnumerator.MoveNext()
         {
-            if (m_Disposed) return false;
-            else return MoveNext();
+            return m_Disposed ? false : MoveNext();
         }
 
         void System.Collections.IEnumerator.Reset()
@@ -460,8 +464,7 @@ namespace Media.Concepts.Experimental
         public EnumerableSegment(IEnumerable<T> enumerable, int start = 0, int count = -1)
         {
             Index = VirtualIndex = start;
-            if (count == -1) VirtualCount = enumerable.Count();
-            else VirtualCount = count;
+            VirtualCount = count == -1 ? enumerable.Count() : count;
         }
 
         public EnumerableSegment(T item)
@@ -552,10 +555,8 @@ namespace Media.Concepts.Experimental
         IEnumerable<ArraySegment<T>> //You can Generate ArraySegment<T> for each List<T> contained by using the Segments property
     {
         public readonly int SegmentCapacity = -1;
-
-        List<List<T>> m_Segments = [];
-
-        List<T> m_CurrentSegment = [];
+        private readonly List<List<T>> m_Segments = [];
+        private readonly List<T> m_CurrentSegment = [];
 
         public IEnumerable<ArraySegment<T>> Segments
         {
@@ -578,7 +579,7 @@ namespace Media.Concepts.Experimental
             SegmentCapacity = segmentCapacity;
         }
 
-        void EnsureCapacity(int amount = 1)
+        private void EnsureCapacity(int amount = 1)
         {
             if (m_CurrentSegment.Count + amount > SegmentCapacity)
             {
@@ -628,7 +629,7 @@ namespace Media.Concepts.Experimental
             found.RemoveAt(index);
         }
 
-        List<T> FindSegmentForIndex(ref int index)
+        private List<T> FindSegmentForIndex(ref int index)
         {
             foreach (List<T> segment in m_Segments)
             {
@@ -643,8 +644,7 @@ namespace Media.Concepts.Experimental
             get
             {
                 List<T> found = FindSegmentForIndex(ref index);
-                if (found is not null) return found[System.Math.Min(found.Count - 1, index)];
-                else return default;
+                return found is not null ? found[System.Math.Min(found.Count - 1, index)] : default;
             }
             set
             {
@@ -762,11 +762,11 @@ namespace Media.Concepts.Experimental
     {
         protected int m_Current;
 
-        internal protected System.IO.Stream m_Stream;
+        protected internal System.IO.Stream m_Stream;
 
         internal EnumerableByteStream m_Self;
 
-        bool Initialized { get { return CurrentInt != -1; } }
+        private bool Initialized { get { return CurrentInt != -1; } }
 
         public int CurrentInt { get { return Current; } }
 
@@ -815,19 +815,19 @@ namespace Media.Concepts.Experimental
 
         public override bool MoveNext()
         {
-            if (base.MoveNext()) return CoreGetEnumerator() != -1;
-            return false;
+            return base.MoveNext() ? CoreGetEnumerator() != -1 : false;
         }
 
-        int CoreGetEnumerator(long direction = 1)
+        private int CoreGetEnumerator(long direction = 1)
         {
-            if (!m_Disposed && m_Stream.Position < Count) return Current = (byte)(m_Current = m_Stream.ReadByte());
-            else unchecked { return Current = (byte)(m_Current = -1); }
+            return !m_Disposed && m_Stream.Position < Count
+                ? (Current = (byte)(m_Current = m_Stream.ReadByte()))
+                : (Current = (byte)(m_Current = -1));
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { return GetEnumerator(); }
 
-        internal protected long CoreIndexOf(IEnumerable<byte> items, int start = -1, int count = -1)
+        protected internal long CoreIndexOf(IEnumerable<byte> items, int start = -1, int count = -1)
         {
             if (m_Stream is null || m_Disposed || items is null || items == Enumerable.Empty<byte>() || count is 0) return -1;
             if (count == -1) count = items.Count();
@@ -870,7 +870,7 @@ namespace Media.Concepts.Experimental
             }
         }
 
-        internal protected int CoreIndexOf(byte item, int start, int count) { return (int)CoreIndexOf(item.Yield(), start, count); }
+        protected internal int CoreIndexOf(byte item, int start, int count) { return (int)CoreIndexOf(item.Yield(), start, count); }
 
         public virtual int IndexOf(byte item)
         {
@@ -1025,7 +1025,10 @@ namespace Media.Concepts.Experimental
             base.Reset();
         }
 
-        public long Seek(long offset, System.IO.SeekOrigin origin) { if (m_Stream.CanSeek) return m_Stream.Seek(offset, origin); return m_Stream.Position; }
+        public long Seek(long offset, System.IO.SeekOrigin origin)
+        {
+            return m_Stream.CanSeek ? m_Stream.Seek(offset, origin) : m_Stream.Position;
+        }
     }
 
     #endregion
@@ -1037,7 +1040,7 @@ namespace Media.Concepts.Experimental
     public class CachingEnumerableByteStream : EnumerableByteStream
     {
         //Same as above but with a Cache for previously read bytes
-        List<byte> m_ReadCache = [], m_WriteCache = [];
+        private readonly List<byte> m_ReadCache = [], m_WriteCache = [];
 
         public CachingEnumerableByteStream(System.IO.Stream stream)
             : base(stream)
@@ -1090,17 +1093,17 @@ namespace Media.Concepts.Experimental
     {
         #region Fields
 
-        internal protected IEnumerable<EnumerableByteStream> m_Streams;
+        protected internal IEnumerable<EnumerableByteStream> m_Streams;
 
-        internal protected ulong m_AbsolutePosition;
+        protected internal ulong m_AbsolutePosition;
 
-        internal protected IEnumerator<EnumerableByteStream> m_Enumerator;
+        protected internal IEnumerator<EnumerableByteStream> m_Enumerator;
 
         internal EnumerableByteStream m_CurrentStream;
 
         internal int m_StreamIndex = 0;
 
-        internal protected bool m_Disposed;
+        protected internal bool m_Disposed;
 
         #endregion
 
@@ -1271,7 +1274,7 @@ namespace Media.Concepts.Experimental
             return CoreRead(buffer, offset, count);
         }
 
-        internal protected int CoreRead(byte[] buffer, long offset, long count, System.IO.SeekOrigin readOrigin = System.IO.SeekOrigin.Current)
+        protected internal int CoreRead(byte[] buffer, long offset, long count, System.IO.SeekOrigin readOrigin = System.IO.SeekOrigin.Current)
         {
             switch (readOrigin)
             {
@@ -1309,7 +1312,7 @@ namespace Media.Concepts.Experimental
             return 0;
         }
 
-        bool MoveNext()
+        private bool MoveNext()
         {
             if (m_Disposed || m_Streams is null || m_Enumerator is null) return false;
             //If the current stream can seek it's not a big deal to reset it now also
@@ -1377,9 +1380,7 @@ namespace Media.Concepts.Experimental
             return m_AbsolutePosition;
         }
 
-
-
-        IEnumerator<EnumerableByteStream> GetEnumerator() { return m_Disposed ? null : m_Streams.GetEnumerator(); }
+        private IEnumerator<EnumerableByteStream> GetEnumerator() { return m_Disposed ? null : m_Streams.GetEnumerator(); }
 
         public override void SetLength(long value)
         {
@@ -1400,7 +1401,7 @@ namespace Media.Concepts.Experimental
 
         ///Todo => Test and complete
         [CLSCompliant(false)]
-        internal protected int CoreWrite(byte[] buffer, ulong offset, ulong count, System.IO.SeekOrigin readOrigin = System.IO.SeekOrigin.Current)
+        protected internal int CoreWrite(byte[] buffer, ulong offset, ulong count, System.IO.SeekOrigin readOrigin = System.IO.SeekOrigin.Current)
         {
             //Select the stream to write based on the offset
             SelectStream(offset);

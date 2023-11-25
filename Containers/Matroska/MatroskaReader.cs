@@ -615,11 +615,10 @@ namespace Media.Containers.Matroska
     /// </summary>
     public class MatroskaReader : MediaFileStream, IMediaContainer
     {
-        const int DefaulTimeCodeScale = (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMillisecond, DefaultMaxIdSize = 4, DefaultMaxSizeLength = 8;
+        private const int DefaulTimeCodeScale = (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMillisecond, DefaultMaxIdSize = 4, DefaultMaxSizeLength = 8;
+        private static readonly DateTime BaseDate = new(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        static DateTime BaseDate = new(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
-        static byte[] ReadIdentifier(System.IO.Stream reader, out int length)
+        private static byte[] ReadIdentifier(System.IO.Stream reader, out int length)
         {
 
             //Lookup for length?
@@ -627,10 +626,10 @@ namespace Media.Containers.Matroska
             //if(reader.Remaining < 2) return null;
 
             // Get the header byte
-            Byte header_byte = (byte)reader.ReadByte();
+            byte header_byte = (byte)reader.ReadByte();
 
             // Define a mask
-            Byte mask = 0x80, id_length = 1;
+            byte mask = 0x80, id_length = 1;
 
             // Figure out the size in bytes
             while (id_length <= 4 && (header_byte & mask) is 0)
@@ -654,18 +653,19 @@ namespace Media.Containers.Matroska
 
             return Media.Common.Extensions.Linq.LinqExtensions.Yield(header_byte).ToArray();
         }
+
         //
-        static byte[] ReadLength(System.IO.Stream reader, out int length)
+        private static byte[] ReadLength(System.IO.Stream reader, out int length)
         {
             //if (reader.Remaining < 2) return null;
 
             // Get the header byte
-            Byte header_byte = (byte)reader.ReadByte();
+            byte header_byte = (byte)reader.ReadByte();
 
             //Lookup for length?
 
             // Define a mask
-            Byte mask = 0x80, size_length = 1;
+            byte mask = 0x80, size_length = 1;
 
             // Figure out the size in bytes (Should check MaxSize in the header)
             while (size_length <= 8 && (header_byte & mask) is 0)
@@ -791,11 +791,10 @@ namespace Media.Containers.Matroska
 
         public override string ToTextualConvention(Node node)
         {
-            if (node.Master.Equals(this)) return MatroskaReader.ToTextualConvention(node.Identifier);
-            return base.ToTextualConvention(node);
+            return node.Master.Equals(this) ? MatroskaReader.ToTextualConvention(node.Identifier) : base.ToTextualConvention(node);
         }
 
-        void ParseEbmlHeader()
+        private void ParseEbmlHeader()
         {
 
             using (var ebml = Root)
@@ -886,7 +885,7 @@ namespace Media.Containers.Matroska
 
         }
 
-        void ParseSegmentInfo()
+        private void ParseSegmentInfo()
         {
             using (var matroskaSegmentInfo = ReadElement(Identifier.SegmentInfo, Root.DataOffset))
             {
@@ -991,9 +990,8 @@ namespace Media.Containers.Matroska
             m_Modified = FileInfo.LastWriteTimeUtc;
         }
 
-        long m_TimeCodeScale = DefaulTimeCodeScale;
-
-        DateTime? m_Created, m_Modified;
+        private long m_TimeCodeScale = DefaulTimeCodeScale;
+        private DateTime? m_Created, m_Modified;
 
         public DateTime Created
         {
@@ -1041,11 +1039,9 @@ namespace Media.Containers.Matroska
             }
         }
 
-        string m_DocType, m_MuxingApp, m_WritingApp, m_Title;
-
-        int m_MaxIDLength = DefaultMaxIdSize, m_MaxSizeLength = DefaultMaxSizeLength;
-
-        int? m_EbmlVersion, m_EbmlReadVersion, m_DocTypeVersion, m_DocTypeReadVersion;
+        private string m_DocType, m_MuxingApp, m_WritingApp, m_Title;
+        private int m_MaxIDLength = DefaultMaxIdSize, m_MaxSizeLength = DefaultMaxSizeLength;
+        private int? m_EbmlVersion, m_EbmlReadVersion, m_DocTypeVersion, m_DocTypeReadVersion;
 
         public int EbmlVersion
         {
@@ -1110,7 +1106,7 @@ namespace Media.Containers.Matroska
             }
         }
 
-        TimeSpan? m_Duration;
+        private TimeSpan? m_Duration;
 
         public TimeSpan Duration
         {
@@ -1140,7 +1136,7 @@ namespace Media.Containers.Matroska
             get { return ReadElement(Identifier.SeekHead, Root.DataOffset); }
         }
 
-        List<Track> m_Tracks;
+        private List<Track> m_Tracks;
 
         public override IEnumerable<Track> GetTracks()
         {
@@ -1258,8 +1254,9 @@ namespace Media.Containers.Matroska
                                     //Really the sample Rate?
                                     //Number of nanoseconds (not scaled via TimecodeScale) per frame ('frame' in the  sense -- one element put into a (Simple)Block).
                                     stream.Read(buffer, 0, (int)length);
-                                    if (mediaType == Sdp.MediaType.video) rate = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerSecond / Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
-                                    else rate = Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
+                                    rate = mediaType == Sdp.MediaType.video
+                                        ? Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerSecond / Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian)
+                                        : Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
                                     offset += length;
                                     continue;
                                 }

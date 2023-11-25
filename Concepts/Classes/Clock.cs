@@ -46,7 +46,7 @@ namespace Media.Concepts.Classes
     /// </summary>
     public class Clock : Media.Common.SuppressedFinalizerDisposable
     {
-        static bool GC = false;
+        private static bool GC = false;
 
         #region Fields
 
@@ -236,7 +236,7 @@ namespace Media.Concepts.Classes
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static void NanoSleep(ref long nanos, long aopt = 1)
+        private static void NanoSleep(ref long nanos, long aopt = 1)
         {
             unchecked
             {
@@ -275,7 +275,7 @@ namespace Media.UnitTests
         /// A static instance can be useful to warm a type but should not be relied upon for absolute time requirements.
         /// You will notice based on it's properties that it may or may not have been started just before a system clock update and can only update at the same frequency of that clock.
         /// </notes>
-        static Media.Concepts.Classes.Clock staticClock = new(false);
+        private static readonly Media.Concepts.Classes.Clock staticClock = new(false);
 
         public void TestStaticClock()
         {

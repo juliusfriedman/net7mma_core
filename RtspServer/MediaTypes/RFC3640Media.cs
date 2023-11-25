@@ -73,9 +73,9 @@ namespace Media.Rtsp.Server.MediaTypes
             {
                 profileId = frequencyIndex = channelConfiguration = packetLen = 0;
 
-                if (attributeLine is null || attributeLine.Type != Sdp.Lines.SessionAttributeLine.AttributeType) return false;
-
-                throw new NotImplementedException();
+                return attributeLine is null || attributeLine.Type != Sdp.Lines.SessionAttributeLine.AttributeType
+                    ? false
+                    : throw new NotImplementedException();
             }
 
             /// <summary>

@@ -104,12 +104,13 @@ namespace Media.Containers.Mpeg
 
         public static string ToTextualConvention(byte b)
         {
-            if (StreamTypeMap.TryGetValue(b, out string name)) return name;
-            if (IsMpeg1or2AudioStream(b)) return "Audio";
-            if (IsMpeg1or2VideoStream(b)) return "Video";
-            if (IsReserverd(b)) return "Reserved";
-            if (IsUserPrivate(b)) return "UserPrivate";
-            return Media.Common.Extensions.String.StringExtensions.UnknownString;
+            return StreamTypeMap.TryGetValue(b, out string name)
+                ? name
+                : IsMpeg1or2AudioStream(b)
+                ? "Audio"
+                : IsMpeg1or2VideoStream(b)
+                ? "Video"
+                : IsReserverd(b) ? "Reserved" : IsUserPrivate(b) ? "UserPrivate" : Media.Common.Extensions.String.StringExtensions.UnknownString;
         }
 
         static StreamTypes()

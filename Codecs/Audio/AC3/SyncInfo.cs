@@ -75,7 +75,7 @@ namespace Media.Codecs.Audio.Ac3
             }
         }
 
-        static int[,] frameSizeCodeTable = new int[,]
+        private static readonly int[,] frameSizeCodeTable = new int[,]
             {
                 {96, 69, 64},
                 {96, 70, 64},

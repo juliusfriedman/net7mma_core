@@ -196,10 +196,9 @@ namespace Media.Rtcp
         {
             get
             {
-                if (false == HasExtensionData) return Common.MemorySegment.Empty;
-
-                return new Common.MemorySegment(Payload.Array, Payload.Offset + ReportBlockOctets, ExtensionDataOctets);
-
+                return false == HasExtensionData
+                    ? Common.MemorySegment.Empty
+                    : (IEnumerable<byte>)new Common.MemorySegment(Payload.Array, Payload.Offset + ReportBlockOctets, ExtensionDataOctets);
             }
             //internal protected set
             //{
@@ -256,7 +255,7 @@ namespace Media.Rtcp
         #region Instance Methods       
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected virtual IEnumerator<IReportBlock> GetEnumeratorInternal(int offset = 0)//, int blockSize = ReportBlock.ReportBlockSize)
+        protected internal virtual IEnumerator<IReportBlock> GetEnumeratorInternal(int offset = 0)//, int blockSize = ReportBlock.ReportBlockSize)
         {
             //CheckDisposed();
 

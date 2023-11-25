@@ -97,11 +97,10 @@ namespace Concepts.Classes.Sockets
 
             InternetEndPoint iNetComparand = obj as InternetEndPoint;
 
-            if (iNetComparand is null)
-                return false;
-
-            return (ProtocolType == iNetComparand.ProtocolType &&
-                    ProtocolFamily == iNetComparand.ProtocolFamily);
+            return iNetComparand is null
+                ? false
+                : ProtocolType == iNetComparand.ProtocolType &&
+                    ProtocolFamily == iNetComparand.ProtocolFamily;
         }
 
         public override int GetHashCode()
@@ -221,11 +220,10 @@ namespace Concepts.Classes.Sockets
 
             InternetEndPoint iNetComparand = comparand as InternetEndPoint;
 
-            if (iNetComparand is null)
-                return false;
-
-            return (m_Family == iNetComparand.m_Family &&
-                    m_Port == iNetComparand.m_Port);
+            return iNetComparand is null
+                ? false
+                : m_Family == iNetComparand.m_Family &&
+                    m_Port == iNetComparand.m_Port;
         }
 
         public static implicit operator System.Net.IPEndPoint(InternetEndPoint iep)
@@ -236,7 +234,7 @@ namespace Concepts.Classes.Sockets
 
     public class DnsEndPoint : InternetEndPoint
     {
-        string m_Host;
+        private readonly string m_Host;
 
         public DnsEndPoint(string host, int port) : this(host, port, System.Net.Sockets.AddressFamily.Unspecified) { }
 
@@ -272,12 +270,11 @@ namespace Concepts.Classes.Sockets
 
             DnsEndPoint dnsComparand = comparand as DnsEndPoint;
 
-            if (dnsComparand is null)
-                return false;
-
-            return (m_Family == dnsComparand.m_Family &&
+            return dnsComparand is null
+                ? false
+                : m_Family == dnsComparand.m_Family &&
                     m_Port == dnsComparand.m_Port &&
-                    m_Host == dnsComparand.m_Host);
+                    m_Host == dnsComparand.m_Host;
         }
 
         public override int GetHashCode()

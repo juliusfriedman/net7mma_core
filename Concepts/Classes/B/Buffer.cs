@@ -44,7 +44,7 @@ namespace Media.Concepts.Classes.B
 
     }
 
-    class Buffer
+    internal class Buffer
     {
     }
 }

@@ -39,7 +39,7 @@ namespace Media.Sdp
 
         //AllowedTypes
 
-        System.Collections.Generic.IEnumerable<SessionDescriptionLine> GroupedLines = System.Linq.Enumerable.Empty<SessionDescriptionLine>();
+        private System.Collections.Generic.IEnumerable<SessionDescriptionLine> GroupedLines = System.Linq.Enumerable.Empty<SessionDescriptionLine>();
 
         #endregion
 

@@ -16,12 +16,12 @@ public class RFC7655Media : RtpAudioSink
     /// <summary>
     /// Used to identify the codec
     /// </summary>
-    const string RfcEncodingName = "G711-0";
+    private const string RfcEncodingName = "G711-0";
 
     /// <summary>
     /// Used to specify the clock rate
     /// </summary>
-    const int RfcClockRate = 8000;
+    private const int RfcClockRate = 8000;
 
     #endregion
 

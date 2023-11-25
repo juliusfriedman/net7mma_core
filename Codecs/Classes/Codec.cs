@@ -15,9 +15,9 @@ namespace Media.Codec
             System.Runtime.InteropServices.GuidAttribute attribute = (System.Runtime.InteropServices.GuidAttribute)attributes[0];
 
 
-            if (false == System.Guid.TryParse(attribute.Value, out Guid result)) throw new System.InvalidOperationException("Invalid GuidAttribute Attribute Found");
-
-            return result;
+            return false == System.Guid.TryParse(attribute.Value, out Guid result)
+                ? throw new System.InvalidOperationException("Invalid GuidAttribute Attribute Found")
+                : result;
         }
 
         public readonly string Name;

@@ -310,7 +310,7 @@ namespace Media.RtpTools
         /// <summary>
         /// Used internally, should possibly allow for registration and expansion.
         /// </summary>
-        static internal Dictionary<byte, PayloadDescription> PayloadDescriptions = new()
+        internal static Dictionary<byte, PayloadDescription> PayloadDescriptions = new()
         {
             {0, new PayloadDescription() {EncodingName = "PCMU", Clockrate = 8000, Channel = 1, PayloadType = 0 } },
             {1, new PayloadDescription() {EncodingName = "1016", Clockrate = 8000, Channel = 1, PayloadType = 1 } },

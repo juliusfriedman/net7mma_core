@@ -13,11 +13,10 @@ namespace Media.Rtsp.Server
 
         public readonly string BaseDirectory =
             System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "archive";
-
-        IDictionary<IMedia, RtpTools.RtpDump.Program> Attached =
+        private IDictionary<IMedia, RtpTools.RtpDump.Program> Attached =
             new System.Collections.Concurrent.ConcurrentDictionary<IMedia, RtpTools.RtpDump.Program>();
 
-        RtspStreamArchiver(bool shouldDispose = true)
+        private RtspStreamArchiver(bool shouldDispose = true)
             : base(shouldDispose)
         {
             if (System.IO.Directory.Exists(BaseDirectory) is false)
@@ -88,7 +87,7 @@ namespace Media.Rtsp.Server
             }
         }
 
-        void RtpClientPacketReceieved(object sender,
+        private void RtpClientPacketReceieved(object sender,
             Common.IPacket packet = null,
             Media.Rtp.RtpClient.TransportContext tc = null)
         {

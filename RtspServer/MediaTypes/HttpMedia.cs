@@ -1,6 +1,6 @@
 ﻿namespace Media.RtspServer.MediaTypes
 {
-    class HttpMedia
+    internal class HttpMedia
     {
         //Media which Http based, possibly a long stream or something with boundaries etc.
     }

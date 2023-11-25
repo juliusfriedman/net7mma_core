@@ -80,9 +80,9 @@ namespace Media.Common
 
         #region Fields
 
-        internal protected byte[] m_Array;
+        protected internal byte[] m_Array;
 
-        internal protected long m_Offset, m_Length;
+        protected internal long m_Offset, m_Length;
 
         //public readonly Binary.ByteOrder ByteOrder;
 
@@ -103,7 +103,7 @@ namespace Media.Common
             get { return (int)m_Length; }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { m_Length = value; }
+            protected internal set { m_Length = value; }
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace Media.Common
             get { return m_Length; }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { m_Length = value; }
+            protected internal set { m_Length = value; }
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace Media.Common
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             //could just have a Resize method
-            internal protected set { m_Offset = value; }
+            protected internal set { m_Offset = value; }
         }
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace Media.Common
             get { return m_Offset; }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { m_Offset = value; }
+            protected internal set { m_Offset = value; }
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace Media.Common
             get { return m_Array; }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { m_Array = value; }
+            protected internal set { m_Array = value; }
         }
 
         #endregion
@@ -420,9 +420,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            if (System.Object.ReferenceEquals(this, obj)) return true;
-
-            return obj is MemorySegment other && Equals(other);
+            return object.ReferenceEquals(this, obj) ? true : obj is MemorySegment other && Equals(other);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -472,7 +470,7 @@ namespace Media.Common
     /// </summary>
     public class BitSegment : MemorySegment
     {
-        ulong m_BitOffset, m_BitCount;
+        private ulong m_BitOffset, m_BitCount;
 
         public int BitCount
         {

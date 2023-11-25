@@ -70,7 +70,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
 
             //Probably not the final API as it smells like Java too much
-            internal protected static class ProfileHeaderInformation //: RtpFrame.ProfileHeaderInformation
+            protected internal static class ProfileHeaderInformation //: RtpFrame.ProfileHeaderInformation
             {
                 internal const bool HasVariableProfileHeaderSize = true;
 
@@ -142,7 +142,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 //}
             }
 
-            const int JpegMaxSizeDimension = 65500; //65535
+            private const int JpegMaxSizeDimension = 65500; //65535
 
             //public const int MaxWidth = 2048;
 
@@ -596,11 +596,10 @@ namespace Media.Rtsp.Server.MediaTypes
                 return result.ToArray();
             }
 
-
-            static readonly Common.MemorySegment EndOfInformationMarkerSegment = new(new byte[] { Media.Codecs.Image.Jpeg.Markers.Prefix, Media.Codecs.Image.Jpeg.Markers.EndOfInformation });
+            private static readonly Common.MemorySegment EndOfInformationMarkerSegment = new(new byte[] { Media.Codecs.Image.Jpeg.Markers.Prefix, Media.Codecs.Image.Jpeg.Markers.EndOfInformation });
 
             // The default 'luma' and 'chroma' quantizer tables, in zigzag order and energy reduced
-            static byte[] defaultQuantizers = new byte[]
+            private static readonly byte[] defaultQuantizers = new byte[]
         {
            // luma table: Psychovisual
            16, 11, 12, 14, 12, 10, 16, 14,
@@ -621,8 +620,7 @@ namespace Media.Rtsp.Server.MediaTypes
            99, 99, 99, 99, 99, 99, 99, 99,
            99, 99, 99, 99, 99, 99, 99, 99
         };
-
-            static byte[] rfcQuantizers = new byte[]
+            private static readonly byte[] rfcQuantizers = new byte[]
         {
            // luma table:
             //From RFC2435 / Jpeg Spec
@@ -647,7 +645,7 @@ namespace Media.Rtsp.Server.MediaTypes
         };
 
             //http://www.jatit.org/volumes/Vol70No3/24Vol70No3.pdf
-            static byte[] psychoVisualQuantizers = new byte[]
+            private static readonly byte[] psychoVisualQuantizers = new byte[]
         {
            // luma table:
            16, 14, 13, 15, 19, 28, 37, 55,
@@ -847,19 +845,17 @@ namespace Media.Rtsp.Server.MediaTypes
 
             //JpegHuffmanTable StdDCLuminance
 
-            static byte[] lum_dc_codelens = { 0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
+            private static readonly byte[] lum_dc_codelens = { 0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
                         //Progressive
                         lum_dc_codelens_p = { 0, 2, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-            static byte[] lum_dc_symbols = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 },
+            private static readonly byte[] lum_dc_symbols = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 },
                         //Progressive
                         lum_dc_symbols_p = { 0, 2, 3, 0, 1, 4, 5, 6, 7 }; //lum_dc_symbols_p = { 0, 0, 2, 1, 3, 4, 5, 6, 7}; Work for TestProg but not TestImgP
 
             //JpegHuffmanTable StdACLuminance
 
-            static byte[] lum_ac_codelens = { 0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 0x7d };
-
-            static byte[] lum_ac_symbols =
+            private static readonly byte[] lum_ac_codelens = { 0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 0x7d };
+            private static readonly byte[] lum_ac_symbols =
             {
                 0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12,
                 0x21, 0x31, 0x41, 0x06, 0x13, 0x51, 0x61, 0x07,
@@ -887,19 +883,17 @@ namespace Media.Rtsp.Server.MediaTypes
             //Chromiance
 
             //JpegHuffmanTable StdDCChrominance
-            static byte[] chm_dc_codelens = { 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
+            private static readonly byte[] chm_dc_codelens = { 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
                         //Progressive
                         chm_dc_codelens_p = { 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-
-            static byte[] chm_dc_symbols = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 },
+            private static readonly byte[] chm_dc_symbols = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 },
                         //Progressive
                         chm_dc_symbols_p = { 0, 1, 2, 3, 0, 4, 5 };
 
             //JpegHuffmanTable StdACChrominance
 
-            static byte[] chm_ac_codelens = { 0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 0x77 };
-
-            static byte[] chm_ac_symbols =
+            private static readonly byte[] chm_ac_codelens = { 0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 0x77 };
+            private static readonly byte[] chm_ac_symbols =
             {
                 0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21,
                 0x31, 0x06, 0x12, 0x41, 0x51, 0x07, 0x61, 0x71,
@@ -2279,8 +2273,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         //use 50 because that is where the rfc quality was based on
         public const int DefaultQuality = 50;
-
-        static List<string> SupportedImageFormats = new(System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders().SelectMany(enc => enc.FilenameExtension.Split((char)Common.ASCII.SemiColon)).Select(s => s.Substring(1).ToLowerInvariant()));
+        private static readonly List<string> SupportedImageFormats = new(System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders().SelectMany(enc => enc.FilenameExtension.Split((char)Common.ASCII.SemiColon)).Select(s => s.Substring(1).ToLowerInvariant()));
 
         protected System.IO.FileSystemWatcher m_Watcher;
 
@@ -2321,7 +2314,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         #region Methods
 
-        void EnsureDimensions()
+        private void EnsureDimensions()
         {
             Width += Width % Common.Binary.BitsPerByte;
             Height += Height % Common.Binary.BitsPerByte;

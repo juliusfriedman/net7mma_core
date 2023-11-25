@@ -906,7 +906,7 @@ a=control:track1
         Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
         //Should have o=?
-        string originatorAndSession = String.Format("{0} {1} {2} {3} {4} {5}", "-", "62464", "0", "IN", "IP4", "10.1.1.2");
+        string originatorAndSession = string.Format("{0} {1} {2} {3} {4} {5}", "-", "62464", "0", "IN", "IP4", "10.1.1.2");
 
         string profile = "RTP/AVP";
 

@@ -61,18 +61,15 @@ namespace Media.Common
 
         #region Fields
 
-        long m_Position, m_Count;
-
-        readonly IList<Common.MemorySegment> Segments;
-
-        Common.MemorySegment WorkingSegment = Common.MemorySegment.Empty;
-
-        int m_Index = -1;
+        private long m_Position, m_Count;
+        private readonly IList<Common.MemorySegment> Segments;
+        private Common.MemorySegment WorkingSegment = Common.MemorySegment.Empty;
+        private int m_Index = -1;
 
         //Could keep remaining instead of cursor would be easier to keep track of but would require an extra calulcation given Position
         //Position => can be based on the cursor with m_Position + 'm_Cursor' and based on remaining with m_Position + '(WorkingSegment.m_Length - m_Remaining)'
 
-        long m_Cursor;
+        private long m_Cursor;
 
         #endregion
 
@@ -237,7 +234,7 @@ namespace Media.Common
 
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void Free(ref int index)
+        protected internal void Free(ref int index)
         {
             //Some lists are read only.
             if (index < 0 || index >= Segments.Count || Segments.IsReadOnly) return;
@@ -444,7 +441,7 @@ namespace Media.Common
         /// Calls <see cref="Free"/> for each entry in <see cref="Segments"/>
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void Clear()
+        protected internal void Clear()
         {
             for (int i = 0, e = Segments.Count - 1; e >= i; --e) Free(ref e);
 
@@ -1053,7 +1050,7 @@ namespace Media.Common
 
         //LeaveOpen//
 
-        internal protected bool ShouldDispose = true, IsDisposed;
+        protected internal bool ShouldDispose = true, IsDisposed;
 
         protected override void Dispose(bool disposing)
         {

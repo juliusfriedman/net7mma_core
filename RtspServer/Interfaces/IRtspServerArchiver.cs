@@ -1,6 +1,6 @@
 ﻿namespace Media.RtspServer.Interfaces
 {
-    interface IRtspServerArchiver
+    internal interface IRtspServerArchiver
     {
 
         //Archiving, StartDateUtc, EndDateUtc

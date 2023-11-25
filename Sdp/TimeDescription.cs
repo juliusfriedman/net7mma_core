@@ -162,7 +162,7 @@ namespace Media.Sdp
         #endregion
 
         //Todo remove?
-        internal protected readonly Lines.SessionTimeDescriptionLine TimeDescriptionLine;
+        protected internal readonly Lines.SessionTimeDescriptionLine TimeDescriptionLine;
 
         #region Constructor
 
@@ -226,8 +226,7 @@ namespace Media.Sdp
 
             StopTime = other.StopTime;
 
-            if (referenceRepeatTimes) RepeatLines = other.RepeatLines;
-            else RepeatLines = new List<Lines.SessionRepeatTimeLine>(other.RepeatLines);
+            RepeatLines = referenceRepeatTimes ? other.RepeatLines : new List<Lines.SessionRepeatTimeLine>(other.RepeatLines);
         }
 
         public TimeDescription(long sessionStart, long sessionStop)

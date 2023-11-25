@@ -1,6 +1,6 @@
 ﻿namespace Media.Codecs.Video
 {
-    class VideoInfoHeader
+    internal class VideoInfoHeader
     {
     }
 }

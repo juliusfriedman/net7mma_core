@@ -49,12 +49,11 @@ namespace Media.Containers.Ogg
 
         #region Constants
 
-        static byte[] VorbisBytes = System.Text.Encoding.UTF8.GetBytes("vorbis");
-
-        const int MaximumPageSize = 65307, IdentifierSize = 8, MinimumSize = 20 + IdentifierSize, MinimumReadSize = MinimumSize - 1, PageVersionOffset = 4, PageSegmentCountOffset = 26;
+        private static readonly byte[] VorbisBytes = System.Text.Encoding.UTF8.GetBytes("vorbis");
+        private const int MaximumPageSize = 65307, IdentifierSize = 8, MinimumSize = 20 + IdentifierSize, MinimumReadSize = MinimumSize - 1, PageVersionOffset = 4, PageSegmentCountOffset = 26;
 
         //OggDS
-        const int PackTypeHeader = 0x01,
+        private const int PackTypeHeader = 0x01,
             PacketTypeComment = 0x03,
             PacketTypeCodeBook = 0x05,
             PacketTypeBits = 0x07,
@@ -95,36 +94,35 @@ namespace Media.Containers.Ogg
 
         public static HeaderType GetHeaderType(Node node)
         {
-            if (node is null) throw new ArgumentNullException("node");
-            return (HeaderType)node.Identifier[5];
+            return node is null ? throw new ArgumentNullException("node") : (HeaderType)node.Identifier[5];
         }
 
         public static long GetGranulePosition(Node node)
         {
-            if (node is null) throw new ArgumentNullException("node");
-
-            return Common.Binary.Read64(node.Identifier, 6, Media.Common.Binary.IsBigEndian);
+            return node is null
+                ? throw new ArgumentNullException("node")
+                : Common.Binary.Read64(node.Identifier, 6, Media.Common.Binary.IsBigEndian);
         }
 
         public static int GetSerialNumber(Node node)
         {
-            if (node is null) throw new ArgumentNullException("node");
-
-            return (int)Common.Binary.ReadU32(node.Identifier, 14, Media.Common.Binary.IsBigEndian);
+            return node is null
+                ? throw new ArgumentNullException("node")
+                : (int)Common.Binary.ReadU32(node.Identifier, 14, Media.Common.Binary.IsBigEndian);
         }
 
         public static int GetSequenceNumber(Node node)
         {
-            if (node is null) throw new ArgumentNullException("node");
-
-            return (int)Common.Binary.ReadU32(node.Identifier, 18, Media.Common.Binary.IsBigEndian);
+            return node is null
+                ? throw new ArgumentNullException("node")
+                : (int)Common.Binary.ReadU32(node.Identifier, 18, Media.Common.Binary.IsBigEndian);
         }
 
         public static int GetCrc(Node node)
         {
-            if (node is null) throw new ArgumentNullException("node");
-
-            return (int)Common.Binary.ReadU32(node.Identifier, 22, Media.Common.Binary.IsBigEndian);
+            return node is null
+                ? throw new ArgumentNullException("node")
+                : (int)Common.Binary.ReadU32(node.Identifier, 22, Media.Common.Binary.IsBigEndian);
         }
 
         #endregion
@@ -324,13 +322,11 @@ namespace Media.Containers.Ogg
             }
         }
 
-        List<Track> m_Tracks;
+        private List<Track> m_Tracks;
+        private Dictionary<int, Node> m_PageBegins, m_PageEnds;
+        private Common.Collections.Generic.ConcurrentThesaurus<int, Node> m_InfoPages;
 
-        Dictionary<int, Node> m_PageBegins, m_PageEnds;
-
-        Common.Collections.Generic.ConcurrentThesaurus<int, Node> m_InfoPages;
-
-        void ParsePages()
+        private void ParsePages()
         {
 
             if (m_PageBegins is not null || m_PageEnds is not null || m_InfoPages is not null) return;

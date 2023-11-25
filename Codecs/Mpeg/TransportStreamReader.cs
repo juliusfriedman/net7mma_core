@@ -68,10 +68,11 @@ namespace Media.Containers.Mpeg
         public static string ToTextualConvention(TransportStreamReader reader, byte[] identifier)
         {
             TransportStreamUnit.PacketIdentifier result = TransportStreamUnit.GetPacketIdentifier(identifier, reader.UnitOverhead);
-            if (TransportStreamUnit.IsReserved(result)) return "Reserved";
-            if (TransportStreamUnit.IsDVBMetaData(result)) return "DVBMetaData";
-            if (TransportStreamUnit.IsUserDefined(result)) return "UserDefined";
-            return result.ToString();
+            return TransportStreamUnit.IsReserved(result)
+                ? "Reserved"
+                : TransportStreamUnit.IsDVBMetaData(result)
+                ? "DVBMetaData"
+                : TransportStreamUnit.IsUserDefined(result) ? "UserDefined" : result.ToString();
         }
 
         #endregion
@@ -318,17 +319,16 @@ namespace Media.Containers.Mpeg
             }
         }
 
-        HashSet<TransportStreamUnit.PacketIdentifier> m_ProgramIds = [];
+        private readonly HashSet<TransportStreamUnit.PacketIdentifier> m_ProgramIds = [];
 
         public override string ToTextualConvention(Container.Node node)
         {
-            if (node.Master.Equals(this)) return TransportStreamReader.ToTextualConvention(this, node.Identifier);
-            return base.ToTextualConvention(node);
+            return node.Master.Equals(this) ? TransportStreamReader.ToTextualConvention(this, node.Identifier) : base.ToTextualConvention(node);
         }
 
-        System.Collections.Concurrent.ConcurrentDictionary<ushort, TransportStreamUnit.PacketIdentifier> m_ProgramAssociations = new();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<ushort, TransportStreamUnit.PacketIdentifier> m_ProgramAssociations = new();
 
-        static internal int ReadPointerField(Container.Node node, int offset = 0)
+        internal static int ReadPointerField(Container.Node node, int offset = 0)
         {
             int pointer = node.Data[offset++];
 
@@ -337,7 +337,7 @@ namespace Media.Containers.Mpeg
 
         //Static and take reader?
         //Maps from Program to PacketIdentifer?
-        internal protected virtual void ParseProgramAssociationTable(Container.Node node)
+        protected internal virtual void ParseProgramAssociationTable(Container.Node node)
         {
 
             int offset = ReadPointerField(node);
@@ -418,9 +418,9 @@ namespace Media.Containers.Mpeg
             //CRC
         }
 
-        System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<TransportStreamUnit.PacketIdentifier, ushort>> m_ProgramDescriptions = new();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<TransportStreamUnit.PacketIdentifier, ushort>> m_ProgramDescriptions = new();
 
-        internal protected virtual void ParseDescriptionTable(Container.Node node)
+        protected internal virtual void ParseDescriptionTable(Container.Node node)
         {
             int offset = ReadPointerField(node);
 

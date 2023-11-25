@@ -97,7 +97,7 @@ namespace Media.Common
         /// <param name="sender"></param>
         /// <param name="e"></param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected static void SetShouldDisposeIfSenderIsBaseDisposableAndDisposeNow(object sender, EventArgs e)
+        protected internal static void SetShouldDisposeIfSenderIsBaseDisposableAndDisposeNow(object sender, EventArgs e)
         {
             if (sender is BaseDisposable bd) SetShouldDispose(bd, true, true);
         }
@@ -133,7 +133,7 @@ namespace Media.Common
         ///  The sign bit of the integer value is the only 'confusing' part about this and it must be understood because the Interlocked methods are CLS Compliant and do not expose unsigned counterparts.
         ///  See the remarks section above for more clarity.
         /// </remarks>
-        long State; // = Undisposed; (Todo, internal protected and can remove Statics.. or new private protected and...)
+        private long State; // = Undisposed; (Todo, internal protected and can remove Statics.. or new private protected and...)
 
         #endregion
 
@@ -183,7 +183,7 @@ namespace Media.Common
         /// <summary>
         /// Gets a value indicating whether the object is undisposed.
         /// </summary>
-        internal protected bool IsUndisposed
+        protected internal bool IsUndisposed
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
@@ -229,7 +229,7 @@ namespace Media.Common
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get;
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set;
+            protected internal set;
         }
 
         #endregion
@@ -241,7 +241,7 @@ namespace Media.Common
         /// Throws a System.ObjectDisposedException if <see cref="IsDisposed"/> is true and the Finalizer has yet not been called
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void CheckDisposed()
+        protected internal void CheckDisposed()
         {
             if (IsUndisposed is false || IsFinalized || IsDisposed) throw new ObjectDisposedException(GetType().Name);
         }
@@ -252,7 +252,7 @@ namespace Media.Common
         /// </summary>
         /// <param name="disposing">Indicates if resources should be destroyed</param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected virtual void Dispose(bool disposing)
+        protected internal virtual void Dispose(bool disposing)
         {
             //Do not dispose when ShouldDispose is false.
             if (disposing is false || ShouldDispose is false /*|| State >> 32 > 0*/) return;
@@ -303,7 +303,7 @@ namespace Media.Common
         /// if <see cref="IsDisposed"/> returns, calls <see cref="GC.SuppressFinalize"/> and sets <see cref="State"/>
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        void Destruct()
+        private void Destruct()
         {
             //If not disposed return.
             if (ShouldDispose is false || IsDisposed) return;

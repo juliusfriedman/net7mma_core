@@ -13,9 +13,9 @@ namespace Media.Rtsp.Server.MediaTypes;
 
 public class RtpAudioSink : RtpSink
 {
-    internal protected readonly ConcurrentLinkedQueueSlim<RtpFrame> Frames = new();
+    protected internal readonly ConcurrentLinkedQueueSlim<RtpFrame> Frames = new();
 
-    internal protected int m_FramesSentCounter = 0;
+    protected internal int m_FramesSentCounter = 0;
 
     /// <summary>
     /// The number of channels in this audio sink.
@@ -35,7 +35,7 @@ public class RtpAudioSink : RtpSink
     /// <summary>
     /// The coded used to encode or decode
     /// </summary>
-    public ICodec Codec { get; internal protected set; }
+    public ICodec Codec { get; protected internal set; }
 
     /// <summary>
     /// Creates an audio sink and assigns <see cref="PayloadType"/>, <see cref="Channels"/> and <see cref="ClockRate"/>

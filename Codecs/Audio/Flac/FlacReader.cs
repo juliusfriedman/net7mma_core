@@ -16,12 +16,12 @@ namespace Media.Codecs.Flac
         /// <summary>
         /// ASCII "fLaC"
         /// </summary>
-        static byte[] fLaCBytes = System.Text.Encoding.ASCII.GetBytes("fLaC");
+        private static readonly byte[] fLaCBytes = System.Text.Encoding.ASCII.GetBytes("fLaC");
 
         /// <summary>
         /// The value used to ensure frames are read correctly.
         /// </summary>
-        static uint FrameSync = 0b11111111111110;
+        private static readonly uint FrameSync = 0b11111111111110;
 
         /// <summary>
         /// Used to decode a sampleRate code
@@ -72,7 +72,7 @@ namespace Media.Codecs.Flac
         /// <summary>
         /// Used to determine how many bytes are allocated to read a <see cref=nameof(node)/>
         /// </summary>
-        const int IdentifierSize = 4,
+        private const int IdentifierSize = 4,
             MinimumReadSize = IdentifierSize;
 
         #endregion
@@ -302,26 +302,22 @@ namespace Media.Codecs.Flac
 
         public static bool IsLastBlock(Node node)
         {
-            if (node is null) throw new ArgumentNullException(nameof(node));
-            return IsLastBlock(ref node.Identifier[0]);
+            return node is null ? throw new ArgumentNullException(nameof(node)) : IsLastBlock(ref node.Identifier[0]);
         }
 
         public static bool IsReservedBlock(Node node)
         {
-            if (node is null) throw new ArgumentNullException(nameof(node));
-            return IsReservedBlock(GetBlockType(ref node.Identifier[0]));
+            return node is null ? throw new ArgumentNullException(nameof(node)) : IsReservedBlock(GetBlockType(ref node.Identifier[0]));
         }
 
         public static bool IsInvalid(Node node)
         {
-            if (node is null) throw new ArgumentNullException(nameof(node));
-            return IsInvalid(ref node.Identifier[0]);
+            return node is null ? throw new ArgumentNullException(nameof(node)) : IsInvalid(ref node.Identifier[0]);
         }
 
         public static bool IsFrameHeader(Node node)
         {
-            if (node is null) throw new ArgumentNullException(nameof(node));
-            return IsFrameHeader(node.Identifier);
+            return node is null ? throw new ArgumentNullException(nameof(node)) : IsFrameHeader(node.Identifier);
         }
 
         public static bool IsInvalid(ref byte blockType) { return IsInvalid(GetBlockType(ref blockType)); }
@@ -340,17 +336,18 @@ namespace Media.Codecs.Flac
 
         public static bool IsFrameHeader(byte[] identifier)
         {
-            if (identifier is null) throw new ArgumentNullException(nameof(identifier));
-            if (identifier.Length < 2) throw new ArgumentOutOfRangeException(nameof(identifier));
-            return Media.Common.Binary.ReadBitsMSB(identifier, 0, 14) == FrameSync;
+            return identifier is null
+                ? throw new ArgumentNullException(nameof(identifier))
+                : identifier.Length < 2
+                ? throw new ArgumentOutOfRangeException(nameof(identifier))
+                : Media.Common.Binary.ReadBitsMSB(identifier, 0, 14) == FrameSync;
         }
 
         #region Frame Methods
 
         public static int GetBlockSize(Node node)
         {
-            if (node is null) throw new ArgumentNullException(nameof(node));
-            return GetBlockSize(node.Identifier);
+            return node is null ? throw new ArgumentNullException(nameof(node)) : GetBlockSize(node.Identifier);
         }
 
         public static int GetBlockSize(byte[] identifier)
@@ -364,18 +361,13 @@ namespace Media.Codecs.Flac
             {
                 throw new InvalidOperationException("Invalid Blocksize value: 0");
             }
-            if (val == 1)
-                blocksize = 192;
-            else if (val >= 2 && val <= 5)
-                blocksize = 576 << (val - 2);
-            else if (val == 6 || val == 7)
-                blocksize = val;
-            else if (val >= 8 && val <= 15)
-                blocksize = 256 << (val - 8);
-            else
-            {
-                throw new InvalidOperationException("Invalid Blocksize value: " + val);
-            }
+            blocksize = val == 1
+                ? 192
+                : val >= 2 && val <= 5
+                ? 576 << (val - 2)
+                : val == 6 || val == 7
+                ? val
+                : val >= 8 && val <= 15 ? 256 << (val - 8) : throw new InvalidOperationException("Invalid Blocksize value: " + val);
 
             return blocksize;
 
@@ -384,8 +376,7 @@ namespace Media.Codecs.Flac
 
         public static int GetSampleRate(Node node)
         {
-            if (node is null) throw new ArgumentNullException(nameof(node));
-            return GetSampleRate(node.Identifier);
+            return node is null ? throw new ArgumentNullException(nameof(node)) : GetSampleRate(node.Identifier);
         }
 
         public static int GetSampleRate(byte[] identifier)
@@ -394,20 +385,16 @@ namespace Media.Codecs.Flac
 
             //samplerate
             int sampleRate = identifier[2] & 0x0F;
-            if (sampleRate >= 1 && sampleRate <= 11)
-                sampleRate = SampleRateTable[sampleRate];
-            else
-            {
-                throw new InvalidOperationException("Invalid SampleRate value: " + sampleRate);
-            }
+            sampleRate = sampleRate >= 1 && sampleRate <= 11
+                ? SampleRateTable[sampleRate]
+                : throw new InvalidOperationException("Invalid SampleRate value: " + sampleRate);
             return sampleRate;
             #endregion samplerate
         }
 
         public static int GetChannels(Node node, out ChannelAssignment channelAssignment)
         {
-            if (node is null) throw new ArgumentNullException(nameof(node));
-            return GetChannels(node.Identifier, out channelAssignment);
+            return node is null ? throw new ArgumentNullException(nameof(node)) : GetChannels(node.Identifier, out channelAssignment);
         }
 
         public static int GetChannels(byte[] identifier, out ChannelAssignment channelAssignment)
@@ -442,8 +429,7 @@ namespace Media.Codecs.Flac
         /// <returns></returns>
         public static int GetBitsPerSample(Node node)
         {
-            if (node is null) throw new ArgumentNullException(nameof(node));
-            return GetBitsPerSample(node.Identifier);
+            return node is null ? throw new ArgumentNullException(nameof(node)) : GetBitsPerSample(node.Identifier);
         }
 
         public static int GetBitsPerSample(byte[] identififer)
@@ -451,12 +437,9 @@ namespace Media.Codecs.Flac
             #region bitspersample
 
             int bitsPerSample = (identififer[3] & 0x0E) >> 1;
-            if (bitsPerSample == 3 || bitsPerSample >= 7 || bitsPerSample < 0)
-            {
-                throw new InvalidOperationException("Invalid BitsPerSampleIndex");
-            }
-            else
-                bitsPerSample = BitPerSampleTable[bitsPerSample];
+            bitsPerSample = bitsPerSample == 3 || bitsPerSample >= 7 || bitsPerSample < 0
+                ? throw new InvalidOperationException("Invalid BitsPerSampleIndex")
+                : BitPerSampleTable[bitsPerSample];
             return bitsPerSample;
             #endregion bitspersample
         }
@@ -470,21 +453,18 @@ namespace Media.Codecs.Flac
         /// <summary>
         /// Where the <see cref="fLaCBytes"/> were found in the stream.
         /// </summary>
-        long m_FlacPosition = -1;
+        private long m_FlacPosition = -1;
 
         /// <summary>
         /// Any <see cref="Track"/> instances, Typically only 1 per file / stream.
         /// </summary>
-        List<Track> m_Tracks = null;
-
-        int? m_MinBlockSize = 0, m_MaxBlockSize = 0,
+        private List<Track> m_Tracks = null;
+        private int? m_MinBlockSize = 0, m_MaxBlockSize = 0,
              m_MinFrameSize = 0, m_MaxFrameSize = 0,
              m_SampleRate = 0, m_Channels = 0,
              m_BitsPerSample = 0;
-
-        ulong? m_TotalSamples = 0;
-
-        string m_Md5 = string.Empty, m_Title = string.Empty;
+        private ulong? m_TotalSamples = 0;
+        private string m_Md5 = string.Empty, m_Title = string.Empty;
         #endregion
 
         #region Properties
@@ -735,12 +715,7 @@ namespace Media.Codecs.Flac
                         {
                             val = (val << 8) | (identifier[++pos] = (byte)ReadByte());
                         }
-                        if (sampleRateCode == 12)
-                            sampleRateCode = val * 1000;
-                        else if (sampleRateCode == 13)
-                            sampleRateCode = val;
-                        else
-                            sampleRateCode = val * 10;
+                        sampleRateCode = sampleRateCode == 12 ? val * 1000 : sampleRateCode == 13 ? val : val * 10;
                     }
 
                     #endregion read hints
@@ -766,7 +741,7 @@ namespace Media.Codecs.Flac
         /// Parses a <see cref="BlockType.StreamInfo"/> <see cref="Media.Container.Node"/>
         /// </summary>
         /// <param name=nameof(node)>The <see cref="Media.Container.Node"/> to parse</param>
-        internal protected void ParseStreamInfo(Container.Node node = null)
+        protected internal void ParseStreamInfo(Container.Node node = null)
         {
             node ??= Root;
             VerifyBlockType(node, BlockType.StreamInfo);
@@ -800,7 +775,7 @@ namespace Media.Codecs.Flac
         /// Parses a <see cref="BlockType.VorbisComment"/> <see cref="Media.Container.Node"/>
         /// </summary>
         /// <param name=nameof(node)>The <see cref="Media.Container.Node"/> to parse</param>
-        internal protected List<KeyValuePair<string, string>> ParseVorbisComment(Media.Container.Node node)
+        protected internal List<KeyValuePair<string, string>> ParseVorbisComment(Media.Container.Node node)
         {
             VerifyBlockType(node, BlockType.VorbisComment);
 
@@ -886,7 +861,7 @@ namespace Media.Codecs.Flac
         /// Parses a <see cref="BlockType.SeekTable"/> <see cref="Media.Container.Node"/>
         /// </summary>
         /// <param name=nameof(node)>The <see cref="Media.Container.Node"/> to parse</param>
-        internal protected List<Tuple<long, long, short>> ParseSeekTable(Media.Container.Node node)
+        protected internal List<Tuple<long, long, short>> ParseSeekTable(Media.Container.Node node)
         {
             VerifyBlockType(node, BlockType.SeekTable);
             ///	NOTE
@@ -902,7 +877,7 @@ namespace Media.Codecs.Flac
             return seekPoints;
         }
 
-        internal protected uint ReadUnary()
+        protected internal uint ReadUnary()
         {
 
             //int i;
@@ -927,7 +902,7 @@ namespace Media.Codecs.Flac
             }
         }
 
-        internal protected int ReadUnarySigned()
+        protected internal int ReadUnarySigned()
         {
             var value = ReadUnary();
             return (int)(value >> 1 ^ -((int)(value & 1)));
@@ -941,13 +916,9 @@ namespace Media.Codecs.Flac
 
         public override string ToTextualConvention(Node block)
         {
-            if (block.Master.Equals(this))
-            {
-                if (IsFrameHeader(block.Identifier)) return "FrameHeader";
-                return GetBlockType(block).ToString();
-            }
-
-            return base.ToTextualConvention(block);
+            return block.Master.Equals(this)
+                ? IsFrameHeader(block.Identifier) ? "FrameHeader" : GetBlockType(block).ToString()
+                : base.ToTextualConvention(block);
         }
 
         public override IEnumerator<Node> GetEnumerator()

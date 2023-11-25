@@ -175,8 +175,7 @@ namespace Media.Common.Extensions.Encoding
                         {
                             sawDelimit = true;
 
-                            if (includeDelimits is false) charsUsed = c;
-                            else charsUsed = ++c;
+                            charsUsed = includeDelimits is false ? c : ++c;
 
                             break;
                         }

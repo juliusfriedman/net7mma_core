@@ -45,9 +45,8 @@
         #endregion
 
         //PayloadType, Frames for PayloadType
-        readonly Common.Collections.Generic.ConcurrentThesaurus<int, RtpFrame> Frames = [];
-
-        readonly System.Collections.Generic.Dictionary<int, Sdp.MediaDescription> MediaDescriptions = [];
+        private readonly Common.Collections.Generic.ConcurrentThesaurus<int, RtpFrame> Frames = [];
+        private readonly System.Collections.Generic.Dictionary<int, Sdp.MediaDescription> MediaDescriptions = [];
 
         //Todo
         //Properties to track for max, Memory, Packets, Time etc.

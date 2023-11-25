@@ -257,14 +257,14 @@ namespace Media.Rtsp.Server.MediaTypes
             }
         }
 
-        void RtspClient_OnStop(RtspClient sender, object args)
+        private void RtspClient_OnStop(RtspClient sender, object args)
         {
             base.IsReady = RtspClient.IsPlaying;
 
             //Should also push event to all clients that the stream is stopping.
         }
 
-        void RtspClient_OnPlay(RtspClient sender, object args)
+        private void RtspClient_OnPlay(RtspClient sender, object args)
         {
             State = StreamState.Started;
 
@@ -278,17 +278,17 @@ namespace Media.Rtsp.Server.MediaTypes
             }
         }
 
-        void RtspClient_OnDisconnect(RtspClient sender, object args)
+        private void RtspClient_OnDisconnect(RtspClient sender, object args)
         {
             base.IsReady = false;
         }
 
-        void RtspClient_OnPausing(RtspClient sender, object args)
+        private void RtspClient_OnPausing(RtspClient sender, object args)
         {
             base.IsReady = RtspClient.IsPlaying;
         }
 
-        void RtspClient_OnConnect(RtspClient sender, object args)
+        private void RtspClient_OnConnect(RtspClient sender, object args)
         {
             if (RtspClient.IsConnected is false || State == StreamState.StartRequested) return;
 

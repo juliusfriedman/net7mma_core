@@ -46,7 +46,7 @@ namespace Media.UnitTests
     public class RtpRtcpTests
     {
         //Declare a few exceptions
-        static Exception versionException = new("Unable to set the version"),
+        private static readonly Exception versionException = new("Unable to set the version"),
         extensionException = new("Incorrectly set the Extensions Bit"),
         contributingSourceException = new("Incorrectly set the ContributingSource nibble"),
         inValidHeaderException = new("Invalid header."),

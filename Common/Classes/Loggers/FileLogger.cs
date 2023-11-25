@@ -10,9 +10,8 @@ namespace Media.Common.Loggers
 
         #region Fields
 
-        System.Text.Encoding m_Encoding = System.Text.Encoding.Default;
-
-        System.IO.FileInfo m_FileInfo;
+        private System.Text.Encoding m_Encoding = System.Text.Encoding.Default;
+        private System.IO.FileInfo m_FileInfo;
 
         #endregion
 

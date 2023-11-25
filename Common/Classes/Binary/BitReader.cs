@@ -39,11 +39,11 @@
 
         internal readonly System.IO.Stream m_BaseStream;
 
-        internal protected int m_ByteIndex = 0, m_BitIndex = 0, m_Remaining = 0;
+        protected internal int m_ByteIndex = 0, m_BitIndex = 0, m_Remaining = 0;
 
-        internal protected bool m_LeaveOpen;
+        protected internal bool m_LeaveOpen;
 
-        internal protected Common.Binary.BitOrder m_BitOrder;
+        protected internal Common.Binary.BitOrder m_BitOrder;
 
         #endregion
 
@@ -284,7 +284,7 @@
         /// Copies the bits which are left in the cache to the beginning of the cache
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected bool Recycle(bool clear = false)
+        protected internal bool Recycle(bool clear = false)
         {
             //If there are any bytes then copy them to the offset of the cache from the index
             if (m_Remaining > 0 && m_ByteIndex > Common.Binary.Zero && m_ByteIndex < m_ByteCache.Count)

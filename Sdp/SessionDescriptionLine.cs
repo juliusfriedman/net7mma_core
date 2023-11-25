@@ -46,7 +46,7 @@ namespace Media.Sdp
     /// Low level class for dealing with Sdp lines with a format of 'X=V{st:sv0,sv1;svN}'    
     /// </summary>
     /// <remarks>Should use byte[]</remarks>
-    public class SessionDescriptionLine : IEnumerable<String>, ICloneable//, IUpdateable
+    public class SessionDescriptionLine : IEnumerable<string>, ICloneable//, IUpdateable
     {
         #region Statics
 
@@ -138,9 +138,9 @@ namespace Media.Sdp
         internal char m_Type;
 
         //array would allow easier parsing,
-        internal readonly protected string m_Seperator = string.Empty;
+        protected internal readonly string m_Seperator = string.Empty;
 
-        internal readonly protected List<string> m_Parts;
+        protected internal readonly List<string> m_Parts;
 
         internal readonly Encoding m_Encoding = SessionDescription.DefaultEncoding;
 
@@ -157,7 +157,7 @@ namespace Media.Sdp
         /// <summary>
         /// Gets the Encoding of the line.
         /// </summary>
-        Encoding Encoding { get { return m_Encoding; } }
+        private Encoding Encoding { get { return m_Encoding; } }
 
         /// <summary>
         /// Gets the Type of the line.
@@ -221,7 +221,7 @@ namespace Media.Sdp
         //Todo, add string[] field for state, keep all parts contigious
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected virtual void ClearState(int part)
+        protected internal virtual void ClearState(int part)
         {
             //part < 0 == all state, otherwise the state for the given part
         }
@@ -238,7 +238,7 @@ namespace Media.Sdp
         /// <param name="index">The index</param>
         /// <returns>String.Empty if the result was out of range, otherwise the value at the specified index.</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected string GetPart(int index)
+        protected internal string GetPart(int index)
         {
             return m_Parts.Count > index ? m_Parts[index] : string.Empty;
         }
@@ -310,8 +310,7 @@ namespace Media.Sdp
 
             m_Seperator = seperator ?? other.m_Seperator;
 
-            if (reference) m_Parts = other.m_Parts;
-            else m_Parts = new List<string>(other.m_Parts);
+            m_Parts = reference ? other.m_Parts : new List<string>(other.m_Parts);
         }
 
         /// <summary>
@@ -423,14 +422,12 @@ namespace Media.Sdp
         public override bool Equals(object obj)
         {
             //System.Object
-            if (object.ReferenceEquals(this, obj)) return true;
-
-            return obj is SessionDescriptionLine l && Equals(l);
+            return object.ReferenceEquals(this, obj) ? true : obj is SessionDescriptionLine l && Equals(l);
         }
 
         //ToString should be implemented by GetEnumerator and String.Join(string.Empty, GetEnumerator)
 
-        internal protected string ToString(string seperator = null)
+        protected internal string ToString(string seperator = null)
         {
             StringBuilder result;
 

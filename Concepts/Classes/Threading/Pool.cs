@@ -143,7 +143,7 @@ namespace Media.Concepts.Classes.Threading
 
         #region Statics
 
-        const double Whole = 100.0;
+        private const double Whole = 100.0;
 
         internal static readonly System.Type ElementType = typeof(T);
 
@@ -156,10 +156,9 @@ namespace Media.Concepts.Classes.Threading
         internal static readonly T[][] EmptyPool = new T[0][] { };
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static void AllocatePool(Pool<T> pool, int size)
+        private static void AllocatePool(Pool<T> pool, int size)
         {
-            if (size < 0) pool.m_Pool = (T[][])System.Array.CreateInstance(ElementType, new int[] { -size, 0 }, new int[] { size, 0 });
-            else pool.m_Pool = new T[size][];
+            pool.m_Pool = size < 0 ? (T[][])System.Array.CreateInstance(ElementType, new int[] { -size, 0 }, new int[] { size, 0 }) : (new T[size][]);
 
             if (pool.m_DisableNull) for (int i = size - 1; i >= 0; --i)
                 {
@@ -168,7 +167,7 @@ namespace Media.Concepts.Classes.Threading
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static void ResizePool(Pool<T> pool, int size)
+        private static void ResizePool(Pool<T> pool, int size)
         {
             //int previousSize = pool.m_Pool.Length;
 
@@ -182,7 +181,7 @@ namespace Media.Concepts.Classes.Threading
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static int SortByLength(T[] x, T[] y)
+        private static int SortByLength(T[] x, T[] y)
         {
 
             Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(x, out int a);
@@ -222,16 +221,14 @@ namespace Media.Concepts.Classes.Threading
         /// <summary>
         /// The pool
         /// </summary>
-        T[][] m_Pool = NullMultiArray;
+        private T[][] m_Pool = NullMultiArray;
 
         //     <= -1,        >= 0
         //T[][]m_BelowWater, m_AboveWater;
 
-        int m_Capacity = -1;
-
-        bool m_DisableNull;
-
-        readonly System.Collections.Generic.ICollection<Lease> m_Leases;
+        private readonly int m_Capacity = -1;
+        private readonly bool m_DisableNull;
+        private readonly System.Collections.Generic.ICollection<Lease> m_Leases;
 
         #endregion
 
@@ -368,7 +365,7 @@ namespace Media.Concepts.Classes.Threading
             Get(access, size);
         }
 
-        System.Comparison<T[]> Sorter;
+        private readonly System.Comparison<T[]> Sorter;
 
         public void Sort()
         {

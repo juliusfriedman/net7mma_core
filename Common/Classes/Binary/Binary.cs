@@ -351,7 +351,7 @@ namespace Media.Common
         /// <summary>
         /// A string which contains has a format in which all Overflow exceptions Read by the ReadBinaryOverflowException function utilize.
         /// </summary>
-        static string OverFlowExceptionFormat = "{0} overflowed. Cannot store a number lower than {1} or higher than {2} in a {3} structure.";
+        private static readonly string OverFlowExceptionFormat = "{0} overflowed. Cannot store a number lower than {1} or higher than {2} in a {3} structure.";
 
         public static OverflowException CreateOverflowException<T>(string parameter, T value, string minValue, string maxValue)
         {
@@ -1478,9 +1478,9 @@ namespace Media.Common
         /// <param name="bitCount">The count of bits</param>
         /// <param name="bitOffset">The bit offset</param>
         /// <returns></returns>
-        public static Int64 ReadInt64MSB(byte[] data, int byteOffset, int bitCount, ref byte bitOffset)
+        public static long ReadInt64MSB(byte[] data, int byteOffset, int bitCount, ref byte bitOffset)
         {
-            return (Int64)ReadUInt64MSB(data, byteOffset, bitCount, ref bitOffset);
+            return (long)ReadUInt64MSB(data, byteOffset, bitCount, ref bitOffset);
         }
 
         /// <summary>
@@ -1492,11 +1492,11 @@ namespace Media.Common
         /// <param name="bitOffset"></param>
         /// <returns></returns>
         [System.CLSCompliant(false)]
-        public static UInt64 ReadUInt64MSB(byte[] data, int byteOffset, int bitCount, ref byte bitOffset)
+        public static ulong ReadUInt64MSB(byte[] data, int byteOffset, int bitCount, ref byte bitOffset)
         {
             unchecked
             {
-                UInt64 result = Common.Binary.Zero;
+                ulong result = Common.Binary.Zero;
 
                 // Check input
                 if (bitCount > Common.Binary.BitsPerLong)
@@ -1540,7 +1540,7 @@ namespace Media.Common
         }
 
         [System.CLSCompliant(false)]
-        public static UInt64 ReadUInt64MSB(byte[] data, int byteOffset, int bitCount, byte bitOffset = 0)
+        public static ulong ReadUInt64MSB(byte[] data, int byteOffset, int bitCount, byte bitOffset = 0)
         {
             return ReadUInt64MSB(data, byteOffset, bitCount, ref bitOffset);
         }
@@ -1554,11 +1554,11 @@ namespace Media.Common
         /// <param name="bitOffset"></param>
         /// <returns></returns>
         [System.CLSCompliant(false)]
-        public static UInt64 ReadUInt64LSB(byte[] data, int byteOffset, int bitCount, ref byte bitOffset)
+        public static ulong ReadUInt64LSB(byte[] data, int byteOffset, int bitCount, ref byte bitOffset)
         {
             unchecked
             {
-                UInt64 result = Common.Binary.Zero;
+                ulong result = Common.Binary.Zero;
 
                 // Check input
                 if (bitCount > Common.Binary.BitsPerLong)
@@ -1607,15 +1607,15 @@ namespace Media.Common
         }
 
         [System.CLSCompliant(false)]
-        public static UInt64 ReadUInt64LSB(byte[] data, int byteOffset, int bitCount, byte bitOffset = 0)
+        public static ulong ReadUInt64LSB(byte[] data, int byteOffset, int bitCount, byte bitOffset = 0)
         {
             return ReadUInt64LSB(data, byteOffset, bitCount, ref bitOffset);
         }
 
         [System.CLSCompliant(false)]
-        public static Int64 ReadInt64LSB(byte[] data, int byteOffset, int bitCount, byte bitOffset = 0)
+        public static long ReadInt64LSB(byte[] data, int byteOffset, int bitCount, byte bitOffset = 0)
         {
-            return (Int64)ReadUInt64LSB(data, byteOffset, bitCount, ref bitOffset);
+            return (long)ReadUInt64LSB(data, byteOffset, bitCount, ref bitOffset);
         }
 
         #endregion
@@ -1825,9 +1825,7 @@ namespace Media.Common
 
         public static byte[] CopyBits(byte[] data, int byteOffset, int bitOffset, int count)
         {
-            if (data is null) throw new ArgumentNullException("data");
-
-            return CopyBits(data, ref byteOffset, ref bitOffset, count);
+            return data is null ? throw new ArgumentNullException("data") : CopyBits(data, ref byteOffset, ref bitOffset, count);
         }
 
         /// <summary>
@@ -1905,9 +1903,7 @@ namespace Media.Common
 
         public static byte[] CopyBitsReverse(byte[] data, int byteOffset, int bitOffset, int count)
         {
-            if (data is null) throw new ArgumentNullException("data");
-
-            return CopyBitsReverse(data, ref byteOffset, ref bitOffset, count);
+            return data is null ? throw new ArgumentNullException("data") : CopyBitsReverse(data, ref byteOffset, ref bitOffset, count);
         }
 
         /// <summary>
@@ -2058,7 +2054,7 @@ namespace Media.Common
         /// Calculates a 64 bit value from the given parameters.
         /// Throws an <see cref="ArgumentException"/> if <paramref name="sizeInBytes"/> is less than or equal to 0.
         /// </summary>
-        /// <param name="octets">The sequence of <see cref="Byte"/> to enumerate</param>
+        /// <param name="octets">The sequence of <see cref="byte"/> to enumerate</param>
         /// <param name="offset">The offset to skip to in the enumeration</param>
         /// <param name="sizeInBytes">The size of the binary representation of the integer to calculate</param>
         /// <param name="reverse">If true the sequence will be reversed before being calculated</param>
@@ -2552,7 +2548,7 @@ namespace Media.Common
         //ref..
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static byte[] GetBytes(Guid value, bool reverse = false)
+        private static byte[] GetBytes(Guid value, bool reverse = false)
         {
             byte[] result = value.ToByteArray();
 
@@ -3311,13 +3307,13 @@ namespace Media.UnitTests
                     using (BitReader br = new(bw.BaseStream))
                     {
                         ulong result = (ulong)br.Read64(reverse);
-                        if (result != i) throw new Exception(String.Format("BitWriter.Read64 - Expected:{0}, Found:{1}", i, result));
+                        if (result != i) throw new Exception(string.Format("BitWriter.Read64 - Expected:{0}, Found:{1}", i, result));
 
                         br.BaseStream.Position = Common.Binary.Zero;
                         if (br.BaseStream.Position != Common.Binary.Zero) throw new Exception("BitWriter - Position");
 
                         result = br.ReadBits(Common.Binary.BitsPerLong, reverse);
-                        if (result != (reverse ? r : i)) throw new Exception(String.Format("BitReader.ReadBits - Expected:{0}, Found:{1}", (reverse ? r : i), result));
+                        if (result != (reverse ? r : i)) throw new Exception(string.Format("BitReader.ReadBits - Expected:{0}, Found:{1}", (reverse ? r : i), result));
                     }
 
                     //Test moving the position of the writer back to 0
@@ -3330,13 +3326,13 @@ namespace Media.UnitTests
                     {
                         br.BaseStream.Position = Common.Binary.Zero;
                         ulong result = (ulong)br.Read64(reverse);
-                        if (result != i) throw new Exception(String.Format("WriteU64 / Read64 - Expected:{0}, Found:{1}", i, result));
+                        if (result != i) throw new Exception(string.Format("WriteU64 / Read64 - Expected:{0}, Found:{1}", i, result));
                         if (br.BaseStream.Position != Common.Binary.BytesPerLong) throw new Exception("Position");
 
                         //Set Position and ReadBits
                         br.BaseStream.Position = Common.Binary.Zero;
                         result = br.ReadBits(Common.Binary.BitsPerLong, reverse);
-                        if (result != (reverse ? r : i)) throw new Exception(String.Format("ReadBits - Expected:{0}, Found:{1}", (reverse ? r : i), result));
+                        if (result != (reverse ? r : i)) throw new Exception(string.Format("ReadBits - Expected:{0}, Found:{1}", (reverse ? r : i), result));
                         if (br.BaseStream.Position != Common.Binary.BytesPerLong) throw new Exception("Position");
 
                         //Set Position and Read64

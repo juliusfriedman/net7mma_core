@@ -83,15 +83,14 @@ namespace Media.Containers.Nut
 
         #region Constants
 
-        const int MinimumVersion = 2, MaximumVersion = 4, StableVersion = 3,
+        private const int MinimumVersion = 2, MaximumVersion = 4, StableVersion = 3,
             LengthBits = 7,
             IdentifierSize = LengthBits + 1,
             MinimumSize = IdentifierSize + 1,
             IdentifierBytesSize = IdentifierSize - 1,
             MaximumHeaderOptions = 256,
             ForwardPointerWithChecksum = 4096, MultiByteLength = 0x80, LengthMask = sbyte.MaxValue, MaximumEllisionTotal = 1024, DefaultMaxDistance = MaximumEllisionTotal * 32 - 1;
-
-        const byte NutByte = (byte)'N';
+        private const byte NutByte = (byte)'N';
 
         #endregion
 
@@ -117,44 +116,32 @@ namespace Media.Containers.Nut
 
         public static bool IsFrame(Node node)
         {
-            if (node is null) throw new ArgumentNullException("node");
-
-            return node.Identifier[0] == default(byte);
+            return node is null ? throw new ArgumentNullException("node") : node.Identifier[0] == default(byte);
         }
 
         public static bool IsNutNode(Node node)
         {
-            if (node is null) throw new ArgumentNullException("node");
-
-            return node.Identifier[0] == NutByte;
+            return node is null ? throw new ArgumentNullException("node") : node.Identifier[0] == NutByte;
         }
 
         public static FrameFlags GetFrameFlags(NutReader reader, Node node)
         {
 
-            if (node is null) throw new ArgumentNullException("node");
-
-            if (!IsFrame(node)) return FrameFlags.Unknown;
-
-            return (FrameFlags)reader.HeaderOptions[node.Identifier[IdentifierBytesSize]].Item1;
+            return node is null
+                ? throw new ArgumentNullException("node")
+                : !IsFrame(node) ? FrameFlags.Unknown : (FrameFlags)reader.HeaderOptions[node.Identifier[IdentifierBytesSize]].Item1;
         }
 
         public static int GetStreamId(Node node)
         {
-            if (node is null) throw new ArgumentNullException("node");
-
-            if (!IsFrame(node)) return -1;
-
-            return node.Identifier[6];
+            return node is null ? throw new ArgumentNullException("node") : !IsFrame(node) ? -1 : node.Identifier[6];
         }
 
         public static byte[] GetFrameHeader(NutReader reader, Node node)
         {
-            if (node is null) throw new ArgumentNullException("node");
-
-            if (!IsFrame(node)) return Media.Common.MemorySegment.EmptyBytes;
-
-            return reader.EllisionHeaders[node.Identifier[5]];
+            return node is null
+                ? throw new ArgumentNullException("node")
+                : !IsFrame(node) ? Media.Common.MemorySegment.EmptyBytes : reader.EllisionHeaders[node.Identifier[5]];
         }
 
         public static byte[] GetFrameData(NutReader reader, Node node, out byte[] sideData, out byte[] metaData)
@@ -301,7 +288,7 @@ namespace Media.Containers.Nut
 
         public DateTime Modified { get { return FileInfo.LastWriteTimeUtc; } }
 
-        string m_FileIdString;
+        private string m_FileIdString;
 
         public string FileIdString
         {
@@ -312,7 +299,7 @@ namespace Media.Containers.Nut
             }
         }
 
-        void ParseFileIdString()
+        private void ParseFileIdString()
         {
             if (false == string.IsNullOrEmpty(m_FileIdString)) return;
 
@@ -330,9 +317,8 @@ namespace Media.Containers.Nut
             m_FileIdString = Encoding.UTF8.GetString(bytes.ToArray());
         }
 
-        int? m_MajorVersion, m_MinorVersion, m_StreamCount, m_MaxDistance;
-
-        List<long> m_TimeBases;
+        private int? m_MajorVersion, m_MinorVersion, m_StreamCount, m_MaxDistance;
+        private List<long> m_TimeBases;
 
         public List<long> TimeBases
         {
@@ -343,9 +329,8 @@ namespace Media.Containers.Nut
             }
         }
 
-        long? m_EllisionHeaderCount, m_MainHeaderFlags;
-
-        List<byte[]> m_EllisionHeaders;
+        private long? m_EllisionHeaderCount, m_MainHeaderFlags;
+        private List<byte[]> m_EllisionHeaders;
 
         public Version Version
         {
@@ -364,8 +349,7 @@ namespace Media.Containers.Nut
         {
             get
             {
-                if (false == HasMainHeaderFlags) return HeaderFlags.Unknown;
-                return (HeaderFlags)m_MainHeaderFlags.Value;
+                return false == HasMainHeaderFlags ? HeaderFlags.Unknown : (HeaderFlags)m_MainHeaderFlags.Value;
             }
         }
 
@@ -416,9 +400,9 @@ namespace Media.Containers.Nut
             }
         }
 
-        List<Tuple<long, long, long, long, long, long, long, Tuple<long, long>>> m_HeaderOptions;
+        private List<Tuple<long, long, long, long, long, long, long, Tuple<long, long>>> m_HeaderOptions;
 
-        void ParseMainHeader()
+        private void ParseMainHeader()
         {
             if (m_MaxDistance.HasValue) return;
 
@@ -480,8 +464,7 @@ namespace Media.Containers.Nut
 
                     if (tmp_fields > 2) tmp_stream = DecodeVariableLength(stream, out bytesRead);
 
-                    if (tmp_fields > 3) tmp_size = DecodeVariableLength(stream, out bytesRead);
-                    else tmp_size = 0;
+                    tmp_size = tmp_fields > 3 ? DecodeVariableLength(stream, out bytesRead) : 0;
 
                     if (tmp_fields > 4) tmp_res = DecodeVariableLength(stream, out bytesRead);
                     tmp_res = 0;
@@ -580,8 +563,7 @@ namespace Media.Containers.Nut
 
                 // flags had been effectively introduced in version 4.
                 // If there are at least 4 bytes? 
-                if (HasMainHeaderFlags && end - position > 4) m_MainHeaderFlags = DecodeVariableLength(stream, out bytesRead);
-                else m_MainHeaderFlags = (long)HeaderFlags.Unknown;
+                m_MainHeaderFlags = HasMainHeaderFlags && end - position > 4 ? DecodeVariableLength(stream, out bytesRead) : (long)HeaderFlags.Unknown;
 
                 //reserved_bytes can be ignored.
             }
@@ -803,11 +785,10 @@ namespace Media.Containers.Nut
             }
         }
 
-        List<Track> m_Tracks;
+        private List<Track> m_Tracks;
+        private Dictionary<int, Node> m_StreamPackages;
 
-        Dictionary<int, Node> m_StreamPackages;
-
-        void ParseStreamPackages()
+        private void ParseStreamPackages()
         {
             if (m_StreamPackages is not null) return;
 
@@ -1023,8 +1004,7 @@ namespace Media.Containers.Nut
 
         public override string ToTextualConvention(Container.Node node)
         {
-            if (node.Master.Equals(this)) return NutReader.ToTextualConvention(node.Identifier);
-            return base.ToTextualConvention(node);
+            return node.Master.Equals(this) ? NutReader.ToTextualConvention(node.Identifier) : base.ToTextualConvention(node);
         }
 
         public override Node TableOfContents

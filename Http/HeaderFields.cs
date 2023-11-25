@@ -63,7 +63,7 @@ namespace Media.Http
 
         #endregion
 
-        internal protected HeaderFields() { }
+        protected internal HeaderFields() { }
 
         #region Connection
 

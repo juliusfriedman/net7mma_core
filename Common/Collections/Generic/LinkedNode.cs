@@ -114,7 +114,7 @@ namespace Media.Common.Collections.Generic
         /// Any flags use for <see cref="State"/>
         /// </summary>
         [System.CLSCompliant(false)]
-        internal protected uint Flags;
+        protected internal uint Flags;
 
         //Owner could be given in Flags or otherwise.
 

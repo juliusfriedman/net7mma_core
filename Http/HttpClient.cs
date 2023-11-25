@@ -93,7 +93,7 @@ namespace Media.Http
 
         public event HttpClientAction OnConnect;
 
-        internal protected void OnConnected()
+        protected internal void OnConnected()
         {
             if (IsDisposed) return;
 
@@ -111,7 +111,7 @@ namespace Media.Http
 
         public event RequestHandler OnRequest;
 
-        internal protected void Requested(HttpMessage request)
+        protected internal void Requested(HttpMessage request)
         {
             if (IsDisposed) return;
 
@@ -128,7 +128,7 @@ namespace Media.Http
 
         public event ResponseHandler OnResponse;
 
-        internal protected void Received(HttpMessage request, HttpMessage response)
+        protected internal void Received(HttpMessage request, HttpMessage response)
         {
             if (IsDisposed) return;
 
@@ -165,58 +165,53 @@ namespace Media.Http
         #region Fields
 
         internal readonly Guid InternalId = Guid.NewGuid();
-
-        readonly System.Threading.ManualResetEventSlim m_InterleaveEvent;
-
-        AuthenticationSchemes m_AuthenticationScheme;
-
-        NetworkCredential m_Credential;
+        private readonly System.Threading.ManualResetEventSlim m_InterleaveEvent;
+        private AuthenticationSchemes m_AuthenticationScheme;
+        private NetworkCredential m_Credential;
 
         /// <summary>
         /// The buffer this client uses for all requests 4MB * 2
         /// </summary>
-        Common.MemorySegment m_Buffer;
+        private Common.MemorySegment m_Buffer;
 
         /// <summary>
         /// The remote IPAddress to which the Location resolves via Dns
         /// </summary>
-        IPAddress m_RemoteIP;
+        private IPAddress m_RemoteIP;
 
         /// <summary>
         /// The remote RtspEndPoint
         /// </summary>
-        EndPoint m_RemoteHttp;
+        private EndPoint m_RemoteHttp;
 
         /// <summary>
         /// Keep track of certain values.
         /// </summary>
-        int m_SentBytes, m_ReceivedBytes,
-             m_HttpPort,
-             m_SentMessages, m_ReTransmits,
-             m_ReceivedMessages,
-             m_PushedMessages,
-             m_ResponseTimeoutInterval = (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond;
+        private int m_SentBytes;
+        private int m_ReceivedBytes;
+        private int m_HttpPort;
+        private int m_SentMessages;
+        private int m_ReTransmits;
+        private int m_ReceivedMessages;
+        private readonly int m_PushedMessages;
+        private int m_ResponseTimeoutInterval = (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond;
 
         /// <summary>
         /// Keep track of timed values.
         /// </summary>
-        TimeSpan m_SessionTimeout = TimeSpan.FromSeconds(60), //The default...
-            m_ConnectionTime = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan;
-
-        DateTime? m_BeginConnect, m_EndConnect;
+        private readonly TimeSpan m_SessionTimeout = TimeSpan.FromSeconds(60);
+        private TimeSpan m_ConnectionTime = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan;
+        private DateTime? m_BeginConnect, m_EndConnect;
 
         public bool SendUserAgent, DateRequests, EchoXHeaders, AutomaticallyReconnect, Strict, SendChunked;
-
-        HttpMessage m_LastTransmitted;
-
-        Socket m_HttpSocket;
+        private HttpMessage m_LastTransmitted;
+        private Socket m_HttpSocket;
 
         /// <summary>
         /// Any additional headers which may be required by the RtspClient.
         /// </summary>
         public readonly Dictionary<string, string> AdditionalHeaders = [];
-
-        string m_UserAgent = "ASTI HTTP Client", m_AuthorizationHeader;
+        private string m_UserAgent = "ASTI HTTP Client", m_AuthorizationHeader;
 
         /// <summary>
         /// A ILogging instance
@@ -229,7 +224,7 @@ namespace Media.Http
         /// <summary>
         /// The inital, previous and current location's of the HttpClient
         /// </summary>
-        Uri m_InitialLocation, m_PreviousLocation, m_CurrentLocation;
+        private Uri m_InitialLocation, m_PreviousLocation, m_CurrentLocation;
 
         #endregion
 
@@ -299,8 +294,9 @@ namespace Media.Http
             set
             {
                 if (value == m_AuthenticationScheme) return;
-                if (value != AuthenticationSchemes.Basic && value != AuthenticationSchemes.Digest && value != AuthenticationSchemes.None) throw new System.InvalidOperationException("Only None, Basic and Digest are supported");
-                else m_AuthenticationScheme = value;
+                m_AuthenticationScheme = value != AuthenticationSchemes.Basic && value != AuthenticationSchemes.Digest && value != AuthenticationSchemes.None
+                    ? throw new System.InvalidOperationException("Only None, Basic and Digest are supported")
+                    : value;
             }
         }
 
@@ -347,7 +343,7 @@ namespace Media.Http
         /// <summary>
         /// Gets or Sets the socket used for communication
         /// </summary>
-        internal protected Socket HttpSocket
+        protected internal Socket HttpSocket
         {
             get { return m_HttpSocket; }
             set
@@ -393,7 +389,7 @@ namespace Media.Http
         /// <summary>
         /// Gets or Sets the buffer used for data reception
         /// </summary>
-        internal protected Common.MemorySegment Buffer
+        protected internal Common.MemorySegment Buffer
         {
             get { return m_Buffer; }
             set { m_Buffer = value; }
@@ -521,9 +517,11 @@ namespace Media.Http
             if (false == location.IsAbsoluteUri)
             {
                 if (existing is null) throw new ArgumentException("Must be absolute unless a socket is given", "location");
-                if (existing.Connected) location = Media.Common.Extensions.IPEndPoint.IPEndPointExtensions.ToUri(((IPEndPoint)existing.RemoteEndPoint), HttpMessage.TransportScheme);
-                else if (existing.IsBound) location = Media.Common.Extensions.IPEndPoint.IPEndPointExtensions.ToUri(((IPEndPoint)existing.LocalEndPoint), HttpMessage.TransportScheme);
-                else throw new InvalidOperationException("location must be specified when existing socket must be connected or bound.");
+                location = existing.Connected
+                    ? Media.Common.Extensions.IPEndPoint.IPEndPointExtensions.ToUri(((IPEndPoint)existing.RemoteEndPoint), HttpMessage.TransportScheme)
+                    : existing.IsBound
+                    ? Media.Common.Extensions.IPEndPoint.IPEndPointExtensions.ToUri(((IPEndPoint)existing.LocalEndPoint), HttpMessage.TransportScheme)
+                    : throw new InvalidOperationException("location must be specified when existing socket must be connected or bound.");
             }
 
             //Check the Scheme
@@ -709,7 +707,7 @@ namespace Media.Http
         /// DisconnectsSockets, Connects and optionally reconnects the Transport if reconnectClient is true.
         /// </summary>
         /// <param name="reconnectClient"></param>
-        internal protected virtual void Reconnect()
+        protected internal virtual void Reconnect()
         {
             DisconnectSocket();
 
@@ -915,10 +913,9 @@ namespace Media.Http
                             //modify location to only be Path and Query
                             if (message.Location is null)
                             {
-                                if (string.IsNullOrEmpty(CurrentLocation.PathAndQuery))
-                                    message.Location = HttpMessage.Wildcard;
-                                else
-                                    message.Location = new Uri(CurrentLocation.PathAndQuery, UriKind.RelativeOrAbsolute);
+                                message.Location = string.IsNullOrEmpty(CurrentLocation.PathAndQuery)
+                                    ? HttpMessage.Wildcard
+                                    : new Uri(CurrentLocation.PathAndQuery, UriKind.RelativeOrAbsolute);
                             }
                             else if (message.Location.IsAbsoluteUri) message.Location = new Uri(message.Location.PathAndQuery);
 
@@ -1099,8 +1096,7 @@ namespace Media.Http
                         }
 
                         //Raise the exception
-                        if (message is not null) throw new SocketException((int)error);
-                        else return null;
+                        return message is not null ? throw new SocketException((int)error) : null;
                     }
 
                     #endregion
@@ -1404,7 +1400,7 @@ namespace Media.Http
         //Dictionary<string, Func<int>> TransferEncoders 
         //etc to allow for custom transfer methods..
 
-        int SendChunkedBody(HttpMessage message, out SocketError error, int chunkSize)
+        private int SendChunkedBody(HttpMessage message, out SocketError error, int chunkSize)
         {
             error = SocketError.Success;
 
@@ -1487,7 +1483,7 @@ namespace Media.Http
             return totalSent;
         }
 
-        int SendMultipartBody(HttpMessage message, out SocketError error, int chunkSize, string disposition, string contentType)
+        private int SendMultipartBody(HttpMessage message, out SocketError error, int chunkSize, string disposition, string contentType)
         {
 
             int totalSent = 0, boundarySize = 0;
@@ -1651,8 +1647,7 @@ namespace Media.Http
 
                 if (false == string.IsNullOrWhiteSpace(uri))
                 {
-                    if (rfc2069) uri = uri.Substring(4);
-                    else uri = uri.Substring(11);
+                    uri = rfc2069 ? uri.Substring(4) : uri.Substring(11);
                 }
 
                 string qop = baseParts.Where(p => string.Compare("qop", p, true) is 0).FirstOrDefault();
@@ -1680,7 +1675,7 @@ namespace Media.Http
             }
         }
 
-        void ProcessMessageData(object sender, byte[] data, int offset, int length)
+        private void ProcessMessageData(object sender, byte[] data, int offset, int length)
         {
             if (length is 0) return;
 

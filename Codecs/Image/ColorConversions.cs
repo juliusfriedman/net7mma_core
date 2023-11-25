@@ -54,7 +54,7 @@ namespace Media.Codecs.Image
         /// </remarks>
         public static class RgbYuv
         {
-            const uint RgbMask = 0x00ffffff;
+            private const uint RgbMask = 0x00ffffff;
 
             private static volatile int[] lookupTable;
 
@@ -95,7 +95,7 @@ namespace Media.Codecs.Image
                 return GetYuv((uint)rgb);
             }
 
-            const double R0 = .299, G0 = .587, B = .114,
+            private const double R0 = .299, G0 = .587, B = .114,
                          R1 = -.169, G1 = .331, H = .5,
                          R2 = .419, G2 = .081;
 
@@ -178,7 +178,7 @@ namespace Media.Codecs.Image
 
         //Should follow the same api as below...
 
-        const int E = 8, S = 16, H = 100, T = 298, t = 208, N = 409, f = 516;
+        private const int E = 8, S = 16, H = 100, T = 298, t = 208, N = 409, f = 516;
 
         internal static unsafe void YUV2RGBManaged(byte[] YUVData, byte[] RGBData, int width, int height)
         {
@@ -248,7 +248,7 @@ namespace Media.Codecs.Image
             }
         }
 
-        const int OT = 112, M = 129, X = 66, Q = 25, Z = 18, B = -38, C = 74, D = 94;
+        private const int OT = 112, M = 129, X = 66, Q = 25, Z = 18, B = -38, C = 74, D = 94;
 
         public static unsafe byte[] BGRA2YUV420Managed(int width, int height, nint scan0)
         {

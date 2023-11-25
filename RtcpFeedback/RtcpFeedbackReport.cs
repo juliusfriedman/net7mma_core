@@ -18,8 +18,7 @@ namespace Media.Rtcp.Feedback
             Common.Binary.Write32(Payload.Array, Payload.Offset, Common.Binary.IsLittleEndian, (uint)mssrc);
 
             //Copy the FCI Data
-            if (feedbackControlInformation is not null)
-                feedbackControlInformation.CopyTo(Payload.Array, Payload.Offset + Common.Binary.BytesPerInteger);
+            feedbackControlInformation?.CopyTo(Payload.Array, Payload.Offset + Common.Binary.BytesPerInteger);
         }
 
         /// <summary>
@@ -129,7 +128,7 @@ namespace Media.Rtcp.Feedback
             }
         }
 
-        internal protected override IEnumerator<IReportBlock> GetEnumeratorInternal(int offset = 0)
+        protected internal override IEnumerator<IReportBlock> GetEnumeratorInternal(int offset = 0)
         {
             //Add RtcpFeedbackReport's contain a MediaSynchronizationSourceIdentifier before any report data
             return base.GetEnumeratorInternal(offset + Common.Binary.BytesPerInteger);

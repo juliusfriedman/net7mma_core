@@ -57,7 +57,7 @@ namespace Media.Rtcp
 
         public const int SendersInformationSize = 20;
 
-        new public const int PayloadType = 200;
+        public new const int PayloadType = 200;
 
         #endregion
 
@@ -126,7 +126,7 @@ namespace Media.Rtcp
             get { return (int)Binary.ReadU32(Payload.Array, Payload.Offset, Common.Binary.IsLittleEndian); }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { Binary.Write32(Payload.Array, Payload.Offset, Common.Binary.IsLittleEndian, (uint)value); }
+            protected internal set { Binary.Write32(Payload.Array, Payload.Offset, Common.Binary.IsLittleEndian, (uint)value); }
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace Media.Rtcp
             get { return (int)Binary.ReadU32(Payload.Array, Payload.Offset + 4, Common.Binary.IsLittleEndian); }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { Binary.Write32(Payload.Array, Payload.Offset + 4, Common.Binary.IsLittleEndian, (uint)value); }
+            protected internal set { Binary.Write32(Payload.Array, Payload.Offset + 4, Common.Binary.IsLittleEndian, (uint)value); }
         }
 
         /// <summary>            
@@ -154,7 +154,7 @@ namespace Media.Rtcp
             get { return (int)Binary.ReadU32(Payload.Array, Payload.Offset + 8, Common.Binary.IsLittleEndian); }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { Binary.Write32(Payload.Array, Payload.Offset + 8, Common.Binary.IsLittleEndian, (uint)value); }
+            protected internal set { Binary.Write32(Payload.Array, Payload.Offset + 8, Common.Binary.IsLittleEndian, (uint)value); }
         }
 
         /// <summary>
@@ -167,7 +167,7 @@ namespace Media.Rtcp
             get { return (int)Binary.ReadU32(Payload.Array, Payload.Offset + 12, Common.Binary.IsLittleEndian); }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { Binary.Write32(Payload.Array, Payload.Offset + 12, Common.Binary.IsLittleEndian, (uint)value); }
+            protected internal set { Binary.Write32(Payload.Array, Payload.Offset + 12, Common.Binary.IsLittleEndian, (uint)value); }
         }
 
         /// <summary>
@@ -181,7 +181,7 @@ namespace Media.Rtcp
             get { return (int)Binary.ReadU32(Payload.Array, Payload.Offset + 16, Common.Binary.IsLittleEndian); }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { Binary.Write32(Payload.Array, Payload.Offset + 16, Common.Binary.IsLittleEndian, (uint)value); }
+            protected internal set { Binary.Write32(Payload.Array, Payload.Offset + 16, Common.Binary.IsLittleEndian, (uint)value); }
         }
 
         /// <summary>
@@ -203,7 +203,7 @@ namespace Media.Rtcp
             }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set
+            protected internal set
             {
 
                 //We need an unsigned representation of the value
@@ -244,7 +244,7 @@ namespace Media.Rtcp
             }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set
+            protected internal set
             {
                 //NtpTimestamp = (long)Media.Ntp.NetworkTimeProtocol.DateTimeToNptTimestamp(ref value);
                 Common.Binary.Write64(Payload.Array, Payload.Offset, Common.Binary.IsLittleEndian, Media.Ntp.NetworkTimeProtocol.DateTimeToNptTimestamp(ref value));
@@ -279,7 +279,7 @@ namespace Media.Rtcp
             }
         }
 
-        internal protected Common.MemorySegment SendersInformationSegment
+        protected internal Common.MemorySegment SendersInformationSegment
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
@@ -307,7 +307,7 @@ namespace Media.Rtcp
 
         #endregion
 
-        internal protected override IEnumerator<IReportBlock> GetEnumeratorInternal(int offset = 0)
+        protected internal override IEnumerator<IReportBlock> GetEnumeratorInternal(int offset = 0)
         {
             //The SendersReport ReportBlocks start after the SendersInformation
             return base.GetEnumeratorInternal(offset + SendersInformationSize);

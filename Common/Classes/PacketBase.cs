@@ -11,7 +11,7 @@
         #region Fields
 
         //readonly
-        internal protected byte[] m_OwnedOctets; //RawLength => m_OwnedOctets.Length
+        protected internal byte[] m_OwnedOctets; //RawLength => m_OwnedOctets.Length
 
         //internal protected MemorySegment Memory;
 
@@ -81,7 +81,7 @@
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get;
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set;
+            protected internal set;
         }
 
         /// <summary>
@@ -92,7 +92,7 @@
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get;
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set;
+            protected internal set;
         }
 
         /// <summary>
@@ -103,7 +103,7 @@
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get;
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set;
+            protected internal set;
         }
 
         /// <summary>
@@ -114,7 +114,7 @@
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get;
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set;
+            protected internal set;
         }
 
         /// <summary>
@@ -125,7 +125,7 @@
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get;
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set;
+            protected internal set;
         }
 
         /// <summary>
@@ -136,9 +136,7 @@
         /// <returns></returns>
         public int CompleteFrom(System.Net.Sockets.Socket socket, MemorySegment buffer)
         {
-            if (IsComplete) return 0;
-
-            throw new System.NotImplementedException();
+            return IsComplete ? 0 : throw new System.NotImplementedException();
         }
 
         public System.Collections.Generic.IEnumerable<byte> Prepare()
@@ -182,7 +180,7 @@
     /// <summary>
     /// Pattern
     /// </summary>
-    interface IStamp : Media.Common.Interfaces.IPattern
+    internal interface IStamp : Media.Common.Interfaces.IPattern
     {
         System.DateTimeOffset StampDateTime { get; }
 
@@ -192,11 +190,11 @@
     /// <summary>
     /// Implementation, Abstraction
     /// </summary>
-    abstract class Stamp : ClassInterface<IStamp>, Media.Common.Interfaces.InterClass, IStamp
+    internal abstract class Stamp : ClassInterface<IStamp>, Media.Common.Interfaces.InterClass, IStamp
     {
-        internal protected System.Net.EndPoint NetEndPoint;
+        protected internal System.Net.EndPoint NetEndPoint;
 
-        internal protected System.DateTimeOffset Sample;
+        protected internal System.DateTimeOffset Sample;
 
         Class Interfaces.InterClass.Class
         {
@@ -217,7 +215,7 @@
     /// <summary>
     /// Enum to describe a direction or many flagged directions.
     /// </summary>
-    class Direction : Enum
+    internal class Direction : Enum
     {
         [System.Flags]
         public enum DirectionEnum
@@ -281,7 +279,7 @@
     /// <summary>
     /// A derived Direction, relatively received
     /// </summary>
-    class SendDirection : Direction
+    internal class SendDirection : Direction
     {
         public SendDirection()
         {
@@ -292,7 +290,7 @@
     /// <summary>
     /// A derived Direction, relatively sent
     /// </summary>
-    class ReceiveDirection : Direction
+    internal class ReceiveDirection : Direction
     {
         public ReceiveDirection()
         {
@@ -303,7 +301,7 @@
     /// <summary>
     /// A <see cref="Stamp"/> with an encapsulated <see cref="Direction"/>
     /// </summary>
-    class PacketStamp : Stamp
+    internal class PacketStamp : Stamp
     {
         internal Direction StampDirection;
     }
@@ -312,9 +310,9 @@
     /// A <see cref="Class"/> which provides a derivation of <see cref="ClassInterface"/> specific to <see cref="IStamp"/>.
     /// The implemenation provides an <see cref="Add"/> method which allows data to be added to the <see cref="Queue"/>
     /// </summary>
-    class PacketInformation : ClassInterface<IStamp>, Media.Common.Interfaces.InterClass
+    internal class PacketInformation : ClassInterface<IStamp>, Media.Common.Interfaces.InterClass
     {
-        readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<System.Tuple<PacketStamp, Common.MemorySegment>> Queue = new();
+        private readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<System.Tuple<PacketStamp, Common.MemorySegment>> Queue = new();
 
         Class Interfaces.InterClass.Class
         {
@@ -344,7 +342,7 @@
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get;
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set;
+            protected internal set;
         }
 
         #region PacketBase + Completer
@@ -376,7 +374,7 @@
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get;
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set;
+            protected internal set;
         }
 
 
@@ -409,7 +407,7 @@
         #endregion
 
         //AlwaysIncomplete
-        static int StaticCompleteFrom(System.Net.Sockets.Socket socket, MemorySegment buffer)
+        private static int StaticCompleteFrom(System.Net.Sockets.Socket socket, MemorySegment buffer)
         {
             return int.MinValue;
         }
@@ -425,19 +423,14 @@
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (Completer is null)
-                    return StaticCompleteFrom(null, null).Equals(int.MinValue);
-
-                return Completer(null, null).Equals(int.MinValue);
+                return Completer is null ? StaticCompleteFrom(null, null).Equals(int.MinValue) : Completer(null, null).Equals(int.MinValue);
             }
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         System.Collections.Generic.IEnumerable<byte> IPacket.Prepare()
         {
-            if (IsDisposed) return null;
-
-            return m_OwnedOctets ?? Holding.Prepare();
+            return IsDisposed ? null : m_OwnedOctets ?? Holding.Prepare();
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -479,9 +472,7 @@
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (IsHolding) return Holding.IsReadOnly;
-
-                return IsReadOnly;
+                return IsHolding ? Holding.IsReadOnly : IsReadOnly;
             }
         }
 
@@ -490,9 +481,7 @@
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (IsHolding) return Holding.IsCompressed;
-
-                return IsCompressed;
+                return IsHolding ? Holding.IsCompressed : IsCompressed;
             }
         }
 

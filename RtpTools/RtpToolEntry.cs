@@ -105,16 +105,15 @@ namespace Media.RtpTools
             //plen (2)
             //offset (4)
 
-            if (Media.Common.Binary.IsBigEndian)
-                return BitConverter
+            return Media.Common.Binary.IsBigEndian
+                ? BitConverter
                     .GetBytes((ushort)(packet.Length + sizeOf_RD_packet_T))
                     .Concat(packet is Rtcp.RtcpPacket
                         ? BitConverter.GetBytes((ushort)0)
                         : BitConverter
                             .GetBytes((ushort)(packet.Length))
-                            .Concat(BitConverter.GetBytes(offset)));
-
-            return BitConverter
+                            .Concat(BitConverter.GetBytes(offset)))
+                : BitConverter
                 .GetBytes((ushort)(packet.Length + sizeOf_RD_packet_T))
                 .Reverse()
                 .Concat(packet is Rtcp.RtcpPacket
@@ -210,9 +209,7 @@ namespace Media.RtpTools
         {
             get
             {
-                if (IsDisposed) return 0;
-
-                return (short)Common.Binary.ReadU16(Blob, Pointer, ReverseValues);
+                return IsDisposed ? (short)0 : (short)Common.Binary.ReadU16(Blob, Pointer, ReverseValues);
             }
             set
             {
@@ -228,9 +225,7 @@ namespace Media.RtpTools
         {
             get
             {
-                if (IsDisposed) return 0;
-
-                return (short)Common.Binary.ReadU16(Blob, Pointer + 2, ReverseValues);
+                return IsDisposed ? (short)0 : (short)Common.Binary.ReadU16(Blob, Pointer + 2, ReverseValues);
             }
             set
             {
@@ -248,9 +243,7 @@ namespace Media.RtpTools
         {
             get
             {
-                if (IsDisposed) return 0;
-
-                return (int)Common.Binary.ReadU32(Blob, Pointer + 4, ReverseValues);
+                return IsDisposed ? 0 : (int)Common.Binary.ReadU32(Blob, Pointer + 4, ReverseValues);
             }
             set
             {
@@ -315,10 +308,7 @@ namespace Media.RtpTools
             format ??= Format;
 
             //If the item was read in as Text it should have m_Format == Text just return the bytes as they were as to not waste memory
-            if (format == FileFormat.Text && Format >= FileFormat.Text)
-                return Encoding.ASCII.GetString(Blob);
-            else
-                return ToTextualConvention(format);
+            return format == FileFormat.Text && Format >= FileFormat.Text ? Encoding.ASCII.GetString(Blob) : ToTextualConvention(format);
         }
 
         public string ToTextualConvention(FileFormat? format = null)

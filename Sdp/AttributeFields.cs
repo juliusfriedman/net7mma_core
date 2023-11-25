@@ -51,7 +51,7 @@ namespace Media.Sdp
          
          */
 
-        AttributeFields() { }
+        private AttributeFields() { }
 
         #region NestedTypes
 

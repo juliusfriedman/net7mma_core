@@ -68,7 +68,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #endregion
 
-#pragma warning disable 1691, 1692
 
 #pragma warning disable CA1724
 
@@ -90,7 +89,7 @@ namespace Media.Concepts.Math
     {
         #region DivideBy15Fast
 
-        void DivideBy15Fast(ref uint x)
+        private void DivideBy15Fast(ref uint x)
         {
             uint s, t;
 
@@ -103,7 +102,7 @@ namespace Media.Concepts.Math
             t = (t + (t >> 8) >> 4) + s;
         }
 
-        void DivideBy15Fast(ref ushort x)
+        private void DivideBy15Fast(ref ushort x)
         {
             ++x;
 
@@ -116,7 +115,7 @@ namespace Media.Concepts.Math
             x >>= 8;
         }
 
-        void DivideBy15Fast(ref long x)
+        private void DivideBy15Fast(ref long x)
         {
             x = (x >> 4) + (x >> 8);
 
@@ -311,9 +310,7 @@ namespace Media.Concepts.Math
                 return (remainder = ulong.MaxValue);
 
             ulong resultHi, resultLo = Divide(aH, aL, b, out resultHi, out remainder);
-            if (resultHi != 0)
-                return ulong.MaxValue;
-            return resultLo;
+            return resultHi != 0 ? ulong.MaxValue : resultLo;
         }
 
         /// <summary>Divides an unsigned 128-bit number by an unsigned 64-bit 
@@ -491,10 +488,7 @@ namespace Media.Concepts.Math
                 return ShiftLeftFast(aH, ref aL, amount);
             else
             {
-                if (amount >= 128)
-                    aH = 0;
-                else
-                    aH = aL << (amount - 64);
+                aH = amount >= 128 ? 0 : aL << (amount - 64);
                 aL = 0;
             }
             return aH;
@@ -572,10 +566,7 @@ namespace Media.Concepts.Math
                 return ShiftRightFast(aH, ref aL, amount);
             else
             {
-                if (amount >= 128)
-                    aL = 0;
-                else
-                    aL = aH >> (amount - 64);
+                aL = amount >= 128 ? 0 : aH >> (amount - 64);
                 aH = 0;
             }
             return aH;
@@ -649,19 +640,13 @@ namespace Media.Concepts.Math
         /// <inheritdoc cref="Add(ulong, ref ulong, ulong)"/>
         public static long Add(long aH, ref ulong aL, long amount)
         {
-            if (amount >= 0)
-                return (long)Add((ulong)aH, ref aL, (ulong)amount);
-            else
-                return (long)Subtract((ulong)aH, ref aL, (ulong)(-amount));
+            return amount >= 0 ? (long)Add((ulong)aH, ref aL, (ulong)amount) : (long)Subtract((ulong)aH, ref aL, (ulong)(-amount));
         }
 
         /// <inheritdoc cref="Subtract(ulong, ref ulong, ulong)"/>
         public static long Subtract(long aH, ref ulong aL, long amount)
         {
-            if (amount >= 0)
-                return (long)Subtract((ulong)aH, ref aL, (ulong)amount);
-            else
-                return (long)Add((ulong)aH, ref aL, (ulong)(-amount));
+            return amount >= 0 ? (long)Subtract((ulong)aH, ref aL, (ulong)amount) : (long)Add((ulong)aH, ref aL, (ulong)(-amount));
         }
 
         #endregion
@@ -844,9 +829,7 @@ namespace Media.Concepts.Math
         /// </remarks>
         public static int Log2Floor(int x)
         {
-            if (x < 0)
-                return -1;
-            return Log2Floor((uint)x);
+            return x < 0 ? -1 : Log2Floor((uint)x);
         }
 
         [System.CLSCompliant(false)]
@@ -854,9 +837,7 @@ namespace Media.Concepts.Math
         public static int Log2Floor(ref ulong x)
         {
             uint xHi = (uint)(x >> 32);
-            if (xHi != 0)
-                return 32 + Log2Floor(xHi);
-            return Log2Floor((uint)x);
+            return xHi != 0 ? 32 + Log2Floor(xHi) : Log2Floor((uint)x);
         }
 
         /// <inheritdoc cref="Log2Floor(int)"/>

@@ -67,7 +67,7 @@ namespace Media.Sdp
                 }
             }
 
-            string[] m_AttributeParts;
+            private string[] m_AttributeParts;
 
             /// <summary>
             /// 
@@ -224,10 +224,10 @@ namespace Media.Sdp
             /// <summary>
             /// Used to indicate disabled.
             /// </summary>
-            const int DisabledValue = 0;
+            private const int DisabledValue = 0;
 
             //Types registered with IANA
-            const string RecieveBandwidthToken = "RR", SendBandwdithToken = "RS", ApplicationSpecificBandwidthToken = "AS", ConferenceTotalBandwidthToken = "CT",
+            private const string RecieveBandwidthToken = "RR", SendBandwdithToken = "RS", ApplicationSpecificBandwidthToken = "AS", ConferenceTotalBandwidthToken = "CT",
                 IndependentApplicationSpecificBandwidthToken = "TIAS"; //http://tools.ietf.org/html/rfc3890
 
             //const string BandwidthFormat = "b={0}:{1}";
@@ -428,7 +428,7 @@ namespace Media.Sdp
             public string ConnectionNetworkType
             {
                 get { return GetPart(0); }
-                internal protected set
+                protected internal set
                 {
                     if (string.IsNullOrWhiteSpace(value)) throw new System.InvalidOperationException("Cannot be null or consist only of whitespace.");  //Todo, Exceptions in resources.
                     SetPart(0, value);
@@ -441,7 +441,7 @@ namespace Media.Sdp
             public string ConnectionAddressType
             {
                 get { return GetPart(1); }
-                internal protected set
+                protected internal set
                 {
                     if (string.IsNullOrWhiteSpace(value)) throw new System.InvalidOperationException("Cannot be null or consist only of whitespace.");  //Todo, Exceptions in resources.
                     SetPart(1, value);
@@ -457,7 +457,7 @@ namespace Media.Sdp
             public string ConnectionAddress
             {
                 get { return GetPart(2); }
-                internal protected set
+                protected internal set
                 {
                     if (string.IsNullOrWhiteSpace(value)) throw new System.InvalidOperationException("Cannot be null or consist only of whitespace.");  //Todo, Exceptions in resources.
 
@@ -484,7 +484,7 @@ namespace Media.Sdp
             //Todo
             //Only split the ConnectionAddress one time and cache it
             //These are sub fields of a single datum
-            string[] m_ConnectionParts;
+            private string[] m_ConnectionParts;
 
             /// <summary>
             /// Gets the parts of the <see cref="ConnectionAddress"/>
@@ -626,12 +626,9 @@ namespace Media.Sdp
 
                     m_ConnectionParts ??= ConnectionAddress.Split(SessionDescription.ForwardSlashSplit, 3);
 
-                    if (m_ConnectionParts.Length > 2)
-                    {
-                        return int.Parse(m_ConnectionParts[2], System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture);
-                    }
-
-                    return 1;
+                    return m_ConnectionParts.Length > 2
+                        ? int.Parse(m_ConnectionParts[2], System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture)
+                        : 1;
                 }
                 //Todo, may have IReadOnly
                 set
@@ -1383,7 +1380,7 @@ namespace Media.Sdp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get { return GetPart(0); }
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                internal protected set { SetPart(0, value); }
+                protected internal set { SetPart(0, value); }
             }
 
             /// <summary>
@@ -1538,9 +1535,8 @@ namespace Media.Sdp
             }
 
             //Todo getters
-            string[] PayloadTypeTokens;
-
-            int[] ParsedPayloadTypes;
+            private string[] PayloadTypeTokens;
+            private int[] ParsedPayloadTypes;
 
             /// <summary>
             /// Parses the port tokens out of the MediaFormat field, this can probably be an extension method.
@@ -1629,7 +1625,7 @@ namespace Media.Sdp
             #endregion
 
             //Todo, test this...
-            void Add(int payloadType)
+            private void Add(int payloadType)
             {
                 //Add the part
                 //Add(payloadType.ToString());
@@ -2031,7 +2027,7 @@ namespace Media.Sdp
             /// <summary>
             /// The backing field's for the <see cref="PayloadTypeToken"/> and <see cref="InformationToken"/>
             /// </summary>
-            string[] m_InformationParts;
+            private string[] m_InformationParts;
 
             /// <summary>
             /// Contains at most 2 tokens, the <see cref="PayloadTypeToken"/> and <see cref="InformationToken"/>
@@ -2094,7 +2090,7 @@ namespace Media.Sdp
             /// <summary>
             /// Backing field for <see cref="PayloadTypeValue"/>
             /// </summary>
-            int ParsedPayloadTypeToken = -1;
+            private int ParsedPayloadTypeToken = -1;
 
             /// <summary>
             /// The payload type value as parsed from the a=pt:x portion of the line, -1 if not found.
@@ -2215,7 +2211,7 @@ namespace Media.Sdp
             /// <summary>
             /// Split of m_EncodingParts[1], could change this to be a part of m_EncodingParts
             /// </summary>
-            string[] m_EncodingParameters;
+            private string[] m_EncodingParameters;
 
             /// <summary>
             /// All tokens which are found in the <see cref="EncodingParameterToken"/>
@@ -2225,12 +2221,11 @@ namespace Media.Sdp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    if (m_EncodingParameters is not null)
-                        return m_EncodingParameters;
-
-                    if (string.IsNullOrWhiteSpace(EncodingParametersToken)) return Enumerable.Empty<string>();
-
-                    return m_EncodingParameters = EncodingParametersToken.Split(SessionDescription.ForwardSlashSplit, 3);
+                    return m_EncodingParameters is not null
+                        ? m_EncodingParameters
+                        : string.IsNullOrWhiteSpace(EncodingParametersToken)
+                        ? Enumerable.Empty<string>()
+                        : (m_EncodingParameters = EncodingParametersToken.Split(SessionDescription.ForwardSlashSplit, 3));
                 }
             }
 
@@ -2300,7 +2295,7 @@ namespace Media.Sdp
             /// <summary>
             /// The backing field used to indicate the parsed or set value for <see cref="ClockRate"/>
             /// </summary>
-            int ParsedClockRateToken = -1;
+            private int ParsedClockRateToken = -1;
 
             /// <summary>
             /// The clock rate value as parsed from the a=rtmap:x y/z(/w) portion of the line, -1 if not found.
@@ -2462,7 +2457,7 @@ namespace Media.Sdp
             /// <summary>
             /// The backing field for <see cref="FormatSpecificParameters"/>
             /// </summary>
-            string[] m_FormatSpecificParameters;
+            private string[] m_FormatSpecificParameters;
 
             /// <summary>
             /// All tokens which are found in the <see cref="FormatSpecificParameterToken"/>
@@ -2472,11 +2467,11 @@ namespace Media.Sdp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    if (m_FormatSpecificParameters is not null) return m_FormatSpecificParameters;
-
-                    if (string.IsNullOrWhiteSpace(FormatSpecificParameterToken)) return Enumerable.Empty<string>();
-
-                    return m_FormatSpecificParameters = FormatSpecificParameterToken.Split(SessionDescription.SemiColonSplit);
+                    return m_FormatSpecificParameters is not null
+                        ? m_FormatSpecificParameters
+                        : string.IsNullOrWhiteSpace(FormatSpecificParameterToken)
+                        ? Enumerable.Empty<string>()
+                        : (m_FormatSpecificParameters = FormatSpecificParameterToken.Split(SessionDescription.SemiColonSplit));
                 }
             }
 

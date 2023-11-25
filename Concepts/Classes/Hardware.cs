@@ -50,7 +50,7 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// The location of the code to be called.
         /// </summary>
-        internal protected nint InstructionPointer;
+        protected internal nint InstructionPointer;
 
         #endregion
 
@@ -263,7 +263,7 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// The byte code of the instructions the machine should execute
         /// </summary>
-        internal protected byte[] Instructions;
+        protected internal byte[] Instructions;
 
         #endregion
 
@@ -305,17 +305,17 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// Allows to allocate the memory required to execute the <see cref="Instructions"/>
         /// </summary>
-        internal protected abstract void VirtualAllocate();
+        protected internal abstract void VirtualAllocate();
 
         /// <summary>
         /// Allows to free the memory required to execute the <see cref="Instructions"/>
         /// </summary>
-        internal protected abstract void VirtualFree();
+        protected internal abstract void VirtualFree();
 
         /// <summary>
         /// Allows to protect the memory required to execute the <see cref="Instructions"/>
         /// </summary>
-        internal protected abstract void VirtualProtect();
+        protected internal abstract void VirtualProtect();
 
         #endregion
 
@@ -328,16 +328,9 @@ namespace Media.Concepts.Hardware
         /// <param name="x64codeBytes"></param>
         /// <param name="machine"></param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void SetInstructions(byte[] x86codeBytes, byte[] x64codeBytes, bool machine = true)
+        protected internal void SetInstructions(byte[] x86codeBytes, byte[] x64codeBytes, bool machine = true)
         {
-            if (machine ? false == Common.Machine.IsX64() : nint.Size == 4)
-            {
-                Instructions = x86codeBytes;
-            }
-            else
-            {
-                Instructions = x64codeBytes;
-            }
+            Instructions = (machine ? Common.Machine.IsX64() is false : nint.Size == 4) ? x86codeBytes : x64codeBytes;
         }
 
         //Invoke
@@ -429,7 +422,7 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// Allows to unprotect the memory required to execute the <see cref="Instructions"/>
         /// </summary>
-        internal protected abstract void VirtualUnprotect();
+        protected internal abstract void VirtualUnprotect();
 
         /// <summary>
         /// 
@@ -479,11 +472,9 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// should be nameof(PreviousMethod)
         /// </summary>
-        const string PreviousMethodSymbol = "PreviousMethod";
-
-        static System.Type PlatformMethodReplacementType = typeof(PlatformMethodReplacement);
-
-        static System.Reflection.MethodInfo PreviousMethodInfo = PlatformMethodReplacementType.GetMethod(PreviousMethodSymbol, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        private const string PreviousMethodSymbol = "PreviousMethod";
+        private static readonly System.Type PlatformMethodReplacementType = typeof(PlatformMethodReplacement);
+        private static readonly System.Reflection.MethodInfo PreviousMethodInfo = PlatformMethodReplacementType.GetMethod(PreviousMethodSymbol, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         //Media.Common.Extensions.ExpressionExtensions.SymbolExtensions.GetMethodInfo(() => ((PlatformMethodReplacement)null).PreviousMethod());
 
         #endregion
@@ -503,7 +494,7 @@ namespace Media.Concepts.Hardware
         /// Stub method used to offer the ability to restore the replaced method.
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
-        void PreviousMethod()
+        private void PreviousMethod()
         {
 
         }
@@ -512,7 +503,7 @@ namespace Media.Concepts.Hardware
         /// Restores the method replacement to the previous state.
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        void RestoreCode()
+        private void RestoreCode()
         {
             if (Restore)
             {
@@ -666,12 +657,12 @@ namespace Media.Concepts.Hardware
             throw new System.NotImplementedException();
         }
 
-        internal protected override void VirtualAllocate()
+        protected internal override void VirtualAllocate()
         {
             throw new System.NotImplementedException();
         }
 
-        internal protected override void VirtualUnprotect()
+        protected internal override void VirtualUnprotect()
         {
             throw new System.NotImplementedException();
         }

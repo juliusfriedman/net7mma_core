@@ -7,8 +7,7 @@ namespace Media.Codecs.Image.Transformations
     //Todo Seperate into seperate assembly
     public sealed class RGB : ImageTransformation
     {
-
-        static ImageTransform TransformToYUV420 = new(TransformRGBToYUV420);
+        private static readonly ImageTransform TransformToYUV420 = new(TransformRGBToYUV420);
 
         //Needs a way to verify the source is actually RGB and dest is actually YUV420
         public static void TransformRGBToYUV420(Image source, Image dest)

@@ -57,7 +57,7 @@ namespace Media.Rtsp//.Server
         #region Statics, Biasi {Not basis} , or `True Time`; `Fabrica` but not `Fabricated`; `begotten` not `made`
 
         //higher cpu than IsGoodUnlessNullOrDisposed
-        static int TryAssessIsBadPacketThreshold(RtpPacket a, RtpClient.TransportContext b, int threshold = Common.Binary.Zero)
+        private static int TryAssessIsBadPacketThreshold(RtpPacket a, RtpClient.TransportContext b, int threshold = Common.Binary.Zero)
         {
             try
             {
@@ -69,7 +69,7 @@ namespace Media.Rtsp//.Server
             }
         }
 
-        static double Deicide(RtpPacket a, RtpClient.TransportContext b, int t = 0, int s = 0)
+        private static double Deicide(RtpPacket a, RtpClient.TransportContext b, int t = 0, int s = 0)
         {
             if (a.Transferred.HasValue)
             {
@@ -108,18 +108,16 @@ namespace Media.Rtsp//.Server
 
         ///---
 
-        static int IsBadPacket(Media.Common.IPacket a, RtpClient.TransportContext b)
+        private static int IsBadPacket(Media.Common.IPacket a, RtpClient.TransportContext b)
         {
-            if (IsGoodUnlessNullOrDisposed(a, b) <= 0) return Common.Binary.NegativeOne;
-
-            if (a is RtpPacket p) return TryAssessIsBadPacketThreshold(p, b);
-
-            return IsGoodUnlessNullOrDisposed(a, b);
+            return IsGoodUnlessNullOrDisposed(a, b) <= 0
+                ? Common.Binary.NegativeOne
+                : a is RtpPacket p ? TryAssessIsBadPacketThreshold(p, b) : IsGoodUnlessNullOrDisposed(a, b);
         }
 
         ///---
 
-        static int IsGoodUnlessNullOrDisposed(Media.Common.IPacket a, RtpClient.TransportContext b)
+        private static int IsGoodUnlessNullOrDisposed(Media.Common.IPacket a, RtpClient.TransportContext b)
         {
             return Common.IDisposedExtensions.IsNullOrDisposed(a) ||
                 Common.IDisposedExtensions.IsNullOrDisposed(b)
@@ -358,10 +356,7 @@ namespace Media.Rtsp//.Server
             //Todo, pool all memory in a single contiguous allocation using the server.AllocateClientBuffer
 
             //If the buffer is null or disposed create a new buffer of 4096 bytes.
-            if (Common.IDisposedExtensions.IsNullOrDisposed(buffer))
-                m_Buffer = new Common.MemorySegment(RtspMessage.MaximumLength);
-            else
-                m_Buffer = buffer;
+            m_Buffer = Common.IDisposedExtensions.IsNullOrDisposed(buffer) ? new Common.MemorySegment(RtspMessage.MaximumLength) : buffer;
 
             m_SocketPollMicroseconds = interFrameGap;
 
@@ -1001,8 +996,9 @@ namespace Media.Rtsp//.Server
                     if (end.Equals(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan) && max.Equals(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan) is false) endRange = end = max;
 
                     //If the start time is 0 and the end time is not infinite then start the start time to the uptime of the stream (how long it has been playing)
-                    if (start.Equals(TimeSpan.Zero) && end.Equals(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan) is false) startRange = start = source.RtpClient.Uptime;
-                    else startRange = null;
+                    startRange = start.Equals(TimeSpan.Zero) && end.Equals(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan) is false
+                        ? (start = source.RtpClient.Uptime)
+                        : null;
                 }
             }
 
@@ -1119,7 +1115,7 @@ namespace Media.Rtsp//.Server
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        void OnSourceFrameChanged(object sender, RtpFrame frame = null, RtpClient.TransportContext tc = null, bool final = false)
+        private void OnSourceFrameChanged(object sender, RtpFrame frame = null, RtpClient.TransportContext tc = null, bool final = false)
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(frame)) return;
 
@@ -1421,8 +1417,9 @@ namespace Media.Rtsp//.Server
                     //Have to calculate next data and control channel
                     RtpClient.TransportContext lastContext = m_RtpClient.GetTransportContexts().LastOrDefault();
 
-                    if (Common.IDisposedExtensions.IsNullOrDisposed(lastContext) is false) setupContext = new RtpClient.TransportContext((byte)(lastContext.DataChannel + 2), (byte)(lastContext.ControlChannel + 2), localSsrc, mediaDescription, rtcpDisabled is false, remoteSsrc, 0);
-                    else setupContext = new RtpClient.TransportContext(dataChannel, controlChannel, localSsrc, mediaDescription, rtcpDisabled is false, remoteSsrc, 0);
+                    setupContext = Common.IDisposedExtensions.IsNullOrDisposed(lastContext) is false
+                        ? new RtpClient.TransportContext((byte)(lastContext.DataChannel + 2), (byte)(lastContext.ControlChannel + 2), localSsrc, mediaDescription, rtcpDisabled is false, remoteSsrc, 0)
+                        : new RtpClient.TransportContext(dataChannel, controlChannel, localSsrc, mediaDescription, rtcpDisabled is false, remoteSsrc, 0);
                 }
 
                 //Todo, allow for other memory, this is already shared via the RtpClient ...
@@ -1518,14 +1515,15 @@ namespace Media.Rtsp//.Server
                     RtpClient.TransportContext lastContext = m_RtpClient.GetTransportContexts().LastOrDefault();
 
                     //Don't use what was given as data or control channels
-                    if (Common.IDisposedExtensions.IsNullOrDisposed(lastContext) is false) setupContext = new RtpClient.TransportContext(dataChannel = (byte)(lastContext.DataChannel + 2),
+                    setupContext = Common.IDisposedExtensions.IsNullOrDisposed(lastContext) is false
+                        ? new RtpClient.TransportContext(dataChannel = (byte)(lastContext.DataChannel + 2),
                         controlChannel = (byte)(lastContext.ControlChannel + 2),
                         localSsrc,
                         mediaDescription,
                         rtcpDisabled is false,
                         remoteSsrc,
-                        0);
-                    else setupContext = new RtpClient.TransportContext(dataChannel,
+                        0)
+                        : new RtpClient.TransportContext(dataChannel,
                         controlChannel,
                         localSsrc,
                         mediaDescription,
@@ -1597,7 +1595,7 @@ namespace Media.Rtsp//.Server
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        void ProcessClientSessionBuffer(object sender, byte[] data, int offset, int length)
+        private void ProcessClientSessionBuffer(object sender, byte[] data, int offset, int length)
         {
             //Process the data received
             if (IsDisconnected is false) m_Server.ProcessClientBuffer(this, length);
@@ -1616,7 +1614,7 @@ namespace Media.Rtsp//.Server
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        void m_RtpClient_RecievedRtp(object sender, RtpPacket packet, RtpClient.TransportContext tc = null)
+        private void m_RtpClient_RecievedRtp(object sender, RtpPacket packet, RtpClient.TransportContext tc = null)
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(packet) ||
                 Common.IDisposedExtensions.IsNullOrDisposed(tc)) return;
@@ -1640,7 +1638,7 @@ namespace Media.Rtsp//.Server
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        void m_RtpClient_RecievedRtcp(object sender, RtcpPacket packet, RtpClient.TransportContext tc = null)
+        private void m_RtpClient_RecievedRtcp(object sender, RtcpPacket packet, RtpClient.TransportContext tc = null)
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
@@ -1663,7 +1661,7 @@ namespace Media.Rtsp//.Server
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        void m_RtpClient_SentRtcp(object sender, RtcpPacket packet, RtpClient.TransportContext tc = null)
+        private void m_RtpClient_SentRtcp(object sender, RtcpPacket packet, RtpClient.TransportContext tc = null)
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
@@ -1691,7 +1689,7 @@ namespace Media.Rtsp//.Server
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        void m_RtpClient_SentRtp(object sender, RtpPacket packet, RtpClient.TransportContext tc = null)
+        private void m_RtpClient_SentRtp(object sender, RtpPacket packet, RtpClient.TransportContext tc = null)
         {
             var context = tc ?? m_RtpClient.GetContextForPacket(packet);
 

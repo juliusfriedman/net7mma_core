@@ -75,7 +75,7 @@ namespace Media.Rtsp.Server
         internal NetworkCredential m_SourceCred;
         internal HashSet<string> m_Aliases = [];
         //internal bool m_Child = false;
-        public virtual Sdp.SessionDescription SessionDescription { get; internal protected set; }
+        public virtual Sdp.SessionDescription SessionDescription { get; protected internal set; }
 
         //Maybe should be m_AllowUdp?
         internal bool m_ForceTCP;//= true; // To force clients to utilize TCP, Interleaved in Rtsp or Rtp
@@ -97,7 +97,10 @@ namespace Media.Rtsp.Server
         public TimeSpan Uptime
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { if (m_StartedTimeUtc.HasValue) return DateTime.UtcNow - m_StartedTimeUtc.Value; return TimeSpan.MinValue; }
+            get
+            {
+                return m_StartedTimeUtc.HasValue ? DateTime.UtcNow - m_StartedTimeUtc.Value : TimeSpan.MinValue;
+            }
         }
 
         /// <summary>
@@ -108,7 +111,7 @@ namespace Media.Rtsp.Server
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return m_Id; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { m_Id = value; }
+            protected internal set { m_Id = value; }
         }
 
         /// <summary>

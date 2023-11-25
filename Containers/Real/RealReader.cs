@@ -72,7 +72,7 @@ namespace Media.Containers.Real
 
         #region Constants
 
-        const int IdentifierSize = 4, LengthSize = 8, MinimumSize = IdentifierSize + LengthSize;
+        private const int IdentifierSize = 4, LengthSize = 8, MinimumSize = IdentifierSize + LengthSize;
 
         #endregion
 
@@ -86,7 +86,7 @@ namespace Media.Containers.Real
 
         public RealReader(System.IO.FileStream source, System.IO.FileAccess access = System.IO.FileAccess.Read) : base(source, access) { }
 
-        void ParseHeader()
+        private void ParseHeader()
         {
             using (var root = Root)
             {

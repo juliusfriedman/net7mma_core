@@ -125,9 +125,9 @@ namespace Media.Common.Extensions.NetworkInterface
 
         public static System.Net.NetworkInformation.NetworkInterface GetNetworkInterface(System.Net.IPEndPoint localEndPoint)
         {
-            if (localEndPoint is null) throw new System.ArgumentNullException(nameof(localEndPoint));
-
-            return GetNetworkInterface(localEndPoint.Address);
+            return localEndPoint is null
+                ? throw new System.ArgumentNullException(nameof(localEndPoint))
+                : GetNetworkInterface(localEndPoint.Address);
         }
 
         public static System.Net.NetworkInformation.NetworkInterface GetNetworkInterface(System.Net.Sockets.Socket socket)
@@ -152,9 +152,7 @@ namespace Media.Common.Extensions.NetworkInterface
 
             long speed = networkInterface.Speed;
 
-            if (speed <= 0) return 0;
-
-            return (networkInterface.Speed / Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMillisecond);
+            return speed <= 0 ? 0 : networkInterface.Speed / Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMillisecond;
         }
 
         /// <summary>
@@ -190,9 +188,7 @@ namespace Media.Common.Extensions.NetworkInterface
         /// <returns></returns>
         public static double GetInterframeGapNanoseconds(this System.Net.NetworkInformation.NetworkInterface networkInterface)
         {
-            if (networkInterface is null) return 0;
-
-            return CaulculateInterframeGapNanoseconds(networkInterface.Speed);
+            return networkInterface is null ? 0 : CaulculateInterframeGapNanoseconds(networkInterface.Speed);
         }
 
         /// <summary>

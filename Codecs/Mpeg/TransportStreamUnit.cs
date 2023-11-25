@@ -185,13 +185,11 @@ namespace Media.Containers.Mpeg
 
             public static int GetAdaptationFieldLength(byte[] header, int headerOffset, byte[] data, int dataOffset)
             {
-                if (header is null) throw new ArgumentNullException("header");
-
-                if (data is null) throw new ArgumentNullException("data");
-
-                if (false == HasAdaptationField(header, headerOffset)) return -1;
-
-                return data[dataOffset];
+                return header is null
+                    ? throw new ArgumentNullException("header")
+                    : data is null
+                    ? throw new ArgumentNullException("data")
+                    : false == HasAdaptationField(header, headerOffset) ? -1 : data[dataOffset];
             }
 
             public static byte[] GetAdaptationFieldData(byte[] header, int headerOffset, byte[] data, int dataOffset)
@@ -243,7 +241,7 @@ namespace Media.Containers.Mpeg
                 return adaptationFlags.HasFlag(AdaptationFieldFlags.SpliceCountdown) ? adaptationField[offset] : -1;
             }
 
-            const int ProgramClockReferenceSize = 6;
+            private const int ProgramClockReferenceSize = 6;
 
             public static TimeSpan ProgramClockReferenceToTimeSpan(byte[] pcr, int offset)
             {
@@ -285,28 +283,30 @@ namespace Media.Containers.Mpeg
 
             public static int AdaptationFieldExtensionLength(byte[] adaptationField)
             {
-                if (adaptationField is null) throw new ArgumentNullException("adaptationField");
-                return adaptationField[1];
+                return adaptationField is null ? throw new ArgumentNullException("adaptationField") : adaptationField[1];
             }
 
             //GetAdaptationFieldExtensionData
 
             public static bool HasLegalTimeWindow(byte[] adaptationFieldExtension)
             {
-                if (adaptationFieldExtension is null) throw new ArgumentNullException("adaptationFieldExtension");
-                return ((adaptationFieldExtension[2] & ErrorMask) != 0);
+                return adaptationFieldExtension is null
+                    ? throw new ArgumentNullException("adaptationFieldExtension")
+                    : (adaptationFieldExtension[2] & ErrorMask) != 0;
             }
 
             public static bool HasPiecewiseRate(byte[] adaptationFieldExtension)
             {
-                if (adaptationFieldExtension is null) throw new ArgumentNullException("adaptationFieldExtension");
-                return ((adaptationFieldExtension[2] & PayloadStartUnitMask) != 0);
+                return adaptationFieldExtension is null
+                    ? throw new ArgumentNullException("adaptationFieldExtension")
+                    : (adaptationFieldExtension[2] & PayloadStartUnitMask) != 0;
             }
 
             public static bool HasSeamlessSplice(byte[] adaptationFieldExtension)
             {
-                if (adaptationFieldExtension is null) throw new ArgumentNullException("adaptationFieldExtension");
-                return ((adaptationFieldExtension[2] & PriorityMask) != 0);
+                return adaptationFieldExtension is null
+                    ? throw new ArgumentNullException("adaptationFieldExtension")
+                    : (adaptationFieldExtension[2] & PriorityMask) != 0;
             }
 
             public static bool HasAdaptationFieldStuffing(byte[] adaptationFieldExtension, out int length)

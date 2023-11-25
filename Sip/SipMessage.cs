@@ -78,7 +78,7 @@ namespace Media.Sip
         /// <summary>
         /// Reserved
         /// </summary>
-        internal protected SipMessage() : base(SipMessage.MessageIdentifier) { }
+        protected internal SipMessage() : base(SipMessage.MessageIdentifier) { }
 
         /// <summary>
         /// Constructs a SipMessage
@@ -123,9 +123,9 @@ namespace Media.Sip
 
         #region CSeq
 
-        int m_CSeq;
+        private int m_CSeq;
 
-        internal protected virtual bool ParseSequenceNumber(bool force = false)
+        protected internal virtual bool ParseSequenceNumber(bool force = false)
         {
             //If the message is disposed then no parsing can occur
             if (IsDisposed && false == IsPersistent) return false;

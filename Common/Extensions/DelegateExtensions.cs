@@ -50,13 +50,13 @@ namespace Media.Common.Extensions.Delegate
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static System.Delegate ConvertTo(this System.Delegate self, System.Type type)
         {
-            if (type is null) { throw new System.ArgumentNullException("type"); }
-            if (self is null) { return null; }
-
-            if (self.GetType() == type)
-                return self;
-
-            return System.Delegate.Combine(
+            return type is null
+                ? throw new System.ArgumentNullException("type")
+                : self is null
+                ? null
+                : self.GetType() == type
+                ? self
+                : System.Delegate.Combine(
                 self.GetInvocationList()
                     .Select(i => System.Delegate.CreateDelegate(type, i.Target, i.Method))
                     .ToArray());
@@ -76,9 +76,9 @@ namespace Media.Common.Extensions.Delegate
         /// <returns></returns>
         public static System.Delegate CreateDelegate(System.Reflection.MethodInfo method)
         {
-            if (method is null) throw new System.ArgumentNullException("method");
-
-            return method.CreateDelegate(System.Linq.Expressions.Expression.GetDelegateType(method.GetParameters().Select(p => p.ParameterType).Concat(Media.Common.Extensions.Linq.LinqExtensions.Yield(method.ReturnType)).ToArray()));
+            return method is null
+                ? throw new System.ArgumentNullException("method")
+                : method.CreateDelegate(System.Linq.Expressions.Expression.GetDelegateType(method.GetParameters().Select(p => p.ParameterType).Concat(Media.Common.Extensions.Linq.LinqExtensions.Yield(method.ReturnType)).ToArray()));
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -95,7 +95,7 @@ namespace Media.Common.Extensions.Delegate
             do
             {
                 oldBaseDel = baseDel;
-                newBaseDel = (T)(System.Object)System.Delegate.Combine((System.Delegate)(object)oldBaseDel, newDel);
+                newBaseDel = (T)(object)System.Delegate.Combine((System.Delegate)(object)oldBaseDel, newDel);
             } while (System.Threading.Interlocked.CompareExchange(ref baseDel, newBaseDel, oldBaseDel) != oldBaseDel);
         }
 
@@ -107,7 +107,7 @@ namespace Media.Common.Extensions.Delegate
             do
             {
                 oldBaseDel = baseDel;
-                newBaseDel = (T)(System.Object)System.Delegate.Remove((System.Delegate)(object)oldBaseDel, newDel);
+                newBaseDel = (T)(object)System.Delegate.Remove((System.Delegate)(object)oldBaseDel, newDel);
             } while (System.Threading.Interlocked.CompareExchange(ref baseDel, newBaseDel, oldBaseDel) != oldBaseDel);
         }
     }

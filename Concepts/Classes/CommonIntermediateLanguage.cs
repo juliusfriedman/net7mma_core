@@ -627,10 +627,8 @@ namespace Media.Concepts.Classes
         public static System.Type TypeOfVoid = typeof(void);
 
         public static System.Type TypeOfIntPtr = typeof(nint);
-
-        static readonly System.Action<nint, byte, int> InitblkDelegate;
-
-        static readonly System.Action<nint, nint, int> CpyblkDelegate;
+        private static readonly System.Action<nint, byte, int> InitblkDelegate;
+        private static readonly System.Action<nint, nint, int> CpyblkDelegate;
 
         //static readonly System.Func<System.Type, int> SizeOfDelegate;
 
@@ -640,13 +638,10 @@ namespace Media.Concepts.Classes
 
         //static readonly System.Func<nint, int, byte[], int> CallIndirectDelegate1;
 
-        static readonly System.Action<nint> CallIndirectPointerStdCall;
-
-        static readonly System.Func<nint, nint> CallIndirectPointerIntPtr;
-
-        static readonly System.Func<nint, ulong> CallIndirectPointerULongStdCall, CallIndirectPointerULongThisCall, CallIndirectPointerULongCdelc, CallIndirectPointerULongFastCall;
-
-        static readonly System.Func<nint, uint> CallIndirectPointerUIntStdCall;
+        private static readonly System.Action<nint> CallIndirectPointerStdCall;
+        private static readonly System.Func<nint, nint> CallIndirectPointerIntPtr;
+        private static readonly System.Func<nint, ulong> CallIndirectPointerULongStdCall, CallIndirectPointerULongThisCall, CallIndirectPointerULongCdelc, CallIndirectPointerULongFastCall;
+        private static readonly System.Func<nint, uint> CallIndirectPointerUIntStdCall;
 
         //https://msdn.microsoft.com/ja-jp/windows/ms693373(v=vs.110)
         /*
@@ -714,7 +709,7 @@ namespace Media.Concepts.Classes
         /// <param name="result">The variable which receives the result</param>
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal unsafe static void CallIndirect<T>(nint ptr, ref T result)
+        internal static unsafe void CallIndirect<T>(nint ptr, ref T result)
         {
             if (ptr == nint.Zero)
             {
@@ -755,7 +750,7 @@ namespace Media.Concepts.Classes
         /// <param name="t">The element to convert</param>
         /// <returns>An instance of U with the memory of T</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static TResult As<TSource, TResult>(TSource t)
+        public static unsafe TResult As<TSource, TResult>(TSource t)
         {
             //Determine the size of T
             int sizeOfT = Unsafe.ArrayOfTwoElements<TSource>.AddressingDifference();
@@ -1181,7 +1176,7 @@ namespace Media.Concepts.Classes
         //https://github.com/dotnet/corefx/issues/493
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static void CopyBlock<T>(T[] src, int srcOffset, T[] dst, int dstOffset, int length) //CopyBlock (void *)
+        public static unsafe void CopyBlock<T>(T[] src, int srcOffset, T[] dst, int dstOffset, int length) //CopyBlock (void *)
         {
             System.Buffer.MemoryCopy((void*)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<T>(src, srcOffset), (void*)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<T>(dst, dstOffset), length, length);
         }
@@ -1237,7 +1232,7 @@ namespace Media.Concepts.Classes
         /// </summary>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static int StringHeaderSize()
+        public static unsafe int StringHeaderSize()
         {
             //Determine the overhead of the clr header.
             string s = string.Empty;

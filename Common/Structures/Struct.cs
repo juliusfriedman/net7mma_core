@@ -60,7 +60,7 @@ namespace Media.Common.Structures
     /// <summary>
     /// Define an <see cref="interface"/> which can allow for the creation and deletion of references...
     /// </summary>
-    interface IReferenceInfomation : Media.Common.Interfaces.Interface//, IReference
+    internal interface IReferenceInfomation : Media.Common.Interfaces.Interface//, IReference
     {
         //TakeReference
         //RemoveReference

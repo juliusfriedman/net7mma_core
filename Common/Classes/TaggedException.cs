@@ -61,7 +61,7 @@ namespace Media.Common
         /// <summary>
         /// The string which represents the name of the property
         /// </summary>
-        const string TagPropertyString = nameof(Tag);
+        private const string TagPropertyString = nameof(Tag);
 
         #endregion
 
@@ -79,7 +79,7 @@ namespace Media.Common
 
         #region Fields
 
-        readonly Common.SuppressedFinalizerDisposable @base = new(true);
+        private readonly Common.SuppressedFinalizerDisposable @base = new(true);
 
         #endregion
 
@@ -202,14 +202,14 @@ namespace Media.Common
         /// <summary>
         /// Clears <see cref="Data"/>
         /// </summary>
-        internal protected void ClearData() { Data.Clear(); }
+        protected internal void ClearData() { Data.Clear(); }
 
         /// <summary>
         /// Adds to <see cref="Data"/>
         /// </summary>
         /// <param name="key">The key</param>
         /// <param name="value">The value</param>
-        internal protected void AddData(object key, object value) { Data.Add(key, value); }
+        protected internal void AddData(object key, object value) { Data.Add(key, value); }
 
         //Todo, T Key, T Value, Check for Serializable?
 

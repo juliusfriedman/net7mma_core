@@ -51,11 +51,7 @@ namespace Media.Common.Collections.Generic
         /// </returns>
         public IEnumerator<TElement> GetEnumerator()
         {
-            if (_elements is null)
-            {
-                return null;
-            }
-            return _elements.GetEnumerator();
+            return _elements?.GetEnumerator();
         }
 
         /// <summary>

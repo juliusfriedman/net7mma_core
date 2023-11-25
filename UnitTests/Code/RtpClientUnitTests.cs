@@ -147,14 +147,14 @@ namespace Media.UnitTests
 
             private class TestFramework
             {
-                private static System.Net.EndPoint _rtspServer;
+                private static readonly System.Net.EndPoint _rtspServer;
 
-                private static System.Net.Sockets.Socket _listenSocket;
+                private static readonly System.Net.Sockets.Socket _listenSocket;
 
-                private System.Net.Sockets.Socket _sender,
+                private readonly System.Net.Sockets.Socket _sender,
                                _receiving;
 
-                private Media.Rtp.RtpClient _client;
+                private readonly Media.Rtp.RtpClient _client;
 
                 static TestFramework()
                 {
@@ -199,9 +199,9 @@ namespace Media.UnitTests
                     _client.TryAddContext(tc);
                 }
 
-                Media.Rtsp.RtspMessage lastInterleaved;
+                private Media.Rtsp.RtspMessage lastInterleaved;
 
-                void ProcessInterleaveData(object sender, byte[] data, int offset, int length)
+                private void ProcessInterleaveData(object sender, byte[] data, int offset, int length)
                 {
                     ConsoleColor previousForegroundColor = Console.ForegroundColor;
                     Console.ForegroundColor = ConsoleColor.Yellow;
@@ -266,7 +266,7 @@ namespace Media.UnitTests
                     }
                 }
 
-                void ProcessRtpPacket(object sender, Media.Rtp.RtpPacket packet, Media.Rtp.RtpClient.TransportContext tc = null)
+                private void ProcessRtpPacket(object sender, Media.Rtp.RtpPacket packet, Media.Rtp.RtpClient.TransportContext tc = null)
                 {
                     ConsoleColor previousForegroundColor = Console.ForegroundColor;
                     Console.ForegroundColor = ConsoleColor.Magenta;
@@ -454,9 +454,8 @@ namespace Media.UnitTests
                 tf.HaveRtpClientWorkerThreadProcessSocketData();
             }
 
-            static int size = 0;
-
-            static bool quit = false;
+            private static int size = 0;
+            private static bool quit = false;
 
             /// <summary>
             /// This test demonstrates the first point in issue report #17245.
@@ -1000,7 +999,7 @@ namespace Media.UnitTests
             Media.Utility.Random.NextBytes(random);
 
             // Create SDP offer (Step 1).
-            string originatorAndSession = String.Format("{0} {1} {2} {3} {4} {5}", "-", Convert.ToHexString(random), "0", "IN", "IP4", "10.1.1.2");
+            string originatorAndSession = string.Format("{0} {1} {2} {3} {4} {5}", "-", Convert.ToHexString(random), "0", "IN", "IP4", "10.1.1.2");
             using (var sdp = new Media.Sdp.SessionDescription(0, originatorAndSession, "sipsorcery"))
             {
                 sdp.Add(new Media.Sdp.SessionDescriptionLine("c=IN IP4 10.1.1.2"), false);

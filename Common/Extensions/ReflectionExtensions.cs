@@ -2,7 +2,7 @@
 
 namespace Media.Common.Extensions
 {
-    static class ReflectionExtensions
+    internal static class ReflectionExtensions
     {
         public static System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> GetMethods(this System.Type someType, System.Reflection.BindingFlags flags)
         {

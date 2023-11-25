@@ -38,7 +38,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 namespace Media.Concepts.Classes.Threading
 {
     /// <summary>
-    /// <see cref="System.Byte"/> representation of <see cref="System.Threading.ThreadPriority"/>
+    /// <see cref="byte"/> representation of <see cref="System.Threading.ThreadPriority"/>
     /// </summary>
     public enum /*Byte*/ThreadPriority : byte
     {
@@ -257,11 +257,9 @@ namespace Media.Concepts.Classes.Threading
 
     public class EnumerableException : Common.TaggedException<Fiber>, System.Collections.Generic.IEnumerable<System.Exception>
     {
-        const System.Exception NilException = null;
-
-        System.Collections.Generic.IEnumerable<System.Exception> Aggregates = System.Linq.Enumerable.Empty<System.Exception>();
-
-        readonly System.Collections.Generic.HashSet<System.Func<System.Exception, bool>> ExceptionHandlers = [];
+        private const System.Exception NilException = null;
+        private System.Collections.Generic.IEnumerable<System.Exception> Aggregates = System.Linq.Enumerable.Empty<System.Exception>();
+        private readonly System.Collections.Generic.HashSet<System.Func<System.Exception, bool>> ExceptionHandlers = [];
 
         public EnumerableException()
         {
@@ -331,9 +329,9 @@ namespace Media.Concepts.Classes.Threading
 
         public System.Collections.Generic.IEnumerator<System.Exception> GetExceptions()
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this)) throw new System.ObjectDisposedException("The instance is disposed.", this);
-
-            return Aggregates.GetEnumerator();
+            return Common.IDisposedExtensions.IsNullOrDisposed(this)
+                ? throw new System.ObjectDisposedException("The instance is disposed.", this)
+                : Aggregates.GetEnumerator();
         }
 
         System.Collections.Generic.IEnumerator<System.Exception> System.Collections.Generic.IEnumerable<System.Exception>.GetEnumerator()
@@ -359,12 +357,9 @@ namespace Media.Concepts.Classes.Threading
         public const Fiber Nil = null;
 
         public const System.Threading.Thread NilThread = null;
-
-        System.Threading.Thread UnderlyingThread;
-
-        System.Threading.CompressedStack UnderlyingCompressedStack;
-
-        ThreadPriorityInformation UnderlyingThreadsPriorityInformation;
+        private System.Threading.Thread UnderlyingThread;
+        private System.Threading.CompressedStack UnderlyingCompressedStack;
+        private ThreadPriorityInformation UnderlyingThreadsPriorityInformation;
 
         public Fiber(bool shouldDispose = true)
             : base(shouldDispose)
@@ -386,11 +381,11 @@ namespace Media.Concepts.Classes.Threading
 
         //--
 
-        readonly System.DateTimeOffset Created = System.DateTimeOffset.UtcNow;
+        private readonly System.DateTimeOffset Created = System.DateTimeOffset.UtcNow;
 
         public System.DateTimeOffset Started { get; protected set; }
 
-        readonly static System.DateTimeOffset DefaultDateTimeOffset = default;
+        private static readonly System.DateTimeOffset DefaultDateTimeOffset = default;
 
         public bool IsStarted { get { return Started.Equals(DefaultDateTimeOffset) is false; } }
 
@@ -398,9 +393,8 @@ namespace Media.Concepts.Classes.Threading
 
         //-- IUpdateable
 
-        readonly System.Threading.ManualResetEventSlim ManualResetEvent;
-
-        readonly System.Threading.CancellationTokenSource UpdateTokenSource;
+        private readonly System.Threading.ManualResetEventSlim ManualResetEvent;
+        private readonly System.Threading.CancellationTokenSource UpdateTokenSource;
 
         //Todo EnterCriticalRegion, ExitCritialRegion, IsInCriticalRegion
         //long Level;
@@ -426,13 +420,12 @@ namespace Media.Concepts.Classes.Threading
         }
 
         public readonly EnumerableException Exceptions = new();
-
-        static readonly System.Type StructureType = typeof(System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan>);
+        private static readonly System.Type StructureType = typeof(System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan>);
 
         /// <summary>
         /// Normalize the itinerary
         /// </summary>
-        void UniversalEntryPoint()
+        private void UniversalEntryPoint()
         {
             goto Started;
             Started: Started = System.DateTimeOffset.UtcNow; goto Aft;
@@ -512,11 +505,10 @@ namespace Media.Concepts.Classes.Threading
 
         #region Async
 
-        readonly System.AggregateException AggregateExceptions = new();
+        private readonly System.AggregateException AggregateExceptions = new();
+        private readonly System.Func<System.Exception, bool> ExceptionHandler;
 
-        readonly System.Func<System.Exception, bool> ExceptionHandler;
-
-        async void AsyncEntryPoint()
+        private async void AsyncEntryPoint()
         {
             goto Started;
             Started:
@@ -581,7 +573,7 @@ namespace Media.Concepts.Classes.Threading
 
         #endregion
 
-        static void ConfigureFiber(Fiber fiber)
+        private static void ConfigureFiber(Fiber fiber)
         {
             if (fiber is null || fiber.IsStarted || Common.IDisposedExtensions.IsNullOrDisposed(fiber)) return;
 
@@ -668,12 +660,12 @@ namespace Media.Concepts.Classes.Threading
         /// <summary>
         /// Dictionary of delegates
         /// </summary>
-        readonly System.Collections.Concurrent.ConcurrentDictionary<System.Delegate, DelegateHolder> DelegateDictionary = new();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<System.Delegate, DelegateHolder> DelegateDictionary = new();
 
         /// <summary>
         /// List of delegates to be called, we need it because it is relatevely easy to implement a loop with list modification inside of it
         /// </summary>
-        readonly System.Collections.Generic.LinkedList<DelegateHolder> DelegateList = new();
+        private readonly System.Collections.Generic.LinkedList<DelegateHolder> DelegateList = new();
 
         /// <summary>
         /// locker for delegates list
