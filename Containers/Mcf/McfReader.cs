@@ -36,8 +36,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 using Media.Container;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Media.Containers.Mcf
 {
@@ -58,7 +56,7 @@ namespace Media.Containers.Mcf
 
         #region Constants
 
-        const int MinimumSize = 8, 
+        private const int MinimumSize = 8,
             HeaderSize = 0x1400, TypeHeaderSize = 160, ActualHeaderSize = 864, ExtendedInfoSize = 3072, ContentSpecificInfoSize = 1024,
             TrackEntrySize = 0x240, ClusterSize = 16, FooterSize = 4, BlockHeaderSize = 10;
 
@@ -85,7 +83,7 @@ namespace Media.Containers.Mcf
 
             throw new NotImplementedException();
         }
-        
+
         public override IEnumerator<Node> GetEnumerator()
         {
             while (Remaining >= MinimumSize)

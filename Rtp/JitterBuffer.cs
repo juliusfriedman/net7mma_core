@@ -45,9 +45,8 @@
         #endregion
 
         //PayloadType, Frames for PayloadType
-        readonly Common.Collections.Generic.ConcurrentThesaurus<int, RtpFrame> Frames = new Common.Collections.Generic.ConcurrentThesaurus<int, RtpFrame>();
-
-        readonly System.Collections.Generic.Dictionary<int, Sdp.MediaDescription> MediaDescriptions = new System.Collections.Generic.Dictionary<int, Sdp.MediaDescription>();
+        private readonly Common.Collections.Generic.ConcurrentThesaurus<int, RtpFrame> Frames = [];
+        private readonly System.Collections.Generic.Dictionary<int, Sdp.MediaDescription> MediaDescriptions = [];
 
         //Todo
         //Properties to track for max, Memory, Packets, Time etc.
@@ -71,20 +70,18 @@
 
         public Sdp.SessionDescription CreateSessionDescription(int version = 0)
         {
-            Sdp.SessionDescription sdp = new Sdp.SessionDescription(version);
+            Sdp.SessionDescription sdp = new(version);
             foreach (Sdp.MediaDescription md in MediaDescriptions.Values) sdp.Add(new Sdp.MediaDescription(md));
             return sdp;
         }
 
-        public System.TimeSpan GetDuration (int payloadType)
+        public System.TimeSpan GetDuration(int payloadType)
         {
-            System.Collections.Generic.IEnumerable<RtpFrame> frames;
-            if (TryGetFrames(payloadType, out frames))
+            if (TryGetFrames(payloadType, out System.Collections.Generic.IEnumerable<RtpFrame> frames))
             {
-                Sdp.MediaDescription mediaDescription;
-                if (MediaDescriptions.TryGetValue(payloadType, out mediaDescription))
+                if (MediaDescriptions.TryGetValue(payloadType, out Sdp.MediaDescription mediaDescription))
                 {
-                    Sdp.Lines.RtpMapLine rtpMap = new Sdp.Lines.RtpMapLine(mediaDescription.RtpMapLine);
+                    Sdp.Lines.RtpMapLine rtpMap = new(mediaDescription.RtpMapLine);
                     return System.TimeSpan.FromMilliseconds(System.Linq.Enumerable.Last(frames).Timestamp - System.Linq.Enumerable.First(frames).Timestamp * rtpMap.ClockRate);
                 }
             }
@@ -123,9 +120,8 @@
         /// <param name="packet"></param>
         public void Add(int payloadType, RtpPacket packet, bool allowDuplicatePackets = false, bool allowPacketsAfterMarker = false)
         {
-            RtpFrame addedTo;
 
-            Add(payloadType, allowDuplicatePackets, allowPacketsAfterMarker, packet, out addedTo);
+            Add(payloadType, allowDuplicatePackets, allowPacketsAfterMarker, packet, out RtpFrame addedTo);
         }
 
         /// <summary>
@@ -141,10 +137,9 @@
 
             if (Common.IDisposedExtensions.IsNullOrDisposed(packet)) return false;
 
-            System.Collections.Generic.IList<RtpFrame> framesList;
 
             //Use the given payloadType to get frames
-            if (Frames.TryGetValueList(ref payloadType, out framesList))
+            if (Frames.TryGetValueList(ref payloadType, out System.Collections.Generic.IList<RtpFrame> framesList))
             {
                 //loop the frames found
                 foreach (RtpFrame frame in framesList)
@@ -169,7 +164,7 @@
                         }
                     }
                 }
-                
+
                 //Must add a new frame to frames.
                 addedTo = new RtpFrame(packet);
 
@@ -202,7 +197,6 @@
             int Key;
 
             //Store the frames at the key
-            System.Collections.Generic.IEnumerable<RtpFrame> frames;
 
             //Could perform in parallel, would need frames local.
             //System.Linq.ParallelEnumerable.ForAll(keys, () => { });
@@ -214,7 +208,7 @@
                 Key = keys[i];
 
                 //if removed from the ConcurrentThesaurus
-                if (Frames.Remove(ref Key, out frames))
+                if (Frames.Remove(ref Key, out System.Collections.Generic.IEnumerable<RtpFrame> frames))
                 {
                     //if we need to dispose the frames then Loop the frames contined at the key
                     if (disposeFrames) foreach (RtpFrame frame in frames)

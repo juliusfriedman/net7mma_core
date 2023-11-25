@@ -1,5 +1,4 @@
-﻿using Media.Common;
-using System;
+﻿using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 

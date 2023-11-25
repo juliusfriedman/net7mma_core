@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Media.Common.Collections.Generic
@@ -52,11 +51,7 @@ namespace Media.Common.Collections.Generic
         /// </returns>
         public IEnumerator<TElement> GetEnumerator()
         {
-            if (_elements is null)
-            {
-                return null;
-            }
-            return _elements.GetEnumerator();
+            return _elements?.GetEnumerator();
         }
 
         /// <summary>

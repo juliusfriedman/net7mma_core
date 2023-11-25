@@ -51,7 +51,7 @@ namespace Media.Sdp
          
          */
 
-        AttributeFields() { }
+        private AttributeFields() { }
 
         #region NestedTypes
 
@@ -249,7 +249,7 @@ namespace Media.Sdp
                 */
 
         #endregion
-    }            
+    }
 
     //ProtoFields...
     //udp: denotes an unspecified protocol running over UDP.

@@ -11,7 +11,7 @@
         /// An array where the index is the mu-law input, and the value is
         /// the 16-bit PCM result.
         /// </summary>
-        private static short[] muLawToPcmMap;
+        private static readonly short[] muLawToPcmMap;
 
         static MuLawDecoder()
         {

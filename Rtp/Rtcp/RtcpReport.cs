@@ -38,11 +38,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
+using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Media.Common;
 
 #endregion
 namespace Media.Rtcp
@@ -58,7 +57,7 @@ namespace Media.Rtcp
         #region Statics
 
         //Should be extensions because it makes intellisense weird for all derived types.
-        
+
         #endregion
 
         #region Constructor
@@ -132,7 +131,7 @@ namespace Media.Rtcp
         {
 
         }
-        
+
         #endregion
 
         #region Properties
@@ -146,7 +145,7 @@ namespace Media.Rtcp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-            get { return IsDisposed ? false : Payload.Count - ReportBlockOctets - PaddingOctets > 0; }
+            get { return !IsDisposed && Payload.Count - ReportBlockOctets - PaddingOctets > 0; }
         }
 
         /// <summary>
@@ -157,7 +156,7 @@ namespace Media.Rtcp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-            get { return IsDisposed ? false : Header.BlockCount > 0; }
+            get { return !IsDisposed && Header.BlockCount > 0; }
         }
 
         /// <summary>
@@ -181,7 +180,7 @@ namespace Media.Rtcp
             get
             {
                 if (false == HasReports || IsDisposed) return Common.MemorySegment.Empty;
-                
+
                 //return Payload.Take(ReportBlockOctets);
 
                 return new Common.MemorySegment(Payload.Array, Payload.Offset, ReportBlockOctets);
@@ -197,10 +196,9 @@ namespace Media.Rtcp
         {
             get
             {
-                if (false == HasExtensionData) return Common.MemorySegment.Empty;
-
-                return new Common.MemorySegment(Payload.Array, Payload.Offset + ReportBlockOctets, ExtensionDataOctets);
-
+                return false == HasExtensionData
+                    ? Common.MemorySegment.Empty
+                    : (IEnumerable<byte>)new Common.MemorySegment(Payload.Array, Payload.Offset + ReportBlockOctets, ExtensionDataOctets);
             }
             //internal protected set
             //{
@@ -257,17 +255,17 @@ namespace Media.Rtcp
         #region Instance Methods       
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected virtual IEnumerator<IReportBlock> GetEnumeratorInternal(int offset = 0)//, int blockSize = ReportBlock.ReportBlockSize)
+        protected internal virtual IEnumerator<IReportBlock> GetEnumeratorInternal(int offset = 0)//, int blockSize = ReportBlock.ReportBlockSize)
         {
             //CheckDisposed();
 
             //Loop for the BlockCount, bounded by BlockCount and count of bytes in the ReportData
-            for (int currentSize = 0, count = ReportBlockOctets, blockCounter = BlockCount, localOffset = Payload.Offset + offset; 
-                count > 0 && --blockCounter >= 0 && localOffset + count <= Payload.Count && IsDisposed is false; 
+            for (int currentSize = 0, count = ReportBlockOctets, blockCounter = BlockCount, localOffset = Payload.Offset + offset;
+                count > 0 && --blockCounter >= 0 && localOffset + count <= Payload.Count && IsDisposed is false;
                 count -= currentSize) //Subtract the currentSize each iteration
             {
                 //Create the report block using the payload data available, should probably Clamp(count, 0, ReportBlock.ReportBlockSize at report block size since the sdes has its own enumerator.
-                using (ReportBlock current = new ReportBlock(new Common.MemorySegment(Payload.Array, localOffset, count)))
+                using (ReportBlock current = new(new Common.MemorySegment(Payload.Array, localOffset, count)))
                 {
                     //Yield the current block
                     yield return current;
@@ -309,13 +307,13 @@ namespace Media.Rtcp
             int reportBlockSize = reportBlock.Size;
 
             //If there is nothing being added then there is nothing to do.
-            if(reportBlockSize is 0) return;
+            if (reportBlockSize is 0) return;
 
             //Increase the BlockCount
             ++BlockCount;
 
             AddBytesToPayload(reportBlock.BlockData, 0, reportBlockSize);
-        }       
+        }
 
         //RemoveAt index?
 
@@ -331,7 +329,7 @@ namespace Media.Rtcp
 
             //Preserve the state in the enumerator
             using (var enumerator = GetEnumerator())
-            {               
+            {
                 //keep track of the offset
                 int offset = 0;
 
@@ -376,20 +374,20 @@ namespace Media.Rtcp
         {
             //indicate no result found yet
             int result = -1;
-            
-            //If the index is in bounds, use an enumerator on the data because each report block is potentially sized differently but must always contain an Identifier.
-            if(index >= 0 && index <= BlockCount) using (IEnumerator<IReportBlock> blockEnumerator = GetEnumerator())
-            {
-                //While there is an item in the enumerator
-                while (blockEnumerator.MoveNext())
-                {
-                    //If the index is not yet 0 decrement and continue enumeration to move to the correct given index.
-                    if (index-- > 0) continue;
 
-                    //If the current block being enumerated corresponds to the given reportBlock then break enumeration.
-                    if (blockEnumerator.Current.BlockIdentifier == reportBlock.BlockIdentifier && reportBlock.BlockData == blockEnumerator.Current.BlockData) break;
+            //If the index is in bounds, use an enumerator on the data because each report block is potentially sized differently but must always contain an Identifier.
+            if (index >= 0 && index <= BlockCount) using (IEnumerator<IReportBlock> blockEnumerator = GetEnumerator())
+                {
+                    //While there is an item in the enumerator
+                    while (blockEnumerator.MoveNext())
+                    {
+                        //If the index is not yet 0 decrement and continue enumeration to move to the correct given index.
+                        if (index-- > 0) continue;
+
+                        //If the current block being enumerated corresponds to the given reportBlock then break enumeration.
+                        if (blockEnumerator.Current.BlockIdentifier == reportBlock.BlockIdentifier && reportBlock.BlockData == blockEnumerator.Current.BlockData) break;
+                    }
                 }
-            }
 
             //Return the result which corresponds to the index of the matched reportBlock
             return result;

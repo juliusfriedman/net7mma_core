@@ -46,7 +46,7 @@ namespace Media.Common.Extensions.WaitHandle
         public static void TryWaitOnHandleAndDispose(ref System.Threading.WaitHandle handle)
         {
             if (handle is null) return;
-            
+
             try
             {
                 handle.WaitOne();

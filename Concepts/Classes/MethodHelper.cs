@@ -95,19 +95,19 @@ namespace Media.Concepts.Classes
             }
         }
 
-    public static void WriteTest()
+        public static void WriteTest()
         {
             System.Console.WriteLine("TEST");
         }
 
-    public static void WriteTest2()
-    {
-        System.Console.WriteLine("TEST2");
-    }
-
-    static void Main(string[] args)
+        public static void WriteTest2()
         {
-            Target targetInstance = new Target();
+            System.Console.WriteLine("TEST2");
+        }
+
+        private static void Main(string[] args)
+        {
+            Target targetInstance = new();
 
             System.Type targetType = typeof(Target);
 
@@ -201,17 +201,17 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// Default flags used for <see cref="Redirect"/>
         /// </summary>
-        static BindingFlags DefaultBindingFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
-        
+        private static readonly BindingFlags DefaultBindingFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public;
+
         #region Private
 
-        static IntPtr GetDynamicMethodRuntimeHandle(MethodBase method)
+        private static IntPtr GetDynamicMethodRuntimeHandle(MethodBase method)
         {
             if (method is System.Reflection.Emit.DynamicMethod)
             {
                 if (Environment.Version.Major == 4)
                 {
-                    MethodInfo methodDescriptior = typeof(System.Reflection.Emit.DynamicMethod).GetMethod("GetMethodDescriptor", 
+                    MethodInfo methodDescriptior = typeof(System.Reflection.Emit.DynamicMethod).GetMethod("GetMethodDescriptor",
                                       BindingFlags.Instance | BindingFlags.NonPublic);
                     return ((RuntimeMethodHandle)methodDescriptior.Invoke(method as System.Reflection.Emit.DynamicMethod, null)).GetFunctionPointer();
                 }
@@ -225,11 +225,9 @@ namespace Media.Concepts.Classes
             return method.MethodHandle.Value;
         }
 
-        static Type GetMethodReturnType(MethodBase method)
+        private static Type GetMethodReturnType(MethodBase method)
         {
-            MethodInfo methodInfo = method as MethodInfo;
-
-            if (methodInfo is null)
+            if (method is not MethodInfo methodInfo)
             {
                 // Constructor info.
                 throw new ArgumentException("Unsupported MethodBase : " + method.GetType().Name, "method");
@@ -238,22 +236,22 @@ namespace Media.Concepts.Classes
             return methodInfo.ReturnType;
         }
 
-        static bool MethodSignaturesEqual(MethodBase x, MethodBase y)
+        private static bool MethodSignaturesEqual(MethodBase x, MethodBase y)
         {
             if (x.CallingConvention != y.CallingConvention)
             {
                 return false;
             }
-            
+
             Type returnX = GetMethodReturnType(x), returnY = GetMethodReturnType(y);
-            
+
             if (returnX != returnY)
             {
                 return false;
             }
-            
+
             ParameterInfo[] xParams = x.GetParameters(), yParams = y.GetParameters();
-            
+
             if (xParams.Length != yParams.Length)
             {
                 return false;
@@ -342,9 +340,9 @@ namespace Media.Concepts.Classes
         /// <param name="srcAdr"></param>
         /// <param name="dest"></param>
         /// <param name="codeSize">The optional amount of bytes to copy from <paramref name="srcAdr"/> to <paramref name="dest"/></param>
-        public unsafe static void Patch(IntPtr srcAdr, MethodBase dest, int codeSize = 0)
+        public static unsafe void Patch(IntPtr srcAdr, MethodBase dest, int codeSize = 0)
         {
-            IntPtr destAdr = GetMethodAddress(dest);            
+            IntPtr destAdr = GetMethodAddress(dest);
             if (IntPtr.Size == 8)
             {
                 ulong* d = (ulong*)destAdr.ToPointer();
@@ -379,7 +377,7 @@ namespace Media.Concepts.Classes
             Marshal.Copy(new IntPtr[] { Marshal.ReadIntPtr(tar) }, 0, ori, 1);
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Redirects a method to another method
@@ -416,6 +414,6 @@ namespace Media.Concepts.Classes
         public static void Redirect(System.Type sourceType, string sourceTypeMethodName, System.Type destinationType, string destinationTypeMethodName)
         {
             Redirect(sourceType, sourceTypeMethodName, DefaultBindingFlags, destinationType, destinationTypeMethodName, DefaultBindingFlags);
-        }       
+        }
     }
 }

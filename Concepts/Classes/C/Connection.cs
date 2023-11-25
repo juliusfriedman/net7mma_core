@@ -85,16 +85,16 @@ namespace Media.Concepts.Classes.C
         /// </summary>
         /// <param name="connection"></param>
         /// <returns></returns>
-        static bool Refresh(Connection connection)
+        private static bool Refresh(Connection connection)
         {
-            return ConnectionExtensions.IsConnecting(connection) ? false : ConnectionExtensions.IsConnected(connection);
+            return !ConnectionExtensions.IsConnecting(connection) && ConnectionExtensions.IsConnected(connection);
         }
 
         #endregion
 
         #region Fields
 
-        bool m_Connecting, m_Connected;
+        private bool m_Connecting, m_Connected;
 
         /// <summary>
         /// An event which is fired to update the connection
@@ -114,17 +114,17 @@ namespace Media.Concepts.Classes.C
         #endregion
 
         //Media.Common.Structures.Getter Getter;
-        
+
         //Media.Common.Structures.Setter Setter;
 
         #region Setters
 
-        internal protected void SetConnected()
+        protected internal void SetConnected()
         {
             m_Connected = true;
         }
 
-        internal protected void SetDisconnected()
+        protected internal void SetDisconnected()
         {
             m_Connected = false;
         }
@@ -155,7 +155,7 @@ namespace Media.Concepts.Classes.C
         /// <summary>
         /// The default handler of the <see cref="ConnectionEvent"/>
         /// </summary>
-        void Refresh()
+        private void Refresh()
         {
             m_Connected = Refresh(this);
         }
@@ -199,20 +199,16 @@ namespace Media.Concepts.Classes.C
     /// <summary>
     /// Useful methods for instance of <see cref="IConnecton"/>
     /// </summary>
-    static class ConnectionExtensions
+    internal static class ConnectionExtensions
     {
         public static bool IsConnecting(IConnecton connection)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(connection)) return false;
-
-            return connection.IsConnecting;
+            return !Common.IDisposedExtensions.IsNullOrDisposed(connection) && connection.IsConnecting;
         }
 
         public static bool IsConnected(IConnecton connection)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(connection)) return false;
-
-            return connection.IsConnected;
+            return !Common.IDisposedExtensions.IsNullOrDisposed(connection) && connection.IsConnected;
         }
     }
 }

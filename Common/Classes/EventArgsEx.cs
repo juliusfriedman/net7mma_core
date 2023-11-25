@@ -24,17 +24,17 @@ namespace Media.Common
 
         public DateTimeOffset LastHandled { get; protected set; }
 
-        public readonly HashSet<object> Ignore = new HashSet<object>() { null };
+        public readonly HashSet<object> Ignore = [null];
 
         public bool IgnoreSender(object o) { return Ignore.Add(o); }
 
-        public bool IgnoresSender(object o){ return Ignore.Contains(o);}
+        public bool IgnoresSender(object o) { return Ignore.Contains(o); }
 
         public bool ListenForSender(object o) { return Ignore.Remove(o); }
 
         public static void SetHandled(object sender, EventArgsEx args, bool value = true)
         {
-            if(args is not null && false == args.IgnoresSender(sender)) args.Handled = value;
+            if (args is not null && false == args.IgnoresSender(sender)) args.Handled = value;
         }
 
         public static void SetContinue(object sender, EventArgsEx args, bool value = true)
@@ -49,7 +49,7 @@ namespace Media.Common
     }
 
     #endregion
-    
+
     #region IEvent
 
     /// <summary>
@@ -77,7 +77,7 @@ namespace Media.Common
         /////// Signature &lt;0 : Will throw an exception (-0)
         /////// Signature &gt;0 : May throw an exception
         /// </remarks>
-        long Signature { get; }        
+        long Signature { get; }
     }
 
     public static class IEventExtensions
@@ -121,7 +121,7 @@ namespace Media.Common
             if (o is System.Delegate) Source = o as System.Delegate;
 
             Enabled = enabled;
-        }        
+        }
 
         public Delegate Source { get; protected set; }
 
@@ -140,7 +140,7 @@ namespace Media.Common
         //    }
         //}
 
-        void Raise(bool force, params object[] args)
+        private void Raise(bool force, params object[] args)
         {
             if (Enabled || force)
             {
@@ -149,22 +149,22 @@ namespace Media.Common
             }
         }
 
-        void Disable() { Enabled = false; }
+        private void Disable() { Enabled = false; }
 
-        void Enable() { Enabled = true; }
+        private void Enable() { Enabled = true; }
 
-        void Toggle() { if (Enabled) Disable(); else Enable(); }
+        private void Toggle() { if (Enabled) Disable(); else Enable(); }
     }
 
     internal class Consumable<T> : Eventbase
     {
-        public T Consumed { get; internal protected set; }
+        public T Consumed { get; protected internal set; }
 
         public Consumable(T t, bool enabled)
             : base(t, enabled)
         {
 
-        }       
+        }
     }
 
     internal struct EventReferenceInformation<T> : IEvent, IDisposed
@@ -195,7 +195,7 @@ namespace Media.Common
         {
             ShouldDispose = shouldDispose;
 
-            Consumed = default(T);
+            Consumed = default;
 
             Event = @event;
 
@@ -211,12 +211,12 @@ namespace Media.Common
             Signature = signature;
         }
 
-        System.Collections.IList GetInvocationList()
+        private System.Collections.IList GetInvocationList()
         {
             return Event.GetInvocationList();
         }
 
-        void Fire(System.Reflection.ParameterInfo[] optional = null)
+        private void Fire(System.Reflection.ParameterInfo[] optional = null)
         {
             Common.EventReferenceInformationExtensions.Consume(this, Consumed, optional);
         }
@@ -230,10 +230,10 @@ namespace Media.Common
         {
             get
             {
-                return Common.IDisposedExtensions.IsNullOrDisposed(this) is false ? 
-                    IEventExtensions.HasSource(this) ? 
-                        Event : Consumed as Delegate 
-                            : null; 
+                return Common.IDisposedExtensions.IsNullOrDisposed(this) is false ?
+                    IEventExtensions.HasSource(this) ?
+                        Event : Consumed as Delegate
+                            : null;
             }
         }
 
@@ -261,7 +261,7 @@ namespace Media.Common
 
             ShouldDispose = false;
         }
-    }   
+    }
 
     internal static class EventReferenceInformationExtensions
     {
@@ -294,6 +294,6 @@ namespace Media.Common
         }
     }
 
-#endregion
+    #endregion
 
 }

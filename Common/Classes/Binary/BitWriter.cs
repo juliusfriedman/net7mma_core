@@ -12,15 +12,14 @@
         internal readonly System.IO.Stream m_BaseStream;
 
         internal Binary.BitOrder m_BitOrder = Binary.SystemBitOrder;
+        private int m_ByteIndex = 0, m_BitIndex = 0;
 
-        int m_ByteIndex = 0, m_BitIndex = 0; 
-        
         internal bool m_LeaveOpen;
 
         #endregion
 
         #region Properties
-        
+
         //IsAligned
 
         /// <summary>
@@ -87,7 +86,7 @@
         public Common.Binary.BitOrder BitOrder { get { return m_BitOrder; } set { m_BitOrder = value; } }
 
         /// <summary>
-        /// Gets or Sets the current <see cref="System.Byte"/> in the <see cref="Buffer"/> based on the <see cref="ByteIndex"/>
+        /// Gets or Sets the current <see cref="byte"/> in the <see cref="Buffer"/> based on the <see cref="ByteIndex"/>
         /// </summary>
         public byte CurrentByte
         {
@@ -118,7 +117,7 @@
         /// <param name="bitOffset"></param>
         /// <param name="byteOffset"></param>
         /// <param name="leaveOpen"></param>
-        public BitWriter(byte[] buffer, bool writable, Common.Binary.BitOrder bitOrder, int bitOffset, int byteOffset, bool leaveOpen = false) 
+        public BitWriter(byte[] buffer, bool writable, Common.Binary.BitOrder bitOrder, int bitOffset, int byteOffset, bool leaveOpen = false)
             : this(buffer, writable, bitOrder, leaveOpen)
         {
             m_BitIndex = bitOffset;
@@ -173,7 +172,7 @@
         /// <param name="cacheSize">The amount of bytes to be used for writing before <see cref="Flush"/> is called.</param>
         /// <param name="leaveOpen">Indicates if the <paramref name="source"/> should be left open when calling <see cref="Dispose"/></param>
         public BitWriter(System.IO.Stream source, int cacheSize = 32, bool leaveOpen = false)
-            :this(source, Common.Binary.SystemBitOrder, cacheSize, leaveOpen)
+            : this(source, Common.Binary.SystemBitOrder, cacheSize, leaveOpen)
         {
 
         }
@@ -354,7 +353,7 @@
             }
             int bytes = (Binary.Log2i(val) + Common.Binary.Quattuor) / Common.Binary.Quinque;
             int shift = (bytes - 1) * Common.Binary.Sex;
-            WriteBits(Common.Binary.BitsPerByte, ((uint)Binary.TrīgintāDuoBitSize - ((uint)Binary.TrīgintāDuoBitSize >> bytes)) | (val >> shift));
+            WriteBits(Common.Binary.BitsPerByte, (Binary.TrīgintāDuoBitSize - ((uint)Binary.TrīgintāDuoBitSize >> bytes)) | (val >> shift));
             while (shift >= Common.Binary.Sex)
             {
                 shift -= Common.Binary.Sex;
@@ -375,7 +374,7 @@
 
         //    // write quotient in unary
         //    int q = v + Binary.One;
-            
+
         //    while (q > Binary.ThirtyOne)
         //    {
         //        WriteBits(Binary.ThirtyOne, Binary.Zero, reverse);

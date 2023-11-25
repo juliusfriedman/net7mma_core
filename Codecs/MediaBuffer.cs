@@ -56,7 +56,7 @@ namespace Media.Codec
         public readonly Common.MemorySegment Data = Common.MemorySegment.Empty;
 
         public MediaBuffer(MediaFormat mediaFormat, Common.MemorySegment data, Media.Codec.Interfaces.ICodec codec = null, long timestamp = 0, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             MediaFormat = mediaFormat;
 
@@ -72,7 +72,7 @@ namespace Media.Codec
         }
 
         public MediaBuffer(MediaFormat mediaFormat, int size, Media.Codec.Interfaces.ICodec codec = null, long timestamp = 0, bool shouldDispose = true)
-            :this(mediaFormat, new Common.MemorySegment(size), codec, timestamp, shouldDispose)
+            : this(mediaFormat, new Common.MemorySegment(size), codec, timestamp, shouldDispose)
         {
 
         }
@@ -184,7 +184,7 @@ namespace Media.UnitTests
             try
             {
                 //Make a media buffer with all supported layouts and byte orders and sample sizes...
-                using (Media.Codec.MediaBuffer mb = new Media.Codec.MediaBuffer(new Codec.MediaFormat(Codec.MediaType.Unknown, Common.Binary.ByteOrder.Unknown, Codec.DataLayout.Unknown, null), null))
+                using (Media.Codec.MediaBuffer mb = new(new Codec.MediaFormat(Codec.MediaType.Unknown, Common.Binary.ByteOrder.Unknown, Codec.DataLayout.Unknown, null), null))
                 {
 
                 }

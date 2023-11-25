@@ -49,7 +49,7 @@ namespace Media.Common
         /// 
         /// </summary>
         System.Threading.CancellationTokenSource UpdateTokenSource { get; } //= new System.Threading.CancellationTokenSource();
-        
+
         //System.Threading.CancellationToken LastToken { get; }
 
         //System.Threading.CancellationToken BeginUpdate(); //out Token ^
@@ -71,9 +71,8 @@ namespace Media.Common
         /// <returns>True or False</returns>
         public static bool UnderModification(this IUpdateable updateable)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(updateable)) return false;
-
-            return updateable.ManualResetEvent.IsSet is false && updateable.UpdateTokenSource.IsCancellationRequested is false;
+            return !Common.IDisposedExtensions.IsNullOrDisposed(updateable)
+&& updateable.ManualResetEvent.IsSet is false && updateable.UpdateTokenSource.IsCancellationRequested is false;
         }
 
         public static bool UnderModification(this IUpdateable updateable, System.Threading.CancellationToken token)
@@ -90,7 +89,7 @@ namespace Media.Common
             if (reset = System.Threading.WaitHandle.SignalAndWait(updateable.UpdateTokenSource.Token.WaitHandle, updateable.ManualResetEvent.WaitHandle))
             {
                 updateable.ManualResetEvent.Reset();
-                
+
                 reset = true;
             }
 
@@ -109,7 +108,7 @@ namespace Media.Common
             return updateable.UpdateTokenSource.Token;
         }
 
-        static readonly System.InvalidOperationException InvalidStateException = new System.InvalidOperationException("Must obtain the CancellationToken from a call to BeginUpdate.");
+        private static readonly System.InvalidOperationException InvalidStateException = new("Must obtain the CancellationToken from a call to BeginUpdate.");
 
         public static void EndUpdate(this IUpdateable updateable, System.Threading.CancellationToken token)
         {

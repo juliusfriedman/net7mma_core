@@ -41,8 +41,7 @@ namespace Media.Rtsp.Server.Loggers
     public class RtspServerTraceLogger : RtspServerLogger
     {
         public string Format = "{0} {1} {2} {3} {4}\r\n";
-
-        readonly Media.Common.ILogging Logger = new Media.Common.Loggers.TraceLogger();
+        private readonly Media.Common.ILogging Logger = new Media.Common.Loggers.TraceLogger();
 
         internal override void LogRequest(RtspMessage request, ClientSession session)
         {

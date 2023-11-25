@@ -2,7 +2,7 @@
 
 namespace Media.Common.Extensions
 {
-    static class ReflectionExtensions
+    internal static class ReflectionExtensions
     {
         public static System.Collections.Generic.IEnumerable<System.Reflection.MethodInfo> GetMethods(this System.Type someType, System.Reflection.BindingFlags flags)
         {
@@ -23,15 +23,15 @@ namespace Media.Common.Extensions
                     }
                     //Check access based on the given binding flags.
                     else if (flags.HasFlag(System.Reflection.BindingFlags.Public) && methodInfo.IsPublic)
-                    {                        
+                    {
                         yield return methodInfo;
                     }
-                    else if(flags.HasFlag(System.Reflection.BindingFlags.NonPublic) && methodInfo.IsPrivate)
+                    else if (flags.HasFlag(System.Reflection.BindingFlags.NonPublic) && methodInfo.IsPrivate)
                     {
                         yield return methodInfo;
                     }
                 }
-                    
+
                 //change to the base type and proceed again
                 localType = typeInfo.BaseType;
             }

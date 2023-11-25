@@ -79,7 +79,7 @@ namespace Media.Common.Extensions.Socket
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         public static System.Net.Sockets.Socket ReservePort(System.Net.Sockets.SocketType socketType, System.Net.Sockets.ProtocolType protocol, System.Net.IPAddress localIp, int port)
         {
-            System.Net.Sockets.Socket result = new System.Net.Sockets.Socket(localIp.AddressFamily, socketType, protocol);
+            System.Net.Sockets.Socket result = new(localIp.AddressFamily, socketType, protocol);
 
             Media.Common.Extensions.Socket.SocketExtensions.EnableAddressReuse(result);
 
@@ -99,7 +99,7 @@ namespace Media.Common.Extensions.Socket
         public static int FindOpenPort(System.Net.Sockets.ProtocolType type, int start = 30000, bool even = true, System.Net.IPAddress localIp = null)
         {
             //As IP would imply either or Only Tcp or Udp please.
-            if (type != System.Net.Sockets.ProtocolType.Udp && type != System.Net.Sockets.ProtocolType.Tcp) return -1;
+            if (type is not System.Net.Sockets.ProtocolType.Udp and not System.Net.Sockets.ProtocolType.Tcp) return -1;
 
             //Start at the given port number
             int port = start;
@@ -117,16 +117,12 @@ namespace Media.Common.Extensions.Socket
             try
             {
                 //Determine if Udp or Tcp listeners are being checked.
-                switch (type)
+                listeners = type switch
                 {
-                    case System.Net.Sockets.ProtocolType.Udp:
-                        listeners = ipGlobalProperties.GetActiveUdpListeners();
-                        break;
-                    case System.Net.Sockets.ProtocolType.Tcp:
-                        listeners = ipGlobalProperties.GetActiveTcpListeners();
-                        break;
-                    default: throw new System.NotSupportedException("The given ProtocolType is not supported");
-                }
+                    System.Net.Sockets.ProtocolType.Udp => ipGlobalProperties.GetActiveUdpListeners(),
+                    System.Net.Sockets.ProtocolType.Tcp => ipGlobalProperties.GetActiveTcpListeners(),
+                    _ => throw new System.NotSupportedException("The given ProtocolType is not supported"),
+                };
             }
             catch (System.NotImplementedException)
             {
@@ -191,7 +187,7 @@ namespace Media.Common.Extensions.Socket
                         working = new System.Net.Sockets.Socket(localIp.AddressFamily, System.Net.Sockets.SocketType.Dgram, type);
 
                         Media.Common.Extensions.Socket.SocketExtensions.DisableAddressReuse(working);
-                        
+
                         break;
                     }
                 //Don't handle
@@ -200,48 +196,46 @@ namespace Media.Common.Extensions.Socket
 
             //The port is in the valid range.
             using (working) while (start <= ushort.MaxValue)
-            {
-                try
                 {
-                    //Try to bind the end point.
-                    working.Bind(new System.Net.IPEndPoint(localIp, start));
-
-                    //We are done if we can bind.
-                    break;
-                }
-                catch (System.Exception ex)
-                {
-                    //Check for the expected error.
-                    if (ex is System.Net.Sockets.SocketException)
+                    try
                     {
-                        System.Net.Sockets.SocketException se = (System.Net.Sockets.SocketException)ex;
+                        //Try to bind the end point.
+                        working.Bind(new System.Net.IPEndPoint(localIp, start));
 
-                        if (se.SocketErrorCode == System.Net.Sockets.SocketError.AddressAlreadyInUse)
+                        //We are done if we can bind.
+                        break;
+                    }
+                    catch (System.Exception ex)
+                    {
+                        //Check for the expected error.
+                        if (ex is System.Net.Sockets.SocketException se)
                         {
-                            //Try next port
-                            if (++start > ushort.MaxValue)
+                            if (se.SocketErrorCode == System.Net.Sockets.SocketError.AddressAlreadyInUse)
                             {
-                                //No port found
-                                start = -1;
+                                //Try next port
+                                if (++start > ushort.MaxValue)
+                                {
+                                    //No port found
+                                    start = -1;
 
-                                break;
+                                    break;
+                                }
+
+                                //Ensure even if possible
+                                if (even && Common.Binary.IsOdd(ref start) && start < ushort.MaxValue) ++start;
+
+                                //Iterate again
+                                continue;
                             }
 
-                            //Ensure even if possible
-                            if (even && Common.Binary.IsOdd(ref start) && start < ushort.MaxValue) ++start;
-
-                            //Iterate again
-                            continue;
                         }
 
+                        //Something bad happened
+                        start = -1;
+
+                        break;
                     }
-
-                    //Something bad happened
-                    start = -1;
-
-                    break;
                 }
-            }
 
             //Return the port.
             return start;
@@ -263,9 +257,8 @@ namespace Media.Common.Extensions.Socket
 
         public static System.Net.IPAddress GetFirstUnicastIPAddress(System.Net.Sockets.AddressFamily addressFamily)
         {
-            System.Net.NetworkInformation.NetworkInterface networkInterface;
 
-            return GetFirstUnicastIPAddress(addressFamily, out networkInterface);
+            return GetFirstUnicastIPAddress(addressFamily, out System.Net.NetworkInformation.NetworkInterface networkInterface);
         }
 
         public static System.Net.IPAddress GetFirstUnicastIPAddress(System.Net.Sockets.AddressFamily addressFamily, out System.Net.NetworkInformation.NetworkInterface networkInterface)
@@ -344,9 +337,8 @@ namespace Media.Common.Extensions.Socket
 
         public static System.Net.IPAddress GetFirstMulticastIPAddress(System.Net.Sockets.AddressFamily addressFamily)
         {
-            System.Net.NetworkInformation.NetworkInterface networkInterface;
 
-            return GetFirstMulticastIPAddress(addressFamily, out networkInterface);
+            return GetFirstMulticastIPAddress(addressFamily, out System.Net.NetworkInformation.NetworkInterface networkInterface);
         }
 
         public static void SetMulticastTimeToLive(this System.Net.Sockets.Socket socket, int ttl)
@@ -393,7 +385,7 @@ namespace Media.Common.Extensions.Socket
                 case System.Net.Sockets.AddressFamily.InterNetworkV6:
                     socket.SetSocketOption(System.Net.Sockets.SocketOptionLevel.IPv6, System.Net.Sockets.SocketOptionName.AddMembership,
                                             new System.Net.Sockets.IPv6MulticastOption(toJoin));
-                    
+
                     //socket.MulticastLoopback = false;
 
                     ////Try to specify the multicast adapter to use.
@@ -448,7 +440,7 @@ namespace Media.Common.Extensions.Socket
                         System.Net.Sockets.SocketOptionName.AddMembership,
                         new System.Net.Sockets.IPv6MulticastOption(toJoin, interfaceIndex));
 
-                     //Call SetMulticastTimeToLive
+                    //Call SetMulticastTimeToLive
                     //socket.SetSocketOption(System.Net.Sockets.SocketOptionLevel.IPv6, System.Net.Sockets.SocketOptionName.MulticastTimeToLive, ttl);
 
                     return;
@@ -462,8 +454,8 @@ namespace Media.Common.Extensions.Socket
         /// <param name="interfaceIndex"></param>
         public static void SetMulticastInterface(this System.Net.Sockets.Socket socket, int interfaceIndex)
         {
-            socket.SetSocketOption(System.Net.Sockets.SocketOptionLevel.IP, 
-                System.Net.Sockets.SocketOptionName.MulticastInterface, 
+            socket.SetSocketOption(System.Net.Sockets.SocketOptionLevel.IP,
+                System.Net.Sockets.SocketOptionName.MulticastInterface,
                 Common.Binary.IsLittleEndian ? Common.Binary.Reverse32(interfaceIndex) : interfaceIndex);
         }
 
@@ -506,16 +498,16 @@ namespace Media.Common.Extensions.Socket
             {
                 case System.Net.Sockets.AddressFamily.InterNetwork:
                     {
-                        socket.SetSocketOption(System.Net.Sockets.SocketOptionLevel.IP, 
-                            System.Net.Sockets.SocketOptionName.AddSourceMembership, 
+                        socket.SetSocketOption(System.Net.Sockets.SocketOptionLevel.IP,
+                            System.Net.Sockets.SocketOptionName.AddSourceMembership,
                             membershipAddress);
 
                         return;
                     }
                 case System.Net.Sockets.AddressFamily.InterNetworkV6:
                     {
-                        socket.SetSocketOption(System.Net.Sockets.SocketOptionLevel.IPv6, 
-                            System.Net.Sockets.SocketOptionName.AddSourceMembership, 
+                        socket.SetSocketOption(System.Net.Sockets.SocketOptionLevel.IPv6,
+                            System.Net.Sockets.SocketOptionName.AddSourceMembership,
                             membershipAddress);
 
                         return;
@@ -532,17 +524,17 @@ namespace Media.Common.Extensions.Socket
                 case System.Net.Sockets.AddressFamily.InterNetwork:
                     {
                         socket.SetSocketOption(System.Net.Sockets.SocketOptionLevel.IP, System.Net.Sockets.SocketOptionName.DropSourceMembership, membershipAddress);
-                        
+
                         return;
                     }
                 case System.Net.Sockets.AddressFamily.InterNetworkV6:
                     {
                         socket.SetSocketOption(System.Net.Sockets.SocketOptionLevel.IPv6, System.Net.Sockets.SocketOptionName.DropSourceMembership, membershipAddress);
-                        
+
                         return;
                     }
             }
-            
+
         }
 
         #region Other Values
@@ -645,14 +637,16 @@ namespace Media.Common.Extensions.Socket
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal static void SetTcpOption(System.Net.Sockets.Socket socket, System.Net.Sockets.SocketOptionName name, int value)
         {
-            /*if (Common.Extensions.OperatingSystemExtensions.IsWindows) */socket.SetSocketOption(System.Net.Sockets.SocketOptionLevel.Tcp, name, value);
+            /*if (Common.Extensions.OperatingSystemExtensions.IsWindows) */
+            socket.SetSocketOption(System.Net.Sockets.SocketOptionLevel.Tcp, name, value);
             //else SetSocketOption_internal 
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal static void GetTcpOption(System.Net.Sockets.Socket socket, System.Net.Sockets.SocketOptionName name, byte[] buffer)
         {
-            /*if (Common.Extensions.OperatingSystemExtensions.IsWindows) */socket.GetSocketOption(System.Net.Sockets.SocketOptionLevel.Tcp, name, buffer);
+            /*if (Common.Extensions.OperatingSystemExtensions.IsWindows) */
+            socket.GetSocketOption(System.Net.Sockets.SocketOptionLevel.Tcp, name, buffer);
             //else SetSocketOption_internal 
         }
 
@@ -669,9 +663,9 @@ namespace Media.Common.Extensions.Socket
             //could be byte[] or something else socket.GetSocketOption(System.Net.Sockets.SocketOptionLevel.Socket, System.Net.Sockets.SocketOptionName.Linger);
 
             //Todo, static local allocation
-            byte [] value = socket.GetSocketOption(System.Net.Sockets.SocketOptionLevel.Socket, System.Net.Sockets.SocketOptionName.Linger, 8);
+            byte[] value = socket.GetSocketOption(System.Net.Sockets.SocketOptionLevel.Socket, System.Net.Sockets.SocketOptionName.Linger, 8);
 
-            return new System.Net.Sockets.LingerOption(Common.Binary.ReadU32(value, 0, Media.Common.Binary.IsLittleEndian) > 0, 
+            return new System.Net.Sockets.LingerOption(Common.Binary.ReadU32(value, 0, Media.Common.Binary.IsLittleEndian) > 0,
                 (int)Common.Binary.ReadU32(value, 4, Media.Common.Binary.IsLittleEndian));
         }
 
@@ -689,7 +683,7 @@ namespace Media.Common.Extensions.Socket
 
         #region Retransmission
 
-        static System.Net.Sockets.SocketOptionName TcpMaximumRetransmissionOptionName = (System.Net.Sockets.SocketOptionName)(Common.Extensions.OperatingSystemExtensions.IsWindows ? 5 : 18);
+        private static readonly System.Net.Sockets.SocketOptionName TcpMaximumRetransmissionOptionName = (System.Net.Sockets.SocketOptionName)(Common.Extensions.OperatingSystemExtensions.IsWindows ? 5 : 18);
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void SetMaximumTcpRetransmissionTime(System.Net.Sockets.Socket socket, int amountInSeconds = 3)
@@ -720,10 +714,9 @@ namespace Media.Common.Extensions.Socket
             //Todo, static local allocation
             byte[] value = socket.GetSocketOption(System.Net.Sockets.SocketOptionLevel.Tcp, TcpMaximumRetransmissionOptionName, len);
 
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(value, out len) || len < Common.Binary.BytesPerInteger) return -1;
-
-            return Common.Binary.Read32(value, Common.Binary.BytesPerInteger, Media.Common.Binary.IsLittleEndian);
-
+            return Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(value, out len) || len < Common.Binary.BytesPerInteger
+                ? -1
+                : Common.Binary.Read32(value, Common.Binary.BytesPerInteger, Media.Common.Binary.IsLittleEndian);
         }
 
         #endregion
@@ -732,7 +725,7 @@ namespace Media.Common.Extensions.Socket
 
         //Should verify the value for the option is correct for the OS.
 
-        static System.Net.Sockets.SocketOptionName TcpMaximumSegmentSizeOptionName = (System.Net.Sockets.SocketOptionName)(Common.Extensions.OperatingSystemExtensions.IsWindows ? 4 : 2);
+        private static readonly System.Net.Sockets.SocketOptionName TcpMaximumSegmentSizeOptionName = (System.Net.Sockets.SocketOptionName)(Common.Extensions.OperatingSystemExtensions.IsWindows ? 4 : 2);
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void GetMaximumSegmentSize(System.Net.Sockets.Socket socket, out int result)
@@ -753,14 +746,12 @@ namespace Media.Common.Extensions.Socket
         //Windows
 
         //#define TCP_NOURG                   7
-        const int NotUrgent = 7;
-
-        static System.Net.Sockets.SocketOptionName TcpNotUrgent = (System.Net.Sockets.SocketOptionName)NotUrgent;
+        private const int NotUrgent = 7;
+        private static readonly System.Net.Sockets.SocketOptionName TcpNotUrgent = (System.Net.Sockets.SocketOptionName)NotUrgent;
 
         //#define TCP_STDURG                  6
-        const int StandardUrgency = 6;
-
-        static System.Net.Sockets.SocketOptionName TcpStandardUrgency = (System.Net.Sockets.SocketOptionName)StandardUrgency;
+        private const int StandardUrgency = 6;
+        private static readonly System.Net.Sockets.SocketOptionName TcpStandardUrgency = (System.Net.Sockets.SocketOptionName)StandardUrgency;
 
         internal static void SetTcpExpedited(System.Net.Sockets.Socket socket, int amount = 1)
         {
@@ -831,9 +822,9 @@ namespace Media.Common.Extensions.Socket
             //Todo, static local allocation
             byte[] value = socket.GetSocketOption(System.Net.Sockets.SocketOptionLevel.Tcp, System.Net.Sockets.SocketOptionName.Expedited, len);
 
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(value, out len) || len < Common.Binary.BytesPerInteger) return 0;
-
-            return Common.Binary.Read32(value, Common.Binary.BytesPerInteger, Media.Common.Binary.IsLittleEndian);
+            return Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(value, out len) || len < Common.Binary.BytesPerInteger
+                ? 0
+                : Common.Binary.Read32(value, Common.Binary.BytesPerInteger, Media.Common.Binary.IsLittleEndian);
         }
 
         /// <summary>
@@ -848,9 +839,8 @@ namespace Media.Common.Extensions.Socket
             //Todo, static local allocation
             byte[] value = socket.GetSocketOption(System.Net.Sockets.SocketOptionLevel.Tcp, System.Net.Sockets.SocketOptionName.Expedited, len);
 
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(value, out len) || len < Common.Binary.BytesPerInteger) return false;
-
-            return Common.Binary.ReadU32(value, Common.Binary.BytesPerInteger, Media.Common.Binary.IsLittleEndian) > 0;
+            return !Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(value, out len) && len >= Common.Binary.BytesPerInteger
+&& Common.Binary.ReadU32(value, Common.Binary.BytesPerInteger, Media.Common.Binary.IsLittleEndian) > 0;
         }
 
         #endregion
@@ -913,7 +903,7 @@ namespace Media.Common.Extensions.Socket
 
         #region KeepAlive
 
-        const int KeepAliveSize = 12;
+        private const int KeepAliveSize = 12;
 
         public static void ChangeTcpKeepAlive(System.Net.Sockets.Socket socket, int time, int interval)
         {
@@ -975,9 +965,9 @@ namespace Media.Common.Extensions.Socket
 
         //Notes 4.6 has ReuseUnicastPort
 
-        const int ReuseUnicastPort = 0x3007; // 12295
+        private const int ReuseUnicastPort = 0x3007; // 12295
 
-        static readonly System.Net.Sockets.SocketOptionName ReuseUnicastPortOption = (System.Net.Sockets.SocketOptionName)ReuseUnicastPort;
+        private static readonly System.Net.Sockets.SocketOptionName ReuseUnicastPortOption = (System.Net.Sockets.SocketOptionName)ReuseUnicastPort;
 
         public static void SetUnicastPortReuse(System.Net.Sockets.Socket socket, int value)
         {
@@ -998,9 +988,8 @@ namespace Media.Common.Extensions.Socket
 
         #region NoSynRetries
 
-        const int NoSynRetries = 9;
-
-        static readonly System.Net.Sockets.SocketOptionName NoSynRetriesOption = (System.Net.Sockets.SocketOptionName)NoSynRetries;
+        private const int NoSynRetries = 9;
+        private static readonly System.Net.Sockets.SocketOptionName NoSynRetriesOption = (System.Net.Sockets.SocketOptionName)NoSynRetries;
 
         public static void SetTcpNoSynRetries(System.Net.Sockets.Socket socket, int amountInSeconds = 1)
         {
@@ -1021,9 +1010,8 @@ namespace Media.Common.Extensions.Socket
 
         #region Timestamp
 
-        const int Timestamp = 10;
-
-        static readonly System.Net.Sockets.SocketOptionName TimestampOption = (System.Net.Sockets.SocketOptionName)Timestamp;
+        private const int Timestamp = 10;
+        private static readonly System.Net.Sockets.SocketOptionName TimestampOption = (System.Net.Sockets.SocketOptionName)Timestamp;
 
         public static void SetTcpTimestamp(System.Net.Sockets.Socket socket, int value = 1)
         {
@@ -1061,9 +1049,8 @@ namespace Media.Common.Extensions.Socket
         public const int TcpOffloadNotPreferred = 1;
         //#define TCP_OFFLOAD_PREFERRED		2
         public const int TcpOffloadPreferred = 2;
-
-        const int TcpOffloadPreference = 11;
-        static readonly System.Net.Sockets.SocketOptionName TcpOffloadPreferenceOption = (System.Net.Sockets.SocketOptionName)TcpOffloadPreference;
+        private const int TcpOffloadPreference = 11;
+        private static readonly System.Net.Sockets.SocketOptionName TcpOffloadPreferenceOption = (System.Net.Sockets.SocketOptionName)TcpOffloadPreference;
 
 
         public static void SetTcpOffloadPreference(System.Net.Sockets.Socket socket, int value = TcpOffloadPreferred) // TcpOffloadPreference.NoPreference
@@ -1075,9 +1062,8 @@ namespace Media.Common.Extensions.Socket
 
         #region CongestionAlgorithm
 
-        const int TcpCongestionAlgorithm = 12;
-
-        static readonly System.Net.Sockets.SocketOptionName TcpCongestionAlgorithmOption = (System.Net.Sockets.SocketOptionName)TcpCongestionAlgorithm;
+        private const int TcpCongestionAlgorithm = 12;
+        private static readonly System.Net.Sockets.SocketOptionName TcpCongestionAlgorithmOption = (System.Net.Sockets.SocketOptionName)TcpCongestionAlgorithm;
 
         public static void SetTcpCongestionAlgorithm(System.Net.Sockets.Socket socket, int value = 1)
         {
@@ -1100,10 +1086,9 @@ namespace Media.Common.Extensions.Socket
 
         //#define WS_TCP_DELAY_FIN_ACK    13
 
-        const int DelayFinAck = 13;
+        private const int DelayFinAck = 13;
+        private static readonly System.Net.Sockets.SocketOptionName DelayFinAckOption = (System.Net.Sockets.SocketOptionName)DelayFinAck;
 
-        static readonly System.Net.Sockets.SocketOptionName DelayFinAckOption = (System.Net.Sockets.SocketOptionName)DelayFinAck;
-        
         public static void EnableTcpDelayFinAck(System.Net.Sockets.Socket socket)
         {
             SetTcpOption(socket, DelayFinAckOption, 1);
@@ -1122,20 +1107,20 @@ namespace Media.Common.Extensions.Socket
 
             if (nif is null) return -1;
 
-            switch (socket.AddressFamily)
+            return socket.AddressFamily switch
             {
-                case System.Net.Sockets.AddressFamily.InterNetwork: return nif.GetIPProperties().GetIPv4Properties().Mtu;
-                case System.Net.Sockets.AddressFamily.InterNetworkV6: return nif.GetIPProperties().GetIPv6Properties().Mtu;
-                default: return -1;
-            }
+                System.Net.Sockets.AddressFamily.InterNetwork => nif.GetIPProperties().GetIPv4Properties().Mtu,
+                System.Net.Sockets.AddressFamily.InterNetworkV6 => nif.GetIPProperties().GetIPv6Properties().Mtu,
+                _ => -1,
+            };
         }
 
         public static bool TryGetMaximumTransmittableUnit(System.Net.Sockets.Socket socket, out int mtu)
         {
             try
             {
-                mtu = GetMaximumTransmittableUnit(socket); 
-                
+                mtu = GetMaximumTransmittableUnit(socket);
+
                 return true;
             }
             catch
@@ -1149,7 +1134,7 @@ namespace Media.Common.Extensions.Socket
         //Other useful options or combination methods e.g. NoDelay and SendBuffer / ReceiveBuffer 
 
         //IPV6_DONTFRAG       
-        
+
         //InterframeGapBits => (NetworkInterface)
 
         //Todo ->
@@ -1163,7 +1148,7 @@ namespace Media.Common.Extensions.Socket
         //SelectDelegate(socket, ISelectItem)
 
         //}
-        
+
         //SendAll / SendAllTo
 
         //RecieveAll / RecieveAllFrom
@@ -1197,12 +1182,12 @@ namespace Media.Common.Extensions.Socket
             error = System.Net.Sockets.SocketError.SocketError;
 
             //Return the amount if its negitive;
-            if (amount <= 0) return amount;            
+            if (amount <= 0) return amount;
 
             //To hold what was received and the maximum amount to receive
-            int totalReceived = 0, max , attempt = 0, justReceived = 0;
+            int totalReceived = 0, attempt = 0, justReceived = 0;
 
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer, out max)) return 0;
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer, out int max)) return 0;
 
             //Account for the offset
             max -= offset;
@@ -1254,7 +1239,7 @@ namespace Media.Common.Extensions.Socket
                 }
             }
 
-        Done:
+            Done:
             return totalReceived;
         }
 

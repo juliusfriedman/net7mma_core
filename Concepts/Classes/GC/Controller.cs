@@ -62,7 +62,7 @@ namespace Media.Concepts.Classes.GC
         /// Enters, waits <see cref="Timeout"/> and Exits on the result.
         /// </summary>
         /// <param name="result">If null nothing occurs</param>
-        static void Controlation(System.IAsyncResult result)
+        private static void Controlation(System.IAsyncResult result)
         {
             if (result is null) return;
 
@@ -76,13 +76,13 @@ namespace Media.Concepts.Classes.GC
         /// <summary>
         /// 
         /// </summary>
-        static void ControlationLogic()
+        private static void ControlationLogic()
         {
             System.TimeSpan HalfTimeout = System.TimeSpan.FromTicks(Timeout.Ticks >> 1);
 
             System.DateTime lastControlation;
 
-        Start:
+            Start:
 
             System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.BelowNormal;
 
@@ -147,7 +147,7 @@ namespace Media.Concepts.Classes.GC
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void Suspend()
         {
-           if (IsAlive) ControlationThread.Suspend();
+            if (IsAlive) ControlationThread.Suspend();
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

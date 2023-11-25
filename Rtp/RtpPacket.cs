@@ -38,10 +38,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
+using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Media.Common;
 
 #endregion
 
@@ -60,7 +60,7 @@ namespace Media.Rtp
         /// <summary>
         /// Provides a storage location for bytes which are owned by this instance.
         /// </summary>
-        byte[] m_OwnedOctets;
+        private byte[] m_OwnedOctets;
 
         /// <summary>
         /// The RtpHeader assoicated with this RtpPacket instance.
@@ -69,8 +69,7 @@ namespace Media.Rtp
         /// readonly attempts to ensure no race conditions when accessing this field e.g. during property access when using the Dispose method.
         /// </remarks>
         public readonly RtpHeader Header;
-
-        bool m_OwnsHeader;
+        private readonly bool m_OwnsHeader;
 
         #endregion
 
@@ -97,9 +96,7 @@ namespace Media.Rtp
 
             get
             {
-                if (IsDisposed || Payload.Count is 0) return 0;
-                
-                return Binary.Clamp(Header.ContributingSourceCount * 4, 0, 60);
+                return IsDisposed || Payload.Count is 0 ? 0 : Binary.Clamp(Header.ContributingSourceCount * 4, 0, 60);
             }
         }
 
@@ -135,10 +132,7 @@ namespace Media.Rtp
 
             get
             {
-                if (IsDisposed || Payload.Count is 0)
-                    return 0;
-                
-                return ContributingSourceListOctets + ExtensionOctets;
+                return IsDisposed || Payload.Count is 0 ? 0 : ContributingSourceListOctets + ExtensionOctets;
             }
         }
 
@@ -153,9 +147,7 @@ namespace Media.Rtp
 
             get
             {
-                if (IsDisposed || Header.Padding is false) return 0;
-
-                return Media.RFC3550.ReadPadding(Payload.Array, Payload.Offset + Payload.Count - 1, 1);
+                return IsDisposed || Header.Padding is false ? 0 : Media.RFC3550.ReadPadding(Payload.Array, Payload.Offset + Payload.Count - 1, 1);
             }
         }
 
@@ -218,7 +210,7 @@ namespace Media.Rtp
         /// <summary>
         /// <see cref="PayloadData"/>
         /// </summary>
-        internal protected Common.MemorySegment PayloadDataSegment
+        protected internal Common.MemorySegment PayloadDataSegment
         {
             get
             {
@@ -246,7 +238,7 @@ namespace Media.Rtp
             get { return PayloadDataSegment; }
         }
 
-        internal protected Common.MemorySegment PaddingDataSegment 
+        protected internal Common.MemorySegment PaddingDataSegment
         {
             get
             {
@@ -258,9 +250,9 @@ namespace Media.Rtp
 
                 int padding = PaddingOctets;
 
-                if (padding is 0) return Common.MemorySegment.Empty;
-
-                return new Common.MemorySegment(Payload.Array, (Payload.Offset + Payload.Count) - padding, padding);
+                return padding is 0
+                    ? Common.MemorySegment.Empty
+                    : new Common.MemorySegment(Payload.Array, (Payload.Offset + Payload.Count) - padding, padding);
 
                 //for (int  p = PaddingOctets, e = Payload.Count, i = e - p; i < e; ++i) yield return Payload[i];
             }
@@ -279,7 +271,7 @@ namespace Media.Rtp
         /// <param name="offset">The offset to start copying</param>
         /// <param name="count">The amount of bytes to copy</param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
-        internal protected virtual void AddBytesToPayload(IEnumerable<byte> octets, int offset = 0, int count = int.MaxValue)
+        protected internal virtual void AddBytesToPayload(IEnumerable<byte> octets, int offset = 0, int count = int.MaxValue)
         {
             if (IsReadOnly)
                 throw new InvalidOperationException("Can only set the AddBytesToPayload when IsReadOnly is false.");
@@ -342,7 +334,7 @@ namespace Media.Rtp
         public RtpPacket(int version, bool padding, bool extension, bool marker, int payloadType, int csc, int ssrc, int seq, int timestamp, byte[] payload = null)
             : this(new RtpHeader(version, padding, extension, marker, payloadType, csc, ssrc, seq, timestamp), payload)
         {
-            
+
         }
 
         /// <summary>
@@ -410,7 +402,7 @@ namespace Media.Rtp
                 Payload = new MemorySegment(m_OwnedOctets, RtpHeader.Length, count - RtpHeader.Length);
             }
             else
-            {                
+            {
                 //m_OwnedOctets = Media.Common.MemorySegment.EmptyBytes; //IsReadOnly should be false
                 //Payload = new MemoryReference(m_OwnedOctets, 0, 0, m_OwnsHeader);
                 Payload = MemorySegment.Empty;
@@ -426,7 +418,7 @@ namespace Media.Rtp
         /// <param name="size"></param>
         /// <param name="shouldDispose"></param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public RtpPacket(int size, bool shouldDispose = true) 
+        public RtpPacket(int size, bool shouldDispose = true)
             : base(shouldDispose)
         {
             size = Common.Binary.Max(0, size);
@@ -439,7 +431,7 @@ namespace Media.Rtp
 
             Payload = new MemorySegment(m_OwnedOctets, RtpHeader.Length, size - Header.Size);
         }
-            
+
         #endregion
 
         #region Properties
@@ -450,7 +442,7 @@ namespace Media.Rtp
         public int Version
         {
             get { return Header.Version; }
-            internal protected set
+            protected internal set
             {
                 if (IsReadOnly) throw new InvalidOperationException("Version can only be set when IsReadOnly is false.");
                 Header.Version = value;
@@ -463,7 +455,7 @@ namespace Media.Rtp
         public bool Padding
         {
             get { return Header.Padding; }
-            internal protected set
+            protected internal set
             {
                 if (IsReadOnly) throw new InvalidOperationException("Padding can only be set when IsReadOnly is false.");
                 Header.Padding = value;
@@ -476,7 +468,7 @@ namespace Media.Rtp
         public bool Extension
         {
             get { return Header.Extension; }
-            internal protected set
+            protected internal set
             {
                 if (IsReadOnly) throw new InvalidOperationException("Extension can only be set when IsReadOnly is false.");
                 Header.Extension = value;
@@ -489,7 +481,7 @@ namespace Media.Rtp
         public bool Marker
         {
             get { return Header.Marker; }
-            internal protected set
+            protected internal set
             {
                 if (IsReadOnly) throw new InvalidOperationException("Marker can only be set when IsReadOnly is false.");
                 Header.Marker = value;
@@ -502,7 +494,7 @@ namespace Media.Rtp
         public int ContributingSourceCount
         {
             get { return Header.ContributingSourceCount; }
-            internal protected set
+            protected internal set
             {
                 if (IsReadOnly) throw new InvalidOperationException("ContributingSourceCount can only be set when IsReadOnly is false.");
                 Header.ContributingSourceCount = value;
@@ -515,7 +507,7 @@ namespace Media.Rtp
         public int PayloadType
         {
             get { return Header.PayloadType; }
-            internal protected set
+            protected internal set
             {
                 if (IsReadOnly) throw new InvalidOperationException("PayloadType can only be set when IsReadOnly is false.");
                 Header.PayloadType = value;
@@ -528,7 +520,7 @@ namespace Media.Rtp
         public int SequenceNumber
         {
             get { return Header.SequenceNumber; }
-            internal protected set
+            protected internal set
             {
                 if (IsReadOnly) throw new InvalidOperationException("SequenceNumber can only be set when IsReadOnly is false.");
                 Header.SequenceNumber = value;
@@ -538,10 +530,10 @@ namespace Media.Rtp
         /// <summary>
         /// <see cref="RtpHeader.Timestamp"/>
         /// </summary>
-        public int Timestamp 
+        public int Timestamp
         {
             get { return Header.Timestamp; }
-            internal protected set
+            protected internal set
             {
                 if (IsReadOnly) throw new InvalidOperationException("Timestamp can only be set when IsReadOnly is false.");
                 Header.Timestamp = value;
@@ -554,7 +546,7 @@ namespace Media.Rtp
         public int SynchronizationSourceIdentifier
         {
             get { return Header.SynchronizationSourceIdentifier; }
-            internal protected set
+            protected internal set
             {
                 if (IsReadOnly) throw new InvalidOperationException("SynchronizationSourceIdentifier can only be set when IsReadOnly is false.");
                 Header.SynchronizationSourceIdentifier = value;
@@ -575,7 +567,10 @@ namespace Media.Rtp
         /// Gets an Enumerator which can be used to read the contribuing sources contained in this RtpPacket.
         /// <see cref="SourceList"/> for more information.
         /// </summary>
-        public Media.RFC3550.SourceList GetSourceList() { if (IsDisposed) return null; return new Media.RFC3550.SourceList(this); }
+        public Media.RFC3550.SourceList GetSourceList()
+        {
+            return IsDisposed ? null : new Media.RFC3550.SourceList(this);
+        }
 
         /// <summary>
         /// Gets the RtpExtension which would be created as a result of reading the data from the RtpPacket's payload which would be contained after any contained ContributingSourceList.
@@ -610,8 +605,9 @@ namespace Media.Rtp
             if (includeSourceList && hasSourceList)
             {
                 RFC3550.SourceList sourceList = GetSourceList();
-                if (Common.IDisposedExtensions.IsNullOrDisposed(sourceList) is false) binarySequence = sourceList.GetBinaryEnumerable();
-                else binarySequence = Media.Common.MemorySegment.EmptyBytes;
+                binarySequence = Common.IDisposedExtensions.IsNullOrDisposed(sourceList) is false
+                    ? sourceList.GetBinaryEnumerable()
+                    : Media.Common.MemorySegment.EmptyBytes;
             }
 
             //Determine if the clone should have extenison
@@ -645,7 +641,8 @@ namespace Media.Rtp
                 SynchronizationSourceIdentifier = Header.SynchronizationSourceIdentifier,
                 PayloadType = Header.PayloadType,
                 ContributingSourceCount = includeSourceList ? Header.ContributingSourceCount : 0
-            }.Concat(binarySequence).ToArray(), 0, shouldDispose) { Transferred = Transferred };
+            }.Concat(binarySequence).ToArray(), 0, shouldDispose)
+            { Transferred = Transferred };
         }
 
         /// <summary>
@@ -656,7 +653,7 @@ namespace Media.Rtp
         public RtpPacket Clone()
         {
             return new RtpPacket(new RtpHeader(Header), new Common.MemorySegment(Payload)) { Transferred = Transferred };
-        } 
+        }
 
         /// <summary>
         /// Generates a sequence of bytes containing the RtpHeader and any data contained in Payload.
@@ -724,16 +721,14 @@ namespace Media.Rtp
                 //octetsRemaining = Binary.Min(payloadCount, sourceListOctets);
 
                 //Allocte the memory for the required data
-                if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
-                else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
+                m_OwnedOctets = m_OwnedOctets is null ? (new byte[octetsRemaining]) : m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
 
-                System.Net.Sockets.SocketError error;
 
                 //Read from the stream, decrementing from octetsRemaining what was read.
                 while (octetsRemaining > 0)
                 {
                     //Receive octetsRemaining or less
-                    int justReceived = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out error);
+                    int justReceived = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out System.Net.Sockets.SocketError error);
 
                     //Move the offset
                     offset += justReceived;
@@ -757,19 +752,17 @@ namespace Media.Rtp
                 octetsRemaining = RtpExtension.MinimumSize - (payloadCount - offset);
 
                 //If the extension header is not yet read
-                if (octetsRemaining > 0) 
+                if (octetsRemaining > 0)
                 {
                     //Allocte the memory for the extension header
-                    if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
-                    else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
+                    m_OwnedOctets = m_OwnedOctets is null ? (new byte[octetsRemaining]) : m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
 
-                    System.Net.Sockets.SocketError error;
 
                     //Read from the socket, decrementing from octetsRemaining what was read.
                     while (octetsRemaining > 0)
                     {
                         //Receive octetsRemaining or less
-                        int justReceived = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out error);
+                        int justReceived = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out System.Net.Sockets.SocketError error);
 
                         //Move the offset
                         offset += justReceived;
@@ -798,16 +791,14 @@ namespace Media.Rtp
                         if (octetsRemaining > 0 && octetsRemaining < extensionSize)
                         {
                             //Allocte the memory for the required data
-                            if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
-                            else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
+                            m_OwnedOctets = m_OwnedOctets is null ? (new byte[octetsRemaining]) : m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
 
-                            System.Net.Sockets.SocketError error;
 
                             //Read from the stream, decrementing from octetsRemaining what was read.
                             while (octetsRemaining > 0)
                             {
                                 //Receive octetsRemaining or less
-                                int justReceived = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out error);
+                                int justReceived = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out System.Net.Sockets.SocketError error);
 
                                 //Move the offset
                                 offset += justReceived;
@@ -833,19 +824,17 @@ namespace Media.Rtp
                 if (octetsRemaining > 0)
                 {
                     //Allocte the memory for the required data
-                    if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
-                    else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
+                    m_OwnedOctets = m_OwnedOctets is null ? (new byte[octetsRemaining]) : m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
 
                     offset = payloadCount;
 
                     //If the amount of bytes read in the padding is NOT equal to the last byte in the segment the RtpPacket is NOT complete
                     while (octetsRemaining > 0)
                     {
-                        System.Net.Sockets.SocketError error;
 
                         //Receive 1 byte
                         //Receive octetsRemaining or less
-                        int justReceived = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out error);
+                        int justReceived = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out System.Net.Sockets.SocketError error);
 
                         //Move the offset
                         offset += justReceived;
@@ -865,7 +854,7 @@ namespace Media.Rtp
             //RtpPacket is complete
 
             return recieved;
-        }      
+        }
 
         #endregion
 
@@ -877,7 +866,7 @@ namespace Media.Rtp
 
         public DateTime? Transferred { get; set; }
 
-        long Common.IPacket.Length { get { return (long)Length; } }
+        long Common.IPacket.Length { get { return Length; } }
 
         public virtual bool IsCompressed { get { return Header.IsCompressed; } }
 
@@ -929,9 +918,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(this, obj)) return true;
-
-            return obj is RtpPacket p && Equals(p);
+            return ReferenceEquals(this, obj) || obj is RtpPacket p && Equals(p);
         }
 
         //Packet equals...
@@ -955,7 +942,7 @@ namespace Media.Rtp
         /// Calls <see cref="Update"/> on the <see cref="Payload"/> and <see cref="Synchronize"/> on the <see cref="Header"/>
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
-        internal protected void Synchronize()
+        protected internal void Synchronize()
         {
             //Should check IsContiguous
 
@@ -1059,11 +1046,11 @@ namespace Media.UnitTests
                             int RandomId = Utility.Random.Next(), RandomSequenceNumber = Utility.Random.Next(ushort.MinValue, ushort.MaxValue), RandomTimestamp = Utility.Random.Next();
 
                             //Create a RtpPacket instance using the specified options
-                            using (Media.Rtp.RtpPacket p = new Rtp.RtpPacket(VersionCounter, 
-                                bitValue, !bitValue, bitValue, 
-                                PayloadCounter, 
-                                ContributingSourceCounter, 
-                                RandomId, 
+                            using (Media.Rtp.RtpPacket p = new(VersionCounter,
+                                bitValue, !bitValue, bitValue,
+                                PayloadCounter,
+                                ContributingSourceCounter,
+                                RandomId,
                                 RandomSequenceNumber,
                                 RandomTimestamp))
                             {
@@ -1086,7 +1073,7 @@ namespace Media.UnitTests
                                 System.Diagnostics.Debug.Assert(p.Length == Media.Rtp.RtpHeader.Length, "Unexpected Length");
 
                                 //Serialize, Deserialize and verify again
-                                using (Media.Rtp.RtpPacket s = new Rtp.RtpPacket(p.Prepare().ToArray(), 0))
+                                using (Media.Rtp.RtpPacket s = new(p.Prepare().ToArray(), 0))
                                 {
                                     if (false == s.Prepare().SequenceEqual(p.Prepare())) throw new Exception("Unexpected Data");
 

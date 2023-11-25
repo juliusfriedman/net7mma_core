@@ -41,7 +41,7 @@ namespace Media.Common.Extensions.Array
     public static class ArrayExtensions
     {
         //Can be set via reflection
-        readonly static System.Array EmptyArray = new object[0];
+        private static readonly System.Array EmptyArray = new object[0];
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool IsNullOrEmpty(this System.Array a, out long longLength) { return (longLength = (a ?? EmptyArray).LongLength) is 0; }
@@ -56,9 +56,8 @@ namespace Media.Common.Extensions.Array
 
         public static bool Contains<T>(this System.Array a, T t)
         {
-            int index;
 
-            return Contains(a, t, out index);
+            return Contains(a, t, out int index);
         }
 
         //4.6 Has System.Array.Empty<T>

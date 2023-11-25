@@ -47,11 +47,11 @@ namespace Media.Common.Interfaces
 {
     #region Unrelated
 
-    interface ISpace : Interface { } //@S
+    internal interface ISpace : Interface { } //@S
 
     internal interface ITime : Interface { }//@T
 
-    class SpaceTime : ISpace, ITime { }
+    internal class SpaceTime : ISpace, ITime { }
 
     /* Finite, In, De,
      *  `The theory of occupation` States many things, of which is:
@@ -151,12 +151,12 @@ namespace Media.Common.Interfaces
     public class Keyword : IKeyWord, IBridge
     {
         //
-        InterStruct Structure;
+        private readonly InterStruct Structure;
         //
 
-        internal protected Keyword()
+        protected internal Keyword()
         {
-            
+
         }
 
         InterStruct IBridge.Bridge
@@ -165,7 +165,7 @@ namespace Media.Common.Interfaces
         }
 
         //KeywordStructure : =>
-    }    
+    }
 
     /// <summary>
     /// 
@@ -184,11 +184,9 @@ namespace Media.Common.Interfaces
         {
             public const StringClass Nil = null;
 
-            public static readonly StringClass Empty = new StringClass(string.Empty);
-
-            object Object;
-
-            string String;
+            public static readonly StringClass Empty = new(string.Empty);
+            private readonly object Object;
+            private readonly string String;
 
             public StringClass(string the)
             {
@@ -246,12 +244,12 @@ namespace Media.Common.Interfaces
         /// <summary>
         /// 
         /// </summary>
-        InterClass String;
+        private readonly InterClass String;
 
         /// <summary>
         /// 
         /// </summary>
-        T Key;
+        private readonly T Key;
 
         #endregion
 
@@ -618,7 +616,7 @@ namespace Media.Common.Interfaces
         /// Is this instance output.
         /// </summary>
         bool IsOutput { get; }
-        
+
         /// <summary>
         /// Does this instance have input
         /// </summary>

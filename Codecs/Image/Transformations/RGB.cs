@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,8 +7,7 @@ namespace Media.Codecs.Image.Transformations
     //Todo Seperate into seperate assembly
     public sealed class RGB : ImageTransformation
     {
-
-        static ImageTransform TransformToYUV420 = new ImageTransform(TransformRGBToYUV420);
+        private static readonly ImageTransform TransformToYUV420 = new(TransformRGBToYUV420);
 
         //Needs a way to verify the source is actually RGB and dest is actually YUV420
         public static void TransformRGBToYUV420(Image source, Image dest)
@@ -136,7 +132,7 @@ namespace Media.Codecs.Image.Transformations
             int offChr = 0, offLuma = 0, offSrc = 0, strideSrc = src.Width * src.ImageFormat.Length, strideDst = dst.Width, dstComponentOffset = dst.MediaFormat.Length;
 
             //Could probably handle packed or semi planar YUV by making a small offset change
-            if (dst.ImageFormat.DataLayout == Codec.DataLayout.Packed || dst.ImageFormat.DataLayout == Codec.DataLayout.SemiPlanar)
+            if (dst.ImageFormat.DataLayout is Codec.DataLayout.Packed or Codec.DataLayout.SemiPlanar)
             {
                 strideDst = dst.MediaFormat.Length;
 
@@ -453,10 +449,9 @@ namespace Media.Codecs.Image.Transformations
                         }
                         else
                         {
-                            int leftOverbits = 0;
 
                             //Move the offset the required amount of bytes
-                            offsetStart += Math.DivRem(Common.Binary.BitsPerByte, usedBits, out leftOverbits);
+                            offsetStart += Math.DivRem(Common.Binary.BitsPerByte, usedBits, out int leftOverbits);
 
                             //Move the bit offset for any odd bits
                             bitOffset += leftOverbits;

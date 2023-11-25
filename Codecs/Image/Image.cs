@@ -10,18 +10,18 @@ namespace Media.Codecs.Image
 {
     public class Image : Media.Codec.MediaBuffer
     {
-        const float DefaultDpi = 96.0f;
+        private const float DefaultDpi = 96.0f;
 
         #region Statics
 
         public static Image FromStream(Stream stream)
-        {            
-            BitmapInfoHeader header = new BitmapInfoHeader();
+        {
+            BitmapInfoHeader header = new();
             if (14 != stream.Read(header.Array, 0, 14))
                 throw new InvalidOperationException("Need 14 Bytes for the Bitmap Header");
 
             if (header[0] != 0x42 && header[1] != 0x4D)
-                    throw new InvalidOperationException("Need BM File Header.");
+                throw new InvalidOperationException("Need BM File Header.");
 
             var fileSize = Binary.ReadU32(header, 2, Binary.IsBigEndian);
 
@@ -36,7 +36,7 @@ namespace Media.Codecs.Image
 
             var components = new MediaComponent[componentCount];
 
-            for(var c = 0 ; c < componentCount; c++)
+            for (var c = 0; c < componentCount; c++)
                 components[c] = new MediaComponent((byte)c, componentSize);
 
             var image = new Image(new ImageFormat(Binary.SystemByteOrder, DataLayout.Packed, components), header.Width, header.Height);
@@ -54,7 +54,7 @@ namespace Media.Codecs.Image
             int totalSize = 0;
 
             //Iterate each component in the ColorSpace
-            for (int i = 0, ie = format.Components.Length; i <ie ; ++i)
+            for (int i = 0, ie = format.Components.Length; i < ie; ++i)
             {
                 //Increment the total size in bytes by calculating the size in bytes of that plane using the ColorSpace information
                 totalSize += (width >> format.Widths[i]) * (height >> format.Heights[i]);
@@ -71,7 +71,7 @@ namespace Media.Codecs.Image
         public readonly int Width;
 
         public readonly int Height;
-        
+
         #endregion
 
         #region Constructor
@@ -119,7 +119,7 @@ namespace Media.Codecs.Image
 
                 int componentIndex = 0;
 
-                foreach(var componentData in value)
+                foreach (var componentData in value)
                     SetComponentData(x, y, componentIndex++, componentData);
             }
         }
@@ -152,7 +152,7 @@ namespace Media.Codecs.Image
             int ypelsPerMeter = (int)Math.Round(1.0f / verticalResolutionMeters);
 
             // Create a new BitmapInfoHeader based on the ImageFormat
-            BitmapInfoHeader header = new BitmapInfoHeader(width, height, (short)ImageFormat.Length, (short)ImageFormat.Size, compressionFormat, Data.Array.Length, xpelsPerMeter, ypelsPerMeter, 0, 0);
+            BitmapInfoHeader header = new(width, height, (short)ImageFormat.Length, (short)ImageFormat.Size, compressionFormat, Data.Array.Length, xpelsPerMeter, ypelsPerMeter, 0, 0);
             SaveBitmap(header, stream);
         }
 
@@ -176,20 +176,16 @@ namespace Media.Codecs.Image
             stream.Write(fileHeader, 0, fileHeader.Length);
             stream.Write(header.Array, header.Offset, header.Count);
             stream.Write(Data.Array, Data.Offset, Data.Count);
-        }       
+        }
 
         public int PlaneWidth(int plane)
         {
-            if (plane >= MediaFormat.Components.Length) return -1;
-
-            return Width >> ImageFormat.Widths[plane];
+            return plane >= MediaFormat.Components.Length ? -1 : Width >> ImageFormat.Widths[plane];
         }
 
         public int PlaneHeight(int plane)
         {
-            if (plane >= MediaFormat.Components.Length) return -1;
-
-            return Height >> ImageFormat.Heights[plane];
+            return plane >= MediaFormat.Components.Length ? -1 : Height >> ImageFormat.Heights[plane];
         }
 
         /// <summary>
@@ -199,9 +195,7 @@ namespace Media.Codecs.Image
         /// <returns></returns>
         public int PlaneSize(int plane)
         {
-            if (plane >= MediaFormat.Components.Length) return -1;
-
-            return (PlaneWidth(plane) + PlaneHeight(plane)) * ImageFormat.Size;
+            return plane >= MediaFormat.Components.Length ? -1 : (PlaneWidth(plane) + PlaneHeight(plane)) * ImageFormat.Size;
         }
 
         /// <summary>
@@ -211,9 +205,7 @@ namespace Media.Codecs.Image
         /// <returns></returns>
         public int PlaneLength(int plane)
         {
-            if (plane >= MediaFormat.Components.Length) return -1;
-
-            return Common.Binary.BitsToBytes(PlaneSize(plane));
+            return plane >= MediaFormat.Components.Length ? -1 : Common.Binary.BitsToBytes(PlaneSize(plane));
         }
 
         /// <summary>
@@ -236,7 +228,7 @@ namespace Media.Codecs.Image
             {
                 case Media.Codec.DataLayout.Planar:
                     //for(int c = 0; c < componentIndex; ++c)
-                        //offset += PlaneLength(c);
+                    //offset += PlaneLength(c);
 
                     int widthSampling = ImageFormat.Widths[componentIndex];
                     int heightSampling = ImageFormat.Heights[componentIndex];
@@ -273,7 +265,7 @@ namespace Media.Codecs.Image
 
             return offset;
         }
-        
+
         //Gets all component samples for the given coordinate into a SegmentStream (not really useful besides saving on some allocation)
 
         public SegmentStream GetSampleData(int x, int y)
@@ -368,7 +360,7 @@ namespace Media.UnitTests
             {
                 if (dataLayout == DataLayout.Unknown) continue;
 
-                using (Media.Codecs.Image.Image image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8, Binary.SystemByteOrder, dataLayout), 1, 1))
+                using (Media.Codecs.Image.Image image = new(Media.Codecs.Image.ImageFormat.RGB(8, Binary.SystemByteOrder, dataLayout), 1, 1))
                 {
                     if (image.SampleCount != 1) throw new System.InvalidOperationException();
 
@@ -379,7 +371,7 @@ namespace Media.UnitTests
 
         public static void Test_GetComponentData_SetComponentData()
         {
-            foreach(var dataLayout in Enum.GetValues<DataLayout>())
+            foreach (var dataLayout in Enum.GetValues<DataLayout>())
             {
                 if (dataLayout == DataLayout.Unknown) continue;
 
@@ -425,7 +417,7 @@ namespace Media.UnitTests
             {
                 if (dataLayout == DataLayout.Unknown) continue;
 
-                using (Media.Codecs.Image.ImageFormat imageFormat = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.RGB(8, Binary.SystemByteOrder, dataLayout)))
+                using (Media.Codecs.Image.ImageFormat imageFormat = new(Media.Codecs.Image.ImageFormat.RGB(8, Binary.SystemByteOrder, dataLayout)))
                 {
                     using (var image = new Codecs.Image.Image(imageFormat, 32, 32))
                     {
@@ -640,7 +632,7 @@ namespace Media.UnitTests
                     {
                         //int planeOffset = 0;
                         //for (int i = 0; i < componentIndex; ++i)
-                            //planeOffset += image.PlaneLength(i);
+                        //planeOffset += image.PlaneLength(i);
 
                         int widthSampling = imageFormat.Widths[componentIndex];
                         int heightSampling = imageFormat.Heights[componentIndex];
@@ -670,16 +662,9 @@ namespace Media.UnitTests
                 {
                     for (int componentIndex = 0; componentIndex < imageFormat.Length; componentIndex++)
                     {
-                        int expectedOffset;
-                        if (componentIndex is 0) // Y component
-                        {
-                            expectedOffset = y * image.Width + x;
-                        }
-                        else // UV components
-                        {
-                            expectedOffset = (image.Width * image.Height) + ((y / 2) * (image.Width / 2) + (x / 2)) * imageFormat.Components[componentIndex].Length;
-                        }
-
+                        int expectedOffset = componentIndex is 0
+                            ? y * image.Width + x
+                            : (image.Width * image.Height) + ((y / 2) * (image.Width / 2) + (x / 2)) * imageFormat.Components[componentIndex].Length;
                         int calculatedOffset = image.CalculateComponentDataOffset(x, y, componentIndex);
 
                         if (expectedOffset != calculatedOffset) throw new InvalidOperationException();
@@ -716,7 +701,7 @@ namespace Media.UnitTests
             System.DateTime start = System.DateTime.UtcNow, end;
 
             //Create the source image
-            using (Media.Codecs.Image.Image rgbImage = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), testWidth, testHeight))
+            using (Media.Codecs.Image.Image rgbImage = new(Media.Codecs.Image.ImageFormat.RGB(8), testWidth, testHeight))
             {
                 if (rgbImage.ImageFormat.HasAlphaComponent) throw new System.Exception("HasAlphaComponent should be false");
 
@@ -730,7 +715,7 @@ namespace Media.UnitTests
                 //ImageFormat could be given directly to constructor here
 
                 //Create the destination image
-                using (Media.Codecs.Image.Image yuvImage = new Codecs.Image.Image(Yuv420P, testWidth, testHeight))
+                using (Media.Codecs.Image.Image yuvImage = new(Yuv420P, testWidth, testHeight))
                 {
 
                     //Cache the data of the source before transformation
@@ -784,12 +769,12 @@ namespace Media.UnitTests
             System.DateTime start = System.DateTime.UtcNow, end;
 
             //Create the source image
-            using (Media.Codecs.Image.Image rgbImage = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), testWidth, testHeight))
+            using (Media.Codecs.Image.Image rgbImage = new(Media.Codecs.Image.ImageFormat.RGB(8), testWidth, testHeight))
             {
                 if (rgbImage.ImageFormat.HasAlphaComponent) throw new System.Exception("HasAlphaComponent should be false");
 
                 //Create the ImageFormat based on YUV packed but in Planar format with a full height luma plane and half hight chroma planes
-                Media.Codecs.Image.ImageFormat Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
+                Media.Codecs.Image.ImageFormat Yuv420P = new(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
 
                 if (Yuv420P.IsInterleaved) throw new System.Exception("IsInterleaved should be false");
 
@@ -798,7 +783,7 @@ namespace Media.UnitTests
                 //ImageFormat could be given directly to constructor here
 
                 //Create the destination image
-                using (Media.Codecs.Image.Image yuvImage = new Codecs.Image.Image(Yuv420P, testWidth, testHeight))
+                using (Media.Codecs.Image.Image yuvImage = new(Yuv420P, testWidth, testHeight))
                 {
 
                     //Cache the data of the source before transformation
@@ -855,12 +840,12 @@ namespace Media.UnitTests
             Codecs.Image.Image yuvImage;
 
             //Create the source image
-            using (Media.Codecs.Image.Image rgbImage = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), testWidth, testHeight))
+            using (Media.Codecs.Image.Image rgbImage = new(Media.Codecs.Image.ImageFormat.RGB(8), testWidth, testHeight))
             {
                 if (rgbImage.ImageFormat.HasAlphaComponent) throw new System.Exception("HasAlphaComponent should be false");
 
                 //Create the ImageFormat based on YUV packed but in Planar format with a full height luma plane and half hight chroma planes
-                Media.Codecs.Image.ImageFormat Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
+                Media.Codecs.Image.ImageFormat Yuv420P = new(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
 
                 if (Yuv420P.IsInterleaved) throw new System.Exception("IsInterleaved should be false");
 
@@ -916,10 +901,10 @@ namespace Media.UnitTests
         public static void TestConversionARGB()
         {
             //Create the source image
-            using (Media.Codecs.Image.Image rgbImage = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.ARGB(8), 8, 8))
+            using (Media.Codecs.Image.Image rgbImage = new(Media.Codecs.Image.ImageFormat.ARGB(8), 8, 8))
             {
                 //Create the ImageFormat based on YUV packed but in Planar format with a full height luma plane and half hight chroma planes
-                Media.Codecs.Image.ImageFormat Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
+                Media.Codecs.Image.ImageFormat Yuv420P = new(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
 
                 if (Yuv420P.IsInterleaved) throw new System.Exception("IsInterleaved should be false");
 
@@ -930,7 +915,7 @@ namespace Media.UnitTests
                 //ImageFormat be given directly to constructor here
 
                 //Create the destination image
-                using (Media.Codecs.Image.Image yuvImage = new Codecs.Image.Image(Yuv420P, 8, 8))
+                using (Media.Codecs.Image.Image yuvImage = new(Yuv420P, 8, 8))
                 {
 
                     //Cache the data of the source before transformation
@@ -968,10 +953,10 @@ namespace Media.UnitTests
         public static void TestConversionRGBA()
         {
             //Create the source image
-            using (Media.Codecs.Image.Image rgbImage = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGBA(8), 8, 8))
+            using (Media.Codecs.Image.Image rgbImage = new(Media.Codecs.Image.ImageFormat.RGBA(8), 8, 8))
             {
                 //Create the ImageFormat based on YUV packed but in Planar format with a full height luma plane and half hight chroma planes
-                Media.Codecs.Image.ImageFormat Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
+                Media.Codecs.Image.ImageFormat Yuv420P = new(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
 
                 if (Yuv420P.IsInterleaved) throw new System.Exception("IsInterleaved should be false");
 
@@ -982,7 +967,7 @@ namespace Media.UnitTests
                 //ImageFormat could be given directly to constructor here
 
                 //Create the destination image
-                using (Media.Codecs.Image.Image yuvImage = new Codecs.Image.Image(Yuv420P, 8, 8))
+                using (Media.Codecs.Image.Image yuvImage = new(Yuv420P, 8, 8))
                 {
 
                     //Cache the data of the source before transformation
@@ -1020,20 +1005,20 @@ namespace Media.UnitTests
         public static void TestConversionRGAB()
         {
 
-            Codecs.Image.ImageFormat weird = new Codecs.Image.ImageFormat(Common.Binary.ByteOrder.Little, Codec.DataLayout.Packed, new Codec.MediaComponent[]
+            Codecs.Image.ImageFormat weird = new(Common.Binary.ByteOrder.Little, Codec.DataLayout.Packed, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent((byte)'r', 10),
-                new Codec.MediaComponent((byte)'g', 10),
-                new Codec.MediaComponent((byte)'a', 2),
-                new Codec.MediaComponent((byte)'b', 10),
-                
+                new((byte)'r', 10),
+                new((byte)'g', 10),
+                new((byte)'a', 2),
+                new((byte)'b', 10),
+
             });
 
             //Create the source image
-            using (Media.Codecs.Image.Image rgbImage = new Codecs.Image.Image(weird, 8, 8))
+            using (Media.Codecs.Image.Image rgbImage = new(weird, 8, 8))
             {
                 //Create the ImageFormat based on YUV packed but in Planar format with a full height luma plane and half hight chroma planes
-                Media.Codecs.Image.ImageFormat Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
+                Media.Codecs.Image.ImageFormat Yuv420P = new(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
 
                 if (Yuv420P.IsInterleaved) throw new System.Exception("IsInterleaved should be false");
 
@@ -1046,7 +1031,7 @@ namespace Media.UnitTests
                 //ImageFormat could be given directly to constructor here
 
                 //Create the destination image
-                using (Media.Codecs.Image.Image yuvImage = new Codecs.Image.Image(Yuv420P, 8, 8))
+                using (Media.Codecs.Image.Image yuvImage = new(Yuv420P, 8, 8))
                 {
 
                     //Cache the data of the source before transformation
@@ -1085,7 +1070,7 @@ namespace Media.UnitTests
         {
             System.DateTime start = System.DateTime.UtcNow, end;
 
-            Media.Codecs.Image.ImageFormat Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
+            Media.Codecs.Image.ImageFormat Yuv420P = new(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
 
             using (var image = new Codecs.Image.Image(Yuv420P, 32, 32))
             {
@@ -1097,6 +1082,6 @@ namespace Media.UnitTests
 
                 if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new InvalidOperationException("Did not set Component data (Vector)");
             }
-        }        
+        }
     }
 }

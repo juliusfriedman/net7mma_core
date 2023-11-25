@@ -52,7 +52,7 @@ namespace Media.Rtsp.Server
         /// The name of the media
         /// </summary>
         /// <remarks>string and not System.String</remarks>
-        System.String Name { get; }
+        string Name { get; }
 
         /// <summary>
         /// The id of the media
@@ -92,8 +92,8 @@ namespace Media.Rtsp.Server
         /// <summary>
         /// Stops the media
         /// </summary>
-        void Stop();   
-        
+        void Stop();
+
         //UserTag, IMedia<T>     
     }
 }

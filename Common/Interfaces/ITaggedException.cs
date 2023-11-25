@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Common
 {
@@ -17,9 +13,9 @@ namespace Media.Common
         Exception InnerException { get; } //CurrentException
 
         /// <summary>
-        /// The <see cref="System.Object"/> which corresponds to the underlying exception.
+        /// The <see cref="object"/> which corresponds to the underlying exception.
         /// </summary>
-        Object Tag { get; }
+        object Tag { get; }
     }
 
     //ITaggedExceptionExtensions

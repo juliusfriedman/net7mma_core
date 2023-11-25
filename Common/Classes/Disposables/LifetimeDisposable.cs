@@ -39,9 +39,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #region Using Statements
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 #endregion
 
@@ -99,7 +96,7 @@ namespace Media.Common
 
         //Dispose could check for lifetime and then reschedule for finalize.
 
-        internal protected override void Dispose(bool disposing)
+        protected internal override void Dispose(bool disposing)
         {
             //if (ShouldDispose is false && disposing is false && LifetimeElapsed) disposing = ShouldDispose = true;
 

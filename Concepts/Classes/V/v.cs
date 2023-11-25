@@ -79,7 +79,7 @@ namespace Media.Concepts.Classes.v
             public System.Delegate SystemDelegate
             {
                 get;
-                internal protected set;
+                protected internal set;
             }
         }
 
@@ -90,7 +90,7 @@ namespace Media.Concepts.Classes.v
         /// <summary>
         /// The <see cref="Delegate"/>
         /// </summary>
-        internal protected Delegate Delegation
+        protected internal Delegate Delegation
         {
             get;
             set;
@@ -161,17 +161,17 @@ namespace Media.Concepts.Classes.v
         /// <summary>
         /// <see cref="null"/>
         /// </summary>
-        const AbstractValidator NilValidator = null;
+        private const AbstractValidator NilValidator = null;
 
         /// <summary>
         /// For expansion.
         /// </summary>
-        Prototype Prototype = null;
+        private readonly Prototype Prototype = null;
 
         /// <summary>
         /// by default, <see cref="Media.Common.Extensions.Delegate.ActionExtensions.NoOp"/>
         /// </summary>
-        internal protected System.Delegate Void = Media.Common.Extensions.Delegate.ActionExtensions.NoOp;
+        protected internal System.Delegate Void = Media.Common.Extensions.Delegate.ActionExtensions.NoOp;
 
         /// <summary>
         /// <see cref="Prototype"/> or the underlying <see cref="Prototype.Delegate"/> unless <see cref="null"/>, then <see cref="Void"/>
@@ -195,12 +195,11 @@ namespace Media.Concepts.Classes.v
         /// Assigning a new <see cref="Prototype"/> if <paramref name="other"/> is <see cref="NilValidator"/>, otherwise the underlying <see cref="Prototype.Delegation"/>
         /// </summary>
         /// <param name="other"></param>
-        internal protected AbstractValidator(AbstractValidator other)
+        protected internal AbstractValidator(AbstractValidator other)
         {
-            if (other is null)
-                Prototype = new Prototype();
-            else
-                Prototype = new Prototype()
+            Prototype = other is null
+                ? new Prototype()
+                : new Prototype()
                 {
                     Delegation = other.Prototype.Delegation
                 };
@@ -216,7 +215,7 @@ namespace Media.Concepts.Classes.v
         /// <summary>
         /// <see cref="Validator{T}"/>
         /// </summary>
-        public Validator<T> Validator { get; internal protected set; }
+        public Validator<T> Validator { get; protected internal set; }
 
         /// <summary>
         /// <see cref="IValid{T}.Rudīmentum"/>
@@ -251,16 +250,17 @@ namespace Media.Concepts.Classes.v
         /// </summary>
         /// <param name="t">t</param>
         /// <param name="v">v</param>
-        static void Invalid (T t, out bool v){
+        private static void Invalid(T t, out bool v)
+        {
             v = t is null;
         }
 
         /// <summary>
         /// The static implemenation of `for` the given, using <see cref="Invalidator{T}"/> as a `basis`
         /// </summary>
-        static Invalidator<T> Invalidate = new Invalidator<T>()
+        private static readonly Invalidator<T> Invalidate = new()
         {
-            Void = System.Delegate.CreateDelegate(typeof(Invalidator<T>), Common.Extensions.ExpressionExtensions.SymbolExtensions.GetMethodInfo(()=>Invalidator<T>.Invalid(default(T), out Nil)))
+            Void = System.Delegate.CreateDelegate(typeof(Invalidator<T>), Common.Extensions.ExpressionExtensions.SymbolExtensions.GetMethodInfo(() => Invalidator<T>.Invalid(default, out Nil)))
         };
     }
 }

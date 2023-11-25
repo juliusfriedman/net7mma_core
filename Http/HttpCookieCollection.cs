@@ -1,7 +1,7 @@
 ﻿//Beg of work
 namespace Media.Http
 {
-    class HttpCookieCollection
+    internal class HttpCookieCollection
     {
     }
 }

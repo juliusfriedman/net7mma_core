@@ -54,7 +54,7 @@ namespace Media.Concepts.Classes
     /// Provides various functionality which can only be achieved with the used of unsafe code.
     /// </summary>
     public static unsafe class Unsafe
-    {        
+    {
         #region AddressOf
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal static T Read<T>(nint address)
         {
-            T obj = default(T);
+            T obj = default;
 
             System.TypedReference tr = __makeref(obj);
 
@@ -191,10 +191,10 @@ namespace Media.Concepts.Classes
         /// <param name="address"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static object Read(nint address)
+        private static object Read(nint address)
         {
             //Create memory for a boxed object
-            object box = default(object);
+            object box = default;
 
             //Make a TypedReference to the object created
             System.TypedReference tr = __makeref(box);
@@ -248,7 +248,7 @@ namespace Media.Concepts.Classes
         //http://stackoverflow.com/questions/621493/c-sharp-unsafe-value-type-array-to-byte-array-conversions/3577227#3577227
 
         [System.CLSCompliant(false)]
-        public unsafe static T[] Create<T>(void* source, int length)
+        public static unsafe T[] Create<T>(void* source, int length)
         {
             System.Type type = typeof(T);
 
@@ -259,7 +259,7 @@ namespace Media.Concepts.Classes
             if (type.IsPrimitive)
             {
                 // Make sure the array won't be moved around by the GC 
-                System.Runtime.InteropServices.GCHandle handleOutput = default(System.Runtime.InteropServices.GCHandle);
+                System.Runtime.InteropServices.GCHandle handleOutput = default;
 
                 try
                 {
@@ -289,11 +289,11 @@ namespace Media.Concepts.Classes
                     throw new System.InvalidOperationException(string.Format("{0} does not define a StructLayout attribute", type));
                 }
 
-                nint sourcePtr = new nint(source);
+                nint sourcePtr = new(source);
 
                 for (int i = 0; i < length; i++)
                 {
-                    nint p = new nint((byte*)source + i * sizeInBytes);
+                    nint p = new((byte*)source + i * sizeInBytes);
 
                     output[i] = (T)System.Runtime.InteropServices.Marshal.PtrToStructure(p, typeof(T));
                 }
@@ -306,12 +306,12 @@ namespace Media.Concepts.Classes
             return output;
         }
 
-        static unsafe T[] MakeArray<T>(void* t, int length, int tSizeInBytes) where T : struct
+        private static unsafe T[] MakeArray<T>(void* t, int length, int tSizeInBytes) where T : struct
         {
             T[] result = new T[length];
             for (int i = 0; i < length; i++)
             {
-                nint p = new nint((byte*)t + (i * tSizeInBytes));
+                nint p = new((byte*)t + (i * tSizeInBytes));
                 result[i] = (T)System.Runtime.InteropServices.Marshal.PtrToStructure(p, typeof(T));
             }
 
@@ -353,8 +353,8 @@ namespace Media.Concepts.Classes
 
         public static object AllocateAt(int address, nint typeHandle)
         {
-            System.Runtime.InteropServices.Marshal.WriteInt32((nint)(address), 0);
-            System.Runtime.InteropServices.Marshal.WriteInt32((nint)(address + 1 * sizeof(int)), (int)typeHandle);
+            System.Runtime.InteropServices.Marshal.WriteInt32(address, 0);
+            System.Runtime.InteropServices.Marshal.WriteInt32(address + 1 * sizeof(int), (int)typeHandle);
             object createdObject = null;
             unsafe
             {
@@ -366,10 +366,10 @@ namespace Media.Concepts.Classes
 
         public static bool TryAllocateAt<T>(nint address, nint typeHandle, out T t)
         {
-            System.Runtime.InteropServices.Marshal.WriteInt32((nint)(address), 0);
-            System.Runtime.InteropServices.Marshal.WriteInt32((nint)(address + 1 * sizeof(int)), (int)typeHandle);
-            t = default(T);
-            CommonIntermediateLanguage.InitBlock(address + 1 * sizeof(int), (byte)0, CommonIntermediateLanguage.SizeOf<T>());
+            System.Runtime.InteropServices.Marshal.WriteInt32(address, 0);
+            System.Runtime.InteropServices.Marshal.WriteInt32(address + 1 * sizeof(int), (int)typeHandle);
+            t = default;
+            CommonIntermediateLanguage.InitBlock(address + 1 * sizeof(int), 0, CommonIntermediateLanguage.SizeOf<T>());
             unsafe
             {
                 System.TypedReference newObjectReference = __makeref(t);
@@ -379,7 +379,7 @@ namespace Media.Concepts.Classes
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoOptimization)]
-        static object CreateObject() { return new System.Object(); }
+        private static object CreateObject() { return new object(); }
 
         private static nint GetAllocMethodAddress()
         {
@@ -394,7 +394,7 @@ namespace Media.Concepts.Classes
 
             // Call to internal function differs between builds
 #if DEBUG
-	        int offset = nint.Size == 8  ? 0x2D : 0x22;
+            int offset = nint.Size == 8 ? 0x2D : 0x22;
 #else
             int offset = nint.Size == 8 ? 0x1A : 0xE;
 #endif
@@ -405,7 +405,7 @@ namespace Media.Concepts.Classes
             //Byte by byte convert to integer
             for (int i = 1; i < 5; ++i)
             {
-                jumpOffset = jumpOffset + (System.Runtime.InteropServices.Marshal.ReadByte(methodAddress, offset + i) << (i - 1) * 8);
+                jumpOffset += (System.Runtime.InteropServices.Marshal.ReadByte(methodAddress, offset + i) << (i - 1) * 8);
             }
 
             // Calculate absolute address
@@ -414,24 +414,24 @@ namespace Media.Concepts.Classes
             return absoluteAddress;
         }
 
-  //      public static void HijackNew(System.Reflection.MethodBase method)
-  //      {
-  //          var defaultAllocAddress = (long)GetAllocMethodAddress();
+        //      public static void HijackNew(System.Reflection.MethodBase method)
+        //      {
+        //          var defaultAllocAddress = (long)GetAllocMethodAddress();
 
-  //          var myAllocAddress = (long)MethodHelper.GetMethodAddress(method);
+        //          var myAllocAddress = (long)MethodHelper.GetMethodAddress(method);
 
-  //          int offset = (int)(myAllocAddress - defaultAllocAddress - 4 - 1); // 4 bytes for relative address and one byte for opcode
-  //          byte[] instruction = {
-  //      0xE9, // Long jump instruction
-		//(byte)(offset & 0xFF),
-  //      (byte)((offset >> 8) & 0xFF),
-  //      (byte)((offset >> 16) & 0xFF),
-  //      (byte)((offset >> 24) & 0xFF)
-  //  };
+        //          int offset = (int)(myAllocAddress - defaultAllocAddress - 4 - 1); // 4 bytes for relative address and one byte for opcode
+        //          byte[] instruction = {
+        //      0xE9, // Long jump instruction
+        //(byte)(offset & 0xFF),
+        //      (byte)((offset >> 8) & 0xFF),
+        //      (byte)((offset >> 16) & 0xFF),
+        //      (byte)((offset >> 24) & 0xFF)
+        //  };
 
-  //          //UnlockPage((IntPtr)defaultAllocAddress);
-  //          System.Runtime.InteropServices.Marshal.Copy(instruction, 0, (nint)defaultAllocAddress, instruction.Length);
-  //      }
+        //          //UnlockPage((IntPtr)defaultAllocAddress);
+        //          System.Runtime.InteropServices.Marshal.Copy(instruction, 0, (nint)defaultAllocAddress, instruction.Length);
+        //      }
 
         #endregion
 
@@ -482,24 +482,30 @@ namespace Media.Concepts.Classes
 
             public static byte[] GetBytes(float[] floats)
             {
-                Inspector i = new Inspector();
-                i.FloatArray = floats;
+                Inspector i = new()
+                {
+                    FloatArray = floats
+                };
                 i.Length.Value = floats.Length << 2; //* 4;
                 return i.ByteArray;
             }
 
             public static float[] GetFloats(byte[] bytes)
             {
-                Inspector i = new Inspector();
-                i.ByteArray = bytes;
+                Inspector i = new()
+                {
+                    ByteArray = bytes
+                };
                 i.Length.Value = bytes.Length >> 2; // / 4;
                 return i.FloatArray;
             }
 
             public static byte[] GetTop4BytesFrom(object obj)
             {
-                Inspector i = new Inspector();
-                i.Object = obj;
+                Inspector i = new()
+                {
+                    Object = obj
+                };
                 return new byte[]
                 {
                     i.Octets.Byte_0,
@@ -511,8 +517,10 @@ namespace Media.Concepts.Classes
 
             public static byte[] GetBytesFrom(object obj, int size)
             {
-                Inspector i = new Inspector();
-                i.Object = obj;
+                Inspector i = new()
+                {
+                    Object = obj
+                };
                 i.Length.Value = size;
                 return i.ByteArray;
             }
@@ -549,19 +557,19 @@ namespace Media.Concepts.Classes
             internal System.Array Array;
 
             [System.Runtime.InteropServices.FieldOffset(0)]
-            internal System.Char[] CharArray;
+            internal char[] CharArray;
 
             [System.Runtime.InteropServices.FieldOffset(0)]
-            internal System.Byte[] ByteArray;
+            internal byte[] ByteArray;
 
             [System.Runtime.InteropServices.FieldOffset(0)]
-            internal System.Single[] FloatArray;
+            internal float[] FloatArray;
 
             [System.Runtime.InteropServices.FieldOffset(0)]
-            internal System.Object Object;
+            internal object Object;
 
             [System.Runtime.InteropServices.FieldOffset(0)]
-            internal System.String String;
+            internal string String;
 
             //Probably only need one of these.
 
@@ -672,13 +680,13 @@ namespace Media.Concepts.Classes
         }
 
         [System.CLSCompliant(false)]
-        public unsafe static bool IsNegativeZero(double* d) //ref
+        public static unsafe bool IsNegativeZero(double* d) //ref
         {
             //Check for -0.0
             return (*((long*)(d))).Equals(Common.Binary.NegativeZeroBits);
         }
 
-        public unsafe static bool IsNegativeZero(ref double d)
+        public static unsafe bool IsNegativeZero(ref double d)
         {
             //Make a pointer to the pointer, which when dereferenced can access the result.
             nint value = Unsafe.AddressOf(ref d);
@@ -823,7 +831,7 @@ namespace Media.Concepts.Classes
         /// <param name="index"></param>
         /// <param name="newValue"></param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static bool UnsafeTryModifyString(string toModify, int index, char newValue)
+        public static unsafe bool UnsafeTryModifyString(string toModify, int index, char newValue)
         {
             try
             {
@@ -838,7 +846,7 @@ namespace Media.Concepts.Classes
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static void UnsafeModifyString(string toModify, ref int index, ref char newValue)
+        public static unsafe void UnsafeModifyString(string toModify, ref int index, ref char newValue)
         {
             fixed (char* str = toModify)
             {
@@ -894,7 +902,7 @@ namespace Media.Concepts.Classes
                 _elementSize = elementSize + 1;
                 _storage = new int[size * _elementSize];
                 _elements = new T[size];
-                _target = default(T);
+                _target = default;
             }
 
             public void Add(T item)
@@ -909,7 +917,7 @@ namespace Media.Concepts.Classes
                     for (int i = 1; i < _elementSize; ++i)
                     {
                         _storage[_currentIndex * _elementSize + i] = *itemAddress;
-                        itemAddress = itemAddress + 1;
+                        itemAddress++;
                     }
 
                     reference = __makeref(_storage);
@@ -949,7 +957,7 @@ namespace Media.Concepts.Classes
                 private readonly UnsafeList<R> _list;
                 private int _index;
                 private R _current;
-                private int size;
+                private readonly int size;
 
                 public CustomEnumerator(UnsafeList<R> list)
                 {

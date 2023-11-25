@@ -114,7 +114,7 @@ namespace Media.Concepts.Classes.I
     /// <typeparam name="T"></typeparam>
     public struct Structure<T> : IStructure<T>
     {
-        T Value;
+        private T Value;
 
         T IStructure<T>.Element
         {
@@ -174,12 +174,12 @@ namespace Media.Concepts.Classes.I
     //https://msdn.microsoft.com/en-us/library/windows/apps/br225864.aspx
 
     /// <summary>
-    /// A interface which consists of only <see cref="System.Object"/>
+    /// A interface which consists of only <see cref="object"/>
     /// </summary>
     public interface IReference : IPropertyValue
     {
         /// <summary>
-        /// The underlying <see cref="System.Object"/>
+        /// The underlying <see cref="object"/>
         /// </summary>
         object Object { get; set; }
     }
@@ -205,7 +205,7 @@ namespace Media.Concepts.Classes.I
 
     public class Reference<T> : IReference<T>
     {
-        IStructure<T> Value;
+        private IStructure<T> Value;
 
         IStructure<T> IReference<T>.Element
         {
@@ -266,14 +266,14 @@ namespace Media.Concepts.Classes.I
 
     #region ContrivedReference<U, T>
 
-    public abstract class ContrivedReference<U, T> : 
+    public abstract class ContrivedReference<U, T> :
         Reference<T>, //base
         IReference<U>, //this
         Media.Common.Interfaces.IComposed<T>
         where U : IReference<U>
         where T : class, IReference<T>
     {
-        IStructure<U> Contrived;
+        private IStructure<U> Contrived;
 
         public ContrivedReference(U u)
             : base(u as T)
@@ -326,17 +326,17 @@ namespace Media.Concepts.Classes.I
 
     #region
 
-    sealed class Atonement
+    internal sealed class Atonement
     {
 
     }
 
-    sealed class Declension
+    internal sealed class Declension
     {
 
     }
 
-    sealed class Astringent
+    internal sealed class Astringent
     {
 
     }

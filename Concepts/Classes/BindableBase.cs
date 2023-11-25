@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Media.Common
 {
-    using System;
     using System.ComponentModel;
     using System.Runtime.CompilerServices;
 
@@ -55,7 +50,7 @@ namespace Media.Common
         ///     True if the value was changed, false if the existing value matched the
         ///     desired value.
         /// </returns>
-        protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] String propertyName = null, bool useEqualityComparer = false)
+        protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName] string propertyName = null, bool useEqualityComparer = false)
         {
             if (useEqualityComparer ? EqualityComparer<T>.Default.Equals(storage, value) : Equals(storage, value))
             {

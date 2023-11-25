@@ -33,11 +33,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * 
  * v//
  */
+using Media.Container;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Media.Container;
 
 namespace Media.Containers.Mxf
 {
@@ -85,10 +85,10 @@ namespace Media.Containers.Mxf
 
 
             //Header, Body and Footer Klv - The last 2 bytes indicate type and open or closed.                                                         //Type, //Status, //Reserved
-            public static Guid PartitionPack = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x05, 0x01, 0x01, 0x0D, 0x01, 0x02, 0x01, 0x01, 0x02, 0x00, 0x00 });
-            
+            public static Guid PartitionPack = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x05, 0x01, 0x01, 0x0D, 0x01, 0x02, 0x01, 0x01, 0x02, 0x00, 0x00 });
+
             //For tracks the last 4 are the trackId 
-            public static Guid EssenceElement = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x01, 0x02, 0x01, 0x01, 0x0D, 0x01, 0x03, 0x01, 0, 0, 0, 0 });
+            public static Guid EssenceElement = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x01, 0x02, 0x01, 0x01, 0x0D, 0x01, 0x03, 0x01, 0, 0, 0, 0 });
 
             //KnownUnknown?
             //0x06,0x0E,0x2B,0x34,0x04,0x01,0x01,0x0A,0x01,0x01,0x02,0x01,0x01,0x00,0x00,0x00
@@ -115,171 +115,171 @@ namespace Media.Containers.Mxf
              14~16 Definition depends on byte 13 xxh
              */
 
-            public static Guid OperationalPattern = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x0D, 0x01, 0x02, 0x01, 0, 0, 0, 0 });
+            public static Guid OperationalPattern = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x0D, 0x01, 0x02, 0x01, 0, 0, 0, 0 });
 
             //Value 8 may be different >0 ? - ff
             //public static Guid PrimerPack = new Guid(new byte[] { 0x06, 0x0E, 0x2B , 0x34 , 0x02 , 0x05 , 0x01 , 0x01 , 0x0D , 0x01 , 0x02 , 0x01 , 0x01 , 0x05 , 0x01 , 0x00 });
 
-            public static Guid RandomIndexPack = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x05 , 0x01 , 0x01 , 0x0D , 0x01 , 0x02 , 0x01 , 0x01 , 0x11 , 0x01 , 0x00 });
+            public static Guid RandomIndexPack = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x05, 0x01, 0x01, 0x0D, 0x01, 0x02, 0x01, 0x01, 0x11, 0x01, 0x00 });
 
-            public static Guid PartitionMetadata = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x05, 0x01, 0x01, 0x0d, 0x01, 0x02, 0x01, 0x01, 0x04, 0x04, 0x00 });
+            public static Guid PartitionMetadata = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x05, 0x01, 0x01, 0x0d, 0x01, 0x02, 0x01, 0x01, 0x04, 0x04, 0x00 });
 
-            public static Guid EncryptedEssenceContainer = new Guid ( new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x04, 0x01, 0x01, 0x07, 0x0d, 0x01, 0x03, 0x01, 0x02, 0x0b, 0x01, 0x00 });
+            public static Guid EncryptedEssenceContainer = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x04, 0x01, 0x01, 0x07, 0x0d, 0x01, 0x03, 0x01, 0x02, 0x0b, 0x01, 0x00 });
 
-            public static Guid FillerPack = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x01, 0x01, 0x01, 0x02, 0x03, 0x01, 0x02, 0x10, 0x01, 0x00, 0x00, 0x00 });
+            public static Guid FillerPack = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x01, 0x01, 0x01, 0x02, 0x03, 0x01, 0x02, 0x10, 0x01, 0x00, 0x00, 0x00 });
 
             //Rp210 version number byte (8) is different
-            public static Guid LegacyFillerPack = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x02, 0x10, 0x01, 0x00, 0x00, 0x00 });
+            public static Guid LegacyFillerPack = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x01, 0x01, 0x01, 0x01, 0x03, 0x01, 0x02, 0x10, 0x01, 0x00, 0x00, 0x00 });
 
-            public static Guid Index = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x02, 0x01, 0x01, 0x10, 0x01, 0x00 });
+            public static Guid Index = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x02, 0x01, 0x01, 0x10, 0x01, 0x00 });
 
             //Could be top level with an enum defining all 
 
-            public static Guid StructuralMetadata = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00 });
+            public static Guid StructuralMetadata = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00 });
 
             //Structural MetaData Sets (Also Generic by label)
 
-            public static Guid InterchangeObject = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00 });
+            public static Guid InterchangeObject = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x00 });
 
-            public static Guid StructuralComponent = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x00 });
+            public static Guid StructuralComponent = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x02, 0x00 });
 
-            public static Guid Segment = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x00 });
+            public static Guid Segment = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x03, 0x00 });
 
-            public static Guid Event = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x06, 0x00 });
+            public static Guid Event = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x06, 0x00 });
 
-            public static Guid CommentMarker = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x08, 0x00 });
+            public static Guid CommentMarker = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x08, 0x00 });
 
-            public static Guid Preface = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x2F, 0x00 });
+            public static Guid Preface = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x2F, 0x00 });
 
-            public static Guid Identification = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x30, 0x00 });
+            public static Guid Identification = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x30, 0x00 });
 
-            public static Guid ContentStorage = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x18, 0x00 });
+            public static Guid ContentStorage = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x18, 0x00 });
 
             //Is almost like a FileDescriptor but useless...
-            public static Guid EssenceContainerData = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x23, 0x00 });
+            public static Guid EssenceContainerData = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x23, 0x00 });
 
             //Incase no other one is present.
-            public static Guid GenericDescriptor = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x24, 0x00 });
+            public static Guid GenericDescriptor = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x24, 0x00 });
 
             //Must be instance of FileDescriptor ... --- !!!!
-            public static Guid FileDescriptor = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x25, 0x00 });
+            public static Guid FileDescriptor = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x25, 0x00 });
 
-            public static Guid GenericPackage = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x34, 0x00 });
+            public static Guid GenericPackage = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x34, 0x00 });
 
-            public static Guid SubDescriptor = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x59, 0x00 });
+            public static Guid SubDescriptor = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x59, 0x00 });
 
-            public static Guid MaterialPackage = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x36, 0x00 });
+            public static Guid MaterialPackage = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x36, 0x00 });
 
-            public static Guid SourcePackage = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x37, 0x00 });
+            public static Guid SourcePackage = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x37, 0x00 });
 
-            public static Guid TimelineTrack = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x3B, 0x00 });
+            public static Guid TimelineTrack = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x3B, 0x00 });
 
-            public static Guid GenericTrack = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x38, 0x00 });
+            public static Guid GenericTrack = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x38, 0x00 });
 
-            public static Guid EventTrack = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x39, 0x00 });
+            public static Guid EventTrack = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x39, 0x00 });
 
-            public static Guid StaticTrack = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x3A, 0x00 });
+            public static Guid StaticTrack = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x3A, 0x00 });
 
-            public static Guid Sequence = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x0F, 0x00 });
+            public static Guid Sequence = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x0F, 0x00 });
 
-            public static Guid SourceClip = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x11, 0x00 });            
+            public static Guid SourceClip = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x11, 0x00 });
 
-            public static Guid TimecodeComponent = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0D, 0x01, 0x01, 0x01, 0x01, 0x01, 0x14, 0x00 });
+            public static Guid TimecodeComponent = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0D, 0x01, 0x01, 0x01, 0x01, 0x01, 0x14, 0x00 });
 
-            public static Guid DMSegment = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0D, 0x01, 0x01, 0x01, 0x01, 0x01, 0x41, 0x00 });
+            public static Guid DMSegment = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0D, 0x01, 0x01, 0x01, 0x01, 0x01, 0x41, 0x00 });
 
-            public static Guid DMSourceClip = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0D, 0x01, 0x01, 0x01, 0x01, 0x01, 0x45, 0x00 });
+            public static Guid DMSourceClip = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0D, 0x01, 0x01, 0x01, 0x01, 0x01, 0x45, 0x00 });
 
-            public static Guid Filler = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0D, 0x01, 0x01, 0x01, 0x01, 0x01, 0x09, 0x00 });
+            public static Guid Filler = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0D, 0x01, 0x01, 0x01, 0x01, 0x01, 0x09, 0x00 });
 
-            public static Guid PackageMarkerObject = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0D, 0x01, 0x01, 0x01, 0x01, 0x01, 0x60, 0x00 });
+            public static Guid PackageMarkerObject = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0D, 0x01, 0x01, 0x01, 0x01, 0x01, 0x60, 0x00 });
 
             // Also 6th Byte allowed to be 13 (Note 1: According to SMPTE 336M, the xxh entry in Table 16 has the value of 13h for BER long or short form encoded length and 53h for 2-byte length)
 
-            public static Guid FillerBer = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x13, 0x01, 0x01, 0x0D, 0x01, 0x01, 0x01, 0x01, 0x01, 0x09, 0x00 });
+            public static Guid FillerBer = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x13, 0x01, 0x01, 0x0D, 0x01, 0x01, 0x01, 0x01, 0x01, 0x09, 0x00 });
 
-            public static Guid PackageMarkerObjectBer = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x13, 0x01, 0x01, 0x0D, 0x01, 0x01, 0x01, 0x01, 0x01, 0x60, 0x00 });            
+            public static Guid PackageMarkerObjectBer = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x13, 0x01, 0x01, 0x0D, 0x01, 0x01, 0x01, 0x01, 0x01, 0x60, 0x00 });
 
             //
 
-            public static Guid GenericPictureEssenceDescriptor = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x27, 0x00 });
+            public static Guid GenericPictureEssenceDescriptor = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x27, 0x00 });
 
-            public static Guid CDCIEssenceDescriptor = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x28, 0x00 });
+            public static Guid CDCIEssenceDescriptor = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x28, 0x00 });
 
-            public static Guid RGBAEssenceDescriptor = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x29, 0x00 });
+            public static Guid RGBAEssenceDescriptor = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x29, 0x00 });
 
-            public static Guid GenericSoundEssenceDescriptor = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x42, 0x00 });
+            public static Guid GenericSoundEssenceDescriptor = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x42, 0x00 });
 
-            public static Guid GenericDataEssenceDescriptor = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x43, 0x00 });
+            public static Guid GenericDataEssenceDescriptor = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x43, 0x00 });
 
             //Has Codec UL?
 
-            public static Guid MultipleDescriptor = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x44, 0x00 });
+            public static Guid MultipleDescriptor = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x44, 0x00 });
 
-            public static Guid NetworkLocator = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x32, 0x00 });
+            public static Guid NetworkLocator = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x32, 0x00 });
 
-            public static Guid TextLocator = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x33, 0x00 });
+            public static Guid TextLocator = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x33, 0x00 });
 
-            public static Guid  ApplicationPlugInObject = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x61, 0x00 });
+            public static Guid ApplicationPlugInObject = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x61, 0x00 });
 
-            public static Guid ApplicationReferencedObject = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x62, 0x00 });
+            public static Guid ApplicationReferencedObject = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x62, 0x00 });
 
             //6th byte allowed to be 13 // Also 6th Byte allowed to be 13 (Note 1: According to SMPTE 336M, the xxh entry in Table 16 has the value of 13h for BER long or short form encoded length and 53h for 2-byte length)
-            
-            public static Guid ApplicationPlugInObjectBer = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x13, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x61, 0x00 });
 
-            public static Guid ApplicationReferencedObjectBer = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x13, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x62, 0x00 });
+            public static Guid ApplicationPlugInObjectBer = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x13, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x61, 0x00 });
 
-            //
-
-            public static Guid ApplicationObject = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x66, 0x00 });
+            public static Guid ApplicationReferencedObjectBer = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x13, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x62, 0x00 });
 
             //
 
-            public static Guid MPEG2VideoDescriptor = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x51, 0x00 });
+            public static Guid ApplicationObject = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x66, 0x00 });
 
-            public static Guid WaveAudioDescriptor = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x48, 0x00 });
+            //
 
-            public static Guid AES3PCMDescriptor = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x47, 0x00 });
+            public static Guid MPEG2VideoDescriptor = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x51, 0x00 });
 
-            public static Guid J2KPictureDescriptor = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x5a, 0x00 });            
+            public static Guid WaveAudioDescriptor = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x48, 0x00 });
+
+            public static Guid AES3PCMDescriptor = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x47, 0x00 });
+
+            public static Guid J2KPictureDescriptor = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x02, 0x53, 0x01, 0x01, 0x0d, 0x01, 0x01, 0x01, 0x01, 0x01, 0x5a, 0x00 });
 
             //DataDefinitions...
-            public static Guid DataDefinitionVideo = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x01, 0x03, 0x02, 0x02, 0x01, 0x00, 0x00, 0x00 });
+            public static Guid DataDefinitionVideo = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x01, 0x03, 0x02, 0x02, 0x01, 0x00, 0x00, 0x00 });
 
-            public static Guid DataDefinitionVideoLegacy = new Guid(new byte[] { 0x80, 0x7D, 0x00, 0x60, 0x08, 0x14, 0x3E, 0x6F, 0x6F, 0x3C, 0x8C, 0xE1, 0x6C, 0xEF, 0x11, 0xD2 });
+            public static Guid DataDefinitionVideoLegacy = new(new byte[] { 0x80, 0x7D, 0x00, 0x60, 0x08, 0x14, 0x3E, 0x6F, 0x6F, 0x3C, 0x8C, 0xE1, 0x6C, 0xEF, 0x11, 0xD2 });
 
-            public static Guid DataDefinitionAudio = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x01, 0x03, 0x02, 0x02, 0x02, 0x00, 0x00, 0x00 });
+            public static Guid DataDefinitionAudio = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x01, 0x03, 0x02, 0x02, 0x02, 0x00, 0x00, 0x00 });
 
-            public static Guid DataDefinitionAudioLegacy = new Guid(new byte[] { 0x80, 0x7D, 0x00, 0x60, 0x08, 0x14, 0x3E, 0x6F, 0x78, 0xE1, 0xEB, 0xE1, 0x6C, 0xEF, 0x11, 0xD2 });
+            public static Guid DataDefinitionAudioLegacy = new(new byte[] { 0x80, 0x7D, 0x00, 0x60, 0x08, 0x14, 0x3E, 0x6F, 0x78, 0xE1, 0xEB, 0xE1, 0x6C, 0xEF, 0x11, 0xD2 });
 
             //EssenceContainer UL's
-                                                            
-            public static Guid Mpeg2 = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x04, 0x01, 0x01, 0x02, 0x0d, 0x01, 0x03, 0x01, 0x02, 0x04, 0x60, 0x01 });
+
+            public static Guid Mpeg2 = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x04, 0x01, 0x01, 0x02, 0x0d, 0x01, 0x03, 0x01, 0x02, 0x04, 0x60, 0x01 });
 
             //SMPTE D-10 Mapping
-            public static Guid Mpeg2Alt = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x04, 0x01, 0x01, 0x01, 0x0d, 0x01, 0x03, 0x01, 0x02, 0x01, 0x00, 0x00 });
+            public static Guid Mpeg2Alt = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x04, 0x01, 0x01, 0x01, 0x0d, 0x01, 0x03, 0x01, 0x02, 0x01, 0x00, 0x00 });
 
-            public static Guid DV = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x04, 0x01, 0x01, 0x01, 0x0d, 0x01, 0x03, 0x01, 0x02, 0x02, 0x41, 0x01 });
+            public static Guid DV = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x04, 0x01, 0x01, 0x01, 0x0d, 0x01, 0x03, 0x01, 0x02, 0x02, 0x41, 0x01 });
 
-            public static Guid UncompressedPicture = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x04, 0x01, 0x01, 0x01, 0x0d, 0x01, 0x03, 0x01, 0x02, 0x05, 0x00, 0x00 });
+            public static Guid UncompressedPicture = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x04, 0x01, 0x01, 0x01, 0x0d, 0x01, 0x03, 0x01, 0x02, 0x05, 0x00, 0x00 });
 
             //Codecs
 
-            public static Guid MPEG2_XDCam = new Guid ( new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x03, 0x04, 0x01, 0x02, 0x02, 0x01, 0x04, 0x03, 0x00 });
+            public static Guid MPEG2_XDCam = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x03, 0x04, 0x01, 0x02, 0x02, 0x01, 0x04, 0x03, 0x00 });
 
-            public static Guid MPEG2_ML = new Guid ( new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x03, 0x04, 0x01, 0x02, 0x02, 0x01, 0x01, 0x11, 0x00 });
+            public static Guid MPEG2_ML = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x03, 0x04, 0x01, 0x02, 0x02, 0x01, 0x01, 0x11, 0x00 });
 
-            public static Guid MPEG2_D10_PAL = new Guid ( new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x01, 0x02, 0x02, 0x01, 0x02, 0x01, 0x01 });
+            public static Guid MPEG2_D10_PAL = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x01, 0x02, 0x02, 0x01, 0x02, 0x01, 0x01 });
 
-            public static Guid MPEG2_HL = new Guid ( new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x03, 0x04, 0x01, 0x02, 0x02, 0x01, 0x03, 0x03, 0x00 });
+            public static Guid MPEG2_HL = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x03, 0x04, 0x01, 0x02, 0x02, 0x01, 0x03, 0x03, 0x00 });
 
-            public static Guid MPEG2_HL_422_I = new Guid ( new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x03, 0x04, 0x01, 0x02, 0x02, 0x01, 0x04, 0x02, 0x00 });
+            public static Guid MPEG2_HL_422_I = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x03, 0x04, 0x01, 0x02, 0x02, 0x01, 0x04, 0x02, 0x00 });
 
-            public static Guid Mpeg4 = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x03, 0x04, 0x01, 0x02, 0x02, 0x01, 0x20, 0x02, 0x03 });
+            public static Guid Mpeg4 = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x03, 0x04, 0x01, 0x02, 0x02, 0x01, 0x20, 0x02, 0x03 });
 
             //DDVIDEO
-            public static Guid DV_25_PAL = new Guid ( new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x01, 0x02, 0x02, 0x02, 0x01, 0x02, 0x00 });
+            public static Guid DV_25_PAL = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x01, 0x02, 0x02, 0x02, 0x01, 0x02, 0x00 });
 
             //Jpeg
             /*
@@ -292,56 +292,56 @@ namespace Media.Containers.Mxf
             //?
             //06 0e 2b 34 01 01 01 05 03 01 02 20 01 00 00 00
 
-            public static Guid Dark = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x05, 0x01, 0x01, 0x0d, 0x01, 0x03, 0x01, 0x18, 0x01, 0x02, 0x01 });
+            public static Guid Dark = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x02, 0x05, 0x01, 0x01, 0x0d, 0x01, 0x03, 0x01, 0x18, 0x01, 0x02, 0x01 });
 
-            public static Guid JPEG2000 = new Guid ( new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x07, 0x04, 0x01, 0x02, 0x02, 0x03, 0x01, 0x01, 0x00 });
+            public static Guid JPEG2000 = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x07, 0x04, 0x01, 0x02, 0x02, 0x03, 0x01, 0x01, 0x00 });
 
-            public static Guid Raw = new Guid ( new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x01, 0x02, 0x01, 0x7F, 0x00, 0x00, 0x00 });
+            public static Guid Raw = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x01, 0x02, 0x01, 0x7F, 0x00, 0x00, 0x00 });
 
-            public static Guid Raw_422 = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x0A, 0x04, 0x01, 0x02, 0x01, 0x01, 0x02, 0x01, 0x00 });
+            public static Guid Raw_422 = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x0A, 0x04, 0x01, 0x02, 0x01, 0x01, 0x02, 0x01, 0x00 });
 
-            public static Guid VC3_DNXD = new Guid ( new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x01, 0x02, 0x02, 0x03, 0x02, 0x00, 0x00 });
+            public static Guid VC3_DNXD = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x01, 0x02, 0x02, 0x03, 0x02, 0x00, 0x00 });
 
-            public static Guid VC3_DNXD_Alt = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x01, 0x02, 0x02, 0x71, 0x00, 0x00, 0x00 });
+            public static Guid VC3_DNXD_Alt = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x01, 0x02, 0x02, 0x71, 0x00, 0x00, 0x00 });
 
-            public static Guid VC3_DNXD_Legacy = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x0E, 0x04, 0x02, 0x01, 0x02, 0x04, 0x01, 0x00 });
+            public static Guid VC3_DNXD_Legacy = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x0E, 0x04, 0x02, 0x01, 0x02, 0x04, 0x01, 0x00 });
 
             //H.264
             //SPS and PPS In Band
-            public static Guid AVC_SPSPPS = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x0A, 0x04, 0x01, 0x02, 0x02, 0x01, 0x31, 0x00, 0x00 });            
+            public static Guid AVC_SPSPPS = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x0A, 0x04, 0x01, 0x02, 0x02, 0x01, 0x31, 0x00, 0x00 });
             //Intra
-            public static Guid AVC_INTRA = new Guid ( new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x0A, 0x04, 0x01, 0x02, 0x02, 0x01, 0x32, 0x00, 0x00 });
+            public static Guid AVC_INTRA = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x0A, 0x04, 0x01, 0x02, 0x02, 0x01, 0x32, 0x00, 0x00 });
 
-            public static Guid V210 = new Guid ( new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x0A, 0x04, 0x01, 0x02, 0x01, 0x01, 0x02, 0x02, 0x00 });
+            public static Guid V210 = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x0A, 0x04, 0x01, 0x02, 0x01, 0x01, 0x02, 0x02, 0x00 });
 
             //Sound
-            public static Guid Mpeg2_AAC_DTS_Legacy = new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x04, 0x01, 0x01, 0x03, 0x04, 0x02, 0x02, 0x02, 0x03, 0x03, 0x01, 0x00 });
+            public static Guid Mpeg2_AAC_DTS_Legacy = new(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x04, 0x01, 0x01, 0x03, 0x04, 0x02, 0x02, 0x02, 0x03, 0x03, 0x01, 0x00 });
 
             //Uncompressed
-            public static Guid PCM_S16LE_1 = new Guid ( new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x02, 0x02, 0x01, 0x00, 0, 0, 0 });
+            public static Guid PCM_S16LE_1 = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x02, 0x02, 0x01, 0x00, 0, 0, 0 });
 
-            public static Guid PCM_S16LE_2 = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x02, 0x02, 0x01, 0x7F, 0, 0, 0 });
+            public static Guid PCM_S16LE_2 = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x02, 0x02, 0x01, 0x7F, 0, 0, 0 });
 
-            public static Guid PCM_S16LE_3 = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x02, 0x02, 0x01, 0x01, 0, 0, 0 });
+            public static Guid PCM_S16LE_3 = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x02, 0x02, 0x01, 0x01, 0, 0, 0 });
 
-            public static Guid PCM_S16BE = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x07, 0x04, 0x02, 0x02, 0x01, 0x7E, 0, 0, 0 });
+            public static Guid PCM_S16BE = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x07, 0x04, 0x02, 0x02, 0x01, 0x7E, 0, 0, 0 });
 
-            public static Guid PCM_ALAW = new Guid ( new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x04, 0x04, 0x02, 0x02, 0x02, 0x03, 0x01, 0x01, 0x00 });
+            public static Guid PCM_ALAW = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x04, 0x04, 0x02, 0x02, 0x02, 0x03, 0x01, 0x01, 0x00 });
 
-            public static Guid AC3 = new Guid ( new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x02, 0x02, 0x02, 0x03, 0x02, 0x01, 0x00 });
+            public static Guid AC3 = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x02, 0x02, 0x02, 0x03, 0x02, 0x01, 0x00 });
 
             //Mp3
-            public static Guid MP2 = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x02, 0x02, 0x02, 0x03, 0x02, 0x05, 0x00 });
+            public static Guid MP2 = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x02, 0x02, 0x02, 0x03, 0x02, 0x05, 0x00 });
 
-            public static Guid Dolby_E = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x02, 0x02, 0x02, 0x03, 0x02, 0x1C, 0x00 });
+            public static Guid Dolby_E = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x01, 0x04, 0x02, 0x02, 0x02, 0x03, 0x02, 0x1C, 0x00 });
 
             //Pixel Formats
 
-            public static Guid PixelFormat = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x0A, 0x04, 0x01, 0x02, 0x01, 0, 0, 0, 0 });
+            public static Guid PixelFormat = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x0A, 0x04, 0x01, 0x02, 0x01, 0, 0, 0, 0 });
 
-            public static Guid PixelFormatUYUV_422 = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x0A, 0x04, 0x01, 0x02, 0x01, 0x01, 0x02, 0x01, 0x01 });
+            public static Guid PixelFormatUYUV_422 = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x0A, 0x04, 0x01, 0x02, 0x01, 0x01, 0x02, 0x01, 0x01 });
 
-            public static Guid PixelFormatYUYV_422 = new Guid(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x0A, 0x04, 0x01, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02 });
+            public static Guid PixelFormatYUYV_422 = new(new byte[] { 0x06, 0x0E, 0x2B, 0x34, 0x04, 0x01, 0x01, 0x0A, 0x04, 0x01, 0x02, 0x01, 0x01, 0x02, 0x01, 0x02 });
         }
 
         //Byte 14 of any Universal Label for a PartitionPack
@@ -386,7 +386,7 @@ namespace Media.Containers.Mxf
             Private,
             Reserved
         }
-        
+
         ////Byte 14 of operational pattern under certain conditions
         //public enum OperationalPatternPackageComplexity
         //{
@@ -405,9 +405,9 @@ namespace Media.Containers.Mxf
 
         #region Constants
 
-        const int IdentifierSize = 16, MinimumSizeLength = 1, MinimumSize = IdentifierSize + MinimumSizeLength, UniqueIdBytes = 12, MultiByteLength = 0x80; //128
+        private const int IdentifierSize = 16, MinimumSizeLength = 1, MinimumSize = IdentifierSize + MinimumSizeLength, UniqueIdBytes = 12, MultiByteLength = 0x80; //128
 
-        const string PictureTrack = "Picture Track", AudioTrack = "Audio Track", TextTrack = "Text Track", TimecodeTrack = "Timecode Track", DataTrack = "Data Track";
+        private const string PictureTrack = "Picture Track", AudioTrack = "Audio Track", TextTrack = "Text Track", TimecodeTrack = "Timecode Track", DataTrack = "Data Track";
 
         #endregion
 
@@ -425,9 +425,7 @@ namespace Media.Containers.Mxf
 
         public static Category GetCategory(Node node)
         {
-            if (node is null) throw new ArgumentNullException("node");
-
-            return (Category)node.Identifier[4];
+            return node is null ? throw new ArgumentNullException("node") : (Category)node.Identifier[4];
         }
 
         public static PartitionKind GetPartitionKind(Node node)
@@ -451,17 +449,17 @@ namespace Media.Containers.Mxf
             return (PartitionStatus)node.Identifier[14];
         }
 
-        static bool CompareUL(Guid a, Guid b, bool compareRegistry = false, bool compareVersion = false, bool compareKind = false)
+        private static bool CompareUL(Guid a, Guid b, bool compareRegistry = false, bool compareVersion = false, bool compareKind = false)
         {
             if (a == default) return b == default;
 
             //Use the hash code if exact
-            if (compareRegistry && compareVersion && compareKind) return a.GetHashCode() == b.GetHashCode();
-
-            return CompareUL(a.ToByteArray(), b.ToByteArray(), compareRegistry, compareVersion, compareKind);
+            return compareRegistry && compareVersion && compareKind
+                ? a.GetHashCode() == b.GetHashCode()
+                : CompareUL(a.ToByteArray(), b.ToByteArray(), compareRegistry, compareVersion, compareKind);
         }
 
-        static bool CompareUL(byte[] aBytes, byte[] bBytes, bool compareRegistry = false, bool compareVersion = false, bool compareKind = false)
+        private static bool CompareUL(byte[] aBytes, byte[] bBytes, bool compareRegistry = false, bool compareVersion = false, bool compareKind = false)
         {
             if (aBytes is null) return bBytes is null;
 
@@ -493,17 +491,16 @@ namespace Media.Containers.Mxf
         {
             if (identifier is null) return Media.Common.Extensions.String.StringExtensions.UnknownString;
 
-            string result;
 
             Guid id = offset > 0 || identifier.Length > 16 ? new Guid(identifier.Skip(offset).Take(IdentifierSize).ToArray()) : new Guid(identifier);
 
 
             //Reduces code but defeats lookup
             //foreach (var kvp in IdentifierLookup) if (CompareUL(kvp.Key.ToByteArray(), identifier, false, false, false)) return kvp.Value;
-                
+
 
             //If not an exact match
-            if (false == IdentifierLookup.TryGetValue(id, out result))
+            if (false == IdentifierLookup.TryGetValue(id, out string result))
             {
                 //Attempt by generic compare
                 if (CompareUL(UniversalLabel.PartitionPack.ToByteArray(), identifier, false, false, false)) return "PartitionPack"; //Last 4 bytes is version and open or closed
@@ -523,8 +520,7 @@ namespace Media.Containers.Mxf
 
         public override string ToTextualConvention(Container.Node node)
         {
-            if (node.Master.Equals(this)) return MxfReader.ToTextualConvention(node.Identifier);
-            return base.ToTextualConvention(node);
+            return node.Master.Equals(this) ? MxfReader.ToTextualConvention(node.Identifier) : base.ToTextualConvention(node);
         }
 
 
@@ -539,7 +535,7 @@ namespace Media.Containers.Mxf
         public static long DecodeVariableLength(System.IO.Stream stream, out int read)
         {
             read = 0;
-            
+
             long length = stream.ReadByte();
 
             ++read;
@@ -558,7 +554,7 @@ namespace Media.Containers.Mxf
                 length = 0;
 
                 //While there are bytes in the value
-                while(end-- > 0)
+                while (end-- > 0)
                 {
                     length <<= 8;
                     length |= (byte)(stream.ReadByte());
@@ -574,11 +570,11 @@ namespace Media.Containers.Mxf
         /// <summary>
         /// Holds a cache of all Fields in the Identifiers static type
         /// </summary>
-        static Dictionary<Guid, string> IdentifierLookup;
+        private static readonly Dictionary<Guid, string> IdentifierLookup;
 
         static MxfReader()
         {
-            IdentifierLookup = new Dictionary<Guid, string>();
+            IdentifierLookup = [];
 
             foreach (var fieldInfo in typeof(UniversalLabel).GetFields()) IdentifierLookup.Add((Guid)fieldInfo.GetValue(null), fieldInfo.Name);
         }
@@ -591,11 +587,10 @@ namespace Media.Containers.Mxf
 
         public MxfReader(System.IO.FileStream source, System.IO.FileAccess access = System.IO.FileAccess.Read) : base(source, access) { }
 
-        public MxfReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { } 
+        public MxfReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { }
 
-        int? m_RunInSize, m_MajorVersion, m_MinorVersion, m_IndexByteCount, m_KagSize;
-
-        Guid? m_OperationalPattern;
+        private int? m_RunInSize, m_MajorVersion, m_MinorVersion, m_IndexByteCount, m_KagSize;
+        private Guid? m_OperationalPattern;
 
         public Version HeaderVersion
         {
@@ -627,7 +622,7 @@ namespace Media.Containers.Mxf
         public bool HasIndex { get { return IndexByteCount > 0; } }
 
         //6.5 Run-In Sequence
-        void ReadRunIn()
+        private void ReadRunIn()
         {
             if (false == m_RunInSize.HasValue)
             {
@@ -648,7 +643,7 @@ namespace Media.Containers.Mxf
                 {
                     b = ReadByte();
 
-                    if(b == -1) break;
+                    if (b == -1) break;
 
                     switch (b)
                     {
@@ -668,7 +663,7 @@ namespace Media.Containers.Mxf
                     }
                 }
 
-            EndWhile:
+                EndWhile:
                 m_RunInSize = (int)Position;
             }
         }
@@ -719,7 +714,7 @@ namespace Media.Containers.Mxf
         //    }
         //}
 
-        void ParseHeader()
+        private void ParseHeader()
         {
             long position = Position;
 
@@ -731,7 +726,7 @@ namespace Media.Containers.Mxf
                 int offset = 0;
 
                 m_MajorVersion = Common.Binary.Read16(headerPartition.Data, offset, Common.Binary.IsLittleEndian);
-                
+
                 m_MinorVersion = Common.Binary.Read16(headerPartition.Data, offset + 2, Common.Binary.IsLittleEndian);
 
                 offset += 4;
@@ -746,7 +741,7 @@ namespace Media.Containers.Mxf
                     headerByteCount = Common.Binary.Read64(headerPartition.Data, offset + 32, Common.Binary.IsLittleEndian);
 
                 m_IndexByteCount = (int)Common.Binary.Read64(headerPartition.Data, offset + 40, Common.Binary.IsLittleEndian);
-                
+
                 //Header should be first partition and have no previous 
                 if (thisPartition != 0 || previousPartition != 0) throw new InvalidOperationException("Invalid HeaderParition");
 
@@ -803,7 +798,7 @@ namespace Media.Containers.Mxf
                         status = (PartitionStatus)footer.Identifier[14];
 
                         //Don't parse an incomplete footer
-                        if (status == PartitionStatus.OpenAndIncomplete || status == PartitionStatus.ClosedAndIncomplete) return;
+                        if (status is PartitionStatus.OpenAndIncomplete or PartitionStatus.ClosedAndIncomplete) return;
 
                         offset = 0;
 
@@ -821,7 +816,7 @@ namespace Media.Containers.Mxf
                         previousPartition = Common.Binary.Read64(footer.Data, offset + 8, Common.Binary.IsLittleEndian);
                         footerPartitionOffset = Common.Binary.Read64(footer.Data, offset + 16, Common.Binary.IsLittleEndian);
                         headerByteCount = Common.Binary.Read64(footer.Data, offset + 32, Common.Binary.IsLittleEndian);
-                        
+
                         //this partition should equal Footer
                         if (thisPartition != footerPartitionOffset) throw new InvalidOperationException("Invalid FooterParition");
 
@@ -837,7 +832,7 @@ namespace Media.Containers.Mxf
                         bodySid = Common.Binary.Read32(footer.Data, offset, Common.Binary.IsLittleEndian);
                         offset += 4;
 
-                        if(bodyOffset != 0 || bodySid != 0) throw new InvalidOperationException("Invalid FooterPartition");
+                        if (bodyOffset != 0 || bodySid != 0) throw new InvalidOperationException("Invalid FooterPartition");
 
                         m_OperationalPattern = new Guid(footer.Data.Skip(offset).Take(16).ToArray());
 
@@ -869,9 +864,8 @@ namespace Media.Containers.Mxf
             Position = position;
         }
 
-        DateTime? m_PrefaceLastModifiedDate;
-
-        short? m_PrefaceVersion;
+        private DateTime? m_PrefaceLastModifiedDate;
+        private short? m_PrefaceVersion;
 
         public short PrefaceVersion
         {
@@ -891,7 +885,7 @@ namespace Media.Containers.Mxf
             }
         }
 
-        void ParsePreface()
+        private void ParsePreface()
         {
             using (var preface = ReadObject(UniversalLabel.Preface, true, Root.DataOffset + Root.DataSize))
             {
@@ -911,13 +905,13 @@ namespace Media.Containers.Mxf
                     {
                         case 0x3b02:
                             {
-                                m_PrefaceLastModifiedDate = new DateTime((int)Common.Binary.ReadU16(preface.Data, offset, Common.Binary.IsLittleEndian),
-                                    (int)preface.Data[offset + 2],
-                                    (int)preface.Data[offset + 3],
-                                    (int)preface.Data[offset + 4],
-                                    (int)preface.Data[offset + 5],
-                                    (int)preface.Data[offset + 6],
-                                    (int)preface.Data[offset + 7],
+                                m_PrefaceLastModifiedDate = new DateTime(Common.Binary.ReadU16(preface.Data, offset, Common.Binary.IsLittleEndian),
+                                    preface.Data[offset + 2],
+                                    preface.Data[offset + 3],
+                                    preface.Data[offset + 4],
+                                    preface.Data[offset + 5],
+                                    preface.Data[offset + 6],
+                                    preface.Data[offset + 7],
                                     DateTimeKind.Utc);
                                 goto default;
                             }
@@ -982,7 +976,7 @@ namespace Media.Containers.Mxf
             }
         }
 
-        string m_CompanyName, m_ProductName, m_ProductVersion, m_Platform;
+        private string m_CompanyName, m_ProductName, m_ProductVersion, m_Platform;
 
         public string CompanyName
         {
@@ -1020,7 +1014,7 @@ namespace Media.Containers.Mxf
             }
         }
 
-        Guid? m_ProductUID;
+        private Guid? m_ProductUID;
 
         public Guid ProductUID
         {
@@ -1031,7 +1025,7 @@ namespace Media.Containers.Mxf
             }
         }
 
-        DateTime? m_IdentificationModificationDate;
+        private DateTime? m_IdentificationModificationDate;
 
         public DateTime IdentificationModificationDate
         {
@@ -1042,7 +1036,7 @@ namespace Media.Containers.Mxf
             }
         }
 
-        void ParseIdentification()
+        private void ParseIdentification()
         {
             using (var identification = ReadObject(UniversalLabel.Identification, true, Root.DataOffset + Root.DataSize))
             {
@@ -1072,7 +1066,7 @@ namespace Media.Containers.Mxf
                         //case 0x3c03:
                         //    {
                         //        //Product Version 10 byte type
-                                  //Suprisingly NOT REQUIRED
+                        //Suprisingly NOT REQUIRED
                         //        //ALL 2 bytes
 
                         //        //Major
@@ -1095,13 +1089,13 @@ namespace Media.Containers.Mxf
                             }
                         case 0x3c06:
                             {
-                                m_IdentificationModificationDate = new DateTime((int)Common.Binary.ReadU16(identification.Data, offset, Common.Binary.IsLittleEndian),
-                                   (int)identification.Data[offset + 2],
-                                   (int)identification.Data[offset + 3],
-                                   (int)identification.Data[offset + 4],
-                                   (int)identification.Data[offset + 5],
-                                   (int)identification.Data[offset + 6],
-                                   (int)identification.Data[offset + 7],
+                                m_IdentificationModificationDate = new DateTime(Common.Binary.ReadU16(identification.Data, offset, Common.Binary.IsLittleEndian),
+                                   identification.Data[offset + 2],
+                                   identification.Data[offset + 3],
+                                   identification.Data[offset + 4],
+                                   identification.Data[offset + 5],
+                                   identification.Data[offset + 6],
+                                   identification.Data[offset + 7],
                                    DateTimeKind.Utc);
                                 goto default;
                             }
@@ -1115,7 +1109,7 @@ namespace Media.Containers.Mxf
 
                 }
 
-                if (m_Platform is null) m_Platform = string.Empty;
+                m_Platform ??= string.Empty;
 
                 if (false == m_IdentificationModificationDate.HasValue
                     //Important?
@@ -1125,7 +1119,7 @@ namespace Media.Containers.Mxf
             }
         }
 
-        DateTime? m_MaterialCreationDate, m_MaterialModifiedDate;
+        private DateTime? m_MaterialCreationDate, m_MaterialModifiedDate;
 
         public DateTime Created
         {
@@ -1145,7 +1139,7 @@ namespace Media.Containers.Mxf
             }
         }
 
-        void ParseMaterialPackage()
+        private void ParseMaterialPackage()
         {
             using (var materialPackage = ReadObject(UniversalLabel.MaterialPackage, true, Root.DataOffset + Root.DataSize))
             {
@@ -1192,25 +1186,25 @@ namespace Media.Containers.Mxf
                         //    }
                         case 0x4404:
                             {
-                                m_MaterialModifiedDate = new DateTime((int)Common.Binary.ReadU16(materialPackage.Data, offset, Common.Binary.IsLittleEndian),
-                                   (int)materialPackage.Data[offset + 2],
-                                   (int)materialPackage.Data[offset + 3],
-                                   (int)materialPackage.Data[offset + 4],
-                                   (int)materialPackage.Data[offset + 5],
-                                   (int)materialPackage.Data[offset + 6],
-                                   (int)materialPackage.Data[offset + 7],
+                                m_MaterialModifiedDate = new DateTime(Common.Binary.ReadU16(materialPackage.Data, offset, Common.Binary.IsLittleEndian),
+                                   materialPackage.Data[offset + 2],
+                                   materialPackage.Data[offset + 3],
+                                   materialPackage.Data[offset + 4],
+                                   materialPackage.Data[offset + 5],
+                                   materialPackage.Data[offset + 6],
+                                   materialPackage.Data[offset + 7],
                                    DateTimeKind.Utc);
                                 goto default;
                             }
                         case 0x4405:
                             {
-                                m_MaterialCreationDate = new DateTime((int)Common.Binary.ReadU16(materialPackage.Data, offset, Common.Binary.IsLittleEndian),
-                                   (int)materialPackage.Data[offset + 2],
-                                   (int)materialPackage.Data[offset + 3],
-                                   (int)materialPackage.Data[offset + 4],
-                                   (int)materialPackage.Data[offset + 5],
-                                   (int)materialPackage.Data[offset + 6],
-                                   (int)materialPackage.Data[offset + 7],
+                                m_MaterialCreationDate = new DateTime(Common.Binary.ReadU16(materialPackage.Data, offset, Common.Binary.IsLittleEndian),
+                                   materialPackage.Data[offset + 2],
+                                   materialPackage.Data[offset + 3],
+                                   materialPackage.Data[offset + 4],
+                                   materialPackage.Data[offset + 5],
+                                   materialPackage.Data[offset + 6],
+                                   materialPackage.Data[offset + 7],
                                    DateTimeKind.Utc);
                                 goto default;
                             }
@@ -1281,7 +1275,7 @@ namespace Media.Containers.Mxf
 
             foreach (var mxfObject in this)
             {
-                Guid objectId = new Guid(mxfObject.Identifier);
+                Guid objectId = new(mxfObject.Identifier);
 
                 if (names is null || names.Count() is 0 || (exact ? names.Contains(objectId) : names.Any(n => CompareUL(n, objectId, ignoreRegistry, ignoreVersion, ignoreType))))
                     yield return mxfObject;
@@ -1304,21 +1298,20 @@ namespace Media.Containers.Mxf
 
             Read(identifier, 0, IdentifierSize);
 
-            int sizeLength = 0;
 
-            long length = DecodeVariableLength(this, out sizeLength);
+            long length = DecodeVariableLength(this, out int sizeLength);
 
-            if (sizeLength < MinimumSizeLength) throw new InvalidOperationException("Cannot Decode Length");
-
-            return new Node(this, identifier, sizeLength, Position, length, length <= Remaining);
+            return sizeLength < MinimumSizeLength
+                ? throw new InvalidOperationException("Cannot Decode Length")
+                : new Node(this, identifier, sizeLength, Position, length, length <= Remaining);
         }
 
-        public override IEnumerator<Node> GetEnumerator() 
+        public override IEnumerator<Node> GetEnumerator()
         {
             while (Remaining > MinimumSize)
             {
                 Node next = ReadNext();
-                
+
                 if (next is null) yield break;
 
                 yield return next;
@@ -1327,17 +1320,17 @@ namespace Media.Containers.Mxf
             }
         }
 
-        List<Track> m_Tracks;
+        private List<Track> m_Tracks;
 
         /// <summary>
         /// Provides a lookup of a (Related/Linked)TrackId to a GenericDescriptor
         /// </summary>
-        Common.Collections.Generic.ConcurrentThesaurus<int, Node> m_TrackDescriptors;
+        private Common.Collections.Generic.ConcurrentThesaurus<int, Node> m_TrackDescriptors;
 
         /// <summary>
         /// Obtains information which describes all tracks in the container
         /// </summary>
-        void ParseGenericDescriptors()
+        private void ParseGenericDescriptors()
         {
             if (m_TrackDescriptors is not null) return;
 
@@ -1354,13 +1347,13 @@ namespace Media.Containers.Mxf
             //Could also make virtual Nodes with each tag but would increase IO
 
             //Create a lookup to asscioate a descriptor to the node
-            m_TrackDescriptors = new Common.Collections.Generic.ConcurrentThesaurus<int, Node>();
+            m_TrackDescriptors = [];
 
             //Iterate the GenericDescriptors in the file parsing for trackId.
             foreach (var descriptor in ReadObjects(offsetStart, false, UniversalLabel.GenericDescriptor).ToArray())
             {
                 int offset = 0, lenth = (int)descriptor.DataSize;
-                
+
                 //Don't reset the trackId because apparently it means that its the from the lastId encountered...
                 //trackId = -1;
 
@@ -1483,13 +1476,13 @@ namespace Media.Containers.Mxf
                                 }
                             case 0x4405: //Package Creation Date
                                 {
-                                    trackCreated = new DateTime((int)Common.Binary.ReadU16(descriptor.Data, offset, Common.Binary.IsLittleEndian),
-                                       (int)descriptor.Data[offset + 2],
-                                       (int)descriptor.Data[offset + 3],
-                                       (int)descriptor.Data[offset + 4],
-                                       (int)descriptor.Data[offset + 5],
-                                       (int)descriptor.Data[offset + 6],
-                                       (int)descriptor.Data[offset + 7],
+                                    trackCreated = new DateTime(Common.Binary.ReadU16(descriptor.Data, offset, Common.Binary.IsLittleEndian),
+                                       descriptor.Data[offset + 2],
+                                       descriptor.Data[offset + 3],
+                                       descriptor.Data[offset + 4],
+                                       descriptor.Data[offset + 5],
+                                       descriptor.Data[offset + 6],
+                                       descriptor.Data[offset + 7],
                                        DateTimeKind.Utc);
                                     goto default;
                                 }
@@ -1497,13 +1490,13 @@ namespace Media.Containers.Mxf
                             case 0x3c06: // Modification Date
                             case 0x3b02: // Last Modified Date
                                 {
-                                    trackModified = new DateTime((int)Common.Binary.ReadU16(descriptor.Data, offset, Common.Binary.IsLittleEndian),
-                                        (int)descriptor.Data[offset + 2],
-                                        (int)descriptor.Data[offset + 3],
-                                        (int)descriptor.Data[offset + 4],
-                                        (int)descriptor.Data[offset + 5],
-                                        (int)descriptor.Data[offset + 6],
-                                        (int)descriptor.Data[offset + 7],
+                                    trackModified = new DateTime(Common.Binary.ReadU16(descriptor.Data, offset, Common.Binary.IsLittleEndian),
+                                        descriptor.Data[offset + 2],
+                                        descriptor.Data[offset + 3],
+                                        descriptor.Data[offset + 4],
+                                        descriptor.Data[offset + 5],
+                                        descriptor.Data[offset + 6],
+                                        descriptor.Data[offset + 7],
                                         DateTimeKind.Utc);
                                     goto default;
                                 }
@@ -1630,8 +1623,8 @@ namespace Media.Containers.Mxf
                                         ++i;
 
                                         //Component [ARGB, argb, F, YCBR]
-                                        if(descriptor.Data[++localOffset] is 0) break;
-                                        
+                                        if (descriptor.Data[++localOffset] is 0) break;
+
                                         //Bits per component
                                         bitDepth += descriptor.Data[localOffset++];
                                     }
@@ -1700,26 +1693,26 @@ namespace Media.Containers.Mxf
                         case TimecodeTrack: mediaType = Sdp.MediaType.timing; break;
                         case TextTrack: mediaType = Sdp.MediaType.text; break;
                         case DataTrack: mediaType = Sdp.MediaType.data; break;
-                    }                
+                    }
 
                 //Convert codecIndication to 4cc? sometimes is the last 4
 
                 //Get sampleCount if index is available? or count all frames...
 
-                                                        //Guid is EssenceElement
-                                                        //MxfReader.UniversalLabel.EssenceElement.ToByteArray()
+                //Guid is EssenceElement
+                //MxfReader.UniversalLabel.EssenceElement.ToByteArray()
                 int sampleCount = ReadObjects(timelineTrackObject.DataOffset + timelineTrackObject.DataSize, false, new Guid(new byte[] { 0x06, 0x0e, 0x2b, 0x34, 0x01, 0x02, 0x01, 0x01, 0x0d, 0x01, 0x03, 0x01, 
                     //Modified with trackNumber
                     (byte)((trackNumber >> 24) & byte.MaxValue), (byte)((trackNumber >> 16) & byte.MaxValue), (byte)((trackNumber >> 8) & byte.MaxValue), (byte)(trackNumber & byte.MaxValue) })).Count();
 
                 //Do duration calculation in a function and possibly do it above when there is a trackname
 
-                Track created = new Track(timelineTrackObject, trackName, trackId, trackCreated, trackModified, sampleCount, height, width, TimeSpan.FromSeconds(startTime * editRate), 
+                Track created = new(timelineTrackObject, trackName, trackId, trackCreated, trackModified, sampleCount, height, width, TimeSpan.FromSeconds(startTime * editRate),
                     //Duration calculation for Audio
                     (mediaType == Sdp.MediaType.audio ?
-                        TimeSpan.FromMilliseconds(duration * rate / Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond) 
+                        TimeSpan.FromMilliseconds(duration * rate / Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond)
                         : //Video
-                        TimeSpan.FromMilliseconds(duration * (1 / rate) * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond)), 
+                        TimeSpan.FromMilliseconds(duration * (1 / rate) * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond)),
                     rate, mediaType, codecIndication, channels, bitDepth);
 
                 yield return created;

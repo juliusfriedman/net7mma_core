@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Media.Codecs.Image.Transformations
+﻿namespace Media.Codecs.Image.Transformations
 {
     //Todo Seperate into seperate assembly
     public sealed class YUV : ImageTransformation
     {
-
-        static ImageTransform TransformToRGB = new ImageTransform(TransformYUV420ToRGB);
+        private static readonly ImageTransform TransformToRGB = new(TransformYUV420ToRGB);
 
         //Needs a way to verify the source is actuall YUV420 and dest is actually RGB
         public static void TransformYUV420ToRGB(Image source, Image dest)
@@ -35,11 +28,11 @@ namespace Media.Codecs.Image.Transformations
             bool oddWidth = Common.Binary.IsOdd(m_Dest.Width);
 
             //Take pointers to each plane
-            using (Common.MemorySegment y = new Common.MemorySegment(m_Source.Data.Array, m_Source.Data.Offset, m_Source.PlaneLength(0)))
+            using (Common.MemorySegment y = new(m_Source.Data.Array, m_Source.Data.Offset, m_Source.PlaneLength(0)))
             {
-                using (Common.MemorySegment u = new Common.MemorySegment(m_Source.Data.Array, y.Offset + y.Count, m_Source.PlaneLength(1)))
+                using (Common.MemorySegment u = new(m_Source.Data.Array, y.Offset + y.Count, m_Source.PlaneLength(1)))
                 {
-                    using (Common.MemorySegment v = new Common.MemorySegment(m_Source.Data.Array, u.Offset + u.Count, m_Source.PlaneLength(2)))
+                    using (Common.MemorySegment v = new(m_Source.Data.Array, u.Offset + u.Count, m_Source.PlaneLength(2)))
                     {
                         //Loop for the height
                         for (int i = 0, ie = (m_Dest.Height >> 1); i < ie; i++)
@@ -121,18 +114,18 @@ namespace Media.Codecs.Image.Transformations
             }
         }
 
-        const int SCALEBITS = 10;
-        const int ONE_HALF = (1 << (SCALEBITS - 1));
+        private const int SCALEBITS = 10;
+        private const int ONE_HALF = (1 << (SCALEBITS - 1));
 
         private static int FIX(double x)
         {
             return ((int)((x) * (1 << SCALEBITS) + 0.5));
         }
 
-        static readonly int FIX_0_71414 = FIX(0.71414);
-        static readonly int FIX_1_772 = FIX(1.77200);
-        static readonly int _FIX_0_34414 = -FIX(0.34414);
-        static readonly int FIX_1_402 = FIX(1.40200);
+        private static readonly int FIX_0_71414 = FIX(0.71414);
+        private static readonly int FIX_1_772 = FIX(1.77200);
+        private static readonly int _FIX_0_34414 = -FIX(0.34414);
+        private static readonly int FIX_1_402 = FIX(1.40200);
 
         public static void YUVJtoRGB(byte y, byte cb, byte cr, byte[] data, int off)
         {

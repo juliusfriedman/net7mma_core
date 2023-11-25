@@ -43,12 +43,12 @@ namespace Media.Common.Collections.Generic
     {
         #region Fields
 
-        bool m_IsShared;
+        private readonly bool m_IsShared;
 
         //Used to floor, ciel, etc for the index on int versions
         //int Precision;
 
-        System.Collections.Generic.SortedList<double, object> List = new System.Collections.Generic.SortedList<double, object>();
+        private readonly System.Collections.Generic.SortedList<double, object> List = [];
 
         #endregion
 
@@ -173,7 +173,7 @@ namespace Media.Common.Collections.Generic
     /// </summary>
     internal class PrecisionIndexableList : PrecicseList, Media.Common.Interfaces.IndexableList
     {
-        long UpperBound, LowerBound;
+        private readonly long UpperBound, LowerBound;
 
         long Interfaces.Indexable.LowerBound
         {

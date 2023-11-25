@@ -1,8 +1,8 @@
-﻿using System.Text;
-using System;
-using Media.Container;
-using System.IO;
+﻿using Media.Container;
 using Media.Containers.BaseMedia;
+using System;
+using System.IO;
+using System.Text;
 
 namespace Media.Containers.BaseMedia
 {
@@ -31,17 +31,17 @@ namespace Media.Containers.BaseMedia
             uint majorBrand = 0x69736F6D; // "isom"
             uint minorVersion = 0;
             uint[] compatibleBrands = new uint[] { 0x69736F6D, 0x61766331 }; // "isom", "avc1"
-            FtypBox ftypBox = new FtypBox(this, majorBrand, minorVersion, compatibleBrands);
+            FtypBox ftypBox = new(this, majorBrand, minorVersion, compatibleBrands);
             AddBox(ftypBox);
         }
 
         public void WriteMoovBox(TimeSpan duration, uint timeScale, int trackId, int sampleCount, int[] sampleSizes, TimeSpan[] sampleTimestamps)
         {
             // Create the moov box
-            MoovBox moovBox = new MoovBox(this, timeScale, 0, 0, 0, null, null, (uint)trackId);
+            MoovBox moovBox = new(this, timeScale, 0, 0, 0, null, null, (uint)trackId);
 
             // Create the mvhd box
-            MvhdBox mvhdBox = new MvhdBox(this, (uint)duration.Ticks, timeScale, 3, 4, null, null, (uint)trackId);
+            MvhdBox mvhdBox = new(this, (uint)duration.Ticks, timeScale, 3, 4, null, null, (uint)trackId);
             moovBox.AddChildBox(mvhdBox);
 
             var hdlrBox = new HdlrBox(this, 0);
@@ -51,49 +51,49 @@ namespace Media.Containers.BaseMedia
             uint creationTime = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             uint modificationTime = creationTime;
 
-            MdhdBox mdhdBox = new MdhdBox(this, 0, creationTime, modificationTime, timeScale, (ulong)duration.Ticks, 0x55C4);
+            MdhdBox mdhdBox = new(this, 0, creationTime, modificationTime, timeScale, (ulong)duration.Ticks, 0x55C4);
 
             // Create the trak box
-            TrakBox trakBox = new TrakBox(this, new MdiaBox(this, mdhdBox, hdlrBox, minfBox));
+            TrakBox trakBox = new(this, new MdiaBox(this, mdhdBox, hdlrBox, minfBox));
             moovBox.AddChildBox(trakBox);
 
             // Create the tkhd box
-            TkhdBox tkhdBox = new TkhdBox(this, 1, 0);
+            TkhdBox tkhdBox = new(this, 1, 0);
             trakBox.AddChildBox(tkhdBox);
 
             // Create the mdia box        
-            MdiaBox mdiaBox = new MdiaBox(this, mdhdBox, new HdlrBox(this, 0), minfBox);
+            MdiaBox mdiaBox = new(this, mdhdBox, new HdlrBox(this, 0), minfBox);
             trakBox.AddChildBox(mdiaBox);
 
             // Create the vmhd box
-            VmhdBox vmhdBox = new VmhdBox(this);
+            VmhdBox vmhdBox = new(this);
             mdiaBox.MinfBox.AddChildBox(vmhdBox);
 
             // Create the dinf box
-            DinfBox dinfBox = new DinfBox(this);
+            DinfBox dinfBox = new(this);
             mdiaBox.MinfBox.AddChildBox(dinfBox);
 
             // Create the dref box
-            DrefBox drefBox = new DrefBox(this);
+            DrefBox drefBox = new(this);
             dinfBox.AddChildBox(drefBox);
 
             // Create the url box
             drefBox.AddDataReference("");
 
             // Create the stbl box
-            StblBox stblBox = new StblBox(this);
+            StblBox stblBox = new(this);
             mdiaBox.MinfBox.AddChildBox(stblBox);
 
             // Create the stsd box
-            StsdBox stsdBox = new StsdBox(this);
+            StsdBox stsdBox = new(this);
             stblBox.AddChildBox(stsdBox);
 
             // Create the avc1 box
-            Avc1Box avc1Box = new Avc1Box(this, new byte[0]); // Replace with actual avcC data
+            Avc1Box avc1Box = new(this, new byte[0]); // Replace with actual avcC data
             stsdBox.AddSampleEntry(avc1Box);
 
             // Create the stts box
-            SttsBox sttsBox = new SttsBox(this);
+            SttsBox sttsBox = new(this);
             foreach (TimeSpan timestamp in sampleTimestamps)
             {
                 sttsBox.AddTimeToSampleEntry(1, (int)timestamp.TotalMilliseconds * (int)timeScale / 1000);
@@ -101,7 +101,7 @@ namespace Media.Containers.BaseMedia
             stblBox.AddChildBox(sttsBox);
 
             // Create the stsz box
-            StszBox stszBox = new StszBox(this);
+            StszBox stszBox = new(this);
             foreach (int size in sampleSizes)
             {
                 stszBox.AddSampleSize(size);
@@ -109,7 +109,7 @@ namespace Media.Containers.BaseMedia
             stblBox.AddChildBox(stszBox);
 
             // Create the stco box
-            StcoBox stcoBox = new StcoBox(this);
+            StcoBox stcoBox = new(this);
             uint offset = 0;
             foreach (int size in sampleSizes)
             {
@@ -125,24 +125,26 @@ namespace Media.Containers.BaseMedia
         public void WriteMoofBox(uint sequenceNumber, int trackId, TimeSpan baseMediaDecodeTime, int[] sampleSizes, uint[] sampleFlags)
         {
             // Create "moof" box
-            MoofBox moofBox = new MoofBox(this);
+            MoofBox moofBox = new(this);
 
             // Create "mfhd" box
-            MfhdBox mfhdBox = new MfhdBox(this, sequenceNumber);
+            MfhdBox mfhdBox = new(this, sequenceNumber);
 
             // Create "traf" box
-            TrafBox trafBox = new TrafBox(this);
+            TrafBox trafBox = new(this);
 
             // Create "tfhd" box
-            TfhdBox tfhdBox = new TfhdBox(this, (uint)trackId, (uint)baseMediaDecodeTime.Ticks / 10, 0, 0);
+            TfhdBox tfhdBox = new(this, (uint)trackId, (uint)baseMediaDecodeTime.Ticks / 10, 0, 0);
 
             // Create "tfdt" box
-            TfdtBox tfdtBox = new TfdtBox(this, (uint)baseMediaDecodeTime.Ticks / 10);
+            TfdtBox tfdtBox = new(this, (uint)baseMediaDecodeTime.Ticks / 10);
 
             // Create "trun" box
-            TrunBox trunBox = new TrunBox(this, (uint)sampleSizes.Length, 0, 0);
-            //trunBox.SampleSizes = sampleSizes;
-            trunBox.SampleFlags = sampleFlags;
+            TrunBox trunBox = new(this, (uint)sampleSizes.Length, 0, 0)
+            {
+                //trunBox.SampleSizes = sampleSizes;
+                SampleFlags = sampleFlags
+            };
 
             // Add boxes to their parent boxes
             trafBox.AddChildBox(tfhdBox);
@@ -163,7 +165,7 @@ namespace Media.Containers.BaseMedia
             uint creationTime = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             uint modificationTime = creationTime;
 
-            MdhdBox mdhdBox = new MdhdBox(this, 0, creationTime, modificationTime, 1000, 1000, 0x55C4);
+            MdhdBox mdhdBox = new(this, 0, creationTime, modificationTime, 1000, 1000, 0x55C4);
             var hdlrBox = new HdlrBox(this, 0); // Modify handler type as needed
 
             var minfBox = new MinfBox(this);
@@ -226,13 +228,15 @@ namespace Media.Containers.BaseMedia
 
         private Mp4aBox CreateAudioSampleEntry(uint sampleRate, ushort channelCount)
         {
-            var audioSampleEntry = new Mp4aBox(this);
-            audioSampleEntry.EntryVersion = 0;
-            audioSampleEntry.ChannelCount = channelCount;
-            audioSampleEntry.SampleSize = 16; // 16-bit samples
-            audioSampleEntry.CompressionId = 0; // No compression
-            audioSampleEntry.PacketSize = 0; // 0 for uncompressed audio
-            audioSampleEntry.SampleRate = sampleRate;
+            var audioSampleEntry = new Mp4aBox(this)
+            {
+                EntryVersion = 0,
+                ChannelCount = channelCount,
+                SampleSize = 16, // 16-bit samples
+                CompressionId = 0, // No compression
+                PacketSize = 0, // 0 for uncompressed audio
+                SampleRate = sampleRate
+            };
 
             // Set other audio-specific properties as needed
 
@@ -267,8 +271,8 @@ namespace Media.UnitTests
             writer.WriteFtypBox();
 
             // Write the moov box (movie)
-            MoovBox moovBox = new MoovBox(writer, 1000, 5000, 1, 1, null, null, 1);
-            
+            MoovBox moovBox = new(writer, 1000, 5000, 1, 1, null, null, 1);
+
             // Create an instance of MdhdBox
             byte version = 0;  // Use 0 for version 0, or 1 for version 1
             uint creationTime = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -276,30 +280,31 @@ namespace Media.UnitTests
             uint timeScale = 1000;  // For example, 1000 units per second
             ulong duration = 0;     // Duration in timeScale units
             ushort language = 0x55C4;  // Language code, e.g., 0x55C4 for English
-            MdhdBox mdhdBox = new MdhdBox(writer, version, creationTime, modificationTime, timeScale, duration, language);
+            MdhdBox mdhdBox = new(writer, version, creationTime, modificationTime, timeScale, duration, language);
 
             // Create an instance of HdlrBox
-            HdlrBox hdlrBox = new HdlrBox(writer, 1);//"vide");
+            HdlrBox hdlrBox = new(writer, 1);//"vide");
 
             // Create an instance of MinfBox
-            MinfBox minfBox = new MinfBox(writer);
+            MinfBox minfBox = new(writer);
 
             // Create an instance of MdiaBox and link it with MdhdBox, HdlrBox, and MinfBox
-            MdiaBox mdiaBox = new MdiaBox(writer, mdhdBox, hdlrBox, minfBox);
+            MdiaBox mdiaBox = new(writer, mdhdBox, hdlrBox, minfBox);
 
             // Create an instance of TrakBox and link it with MdiaBox
-            TrakBox trakBox = new TrakBox(writer, mdiaBox);            
+            TrakBox trakBox = new(writer, mdiaBox);
 
             // Create an instance of AudioSampleEntryBox
-            var audioSampleEntryBox = new Mp4aBox(writer);
-
-            // Set the properties for audio sample entry
-            audioSampleEntryBox.EntryVersion = 0;
-            audioSampleEntryBox.ChannelCount = 2;
-            audioSampleEntryBox.SampleSize = 16;
-            audioSampleEntryBox.CompressionId = 0;
-            audioSampleEntryBox.PacketSize = 0;
-            audioSampleEntryBox.SampleRate = (uint)sampleRate;
+            var audioSampleEntryBox = new Mp4aBox(writer)
+            {
+                // Set the properties for audio sample entry
+                EntryVersion = 0,
+                ChannelCount = 2,
+                SampleSize = 16,
+                CompressionId = 0,
+                PacketSize = 0,
+                SampleRate = (uint)sampleRate
+            };
 
             // Add AudioChunkBox
             var audioChunkBox = new StcoBox(writer);
@@ -330,9 +335,9 @@ namespace Media.UnitTests
             Console.WriteLine("MP4 file written successfully: " + outputFilePath);
         }
 
-        static void WriteAudioData(Mp4Writer writer, int sampleRate, int channels, int bitsPerSample)
+        private static void WriteAudioData(Mp4Writer writer, int sampleRate, int channels, int bitsPerSample)
         {
-            MdatBox mdatBox = new MdatBox(writer);
+            MdatBox mdatBox = new(writer);
 
             int duration = 1; // duration of each audio chunk in seconds
             int totalSamples = sampleRate * duration;

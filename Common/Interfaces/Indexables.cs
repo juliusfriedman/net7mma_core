@@ -80,12 +80,12 @@ namespace Media.Common.Interfaces
         /// <summary>
         /// 
         /// </summary>
-        bool m_IsReadOnly, m_IsWriteOnly, m_Mutable = true;
+        private bool m_IsReadOnly, m_IsWriteOnly, m_Mutable = true;
 
         /// <summary>
         /// Bounds.
         /// </summary>
-        long m_LowerBound;
+        private long m_LowerBound;
 
         /// <summary>
         /// 

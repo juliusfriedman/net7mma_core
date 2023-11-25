@@ -123,7 +123,7 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// The symbols utilized by this instance
         /// </summary>
-        abstract protected List<string> m_Symbols { get; }
+        protected abstract List<string> m_Symbols { get; }
 
         #endregion
 
@@ -143,7 +143,7 @@ namespace Media.Concepts.Classes
         public Number Constant
         {
             get;
-            internal protected set;
+            protected internal set;
         }
 
         /// <summary>
@@ -210,10 +210,7 @@ namespace Media.Concepts.Classes
         public UnitBase(Number constant, UnitBase other)
             : this(constant)
         {
-            if (other.Constant != Constant)
-                Units = Constant.ToDouble() / other.Units.ToDouble();
-            else
-                Units = other.Units;
+            Units = other.Constant != Constant ? (Number)(Constant.ToDouble() / other.Units.ToDouble()) : other.Units;
         }
 
         #endregion
@@ -241,7 +238,7 @@ namespace Media.Concepts.Classes
 
         //To parse you can provide a static which can be exposed from the dervived types if they desire so.
 
-        static bool Parse(UnitBase units, string value, int offset = 0, int count = -1, char[] symbols = null, System.Globalization.NumberStyles ns = System.Globalization.NumberStyles.None, System.Globalization.NumberFormatInfo nfi = null)
+        private static bool Parse(UnitBase units, string value, int offset = 0, int count = -1, char[] symbols = null, System.Globalization.NumberStyles ns = System.Globalization.NumberStyles.None, System.Globalization.NumberFormatInfo nfi = null)
         {
             if ((units is null || units.Symbols is null) &&
                 units.Symbols is null || string.IsNullOrWhiteSpace(value)) return false;
@@ -306,18 +303,18 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// The smallest and largest positive values.
         /// </summary>
-        public static readonly IdealUnit MinValue = new IdealUnit(-0.0), MaxValue = new IdealUnit(double.MaxValue);
+        public static readonly IdealUnit MinValue = new(-0.0), MaxValue = new(double.MaxValue);
 
         //@Sprintf
-        static readonly List<string> IndirectUnitSymbols = new List<string>()
-            {
+        private static readonly List<string> IndirectUnitSymbols =
+            [
                 "{{0}}"
-            };
+            ];
 
         /// <summary>
         /// The Error
         /// </summary>
-        internal protected Number Error;
+        protected internal Number Error;
 
         /// <summary>
         /// Create the;
@@ -406,7 +403,7 @@ namespace Media.Concepts.Classes
     /// <summary>
     /// A form of <see cref="Unit"/> which represents values through bias.
     /// </summary>
-    class VisceralUnit : IdealUnit
+    internal class VisceralUnit : IdealUnit
     {
 
     }
@@ -427,7 +424,7 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// Typically used to compute a value or call a function
         /// </summary>
-        Action OnSample = Common.Extensions.Delegate.ActionExtensions.NoOp;
+        private readonly Action OnSample = Common.Extensions.Delegate.ActionExtensions.NoOp;
 
         /// <summary>
         /// Stores the current instance in <see cref="LastValue"/> and calls <see cref="OnSample"/> which may modify this instance to pass values.
@@ -457,7 +454,7 @@ namespace Media.Concepts.Classes
         public ValueType Value;
 
         /// <summary>
-        /// Calls <see cref="InformalUnit.Sample"/> and then copies the result to <see cref="Value"/> as a <see cref="Double"/>
+        /// Calls <see cref="InformalUnit.Sample"/> and then copies the result to <see cref="Value"/> as a <see cref="double"/>
         /// </summary>
         public override void Sample()
         {
@@ -530,14 +527,13 @@ namespace Media.Concepts.Classes
             /// </summary>
             public static readonly Distance MinValue = Physics.ℓP;
 
-            public static readonly Distance PositiveInfinity = new Distance(Number.PositiveInfinty);
+            public static readonly Distance PositiveInfinity = new(Number.PositiveInfinty);
 
-            public static readonly Distance NegitiveInfinity = new Distance(Number.NegitiveInfinity);
+            public static readonly Distance NegitiveInfinity = new(Number.NegitiveInfinity);
 
-            public static readonly Distance Zero = new Distance(Number.Zero);
-
-            static readonly List<string> DistanceSymbols = new List<string>()
-            {
+            public static readonly Distance Zero = new(Number.Zero);
+            private static readonly List<string> DistanceSymbols =
+            [
                 "ℓP",
                 "mil",
                 "in",
@@ -550,7 +546,7 @@ namespace Media.Concepts.Classes
                 "cm",
                 "m",
                 "km"
-            };
+            ];
 
             public Distance()
                 : base(M)
@@ -644,9 +640,7 @@ namespace Media.Concepts.Classes
 
             public static bool operator >(Distance a, IDistance b)
             {
-                if (a.Constant.Equals(b.Constant) is false)
-                    return a.Units * b.Constant > b.TotalMeters;
-                return a.Units > b.TotalMeters;
+                return a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant > b.TotalMeters : a.Units > b.TotalMeters;
             }
 
             public static bool operator <(Distance a, IDistance b)
@@ -656,11 +650,9 @@ namespace Media.Concepts.Classes
 
             public static bool operator ==(Distance a, IDistance b)
             {
-                if (a is null) return b is null;
-                if (b is null) return false;
-                if (a.Constant.Equals(b.Constant) is false)
-                    return a.Units * b.Constant == b.TotalMeters;
-                return a.Units == b.TotalMeters;
+                return a is null
+                    ? b is null
+                    : b is not null && (a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalMeters : a.Units == b.TotalMeters);
             }
 
             public static bool operator !=(Distance a, IDistance b)
@@ -670,8 +662,7 @@ namespace Media.Concepts.Classes
 
             public override bool Equals(object obj)
             {
-                if (obj is IDistance) return obj as IDistance == this;
-                return base.Equals(obj);
+                return obj is IDistance ? obj as IDistance == this : base.Equals(obj);
             }
 
             public override int GetHashCode()
@@ -680,7 +671,7 @@ namespace Media.Concepts.Classes
             }
         }
     }
-    
+
     /// <summary>
     /// Class which is usefl for measuring and converting frequency
     /// </summary>
@@ -720,9 +711,9 @@ namespace Media.Concepts.Classes
 
             public static implicit operator Frequency(double t) { return new Frequency(t); }
 
-            public static readonly Frequency Zero = new Frequency(Number.Zero);
+            public static readonly Frequency Zero = new(Number.Zero);
 
-            public static readonly Frequency One = new Frequency(new Number(Hz)); //Hz
+            public static readonly Frequency One = new(new Number(Hz)); //Hz
 
             //Should be Number to avoid readonly ValueType
 
@@ -744,14 +735,14 @@ namespace Media.Concepts.Classes
                 return F >= min && F <= max;
             }
 
-            static readonly List<string> FrequencySymbols = new List<string>()
-            {
+            private static readonly List<string> FrequencySymbols =
+            [
                 "Hz",
                 "KHz",
                 "MHz",
                 "GHz",
                 "THz"
-            };
+            ];
 
             public Frequency()
                 : base(Hz)
@@ -858,9 +849,7 @@ namespace Media.Concepts.Classes
 
             public static bool operator >(Frequency a, Frequency b)
             {
-                if (a.Constant.Equals(b.Constant) is false)
-                    return a.Units * b.Constant > b.TotalUnits;
-                return a.Units > b.TotalUnits;
+                return a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant > b.TotalUnits : a.Units > b.TotalUnits;
             }
 
             public static bool operator <(Frequency a, Frequency b)
@@ -870,11 +859,9 @@ namespace Media.Concepts.Classes
 
             public static bool operator ==(Frequency a, Frequency b)
             {
-                if (a is null) return b is null;
-                if (b is null) return false;
-                if (a.Constant.Equals(b.Constant) is false)
-                    return a.Units * b.Constant == b.TotalUnits;
-                return a.Units == b.TotalUnits;
+                return a is null
+                    ? b is null
+                    : b is not null && (a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits);
             }
 
             public static bool operator !=(Frequency a, Frequency b)
@@ -884,8 +871,7 @@ namespace Media.Concepts.Classes
 
             public override bool Equals(object obj)
             {
-                if (obj is Frequency) return true;
-                return base.Equals(obj);
+                return obj is Frequency || base.Equals(obj);
             }
 
             public override int GetHashCode()
@@ -927,20 +913,19 @@ namespace Media.Concepts.Classes
 
             public static readonly Temperature One = 1D; //Celcius
 
-            const double FahrenheitMultiplier = 1.8;
+            private const double FahrenheitMultiplier = 1.8;
 
             public const double Fahrenheit = 32D;
 
             public const double Kelvin = 273.15D;
 
             public const char Degrees = '°';
-
-            static readonly List<string> TempratureSymbols = new List<string>()
-            {
+            private static readonly List<string> TempratureSymbols =
+            [
                 "C",
                 "F",
                 "K",
-            };
+            ];
 
             public Temperature()
                 : base(One.Units)
@@ -1019,9 +1004,7 @@ namespace Media.Concepts.Classes
 
             public static bool operator >(Temperature a, ITemperature b)
             {
-                if (a.Constant.Equals(b.Constant) is false)
-                    return a.Units * b.Constant > b.TotalUnits;
-                return a.Units > b.TotalUnits;
+                return a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant > b.TotalUnits : a.Units > b.TotalUnits;
             }
 
             public static bool operator <(Temperature a, ITemperature b)
@@ -1031,11 +1014,9 @@ namespace Media.Concepts.Classes
 
             public static bool operator ==(Temperature a, ITemperature b)
             {
-                if (a is null) return b is null;
-                if (b is null) return false;
-                if (a.Constant.Equals(b.Constant) is false)
-                    return a.Units * b.Constant == b.TotalUnits;
-                return a.Units == b.TotalUnits;
+                return a is null
+                    ? b is null
+                    : b is not null && (a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits);
             }
 
             public static bool operator !=(Temperature a, ITemperature b)
@@ -1045,8 +1026,7 @@ namespace Media.Concepts.Classes
 
             public override bool Equals(object obj)
             {
-                if (obj is ITemperature) return true;
-                return base.Equals(obj);
+                return obj is ITemperature || base.Equals(obj);
             }
 
             public override int GetHashCode()
@@ -1086,15 +1066,14 @@ namespace Media.Concepts.Classes
             public const double Kg = 1;
 
             public const double GramsPerKilogram = 1000;
-
-            static readonly List<string> MassSymbols = new List<string>()
-            {
+            private static readonly List<string> MassSymbols =
+            [
                 "u",
                 "o",
                 "lb",
                 "kg",
                 "g",
-            };
+            ];
 
             public Mass()
                 : base(Kg)
@@ -1192,9 +1171,7 @@ namespace Media.Concepts.Classes
 
             public static bool operator >(Mass a, IMass b)
             {
-                if (a.Constant.Equals(b.Constant) is false)
-                    return a.Units * b.Constant > b.TotalUnits;
-                return a.Units > b.TotalUnits;
+                return a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant > b.TotalUnits : a.Units > b.TotalUnits;
             }
 
             public static bool operator <(Mass a, IMass b)
@@ -1206,11 +1183,9 @@ namespace Media.Concepts.Classes
 
             public static bool operator ==(Mass a, IMass b)
             {
-                if (a is null) return b is null;
-                if (b is null) return false;
-                if (a.Constant.Equals(b.Constant) is false)
-                    return a.Units * b.Constant == b.TotalUnits;
-                return a.Units == b.TotalUnits;
+                return a is null
+                    ? b is null
+                    : b is not null && (a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits);
             }
 
             public static bool operator !=(Mass a, IMass b)
@@ -1220,8 +1195,7 @@ namespace Media.Concepts.Classes
 
             public override bool Equals(object obj)
             {
-                if (obj is IMass) return true;
-                return base.Equals(obj);
+                return obj is IMass || base.Equals(obj);
             }
 
             public override int GetHashCode()
@@ -1321,12 +1295,11 @@ namespace Media.Concepts.Classes
             public const double FemtojoulesPerJoule = 1000000000000000;
 
             public const double AuttojoulePerJoule = 1000000000000000000;
-
-            static readonly List<string> EnergySymbols = new List<string>()
-            {
+            private static readonly List<string> EnergySymbols =
+            [
                 "J",
                 //"Btu",
-            };
+            ];
 
 
             public Energy(double joules)
@@ -1430,9 +1403,7 @@ namespace Media.Concepts.Classes
 
             public static bool operator >(Energy a, IEnergy b)
             {
-                if (a.Constant.Equals(b.Constant) is false)
-                    return a.Units * b.Constant > b.TotalUnits;
-                return a.Units > b.TotalUnits;
+                return a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant > b.TotalUnits : a.Units > b.TotalUnits;
             }
 
             public static bool operator <(Energy a, IEnergy b)
@@ -1442,11 +1413,9 @@ namespace Media.Concepts.Classes
 
             public static bool operator ==(Energy a, IEnergy b)
             {
-                if (a is null) return b is null;
-                if (b is null) return false;
-                if (a.Constant.Equals(b.Constant) is false)
-                    return a.Units * b.Constant == b.TotalUnits;
-                return a.Units == b.TotalUnits;
+                return a is null
+                    ? b is null
+                    : b is not null && (a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits);
             }
 
             public static bool operator !=(Energy a, IEnergy b)
@@ -1486,8 +1455,7 @@ namespace Media.Concepts.Classes
 
             public override bool Equals(object obj)
             {
-                if (obj is IEnergy) return obj as IEnergy == this;
-                return base.Equals(obj);
+                return obj is IEnergy ? obj as IEnergy == this : base.Equals(obj);
             }
 
             public override int GetHashCode()
@@ -1514,17 +1482,17 @@ namespace Media.Concepts.Classes
             /// <remarks>
             /// Where as 0 would imply infinite `time` but not `frequency` and make such diambiguation quite difficult. (∞)
             /// </remarks>
-            public new static readonly NanoEnergy MinValue = -0D;
+            public static new readonly NanoEnergy MinValue = -0D;
 
             /// <summary>
             /// `1`
             /// </summary>
-            public new static readonly NanoEnergy One = Energy.NanojoulesPerJoule;
+            public static new readonly NanoEnergy One = Energy.NanojoulesPerJoule;
 
             /// <summary>
             /// `0`
             /// </summary>
-            public new static readonly NanoEnergy Zero = 0D;
+            public static new readonly NanoEnergy Zero = 0D;
 
             /// <summary>
             /// Constructs a new instance
@@ -1570,15 +1538,15 @@ namespace Media.Concepts.Classes
 
             public const double MetersPerSecond = 1;
 
-            public static readonly Velocity MaxValue = new Velocity(Physics.c);//the speed of light = 299 792 458 meters per second
+            public static readonly Velocity MaxValue = new(Physics.c);//the speed of light = 299 792 458 meters per second
 
-            static readonly List<string> VelocitySymbols = new List<string>()
-            {
+            private static readonly List<string> VelocitySymbols =
+            [
                 "mph",
                 "fps",
                 "kph",
                 "mps",
-            };
+            ];
 
             public Velocity()
                 : base(MetersPerSecond) { }
@@ -1655,9 +1623,7 @@ namespace Media.Concepts.Classes
 
             public static bool operator >(Velocity a, IVelocity b)
             {
-                if (a.Constant.Equals(b.Constant) is false)
-                    return a.Units * b.Constant > b.TotalUnits;
-                return a.Units > b.TotalUnits;
+                return a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant > b.TotalUnits : a.Units > b.TotalUnits;
             }
 
             public static bool operator <(Velocity a, IVelocity b)
@@ -1667,11 +1633,9 @@ namespace Media.Concepts.Classes
 
             public static bool operator ==(Velocity a, IVelocity b)
             {
-                if (a is null) return b is null;
-                if (b is null) return false;
-                if (a.Constant.Equals(b.Constant) is false)
-                    return a.Units * b.Constant == b.TotalUnits;
-                return a.Units == b.TotalUnits;
+                return a is null
+                    ? b is null
+                    : b is not null && (a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits);
             }
 
             public static bool operator !=(Velocity a, IVelocity b)
@@ -1681,8 +1645,7 @@ namespace Media.Concepts.Classes
 
             public override bool Equals(object obj)
             {
-                if (obj is IVelocity) return obj as IVelocity == this;
-                return base.Equals(obj);
+                return obj is IVelocity ? obj as IVelocity == this : base.Equals(obj);
             }
 
             public override int GetHashCode()
@@ -1734,10 +1697,10 @@ namespace Media.Concepts.Classes
             //0.0000001 Converts from erg
             //10000000 Converts to erg
 
-            static readonly List<string> ForceSymbols = new List<string>()
-            {
+            private static readonly List<string> ForceSymbols =
+            [
                 "N"
-            };
+            ];
 
             /// <summary>
             /// Constructs the default 1 newton = 1 joule/meter
@@ -1810,9 +1773,7 @@ namespace Media.Concepts.Classes
 
             public static bool operator >(Force a, IForce b)
             {
-                if (a.Constant.Equals(b.Constant) is false)
-                    return a.Units * b.Constant > b.TotalUnits;
-                return a.Units > b.TotalUnits;
+                return a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant > b.TotalUnits : a.Units > b.TotalUnits;
             }
 
             public static bool operator <(Force a, IForce b)
@@ -1822,11 +1783,9 @@ namespace Media.Concepts.Classes
 
             public static bool operator ==(Force a, IForce b)
             {
-                if (a is null) return b is null;
-                if (b is null) return false;
-                if (a.Constant.Equals(b.Constant) is false)
-                    return a.Units * b.Constant == b.TotalUnits;
-                return a.Units == b.TotalUnits;
+                return a is null
+                    ? b is null
+                    : b is not null && (a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits);
             }
 
             public static bool operator !=(Force a, IForce b)
@@ -1836,8 +1795,7 @@ namespace Media.Concepts.Classes
 
             public override bool Equals(object obj)
             {
-                if (obj is IForce) return ((IForce)obj) == this;
-                return base.Equals(obj);
+                return obj is IForce ? ((IForce)obj) == this : base.Equals(obj);
             }
 
             public override int GetHashCode()
@@ -1883,12 +1841,12 @@ namespace Media.Concepts.Classes
 
             public static implicit operator Wavelength(double t) { return new Wavelength(t); }
 
-            static readonly List<string> WavelengthSymbols = new List<string>()
-            {
+            private static readonly List<string> WavelengthSymbols =
+            [
                 "nm",
                 "μm",
                 "m"
-            };
+            ];
 
             public const double Nm = 1D;
 
@@ -1974,9 +1932,7 @@ namespace Media.Concepts.Classes
 
             public static bool operator >(Wavelength a, IWavelength b)
             {
-                if (a.Constant.Equals(b.Constant) is false)
-                    return a.Units * b.Constant > b.TotalUnits;
-                return a.Units > b.TotalUnits;
+                return a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant > b.TotalUnits : a.Units > b.TotalUnits;
             }
 
             public static bool operator <(Wavelength a, IWavelength b)
@@ -1986,11 +1942,9 @@ namespace Media.Concepts.Classes
 
             public static bool operator ==(Wavelength a, IWavelength b)
             {
-                if (a is null) return b is null;
-                if (b is null) return false;
-                if (a.Constant.Equals(b.Constant) is false)
-                    return a.Units * b.Constant == b.TotalUnits;
-                return a.Units == b.TotalUnits;
+                return a is null
+                    ? b is null
+                    : b is not null && (a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits);
             }
 
             public static bool operator !=(Wavelength a, IWavelength b)
@@ -2000,8 +1954,7 @@ namespace Media.Concepts.Classes
 
             public override bool Equals(object obj)
             {
-                if (obj is IWavelength) return obj as IWavelength == this;
-                return base.Equals(obj);
+                return obj is IWavelength ? obj as IWavelength == this : base.Equals(obj);
             }
 
             public override int GetHashCode()

@@ -77,6 +77,6 @@ namespace Media.Common.Extensions.Object
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static T[] ToArray<T>(params T[] tArray) { return tArray; }
-        
+
     }
 }

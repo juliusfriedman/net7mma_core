@@ -1,22 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Codecs.Image.Jpeg
 {
 
     //Would be helpful to have a Stream with a buffer for skipping
-    
+
     //Should allow marker reading on it's own outside of the RFC2435 class to decouple logic.
     public class MarkerReader : IDisposable
     {
-
-        System.IO.Stream jpegStream;
-
-        int streamOffset, streamLength;
-
+        private System.IO.Stream jpegStream;
+        private int streamOffset;
+        private readonly int streamLength;
         public Marker current;
 
         public IEnumerable<Marker> ReadMarkers()
@@ -46,14 +42,14 @@ namespace Media.Codecs.Image.Jpeg
                     if (FunctionCode == -1) break;
 
                     //Ensure not padded
-                    if (FunctionCode == Media.Codecs.Image.Jpeg.Markers.Prefix
-                        ||
-                        FunctionCode is 0) continue;
+                    if (FunctionCode is Media.Codecs.Image.Jpeg.Markers.Prefix
+                        or
+                        0) continue;
 
                     //Last Tag
-                    if (FunctionCode == Media.Codecs.Image.Jpeg.Markers.StartOfInformation
-                        ||
-                        FunctionCode == Media.Codecs.Image.Jpeg.Markers.EndOfInformation) goto AtMarker;
+                    if (FunctionCode is Media.Codecs.Image.Jpeg.Markers.StartOfInformation
+                        or
+                        Media.Codecs.Image.Jpeg.Markers.EndOfInformation) goto AtMarker;
 
                     //Read the Marker Length
 
@@ -68,7 +64,7 @@ namespace Media.Codecs.Image.Jpeg
                     //Correct Length
                     CodeSize -= 2; //Not including their own length
 
-                AtMarker:
+                    AtMarker:
 
                     current = new Marker()
                     {
@@ -127,11 +123,11 @@ namespace Media.Codecs.Image.Jpeg
 
         public IEnumerable<byte> Prepare() //bool includePrefix, includeCode, includeLength, includeData...
         {
-            if(PrefixLength > 0) foreach(byte b in Enumerable.Repeat<byte>(Jpeg.Markers.Prefix, PrefixLength)) yield return b;
+            if (PrefixLength > 0) foreach (byte b in Enumerable.Repeat<byte>(Jpeg.Markers.Prefix, PrefixLength)) yield return b;
 
             yield return Code;
 
-            if (Code == Markers.StartOfInformation || Code == Markers.EndOfInformation) yield break;
+            if (Code is Markers.StartOfInformation or Markers.EndOfInformation) yield break;
 
             foreach (byte b in Common.Binary.GetBytes((short)Length, Media.Common.Binary.IsBigEndian)) yield return b;
 

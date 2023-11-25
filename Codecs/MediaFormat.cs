@@ -64,9 +64,9 @@ namespace Media.Codec
         /// <returns></returns>
         public static MediaFormat Planar(MediaFormat other)
         {
-            if (other.DataLayout == DataLayout.Planar) return other;
-
-            return new MediaFormat(other.MediaType, other.ByteOrder, DataLayout.Planar, other.Components);
+            return other.DataLayout == DataLayout.Planar
+                ? other
+                : new MediaFormat(other.MediaType, other.ByteOrder, DataLayout.Planar, other.Components);
         }
 
         /// <summary>
@@ -76,9 +76,9 @@ namespace Media.Codec
         /// <returns></returns>
         public static MediaFormat Packed(MediaFormat other)
         {
-            if (other.DataLayout == DataLayout.Packed) return other;
-
-            return new MediaFormat(other.MediaType, other.ByteOrder, DataLayout.Packed, other.Components);
+            return other.DataLayout == DataLayout.Packed
+                ? other
+                : new MediaFormat(other.MediaType, other.ByteOrder, DataLayout.Packed, other.Components);
         }
 
         /// <summary>
@@ -88,9 +88,9 @@ namespace Media.Codec
         /// <returns></returns>
         public static MediaFormat SemiPlanar(MediaFormat other)
         {
-            if (other.DataLayout == DataLayout.SemiPlanar) return other;
-
-            return new MediaFormat(other.MediaType, other.ByteOrder, DataLayout.SemiPlanar, other.Components);
+            return other.DataLayout == DataLayout.SemiPlanar
+                ? other
+                : new MediaFormat(other.MediaType, other.ByteOrder, DataLayout.SemiPlanar, other.Components);
         }
 
         #endregion
@@ -152,16 +152,15 @@ namespace Media.Codec
             //Create the array
             Components = new MediaComponent[components];
 
-            long length;
 
             //Validate the length of the id array
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(componentIds, out length) || length < components) throw new System.ArgumentException("componentIds", "Must have the amount of elements indicated by 'components'");
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(componentIds, out long length) || length < components) throw new System.ArgumentException("componentIds", "Must have the amount of elements indicated by 'components'");
 
             //Calculate the size in bits of all components
             Size = bitsPerComponent * components;
 
             //Creates each component
-            for (int i = 0; i < components; ++i) Components[i] = new MediaComponent( componentIds is not null ? componentIds[i] : (byte)i, bitsPerComponent);
+            for (int i = 0; i < components; ++i) Components[i] = new MediaComponent(componentIds is not null ? componentIds[i] : (byte)i, bitsPerComponent);
         }
 
         public MediaFormat(MediaType mediaType, Common.Binary.ByteOrder byteOrder, DataLayout dataLayout, int components, int[] componentSizes, byte[] componentIds, bool shouldDispose = true)
@@ -183,10 +182,9 @@ namespace Media.Codec
             //Create the array
             Components = new MediaComponent[components];
 
-            long length;
 
             //Validate the sizes array
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(componentSizes, out length) || length < components) throw new System.ArgumentException("componentSizes", "Must have the amount of elements indicated by 'components'");
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(componentSizes, out long length) || length < components) throw new System.ArgumentException("componentSizes", "Must have the amount of elements indicated by 'components'");
 
             //Validate the length of the id array
             if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(componentIds, out length) || length < components) throw new System.ArgumentException("componentIds", "Must have the amount of elements indicated by 'components'");
@@ -230,9 +228,9 @@ namespace Media.Codec
         }
 
         public MediaFormat(MediaFormat other, Common.Binary.ByteOrder byteOrder, DataLayout dataLayout, params MediaComponent[] additionalComponents)
-            :this(other.MediaType, byteOrder, dataLayout, System.Linq.Enumerable.Concat(other.Components, additionalComponents ?? System.Linq.Enumerable.Empty<MediaComponent>()))
+            : this(other.MediaType, byteOrder, dataLayout, System.Linq.Enumerable.Concat(other.Components, additionalComponents ?? System.Linq.Enumerable.Empty<MediaComponent>()))
         {
-            
+
         }
 
         public MediaFormat(MediaFormat other)
@@ -272,7 +270,7 @@ namespace Media.Codec
         {
             get
             {
-                System.Collections.Generic.HashSet<byte> idSet = new System.Collections.Generic.HashSet<byte>();
+                System.Collections.Generic.HashSet<byte> idSet = [];
 
                 //Iterate each component
                 for (int i = 0; i < Components.Length; ++i)
@@ -314,9 +312,7 @@ namespace Media.Codec
 
         public int IndexOf(MediaComponent component)
         {
-            if (component is null) throw new System.ArgumentNullException();
-
-            return System.Array.IndexOf(Components, component);
+            return component is null ? throw new System.ArgumentNullException() : System.Array.IndexOf(Components, component);
         }
 
         public MediaComponent GetComponentById(byte id)

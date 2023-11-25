@@ -38,11 +38,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
+using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Media.Common;
 
 #endregion
 namespace Media.Rtcp
@@ -58,7 +57,7 @@ namespace Media.Rtcp
 
         public const int SendersInformationSize = 20;
 
-        new public const int PayloadType = 200;
+        public new const int PayloadType = 200;
 
         #endregion
 
@@ -125,9 +124,9 @@ namespace Media.Rtcp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return (int)Binary.ReadU32(Payload.Array, Payload.Offset, Common.Binary.IsLittleEndian); }
-            
+
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { Binary.Write32(Payload.Array, Payload.Offset, Common.Binary.IsLittleEndian, (uint)value); }
+            protected internal set { Binary.Write32(Payload.Array, Payload.Offset, Common.Binary.IsLittleEndian, (uint)value); }
         }
 
         /// <summary>
@@ -137,9 +136,9 @@ namespace Media.Rtcp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return (int)Binary.ReadU32(Payload.Array, Payload.Offset + 4, Common.Binary.IsLittleEndian); }
-            
+
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { Binary.Write32(Payload.Array, Payload.Offset + 4, Common.Binary.IsLittleEndian, (uint)value); }
+            protected internal set { Binary.Write32(Payload.Array, Payload.Offset + 4, Common.Binary.IsLittleEndian, (uint)value); }
         }
 
         /// <summary>            
@@ -153,9 +152,9 @@ namespace Media.Rtcp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return (int)Binary.ReadU32(Payload.Array, Payload.Offset + 8, Common.Binary.IsLittleEndian); }
-            
+
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { Binary.Write32(Payload.Array, Payload.Offset + 8, Common.Binary.IsLittleEndian, (uint)value); }
+            protected internal set { Binary.Write32(Payload.Array, Payload.Offset + 8, Common.Binary.IsLittleEndian, (uint)value); }
         }
 
         /// <summary>
@@ -166,9 +165,9 @@ namespace Media.Rtcp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return (int)Binary.ReadU32(Payload.Array, Payload.Offset + 12, Common.Binary.IsLittleEndian); }
-            
+
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { Binary.Write32(Payload.Array, Payload.Offset + 12, Common.Binary.IsLittleEndian, (uint)value); }
+            protected internal set { Binary.Write32(Payload.Array, Payload.Offset + 12, Common.Binary.IsLittleEndian, (uint)value); }
         }
 
         /// <summary>
@@ -180,9 +179,9 @@ namespace Media.Rtcp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return (int)Binary.ReadU32(Payload.Array, Payload.Offset + 16, Common.Binary.IsLittleEndian); }
-            
+
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { Binary.Write32(Payload.Array, Payload.Offset + 16, Common.Binary.IsLittleEndian, (uint)value); }
+            protected internal set { Binary.Write32(Payload.Array, Payload.Offset + 16, Common.Binary.IsLittleEndian, (uint)value); }
         }
 
         /// <summary>
@@ -202,9 +201,9 @@ namespace Media.Rtcp
 
                 return (long)Common.Binary.ReadU64(Payload.Array, Payload.Offset, Common.Binary.IsLittleEndian);
             }
-            
+
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set
+            protected internal set
             {
 
                 //We need an unsigned representation of the value
@@ -245,7 +244,7 @@ namespace Media.Rtcp
             }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set
+            protected internal set
             {
                 //NtpTimestamp = (long)Media.Ntp.NetworkTimeProtocol.DateTimeToNptTimestamp(ref value);
                 Common.Binary.Write64(Payload.Array, Payload.Offset, Common.Binary.IsLittleEndian, Media.Ntp.NetworkTimeProtocol.DateTimeToNptTimestamp(ref value));
@@ -272,7 +271,7 @@ namespace Media.Rtcp
             get
             {
                 if (false == HasReports || IsDisposed) return Common.MemorySegment.Empty;
-                
+
                 //return Payload.Skip(SendersInformationSize).Take(ReportBlockOctets);
 
                 return new Common.MemorySegment(Payload.Array, Payload.Offset + SendersInformationSize, ReportBlockOctets);
@@ -280,7 +279,7 @@ namespace Media.Rtcp
             }
         }
 
-        internal protected Common.MemorySegment SendersInformationSegment
+        protected internal Common.MemorySegment SendersInformationSegment
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
@@ -305,10 +304,10 @@ namespace Media.Rtcp
             }
         }
 
-      
+
         #endregion
 
-        internal protected override IEnumerator<IReportBlock> GetEnumeratorInternal(int offset = 0)
+        protected internal override IEnumerator<IReportBlock> GetEnumeratorInternal(int offset = 0)
         {
             //The SendersReport ReportBlocks start after the SendersInformation
             return base.GetEnumeratorInternal(offset + SendersInformationSize);
@@ -341,7 +340,7 @@ namespace Media.UnitTests
                     int RandomId = RFC3550.Random32(Utility.Random.Next());
 
                     //Create a SendersReport instance using the specified options.
-                    using (Media.Rtcp.SendersReport p = new Rtcp.SendersReport(0, PaddingCounter, ReportBlockCounter, RandomId))
+                    using (Media.Rtcp.SendersReport p = new(0, PaddingCounter, ReportBlockCounter, RandomId))
                     {
                         //Check SendersInformation
                         System.Diagnostics.Debug.Assert(p.SendersInformation.Count() == Rtcp.SendersReport.SendersInformationSize, "Unexpected SendersInformation Count");
@@ -377,7 +376,7 @@ namespace Media.UnitTests
                         }
 
                         //Serialize and Deserialize and verify again
-                        using (Rtcp.SendersReport s = new Rtcp.SendersReport(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0), true))
+                        using (Rtcp.SendersReport s = new(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0), true))
                         {
                             //Check SynchronizationSourceIdentifier
                             System.Diagnostics.Debug.Assert(s.SynchronizationSourceIdentifier == p.SynchronizationSourceIdentifier, "Unexpected SynchronizationSourceIdentifier");
@@ -426,10 +425,10 @@ namespace Media.UnitTests
             int RandomId = RFC3550.Random32(Utility.Random.Next());
 
             //Create a SendersReport instance using the specified options.
-            using (Media.Rtcp.SendersReport p = new Rtcp.SendersReport(2, 0, 0, RandomId))
+            using (Media.Rtcp.SendersReport p = new(2, 0, 0, RandomId))
             {
                 //Let LSR =
-                DateTime ExpectedDateTime = new DateTime(1995, 11, 10, 11, 33, 25, 125, DateTimeKind.Utc); //n = LSR //
+                DateTime ExpectedDateTime = new(1995, 11, 10, 11, 33, 25, 125, DateTimeKind.Utc); //n = LSR //
 
                 //sec = 0xb44d_b705 
                 p.NtpMSW = -1269975291; //unchecked((int)3024992005);
@@ -442,12 +441,12 @@ namespace Media.UnitTests
 
                 //The middle 32 bits out of 64 in the NTP timestamp (as explained in Section 4) received as part of the most recent RTCP sender report (SR) packet from source SSRC_n. If no SR has been received yet, the field is set to zero.
                 if ((ulong)((p.NtpTimestamp) >> 16) << 32 != 0xB705200000000000) throw new Exception();
-                
+
                 //In Seconds, DSLR = 0x0005:4000 (5.250s)
-                const double ExpectedDelay = 5.250; 
+                const double ExpectedDelay = 5.250;
 
                 //Let A = 
-                DateTime A = new DateTime(1995, 11, 10, 11, 33, 36, 500, DateTimeKind.Utc); //.ToString("s.ffff")
+                DateTime A = new(1995, 11, 10, 11, 33, 36, 500, DateTimeKind.Utc); //.ToString("s.ffff")
 
                 //The delay, expressed in units of 1/65536 seconds, between receiving the last SR packet from source SSRC_n and sending this reception report block. If no SR packet has been received yet from SSRC_n, the DLSR field is set to zero.
                 TimeSpan delay = A.Subtract(TimeSpan.FromSeconds(ExpectedDelay)).Subtract(ExpectedDateTime);

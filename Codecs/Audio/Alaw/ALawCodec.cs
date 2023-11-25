@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Media.Codecs.Audio.Alaw
+﻿namespace Media.Codecs.Audio.Alaw
 {
     public class ALawCodec : /*: Media.Codec.Codec,*/ IAudioCodec
     {

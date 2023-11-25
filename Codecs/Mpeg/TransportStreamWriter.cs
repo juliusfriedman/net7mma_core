@@ -9,19 +9,18 @@ namespace Media.Containers.Mpeg
     /// <notes>
     /// Needs BitWriter to ensure writing is effecient on all architectures.
     /// </notes>
-    class TransportStreamWriter
+    internal class TransportStreamWriter
     {
 
         #region Fields
 
-        int m_PacketsWritten;
-
-        int m_BytesWritten;
+        private readonly int m_PacketsWritten;
+        private readonly int m_BytesWritten;
 
         //
 
-        private Dictionary<ushort, int> m_continuityCounter = new Dictionary<ushort, int>();
-        
+        private readonly Dictionary<ushort, int> m_continuityCounter = [];
+
         private double m_systemTimeClock; // In seconds (to avoid integer precision issues)
 
         #endregion
@@ -74,7 +73,7 @@ namespace Media.Containers.Mpeg
             //packet.AdaptationField.PCRFlag = true;
 
             //packet.AdaptationField.ProgramClockReferenceBase = (ulong)(ProgramClockReferenceBase + m_systemTimeClock * TimestampResolution);
-            
+
             // Note: The PCR represent the system clock, and thus must be equal to or greater than the value in the previous packet.
 
             // [ISO/IEC 13818-1] The continuity_counter shall not be incremented when the adaptation_field_control of the packet equals '00' or '10'.
@@ -104,12 +103,12 @@ namespace Media.Containers.Mpeg
 
             //packet.Header.ContinuityCounter (last 4 bits)
             packet[3] = (byte)(((continuityCounter % 16) & Common.Binary.FourBitMaxValue) >> 4);
-            
+
             //m_stream.WritePacket(packet);
             //WriteBytes(packet.GetBytes());
 
             double packetTimeSpan = (double)packet.Length / MaximumMultiplexRate;
-            
+
             m_systemTimeClock += packetTimeSpan;
 
             if (incrementContinuityCountr)
@@ -128,32 +127,32 @@ namespace Media.Containers.Mpeg
 
                 //Pid
                 //throw new NotImplementedException();
-                
+
                 // WritePacketAndIncrementClock(nullPacket, false);
             }
         }
 
         private List<byte[]> Packetize(byte[] payload, bool isStuffingAllowed)
         {
-            List<byte[]> result = new List<byte[]>();
+            List<byte[]> result = [];
             int maxPayloadBytesPerPacket = PacketLength - HeaderLength;
             int packetCount = (int)Math.Ceiling((double)payload.Length / maxPayloadBytesPerPacket);
             for (int index = 0; index < packetCount; index++)
             {
                 byte[] packet = new byte[PacketLength];
-                
+
                 //packet.Header.PayloadUnitStartIndicator = (index is 0);
-                
+
                 //packet.Header.PayloadExist = true;
 
                 int bytesInPayload = Common.Binary.Min(payload.Length - index * maxPayloadBytesPerPacket, maxPayloadBytesPerPacket);
-                
+
                 if ((bytesInPayload < maxPayloadBytesPerPacket) && !isStuffingAllowed)
                 {
                     // Packet stuffing bytes of value 0xFF may be found in the payload of Transport Stream packets carrying PSI and/or private_sections.
                     // i.e. for PES we must use adaptation field
                     //packet.Header.AdaptationFieldExist = true;
-                    
+
                     //packet.AdaptationField.FieldLength = (byte)(maxPayloadBytesPerPacket - bytesInPayload - 1);
                 }
 

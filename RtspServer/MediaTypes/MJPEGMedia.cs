@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Media.Rtsp.Server.MediaTypes
+﻿namespace Media.Rtsp.Server.MediaTypes
 {
     using System;
     using System.Drawing;
     using System.IO;
+    using System.Net;
     using System.Text;
     using System.Threading;
-    using System.Net;
-    using System.Security;
 
     /// <summary>
     /// MJPEG video source.
@@ -344,7 +337,7 @@ namespace Media.Rtsp.Server.MediaTypes
             byte[] jpegMagic = [0xFF, 0xD8, 0xFF];
             int jpegMagicLength = 3;
 
-            ASCIIEncoding encoding = new ASCIIEncoding();
+            ASCIIEncoding encoding = new();
 
             while (!stopEvent.WaitOne(0, false))
             {
@@ -487,7 +480,7 @@ namespace Media.Rtsp.Server.MediaTypes
                             {
                                 byte ch = buffer[i];
 
-                                if ((ch == (byte)'\n') || (ch == (byte)'\r'))
+                                if (ch is ((byte)'\n') or ((byte)'\r'))
                                 {
                                     break;
                                 }
@@ -503,7 +496,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         // search for image start
                         if ((align == 1) && (todo >= jpegMagicLength))
                         {
-                            start = Utility.Find( buffer, jpegMagic, pos, todo );
+                            start = Utility.Find(buffer, jpegMagic, pos, todo);
                             if (start != -1)
                             {
                                 // found JPEG start

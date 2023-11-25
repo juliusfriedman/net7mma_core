@@ -38,11 +38,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
+using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Media.Common;
 
 #endregion
 
@@ -60,8 +59,8 @@ namespace Media.Rtcp
     {
         #region Constants and Statics
 
-       // private const int MIN_PACKETS_LOST = -8388607; // 0xFF800001
-       // private const int MAX_PACKETS_LOST = 8388607; // 0x007FFFFF 
+        // private const int MIN_PACKETS_LOST = -8388607; // 0xFF800001
+        // private const int MAX_PACKETS_LOST = 8388607; // 0x007FFFFF 
 
         public const int ReportBlockSize = 24;
 
@@ -69,9 +68,8 @@ namespace Media.Rtcp
 
         #region Fields
 
-        readonly Common.MemorySegment Memory = Common.MemorySegment.Empty;
-
-        readonly byte[] m_OwnedOctets;
+        private readonly Common.MemorySegment Memory = Common.MemorySegment.Empty;
+        private readonly byte[] m_OwnedOctets;
 
         #endregion
 
@@ -212,7 +210,7 @@ namespace Media.Rtcp
         /// <summary>
         /// Allocates 24 octets to represent this ReportBlock instance.
         /// </summary>
-        ReportBlock(bool shouldDispose = true)
+        private ReportBlock(bool shouldDispose = true)
             : base(shouldDispose)
         {
             m_OwnedOctets = new byte[ReportBlockSize];
@@ -230,13 +228,13 @@ namespace Media.Rtcp
 
         public ReportBlock(int ssrc, byte fractionsLost, int cumulativePacketsLost) : this(ssrc, fractionsLost) { CumulativePacketsLost = cumulativePacketsLost; }
 
-        public ReportBlock(int ssrc, byte fractionsLost, int cumulativePacketsLost, int extendedHighestSequenceNumberReceived) 
+        public ReportBlock(int ssrc, byte fractionsLost, int cumulativePacketsLost, int extendedHighestSequenceNumberReceived)
             : this(ssrc, fractionsLost, cumulativePacketsLost) { ExtendedHighestSequenceNumberReceived = extendedHighestSequenceNumberReceived; }
 
-        public ReportBlock(int ssrc, byte fractionsLost, int cumulativePacketsLost, int extendedHighestSequenceNumberReceived, int interarrivalJitterEstimate) 
+        public ReportBlock(int ssrc, byte fractionsLost, int cumulativePacketsLost, int extendedHighestSequenceNumberReceived, int interarrivalJitterEstimate)
             : this(ssrc, fractionsLost, cumulativePacketsLost, extendedHighestSequenceNumberReceived) { InterarrivalJitterEstimate = interarrivalJitterEstimate; }
 
-        public ReportBlock(int ssrc, byte fractionsLost, int cumulativePacketsLost, int extendedHighestSequenceNumberReceived, int interarrivalJitterEstimate, int lastSendersReportTimestamp) 
+        public ReportBlock(int ssrc, byte fractionsLost, int cumulativePacketsLost, int extendedHighestSequenceNumberReceived, int interarrivalJitterEstimate, int lastSendersReportTimestamp)
             : this(ssrc, fractionsLost, cumulativePacketsLost, extendedHighestSequenceNumberReceived, interarrivalJitterEstimate) { LastSendersReportTimestamp = lastSendersReportTimestamp; }
 
         public ReportBlock(int ssrc, byte fractionsLost, int cumulativePacketsLost, int extendedHighestSequenceNumberReceived, int interarrivalJitterEstimate, int lastSendersReportTimestamp, int delaySinceLastSendersReport) : this(ssrc, fractionsLost, cumulativePacketsLost, extendedHighestSequenceNumberReceived, interarrivalJitterEstimate, lastSendersReportTimestamp) { DelaySinceLastSendersReport = delaySinceLastSendersReport; }
@@ -255,7 +253,7 @@ namespace Media.Rtcp
         }
 
         public ReportBlock(Common.MemorySegment data, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             Memory = data;
         }
@@ -312,7 +310,7 @@ namespace Media.Rtcp
 
             base.Dispose(ShouldDispose);
 
-            IDisposable memory = (IDisposable)Memory;
+            IDisposable memory = Memory;
 
             if (memory is not null)
             {
@@ -348,7 +346,7 @@ namespace Media.UnitTests
                 DelaySinceLastSendersReport = RFC3550.Random32(Utility.Random.Next());
 
             //Create the ReportBlock using the random values
-            using (Rtcp.ReportBlock rb = new Rtcp.ReportBlock(RandomId,
+            using (Rtcp.ReportBlock rb = new(RandomId,
                 FractionsLost, CumulativePacketsLost,
                 ExtendedHighestSequenceNumberReceived,
                 InterarrivalJitterEstimate,
@@ -383,7 +381,7 @@ namespace Media.UnitTests
                 System.Diagnostics.Debug.Assert(rb.DelaySinceLastSendersReport == DelaySinceLastSendersReport, "Unexpected DelaySinceLastSendersReport");
 
                 //Serialize, Deserialize and verify again
-                using (Rtcp.ReportBlock s = new Rtcp.ReportBlock(new Common.MemorySegment(rb.Prepare().ToArray())))
+                using (Rtcp.ReportBlock s = new(new Common.MemorySegment(rb.Prepare().ToArray())))
                 {
                     //Check IsComplete
                     System.Diagnostics.Debug.Assert(s.IsComplete, "IsComplete must be true.");

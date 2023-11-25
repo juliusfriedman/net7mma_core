@@ -1,7 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System;
 
 #region References
 
@@ -19,7 +19,7 @@ namespace Media.Common.Extensions.ExpressionExtensions
     {
         #region Support
 
-        static Func<T, object, object> MagicMethod<T>(MethodInfo method) where T : class
+        private static Func<T, object, object> MagicMethod<T>(MethodInfo method) where T : class
         {
             // First fetch the generic form
             MethodInfo genericHelper = typeof(SymbolExtensions).GetMethod("MagicMethodHelper",
@@ -64,11 +64,10 @@ namespace Media.Common.Extensions.ExpressionExtensions
         #endregion
 
         //Dependency ....
-        static readonly Type TypedConstantExpressionType;// = Type.GetType("System.Linq.Expressions.TypedConstantExpression, System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
+        private static readonly Type TypedConstantExpressionType;// = Type.GetType("System.Linq.Expressions.TypedConstantExpression, System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
 
-        static readonly Type InstanceMethodCallExpressionNType;
-
-        static readonly PropertyInfo TypedConstantExpressionValueProperty;
+        private static readonly Type InstanceMethodCallExpressionNType;
+        private static readonly PropertyInfo TypedConstantExpressionValueProperty;
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized | System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static SymbolExtensions()
@@ -172,7 +171,7 @@ namespace Media.Common.Extensions.ExpressionExtensions
         /// <returns></returns>
         public static MethodInfo LoadGetter(Expression<Action> expression)
         {
-            return GetPropertyInfo((LambdaExpression)expression).GetMethod;
+            return GetPropertyInfo(expression).GetMethod;
         }
 
         /// <summary>
@@ -182,7 +181,7 @@ namespace Media.Common.Extensions.ExpressionExtensions
         /// <returns></returns>
         public static MethodInfo LoadSetter(Expression<Action> expression)
         {
-            return GetPropertyInfo((LambdaExpression)expression).SetMethod;
+            return GetPropertyInfo(expression).SetMethod;
         }
 
         /// <summary>
@@ -261,10 +260,9 @@ namespace Media.Common.Extensions.ExpressionExtensions
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static MethodInfo GetMethodInfo(LambdaExpression expression)
         {
-            if (expression.Body is not MethodCallExpression outermostExpression)
-                throw new ArgumentException("Invalid Expression. Expression should consist of a Method call only.", nameof(expression));
-
-            return outermostExpression.Method;
+            return expression.Body is not MethodCallExpression outermostExpression
+                ? throw new ArgumentException("Invalid Expression. Expression should consist of a Method call only.", nameof(expression))
+                : outermostExpression.Method;
         }
     }
 }
@@ -281,7 +279,7 @@ namespace Media.UnitTests
 
         public class MyTestClass
         {
-            string m_Test;
+            private string m_Test;
 
             public string Test
             {
@@ -292,7 +290,7 @@ namespace Media.UnitTests
 
         public class MyTestClass<T> : MyTestClass
         {
-            T Backing;
+            private T Backing;
 
             public T Property
             {
@@ -311,14 +309,14 @@ namespace Media.UnitTests
             }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoOptimization)]
-            public T Method() { return default(T); }
+            public T Method() { return default; }
         }
 
         #endregion
 
         public void TestExpressionExtensions()
         {
-            MyTestClass testClass = new MyTestClass();
+            MyTestClass testClass = new();
 
             //Todo ... show how to allow to TypedReference use inside the body
             //System.TypedReference member = __makeref(testClass.Test);

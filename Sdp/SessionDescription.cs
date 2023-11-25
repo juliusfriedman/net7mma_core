@@ -57,9 +57,9 @@ namespace Media.Sdp
         public const string MimeType = "application/sdp";
 
         internal const char EqualsSign = (char)Common.ASCII.EqualsSign,
-            HyphenSign = (char)Common.ASCII.HyphenSign, 
+            HyphenSign = (char)Common.ASCII.HyphenSign,
             SemiColon = (char)Common.ASCII.SemiColon,
-            Colon = (char)Common.ASCII.Colon, 
+            Colon = (char)Common.ASCII.Colon,
             Space = (char)Common.ASCII.Space,
             ForwardSlash = (char)Common.ASCII.ForwardSlash,
             Asterisk = (char)Common.ASCII.Asterisk,
@@ -67,21 +67,21 @@ namespace Media.Sdp
             NewLine = (char)Common.ASCII.NewLine;
 
         internal static string
-            ForwardSlashString = new string(ForwardSlash, 1),
-            SpaceString = new string(Space, 1),
-            WildcardString = new string(Asterisk, 1),
-            LineFeedString = new string(LineFeed, 1), 
-            CarriageReturnString = new string(NewLine, 1),
-            SemiColonString = new string(SemiColon, 1), 
-            ColonString = new string(Colon, 1), 
+            ForwardSlashString = new(ForwardSlash, 1),
+            SpaceString = new(Space, 1),
+            WildcardString = new(Asterisk, 1),
+            LineFeedString = new(LineFeed, 1),
+            CarriageReturnString = new(NewLine, 1),
+            SemiColonString = new(SemiColon, 1),
+            ColonString = new(Colon, 1),
             NewLineString = CarriageReturnString + LineFeedString;
 
         internal static char[] SpaceSplit = new char[] { Space },
             ForwardSlashSplit = new char[] { ForwardSlash },
             SemiColonSplit = new char[] { SemiColon };
-                             //CRSPlit, LFSplit...
+        //CRSPlit, LFSplit...
         internal static char[] ColonSplit = new char[] { Colon };
-        
+
         internal static string[] CRLFSplit = new string[] { NewLineString };
 
         internal static string TrimLineValue(string value) { return string.IsNullOrWhiteSpace(value) ? value : value.Trim(); }
@@ -113,7 +113,7 @@ namespace Media.Sdp
 
             int offset = 0;
 
-            int length = value.Length;            
+            int length = value.Length;
 
             //Parse Type
             //Find '='
@@ -192,15 +192,13 @@ namespace Media.Sdp
                         const string clockFormat = "yyyyMMdd\\THHmmsss.ff";
                         try
                         {
-                            DateTime now = DateTime.UtcNow, date;
+                            DateTime now = DateTime.UtcNow;
 
                             //Parse and determine the start time
-                            if (string.IsNullOrWhiteSpace(startTimeString) is false && DateTime.TryParseExact(startTimeString, clockFormat, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out date))
+                            if (string.IsNullOrWhiteSpace(startTimeString) is false && DateTime.TryParseExact(startTimeString, clockFormat, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime date))
                             {
                                 //Time in the past
-                                if (now > date) start = now - date;
-                                //Future?
-                                else start = date - now;
+                                start = now > date ? now - date : date - now;
 
                                 //Ensure UTC
                                 date = DateTime.SpecifyKind(date, DateTimeKind.Utc);
@@ -208,12 +206,10 @@ namespace Media.Sdp
 
                             //Parse and determine the end time
                             if (string.Compare(startTimeString, endTimeString) is 0) end = start;
-                            else if (false.Equals( string.IsNullOrWhiteSpace(endTimeString)) && DateTime.TryParseExact(startTimeString, clockFormat, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out date))
+                            else if (false.Equals(string.IsNullOrWhiteSpace(endTimeString)) && DateTime.TryParseExact(startTimeString, clockFormat, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out date))
                             {
                                 //Time in the past
-                                if (now > date) end = now - date;
-                                //Future?
-                                else end = date - now;
+                                end = now > date ? now - date : date - now;
 
                                 //Ensure UTC
                                 date = DateTime.SpecifyKind(date, DateTimeKind.Utc);
@@ -320,19 +316,17 @@ namespace Media.Sdp
         #region Fields
 
         //Should be done in constructor of a new 
-            //Todo, could allow a local dictionary where certain types are cached.
+        //Todo, could allow a local dictionary where certain types are cached.
         //Todo, check if readonly is applicable.
-        internal protected Media.Sdp.Lines.SessionVersionLine m_SessionVersionLine;
-        internal protected Media.Sdp.Lines.SessionOriginLine m_OriginatorLine;
-        internal protected Media.Sdp.Lines.SessionNameLine m_NameLine;
-        
-        internal readonly protected List<MediaDescription> m_MediaDescriptions = new List<MediaDescription>();
-        internal readonly protected List<TimeDescription> m_TimeDescriptions = new List<TimeDescription>();
-        internal readonly protected List<SessionDescriptionLine> m_Lines = new List<SessionDescriptionLine>();
+        protected internal Media.Sdp.Lines.SessionVersionLine m_SessionVersionLine;
+        protected internal Media.Sdp.Lines.SessionOriginLine m_OriginatorLine;
+        protected internal Media.Sdp.Lines.SessionNameLine m_NameLine;
 
-        System.Threading.ManualResetEventSlim m_Update = new System.Threading.ManualResetEventSlim(true);
-
-        System.Threading.CancellationTokenSource m_UpdateTokenSource = new System.Threading.CancellationTokenSource();
+        protected internal readonly List<MediaDescription> m_MediaDescriptions = [];
+        protected internal readonly List<TimeDescription> m_TimeDescriptions = [];
+        protected internal readonly List<SessionDescriptionLine> m_Lines = [];
+        private readonly System.Threading.ManualResetEventSlim m_Update = new(true);
+        private readonly System.Threading.CancellationTokenSource m_UpdateTokenSource = new();
 
         #endregion
 
@@ -350,9 +344,9 @@ namespace Media.Sdp
             {
                 if (IsDisposed || UnderModification) return;
 
-                if (m_SessionVersionLine is not null && 
+                if (m_SessionVersionLine is not null &&
                     value.Equals(m_SessionVersionLine.Version)) return;
-                
+
                 var token = BeginUpdate();
 
                 m_SessionVersionLine = new Lines.SessionVersionLine(value);
@@ -377,7 +371,7 @@ namespace Media.Sdp
 
                 bool hadValueWithSetVersion = m_OriginatorLine is not null && m_OriginatorLine.SessionVersion is not Common.Binary.LongZero;
 
-                if (hadValueWithSetVersion && 
+                if (hadValueWithSetVersion &&
                     string.Compare(value, m_OriginatorLine.ToString(), StringComparison.InvariantCultureIgnoreCase) is 0) return;
 
                 var token = BeginUpdate();
@@ -401,7 +395,7 @@ namespace Media.Sdp
             {
                 if (IsDisposed) return;
 
-                if (object.ReferenceEquals(m_NameLine, null).Equals(false) && 
+                if (object.ReferenceEquals(m_NameLine, null).Equals(false) &&
                     string.Compare(value, m_NameLine.SessionName, StringComparison.InvariantCultureIgnoreCase).Equals(0)) return;
 
                 var token = BeginUpdate();
@@ -484,7 +478,7 @@ namespace Media.Sdp
 
                 m_TimeDescriptions.Clear();
 
-                if(value is not null) m_TimeDescriptions.AddRange(value);
+                if (value is not null) m_TimeDescriptions.AddRange(value);
 
                 EndUpdate(token, true);
             }
@@ -601,10 +595,10 @@ namespace Media.Sdp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return ((IEnumerable<SessionDescriptionLine>)this);
+                return this;
             }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set
+            protected internal set
             {
                 if (UnderModification) return;
 
@@ -650,7 +644,7 @@ namespace Media.Sdp
                 {
                     throw new InvalidOperationException("The ConnectionList must be a ConnectionLine");
                 }
-                
+
                 if (UnderModification) return;
 
                 Remove(ConnectionLine);
@@ -745,21 +739,21 @@ namespace Media.Sdp
         #region Constructor
 
         public SessionDescription(int version, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
-            m_OriginatorLine = new Lines.SessionOriginLine();
+            m_OriginatorLine = [];
 
-            m_NameLine = new Sdp.Lines.SessionNameLine();
+            m_NameLine = [];
 
             SessionDescriptionVersion = version;
         }
 
         public SessionDescription(string originatorString, string sessionName, bool shouldDispose = true)
-            :this(0, shouldDispose)
+            : this(0, shouldDispose)
         {
             OriginatorAndSessionIdentifier = originatorString;
 
-            m_NameLine = new Lines.SessionNameLine(sessionName); 
+            m_NameLine = new Lines.SessionNameLine(sessionName);
         }
 
         /// <summary>
@@ -773,7 +767,7 @@ namespace Media.Sdp
         {
             OriginatorAndSessionIdentifier = originatorAndSession;
 
-            m_NameLine = new Lines.SessionNameLine(sessionName); 
+            m_NameLine = new Lines.SessionNameLine(sessionName);
         }
 
         /// <summary>
@@ -781,20 +775,19 @@ namespace Media.Sdp
         /// </summary>
         /// <param name="sdpContents">The Session Description Protocol usually recieved in the Describe request of a RtspClient</param>
         public SessionDescription(string sdpContents, bool shouldDispose = true)
-            :this((sdpContents ?? string.Empty).Split(SessionDescription.CRLFSplit, StringSplitOptions.RemoveEmptyEntries), 0, -1, shouldDispose)
+            : this((sdpContents ?? string.Empty).Split(SessionDescription.CRLFSplit, StringSplitOptions.RemoveEmptyEntries), 0, -1, shouldDispose)
         {
             //if (string.IsNullOrWhiteSpace(sdpContents)) return;
 
             //string[] lines = sdpContents.Split(SessionDescription.CRLFSplit, StringSplitOptions.RemoveEmptyEntries);
-        }        
+        }
 
         public SessionDescription(string[] lines, int offset = 0, int length = -1, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
-            int register;
 
-            if (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(lines, out register) ||
-                register < MinimumLines || 
+            if (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(lines, out int register) ||
+                register < MinimumLines ||
                 register < length - offset) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(lines, string.Format("Invalid Session Description, At least {0} lines should be found.", MinimumLines));
 
             //Todo, handle when length is not negative and ensure only length lines are read
@@ -858,15 +851,14 @@ namespace Media.Sdp
                     //    }
                     default:
                         {
-                            SessionDescriptionLine parsed;
 
-                            if (SessionDescriptionLine.TryParse(lines, ref offset, out parsed)) m_Lines.Add(parsed);
+                            if (SessionDescriptionLine.TryParse(lines, ref offset, out SessionDescriptionLine parsed)) m_Lines.Add(parsed);
                             else ++offset;//No advance was made on lineIndex by SessionDescriptionLine if parsed was null
 
                             continue;
                         }
                 }
-            }        
+            }
         }
 
         /// <summary>
@@ -990,7 +982,7 @@ namespace Media.Sdp
                     m_Lines.Add(line);
                     break;
             }
-            
+
             EndUpdate(token, updateVersion);
         }
 
@@ -1026,17 +1018,17 @@ namespace Media.Sdp
                     }
                     break;
                     //Handle remove of Time Description and its constituents
-                ////case Sdp.MediaDescription.MediaDescriptionType:
-                ////    {
+                    ////case Sdp.MediaDescription.MediaDescriptionType:
+                    ////    {
                     //Handle remove of Media Description and its constituents
-                ////        foreach (MediaDescription md in MediaDescriptions) if (result = md.Remove(line)) break;
-                ////    }                    
-                ////    break;
-                ////default:
-                ////    {
-                ////        result = m_Lines.Remove(line);
-                ////    }
-                ////    break;
+                    ////        foreach (MediaDescription md in MediaDescriptions) if (result = md.Remove(line)) break;
+                    ////    }                    
+                    ////    break;
+                    ////default:
+                    ////    {
+                    ////        result = m_Lines.Remove(line);
+                    ////    }
+                    ////    break;
             }
 
             if (result is false)
@@ -1074,7 +1066,7 @@ namespace Media.Sdp
             var token = BeginUpdate();
 
             bool result = m_MediaDescriptions.Remove(mediaDescription);
-            
+
             EndUpdate(token, updateVersion);
 
             return result;
@@ -1194,9 +1186,7 @@ namespace Media.Sdp
         public override bool Equals(object obj)
         {
             //System.Object
-            if (object.ReferenceEquals(this, obj)) return true;
-
-            return obj is SessionDescription sd && Equals(sd);
+            return object.ReferenceEquals(this, obj) || obj is SessionDescription sd && Equals(sd);
         }
 
         /// <summary>
@@ -1370,9 +1360,8 @@ namespace Media.Sdp
 
         public static bool SupportsAggregateMediaControl(this SessionDescription sdp, Uri baseUri = null)
         {
-            Uri result;
 
-            return SupportsAggregateMediaControl(sdp, out result, baseUri);
+            return SupportsAggregateMediaControl(sdp, out Uri result, baseUri);
         }
 
         /// <summary>
@@ -1435,18 +1424,18 @@ namespace Media.Sdp
         //E.g. This index can be used in GetMediaDescription(index)
         public static int GetIndexFor(this SessionDescription sdp, MediaDescription md)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(sdp) || Common.IDisposedExtensions.IsNullOrDisposed(md)) return -1;
-
-            return sdp.m_MediaDescriptions.IndexOf(md);
+            return Common.IDisposedExtensions.IsNullOrDisposed(sdp) || Common.IDisposedExtensions.IsNullOrDisposed(md)
+                ? -1
+                : sdp.m_MediaDescriptions.IndexOf(md);
         }
 
         //E.g. This index can be used in GetTimeDescription(index)
         public static int GetIndexFor(this SessionDescription sdp, TimeDescription td)
         {
             //if (sdp is null || td is null) return -1;
-            if (Common.IDisposedExtensions.IsNullOrDisposed(sdp) || Common.IDisposedExtensions.IsNullOrDisposed(td)) return -1;
-
-            return sdp.m_TimeDescriptions.IndexOf(td);
+            return Common.IDisposedExtensions.IsNullOrDisposed(sdp) || Common.IDisposedExtensions.IsNullOrDisposed(td)
+                ? -1
+                : sdp.m_TimeDescriptions.IndexOf(td);
         }
 
         //GetMediaDescriptionFor
@@ -1476,7 +1465,7 @@ namespace Media.Sdp
     //     */
     //}
 
-    
+
 
     //Public? TryRegisterLineImplementation, TypeCollection
 }

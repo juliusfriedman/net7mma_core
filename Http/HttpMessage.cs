@@ -87,9 +87,7 @@ namespace Media.Http
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static string CreateReasonPhrase(HttpStatusCode code, bool includeSpaces = false)
         {
-            if (includeSpaces is false) return code.ToString();
-
-            return Common.Extensions.String.StringExtensions.AddSpacesBeforeCapitols(code.ToString());
+            return includeSpaces is false ? code.ToString() : Common.Extensions.String.StringExtensions.AddSpacesBeforeCapitols(code.ToString());
         }
     }
 
@@ -192,7 +190,7 @@ namespace Media.Http
         //Or here
         //"{0}{2}{1}{3}{1}{4}"; 
 
-        public static Uri Wildcard = new Uri("*", UriKind.RelativeOrAbsolute);
+        public static Uri Wildcard = new("*", UriKind.RelativeOrAbsolute);
 
         public const double DefaultVersion = 1.0;
 
@@ -200,7 +198,7 @@ namespace Media.Http
         public static string VersionFormat = "0.0";
 
         //System encoded 'Carriage Return' => \r and 'New Line' => \n
-        internal protected const string CRLF = "\r\n";
+        protected internal const string CRLF = "\r\n";
 
         //The scheme of Uri's of RtspMessage's
         public const string TransportScheme = "http"; //System.Uri.UriSchemeHttp;
@@ -218,16 +216,16 @@ namespace Media.Http
         public const string MessageIdentifier = "HTTP";
 
         //String which can be used to delimit a HttpMessage for preprocessing
-        internal protected static string[] HeaderLineSplit = new string[] { CRLF };
+        protected internal static string[] HeaderLineSplit = new string[] { CRLF };
 
         //String which is used to split Header values of the HttpMessage
-        internal protected static char[] HeaderNameValueSplit = new char[] { (char)Common.ASCII.Colon };
+        protected internal static char[] HeaderNameValueSplit = new char[] { (char)Common.ASCII.Colon };
 
         //String which is used to split Header values of the HttpMessage
-        internal protected static char[] SpaceSplit = new char[] { (char)Common.ASCII.Space };
+        protected internal static char[] SpaceSplit = new char[] { (char)Common.ASCII.Space };
 
         //Should be instance variable and calulcated from Protocol
-        internal protected static int MinimumStatusLineSize = 9; //'HTTP/X.X ' 
+        protected internal static int MinimumStatusLineSize = 9; //'HTTP/X.X ' 
 
         public static readonly Encoding DefaultEncoding = System.Text.Encoding.UTF8;
 
@@ -235,7 +233,7 @@ namespace Media.Http
         {
             if (string.IsNullOrWhiteSpace(data)) throw new InvalidOperationException("data cannot be null or whitespace.");
 
-            if (encoding is null) encoding = HttpMessage.DefaultEncoding;
+            encoding ??= HttpMessage.DefaultEncoding;
 
             return new HttpMessage(encoding.GetBytes(data), 0, encoding);
         }
@@ -248,14 +246,13 @@ namespace Media.Http
 
         protected bool m_StatusLineParsed, m_HeadersParsed;
 
-        internal protected char[] m_EncodedLineEnds = Media.Common.UTF8.LineEndingCharacters,
+        protected internal char[] m_EncodedLineEnds = Media.Common.UTF8.LineEndingCharacters,
             m_EncodedWhiteSpace = Media.Common.UTF8.WhiteSpaceCharacters,
             m_EncodedForwardSlash = Media.Common.UTF8.ForwardSlashCharacters,
             m_EncodedColon = Media.Common.UTF8.ColonCharacters,
             m_EncodedSemiColon = Media.Common.UTF8.SemiColonCharacters,
             m_EncodedComma = Media.Common.UTF8.CommaCharacters;
-
-        string m_HeaderFormat = DefaultHeaderFormat, m_StringWhiteSpace, m_StringEndLine, m_StringColon, m_StringSemiColon, m_StringComma;
+        private string m_HeaderFormat = DefaultHeaderFormat, m_StringWhiteSpace, m_StringEndLine, m_StringColon, m_StringSemiColon, m_StringComma;
 
         //Should expose string in format for outside parsing...
 
@@ -266,7 +263,7 @@ namespace Media.Http
         /// <summary>
         /// The body of the message
         /// </summary>
-        internal protected string m_ReasonPhrase, m_Body = string.Empty;
+        protected internal string m_ReasonPhrase, m_Body = string.Empty;
 
         //Todo, Should be a Thesarus to support duplicates.
         //Todo, Should use EqualityComparer of String with OrdinalIgnoreCase!!
@@ -274,7 +271,7 @@ namespace Media.Http
         /// <summary>
         /// Generic.Dictionary containing the headers of the HttpMessage
         /// </summary>
-        readonly protected Dictionary<string, string> m_Headers = new Dictionary<string, string>(), m_EntityHeaders = new Dictionary<string, string>();
+        protected readonly Dictionary<string, string> m_Headers = [], m_EntityHeaders = [];
 
         //readonly protected Dictionary<intString, string> m_Headers = new Dictionary<intString, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -384,7 +381,7 @@ namespace Media.Http
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return m_HeaderFormat; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set
+            protected internal set
             {
                 if (string.IsNullOrWhiteSpace(value)) throw new InvalidOperationException("The Header Format must not be null or consist only of Whitespace");
 
@@ -433,7 +430,7 @@ namespace Media.Http
         /// <summary>
         /// Indicates the UserAgent of this HttpRquest
         /// </summary>
-        public String UserAgent
+        public string UserAgent
         {
             get { return GetHeader(HttpHeaders.UserAgent); }
             set { if (string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException(); SetHeader(HttpHeaders.UserAgent, value); }
@@ -507,11 +504,10 @@ namespace Media.Http
                 {
                     if (IsDisposed && IsPersistent is false) return 0;
 
-                    int lineEndsLength, whitespaceLength;
 
-                    Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(m_EncodedLineEnds, out lineEndsLength);
+                    Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(m_EncodedLineEnds, out int lineEndsLength);
 
-                    Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(m_EncodedWhiteSpace, out whitespaceLength);
+                    Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(m_EncodedWhiteSpace, out int whitespaceLength);
 
                     if (lineEndsLength + whitespaceLength <= 0) return 0;
 
@@ -562,7 +558,7 @@ namespace Media.Http
                     {
                         length = (int)(m_Buffer?.Length ?? 0);
                     }
-                    
+
                     //Should also count headers when body is empty... and then add body length
 
                     if (m_Headers.Count > 0)
@@ -603,9 +599,7 @@ namespace Media.Http
                 }
                 catch
                 {
-                    if (IsDisposed) return 0;
-
-                    return length;
+                    return IsDisposed ? 0 : length;
                 }
             }
         }
@@ -620,16 +614,13 @@ namespace Media.Http
             {
                 //rfc2616.html#rfc.section.4.4
 
-                if (StatusCode >= 100 && StatusCode <= 199) return false;
+                if (StatusCode is >= 100 and <= 199) return false;
 
-                switch (HttpStatusCode)
+                return HttpStatusCode switch
                 {
-                    case HttpStatusCode.NoContent:
-                    case HttpStatusCode.NotModified:
-                    case HttpStatusCode.Found:
-                        return false;
-                    default: return true;
-                }
+                    HttpStatusCode.NoContent or HttpStatusCode.NotModified or HttpStatusCode.Found => false,
+                    _ => true,
+                };
             }
         }
 
@@ -691,7 +682,7 @@ namespace Media.Http
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get;
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set;
+            protected internal set;
         }
 
         /// <summary>
@@ -707,7 +698,7 @@ namespace Media.Http
                 return m_ContentLength;
             }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set
+            protected internal set
             {
                 //Use the unsigned representation
                 SetHeader(HttpHeaders.ContentLength, ((uint)(m_ContentLength = value)).ToString());
@@ -743,7 +734,7 @@ namespace Media.Http
             get { return GetHeader(header); }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set { SetHeader(header, value); }
-        }        
+        }
 
         /// <summary>
         /// Gets or Sets the encoding of the headers of this HttpMessage. (Defaults to UTF-8).
@@ -783,7 +774,7 @@ namespace Media.Http
 
                 CacheStrings();
             }
-        }        
+        }
 
         /// <summary>
         /// Gets or Sets the encoding of this HttpMessage. (Defaults to UTF-8)
@@ -855,7 +846,7 @@ namespace Media.Http
                 return true;
             }
         }
-        
+
         //Exposing these is prob not necessary and should be isolated to the parser / writer
 
         /// <summary>
@@ -912,7 +903,7 @@ namespace Media.Http
         {
             if (false == UriParser.IsKnownScheme(HttpMessage.TransportScheme))
                 UriParser.Register(new HttpStyleUriParser(), HttpMessage.TransportScheme, HttpMessage.TransportDefaultPort);
-            
+
             if (false == UriParser.IsKnownScheme(HttpMessage.SecureTransportScheme))
                 UriParser.Register(new HttpStyleUriParser(), HttpMessage.SecureTransportScheme, HttpMessage.SecureTransportDefaultPort);
         }
@@ -935,8 +926,8 @@ namespace Media.Http
         public HttpMessage(HttpMessageType messageType, double? version = DefaultVersion, Encoding contentEncoding = null, bool shouldDispse = true, string protocol = HttpMessage.MessageIdentifier)
             : base(shouldDispse)
         {
-            MessageType = messageType; 
-            
+            MessageType = messageType;
+
             Version = version ?? DefaultVersion;
 
             if (contentEncoding is not null) ContentEncoding = contentEncoding;
@@ -1042,7 +1033,7 @@ namespace Media.Http
         /// <param name="other">The other HttpMessage</param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public HttpMessage(HttpMessage other, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             MethodString = other.MethodString;
 
@@ -1062,7 +1053,7 @@ namespace Media.Http
         #region Methods
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        void CacheStrings()
+        private void CacheStrings()
         {
             m_StringWhiteSpace = m_HeaderEncoding.GetString(m_HeaderEncoding.GetBytes(m_EncodedWhiteSpace));
 
@@ -1083,7 +1074,7 @@ namespace Media.Http
             m_Buffer = null;
         }
 
-        virtual protected bool ParseStatusLine(bool force = false)
+        protected virtual bool ParseStatusLine(bool force = false)
         {
 
             if (IsDisposed && IsPersistent is false) return m_StatusLineParsed;
@@ -1115,8 +1106,8 @@ namespace Media.Http
 
             bool sawDelemit;
 
-        //Parse occurs when there is invalid data before an actual status line.
-        Parse:
+            //Parse occurs when there is invalid data before an actual status line.
+            Parse:
 
             //If it was not present then do not parse further
             //if (false == (sawDelemit = Media.Common.Extensions.Encoding.EncodingExtensions.ReadDelimitedDataFrom(HeaderEncoding, m_Buffer, m_EncodedLineEnds, m_Buffer.Length, out StatusLine, out read, true)) && read < MinimumStatusLineSize)
@@ -1234,7 +1225,7 @@ namespace Media.Http
                 //Must keep reason phrase..
                 if (partsLength >= 3) m_ReasonPhrase = parts[2];
 
-            }            
+            }
             else if (IsDisposed is false && m_Buffer.Length > MaximumLength)
             {
                 MessageType = HttpMessageType.Invalid;
@@ -1247,11 +1238,11 @@ namespace Media.Http
             return m_StatusLineParsed = sawDelemit && false.Equals(MessageType == HttpMessageType.Invalid);
         }
 
-        virtual protected bool ParseHeaders(bool force = false)
+        protected virtual bool ParseHeaders(bool force = false)
         {
             try
             {
-                if (m_StatusLineParsed is false || 
+                if (m_StatusLineParsed is false ||
                     IsDisposed && IsPersistent is false) return m_HeadersParsed;
 
                 //Headers were parsed if there is already a body.
@@ -1280,7 +1271,7 @@ namespace Media.Http
                 string headerName = null;
 
                 //Header value to append to
-                StringBuilder headerValue = new StringBuilder();
+                StringBuilder headerValue = new();
 
                 long remains = 0, justRead = 0;
 
@@ -1288,24 +1279,23 @@ namespace Media.Http
 
                 //Exception encountered;
 
-                string rawLine;
 
                 string[] parts;
 
                 byte[] buffer = m_Buffer.GetBuffer();
 
                 //While we didn't find the end of the header section in the local call (buffer may be in use)
-                while (IsDisposed is false && 
-                        m_Buffer.CanRead && 
-                        emptyLine <= 2 && 
+                while (IsDisposed is false &&
+                        m_Buffer.CanRead &&
+                        emptyLine <= 2 &&
                         (remains = max - position) > 0)
                 {
                     //Determine if any of the delimits were found
                     //sawDelemit = Media.Common.Extensions.Encoding.EncodingExtensions.ReadDelimitedDataFrom(HeaderEncoding, m_Buffer, m_EncodedLineEnds, remains, out rawLine, out justRead, out encountered, true);
-                    sawDelemit = Media.Common.Extensions.Encoding.EncodingExtensions.ReadDelimitedDataFrom(HeaderEncoding, buffer, m_EncodedLineEnds, position, remains, out rawLine, out justRead, true);
+                    sawDelemit = Media.Common.Extensions.Encoding.EncodingExtensions.ReadDelimitedDataFrom(HeaderEncoding, buffer, m_EncodedLineEnds, position, remains, out string rawLine, out justRead, true);
 
                     //There is not enough data in the buffer
-                    if(justRead is 0) break;
+                    if (justRead is 0) break;
 
                     //Check for the empty line
                     if (string.IsNullOrWhiteSpace(rawLine))
@@ -1381,7 +1371,7 @@ namespace Media.Http
                         readingValue = string.IsNullOrWhiteSpace(headerValue.ToString());
                     }
 
-                UpdatePosition:
+                    UpdatePosition:
 
                     //Move the position
                     //position = m_Buffer.Position; //Just ignore justRead for now
@@ -1410,7 +1400,7 @@ namespace Media.Http
             catch { return false; }
         }
 
-        virtual protected bool ParseTrailer()
+        protected virtual bool ParseTrailer()
         {
             try
             {
@@ -1426,26 +1416,24 @@ namespace Media.Http
                 string headerName = null;
 
                 //Header value to append to
-                StringBuilder headerValue = new StringBuilder();
+                StringBuilder headerValue = new();
 
                 long remains = 0, justRead = 0;
 
                 bool sawDelemit = false;
 
-                Exception encountered;
 
-                string rawLine;
 
                 string[] parts;
 
                 //While we didn't find the end of the header section in the local call (buffer may be in use)
-                while (IsDisposed is false && 
+                while (IsDisposed is false &&
                         m_Buffer.CanRead &&
-                        emptyLine <= 2 && 
+                        emptyLine <= 2 &&
                         (remains = max - position) > 0)
                 {
                     //Determine if any of the delimits were found
-                    sawDelemit = Media.Common.Extensions.Encoding.EncodingExtensions.ReadDelimitedDataFrom(HeaderEncoding, m_Buffer, m_EncodedLineEnds, remains, out rawLine, out justRead, out encountered, true);
+                    sawDelemit = Media.Common.Extensions.Encoding.EncodingExtensions.ReadDelimitedDataFrom(HeaderEncoding, m_Buffer, m_EncodedLineEnds, remains, out string rawLine, out justRead, out Exception encountered, true);
 
                     //Check for the empty line
                     if (string.IsNullOrWhiteSpace(rawLine))
@@ -1520,7 +1508,7 @@ namespace Media.Http
                     }
 
 
-                UpdatePosition:
+                    UpdatePosition:
 
                     //Move the position
                     position = m_Buffer.Position; //Just ignore justRead for now
@@ -1542,7 +1530,7 @@ namespace Media.Http
             catch { return false; }
         }
 
-        internal protected virtual bool ParseContentLength(bool force = false)
+        protected internal virtual bool ParseContentLength(bool force = false)
         {
             if (IsDisposed && IsPersistent is false) return false;
 
@@ -1574,7 +1562,7 @@ namespace Media.Http
         /// </summary>
         /// <param name="raiseWhenNotFound">If true and the requested encoding cannot be found an exception will be thrown.</param>
         /// <returns>The <see cref="System.Text.Encoding"/> requested or the <see cref="System.Text.Encoding.Default"/> if the reqeusted could not be found.</returns>
-        internal protected virtual Encoding ParseContentEncoding(bool force = false, bool raiseWhenNotFound = false)
+        protected internal virtual Encoding ParseContentEncoding(bool force = false, bool raiseWhenNotFound = false)
         {
             //If the message is disposed then no parsing can occur
             if (IsDisposed && IsPersistent is false) return null;
@@ -1607,7 +1595,7 @@ namespace Media.Http
         }
 
         //Todo, could be unified to not require RtspMessage to overload...
-        internal protected virtual bool ParseBody(out int remaining, bool force = false) //bool requireContentLength = true
+        protected internal virtual bool ParseBody(out int remaining, bool force = false) //bool requireContentLength = true
         {
             remaining = 0;
 
@@ -1807,32 +1795,28 @@ namespace Media.Http
             return false;
         }
 
-        internal protected virtual bool ParseBody(bool force = false)
+        protected internal virtual bool ParseBody(bool force = false)
         {
-            if (IsDisposed && IsPersistent is false) return false;
-
-            int remains;
-
-            return ParseBody(out remains, force);
+            return (!IsDisposed || IsPersistent is true) && ParseBody(out int remains, force);
         }
 
         /// <summary>
-        /// Creates a '<see cref="System.String"/>' representation of the HttpMessage including all binary data contained.
+        /// Creates a '<see cref="string"/>' representation of the HttpMessage including all binary data contained.
         /// </summary>
-        /// <returns>A <see cref="System.String"/> which contains the entire message itself in the encoding of the HttpMessage</returns>
+        /// <returns>A <see cref="string"/> which contains the entire message itself in the encoding of the HttpMessage</returns>
         public virtual string ToEncodedString()
         {
             if (IsDisposed && IsPersistent is false) goto Exit;
             if (HeaderEncoding is not null) try
-            {
-                return HeaderEncoding.GetString(Prepare(true, true, false, false).ToArray())
-                +
-                ContentEncoding.GetString(Prepare(false, false, true, false).ToArray())
-                +
-                HeaderEncoding.GetString(Prepare(false, false, false, true).ToArray());
-            }
-            catch { goto Exit; }
-        Exit:
+                {
+                    return HeaderEncoding.GetString(Prepare(true, true, false, false).ToArray())
+                    +
+                    ContentEncoding.GetString(Prepare(false, false, true, false).ToArray())
+                    +
+                    HeaderEncoding.GetString(Prepare(false, false, false, true).ToArray());
+                }
+                catch { goto Exit; }
+            Exit:
             return string.Empty;
         }
 
@@ -1864,9 +1848,8 @@ namespace Media.Http
                 {
                     actualName = headerName;
 
-                    string result = null;
 
-                    if (m_Headers.TryGetValue(actualName, out result)) return result;
+                    if (m_Headers.TryGetValue(actualName, out string result)) return result;
                 }
             return null;
         }
@@ -1879,12 +1862,11 @@ namespace Media.Http
                 if (string.Compare(name, headerName, true) is 0) //headerName.Equals(name, StringComparison.OrdinalIgnoreCase);
                 {
                     actualName = headerName;
-                    
-                    string result = null;
+
 
                     //return m_EntityHeaders[headerName];
 
-                    if (m_EntityHeaders.TryGetValue(actualName, out result)) return result;
+                    if (m_EntityHeaders.TryGetValue(actualName, out string result)) return result;
                 }
             return null;
         }
@@ -1917,12 +1899,11 @@ namespace Media.Http
             name = name.Trim();
 
             //Keep a place to determine if the given name was already encountered in a different case
-            string actualName = null;
 
             //value = string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
 
             //If the header with the same name has already been encountered set the value otherwise add the value
-            if (ContainsHeader(name, out actualName)) m_Headers[actualName] = value;
+            if (ContainsHeader(name, out string actualName)) m_Headers[actualName] = value;
             else
             {
                 m_Headers.Add(name, value);
@@ -1944,12 +1925,11 @@ namespace Media.Http
             name = name.Trim();
 
             //Keep a place to determine if the given name was already encountered in a different case
-            string actualName = null;
 
             //value = string.IsNullOrWhiteSpace(value) ? string.Empty : value.Trim();
 
             //If the header with the same name has already been encountered set the value otherwise add the value
-            if (ContainsEntityHeader(name, out actualName)) m_EntityHeaders[actualName] = value;
+            if (ContainsEntityHeader(name, out string actualName)) m_EntityHeaders[actualName] = value;
             else
             {
                 m_EntityHeaders.Add(name, value);
@@ -1972,7 +1952,6 @@ namespace Media.Http
             }
 
             //The name given to append or set may be set in an alternate case
-            string containedHeader = null;
 
             //Trim any whitespace from the name and value
             name = name.Trim();
@@ -1982,7 +1961,7 @@ namespace Media.Http
             value = nullValue ? string.Empty : value.Trim();
 
             //If not already contained then set, otherwise append the value given
-            if (ContainsHeader(name, out containedHeader) is false) SetHeader(name, value); //joiner ?? 
+            if (ContainsHeader(name, out string containedHeader) is false) SetHeader(name, value); //joiner ?? 
             else if (nullValue is false)
             {
                 string containedValue = m_Headers[containedHeader];
@@ -2005,7 +1984,6 @@ namespace Media.Http
             }
 
             //The name given to append or set may be set in an alternate case
-            string containedHeader = null;
 
             //Trim any whitespace from the name and value
             name = name.Trim();
@@ -2015,7 +1993,7 @@ namespace Media.Http
             value = nullValue ? string.Empty : value.Trim();
 
             //If not already contained then set, otherwise append the value given
-            if (ContainsEntityHeader(name, out containedHeader) is false) SetEntityHeader(name, value); //joiner ?? 
+            if (ContainsEntityHeader(name, out string containedHeader) is false) SetEntityHeader(name, value); //joiner ?? 
             else if (nullValue is false)
             {
                 string containedValue = m_Headers[containedHeader];
@@ -2062,16 +2040,12 @@ namespace Media.Http
 
         public virtual bool ContainsHeader(string name)
         {
-            if (IsDisposed && IsPersistent is false) return false;
-
-            return ContainsHeader(name, out _);
+            return (!IsDisposed || IsPersistent is true) && ContainsHeader(name, out _);
         }
 
         public virtual bool ContainsEntityHeader(string name)
         {
-            if (IsDisposed && IsPersistent is false) return false;
-
-            return ContainsEntityHeader(name, out _);
+            return (!IsDisposed || IsPersistent is true) && ContainsEntityHeader(name, out _);
         }
 
         /// <summary>
@@ -2190,18 +2164,17 @@ namespace Media.Http
         {
             if (IsDisposed)
             {
-                buffer = default(System.Collections.Generic.IList<System.ArraySegment<byte>>);
+                buffer = default;
 
                 return false;
             }
 
-            ArraySegment<byte> existingBuffer;
 
             //buffer = default(System.Collections.Generic.IList<System.ArraySegment<byte>>);
 
             buffer = System.Collections.Immutable.ImmutableList<System.ArraySegment<byte>>.Empty;
 
-            if (m_Buffer.TryGetBuffer(out existingBuffer))
+            if (m_Buffer.TryGetBuffer(out ArraySegment<byte> existingBuffer))
             {
                 //buffer = new System.Collections.Generic.List<System.ArraySegment<byte>>()
                 //{
@@ -2297,7 +2270,7 @@ namespace Media.Http
 
             //switch
 
-            if (MessageType == HttpMessageType.Request || MessageType == HttpMessageType.Invalid)
+            if (MessageType is HttpMessageType.Request or HttpMessageType.Invalid)
             {
                 //foreach (byte b in headerEncoding.GetBytes(MethodString)) yield return b;
 
@@ -2463,7 +2436,7 @@ namespace Media.Http
         /// <param name="name"></param>
         /// <param name="value"></param>
         /// <returns>The bytes which are encoded in <see cref="m_HeaderEncoding"/></returns>
-        internal protected virtual IEnumerable<byte> PrepareHeader(string name, string value)
+        protected internal virtual IEnumerable<byte> PrepareHeader(string name, string value)
         {
             return PrepareHeaderWithFormat(name, value, m_HeaderFormat);
         }
@@ -2475,7 +2448,7 @@ namespace Media.Http
         /// <param name="value"></param>
         /// <param name="format"></param>
         /// <returns></returns>
-        internal protected virtual IEnumerable<byte> PrepareHeaderWithFormat(string name, string value, string format)
+        protected internal virtual IEnumerable<byte> PrepareHeaderWithFormat(string name, string value, string format)
         {
             if (IsDisposed && false == IsPersistent) return Common.MemorySegment.Empty;
 
@@ -2540,7 +2513,7 @@ namespace Media.Http
         }
 
         //CookieCollection or CookieEnumerator
-        IEnumerable<HttpCookie> GetCookies()
+        private IEnumerable<HttpCookie> GetCookies()
         {
             throw new NotImplementedException();
         }
@@ -2577,18 +2550,17 @@ namespace Media.Http
 
         public override int GetHashCode()
         {
-            return Created.GetHashCode() ^ (int)((int)MessageType | (int)HttpMethod ^ (int)HttpStatusCode) ^ (string.IsNullOrWhiteSpace(m_Body) ? Length : m_Body.GetHashCode()) ^ (m_Headers.Count);
+            return Created.GetHashCode() ^ ((int)MessageType | (int)HttpMethod ^ (int)HttpStatusCode) ^ (string.IsNullOrWhiteSpace(m_Body) ? Length : m_Body.GetHashCode()) ^ (m_Headers.Count);
         }
-        
+
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool Equals(HttpMessage other)
         {
             //Fast path doesn't show true equality.
             //other.Created != Created
 
-            if (other is null) return false;
-
-            return other.MessageType == MessageType
+            return other is not null
+&& other.MessageType == MessageType
                 &&
                 other.Version.Equals(Version)
                 &&
@@ -2605,9 +2577,7 @@ namespace Media.Http
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(this, obj)) return true;
-
-            return obj is HttpMessage m && Equals(m);
+            return ReferenceEquals(this, obj) || obj is HttpMessage m && Equals(m);
         }
 
         #endregion
@@ -2647,7 +2617,7 @@ namespace Media.Http
         long Common.IPacket.Length
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return (long)Length; }
+            get { return Length; }
         }
 
         /// <summary>
@@ -2702,16 +2672,16 @@ namespace Media.Http
             }
 
             //If the status line was not parsed return the number of bytes written, reparse if there are no headers parsed yet.
-            if ((ParseStatusLine(MessageType is HttpMessageType.Invalid) || m_StatusLineParsed) is false) 
+            if ((ParseStatusLine(MessageType is HttpMessageType.Invalid) || m_StatusLineParsed) is false)
                 return received;
-            else if (m_Buffer is not null && m_Buffer.CanSeek) 
+            else if (m_Buffer is not null && m_Buffer.CanSeek)
                 m_Buffer.Seek(m_HeaderOffset, System.IO.SeekOrigin.Begin); // Seek past the status line.
 
             //Determine if there can be and is a body already
             bool hasNullBody = CanHaveBody && string.IsNullOrEmpty(m_Body);
 
             //Force the re-parsing of headers unless the body has started parsing.
-            
+
             //CompleteFrom test fails because of this, works correctly in real world.
 
             //We don't have to reparse the headers unless the whole message is in the buffer, we can guess this by checking the length of the m_Buffer.Length to be >= Length
@@ -2734,10 +2704,9 @@ namespace Media.Http
                 //int encodedBodyCount = decoder.GetByteCount(m_Body);
 
                 //Determine how much remaing
-                int remaining;
 
                 //If there are remaining octetes then complete the HttpMessage
-                if (ParseBody(out remaining, false) is false && remaining > 0)
+                if (ParseBody(out int remaining, false) is false && remaining > 0)
                 {
                     //Store the error
                     System.Net.Sockets.SocketError error = System.Net.Sockets.SocketError.SocketError;
@@ -2778,25 +2747,23 @@ namespace Media.Http
             }
             else ParseBody(true);
 
-        End:
+            End:
             //Return the amount of bytes consumed.
             return received;
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        int ParseChunk(ref int offset, int length) //out string extensions
+        private int ParseChunk(ref int offset, int length) //out string extensions
         {
-        //Top:
+            //Top:
             if (length <= 0) return -1;
 
-            string ChunkLine;
 
-            long read;
 
             bool sawDelemit;
 
             //If it was not present then do not parse further
-            if ((sawDelemit = Media.Common.Extensions.Encoding.EncodingExtensions.ReadDelimitedDataFrom(HeaderEncoding, m_Buffer, m_EncodedLineEnds, length, out ChunkLine, out read, true)) is false)
+            if ((sawDelemit = Media.Common.Extensions.Encoding.EncodingExtensions.ReadDelimitedDataFrom(HeaderEncoding, m_Buffer, m_EncodedLineEnds, length, out string ChunkLine, out long read, true)) is false)
             {
                 return -1;
             }
@@ -2805,12 +2772,12 @@ namespace Media.Http
             if (read is 1 && sawDelemit && length > 1)
             {
                 ++offset;
-                
+
                 //No Recursion
                 //--length;
                 //goto Top;
-                
-                return ParseChunk(ref offset, --length); 
+
+                return ParseChunk(ref offset, --length);
             }
 
             int ChunkLength = -1;
@@ -2849,7 +2816,7 @@ namespace Media.UnitTests
 
             foreach (Media.Http.HttpMethod method in Enum.GetValues(typeof(Media.Http.HttpMethod)))
             {
-                using (Media.Http.HttpMessage request = new Media.Http.HttpMessage(Media.Http.HttpMessageType.Request))
+                using (Media.Http.HttpMessage request = new(Media.Http.HttpMessageType.Request))
                 {
                     request.Location = new Uri(TestLocation);
 
@@ -2859,7 +2826,7 @@ namespace Media.UnitTests
 
                     byte[] bytes = request.ToBytes();
 
-                    using (Media.Http.HttpMessage serialized = new Media.Http.HttpMessage(bytes))
+                    using (Media.Http.HttpMessage serialized = new(bytes))
                     {
                         if (false == (serialized.HttpMethod == request.HttpMethod &&
                         serialized.Location == request.Location &&
@@ -2875,7 +2842,7 @@ namespace Media.UnitTests
 
                     bytes = request.ToBytes();
 
-                    using (Media.Http.HttpMessage serialized = new Media.Http.HttpMessage(bytes))
+                    using (Media.Http.HttpMessage serialized = new(bytes))
                     {
                         if (false == (serialized.HttpMethod == request.HttpMethod &&
                         serialized.Location == request.Location &&
@@ -2891,7 +2858,7 @@ namespace Media.UnitTests
 
                     bytes = request.ToBytes();
 
-                    using (Media.Http.HttpMessage serialized = new Media.Http.HttpMessage(bytes))
+                    using (Media.Http.HttpMessage serialized = new(bytes))
                     {
                         if (false == (serialized.HttpStatusCode == request.HttpStatusCode &&
                         serialized.Version == request.Version &&
@@ -2904,7 +2871,7 @@ namespace Media.UnitTests
 
                     bytes = request.ToBytes();
 
-                    using (Media.Http.HttpMessage serialized = new Media.Http.HttpMessage(bytes))
+                    using (Media.Http.HttpMessage serialized = new(bytes))
                     {
                         if (false == (serialized.HttpStatusCode == request.HttpStatusCode &&
                         serialized.Version == request.Version &&
@@ -2926,7 +2893,7 @@ namespace Media.UnitTests
 
             foreach (Media.Http.HttpStatusCode statusCode in Enum.GetValues(typeof(Media.Http.HttpStatusCode)))
             {
-                using (Media.Http.HttpMessage response = new Media.Http.HttpMessage(Media.Http.HttpMessageType.Response)
+                using (Media.Http.HttpMessage response = new(Media.Http.HttpMessageType.Response)
                 {
                     Version = 7,
                     HttpStatusCode = statusCode
@@ -2934,7 +2901,7 @@ namespace Media.UnitTests
                 {
                     byte[] bytes = response.ToBytes();
 
-                    using (Media.Http.HttpMessage serialized = new Media.Http.HttpMessage(bytes))
+                    using (Media.Http.HttpMessage serialized = new(bytes))
                     {
                         if (false == (serialized.HttpStatusCode == response.HttpStatusCode &&
                         serialized.Version == response.Version) ||
@@ -2951,7 +2918,7 @@ namespace Media.UnitTests
 
                         bytes = response.ToBytes();
 
-                        using (Media.Http.HttpMessage serialized = new Media.Http.HttpMessage(bytes))
+                        using (Media.Http.HttpMessage serialized = new(bytes))
                         {
                             if (false == (serialized.HttpStatusCode == response.HttpStatusCode &&
                             serialized.Version == response.Version &&
@@ -2965,7 +2932,7 @@ namespace Media.UnitTests
 
                     bytes = response.ToBytes();
 
-                    using (Media.Http.HttpMessage serialized = new Media.Http.HttpMessage(bytes))
+                    using (Media.Http.HttpMessage serialized = new(bytes))
                     {
                         if (false == (serialized.HttpStatusCode == response.HttpStatusCode &&
                         serialized.Version == response.Version &&
@@ -2984,7 +2951,7 @@ namespace Media.UnitTests
 
             string TestHeaderName = "h", TestHeaderValue = "v", TestBody = "Body Data ! 1234567890-A";
 
-            using (Media.Http.HttpMessage response = new Media.Http.HttpMessage(Media.Http.HttpMessageType.Response)
+            using (Media.Http.HttpMessage response = new(Media.Http.HttpMessageType.Response)
             {
                 Version = 7,
                 HttpStatusCode = (Media.Http.HttpStatusCode)7
@@ -3008,13 +2975,13 @@ namespace Media.UnitTests
 
                 byte[] bytes = response.ToBytes();
 
-                using (Media.Http.HttpMessage serialized = new Media.Http.HttpMessage(bytes))
+                using (Media.Http.HttpMessage serialized = new(bytes))
                 {
                     if (serialized.HttpStatusCode != response.HttpStatusCode ||
                     serialized.Version != response.Version ||
-                        //There must only be one header
+                    //There must only be one header
                     serialized.HeaderCount != 1 ||
-                        //The TestHeaderName must not be present because it was not given a value
+                    //The TestHeaderName must not be present because it was not given a value
                     false == serialized.ContainsHeader(TestHeaderName) ||
                         //Both must be complete
                         false == serialized.IsComplete || false == response.IsComplete)
@@ -3028,14 +2995,14 @@ namespace Media.UnitTests
 
                 bytes = response.ToBytes();
 
-                using (Media.Http.HttpMessage serialized = new Media.Http.HttpMessage(bytes))
+                using (Media.Http.HttpMessage serialized = new(bytes))
                 {
                     if (serialized.HttpStatusCode != response.HttpStatusCode ||
                     serialized.Version != response.Version ||
-                        //There must only be one header
+                    //There must only be one header
                     serialized.HeaderCount != 1 ||
                     false == serialized.ContainsHeader(TestHeaderName) ||
-                        //The TestHeaderValue must be exactly the same
+                    //The TestHeaderValue must be exactly the same
                     string.Compare(serialized[TestHeaderName], TestHeaderValue, false) != 0 ||
                         //Both must be complete
                         false == serialized.IsComplete || false == response.IsComplete)
@@ -3051,12 +3018,12 @@ namespace Media.UnitTests
 
                     bytes = response.ToBytes();
 
-                    using (Media.Http.HttpMessage serialized = new Media.Http.HttpMessage(bytes))
+                    using (Media.Http.HttpMessage serialized = new(bytes))
                     {
                         if (serialized.HttpStatusCode != response.HttpStatusCode ||
                         serialized.Version != response.Version ||
                         string.Compare(serialized.Body, response.Body) != 0 ||
-                            //Both must be complete
+                        //Both must be complete
                         false == serialized.IsComplete || false == response.IsComplete)
                         {
                             throw new Exception("Response Serialization Testing Failed With Body!");
@@ -3066,7 +3033,7 @@ namespace Media.UnitTests
 
                 bytes = response.ToBytes();
 
-                using (Media.Http.HttpMessage serialized = new Media.Http.HttpMessage(bytes))
+                using (Media.Http.HttpMessage serialized = new(bytes))
                 {
                     if (serialized.HttpStatusCode != response.HttpStatusCode ||
                         serialized.Version != response.Version ||

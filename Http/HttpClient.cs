@@ -59,7 +59,7 @@ namespace Media.Http
                 Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableLinger(socket));
 
                 //Retransmit for 0 sec
-                if(Common.Extensions.OperatingSystemExtensions.IsWindows)
+                if (Common.Extensions.OperatingSystemExtensions.IsWindows)
                     Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableTcpRetransmissions(socket));
 
                 //If both send and receieve buffer size are 0 then there is no coalescing when nagle's algorithm is disabled
@@ -93,7 +93,7 @@ namespace Media.Http
 
         public event HttpClientAction OnConnect;
 
-        internal protected void OnConnected()
+        protected internal void OnConnected()
         {
             if (IsDisposed) return;
 
@@ -111,7 +111,7 @@ namespace Media.Http
 
         public event RequestHandler OnRequest;
 
-        internal protected void Requested(HttpMessage request)
+        protected internal void Requested(HttpMessage request)
         {
             if (IsDisposed) return;
 
@@ -128,7 +128,7 @@ namespace Media.Http
 
         public event ResponseHandler OnResponse;
 
-        internal protected void Received(HttpMessage request, HttpMessage response)
+        protected internal void Received(HttpMessage request, HttpMessage response)
         {
             if (IsDisposed) return;
 
@@ -165,58 +165,53 @@ namespace Media.Http
         #region Fields
 
         internal readonly Guid InternalId = Guid.NewGuid();
-
-        readonly System.Threading.ManualResetEventSlim m_InterleaveEvent;
-
-        AuthenticationSchemes m_AuthenticationScheme;
-
-        NetworkCredential m_Credential;
+        private readonly System.Threading.ManualResetEventSlim m_InterleaveEvent;
+        private AuthenticationSchemes m_AuthenticationScheme;
+        private NetworkCredential m_Credential;
 
         /// <summary>
         /// The buffer this client uses for all requests 4MB * 2
         /// </summary>
-        Common.MemorySegment m_Buffer;
+        private Common.MemorySegment m_Buffer;
 
         /// <summary>
         /// The remote IPAddress to which the Location resolves via Dns
         /// </summary>
-        IPAddress m_RemoteIP;
+        private IPAddress m_RemoteIP;
 
         /// <summary>
         /// The remote RtspEndPoint
         /// </summary>
-        EndPoint m_RemoteHttp;
+        private EndPoint m_RemoteHttp;
 
         /// <summary>
         /// Keep track of certain values.
         /// </summary>
-        int m_SentBytes, m_ReceivedBytes,
-             m_HttpPort,
-             m_SentMessages, m_ReTransmits,
-             m_ReceivedMessages,
-             m_PushedMessages,
-             m_ResponseTimeoutInterval = (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond;
+        private int m_SentBytes;
+        private int m_ReceivedBytes;
+        private int m_HttpPort;
+        private int m_SentMessages;
+        private int m_ReTransmits;
+        private int m_ReceivedMessages;
+        private readonly int m_PushedMessages;
+        private int m_ResponseTimeoutInterval = (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond;
 
         /// <summary>
         /// Keep track of timed values.
         /// </summary>
-        TimeSpan m_SessionTimeout = TimeSpan.FromSeconds(60), //The default...
-            m_ConnectionTime = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan;
-
-        DateTime? m_BeginConnect, m_EndConnect;
+        private readonly TimeSpan m_SessionTimeout = TimeSpan.FromSeconds(60);
+        private TimeSpan m_ConnectionTime = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan;
+        private DateTime? m_BeginConnect, m_EndConnect;
 
         public bool SendUserAgent, DateRequests, EchoXHeaders, AutomaticallyReconnect, Strict, SendChunked;
-
-        HttpMessage m_LastTransmitted;
-
-        Socket m_HttpSocket;
+        private HttpMessage m_LastTransmitted;
+        private Socket m_HttpSocket;
 
         /// <summary>
         /// Any additional headers which may be required by the RtspClient.
         /// </summary>
-        public readonly Dictionary<string, string> AdditionalHeaders = new Dictionary<string, string>();
-
-        string m_UserAgent = "ASTI HTTP Client", m_AuthorizationHeader;
+        public readonly Dictionary<string, string> AdditionalHeaders = [];
+        private string m_UserAgent = "ASTI HTTP Client", m_AuthorizationHeader;
 
         /// <summary>
         /// A ILogging instance
@@ -224,12 +219,12 @@ namespace Media.Http
         public Common.ILogging Logger;
 
         //Really needs to be Connection or session will also need to refer to a connection
-        internal Dictionary<string, HttpSession> m_Sessions = new Dictionary<string, HttpSession>();
+        internal Dictionary<string, HttpSession> m_Sessions = [];
 
         /// <summary>
         /// The inital, previous and current location's of the HttpClient
         /// </summary>
-        Uri m_InitialLocation, m_PreviousLocation, m_CurrentLocation;
+        private Uri m_InitialLocation, m_PreviousLocation, m_CurrentLocation;
 
         #endregion
 
@@ -276,7 +271,7 @@ namespace Media.Http
             get { return m_UserAgent; }
             set
             {
-                if (string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException("UserAgent cannot consist of only null or whitespace."); 
+                if (string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException("UserAgent cannot consist of only null or whitespace.");
                 m_UserAgent = value;
             }
         }
@@ -299,8 +294,9 @@ namespace Media.Http
             set
             {
                 if (value == m_AuthenticationScheme) return;
-                if (value != AuthenticationSchemes.Basic && value != AuthenticationSchemes.Digest && value != AuthenticationSchemes.None) throw new System.InvalidOperationException("Only None, Basic and Digest are supported");
-                else m_AuthenticationScheme = value;
+                m_AuthenticationScheme = value is not AuthenticationSchemes.Basic and not AuthenticationSchemes.Digest and not AuthenticationSchemes.None
+                    ? throw new System.InvalidOperationException("Only None, Basic and Digest are supported")
+                    : value;
             }
         }
 
@@ -347,7 +343,7 @@ namespace Media.Http
         /// <summary>
         /// Gets or Sets the socket used for communication
         /// </summary>
-        internal protected Socket HttpSocket
+        protected internal Socket HttpSocket
         {
             get { return m_HttpSocket; }
             set
@@ -380,10 +376,8 @@ namespace Media.Http
 
                     m_RemoteHttp = m_HttpSocket.RemoteEndPoint;
 
-                    if (m_RemoteHttp is IPEndPoint)
+                    if (m_RemoteHttp is IPEndPoint remote)
                     {
-                        IPEndPoint remote = (IPEndPoint)m_RemoteHttp;
-
                         m_RemoteIP = remote.Address;
                     }
                 }
@@ -393,7 +387,7 @@ namespace Media.Http
         /// <summary>
         /// Gets or Sets the buffer used for data reception
         /// </summary>
-        internal protected Common.MemorySegment Buffer
+        protected internal Common.MemorySegment Buffer
         {
             get { return m_Buffer; }
             set { m_Buffer = value; }
@@ -434,7 +428,7 @@ namespace Media.Http
                     if (m_CurrentLocation != value)
                     {
 
-                        if (m_InitialLocation is null) m_InitialLocation = value;
+                        m_InitialLocation ??= value;
 
                         //Backup the current location, (needs history list?)
                         m_PreviousLocation = m_CurrentLocation;
@@ -473,7 +467,7 @@ namespace Media.Http
                         m_HttpPort = m_CurrentLocation.Port;
 
                         //Validate ports, should throw? should also use default for for scheme...
-                        if (m_HttpPort <= ushort.MinValue || m_HttpPort > ushort.MaxValue) m_HttpPort = HttpMessage.TransportDefaultPort;
+                        if (m_HttpPort is <= ushort.MinValue or > ushort.MaxValue) m_HttpPort = HttpMessage.TransportDefaultPort;
 
                         //Make a IPEndPoint 
                         m_RemoteHttp = new IPEndPoint(m_RemoteIP, m_HttpPort);
@@ -514,16 +508,18 @@ namespace Media.Http
         /// <param name="existing">An existing Socket</param>
         /// <param name="leaveOpen"><see cref="LeaveOpen"/></param>
         public HttpClient(Uri location, int bufferSize = DefaultBufferSize, Socket existing = null, bool leaveOpen = false, int responseTimeoutInterval = (int)Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             if (location is null) throw new ArgumentNullException("location");
 
             if (false == location.IsAbsoluteUri)
             {
                 if (existing is null) throw new ArgumentException("Must be absolute unless a socket is given", "location");
-                if (existing.Connected) location = Media.Common.Extensions.IPEndPoint.IPEndPointExtensions.ToUri(((IPEndPoint)existing.RemoteEndPoint), HttpMessage.TransportScheme);
-                else if (existing.IsBound) location = Media.Common.Extensions.IPEndPoint.IPEndPointExtensions.ToUri(((IPEndPoint)existing.LocalEndPoint), HttpMessage.TransportScheme);
-                else throw new InvalidOperationException("location must be specified when existing socket must be connected or bound.");
+                location = existing.Connected
+                    ? Media.Common.Extensions.IPEndPoint.IPEndPointExtensions.ToUri(((IPEndPoint)existing.RemoteEndPoint), HttpMessage.TransportScheme)
+                    : existing.IsBound
+                    ? Media.Common.Extensions.IPEndPoint.IPEndPointExtensions.ToUri(((IPEndPoint)existing.LocalEndPoint), HttpMessage.TransportScheme)
+                    : throw new InvalidOperationException("location must be specified when existing socket must be connected or bound.");
             }
 
             //Check the Scheme
@@ -555,7 +551,7 @@ namespace Media.Http
 
             //Set the protocol version to use in requests.
             ProtocolVersion = DefaultProtocolVersion;
-            
+
             ConfigureSocket = ConfigureHttpSocket;
 
             m_ResponseTimeoutInterval = responseTimeoutInterval;
@@ -689,7 +685,7 @@ namespace Media.Http
             if (m_HttpSocket is not null)
             {
                 //If LeaveOpen was false and the socket is not shared.
-                if (false == LeaveOpen )
+                if (false == LeaveOpen)
                 {
                     //Dispose the socket
                     m_HttpSocket.Dispose();
@@ -709,7 +705,7 @@ namespace Media.Http
         /// DisconnectsSockets, Connects and optionally reconnects the Transport if reconnectClient is true.
         /// </summary>
         /// <param name="reconnectClient"></param>
-        internal protected virtual void Reconnect()
+        protected internal virtual void Reconnect()
         {
             DisconnectSocket();
 
@@ -725,9 +721,8 @@ namespace Media.Http
         /// <returns></returns>
         public HttpMessage SendHttpMessage(HttpMessage message)
         {
-            SocketError error;
 
-            return SendHttpMessage(message, out error);
+            return SendHttpMessage(message, out SocketError error);
         }
 
         public HttpMessage SendHttpMessage(HttpMessage message, out SocketError error, bool useClientProtocolVersion = true, bool hasResponse = true, int attempts = 0)
@@ -834,9 +829,9 @@ namespace Media.Http
                     }
                     #endregion
 
-                    
 
-                Connect:
+
+                    Connect:
                     #region Connect
                     //Wait for any existing requests to finish first
                     wasBlocked = InUse;
@@ -862,8 +857,8 @@ namespace Media.Http
                     #region Prepare To Send
 
                     //Determine if the message should be sent in chunks
-                    bool sendChunked = SendChunked && false == string.IsNullOrWhiteSpace(message.Body) 
-                        || 
+                    bool sendChunked = SendChunked && false == string.IsNullOrWhiteSpace(message.Body)
+                        ||
                         message.Version > 1.0 && string.Compare(message[HttpHeaders.TransferEncoding], "chunked", true) is 0;
 
                     //Protocol version < 1.1 does not support Transfer-Encoding.
@@ -880,9 +875,9 @@ namespace Media.Http
                     }
 
                     //May not have to make a distinct case for multipart... the data would already be in the body...
-                    bool multiPart = string.Compare(message[HttpHeaders.ContentType], "multipart/form-data", true) is 0;                 
+                    bool multiPart = string.Compare(message[HttpHeaders.ContentType], "multipart/form-data", true) is 0;
 
-                    
+
 
                     //Maybe should not require a Strict option?
                     //Checks for ContentLength and TransferEncoding and removes the ContentLength
@@ -903,7 +898,7 @@ namespace Media.Http
                         // A client that sends an HTTP/1.1 request MUST send a Host header.
                         if (1.1 >= message.Version && false == message.ContainsHeader(HttpHeaders.Host)) //Should remove host header if present?
                         {
-                            if(null != message.Location)
+                            if (null != message.Location)
                                 message.SetHeader(HttpHeaders.Host, message.Location.Host);
                             else
                                 message.SetHeader(HttpHeaders.Host, CurrentLocation.Host);
@@ -916,10 +911,9 @@ namespace Media.Http
                             //modify location to only be Path and Query
                             if (message.Location is null)
                             {
-                                if (string.IsNullOrEmpty(CurrentLocation.PathAndQuery))
-                                    message.Location = HttpMessage.Wildcard;
-                                else
-                                    message.Location = new Uri(CurrentLocation.PathAndQuery, UriKind.RelativeOrAbsolute);
+                                message.Location = string.IsNullOrEmpty(CurrentLocation.PathAndQuery)
+                                    ? HttpMessage.Wildcard
+                                    : new Uri(CurrentLocation.PathAndQuery, UriKind.RelativeOrAbsolute);
                             }
                             else if (message.Location.IsAbsoluteUri) message.Location = new Uri(message.Location.PathAndQuery);
 
@@ -928,7 +922,7 @@ namespace Media.Http
                         }
 
                         #endregion
-                                               
+
                         #region Invalid Protocol Headers
 
                         //Check for chunked when protocol is less than or equal to 1.0 and remove.
@@ -952,7 +946,7 @@ namespace Media.Http
 
                     #endregion
 
-                Send:
+                    Send:
                     #region Send
                     //If the message was Transferred previously
                     if (message.Transferred.HasValue)
@@ -1028,7 +1022,7 @@ namespace Media.Http
                             m_SentBytes += sent;
 
                             sent = length = 0;
-                            
+
                             //Release the reference to the array
                             buffer = null;
                         }
@@ -1043,15 +1037,15 @@ namespace Media.Http
 
                     #endregion
 
-                NothingToSend:
+                    NothingToSend:
                     #region NothingToSend
                     //Check for no response.
                     if (false == hasResponse) return null;
 
                     #endregion
 
-                //Receive some data (only referenced by the check for disconnection)
-                Receive:
+                    //Receive some data (only referenced by the check for disconnection)
+                    Receive:
                     #region Receive
                     //If we can receive 
                     //if (m_RtspSocket is not null && m_RtspSocket.Poll(pollTime, SelectMode.SelectRead))
@@ -1094,26 +1088,25 @@ namespace Media.Http
                     else //Nothing was received
                     {
                         //Check for fatal exceptions
-                        if (error != SocketError.ConnectionAborted && error != SocketError.ConnectionReset && error != SocketError.Interrupted)
+                        if (error is not SocketError.ConnectionAborted and not SocketError.ConnectionReset and not SocketError.Interrupted)
                         {
                             if (++attempt <= m_ResponseTimeoutInterval) goto Wait;
                         }
 
                         //Raise the exception
-                        if (message is not null) throw new SocketException((int)error);
-                        else return null;
+                        return message is not null ? throw new SocketException((int)error) : null;
                     }
 
                     #endregion
 
-                //Wait for the response while the amount of data received was less than RtspMessage.MaximumLength
-                Wait:
+                    //Wait for the response while the amount of data received was less than RtspMessage.MaximumLength
+                    Wait:
                     #region Waiting for response, Backoff or Retransmit
                     DateTime lastAttempt = DateTime.UtcNow;
 
                     //Wait while
                     while (IsDisposed is false &&//The client connected and is not disposed AND
-                        //There is no last transmitted message assigned AND it has not already been disposed
+                                                 //There is no last transmitted message assigned AND it has not already been disposed
                         (m_LastTransmitted is null || m_LastTransmitted.IsDisposed)
                         //AND the client is still allowed to wait
                         && ++attempt <= m_ResponseTimeoutInterval)
@@ -1170,7 +1163,7 @@ namespace Media.Http
 
                     #endregion
 
-                HandleResponse:
+                    HandleResponse:
                     #region HandleResponse
 
                     //Update counters for any data received.
@@ -1271,9 +1264,9 @@ namespace Media.Http
                         //Could have a remaining property which is set in parse body
 
                         //Http 1.0 without content-length header or with content-length and not yet completed.
-                        if (received > 0 && m_LastTransmitted is not null && 
-                            ((m_LastTransmitted.ContentLength == -1 && m_LastTransmitted.Version >= 1.0) 
-                            || 
+                        if (received > 0 && m_LastTransmitted is not null &&
+                            ((m_LastTransmitted.ContentLength == -1 && m_LastTransmitted.Version >= 1.0)
+                            ||
                             false == m_LastTransmitted.IsComplete))
                         {
                             //Clear received counter
@@ -1309,7 +1302,7 @@ namespace Media.Http
                 }
                 finally
                 {
-                    
+
                     //Determine if the host will close the connection
                     if (m_LastTransmitted is not null && m_LastTransmitted[HttpHeaders.Connection] == "close")
                     {
@@ -1336,7 +1329,7 @@ namespace Media.Http
         public HttpMessage SendChunkedHttpMessage(HttpMessage message)
         {
             //Ensure 1.1
-            if(message.Version < 1.1) message.Version = 1.1;
+            if (message.Version < 1.1) message.Version = 1.1;
 
             //Determine if message had an existing encoding
             string transferEncoding = message.GetHeader(HttpHeaders.TransferEncoding);
@@ -1405,7 +1398,7 @@ namespace Media.Http
         //Dictionary<string, Func<int>> TransferEncoders 
         //etc to allow for custom transfer methods..
 
-        int SendChunkedBody(HttpMessage message, out SocketError error, int chunkSize)
+        private int SendChunkedBody(HttpMessage message, out SocketError error, int chunkSize)
         {
             error = SocketError.Success;
 
@@ -1488,7 +1481,7 @@ namespace Media.Http
             return totalSent;
         }
 
-        int SendMultipartBody(HttpMessage message, out SocketError error, int chunkSize, string disposition, string contentType)
+        private int SendMultipartBody(HttpMessage message, out SocketError error, int chunkSize, string disposition, string contentType)
         {
 
             int totalSent = 0, boundarySize = 0;
@@ -1499,40 +1492,40 @@ namespace Media.Http
 
             //Boundary is always '--' + boundary
 
-        //User-Agent: curl/7.21.2 (x86_64-apple-darwin)
-        //Host: localhost:8080
-        //Accept: */*
-        //Content-Length: 1143
-        //Expect: 100-continue
-        //Content-Type: multipart/form-data; boundary=----------------------------83ff53821b7c
+            //User-Agent: curl/7.21.2 (x86_64-apple-darwin)
+            //Host: localhost:8080
+            //Accept: */*
+            //Content-Length: 1143
+            //Expect: 100-continue
+            //Content-Type: multipart/form-data; boundary=----------------------------83ff53821b7c
 
 
             //Should already be sent by this point, all headers
 
             //Time to send a boundary specified by the Content-Type, possibly a Disposition and then another Content-Type for the streams data
 
-        //------------------------------83ff53821b7c
-        //Content-Disposition: form-data; name="img"; filename="a.png"
-        //Content-Type: application/octet-stream
+            //------------------------------83ff53821b7c
+            //Content-Disposition: form-data; name="img"; filename="a.png"
+            //Content-Type: application/octet-stream
 
-        //?PNG
+            //?PNG
 
-        //IHD?wS??iCCPICC Profilex?T?kA?6n??Zk?x?"IY?hE?6?bk
-        //Y?<ߡ)??????9Nyx?+=?Y"|@5-?M?S?%?@?H8??qR>?׋??inf???O?????b??N?????~N??>?!?
-        //??V?J?p?8?da?sZHO?Ln?}&???wVQ?y?g????E??0
-        // ??
-        //   IDAc????????-IEND?B`?
+            //IHD?wS??iCCPICC Profilex?T?kA?6n??Zk?x?"IY?hE?6?bk
+            //Y?<ߡ)??????9Nyx?+=?Y"|@5-?M?S?%?@?H8??qR>?׋??inf???O?????b??N?????~N??>?!?
+            //??V?J?p?8?da?sZHO?Ln?}&???wVQ?y?g????E??0
+            // ??
+            //   IDAc????????-IEND?B`?
 
             //Stream data sent, output another boundary and possibly a Disposition and then another Content-Type for the streams data
             //This would be a second call
-        
-        //------------------------------83ff53821b7c
-        //Content-Disposition: form-data; name="foo"
-        //bar
+
+            //------------------------------83ff53821b7c
+            //Content-Disposition: form-data; name="foo"
+            //bar
 
             //Third call
 
-        //------------------------------83ff53821b7c--
+            //------------------------------83ff53821b7c--
 
             //Stream data sent, output another boundary and return total sent.
 
@@ -1652,8 +1645,7 @@ namespace Media.Http
 
                 if (false == string.IsNullOrWhiteSpace(uri))
                 {
-                    if (rfc2069) uri = uri.Substring(4);
-                    else uri = uri.Substring(11);
+                    uri = rfc2069 ? uri.Substring(4) : uri.Substring(11);
                 }
 
                 string qop = baseParts.Where(p => string.Compare("qop", p, true) is 0).FirstOrDefault();
@@ -1681,7 +1673,7 @@ namespace Media.Http
             }
         }
 
-        void ProcessMessageData(object sender, byte[] data, int offset, int length)
+        private void ProcessMessageData(object sender, byte[] data, int offset, int length)
         {
             if (length is 0) return;
 
@@ -1697,7 +1689,7 @@ namespace Media.Http
             unchecked
             {
                 //Validate the data received
-                HttpMessage message = new HttpMessage(data, offset, length);
+                HttpMessage message = new(data, offset, length);
 
                 //Determine what to do with the interleaved message
                 switch (message.MessageType)
@@ -1778,7 +1770,7 @@ namespace Media.Http
 
                                 goto default;
                             }
-                           
+
 
                             //If playing and interleaved stream AND the last transmitted message is NOT null and is NOT Complete then attempt to complete it
                             if (false == IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted))
@@ -1855,7 +1847,7 @@ namespace Media.Http
                         }
                 }
             }
-        }      
+        }
 
         private void ProcessServerSentRequest(HttpMessage m_LastTransmitted)
         {

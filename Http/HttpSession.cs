@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Media.Http
+﻿namespace Media.Http
 {
-    class HttpSession
+    internal class HttpSession
     {
         //See RtspSession and adapt.
     }

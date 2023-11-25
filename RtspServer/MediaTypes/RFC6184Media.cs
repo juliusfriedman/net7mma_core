@@ -37,8 +37,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //http://tools.ietf.org/html/rfc6184
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Media.Rtsp.Server.MediaTypes
 {
@@ -65,10 +65,8 @@ namespace Media.Rtsp.Server.MediaTypes
             #region Static
 
             public static byte[] FullStartSequence = new byte[] { 0x00, 0x00, 0x00, 0x01 };
-
-            static readonly Common.MemorySegment FullStartSequenceSegment = new Common.MemorySegment(FullStartSequence, 0, 4, false);
-
-            static readonly Common.MemorySegment ShortStartSequenceSegment = new Common.MemorySegment(FullStartSequence, 1, 3, false);
+            private static readonly Common.MemorySegment FullStartSequenceSegment = new(FullStartSequence, 0, 4, false);
+            private static readonly Common.MemorySegment ShortStartSequenceSegment = new(FullStartSequence, 1, 3, false);
 
             public static byte[] CreateSingleTimeAggregationUnit(int? DON = null, params byte[][] nals)
             {
@@ -79,11 +77,9 @@ namespace Media.Rtsp.Server.MediaTypes
                 IEnumerable<byte> data = nals.SelectMany(n => Common.Binary.GetBytes((short)n.Length, Common.Binary.IsLittleEndian).Concat(n));
 
                 //STAP - B has DON at the very beginning
-                if (DON.HasValue)
-                {
-                    data = Media.Common.Extensions.Linq.LinqExtensions.Yield(Media.Codecs.Video.H264.NalUnitType.SingleTimeAggregationB).Concat(Common.Binary.GetBytes((short)DON, Common.Binary.IsLittleEndian)).Concat(data);
-                }//STAP - A
-                else data = Media.Common.Extensions.Linq.LinqExtensions.Yield(Media.Codecs.Video.H264.NalUnitType.SingleTimeAggregationA).Concat(data);
+                data = DON.HasValue
+                    ? Media.Common.Extensions.Linq.LinqExtensions.Yield(Media.Codecs.Video.H264.NalUnitType.SingleTimeAggregationB).Concat(Common.Binary.GetBytes((short)DON, Common.Binary.IsLittleEndian)).Concat(data)
+                    : Media.Common.Extensions.Linq.LinqExtensions.Yield(Media.Codecs.Video.H264.NalUnitType.SingleTimeAggregationA).Concat(data);
 
                 return data.ToArray();
             }
@@ -137,7 +133,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     byte[] tsOffsetBytes = new byte[2];
 
                     Common.Binary.Write16(tsOffsetBytes, 0, Common.Binary.IsLittleEndian, tsOffset);
-                    
+
                     return Media.Common.Extensions.Linq.LinqExtensions.Yield(dond).Concat(tsOffsetBytes).Concat(lengthBytes).Concat(n);
                 });
 
@@ -154,13 +150,13 @@ namespace Media.Rtsp.Server.MediaTypes
             public RFC6184Frame(byte payloadType)
                 : base(payloadType)
             {
-                m_ContainedNalTypes = new List<byte>();
+                m_ContainedNalTypes = [];
             }
 
             public RFC6184Frame(Rtp.RtpFrame existing, bool referencePackets = false, bool referenceBuffer = false, bool shouldDispose = true)
                 : base(existing, referencePackets, referenceBuffer, shouldDispose)
             {
-                m_ContainedNalTypes = new List<byte>();
+                m_ContainedNalTypes = [];
             }
 
             public RFC6184Frame(RFC6184Frame existing, bool referencePackets = false, bool referenceBuffer = false, bool shouldDispose = true)
@@ -181,7 +177,7 @@ namespace Media.Rtsp.Server.MediaTypes
             //May be kept in a state or InformationClass eventually, would allow for other options to be kept also.
 
             //Should use HashSet? (would not allow counting of types but isn't really needed)
-            internal protected readonly List<byte> m_ContainedNalTypes;
+            protected internal readonly List<byte> m_ContainedNalTypes;
 
             #endregion
 
@@ -280,7 +276,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     byte nalHeader = nal[offset++],
                         nalFNRI = (byte)(nalHeader & 0xE0), //Extract the F and NRI bit fields
                         nalType = (byte)(nalHeader & Common.Binary.FiveBitMaxValue), //Extract the Type
-                        fragmentType = (byte)(DON.HasValue ? Media.Codecs.Video.H264.NalUnitType.FragmentationUnitB : Media.Codecs.Video.H264.NalUnitType.FragmentationUnitA),
+                        fragmentType = DON.HasValue ? Media.Codecs.Video.H264.NalUnitType.FragmentationUnitB : Media.Codecs.Video.H264.NalUnitType.FragmentationUnitA,
                         fragmentIndicator = (byte)(nalFNRI | fragmentType);//Create the Fragment Indicator Octet
 
                     //Store the nalType contained
@@ -397,7 +393,7 @@ namespace Media.Rtsp.Server.MediaTypes
             /// <param name="containsSlice"></param>
             /// <param name="isIdr"></param>
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected virtual void ProcessPacket(Rtp.RtpPacket packet, bool ignoreForbiddenZeroBit = true, bool fullStartCodes = false)
+            protected internal virtual void ProcessPacket(Rtp.RtpPacket packet, bool ignoreForbiddenZeroBit = true, bool fullStartCodes = false)
             {
                 //If the packet is null or disposed then do not process it.
                 if (Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
@@ -434,7 +430,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                     //Position at the start of the extension? (I would think this would be after the flags...)
                     //It appears that the ExtensionFlags indicates the nal type?
-                    offset -= extensionOctets + Rtp.RtpExtension.MinimumSize;                 
+                    offset -= extensionOctets + Rtp.RtpExtension.MinimumSize;
 
                     //Add the extension data to the count..
                     count += extensionOctets + Rtp.RtpExtension.MinimumSize;
@@ -596,7 +592,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                                 //if (Depacketized.ContainsKey(packetKey)) return;
 
                                                 count -= 4;
-                                                
+
                                                 tmp_nal_size -= 4;
 
 
@@ -635,7 +631,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         }
                     case Media.Codecs.Video.H264.NalUnitType.FragmentationUnitA: //FU - A
                     case Media.Codecs.Video.H264.NalUnitType.FragmentationUnitB: //FU - B (May require re-ordering)
-                        {                            
+                        {
                             /*
                              Informative note: When an FU-A occurs in interleaved mode, it
                              always follows an FU-B, which sets its DON.
@@ -669,7 +665,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                                 //Move to data (Just read the FU Header)
                                 ++offset;
-                                
+
                                 //Adjust count
                                 count -= 2;
 
@@ -760,7 +756,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             //}
 
-            internal protected void DepacketizeStartCode(ref int addIndex, ref byte nalHeader, bool fullStartCodes = false)
+            protected internal void DepacketizeStartCode(ref int addIndex, ref byte nalHeader, bool fullStartCodes = false)
             {
                 //Determine the type of Nal
                 byte nalType = (byte)(nalHeader & Common.Binary.FiveBitMaxValue);
@@ -871,7 +867,7 @@ namespace Media.Rtsp.Server.MediaTypes
             //{
             //    base.RemoveAt(index, disposeBuffer);
             //}
-            
+
             //internal protected override void DisposeBuffer()
             //{
             //    //The nals are definetely still contained when the buffer is disposed...
@@ -889,7 +885,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             //    if (ShouldDispose) m_ContainedNalTypes.Clear();
             //}
-            
+
 
             //To go to an Image...
             //Look for a SliceHeader in the Buffer
@@ -911,7 +907,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         //profile_idc, profile_iop, level_idc
 
-        internal protected SimpleH264Encoder encoder;
+        protected internal SimpleH264Encoder encoder;
 
         #endregion
 
@@ -1046,11 +1042,9 @@ namespace Media.Rtsp.Server.MediaTypes
     {
         public static bool Contains(this Media.Rtsp.Server.MediaTypes.RFC6184Media.RFC6184Frame frame, params byte[] nalTypes)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(frame)) return false;
-
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(nalTypes)) return false;
-
-            return frame.m_ContainedNalTypes.Any(n => nalTypes.Contains(n));
+            return !Common.IDisposedExtensions.IsNullOrDisposed(frame)
+&& !Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(nalTypes)
+&& frame.m_ContainedNalTypes.Any(n => nalTypes.Contains(n));
         }
 
         public static bool IsKeyFrame(this Media.Rtsp.Server.MediaTypes.RFC6184Media.RFC6184Frame frame)

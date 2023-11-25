@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 //Maybe should be CodecInfo
 
@@ -18,11 +14,10 @@ namespace Media.Codec
 
             System.Runtime.InteropServices.GuidAttribute attribute = (System.Runtime.InteropServices.GuidAttribute)attributes[0];
 
-            Guid result;
 
-            if (false == System.Guid.TryParse(attribute.Value, out result)) throw new System.InvalidOperationException("Invalid GuidAttribute Attribute Found");
-
-            return result;
+            return false == System.Guid.TryParse(attribute.Value, out Guid result)
+                ? throw new System.InvalidOperationException("Invalid GuidAttribute Attribute Found")
+                : result;
         }
 
         public readonly string Name;
@@ -96,7 +91,7 @@ namespace Media.Codec
         public virtual Media.Codec.Interfaces.IMediaBuffer CreateBuffer(byte[] data, long timestamp = 0, bool shouldDispose = true)
         {
             //Needs default MediaFormat and subsequently DefaultComponents
-            Media.Codec.MediaFormat format = new Media.Codec.MediaFormat(MediaTypes, DefaultByteOrder, DefaultDataLayout, null);
+            Media.Codec.MediaFormat format = new(MediaTypes, DefaultByteOrder, DefaultDataLayout, null);
 
             return new Media.Codec.MediaBuffer(format, new Common.MemorySegment(data), this, timestamp, shouldDispose);
         }

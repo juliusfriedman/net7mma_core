@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Media.Rtcp;
 
 namespace Media.Rtcp.Feedback
 {
@@ -19,8 +18,7 @@ namespace Media.Rtcp.Feedback
             Common.Binary.Write32(Payload.Array, Payload.Offset, Common.Binary.IsLittleEndian, (uint)mssrc);
 
             //Copy the FCI Data
-            if (feedbackControlInformation is not null)
-                feedbackControlInformation.CopyTo(Payload.Array, Payload.Offset + Common.Binary.BytesPerInteger);
+            feedbackControlInformation?.CopyTo(Payload.Array, Payload.Offset + Common.Binary.BytesPerInteger);
         }
 
         /// <summary>
@@ -33,7 +31,7 @@ namespace Media.Rtcp.Feedback
             : base(reference.Header, reference.Payload, shouldDispose)
         {
             //Validate PayloadType
-            if (Header.PayloadType < 205 || Header.PayloadType > 206) throw new ArgumentException("Header.PayloadType is not equal to the expected type.", "reference");
+            if (Header.PayloadType is < 205 or > 206) throw new ArgumentException("Header.PayloadType is not equal to the expected type.", "reference");
 
             //Validate Format
             switch (Format)
@@ -130,7 +128,7 @@ namespace Media.Rtcp.Feedback
             }
         }
 
-        internal protected override IEnumerator<IReportBlock> GetEnumeratorInternal(int offset = 0)
+        protected internal override IEnumerator<IReportBlock> GetEnumeratorInternal(int offset = 0)
         {
             //Add RtcpFeedbackReport's contain a MediaSynchronizationSourceIdentifier before any report data
             return base.GetEnumeratorInternal(offset + Common.Binary.BytesPerInteger);

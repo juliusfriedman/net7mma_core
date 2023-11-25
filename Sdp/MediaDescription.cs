@@ -35,8 +35,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Media.Sdp
@@ -58,7 +58,7 @@ namespace Media.Sdp
         #region Fields
 
         //Created from the m= which is the first line, this is a computed line and not found in Lines.
-        internal protected readonly Lines.SessionMediaDescriptionLine MediaDescriptionLine;
+        protected internal readonly Lines.SessionMediaDescriptionLine MediaDescriptionLine;
 
         /// <summary>
         /// The MediaType of the MediaDescription
@@ -94,7 +94,7 @@ namespace Media.Sdp
         //LinesByType etc...
 
         //Keep in mind that adding/removing or changing lines should change the version of the parent SessionDescription
-        internal List<SessionDescriptionLine> m_Lines = new List<SessionDescriptionLine>();
+        internal List<SessionDescriptionLine> m_Lines = [];
 
         #endregion
 
@@ -102,7 +102,7 @@ namespace Media.Sdp
 
         public bool HasMultiplePorts
         {
-            get { return MediaDescriptionLine.HasMultiplePorts; }            
+            get { return MediaDescriptionLine.HasMultiplePorts; }
         }
 
         public int NumberOfPorts
@@ -120,7 +120,7 @@ namespace Media.Sdp
             {
                 return MediaDescriptionLine.MediaFormat;
             }
-            internal protected set
+            protected internal set
             {
                 MediaDescriptionLine.MediaFormat = value;
             }
@@ -135,7 +135,7 @@ namespace Media.Sdp
             {
                 return MediaDescriptionLine.PayloadTypes;
             }
-            internal protected set
+            protected internal set
             {
                 //m_MediaDescriptionLine.PayloadTypes = m_MediaDescriptionLine.PayloadTypes.Concat(value);
 
@@ -145,7 +145,7 @@ namespace Media.Sdp
 
         public IEnumerable<SessionDescriptionLine> Lines
         {
-            get { return ((IEnumerable<SessionDescriptionLine>)this); }
+            get { return this; }
         }
 
         /// <summary>
@@ -158,7 +158,7 @@ namespace Media.Sdp
                 return MediaDescriptionLine.Length + m_Lines.Sum(l => l.Length);
             }
         }
-                       
+
         #endregion
 
         #region Constructor
@@ -185,25 +185,25 @@ namespace Media.Sdp
         public MediaDescription(MediaType mediaType, string mediaProtocol, string mediaFormat, int mediaPort = 0, bool shouldDispose = true)
             : base(shouldDispose)
         {
-            MediaDescriptionLine = new Sdp.Lines.SessionMediaDescriptionLine();
+            MediaDescriptionLine = [];
             MediaType = mediaType;
             MediaPort = mediaPort;
             MediaProtocol = mediaProtocol;
             MediaFormat = mediaFormat;
         }
 
-        public MediaDescription(string[] sdpLines, int index, bool shouldDispose = true) 
+        public MediaDescription(string[] sdpLines, int index, bool shouldDispose = true)
             : this(sdpLines, ref index, shouldDispose) { }
 
         [CLSCompliant(false)]
         public MediaDescription(string[] sdpLines, ref int index, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             //Create a MediaDescriptionLine.
             MediaDescriptionLine = new Sdp.Lines.SessionMediaDescriptionLine(sdpLines, ref index);
 
             //Parse remaining optional entries
-            for (int e = sdpLines.Length; index < e; )
+            for (int e = sdpLines.Length; index < e;)
             {
                 string line = sdpLines[index];
 
@@ -216,9 +216,8 @@ namespace Media.Sdp
                 }
                 else
                 {
-                    SessionDescriptionLine parsed;
 
-                    if (SessionDescriptionLine.TryParse(sdpLines, ref index, out parsed)) m_Lines.Add(parsed);
+                    if (SessionDescriptionLine.TryParse(sdpLines, ref index, out SessionDescriptionLine parsed)) m_Lines.Add(parsed);
                     else index++;
                 }
             }
@@ -336,10 +335,11 @@ namespace Media.Sdp
 
         public override bool Equals(object obj)
         {
-            if (obj is MediaDescription md) return md.Equals(this);
-            if (obj is Sdp.Lines.SessionMediaDescriptionLine sdml) return Equals(sdml);
-            if (obj is SessionDescriptionLine sdl) return m_Lines.Contains(sdl);
-            return false;
+            return obj is MediaDescription md
+                ? md.Equals(this)
+                : obj is Sdp.Lines.SessionMediaDescriptionLine sdml
+                ? Equals(sdml)
+                : obj is SessionDescriptionLine sdl && m_Lines.Contains(sdl);
         }
 
         public override string ToString()
@@ -349,7 +349,7 @@ namespace Media.Sdp
 
         public string ToString(SessionDescription sdp = null)
         {
-            StringBuilder buffer = new StringBuilder();
+            StringBuilder buffer = new();
 
             //Check if the mapping matches..., should not be done at this level.
             //All instance still need the sdp in ToString to check if the encoding matches?
@@ -363,7 +363,7 @@ namespace Media.Sdp
             //    If multiple addresses are specified in the "c=" field and multiple
             //    ports are specified in the "m=" field, a one-to-one mapping from
             //    port to the corresponding address is implied.  For example:
-                
+
             //      c=IN IP4 224.2.1.1/127/2
             //      m=video 49170/2 RTP/AVP 31
             //    */
@@ -393,8 +393,8 @@ namespace Media.Sdp
             //Note if Unassigned MediaFormat is used that this might have to be a 'char' to be exactly what was given
             buffer.Append(MediaDescriptionLine.ToString());
 
-        //LinesOnly:
-            foreach (SessionDescriptionLine l in m_Lines.Where(l => l.m_Type != Sdp.Lines.SessionBandwidthLine.BandwidthType && l.m_Type != Sdp.Lines.SessionAttributeLine.AttributeType))
+            //LinesOnly:
+            foreach (SessionDescriptionLine l in m_Lines.Where(l => l.m_Type is not Sdp.Lines.SessionBandwidthLine.BandwidthType and not Sdp.Lines.SessionAttributeLine.AttributeType))
                 buffer.Append(l.ToString());
 
             foreach (SessionDescriptionLine l in m_Lines.Where(l => l.m_Type == Sdp.Lines.SessionBandwidthLine.BandwidthType))
@@ -409,7 +409,7 @@ namespace Media.Sdp
         #endregion
 
         #region Named Lines
-        
+
         //Could all be extension methods.
 
         public IEnumerable<SessionDescriptionLine> AttributeLines
@@ -447,7 +447,7 @@ namespace Media.Sdp
         //    }
         //}
 
-       
+
         public SessionDescriptionLine FmtpLine
         {
             get
@@ -597,9 +597,7 @@ namespace Media.Sdp
             //Needs a better way to get the index of the media description
             int index = sessionDescription.GetIndexFor(mediaDescription);  //Array.IndexOf(sessionDescription.MediaDescriptions.ToArray(), mediaDescription);
 
-            if (index == -1 || index >= sessionDescription.TimeDescriptionsCount) return null;
-
-            return sessionDescription.GetTimeDescription(index);
+            return index == -1 || index >= sessionDescription.TimeDescriptionsCount ? null : sessionDescription.GetTimeDescription(index);
         }
 
         //Should have a date when or should return the date playable, which would then be used by another method to compare against a time.
@@ -608,7 +606,7 @@ namespace Media.Sdp
             if (Common.IDisposedExtensions.IsNullOrDisposed(mediaDescription) || Common.IDisposedExtensions.IsNullOrDisposed(sessionDescription)) return false;
 
             //Get index of mediaDesription
-            
+
             //Check TimeDescription @ index.
 
             TimeDescription td = GetTimeDescription(mediaDescription, sessionDescription);
@@ -646,7 +644,7 @@ namespace Media.Sdp
             {
                 td = null;
             }
-            
+
             return true;
         }
     }

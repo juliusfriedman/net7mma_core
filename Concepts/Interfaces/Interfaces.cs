@@ -38,7 +38,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 namespace Media.Concepts.Interfaces
 {
-    interface IDiambiguation : Common.Interfaces.Interface { }
+    internal interface IDiambiguation : Common.Interfaces.Interface { }
 
-    class Ambiguity : IDiambiguation { }
+    internal class Ambiguity : IDiambiguation { }
 }

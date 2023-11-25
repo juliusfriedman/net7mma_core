@@ -150,7 +150,7 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         void System.Collections.Generic.ICollection<T>.Clear()
         {
-            m_Source = default(T);
+            m_Source = default;
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -269,7 +269,7 @@ namespace Media.Concepts.Classes
     //3) put that header where the copied bytes existed.
     //4) cast the pointer from ArrayHeader to T[] which will then point to the header at the first element would be @ the offset, the count would be the offset count.
     //5) put the data back from the indexes which didn't change (where the forged header was)    
-    
+
     //Could be done in Finalize etc.
 
     //The following attempts to do all of the leg work for the above, the only thing which is not yet implemented is the array header forging with the above class.
@@ -280,7 +280,7 @@ namespace Media.Concepts.Classes
 
     //[System.Runtime.CompilerServices.UnsafeValueType]
     [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit)]
-    struct PseudoArrayHeader //Implement Finalize to have the updates from the implicit copy propagate to the source.
+    internal struct PseudoArrayHeader //Implement Finalize to have the updates from the implicit copy propagate to the source.
     {
         #region Constructor
 
@@ -298,14 +298,14 @@ namespace Media.Concepts.Classes
 
             m_Object = source;
         }
-        
+
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public PseudoArrayHeader(System.Array source, int offset) 
+        public PseudoArrayHeader(System.Array source, int offset)
             : this(source, offset, source.Length - offset)
         {
 
         }
-        
+
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public PseudoArrayHeader(System.Array source, int offset, int count) : this()
         {
@@ -400,7 +400,7 @@ namespace Media.Concepts.Classes
         internal object m_Object;
 
         [System.Runtime.InteropServices.FieldOffset(8)]
-        internal System.String m_String;
+        internal string m_String;
 
         [System.Runtime.InteropServices.FieldOffset(8)]
         internal System.Array m_Array;
@@ -444,7 +444,7 @@ namespace Media.Concepts.Classes
     /// </notes>
     /// <typeparam name="T"></typeparam>
     public class Array<T> : System.Collections.Generic.IList<T> //=> ICollection<T>, IEnumerable<T>, IEnumerable, 
-                                                                 //could also be implicitly IList<ArrayElement<T>>
+                                                                //could also be implicitly IList<ArrayElement<T>>
     {
 
         #region Statics
@@ -453,12 +453,12 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// Defines the byte offset from the start of a <see cref="String"/> to the first character in the string.
         /// </summary>
-        static int ByteOffsetToStringData = -Common.Binary.BytesToMachineWords(System.Runtime.CompilerServices.RuntimeHelpers.OffsetToStringData);
+        private static readonly int ByteOffsetToStringData = -Common.Binary.BytesToMachineWords(System.Runtime.CompilerServices.RuntimeHelpers.OffsetToStringData);
 
         /// <summary>
         /// Defines the Pointer to null
         /// </summary>
-        static unsafe void* NullPtr = null;
+        private static unsafe void* NullPtr = null;
 
         /// <summary>
         /// Creates an Empty generic array
@@ -479,13 +479,14 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// The 12 - 16 bytes which reside directly at offset 0. (possibly 20 - 24)
         /// </summary>
-        PseudoArrayHeader m_Header; //Todo, could store source element size, still must convert when reading if sizes are different.
+        private PseudoArrayHeader m_Header; //Todo, could store source element size, still must convert when reading if sizes are different.
 
         //4 - 8 + bytes (IntPtr), maybe null for strings or pointer types, duplicate of reference stored in header.
-        /*readonly */ T[] m_Source; // = Unsafe.ReinterpretCast<System.Array, T[]>(m_Header.m_Array);
+        /*readonly */
+        private readonly T[] m_Source; // = Unsafe.ReinterpretCast<System.Array, T[]>(m_Header.m_Array);
 
         //All implict reads are stored here for whatever purpose necessary, especially if they need to be sychronized or their header has been modified.
-        internal readonly System.Collections.Generic.HashSet<T[]> Allocations = new System.Collections.Generic.HashSet<T[]>();
+        internal readonly System.Collections.Generic.HashSet<T[]> Allocations = [];
 
         #endregion        
 
@@ -526,11 +527,11 @@ namespace Media.Concepts.Classes
             //Determine how many elements the array will have.
             switch (bytesPerT)
             {
-                    //bytes
+                //bytes
                 case 1:
                     {
                         m_Header.m_Length = length << 1;
-                        
+
                         break;
                     }
                 case 2://char, short, ushort
@@ -611,7 +612,7 @@ namespace Media.Concepts.Classes
         /// <param name="offset"></param>
         /// <param name="length"></param>
         [System.CLSCompliant(false)]
-        public unsafe Array(void* data, int offset, int length): this(ref data, offset, length)
+        public unsafe Array(void* data, int offset, int length) : this(ref data, offset, length)
         {
             //Store the native pointer... a lot of good this does because we don't manage it and we don't know if it's really a pointer or a value.
             //To attainst true branchless operation a second field in the structure would need to be allocated which is designated for pointer values and only pointer values
@@ -669,12 +670,12 @@ namespace Media.Concepts.Classes
         {
             //Store the object reference (helps with branchless reading / writing)
             m_Header.m_Array = m_Source = Common.Extensions.Object.ObjectExtensions.ToArray<T>(t);
-            
+
             m_Header.m_Offset = 0;
 
             m_Header.m_Length = 1;
         }
-      
+
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public Array(T[] source, int offset, int count)
         {
@@ -713,13 +714,13 @@ namespace Media.Concepts.Classes
         public System.Array OriginalArray //Array name is the same as enclosing type..
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return m_Header.m_Array; }            
+            get { return m_Header.m_Array; }
         }
 
         /// <summary>
-        /// A <see cref="System.Object"/> case of the <see cref="Source"/>
+        /// A <see cref="object"/> case of the <see cref="Source"/>
         /// </summary>
-        public System.Object OriginalObject
+        public object OriginalObject
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return m_Header.m_Object; }
@@ -879,7 +880,7 @@ namespace Media.Concepts.Classes
         int System.Collections.Generic.IList<T>.IndexOf(T item)
         {
             if (false == m_Header.IsNullObject()) return System.Array.IndexOf<T>(m_Source, item, m_Header.m_Offset, m_Header.m_Length);
-            else for (int i = 0; i < m_Header.m_Length; ++i) if(UnsafeRead(this, ref i).Equals(item)) return i; 
+            else for (int i = 0; i < m_Header.m_Length; ++i) if (UnsafeRead(this, ref i).Equals(item)) return i;
             return -1;
         }
 
@@ -909,7 +910,7 @@ namespace Media.Concepts.Classes
             if (false == m_Header.IsNullObject()) System.Array.Clear(m_Source, m_Header.m_Offset, m_Header.m_Length);
             else
             {
-                T toWrite = default(T); for (int i = 0; i < m_Header.m_Length; ++i) UnsafeWrite(this, i, ref toWrite);
+                T toWrite = default; for (int i = 0; i < m_Header.m_Length; ++i) UnsafeWrite(this, i, ref toWrite);
             }
         }
 
@@ -964,7 +965,7 @@ namespace Media.Concepts.Classes
         /// <param name="array"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static implicit operator T[](Array<T> array)
+        public static unsafe implicit operator T[](Array<T> array)
         {
             //Maybe faster to use Array.Empty<T>() and resize.
 
@@ -1048,9 +1049,9 @@ namespace Media.Concepts.Classes
 
             //Branch...  same as array.m_Source is null but faster because of 0
             //Uses implicit conversion to array because array.m_Source may be null, (array.m_Source ?? array) works but still branches.
-            segment = array.m_Header.m_Offset < 0 ? 
+            segment = array.m_Header.m_Offset < 0 ?
                 //Strings...
-                new System.ArraySegment<T>(array /*array.m_Source ?? array*/, 0, array.m_Header.m_Length) : 
+                new System.ArraySegment<T>(array /*array.m_Source ?? array*/, 0, array.m_Header.m_Length) :
                 //Everything else
                 new System.ArraySegment<T>(array /*array.m_Source ?? array*/, array.m_Header.m_Offset, array.m_Header.m_Length);
 
@@ -1112,7 +1113,7 @@ namespace Media.Concepts.Classes
         /// <param name="array"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static nint ComputeMaxAddress(Array<T> array)
+        private static nint ComputeMaxAddress(Array<T> array)
         {
             return System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(array.m_Header.m_Array, array.m_Header.m_Length);
         }
@@ -1124,7 +1125,7 @@ namespace Media.Concepts.Classes
         /// <returns></returns>
         /// <remarks>Was branchless before ...</remarks>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static nint ComputeBaseAddress(Array<T> array)
+        private static nint ComputeBaseAddress(Array<T> array)
         {
             //Requires a cmp because the array cannot be null.
             //Could proably work around this by always storing an array in the m_Object field which contains the object...
@@ -1208,7 +1209,7 @@ namespace Media.Concepts.Classes
         /// <param name="index"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static T UnsafeRead(Array<T> array, ref int index)
+        public static unsafe T UnsafeRead(Array<T> array, ref int index)
         {
             //ComputeAddress(array) + ComputeElementAddress(array, ref index)
             //return Unsafe.Read<T>(ComputeAddress(array) + Unsafe.ArrayOfTwoElements<T>.AddressingDifference() * index);
@@ -1230,7 +1231,7 @@ namespace Media.Concepts.Classes
         /// <param name="index"></param>
         /// <param name="value"></param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static void UnsafeWrite(Array<T> array, int index, ref T value)
+        public static unsafe void UnsafeWrite(Array<T> array, int index, ref T value)
         {
             //UnsafeWrite(array.m_Source, array.m_Offset + index, ref value);
             //Unsafe.Write<T>(System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<T>(array.m_Source, array.m_Offset + index), ref value);
@@ -1256,7 +1257,7 @@ namespace Media.Concepts.Classes
         //What would be done in a IDisposable pattern or otherwise is to copy the array header to the offset of the first desired element and change the length in that header.
         //This causes 12 - 16 bytes to be wasted so those bytes need to be swapped out somewhere so they can be put back on dispose.
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static T[] ArrayTest(Array<T> array)
+        private static T[] ArrayTest(Array<T> array)
         {
             //Rebase the array at an index...
             //Use fixed and unsafe to determine the overhead of the array then copy those bytes + the desired length.
@@ -1276,7 +1277,7 @@ namespace Media.Concepts.Classes
 
             T[] refArray = array.m_Source;
 
-            T[] tArray = refArray;            
+            T[] tArray = refArray;
 
             #region Previous
 
@@ -1358,15 +1359,13 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
-            return (int)(m_Source.GetHashCode() ^ m_Header.m_Offset ^ m_Header.m_Length);
+            return m_Source.GetHashCode() ^ m_Header.m_Offset ^ m_Header.m_Length;
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            if (obj is not Array<T> array) return false;
-
-            return GetHashCode() == array.GetHashCode();
+            return obj is Array<T> array && GetHashCode() == array.GetHashCode();
         }
 
         #endregion
@@ -1386,7 +1385,7 @@ namespace Media.Concepts.Classes
         public void UpdateFrom(T[] source) { UpdateFrom(source, 0, source.Length); }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public void UpdateFrom(Array<T> array) { UpdateFrom(array.m_Source, array.m_Header.m_Offset, array.m_Header.m_Length); }        
+        public void UpdateFrom(Array<T> array) { UpdateFrom(array.m_Source, array.m_Header.m_Offset, array.m_Header.m_Length); }
 
         #endregion
     }
@@ -1421,9 +1420,9 @@ namespace Media.Concepts.Classes
     {
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public Spanned(T t) : base(t) { }
-    }    
+    }
 
-    public class Span<T> : Spanned<T> 
+    public class Span<T> : Spanned<T>
         where T : Span
     {
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1468,14 +1467,14 @@ namespace Media.UnitTests
     {
         public void TestArrayLike()
         {
-            Concepts.Classes.ArrayElement<int> intTest = new Concepts.Classes.ArrayElement<int>(0);
+            Concepts.Classes.ArrayElement<int> intTest = new(0);
 
             //Implicit conversion to array
             int[] array = intTest;
 
             //Implicit conversion to T
             int test = intTest;
-            
+
             //Set value implicitly?
             intTest = 1;
 
@@ -1487,7 +1486,7 @@ namespace Media.UnitTests
 
             System.Console.WriteLine(array[0]);
 
-            System.Collections.Generic.IList<int> iList = intTest as System.Collections.Generic.IList<int>;
+            System.Collections.Generic.IList<int> iList = intTest;
 
             System.Console.WriteLine(iList[0]);
 
@@ -1503,12 +1502,12 @@ namespace Media.UnitTests
 
             string testString = "test";
 
-            Concepts.Classes.ArrayElement<string> stringTest = new Concepts.Classes.ArrayElement<string>(testString);
+            Concepts.Classes.ArrayElement<string> stringTest = new(testString);
 
             //Weird but doesn't crash
             //System.Console.WriteLine(stringTest);
 
-            System.Collections.Generic.IList<string> iListS = stringTest as System.Collections.Generic.IList<string>;
+            System.Collections.Generic.IList<string> iListS = stringTest;
 
             if (false == System.Object.ReferenceEquals(iListS[0], testString)) throw new System.Exception("Not ReferenceEqual");
 
@@ -1534,19 +1533,18 @@ namespace Media.UnitTests
             int offset = 2, count = 2;
 
             //Populate this as a test which should not cause an System.Array allocation.
-            System.ArraySegment<byte> arraySegmentByte;
 
             //Make the generic array.
-            Concepts.Classes.Array<int> genericArray = new Concepts.Classes.Array<int>(clrArray, offset, count);
+            Concepts.Classes.Array<int> genericArray = new(clrArray, offset, count);
 
             //Take 16 bytes from the 4 integer values in the array above.
-            Concepts.Classes.Array<byte> testBytez = new Concepts.Classes.Array<byte>(clrArray, 0, 16);
+            Concepts.Classes.Array<byte> testBytez = new(clrArray, 0, 16);
 
             //Print the bytes
             foreach (var byteType in testBytez) System.Console.WriteLine("byteType: " + byteType);
 
             //Cast the generic array as Ilist
-            System.Collections.Generic.IList<int> iList = genericArray as System.Collections.Generic.IList<int>;
+            System.Collections.Generic.IList<int> iList = genericArray;
 
             //Show the members at index 3 of the CLR Array.
             System.Console.WriteLine(clrArray[2]);
@@ -1726,7 +1724,7 @@ namespace Media.UnitTests
             System.Console.WriteLine(string.Join(",", System.Array.ConvertAll<int, string>(clrArray, System.Convert.ToString)));
 
             //Get the bytes without causing an allocation
-            if (Concepts.Classes.Array<byte>.TryGetArray(testBytez, out arraySegmentByte))
+            if (Concepts.Classes.Array<byte>.TryGetArray(testBytez, out System.ArraySegment<byte> arraySegmentByte))
             {
                 foreach (var byteType in arraySegmentByte)
                 {
@@ -1736,7 +1734,7 @@ namespace Media.UnitTests
 
             #region String Tests
 
-            string clrString = "test";           
+            string clrString = "test";
 
             //Unsafe is just for comparison, we don't need unsafe as the Array class keeps a reference to the string or object it was sourced from.
             unsafe
@@ -1751,7 +1749,7 @@ namespace Media.UnitTests
                     System.Console.WriteLine("char@1: " + clrString[1]);
                     System.Console.WriteLine("char@2: " + clrString[2]);
                     System.Console.WriteLine("char@3: " + clrString[3]);
-                    
+
 
                     char[] unsafeclrChars = Concepts.Classes.Unsafe.ReinterpretCast<string, char[]>(ref clrString);
 
@@ -1769,13 +1767,13 @@ namespace Media.UnitTests
                         System.Console.WriteLine("q@" + (int)q);
 
                         //Preparing for ref overloads...
-                        void* vp = (void*)q;
+                        void* vp = q;
 
-                        Concepts.Classes.Array<byte> unsafeBytes = new Concepts.Classes.Array<byte>(vp, 0, 2);
+                        Concepts.Classes.Array<byte> unsafeBytes = new(vp, 0, 2);
 
                         //Dereference the pointer of q, cast to byte and compare against first the element in the generic array
                         //if not equal throw an exception
-                        if(false.Equals(((byte)*q).Equals(unsafeBytes[0]))) throw new System.Exception();
+                        if (false.Equals(((byte)*q).Equals(unsafeBytes[0]))) throw new System.Exception();
 
                         System.Console.WriteLine("unsafeBytes Length: " + unsafeBytes.Length);
 
@@ -1785,15 +1783,15 @@ namespace Media.UnitTests
                     }
 
                     //could also make a special UnicodeByteArray / use Span which reads the string at aligned offsets to allow conversion to a byte[]
-                    Concepts.Classes.Array<byte> testBytes = new Concepts.Classes.Array<byte>(clrString);
+                    Concepts.Classes.Array<byte> testBytes = new(clrString);
 
-                    Concepts.Classes.Array<char> testChars = new Concepts.Classes.Array<char>(clrString);
+                    Concepts.Classes.Array<char> testChars = new(clrString);
 
-                    Concepts.Classes.Array<long> testLong = new Concepts.Classes.Array<long>(clrString);
+                    Concepts.Classes.Array<long> testLong = new(clrString);
 
-                    Concepts.Classes.Array<bool> testBool = new Concepts.Classes.Array<bool>(clrString);
+                    Concepts.Classes.Array<bool> testBool = new(clrString);
 
-                    Concepts.Classes.Array<System.Guid> testGuid = new Concepts.Classes.Array<System.Guid>(clrString);
+                    Concepts.Classes.Array<System.Guid> testGuid = new(clrString);
 
                     //Can't use the array :(
                     //System.Array.Sort(testBytes.m_Header.m_Array)

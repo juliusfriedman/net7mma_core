@@ -37,7 +37,7 @@ namespace Media.Common.Interfaces
 {
     ///Mangle the name once, 12 bytes wide
     ///flags, offset, count    
-    using Dimension = System.Tuple<int, ulong, ulong>;    
+    using Dimension = System.Tuple<int, ulong, ulong>;
 
     //Todo, flags... Read, Write, Flush
 
@@ -49,7 +49,7 @@ namespace Media.Common.Interfaces
     /// The index of the dimension is already known.
     /// </remarks>
     internal delegate void DimensionInformationDelegation(ref Dimension dimensionInformation);
-    
+
     /// <summary>
     /// Conveys the unsigned index of the dimension being communicated.
     /// </summary>

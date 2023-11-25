@@ -68,10 +68,11 @@ namespace Media.Containers.Mpeg
         public static string ToTextualConvention(TransportStreamReader reader, byte[] identifier)
         {
             TransportStreamUnit.PacketIdentifier result = TransportStreamUnit.GetPacketIdentifier(identifier, reader.UnitOverhead);
-            if (TransportStreamUnit.IsReserved(result)) return "Reserved";
-            if (TransportStreamUnit.IsDVBMetaData(result)) return "DVBMetaData";
-            if (TransportStreamUnit.IsUserDefined(result)) return "UserDefined";
-            return result.ToString();
+            return TransportStreamUnit.IsReserved(result)
+                ? "Reserved"
+                : TransportStreamUnit.IsDVBMetaData(result)
+                ? "DVBMetaData"
+                : TransportStreamUnit.IsUserDefined(result) ? "UserDefined" : result.ToString();
         }
 
         #endregion
@@ -120,7 +121,7 @@ namespace Media.Containers.Mpeg
         public TransportStreamReader(System.IO.FileStream source, System.IO.FileAccess access = System.IO.FileAccess.Read) : base(source, access) { }
 
         //uses a temp file for now :(
-        public TransportStreamReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { } 
+        public TransportStreamReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { }
 
         /// <summary>
         /// Used in variations of the Mpeg Transport Stream format which require additional data such as ATSC or M2TS.
@@ -212,20 +213,20 @@ namespace Media.Containers.Mpeg
                 {
                     //size is already IdentiferSize
                     int size = IdentiferSize;
-                    
+
                     //Might need a few checks for Subtitle Format Streams because of P, p, g byte.
                     while (UnitOverhead < MaximumUnitOverhead)
                     {
                         //Increase UnitOverhead by 4 bytes (DefaultIdentifierSize)
                         UnitOverhead += IdentiferSize;
-                        
+
                         //Thew newSize is size + IdentiferSize
                         int newSize = (size + IdentiferSize);
                         Array.Resize(ref identifier, newSize);
-                        
+
                         //Read the next bytes starting at the newly allocated space
                         Read(identifier, size, IdentiferSize);
-                        
+
                         //Check for sync
                         if (identifier[UnitOverhead] == TransportStreamUnit.SyncByte) goto FoundSync;
 
@@ -233,7 +234,7 @@ namespace Media.Containers.Mpeg
                         size = newSize;
                     };
                 }
-                
+
                 //Canot find sync
                 throw new InvalidOperationException("Cannot Find Marker");
             }
@@ -265,7 +266,7 @@ namespace Media.Containers.Mpeg
                 yield return next;
 
                 //Get the type of packet this is
-                TransportStreamUnit.PacketIdentifier pid = GetPacketIdentifier(this, next.Identifier);                
+                TransportStreamUnit.PacketIdentifier pid = GetPacketIdentifier(this, next.Identifier);
 
                 //Need to parse the packet to ensure that GetTracks can always be updated.
                 switch (pid)
@@ -318,17 +319,16 @@ namespace Media.Containers.Mpeg
             }
         }
 
-        HashSet<TransportStreamUnit.PacketIdentifier> m_ProgramIds = new HashSet<TransportStreamUnit.PacketIdentifier>();
+        private readonly HashSet<TransportStreamUnit.PacketIdentifier> m_ProgramIds = [];
 
         public override string ToTextualConvention(Container.Node node)
         {
-            if (node.Master.Equals(this)) return TransportStreamReader.ToTextualConvention(this, node.Identifier);
-            return base.ToTextualConvention(node);
+            return node.Master.Equals(this) ? TransportStreamReader.ToTextualConvention(this, node.Identifier) : base.ToTextualConvention(node);
         }
 
-        System.Collections.Concurrent.ConcurrentDictionary<ushort, TransportStreamUnit.PacketIdentifier> m_ProgramAssociations = new System.Collections.Concurrent.ConcurrentDictionary<ushort, TransportStreamUnit.PacketIdentifier>();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<ushort, TransportStreamUnit.PacketIdentifier> m_ProgramAssociations = new();
 
-        static internal int ReadPointerField(Container.Node node, int offset = 0)
+        internal static int ReadPointerField(Container.Node node, int offset = 0)
         {
             int pointer = node.Data[offset++];
 
@@ -337,7 +337,7 @@ namespace Media.Containers.Mpeg
 
         //Static and take reader?
         //Maps from Program to PacketIdentifer?
-        internal protected virtual void ParseProgramAssociationTable(Container.Node node)
+        protected internal virtual void ParseProgramAssociationTable(Container.Node node)
         {
 
             int offset = ReadPointerField(node);
@@ -418,9 +418,9 @@ namespace Media.Containers.Mpeg
             //CRC
         }
 
-        System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<TransportStreamUnit.PacketIdentifier, ushort>> m_ProgramDescriptions = new System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<TransportStreamUnit.PacketIdentifier, ushort>>();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<TransportStreamUnit.PacketIdentifier, ushort>> m_ProgramDescriptions = new();
 
-        internal protected virtual void ParseDescriptionTable(Container.Node node)
+        protected internal virtual void ParseDescriptionTable(Container.Node node)
         {
             int offset = ReadPointerField(node);
 
@@ -440,7 +440,7 @@ namespace Media.Containers.Mpeg
             {
 
                 byte esType = node.Data[offset++];
-                
+
                 //Could store two bytes and have methods to extract with masks.
 
                 TransportStreamUnit.PacketIdentifier esPid = (TransportStreamUnit.PacketIdentifier)(Common.Binary.ReadU16(node.Data, offset, Common.Binary.IsLittleEndian) & TransportStreamUnit.PacketIdentifierMask);

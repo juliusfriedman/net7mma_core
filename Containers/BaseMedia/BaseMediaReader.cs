@@ -33,12 +33,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * 
  * v//
  */
+using Media.Container;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Media.Container;
 
 namespace Media.Containers.BaseMedia
 {
@@ -54,8 +54,7 @@ namespace Media.Containers.BaseMedia
     //https://dvcs.w3.org/hg/html-media/raw-file/tip/media-source/isobmff-byte-stream-format.html
     public class BaseMediaReader : MediaFileStream
     {
-
-        static DateTime IsoBaseDateUtc = new DateTime(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly DateTime IsoBaseDateUtc = new(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         //Todo Make Generic.Dictionary and have a ToTextualConvention that tries the Generic.Dictionary first. (KnownParents)        
 
@@ -67,8 +66,8 @@ namespace Media.Containers.BaseMedia
         /// <summary>
         /// <see href="http://www.mp4ra.org/atoms.html">MP4REG</see>
         /// </summary>
-        public static List<string> ParentBoxes = new List<string>()
-        {
+        public static List<string> ParentBoxes =
+        [
             "moof", //movie fragment
             "mfhd", //movie fragment header
             "traf", //track fragment
@@ -93,7 +92,7 @@ namespace Media.Containers.BaseMedia
             "minf",
             "dinf",
             "stbl",
-            "edts",            
+            "edts",
             "stsd",
             //"tkhd", //Track Header
             "tref", //Track Reference Container
@@ -124,26 +123,22 @@ namespace Media.Containers.BaseMedia
             "meco", //additional metadata container,
             "udta",
             "vnrp",
-        };
+        ];
 
         //could add level to node by extending or adding bytes to header.
         //Could also track in reader.
 
         public const string UserDefined = "uuid";
+        private const int BytesPerUUID = 16;
 
-        const int BytesPerUUID = 16;
-
-        public static byte[] IsoUUIDTemplate = new byte[] { 
+        public static byte[] IsoUUIDTemplate = new byte[] {
                                                             0x00, 0x00, 0x00, 0x00, /*XXXX*/
-                                                            0x00, 0x11, 0x00, 0x10, 
+                                                            0x00, 0x11, 0x00, 0x10,
                                                             0x80, 0x00, 0x00, 0xAA,
                                                             0x00, 0x39, 0x9B, 0x71
                                                            };
-
-        const int TemplateSize = 12;
-        
-
-        const int MinimumSize = IdentifierSize + LengthSize, IdentifierSize = 4, LengthSize = IdentifierSize;
+        private const int TemplateSize = 12;
+        private const int MinimumSize = IdentifierSize + LengthSize, IdentifierSize = 4, LengthSize = IdentifierSize;
 
         public static string ToUTF8FourCharacterCode(byte[] identifier, int offset = 0, int count = 4)
         {
@@ -152,13 +147,13 @@ namespace Media.Containers.BaseMedia
 
         public static string ToEncodedFourCharacterCode(Encoding encoding, byte[] identifier, int offset, int count)
         {
-            if (encoding is null) throw new ArgumentNullException("encoding");
-
-            if (identifier is null) throw new ArgumentNullException("identifier");
-
-            if (offset + count > identifier.Length) throw new ArgumentOutOfRangeException("offset and count must relfect a position within identifier.");
-
-            return encoding.GetString(identifier, offset, count);
+            return encoding is null
+                ? throw new ArgumentNullException("encoding")
+                : identifier is null
+                ? throw new ArgumentNullException("identifier")
+                : offset + count > identifier.Length
+                ? throw new ArgumentOutOfRangeException("offset and count must relfect a position within identifier.")
+                : encoding.GetString(identifier, offset, count);
         }
 
         public static bool IsUserDefinedNode(BaseMediaReader reader, Node node)
@@ -192,7 +187,7 @@ namespace Media.Containers.BaseMedia
             }
 
             //Return the result of parsing a Guid from the uuid bytes. The UUID should be in big endian format...
-                                                        //BitOrder == LeastSignificant
+            //BitOrder == LeastSignificant
             return Common.Binary.ReadGuid(uuidBytes, 0, Common.Binary.IsLittleEndian);  //new Guid(uuidBytes);
         }
 
@@ -265,7 +260,7 @@ namespace Media.Containers.BaseMedia
         {
             //4.2 Object Structure 
             bytesRead = 0;
-            
+
             ulong length = 0;
 
             //Allocate 8 bytes
@@ -285,7 +280,7 @@ namespace Media.Containers.BaseMedia
                     length = (uint)Common.Binary.Read32(lengthBytes, 0, Common.Binary.IsLittleEndian);
 
                     //Repeat while 0 or 1 was found
-                } while (length <= 1);                
+                } while (length <= 1);
 
                 //By 'my' logic when a '1' was read which indicated the length is unknown or first 32 bits are full, we don't need to read 8 more just 4 since that is what would be different...
                 //This logic / optomization is not inline with the standard and may be changed later.                
@@ -305,20 +300,19 @@ namespace Media.Containers.BaseMedia
             if (Remaining <= MinimumSize) throw new System.IO.EndOfStreamException();
 
             //Keep track of how many bytes used in the length
-            int lengthBytesRead = 0;
 
             //Keep the length bytes
             byte[] lengthBytes = new byte[LengthSize];
 
             //Read the length
-            ulong length = (ulong)ReadLength(this, out lengthBytesRead, lengthBytes, 0);
+            ulong length = (ulong)ReadLength(this, out int lengthBytesRead, lengthBytes, 0);
 
             //Keep the identifier bytes
             byte[] identifier = new byte[IdentifierSize];
-            
+
             //Read the box identifier
             int identifierSize = Read(identifier, 0, IdentifierSize);
-            
+
             //If this is a user defined type, then it must be read to access the length and to property get the data offset.
             //The reason why this is not nested in the check for the extended length is that the identifier should always be kept seperate from the data of the node.
             if (IsUserDefinedIdentifier(this, identifier))
@@ -382,7 +376,7 @@ namespace Media.Containers.BaseMedia
                 //This implies that the DataSize can be trusted since the length has been altered by ReadNext() to account for this.                
 
                 ulong dataSize = (ulong)(next.DataSize);
-                
+
                 //Keep track of how much was skipped
                 ulong skipped = 0, toSkip = 0;
 
@@ -391,7 +385,7 @@ namespace Media.Containers.BaseMedia
                 {
                     //Todo use unsafe conversion
                     toSkip = Common.Binary.Clamp(dataSize, (ulong)0, (ulong)long.MaxValue);
-                    
+
                     //Todo unsigned overloads.
                     Skip((long)toSkip);
 
@@ -417,8 +411,7 @@ namespace Media.Containers.BaseMedia
 
         public override string ToTextualConvention(Node node)
         {
-            if (node.Master.Equals(this)) return BaseMediaReader.ToUTF8FourCharacterCode(node.Identifier);
-            return base.ToTextualConvention(node);
+            return node.Master.Equals(this) ? BaseMediaReader.ToUTF8FourCharacterCode(node.Identifier) : base.ToTextualConvention(node);
         }
 
         public bool HasProtection
@@ -428,7 +421,7 @@ namespace Media.Containers.BaseMedia
             get { return ReadBoxes(Root.DataOffset, "ipro", "sinf").Count() >= 1; }
         }
 
-        DateTime? m_Created, m_Modified;
+        private DateTime? m_Created, m_Modified;
 
         public DateTime Created
         {
@@ -448,9 +441,8 @@ namespace Media.Containers.BaseMedia
             }
         }
 
-        ulong? m_TimeScale;
-
-        TimeSpan? m_Duration;
+        private ulong? m_TimeScale;
+        private TimeSpan? m_Duration;
 
         public TimeSpan Duration
         {
@@ -461,7 +453,7 @@ namespace Media.Containers.BaseMedia
             }
         }
 
-        float? m_PlayRate, m_Volume;
+        private float? m_PlayRate, m_Volume;
 
         public float PlayRate
         {
@@ -481,7 +473,7 @@ namespace Media.Containers.BaseMedia
             }
         }
 
-        byte[] m_Matrix;
+        private byte[] m_Matrix;
 
         public byte[] Matrix
         {
@@ -492,7 +484,7 @@ namespace Media.Containers.BaseMedia
             }
         }
 
-        int? m_NextTrackId;
+        private int? m_NextTrackId;
 
         public int NextTrackId
         {
@@ -525,7 +517,7 @@ namespace Media.Containers.BaseMedia
                             created = Common.Binary.ReadU32(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
 
                             modified = Common.Binary.ReadU32(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
-                            
+
                             m_TimeScale = Common.Binary.ReadU32(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
 
                             duration = Common.Binary.ReadU32(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
@@ -566,7 +558,7 @@ namespace Media.Containers.BaseMedia
 
                 m_Modified = IsoBaseDateUtc.AddMilliseconds(modified * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond);
 
-                m_Duration = TimeSpan.FromSeconds((double)duration / (double)m_TimeScale.Value);
+                m_Duration = TimeSpan.FromSeconds(duration / (double)m_TimeScale.Value);
             }
         }
 
@@ -576,7 +568,7 @@ namespace Media.Containers.BaseMedia
             get { return ReadBoxes(Root.Offset, "stco", "co64").FirstOrDefault(); }
         }
 
-        List<Track> m_Tracks;
+        private List<Track> m_Tracks;
 
         public override IEnumerable<Track> GetTracks() //bool enabled tracks only?
         {
@@ -607,7 +599,7 @@ namespace Media.Containers.BaseMedia
 
                 bool enabled = false, inMovie, inPreview;
 
-                byte[] codecIndication = Media.Common.MemorySegment.EmptyBytes;                
+                byte[] codecIndication = Media.Common.MemorySegment.EmptyBytes;
 
                 float volume = m_Volume.Value;
 
@@ -627,11 +619,11 @@ namespace Media.Containers.BaseMedia
 
                 double rate = 0;
 
-                List<Tuple<long, long>> sttsEntries = new List<Tuple<long, long>>();
+                List<Tuple<long, long>> sttsEntries = [];
 
-                List<long> stOffsets = new List<long>();
+                List<long> stOffsets = [];
 
-                List<int> stSizes = new List<int>();
+                List<int> stSizes = [];
 
                 TimeSpan startTime = TimeSpan.Zero;
 
@@ -682,7 +674,7 @@ namespace Media.Containers.BaseMedia
 
                                     stream.Read(rawData, 0, (int)length);
 
-                                    List<Tuple<int, int, float>> edits = new List<Tuple<int, int, float>>();                                    
+                                    List<Tuple<int, int, float>> edits = [];
 
                                     //Skip Flags and Version
                                     offset = LengthSize;
@@ -717,7 +709,7 @@ namespace Media.Containers.BaseMedia
                                     stream.Read(rawData, 0, (int)length);
 
                                     version = rawData[offset++];
-                                    
+
                                     flags = Common.Binary.Read24(rawData, offset, Common.Binary.IsLittleEndian);
 
                                     offset += 3;
@@ -750,14 +742,9 @@ namespace Media.Containers.BaseMedia
                                     offset += 4;
 
                                     //Get Duration
-                                    if (version is 0)
-                                    {
-                                        duration = Common.Binary.ReadU32(rawData, ref offset, Common.Binary.IsLittleEndian);
-                                    }
-                                    else
-                                    {
-                                        duration = Common.Binary.ReadU64(rawData, ref offset, Common.Binary.IsLittleEndian);
-                                    }
+                                    duration = version is 0
+                                        ? Common.Binary.ReadU32(rawData, ref offset, Common.Binary.IsLittleEndian)
+                                        : Common.Binary.ReadU64(rawData, ref offset, Common.Binary.IsLittleEndian);
 
                                     if (duration == 4294967295L) duration = ulong.MaxValue;
 
@@ -777,7 +764,7 @@ namespace Media.Containers.BaseMedia
 
                                     //Width
                                     width = Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian) / ushort.MaxValue;
-                                    
+
                                     //Height
                                     height = Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian) / ushort.MaxValue;
 
@@ -1024,7 +1011,7 @@ namespace Media.Containers.BaseMedia
 
                                     for (int i = 0; i < chunkCount && offset < length; ++i)
                                     {
-                                        stOffsets.Add((long)Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian));
+                                        stOffsets.Add(Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian));
                                     }
 
                                     offset = (int)length;
@@ -1113,7 +1100,7 @@ namespace Media.Containers.BaseMedia
                     }
                 }
 
-                TimeSpan calculatedDuration = TimeSpan.FromSeconds(trackDuration / (double)trackTimeScale);                
+                TimeSpan calculatedDuration = TimeSpan.FromSeconds(trackDuration / (double)trackTimeScale);
 
                 ulong sampleCount = (ulong)stSizes.Count;
 
@@ -1129,9 +1116,9 @@ namespace Media.Containers.BaseMedia
 
                 //TOdo calc methods in BaseMedia class with base times etc.. (will help with writers)
 
-                rate = mediaType == Sdp.MediaType.audio ? trackTimeScale : (double)((double)sampleCount / ((double)trackDuration / trackTimeScale));
+                rate = mediaType == Sdp.MediaType.audio ? trackTimeScale : (double)(sampleCount / ((double)trackDuration / trackTimeScale));
 
-                Track createdTrack = new Track(trakBox, name, trackId, trackCreated, trackModified, (long)sampleCount, width, height, startTime, calculatedDuration, rate, mediaType, codecIndication, channels, bitDepth, enabled);
+                Track createdTrack = new(trakBox, name, trackId, trackCreated, trackModified, (long)sampleCount, width, height, startTime, calculatedDuration, rate, mediaType, codecIndication, channels, bitDepth, enabled);
 
                 //Useful to support GetSample
                 var dataDictionary = new Dictionary<string, object>();

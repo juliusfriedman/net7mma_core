@@ -166,8 +166,8 @@ namespace Media.Rtsp.Server.MediaTypes
             }
             catch
             {
-                logger = null; 
-                
+                logger = null;
+
                 return false;
             }
         }
@@ -180,7 +180,7 @@ namespace Media.Rtsp.Server.MediaTypes
         {
             //When the stream is not fully stopped
             if (State >= StreamState.StopRequested) return;
-            
+
             //If there is a RtpClient call Activate.
             RtpClient?.Activate();
 

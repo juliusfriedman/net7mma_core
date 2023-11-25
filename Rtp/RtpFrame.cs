@@ -114,7 +114,7 @@ namespace Media.Rtp
         /// <summary>
         /// The maximum amount of packets which can be contained in a frame
         /// </summary>
-        internal protected int MaxPackets = 1024;
+        protected internal int MaxPackets = 1024;
 
         /// <summary>
         /// Indicates if Add operations will ensure that all packets added have the same <see cref="RtpPacket.PayloadType"/>
@@ -135,7 +135,7 @@ namespace Media.Rtp
         /// <summary>
         /// Updating the SequenceNumber of a contained packet can still cause unintended results.
         /// </summary>
-        internal readonly protected List<RtpPacket> Packets;
+        protected internal readonly List<RtpPacket> Packets;
 
         //Could use List if Add is replaced with Insert and index given by something like => Abs(Clamp(n, 0, Min(n - count) + Max(n - count))) or IndexOf(n)
         //Also needs a Dictionary to be able to maintain state of remove operations...
@@ -148,7 +148,7 @@ namespace Media.Rtp
         /// <summary>
         /// After a single RtpPacket is <see cref="Depacketize">depacketized</see> it will be placed into this list with the appropriate index.
         /// </summary>
-        internal protected readonly SortedList<double, Common.MemorySegment> Depacketized;
+        protected internal readonly SortedList<double, Common.MemorySegment> Depacketized;
 
         #region Todo
 
@@ -162,25 +162,24 @@ namespace Media.Rtp
 
         //Maybe something like RtpPacket, IEnumerable<Common.MemorySegment>
         // e.g. ConcurrentThesaurus<RtpPacket, Common.MemorySegment> , but it would be impossible to preserve the order of packets in the dictionary without using SortedDictionary and custom comparer for every derived type
-        
+
         //A structure with the Packet and all corresponding Segments could work, this makes removing easy but it required the DecodingOrder to be seperately stored for each packet.
         //This is because there may be multiple access units within a single packet which have multiple decoding order vectors.
 
         //For example
 
         //Rtp 0
-            //Au 1, 3, 5
+        //Au 1, 3, 5
         //Rtp 1
-            //Au 0, 2, 4
+        //Au 0, 2, 4
 
         //Packetization and Depacketization structure for internal use.
         internal class PaD : Common.BaseDisposable
         {
             #region Fields
 
-            RtpPacket m_Packet;
-
-            readonly List<Media.Common.MemorySegment> Parts;
+            private readonly RtpPacket m_Packet;
+            private readonly List<Media.Common.MemorySegment> Parts;
 
             internal int DecodingOrder;
 
@@ -188,8 +187,8 @@ namespace Media.Rtp
 
             #region Constructor
 
-            PaD(PaD pad, bool shouldDispose = true)
-                :base(shouldDispose)
+            private PaD(PaD pad, bool shouldDispose = true)
+                : base(shouldDispose)
             {
                 if (Common.IDisposedExtensions.IsNullOrDisposed(pad)) throw new InvalidOperationException("pad is NullOrDisposed");
 
@@ -198,14 +197,14 @@ namespace Media.Rtp
                 Parts = pad.Parts;
             }
 
-            PaD(RtpPacket packet)
+            private PaD(RtpPacket packet)
                 : base(packet.ShouldDispose)
             {
                 if (Common.IDisposedExtensions.IsNullOrDisposed(packet)) throw new InvalidOperationException("packet is NullOrDisposed");
 
                 m_Packet = packet;
 
-                Parts = new List<Common.MemorySegment>();
+                Parts = [];
             }
 
             #endregion
@@ -239,7 +238,7 @@ namespace Media.Rtp
         //4) The packet data is depacketized to the Parts member.
         //5) If more data remains in the packet go to Step 1
         // Repeat as necessary for the data in the packet.
-        
+
         //Each packet would be allowed to have many buffers and they could be removed according to the packet which owns them (or the MemorySegment even better in some cases)
 
         //Overlapping DecodingOrder's are easily handled by using Distinct / Sort in PrepareBuffer
@@ -295,7 +294,7 @@ namespace Media.Rtp
         /// <summary>
         /// Useful for depacketization.. might not need a field as buffer can be created on demand from SegmentStream, just need to determine if every call to Buffer should maintain position or not.
         /// </summary>
-        internal protected Common.SegmentStream m_Buffer;
+        protected internal Common.SegmentStream m_Buffer;
 
         #endregion
 
@@ -315,7 +314,7 @@ namespace Media.Rtp
             //    if (value < 0)
             //    {
             //        m_PayloadType = -1;
-                    
+
             //        Clear();
 
             //        return;
@@ -362,7 +361,7 @@ namespace Media.Rtp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return m_Ssrc; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set
+            protected internal set
             {
                 m_Ssrc = value;
 
@@ -378,7 +377,7 @@ namespace Media.Rtp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return m_Timestamp; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { m_Timestamp = value; }
+            protected internal set { m_Timestamp = value; }
         }
 
         /// <summary>
@@ -386,7 +385,7 @@ namespace Media.Rtp
         /// </summary>
         /// <param name="index"></param>
         /// <returns></returns>
-        internal protected RtpPacket this[int index]
+        protected internal RtpPacket this[int index]
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return Packets[index]; }
@@ -413,7 +412,7 @@ namespace Media.Rtp
         public bool HasDepacketized
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Depacketized is null ? false : Depacketized.Count > 0; }
+            get { return Depacketized is not null && Depacketized.Count > 0; }
         }
 
         /// <summary>
@@ -431,7 +430,7 @@ namespace Media.Rtp
         public bool Transferred
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return IsEmpty ? false : Packets.All(p => p.Transferred.HasValue); }
+            get { return !IsEmpty && Packets.All(p => p.Transferred.HasValue); }
         }
 
         //Possible make an Action<bool> / Delegate 'IsCompleteCheck' which represents the functionality to use here and remove virtual.
@@ -468,7 +467,8 @@ namespace Media.Rtp
                     //Skip the range check for 2 packets
                     case 2: return ((short)(m_LowestSequenceNumber - m_HighestSequenceNumber) != -1); //(should be same as 1 + (short)((m_LowestSequenceNumber - m_HighestSequenceNumber)) is 0 but saves an additional addition)
                     //2 or more packets, cache the m_LowestSequenceNumber and check all packets to be sequential starting at offset 1
-                    default: RtpPacket p; for (int nextSeq = m_LowestSequenceNumber == ushort.MaxValue ? ushort.MinValue : m_LowestSequenceNumber + 1, i = 1; i < count; ++i)
+                    default:
+                        RtpPacket p; for (int nextSeq = m_LowestSequenceNumber == ushort.MaxValue ? ushort.MinValue : m_LowestSequenceNumber + 1, i = 1; i < count; ++i)
                         {
                             //Scope the packet
                             p = Packets[i];
@@ -516,7 +516,7 @@ namespace Media.Rtp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return Count is 0; }
         }
-        
+
         /// <summary>
         /// Gets the 16 bit unsigned value which is associated with the highest sequence number contained or -1 if no RtpPackets are contained.
         /// Usually the packet at the highest offset
@@ -554,10 +554,10 @@ namespace Media.Rtp
             Created = DateTime.UtcNow;
 
             //Create the list
-            Packets = new List<RtpPacket>();
+            Packets = [];
 
             //Create the list
-            Depacketized = new SortedList<double, Common.MemorySegment>();
+            Depacketized = [];
         }
 
         /// <summary>
@@ -584,14 +584,14 @@ namespace Media.Rtp
         /// <param name="payloadType"></param>
         /// <param name="timeStamp"></param>
         /// <param name="ssrc"></param>
-        public RtpFrame(int payloadType, int timeStamp, int ssrc) 
-            :this(payloadType)
+        public RtpFrame(int payloadType, int timeStamp, int ssrc)
+            : this(payloadType)
         {
             //Assign the Synconrization Source Identifier
             m_Ssrc = ssrc;
 
             //Assign the Timestamp
-            m_Timestamp = timeStamp;    
+            m_Timestamp = timeStamp;
         }
 
         //Todo, additional byte[] overloads to packetize data with
@@ -607,17 +607,17 @@ namespace Media.Rtp
         /// <param name="addPacket"></param>
         /// <param name="shouldDispose"></param>
         public RtpFrame(RtpPacket packet, bool addPacket = true, bool shouldDispose = true)
-            :this(shouldDispose)
+            : this(shouldDispose)
         {
-            if(Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
+            if (Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
             m_PayloadType = packet.PayloadType;
-            
+
             m_Timestamp = packet.Timestamp;
 
             m_Ssrc = packet.SynchronizationSourceIdentifier;
 
-            if(addPacket) Add(packet);
+            if (addPacket) Add(packet);
         }
 
         /// <summary>
@@ -633,8 +633,8 @@ namespace Media.Rtp
 
             m_PayloadType = f.m_PayloadType;
 
-            m_Ssrc = f.m_Ssrc; 
-            
+            m_Ssrc = f.m_Ssrc;
+
             m_Timestamp = f.m_Timestamp;
 
             m_HighestSequenceNumber = f.m_HighestSequenceNumber;
@@ -662,11 +662,11 @@ namespace Media.Rtp
             else
             {
                 //Create the list
-                Depacketized = new SortedList<double, Common.MemorySegment>();
-                
+                Depacketized = [];
+
                 //Can't create a new one because of the implications
                 //m_Buffer = f.m_Buffer; 
-            }           
+            }
 
             /// See notes and determine if this is appropraite behavior
             //ShouldDispose = f.ShouldDispose;
@@ -742,9 +742,9 @@ namespace Media.Rtp
         /// <param name="packet">The RtpPacket to Add</param>
         /// <param name="allowPacketsAfterMarker">Indicates if the packet shouldbe allowed even if the packet's sequence number is greater than or equal to <see cref="HighestSequenceNumber"/> and <see cref="IsComplete"/> is true.</param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public void Add(RtpPacket packet, 
+        public void Add(RtpPacket packet,
             //Todo, should be Flags which indicate what is allowed to be added
-            bool allowDuplicates = false, 
+            bool allowDuplicates = false,
             bool allowPacketsAfterMarker = true)
         {
             //If the packet is disposed of this frame is then do not add.
@@ -775,7 +775,7 @@ namespace Media.Rtp
 
                     //m_PayloadType |= RFC3550.CommonHeaderBits.RtpMarkerMask;
                 }
-                
+
                 //Should mark as dirty if not dispose.
                 //DisposeBuffer();
 
@@ -809,7 +809,7 @@ namespace Media.Rtp
 
                 throw new ArgumentException("packet.SynchronizationSourceIdentifier(" + ssrc + ") must match frame SynchronizationSourceIdentifier(" + m_Ssrc + ")", "packet");
             }
-        Timestamp:
+            Timestamp:
 
             //Allow multiple timestamps...
             if (false.Equals(ts.Equals(m_Timestamp))) throw new InvalidOperationException("packet.Timestamp must match frame Timestamp");
@@ -857,10 +857,10 @@ namespace Media.Rtp
                 //move the index
                 ++insert;
             }
-            
+
             //Ensure not a duplicate
             if (allowDuplicates is false && tempSeq.Equals(seq))
-            {                
+            {
                 throw new InvalidOperationException("Cannot have duplicate packets in the same frame.");
             }
             else if (tempSeq.Equals(seq))
@@ -900,7 +900,7 @@ namespace Media.Rtp
             if (IsDisposed) return false;
 
             try { Add(packet, allowDuplicates, allowPacketsAfterMarker); return true; }
-            catch { return false; }            
+            catch { return false; }
         }
 
         //TryAddOrUpdate
@@ -926,14 +926,14 @@ namespace Media.Rtp
         internal bool Contains(ref int sequenceNumber) { return IndexOf(ref sequenceNumber) >= 0; }
 
         [CLSCompliant(false)]
-        internal protected int IndexOf(int sequenceNumber) { return IndexOf(ref sequenceNumber); }
+        protected internal int IndexOf(int sequenceNumber) { return IndexOf(ref sequenceNumber); }
 
         /// <summary>
         /// Indicates if the RtpFrame contains a RtpPacket based on the given sequence number.
         /// </summary>
         /// <param name="sequenceNumber">The sequence number to check</param>
         /// <returns>The index of the packet is contained, otherwise -1.</returns>
-        internal protected int IndexOf(ref int sequenceNumber)
+        protected internal int IndexOf(ref int sequenceNumber)
         {
             int count = Count;
 
@@ -946,9 +946,7 @@ namespace Media.Rtp
                     }
                 case 2:
                     {
-                        if (m_LowestSequenceNumber == sequenceNumber) return 0;
-
-                        return m_HighestSequenceNumber == sequenceNumber ? 1 : -1;
+                        return m_LowestSequenceNumber == sequenceNumber ? 0 : m_HighestSequenceNumber == sequenceNumber ? 1 : -1;
                     }
                 //Only optimal if sequenceNumber is @ 1 otherwise default cases may be faster, this saves 2 additional range changes
                 case 3:
@@ -957,7 +955,7 @@ namespace Media.Rtp
 
                         goto case 2;
                     }
-                    //Still really only just saves 2 checks, still not optimals
+                //Still really only just saves 2 checks, still not optimals
                 //case 4:
                 //    {
                 //        if (Packets[2].SequenceNumber == sequenceNumber) return 2;
@@ -983,7 +981,7 @@ namespace Media.Rtp
 
                         RtpPacket p;
 
-                                    //Not really necessary to Max, could just start at 1, but this potentially saves some array access
+                        //Not really necessary to Max, could just start at 1, but this potentially saves some array access
                         //Loop from 1 to count - 1 since they were checked above
                         for (int i = Common.Binary.Max(1, sequenceNumber - m_LowestSequenceNumber), e = count - 1; i < e; ++i)
                         {
@@ -1014,7 +1012,7 @@ namespace Media.Rtp
         /// <param name="sequenceNumber">The sequence number of the RtpPacket to remove</param>
         /// <returns>A RtpPacket with the sequence number if removed, otherwise null</returns>
         public RtpPacket Remove(int sequenceNumber) { return Remove(ref sequenceNumber); }
-        
+
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public RtpPacket Remove(ref int sequenceNumber)
@@ -1043,19 +1041,19 @@ namespace Media.Rtp
             //Determine if the sequence number effects the lowest or highest fields
             switch (--count)
             {
-                case 0: 
-                    m_LowestSequenceNumber = m_HighestSequenceNumber = -1; 
-                    
+                case 0:
+                    m_LowestSequenceNumber = m_HighestSequenceNumber = -1;
+
                     //m_PayloadType &= Common.Binary.SevenBitMaxValue;
 
                     m_MarkerCount = 0;
 
                     goto Done;
-                    //Only 1 packet remains, saves a count - 1 and an array access.
+                //Only 1 packet remains, saves a count - 1 and an array access.
                 case 1:
                     {
                         //m_LowestSequenceNumber = m_HighestSequenceNumber = Packets[0].SequenceNumber; 
-                        
+
                         //If this was at 0 then remap 0 to 1
                         if (sequenceNumber == m_LowestSequenceNumber) m_LowestSequenceNumber = m_HighestSequenceNumber;
 
@@ -1067,7 +1065,7 @@ namespace Media.Rtp
 
                     }
                 //only 2 packets is really default also but this saves a count - 1 instruction
-                    //It also saves one access to the array when possible.
+                //It also saves one access to the array when possible.
                 case 2:
                     {
                         switch (i)
@@ -1092,7 +1090,7 @@ namespace Media.Rtp
                 default:
                     {
                         //Skip the access of the array for all cases but when the sequence was == to the m_LowestSequenceNumber (i is 0)
-                        if(i is 0) //(sequenceNumber == m_LowestSequenceNumber)
+                        if (i is 0) //(sequenceNumber == m_LowestSequenceNumber)
                         {
                             m_LowestSequenceNumber = Packets[0].SequenceNumber; //First
                         }
@@ -1105,24 +1103,24 @@ namespace Media.Rtp
                     }
             }
 
-        CheckMarker:
+            CheckMarker:
             //Check for marker when i >= count and unset marker bit if present. (Todo, if AllowMultipleMarkers this needs to be counted)
             if (m_MarkerCount > 0 && p.Marker) --m_MarkerCount;
 
-        Done:
+            Done:
             //Remove any memory assoicated with the packet by getting the key of the packet.
             //Force if the packet should be disposed... (the packet is not really being disposed just yet..)
 
             //The packets may not be stored with sequenceNumber as a key.
             FreeDepacketizedMemory((short)sequenceNumber, p.ShouldDispose); //(sequenceNumber);
-            
+
             return p;            //Notes, i contains the offset where p was stored.
         }
 
         /// <summary>
         /// Empties the RtpFrame by clearing the underlying List of contained RtpPackets
         /// </summary>
-        internal protected void RemoveAllPackets() //bool disposeBuffer
+        protected internal void RemoveAllPackets() //bool disposeBuffer
         {
             //Packets.Clear();
 
@@ -1192,7 +1190,7 @@ namespace Media.Rtp
         /// Disposes all contained packets. 
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void DisposeAllPackets()
+        protected internal void DisposeAllPackets()
         {
             //System.Linq.ParallelEnumerable.ForAll(Packets.AsParallel(), (t) => t.Dispose());
 
@@ -1230,9 +1228,9 @@ namespace Media.Rtp
             IEnumerable<byte> sequence = Common.MemorySegment.Empty;
 
             //Iterate the packets (if packets are added or removed this logic is interrupted)
-                                                            //Use the static functionality by default RtpFrame.AssemblePacket(packet, useExtensions, profileHeaderSize)
+            //Use the static functionality by default RtpFrame.AssemblePacket(packet, useExtensions, profileHeaderSize)
             for (int i = 0; i < Count; ++i) sequence = sequence.Concat(Assemble(Packets[i], useExtensions, profileHeaderSize));
-                 
+
 
             //Return the result
             return sequence;
@@ -1280,7 +1278,7 @@ namespace Media.Rtp
 
             //PrepareBuffer must be called to access the buffer.
         }
-        
+
         //Virtual so dervied types can call their Depacketize method with any options they may require
 
         /// <summary>
@@ -1307,7 +1305,7 @@ namespace Media.Rtp
         /// Disposes any existing buffer. Creates a new buffer.
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void PrepareBuffer() //bool, persist, action pre pre write, post write
+        protected internal void PrepareBuffer() //bool, persist, action pre pre write, post write
         {
             //Ensure there is something to write to the buffer
             if (HasDepacketized is false) return;
@@ -1371,7 +1369,7 @@ namespace Media.Rtp
         /// <summary>
         /// virtual so it's easy to keep the same API, not really needed though since Dispose is also overridable.
         /// </summary>
-        internal virtual protected void DisposeBuffer()
+        protected internal virtual void DisposeBuffer()
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(m_Buffer)) return;
 
@@ -1382,7 +1380,7 @@ namespace Media.Rtp
 
         //Todo, would be handled with other collection via remove...
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void FreeDepacketizedMemory(bool force = false)
+        protected internal void FreeDepacketizedMemory(bool force = false)
         {
             if (Depacketized is null) return;
 
@@ -1423,7 +1421,7 @@ namespace Media.Rtp
         //    return GetPacketKey(ref key);
         //}
 
-        internal protected void FreeDepacketizedMemory(short key, bool force = false)
+        protected internal void FreeDepacketizedMemory(short key, bool force = false)
         {
             int k = key;
 
@@ -1437,7 +1435,7 @@ namespace Media.Rtp
         /// <param name="key"></param>
         /// <param name="force"></param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected void FreeDepacketizedMemory(ref int key, ref bool force)
+        protected internal void FreeDepacketizedMemory(ref int key, ref bool force)
         {
             //Needs a method to virtually determine the key of the packet.
             if (Depacketized.ContainsKey(key))
@@ -1453,7 +1451,7 @@ namespace Media.Rtp
 
                     //Remove it from the list.
                     Depacketized.Remove(key);
-                }                
+                }
             }
         }
 
@@ -1510,9 +1508,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            if (System.Object.ReferenceEquals(this, obj)) return true;
-
-            return obj is RtpFrame f && Equals(f);
+            return object.ReferenceEquals(this, obj) || obj is RtpFrame f && Equals(f);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1937,7 +1933,7 @@ namespace Media.UnitTests
         public void TestAddingRandomPackets()
         {
             //Create a frame with an unspecified payload
-            using (Media.Rtp.RtpFrame frame = new Media.Rtp.RtpFrame())
+            using (Media.Rtp.RtpFrame frame = [])
             {
 
                 if (frame.SpecifiedPayloadType) throw new Exception("Frame must have SpecifiedPayloadType is false when not set in constructor.");
@@ -2095,7 +2091,7 @@ namespace Media.UnitTests
                 frame.Add(new Media.Rtp.RtpPacket(2, false, false, Media.Common.MemorySegment.EmptyBytes)
                 {
                     SequenceNumber = ushort.MaxValue - 1
-                });                
+                });
 
                 //The frame MUST be missing packets.
                 if (false == frame.IsMissingPackets) throw new Exception("Frame is missing packets");
@@ -2117,22 +2113,22 @@ namespace Media.UnitTests
                     nextSeq = nextSeq == ushort.MaxValue ? 0 : nextSeq + 1;
                 }
 
-                
+
             }
         }
 
         public void TestAddingAndRemovingPackets()
         {
             //Create a frame
-            using (Media.Rtp.RtpFrame frame = new Media.Rtp.RtpFrame(0))
+            using (Media.Rtp.RtpFrame frame = new(0))
             {
 
                 //Add marker packet with seq = 0
                 frame.Add(new Media.Rtp.RtpPacket(2, false, false, Media.Common.MemorySegment.EmptyBytes)
-                   {
-                       SequenceNumber = ushort.MinValue,
-                       Marker = true
-                   });
+                {
+                    SequenceNumber = ushort.MinValue,
+                    Marker = true
+                });
 
 
                 //Add a lower order packet which MAY belong to the frame, 65535 could be a previous packet or a large jump, it would depend on the timestamp.
@@ -2161,7 +2157,7 @@ namespace Media.UnitTests
 
                     throw new Exception("Should not be allowed to add packet");
                 }
-                catch(InvalidOperationException)
+                catch (InvalidOperationException)
                 {
                     //Expected because allowPacketsAfterMarker was false.
 
@@ -2178,7 +2174,7 @@ namespace Media.UnitTests
 
                     if (false == frame.HasMarker) throw new Exception("Should have marker packet");
 
-                    if(frame.MarkerCount != 2) throw new Exception("Should have two marker packets");
+                    if (frame.MarkerCount != 2) throw new Exception("Should have two marker packets");
 
                     using (Media.Rtp.RtpPacket removed = frame.Remove(2))
                     {
@@ -2208,7 +2204,7 @@ namespace Media.UnitTests
                 //Remove three existing packets
                 using (Media.Rtp.RtpPacket packet = frame.Remove(ushort.MaxValue))
                 {
-                    if(packet is null || packet.SequenceNumber != ushort.MaxValue) throw new Exception("Packet is null");
+                    if (packet is null || packet.SequenceNumber != ushort.MaxValue) throw new Exception("Packet is null");
                 }
 
                 using (Media.Rtp.RtpPacket packet = frame.Remove(ushort.MinValue))
@@ -2236,7 +2232,7 @@ namespace Media.UnitTests
                 });
 
                 //Remove 1
-                using(frame.Remove(1)) ;
+                using (frame.Remove(1)) ;
 
                 if (frame.HighestSequenceNumber != 0) throw new Exception("HighestSequenceNumber Incorrect");
 
@@ -2249,7 +2245,7 @@ namespace Media.UnitTests
         public void TestContains()
         {
             //Create a frame
-            using (Media.Rtp.RtpFrame frame = new Media.Rtp.RtpFrame(0))
+            using (Media.Rtp.RtpFrame frame = new(0))
             {
                 frame.Add(new Media.Rtp.RtpPacket(2, false, false, Media.Common.MemorySegment.EmptyBytes)
                 {
@@ -2282,7 +2278,7 @@ namespace Media.UnitTests
         public void TestIsMissingPackets()
         {
             //Create a frame
-            using (Media.Rtp.RtpFrame frame = new Media.Rtp.RtpFrame(0))
+            using (Media.Rtp.RtpFrame frame = new(0))
             {
                 //Add packets to the frame
                 for (int i = 0; i < 15; ++i)
@@ -2332,7 +2328,7 @@ namespace Media.UnitTests
             //Create a frame
             unchecked
             {
-                using (Media.Rtp.RtpFrame frame = new Media.Rtp.RtpFrame(0))
+                using (Media.Rtp.RtpFrame frame = new(0))
                 {
                     //Add 15 packets to the frame starting at 65530, ending at 9 (Wrapping at 65535)
                     for (ushort i = ushort.MaxValue - 5; i != 10; ++i)
@@ -2370,7 +2366,7 @@ namespace Media.UnitTests
 
                         if (frame.HasMarker) throw new Exception("Frame has marker");
 
-                        if (false == frame.IsMissingPackets) throw new Exception("Frame is not missing packets");                        
+                        if (false == frame.IsMissingPackets) throw new Exception("Frame is not missing packets");
                     }
                 }
             }
@@ -2383,7 +2379,7 @@ namespace Media.UnitTests
             {
                 int expected = 0;
 
-                using (Media.Rtp.RtpFrame frame = new Media.Rtp.RtpFrame(0))
+                using (Media.Rtp.RtpFrame frame = new(0))
                 {
                     byte payloadValue = byte.MinValue;
 
@@ -2447,7 +2443,7 @@ namespace Media.UnitTests
 
                     //Also perform the same test with out of order packets by creating a new frame from random packets in frame.
 
-                    using (Media.Rtp.RtpFrame reorder = new Media.Rtp.RtpFrame(0))
+                    using (Media.Rtp.RtpFrame reorder = new(0))
                     {
                         int index;
 
@@ -2486,7 +2482,7 @@ namespace Media.UnitTests
                                     if (currentByte == -1)
                                     {
                                         lastByte = currentByte = buffer.ReadByte();
-                                        
+
                                         continue;
                                     }
 
@@ -2548,7 +2544,7 @@ namespace Media.UnitTests
                         //Todo, integrate with RtpFrame class.
                         //Test the SegmentStream (Not really part of this test yet because it's not used.)
 
-                        using (Common.SegmentStream test = new Common.SegmentStream(reorder.Depacketized.Values))
+                        using (Common.SegmentStream test = new(reorder.Depacketized.Values))
                         {
                             expected = 0;
 

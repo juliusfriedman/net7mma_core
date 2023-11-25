@@ -38,11 +38,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
+using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Media.Common;
 
 #endregion
 
@@ -116,7 +115,7 @@ namespace Media.Rtcp
                 Payload.Array[Payload.Offset + offset++] = (byte)extensionSize;
 
                 //Copy it to the payload after the length
-                extensionData.CopyTo(Payload.Array, Payload.Offset + offset);                
+                extensionData.CopyTo(Payload.Array, Payload.Offset + offset);
             }
 
             //Finally ensure the LengthInWords is set accordingly.
@@ -135,7 +134,7 @@ namespace Media.Rtcp
         internal GoodbyeReport(int version, int padding, int ssrc, int blockCount, int extensionSize, int bytesInSourceList, byte[] extensionData) // ref
             : this(version, padding, ssrc, ref blockCount, ref extensionSize, ref bytesInSourceList, extensionData)
         {
-            
+
         }
 
         /// <summary>
@@ -163,7 +162,7 @@ namespace Media.Rtcp
         }
 
         public GoodbyeReport(int version, int ssrc, byte[] reasonForLeaving) : this(version, ssrc, null, reasonForLeaving) { } //Todo chain?
-            
+
         /// <summary>
         /// Constructs a new GoodbyeReport from the given values.
         /// </summary>
@@ -244,9 +243,7 @@ namespace Media.Rtcp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (IsDisposed || false == HasReasonForLeaving) return Enumerable.Empty<byte>();
-
-                return ExtensionData.Skip(1).Take(ReasonForLeavingLength);
+                return IsDisposed || false == HasReasonForLeaving ? Enumerable.Empty<byte>() : ExtensionData.Skip(1).Take(ReasonForLeavingLength);
             }
         }
 
@@ -323,7 +320,7 @@ namespace Media.Rtcp
         /// <param name="sourceList"></param>
         /// <param name="offset"></param>
         /// <param name="count"></param>
-        internal virtual protected void Add(RFC3550.SourceList sourceList, int offset, int count)
+        protected internal virtual void Add(RFC3550.SourceList sourceList, int offset, int count)
         {
             if (sourceList is null) return;
 
@@ -334,7 +331,7 @@ namespace Media.Rtcp
             if (reportBlocksRemaining is 0) throw new InvalidOperationException("A RtcpReport can only hold 31 ReportBlocks");
 
             //Add the bytes to the payload and set the LengthInWordsMinusOne and increase the BlockCount
-            
+
             //This is not valid when there is a ReasonForLeaving, the data needs to be placed before such reason and padding
             AddBytesToPayload(sourceList.GetBinaryEnumerable(offset, BlockCount += Binary.Min(reportBlocksRemaining, count)));
         }
@@ -349,7 +346,7 @@ namespace Media.Rtcp
             //CheckDisposed();
 
             //The first entry is in the header
-            using (ReportBlock rb = new ReportBlock(Header.GetSendersSynchronizationSourceIdentifierSegment()))
+            using (ReportBlock rb = new(Header.GetSendersSynchronizationSourceIdentifierSegment()))
             {
                 yield return rb;
             }//size becomes -.... add shouldDispose = false....
@@ -359,11 +356,11 @@ namespace Media.Rtcp
 
             //The next entries are in the payload.
             using (RFC3550.SourceList sl = GetSourceList())
-            {                    
+            {
                 foreach (uint ssrc in sl)
                 {
                     //Give a ReportBlock of 4 bytes to represent the source list entry
-                    using (ReportBlock rb = new ReportBlock(new Common.MemorySegment(Payload.Array, Payload.Offset + sl.ItemIndex * RFC3550.SourceList.ItemSize, RFC3550.SourceList.ItemSize)))
+                    using (ReportBlock rb = new(new Common.MemorySegment(Payload.Array, Payload.Offset + sl.ItemIndex * RFC3550.SourceList.ItemSize, RFC3550.SourceList.ItemSize)))
                     {
                         yield return rb;
                     }
@@ -398,13 +395,13 @@ namespace Media.UnitTests
                     for (byte ReasonLength = byte.MinValue; ReasonLength <= Media.Common.Binary.FiveBitMaxValue; ++ReasonLength)
                     {
                         //Create the RandomId and ReasonForLeaving
-                        
+
                         int RandomId = RFC3550.Random32(Utility.Random.Next());
-                        
-                        IEnumerable<byte> ReasonForLeaving = Array.ConvertAll(Enumerable.Range(1, (int)ReasonLength).ToArray(), Convert.ToByte);
+
+                        IEnumerable<byte> ReasonForLeaving = Array.ConvertAll(Enumerable.Range(1, ReasonLength).ToArray(), Convert.ToByte);
 
                         //Create a GoodbyeReport instance using the specified options.
-                        using (Media.Rtcp.GoodbyeReport p = new Rtcp.GoodbyeReport(0, PaddingCounter, RandomId, new RFC3550.SourceList(SourceCounter), ReasonForLeaving.ToArray()))
+                        using (Media.Rtcp.GoodbyeReport p = new(0, PaddingCounter, RandomId, new RFC3550.SourceList(SourceCounter), ReasonForLeaving.ToArray()))
                         {
                             //Check IsComplete
                             System.Diagnostics.Debug.Assert(p.IsComplete, "IsComplete must be true.");
@@ -437,7 +434,7 @@ namespace Media.UnitTests
 
                                     System.Diagnostics.Debug.Assert(expectedSourceListSize == sourceList.Size, "Unexpected SourceList Size");
 
-                                    System.Diagnostics.Debug.Assert(expectedBlockCount == sourceList.Count, "Unexpected SourceList Count");                                    
+                                    System.Diagnostics.Debug.Assert(expectedBlockCount == sourceList.Count, "Unexpected SourceList Count");
 
                                     System.Diagnostics.Debug.Assert(RandomId == sourceList.CurrentSource, "Unexpected Source in SourceList");
 
@@ -472,7 +469,7 @@ namespace Media.UnitTests
                             //Enumerate the RtcpReport version of the instance
 
                             //Serialize and Deserialize and verify again
-                            using (Rtcp.GoodbyeReport s = new Rtcp.GoodbyeReport(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0), true))
+                            using (Rtcp.GoodbyeReport s = new(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0), true))
                             {
                                 //Check the Payload.Count
                                 System.Diagnostics.Debug.Assert(s.Payload.Count == p.Payload.Count, "Unexpected Payload Count");

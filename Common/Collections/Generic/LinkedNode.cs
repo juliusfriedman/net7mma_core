@@ -60,11 +60,12 @@ namespace Media.Common.Collections.Generic
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static LinkedNode<T> InsertBefore(LinkedNode<T> node, ref T value)
         {
-            LinkedNode<T> result = new LinkedNode<T>(ref value);
+            LinkedNode<T> result = new(ref value)
+            {
+                Next = node,
 
-            result.Next = node;
-
-            result.Previous = node.Previous;
+                Previous = node.Previous
+            };
 
             node.Previous.Next = result;
 
@@ -82,7 +83,7 @@ namespace Media.Common.Collections.Generic
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static LinkedNode<T> AddAfter(LinkedNode<T> node, ref T value)
         {
-            LinkedNode<T> result = new LinkedNode<T>(ref value);
+            LinkedNode<T> result = new(ref value);
 
             result = LinkedNode<T>.InsertBefore(node.Next, ref value);
 
@@ -113,7 +114,7 @@ namespace Media.Common.Collections.Generic
         /// Any flags use for <see cref="State"/>
         /// </summary>
         [System.CLSCompliant(false)]
-        internal protected uint Flags;
+        protected internal uint Flags;
 
         //Owner could be given in Flags or otherwise.
 

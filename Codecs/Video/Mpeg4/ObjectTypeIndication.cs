@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-//Todo Seperate Audio and Video stuff
+﻿//Todo Seperate Audio and Video stuff
 
 namespace Media.Codecs.Video.Mpeg4
 {
@@ -118,7 +112,7 @@ namespace Media.Codecs.Video.Mpeg4
 
         public const byte Unspecified = byte.MaxValue;
 
-        public static bool IsUserPrivate(byte b) { return (b >= 0xC0 && b <= 0xE0 || b >= 0xE2 && b <= 0xFE); }
+        public static bool IsUserPrivate(byte b) { return (b is >= 0xC0 and <= 0xE0 or >= 0xE2 and <= 0xFE); }
     }
 
     /*http://wiki.multimedia.cx/index.php?title=MPEG-4_Audio#Audio_Object_Types

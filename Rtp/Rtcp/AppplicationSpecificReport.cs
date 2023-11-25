@@ -38,11 +38,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
+using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Media.Common;
 
 #endregion
 namespace Media.Rtcp
@@ -80,11 +80,11 @@ namespace Media.Rtcp
         /// <param name="name">The name of the ApplicationSpecificReport</param>
         /// <param name="applicationDependentData">Optional Application specific data.</param>
         public ApplicationSpecificReport(int version, int padding, int ssrc, int subType, byte[] name, byte[] applicationDependentData, bool shouldDispose = true)
-            : base(version, PayloadType, padding, ssrc, 
+            : base(version, PayloadType, padding, ssrc,
             subType, //BlockCount
             0, //BlockSize
             Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(applicationDependentData) ? NameSize : NameSize + applicationDependentData.Length + 1,//Extension size in bytes
-            shouldDispose) 
+            shouldDispose)
         {
             //Copy the given name
             if (false == Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(name)) Array.Copy(name, 0, Payload.Array, Payload.Offset, NameSize);
@@ -134,7 +134,7 @@ namespace Media.Rtcp
         }
 
         public ApplicationSpecificReport(RtcpPacket reference, bool shouldDispose = true)
-            :base(reference.Header, reference.Payload, shouldDispose)
+            : base(reference.Header, reference.Payload, shouldDispose)
         {
             if (Header.PayloadType != PayloadType) throw new ArgumentException("Header.PayloadType is not equal to the expected type of 204.", "reference");
         }
@@ -226,9 +226,9 @@ namespace Media.Rtcp
         /// <returns>The newly created instance.</returns>
         public ApplicationSpecificReport Clone(bool reference)
         {
-            if (reference) return new ApplicationSpecificReport(Header, Payload);
-
-            return new ApplicationSpecificReport(Header.Clone(), Prepare().ToArray());
+            return reference
+                ? new ApplicationSpecificReport(Header, Payload)
+                : new ApplicationSpecificReport(Header.Clone(), Prepare().ToArray());
         }
 
         #endregion
@@ -268,11 +268,11 @@ namespace Media.UnitTests
                         int RandomId = RFC3550.Random32(Utility.Random.Next());
 
                         //Create the Name and ApplicationDependentData
-                        IEnumerable<byte> NameData = Array.ConvertAll(Enumerable.Range(1, (int)Rtcp.ApplicationSpecificReport.NameSize).ToArray(), Convert.ToByte),
-                            ApplicationDependentData = Array.ConvertAll(Enumerable.Range(1, (int)ApplicationSpecificDataLength).ToArray(), Convert.ToByte);
+                        IEnumerable<byte> NameData = Array.ConvertAll(Enumerable.Range(1, Rtcp.ApplicationSpecificReport.NameSize).ToArray(), Convert.ToByte),
+                            ApplicationDependentData = Array.ConvertAll(Enumerable.Range(1, ApplicationSpecificDataLength).ToArray(), Convert.ToByte);
 
                         //Create a GoodbyeReport instance using the specified options.
-                        using (Media.Rtcp.ApplicationSpecificReport p = new Rtcp.ApplicationSpecificReport(0, PaddingCounter, RandomId, SubTypeCounter, NameData.ToArray(), ApplicationDependentData.ToArray()))
+                        using (Media.Rtcp.ApplicationSpecificReport p = new(0, PaddingCounter, RandomId, SubTypeCounter, NameData.ToArray(), ApplicationDependentData.ToArray()))
                         {
                             //Check IsComplete
                             System.Diagnostics.Debug.Assert(p.IsComplete, "IsComplete must be true.");
@@ -305,7 +305,7 @@ namespace Media.UnitTests
                             System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b is 0), "Unexpected PaddingData");
 
                             //Serialize and Deserialize the packet and verify again
-                            using (Media.Rtcp.ApplicationSpecificReport s = new Rtcp.ApplicationSpecificReport(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0)))
+                            using (Media.Rtcp.ApplicationSpecificReport s = new(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0)))
                             {
                                 //Check the Payload.Count
                                 System.Diagnostics.Debug.Assert(s.Payload.Count == p.Payload.Count, "Unexpected Payload Count");

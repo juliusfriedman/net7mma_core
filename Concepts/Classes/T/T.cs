@@ -73,7 +73,7 @@ namespace Media.Concepts.Classes.T
         /// <summary>
         /// The element
         /// </summary>
-        public T Element { get; internal protected set; }
+        public T Element { get; protected internal set; }
 
         /// <summary>
         /// `this`
@@ -94,7 +94,7 @@ namespace Media.Concepts.Classes.T
             Reference = (nint)(&typedRefeence);
         }
 
-        internal  TypeReference(string type)
+        internal TypeReference(string type)
         {
             System.TypedReference typedRefeence = __makeref(type);
 
@@ -104,11 +104,11 @@ namespace Media.Concepts.Classes.T
 
     internal class TypeInformation
     {
-        T Reference;
+        private readonly T Reference;
 
         public TypeInformation(T reference) { Reference = reference; }
 
-        bool IsTypedInformation
+        private bool IsTypedInformation
         {
             get
             {
@@ -116,7 +116,7 @@ namespace Media.Concepts.Classes.T
             }
         }
 
-        bool IsTypeLoaded
+        private bool IsTypeLoaded
         {
             get
             {
@@ -127,7 +127,7 @@ namespace Media.Concepts.Classes.T
             }
         }
 
-        bool IsStringType
+        private bool IsStringType
         {
             get
             {
@@ -138,7 +138,7 @@ namespace Media.Concepts.Classes.T
             }
         }
 
-        bool TryGetString(out string value)
+        private bool TryGetString(out string value)
         {
             if (IsStringType is false)
             {
@@ -149,19 +149,18 @@ namespace Media.Concepts.Classes.T
 
             unsafe
             {
-                value = __refvalue( *(System.TypedReference*)(Reference.Reference),string);
+                value = __refvalue(*(System.TypedReference*)(Reference.Reference), string);
 
                 return true;
             }
         }
 
-        bool TryGetType(out System.Type value)
+        private bool TryGetType(out System.Type value)
         {
             if (IsStringType)
             {
-                string typeName;
 
-                if (TryGetString(out typeName) is false)
+                if (TryGetString(out string typeName) is false)
                 {
                     value = null;
 
@@ -175,7 +174,7 @@ namespace Media.Concepts.Classes.T
 
             unsafe
             {
-                value = __refvalue( *(System.TypedReference*)(Reference.Reference), System.Type);
+                value = __refvalue(*(System.TypedReference*)(Reference.Reference), System.Type);
 
                 return true;
             }
@@ -185,7 +184,7 @@ namespace Media.Concepts.Classes.T
     internal class TypedInformation<T> : TypeInformation
         where T : System.Type
     {
-        TypeReference<T> TypeReference;
+        private readonly TypeReference<T> TypeReference;
 
         public TypedInformation(T t)
             : base(new Classes.T.T()
@@ -290,13 +289,13 @@ namespace Media.Concepts.Classes.T
         /// <summary>
         /// constantly <see cref="null"/>
         /// </summary>
-        const System.Type NilType = null;
+        private const System.Type NilType = null;
 
         /// <summary>
         /// Only accesible from this type or reflection.
         /// </summary>
-        readonly System.Collections.Generic.Dictionary<System.Type, System.Tuple<System.Reflection.ConstructorInfo[], System.Reflection.ParameterInfo[][]>> m_SupportedTypes = 
-            new System.Collections.Generic.Dictionary<System.Type, System.Tuple<System.Reflection.ConstructorInfo[], System.Reflection.ParameterInfo[][]>>();
+        private readonly System.Collections.Generic.Dictionary<System.Type, System.Tuple<System.Reflection.ConstructorInfo[], System.Reflection.ParameterInfo[][]>> m_SupportedTypes =
+            [];
 
         /// <summary>
         /// The <see cref="System.Types"/> which are supported.
@@ -309,7 +308,7 @@ namespace Media.Concepts.Classes.T
         /// <param name="shouldDispose"></param>
         public TypeManager(bool shouldDispose = true) : base(shouldDispose) { }
 
-        void Probe(System.Type type, System.Reflection.BindingFlags bindingFlags = System.Reflection.BindingFlags.Public)
+        private void Probe(System.Type type, System.Reflection.BindingFlags bindingFlags = System.Reflection.BindingFlags.Public)
         {
             if (type is null) return;
 
@@ -410,7 +409,7 @@ namespace Media.Concepts.Classes.T
         // if we know instance type\subtype (eg interface) and know an index
         public T Create<T>(ref int supportedTypeIndex, ref int version, object[] paramerters)
         {
-            T typed = default(T);
+            T typed = default;
 
             object untyped = Create(ref supportedTypeIndex, ref version, paramerters);
 

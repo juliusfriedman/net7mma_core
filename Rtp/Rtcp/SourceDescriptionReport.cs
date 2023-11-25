@@ -38,11 +38,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
+using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Media.Common;
 
 #endregion
 namespace Media.Rtcp
@@ -179,12 +179,12 @@ namespace Media.Rtcp
 
             #region Statics
 
-            internal static readonly SourceDescriptionItem End = new SourceDescriptionItem(SourceDescriptionItem.SourceDescriptionItemType.End, 0);
+            internal static readonly SourceDescriptionItem End = new(SourceDescriptionItem.SourceDescriptionItemType.End, 0);
 
             /// <summary>
             ///  The CNAME item SHOULD have the format "user@host
             /// </summary>
-            public static readonly SourceDescriptionItem CName = new SourceDescriptionItem(SourceDescriptionItem.SourceDescriptionItemType.CName, Encoding.UTF8.GetBytes(Environment.UserName + '@' + Environment.MachineName));
+            public static readonly SourceDescriptionItem CName = new(SourceDescriptionItem.SourceDescriptionItemType.CName, Encoding.UTF8.GetBytes(Environment.UserName + '@' + Environment.MachineName));
 
             /// <summary>
             /// The value representing null
@@ -198,20 +198,20 @@ namespace Media.Rtcp
             /// <summary>
             /// Any octets which are owned by this instance when created
             /// </summary>
-            readonly byte[] m_OwnedOctets;
+            private readonly byte[] m_OwnedOctets;
 
             /// <summary>
             /// A reference to the octets which contain the data of this instance. (Including ItemType and ItemLength)
             /// </summary>
-            internal protected readonly IEnumerable<byte> Data;
+            protected internal readonly IEnumerable<byte> Data;
 
             #endregion
 
             #region Constructor
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            SourceDescriptionItem(SourceDescriptionItem existing, bool doNotCopy, bool shouldDispose = true)
-                :base(shouldDispose)
+            private SourceDescriptionItem(SourceDescriptionItem existing, bool doNotCopy, bool shouldDispose = true)
+                : base(shouldDispose)
             {
 
                 //Cache the length because it will be used more than once.
@@ -432,10 +432,10 @@ namespace Media.Rtcp
         /// Provides a construct to enumerate <see cref="SourceDescriptionItem"/>'s from a contigous allocation of memory.
         /// Is effectively a fixed sized read only list.
         /// </summary>
-        internal class SourceDescriptionItemList : SuppressedFinalizerDisposable, 
-            IEnumerator<SourceDescriptionItem>, 
+        internal class SourceDescriptionItemList : SuppressedFinalizerDisposable,
+            IEnumerator<SourceDescriptionItem>,
             IEnumerable<SourceDescriptionItem>
-            //,IReadOnlyCollection<SourceDescriptionItem>
+        //,IReadOnlyCollection<SourceDescriptionItem>
         {
 
             #region Fields
@@ -447,12 +447,12 @@ namespace Media.Rtcp
             /// Not readonly incase a need for the methods Add, Insert or Remove are required.
             /// Would then need to Implement IList, not impossible but not required. Most of the work is done with the IEnumerator implemenation anyway.
             /// </remarks>
-            byte[] m_OwnedOctets;
+            private byte[] m_OwnedOctets;
 
             /// <summary>
             /// The amount of <see cref="SourceDescriptionItem"/>'s known to be in the List
             /// </summary>
-            int m_Count;
+            private int m_Count;
 
             //The data from which the SourceDescriptionItem's are parsed.
             public readonly IEnumerable<byte> ChunkData;
@@ -837,8 +837,8 @@ namespace Media.Rtcp
         /// <remarks>
         /// A SourceDescriptionChunk is a [variable length] 2 Tier Structure which contains an Identifer and a List of <see cref="SourceDescriptionItem"/>.
         /// </remarks>
-        public class SourceDescriptionChunk : Common.SuppressedFinalizerDisposable, 
-            IEnumerable<SourceDescriptionItem>, 
+        public class SourceDescriptionChunk : Common.SuppressedFinalizerDisposable,
+            IEnumerable<SourceDescriptionItem>,
             IReportBlock //,ReportBlock //? virtual calls are slow but it is do-able.
         {
             #region Constants
@@ -899,18 +899,18 @@ namespace Media.Rtcp
                     items.DefaultIfEmpty<SourceDescriptionItem>(SourceDescriptionItem.End).SelectMany(i => i)); //Hot allocation //Todo, profile alternatives if variant and coalesce (items ?? Media.Common.Extensions.Linq.LinqExtensions.Yield(SourceDescriptionItem.End)).SelectMany(i=>i) as IEnumerable<byte>);
             }
 
-            public SourceDescriptionChunk(int chunkIdentifier, SourceDescriptionItem item, bool shouldDispose = true) 
+            public SourceDescriptionChunk(int chunkIdentifier, SourceDescriptionItem item, bool shouldDispose = true)
                 : this(chunkIdentifier, Media.Common.Extensions.Linq.LinqExtensions.Yield(item), shouldDispose) { }
 
             public SourceDescriptionChunk(int chunkIdentifier, bool shouldDispose = true, params SourceDescriptionItem[] items)
-                : this(chunkIdentifier, (IEnumerable<SourceDescriptionItem>)items, shouldDispose) { }
+                : this(chunkIdentifier, items, shouldDispose) { }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public SourceDescriptionChunk(IEnumerable<byte> ChunkData, bool shouldDispose = true)
                 : base(shouldDispose)
             {
                 m_ChunkData = ChunkData;
-            }            
+            }
 
             #endregion
 
@@ -988,7 +988,7 @@ namespace Media.Rtcp
                 return new SourceDescriptionItemList(this);
             }
 
-            IEnumerable<SourceDescriptionItem> GetEnumerableImplementation()
+            private IEnumerable<SourceDescriptionItem> GetEnumerableImplementation()
             {
                 return GetSourceDescriptionItemList();
             }
@@ -1043,7 +1043,7 @@ namespace Media.Rtcp
 
         #region Constants and Statics
 
-        new public const int PayloadType = 202;
+        public new const int PayloadType = 202;
 
         #endregion
 
@@ -1070,7 +1070,7 @@ namespace Media.Rtcp
         /// Constructs a SourceDescription from an existing RtcpPacket reference.
         /// </summary>
         /// <param name="reference">The existing RtcpPacket instance to create a SourceDescription instance from.</param>
-        public SourceDescriptionReport(RtcpPacket reference, bool shouldDispose = true) 
+        public SourceDescriptionReport(RtcpPacket reference, bool shouldDispose = true)
             : base(reference.Header, reference.Payload, shouldDispose)
         {
             if (Header.PayloadType != PayloadType) throw new ArgumentException("Header.PayloadType is not equal to the expected type of 202.", "reference");
@@ -1110,7 +1110,7 @@ namespace Media.Rtcp
         /// <summary>
         /// The cached Enumerable containing the pointer to the sequence of SourceDescriptionChunk contained in this instance.
         /// </summary>
-        IEnumerable<SourceDescriptionChunk> m_Chunks;
+        private IEnumerable<SourceDescriptionChunk> m_Chunks;
 
         #endregion
 
@@ -1132,8 +1132,8 @@ namespace Media.Rtcp
             get
             {
                 if (false == HasChunks) return false;
-                foreach (SourceDescriptionChunk chunk in GetChunkIterator()) 
-                    foreach (SourceDescriptionItem item in chunk) 
+                foreach (SourceDescriptionChunk chunk in GetChunkIterator())
+                    foreach (SourceDescriptionItem item in chunk)
                         if (item.ItemType == SourceDescriptionItem.SourceDescriptionItemType.CName) return true;
                 return false;
             }
@@ -1177,7 +1177,7 @@ namespace Media.Rtcp
             else base.Add(reportBlock);
         }
 
-        internal virtual protected void Add(SourceDescriptionChunk chunk, bool pad)
+        protected internal virtual void Add(SourceDescriptionChunk chunk, bool pad)
         {
             if (chunk is null) return;
 
@@ -1264,7 +1264,7 @@ namespace Media.Rtcp
                 //Increase the index
                 ++chunkIndex;
             }
-                
+
             //If there is no chunk matching by identifer indicate no chunk was removed.
             if (false == contained) return false;
 
@@ -1298,7 +1298,7 @@ namespace Media.Rtcp
         /// <returns>The pointer to the enumerator implemenation.</returns>
         public IEnumerator<SourceDescriptionChunk> GetChunkEnumerator()
         {
-            if (m_Chunks is null) m_Chunks = GetChunkIterator();
+            m_Chunks ??= GetChunkIterator();
 
             return m_Chunks.GetEnumerator();
         }
@@ -1318,7 +1318,7 @@ namespace Media.Rtcp
                 blockCount = Header.BlockCount,
                 bias = 0,
                 max = Payload.Count - PaddingOctets;
-            
+
             //Label the chunk
             SourceDescriptionChunk currentChunk;
 
@@ -1335,7 +1335,7 @@ namespace Media.Rtcp
 
                             //Add -4 to the Size below because of this
                             bias = -SourceDescriptionChunk.IdentifierSize;
-                            
+
 
                             goto UseChunk;
                         }
@@ -1351,7 +1351,7 @@ namespace Media.Rtcp
                 }
 
                 //Create a chunk based on the logicalChunk Index
-            UseChunk: //Take the size of the chunk
+                UseChunk: //Take the size of the chunk
                 currentSize = currentChunk.Size;
 
                 //If the size is 0 continue
@@ -1439,9 +1439,9 @@ namespace Media.UnitTests
                 for (int ItemLength = 0; ItemLength <= byte.MaxValue; ++ItemLength)
                 {
                     //Create the ItemData
-                    IEnumerable<byte> ItemData = Array.ConvertAll(Enumerable.Range(1, (int)ItemLength).ToArray(), Convert.ToByte);
+                    IEnumerable<byte> ItemData = Array.ConvertAll(Enumerable.Range(1, ItemLength).ToArray(), Convert.ToByte);
 
-                    using(Rtcp.SourceDescriptionReport.SourceDescriptionItem sdi = new Rtcp.SourceDescriptionReport.SourceDescriptionItem(
+                    using (Rtcp.SourceDescriptionReport.SourceDescriptionItem sdi = new(
                         (Rtcp.SourceDescriptionReport.SourceDescriptionItem.SourceDescriptionItemType)ItemType,
                         ItemLength, ItemData.ToArray(), 0))
                     {
@@ -1458,7 +1458,7 @@ namespace Media.UnitTests
                         System.Diagnostics.Debug.Assert(sdi.ItemLength <= Rtcp.SourceDescriptionReport.SourceDescriptionItem.ItemHeaderSize + ItemLength, "Unexpected ItemLength");
 
                         //Derserialize, Serialize and Verify again
-                        using (Rtcp.SourceDescriptionReport.SourceDescriptionItem sdis = new Rtcp.SourceDescriptionReport.SourceDescriptionItem(sdi.ToArray()))
+                        using (Rtcp.SourceDescriptionReport.SourceDescriptionItem sdis = new(sdi.ToArray()))
                         {
                             //Check ItemLength
                             System.Diagnostics.Debug.Assert(sdis.ItemLength == sdi.ItemLength, "Unexpected ItemLength");
@@ -1489,16 +1489,16 @@ namespace Media.UnitTests
                 for (int ChunkLength = 0; ChunkLength <= byte.MaxValue; ++ChunkLength)
                 {
                     //Create a random id
-                    int RandomId =  RFC3550.Random32(Utility.Random.Next());
+                    int RandomId = RFC3550.Random32(Utility.Random.Next());
 
                     //Get the bytes in network order
                     IEnumerable<byte> ssrcBytes = Binary.GetBytes(RandomId, Common.Binary.IsLittleEndian);
 
                     //Create the ItemData
-                    IEnumerable<byte> ChunkData = Array.ConvertAll(Enumerable.Range(1, (int)ChunkLength).ToArray(), Convert.ToByte);
+                    IEnumerable<byte> ChunkData = Array.ConvertAll(Enumerable.Range(1, ChunkLength).ToArray(), Convert.ToByte);
 
                     //Create a SourceDescriptionChunk
-                    using (Media.Rtcp.SourceDescriptionReport.SourceDescriptionChunk chunk = new Rtcp.SourceDescriptionReport.SourceDescriptionChunk(ssrcBytes.Concat(ChunkData)))
+                    using (Media.Rtcp.SourceDescriptionReport.SourceDescriptionChunk chunk = new(ssrcBytes.Concat(ChunkData)))
                     {
                         //Check ChunkIdentifer
                         System.Diagnostics.Debug.Assert(chunk.ChunkIdentifer == RandomId, "Unexpected ChunkIdentifer");
@@ -1539,13 +1539,13 @@ namespace Media.UnitTests
                     for (byte ItemLength = byte.MinValue; ItemLength <= Media.Common.Binary.FiveBitMaxValue; ++ItemLength)
                     {
                         //Create the ItemData
-                        IEnumerable<byte> ItemData = Array.ConvertAll(Enumerable.Range(1, (int)ItemLength).ToArray(), Convert.ToByte);
+                        IEnumerable<byte> ItemData = Array.ConvertAll(Enumerable.Range(1, ItemLength).ToArray(), Convert.ToByte);
 
                         //Create a random id
                         int RandomId = RFC3550.Random32(Utility.Random.Next());
 
                         //Create a SourceDescriptionReport instance using the specified options.
-                        using (Media.Rtcp.SourceDescriptionReport p = new Rtcp.SourceDescriptionReport(0, RandomId, 0, 0, PaddingCounter))
+                        using (Media.Rtcp.SourceDescriptionReport p = new(0, RandomId, 0, 0, PaddingCounter))
                         {
                             //Check IsComplete
                             System.Diagnostics.Debug.Assert(p.IsComplete, "IsComplete must be true.");
@@ -1605,7 +1605,7 @@ namespace Media.UnitTests
                             //System.Diagnostics.Debug.Assert(p.Length == p.Header.Size + ReportBlockCounter * Binary.BytesPerInteger + PaddingCounter + expectedReasonLength, "Unexpected Length");
 
                             //Serialize and Deserialize and verify again
-                            using (Rtcp.SourceDescriptionReport s = new Rtcp.SourceDescriptionReport(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0), true))
+                            using (Rtcp.SourceDescriptionReport s = new(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0), true))
                             {
                                 //Check SynchronizationSourceIdentifier
                                 System.Diagnostics.Debug.Assert(s.SynchronizationSourceIdentifier == p.SynchronizationSourceIdentifier, "Unexpected SynchronizationSourceIdentifier");

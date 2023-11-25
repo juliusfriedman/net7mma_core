@@ -38,11 +38,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Media.Rtsp.Server.MediaTypes
 {
@@ -77,9 +73,9 @@ namespace Media.Rtsp.Server.MediaTypes
             {
                 profileId = frequencyIndex = channelConfiguration = packetLen = 0;
 
-                if (attributeLine is null || attributeLine.Type != Sdp.Lines.SessionAttributeLine.AttributeType) return false;
-
-                throw new NotImplementedException();
+                return attributeLine is null || attributeLine.Type != Sdp.Lines.SessionAttributeLine.AttributeType
+                    ? false
+                    : throw new NotImplementedException();
             }
 
             /// <summary>
@@ -132,7 +128,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 // fill in ADTS data
                 header[0] = byte.MaxValue;
 
-                header[1] = (byte)0xF1; //Sync
+                header[1] = 0xF1; //Sync
 
                 header[2] = (byte)(((profileId - 1) << 6) + (frequencyIndex << 2) + (channelConfiguration >> 2));
 
@@ -147,11 +143,11 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 //Should be bit rate
 
-                header[6] = (byte)0xFC;
+                header[6] = 0xFC;
 
                 return header;
             }
-            
+
 
             /// <summary>
             /// /// <summary>
@@ -177,11 +173,11 @@ namespace Media.Rtsp.Server.MediaTypes
             /// <param name="addPadding"></param>
             /// <param name="includeAuHeaders"></param>
             /// <param name="includeAuxData"></param>
-            public void Depacketize(Media.Rtp.RtpPacket packet, out int parsedAccessUnits, out int remainsInAu, bool headersPresent = true, int profileId = 0, int channelConfiguration = 0, 
-                int frequencyIndex = 0, int sizeLength = 0, int indexLength = 0, int indexDeltaLength = 0, int CTSDeltaLength = 0, 
+            public void Depacketize(Media.Rtp.RtpPacket packet, out int parsedAccessUnits, out int remainsInAu, bool headersPresent = true, int profileId = 0, int channelConfiguration = 0,
+                int frequencyIndex = 0, int sizeLength = 0, int indexLength = 0, int indexDeltaLength = 0, int CTSDeltaLength = 0,
                 int DTSDeltaLength = 0, int auxDataSizeLength = 0, bool randomAccessIndication = false, int streamStateIndication = 0,
-                int constantAuSize = 0, IEnumerable<byte> frameHeader = null, 
-                bool addPadding = false, bool includeAuHeaders = false, bool includeAuxData = false) 
+                int constantAuSize = 0, IEnumerable<byte> frameHeader = null,
+                bool addPadding = false, bool includeAuHeaders = false, bool includeAuxData = false)
             {
                 remainsInAu = parsedAccessUnits = 0;
 
@@ -360,7 +356,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     if (auxDataSizeBits > 0)
                     {
                         //Calculate the amount of bytes in the auxillary data section
-                        auxLengthBytes = (int)Media.Common.Binary.BitsToBytes(ref auxDataSizeBits);
+                        auxLengthBytes = Media.Common.Binary.BitsToBytes(ref auxDataSizeBits);
 
                         //Ensure the amount of bytes indicated in the section are present in the contained data
                         if (max - offset < auxLengthBytes) throw new InvalidOperationException("Invalid Au Aux Data?");
@@ -585,7 +581,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         else remainsInAu = 0; //Nothing else remains if the auSize indicated was completely contained in the payload
 
                         //Project the data in the payload from the offset of the access unit until its declared size.
-                        using (Common.MemorySegment accessUnitData = new Common.MemorySegment(packet.Payload.Array, Common.Binary.BitsToBytes(ref bitOffset), auSize, false))  //offset, auSize))
+                        using (Common.MemorySegment accessUnitData = new(packet.Payload.Array, Common.Binary.BitsToBytes(ref bitOffset), auSize, false))  //offset, auSize))
                         {
                             //Prepend the accessUnitHeaer with the data to create a depacketized au if the option was specified
                             //var depacketizedAccessUnit = includeAuHeaders ? Enumerable.Concat(accessUnitHeader, accessUnitData) : accessUnitData;
@@ -660,7 +656,7 @@ namespace Media.Rtsp.Server.MediaTypes
             {
                 parsedAccessUnits = remainsInInterleavedAu = 0;
 
-                foreach(Rtp.RtpPacket packet in Packets) Depacketize(packet, out parsedAccessUnits, out remainsInInterleavedAu, headersPresent, profileId, channelConfiguration, frequencyIndex, sizeLength, indexDeltaLength, indexDeltaLength, CTSDeltaLength, DTSDeltaLength, auxDataSizeLength, randomAccessIndication, streamStateIndication, defaultAuSize, frameHeader, addPadding, includeAuHeaders, includeAuxData);
+                foreach (Rtp.RtpPacket packet in Packets) Depacketize(packet, out parsedAccessUnits, out remainsInInterleavedAu, headersPresent, profileId, channelConfiguration, frequencyIndex, sizeLength, indexDeltaLength, indexDeltaLength, CTSDeltaLength, DTSDeltaLength, auxDataSizeLength, randomAccessIndication, streamStateIndication, defaultAuSize, frameHeader, addPadding, includeAuHeaders, includeAuxData);
             }
 
             public override void Depacketize(bool allowIncomplete)
@@ -711,7 +707,7 @@ namespace Media.Rtsp.Server.MediaTypes
             //Add the control line
             SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=control:trackID=1"));
             SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=rtpmap:96 mpeg4-generic/" + ClockRate));
-            
+
             //Should be a field set in constructor.
             /*
               streamType:

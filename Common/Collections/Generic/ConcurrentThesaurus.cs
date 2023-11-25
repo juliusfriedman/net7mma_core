@@ -75,7 +75,7 @@ namespace Media.Common.Collections.Generic
     {
         #region Static
 
-        static TValue DefaultValue = default(TValue);
+        private static TValue DefaultValue = default;
 
         #endregion
 
@@ -83,7 +83,7 @@ namespace Media.Common.Collections.Generic
 
         //Todo, allow the IList type to be specified or changed internally.
 
-        readonly ConcurrentDictionary<TKey, IList<TValue>> Dictionary;
+        private readonly ConcurrentDictionary<TKey, IList<TValue>> Dictionary;
 
         public int Count { get { return Dictionary.Count; } }
 
@@ -137,10 +137,9 @@ namespace Media.Common.Collections.Generic
         [CLSCompliant(false)]
         public void Add(ref TKey key, ref TValue value)
         {
-            IList<TValue> Predicates;
 
             //Attempt to get the value
-            bool hadValue = TryGetValueList(ref key, out Predicates);
+            bool hadValue = TryGetValueList(ref key, out IList<TValue> Predicates);
 
             //Skip CoreAdd because the value list is local
             if (hadValue)
@@ -166,9 +165,8 @@ namespace Media.Common.Collections.Generic
         /// <returns></returns>
         public bool Remove(TKey key)
         {
-            IEnumerable<TValue> removed;
 
-            return Remove(key, out removed);
+            return Remove(key, out IEnumerable<TValue> removed);
         }
 
         /// <summary>
@@ -191,9 +189,8 @@ namespace Media.Common.Collections.Generic
         [CLSCompliant(false)]
         public bool Remove(ref TKey key, out IEnumerable<TValue> values)
         {
-            IList<TValue> list;
 
-            bool result = Dictionary.TryRemove(key, out list);
+            bool result = Dictionary.TryRemove(key, out IList<TValue> list);
 
             values = list;
 
@@ -254,7 +251,7 @@ namespace Media.Common.Collections.Generic
             else predicates.Add(value);//Othewise add the value to the predicates which is a reference to the key
 
             //Add the value if not already in the dictionary
-            return false == inDictionary ? Dictionary.TryAdd(key, predicates) : true;
+            return false != inDictionary || Dictionary.TryAdd(key, predicates);
         }
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
@@ -351,20 +348,20 @@ namespace Media.Common.Collections.Generic
 
         public ConcurrentThesaurus(IDictionary<TKey, IList<TValue>> values, IEqualityComparer<TKey> equalityComparer)
         {
-            Dictionary = new (values, equalityComparer);
+            Dictionary = new(values, equalityComparer);
         }
 
         public ConcurrentThesaurus(int capacity, IEqualityComparer<TKey> equalityComparer)
         {
-            Dictionary = new (Environment.ProcessorCount, capacity, equalityComparer);
+            Dictionary = new(Environment.ProcessorCount, capacity, equalityComparer);
         }
 
         public ConcurrentThesaurus(IEqualityComparer<TKey> equalityComparer)
         {
-            Dictionary = new (equalityComparer);
+            Dictionary = new(equalityComparer);
         }
 
-        public ConcurrentThesaurus(IDictionary<TKey, IList<TValue>> values) : this(values, EqualityComparer<TKey>.Default) { }        
+        public ConcurrentThesaurus(IDictionary<TKey, IList<TValue>> values) : this(values, EqualityComparer<TKey>.Default) { }
 
         public ConcurrentThesaurus(int capacity) : this(capacity, EqualityComparer<TKey>.Default) { }
 

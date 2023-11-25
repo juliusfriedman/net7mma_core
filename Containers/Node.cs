@@ -54,7 +54,7 @@ namespace Media.Container
 
         public static Node CreateNodeFrom(Node n)
         {
-            return new Node(n); 
+            return new Node(n);
         }
 
         public static Node CreateNodeWithDataReference(Node n)
@@ -195,7 +195,7 @@ namespace Media.Container
         /// </summary>
         public long DataSize;
 
-        internal protected MemorySegment m_Data;
+        protected internal MemorySegment m_Data;
 
         /// <summary>
         /// The binary data of the contained in the Node (without (<see cref="Identifier"/> and (<see cref="LengthSize"/>))
@@ -269,7 +269,7 @@ namespace Media.Container
         /// <param name="size"></param>
         /// <param name="complete"></param>
         public Node(IMediaContainer master, byte[] identifier, int lengthSize, long offset, long size, bool complete, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             if (master is null) throw new ArgumentNullException("master");
             if (identifier is null) throw new ArgumentNullException("identifier");
@@ -284,17 +284,17 @@ namespace Media.Container
         }
 
         public Node(IMediaContainer master, Common.MemorySegment identifierPointer, int identifierSize, int lengthSize, long offset, long size, bool complete, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             Master = master;
             DataOffset = offset;
 
             IdentifierPointer = identifierPointer;
             Identifier = IdentifierPointer.Array;
-            
+
             IdentifierSize = identifierSize;
             LengthSize = lengthSize;
-            
+
             DataSize = size;
             IsComplete = complete; //Should calulcate here?
         }
@@ -303,8 +303,8 @@ namespace Media.Container
         /// Creates a shallow copy of the node without the data
         /// </summary>
         /// <param name="n"></param>
-        Node(Node n, bool shouldDispose = true)
-            :base(shouldDispose)
+        private Node(Node n, bool shouldDispose = true)
+            : base(shouldDispose)
         {
             if (n is null) throw new ArgumentNullException();
             Master = n.Master;
@@ -323,10 +323,10 @@ namespace Media.Container
         /// <param name="n">The source <see cref="Node"/></param>
         /// <param name="ndc">How to assign <see cref="Data"/></param>
         /// <param name="offset">The optional offset in <see cref="Data"/> to start the copy. (The length of the copy operation is given by <see cref="DataSize"/> minus this parameter) </param>
-        Node(Node n, bool selfReference, int offset = 0, bool shouldDispose = true)
+        private Node(Node n, bool selfReference, int offset = 0, bool shouldDispose = true)
             : this(n, shouldDispose)
         {
-            if(n is not null && n.DataSize > 0 && n.DataAssigned)
+            if (n is not null && n.DataSize > 0 && n.DataAssigned)
             {
                 if (selfReference) m_Data = n.m_Data;
                 else

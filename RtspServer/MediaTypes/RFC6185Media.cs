@@ -36,13 +36,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 //http://tools.ietf.org/html/rfc6185
 
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Media.Rtsp.Server.MediaTypes
 {

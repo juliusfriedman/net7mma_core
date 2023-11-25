@@ -79,7 +79,7 @@ namespace Media.Concepts.Classes.Threading
             internal T[] Lessee;
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            public Lease(Pool<T> lessor, int id, int emure, T[] lessee)                
+            public Lease(Pool<T> lessor, int id, int emure, T[] lessee)
             {
                 Lessor = lessor;
 
@@ -137,13 +137,13 @@ namespace Media.Concepts.Classes.Threading
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get { return Emurality >= 0; }
             }
-        }   
+        }
 
         #endregion
 
         #region Statics
 
-        const double Whole = 100.0;
+        private const double Whole = 100.0;
 
         internal static readonly System.Type ElementType = typeof(T);
 
@@ -156,19 +156,18 @@ namespace Media.Concepts.Classes.Threading
         internal static readonly T[][] EmptyPool = new T[0][] { };
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static void AllocatePool(Pool<T> pool, int size)
+        private static void AllocatePool(Pool<T> pool, int size)
         {
-            if (size < 0) pool.m_Pool = (T[][])System.Array.CreateInstance(ElementType, new int[] { -size, 0 }, new int[] { size, 0 });
-            else pool.m_Pool = new T[size][];
+            pool.m_Pool = size < 0 ? (T[][])System.Array.CreateInstance(ElementType, new int[] { -size, 0 }, new int[] { size, 0 }) : (new T[size][]);
 
-            if(pool.m_DisableNull) for (int i = size - 1; i >= 0; --i)
-            {
-                pool.m_Pool[i] = EmptyArray;
-            }
+            if (pool.m_DisableNull) for (int i = size - 1; i >= 0; --i)
+                {
+                    pool.m_Pool[i] = EmptyArray;
+                }
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static void ResizePool(Pool<T> pool, int size)
+        private static void ResizePool(Pool<T> pool, int size)
         {
             //int previousSize = pool.m_Pool.Length;
 
@@ -182,13 +181,12 @@ namespace Media.Concepts.Classes.Threading
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        static int SortByLength(T[] x, T[] y)
+        private static int SortByLength(T[] x, T[] y)
         {
-            int a, b;
 
-            Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(x, out a);
+            Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(x, out int a);
 
-            Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(y, out b);
+            Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(y, out int b);
 
             return a - b;
         }
@@ -223,16 +221,14 @@ namespace Media.Concepts.Classes.Threading
         /// <summary>
         /// The pool
         /// </summary>
-        T[][] m_Pool = NullMultiArray;
+        private T[][] m_Pool = NullMultiArray;
 
         //     <= -1,        >= 0
         //T[][]m_BelowWater, m_AboveWater;
 
-        int m_Capacity = -1;
-
-        bool m_DisableNull;
-
-        readonly System.Collections.Generic.ICollection<Lease> m_Leases;
+        private readonly int m_Capacity = -1;
+        private readonly bool m_DisableNull;
+        private readonly System.Collections.Generic.ICollection<Lease> m_Leases;
 
         #endregion
 
@@ -247,7 +243,7 @@ namespace Media.Concepts.Classes.Threading
         {
             get
             {
-                if(Slots is 0) return -(Whole * m_Leases.Count);
+                if (Slots is 0) return -(Whole * m_Leases.Count);
                 else if (m_Leases.Count is 0) return -(Whole * Slots);
                 return (m_Leases.Count / Slots) / Whole;
             }
@@ -281,11 +277,10 @@ namespace Media.Concepts.Classes.Threading
             {
                 int result = 0;
 
-                int length;
 
                 for (int i = m_Pool.Length - 1; i >= 0; --i)
                 {
-                    if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(m_Pool[i], out length)) continue;
+                    if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(m_Pool[i], out int length)) continue;
 
                     result += length;
                 }
@@ -314,7 +309,7 @@ namespace Media.Concepts.Classes.Threading
 
         public T[] Get(System.Threading.Thread access, int size)
         {
-            return Get ((access ?? System.Threading.Thread.CurrentThread).ManagedThreadId, size);
+            return Get((access ?? System.Threading.Thread.CurrentThread).ManagedThreadId, size);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -326,10 +321,9 @@ namespace Media.Concepts.Classes.Threading
             //Access the leaf by id
             T[] leaf = m_Pool[id];
 
-            int existingSize;
 
             //Ensure not null
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(leaf, out existingSize))
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(leaf, out int existingSize))
             {
                 AllocateLeaf(id, size, out leaf);
             }
@@ -345,10 +339,9 @@ namespace Media.Concepts.Classes.Threading
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void EnsureCapacity(int poolSize)
         {
-            int existingSize;
 
             //Ensure not null
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(m_Pool, out existingSize))
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(m_Pool, out int existingSize))
             {
                 AllocatePool(this, poolSize);
             }
@@ -364,15 +357,15 @@ namespace Media.Concepts.Classes.Threading
 
         public void EnsureCapacity(int id, int size)
         {
-            Get (id, size);
+            Get(id, size);
         }
 
         public void EnsureCapacity(System.Threading.Thread access, int size)
         {
-            Get (access, size);
+            Get(access, size);
         }
 
-        System.Comparison<T[]> Sorter;
+        private readonly System.Comparison<T[]> Sorter;
 
         public void Sort()
         {
@@ -391,7 +384,7 @@ namespace Media.Concepts.Classes.Threading
 
             EnsureCapacity(index);
 
-            m_Pool [index] = data;
+            m_Pool[index] = data;
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -410,13 +403,13 @@ namespace Media.Concepts.Classes.Threading
                 return result;
             }
 
-        Null:
+            Null:
             return null;
         }
 
         public T[] FindOrCreate(int size, System.Threading.Thread access)
         {
-            return Find (size) ?? Get (access, size);
+            return Find(size) ?? Get(access, size);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -438,9 +431,9 @@ namespace Media.Concepts.Classes.Threading
             //}
 
             //Ensure the capacity of pool with respect to the thread
-            EnsureCapacity (id);
+            EnsureCapacity(id);
 
-            Lease lease = new Lease(this, id, /*emure * */size, Get(id, size));
+            Lease lease = new(this, id, /*emure * */size, Get(id, size));
 
             //Track the reference
             m_Leases.Add(lease);
@@ -478,7 +471,7 @@ namespace Media.Concepts.Classes.Threading
 
         #endregion
     }
-    
+
     //Todo
     ///// <summary>
     ///// Extends Pool to have only a multidimensional array
@@ -508,9 +501,9 @@ namespace Media.UnitTests
         /// </remarks>
         public void TestPool()
         {
-            Media.Concepts.Classes.Threading.Pool<byte> test = new Media.Concepts.Classes.Threading.Pool<byte>(-1);
+            Media.Concepts.Classes.Threading.Pool<byte> test = new(-1);
 
-            System.Collections.Generic.List<byte[]> allocations = new System.Collections.Generic.List<byte[]>();
+            System.Collections.Generic.List<byte[]> allocations = [];
 
             int minimumAllocation = 1000;
 

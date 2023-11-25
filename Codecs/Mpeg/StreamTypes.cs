@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Media.Containers.Mpeg
 {
@@ -74,9 +70,9 @@ namespace Media.Containers.Mpeg
 
         public const byte PrivateStream2 = 0xBF;
 
-        public static bool IsMpeg1or2AudioStream(byte code) { return code >= 0xC0 && code <= 0xDF; }
+        public static bool IsMpeg1or2AudioStream(byte code) { return code is >= 0xC0 and <= 0xDF; }
 
-        public static bool IsMpeg1or2VideoStream(byte code) { return code >= 0xE0 && code <= 0xEF; }
+        public static bool IsMpeg1or2VideoStream(byte code) { return code is >= 0xE0 and <= 0xEF; }
 
         public const byte ECMStream = 0xF0;
 
@@ -98,23 +94,23 @@ namespace Media.Containers.Mpeg
 
         public const byte AncillaryStream = 0xF9;
 
-        public static bool IsReserverd(byte b) { return b >= 0xFA && b <= 0xFE; }
+        public static bool IsReserverd(byte b) { return b is >= 0xFA and <= 0xFE; }
 
-        public static bool IsUserPrivate(byte b) { return b >= 0x20 && b <= 0x3F; }
+        public static bool IsUserPrivate(byte b) { return b is >= 0x20 and <= 0x3F; }
 
         public const byte ProgramStreamDirectory = byte.MaxValue;
 
-        internal static Dictionary<byte, string> StreamTypeMap = new Dictionary<byte, string>();
+        internal static Dictionary<byte, string> StreamTypeMap = [];
 
         public static string ToTextualConvention(byte b)
         {
-            string name;
-            if (StreamTypeMap.TryGetValue(b, out name)) return name;
-            if (IsMpeg1or2AudioStream(b)) return "Audio";
-            if (IsMpeg1or2VideoStream(b)) return "Video";
-            if (IsReserverd(b)) return "Reserved";
-            if (IsUserPrivate(b)) return "UserPrivate";
-            return Media.Common.Extensions.String.StringExtensions.UnknownString;
+            return StreamTypeMap.TryGetValue(b, out string name)
+                ? name
+                : IsMpeg1or2AudioStream(b)
+                ? "Audio"
+                : IsMpeg1or2VideoStream(b)
+                ? "Video"
+                : IsReserverd(b) ? "Reserved" : IsUserPrivate(b) ? "UserPrivate" : Media.Common.Extensions.String.StringExtensions.UnknownString;
         }
 
         static StreamTypes()

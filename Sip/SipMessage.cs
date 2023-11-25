@@ -23,7 +23,7 @@ namespace Media.Sip
         {
             if (string.IsNullOrWhiteSpace(data)) throw new InvalidOperationException("data cannot be null or whitespace.");
 
-            if (encoding is null) encoding = SipMessage.DefaultEncoding;
+            encoding ??= SipMessage.DefaultEncoding;
 
             return new SipMessage(encoding.GetBytes(data), 0, encoding);
         }
@@ -78,7 +78,7 @@ namespace Media.Sip
         /// <summary>
         /// Reserved
         /// </summary>
-        internal protected SipMessage() : base(SipMessage.MessageIdentifier) { }
+        protected internal SipMessage() : base(SipMessage.MessageIdentifier) { }
 
         /// <summary>
         /// Constructs a SipMessage
@@ -104,10 +104,10 @@ namespace Media.Sip
         /// </summary>
         /// <param name="packet">The array segment which contains the packet in whole at the offset of the segment. The Count of the segment may not contain more bytes than a RFC2326 message may contain.</param>
         public SipMessage(byte[] data, int offset, int length, Encoding contentEncoding = null, bool shouldDispose = true)
-            :base(data, offset, length, contentEncoding, shouldDispose, SipMessage.MessageIdentifier)
+            : base(data, offset, length, contentEncoding, shouldDispose, SipMessage.MessageIdentifier)
         {
 
-            
+
         }
 
         /// <summary>
@@ -116,16 +116,16 @@ namespace Media.Sip
         /// <param name="other">The other RtspMessage</param>
         public SipMessage(SipMessage other) : base(other)
         {
-            
+
         }
 
         #endregion
 
         #region CSeq
 
-        int m_CSeq;
+        private int m_CSeq;
 
-        internal protected virtual bool ParseSequenceNumber(bool force = false)
+        protected internal virtual bool ParseSequenceNumber(bool force = false)
         {
             //If the message is disposed then no parsing can occur
             if (IsDisposed && false == IsPersistent) return false;

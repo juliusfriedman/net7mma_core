@@ -43,7 +43,6 @@ using Media.Rtcp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 #endregion
 
@@ -151,12 +150,12 @@ namespace Media
         {
             if (packets is null) throw new ArgumentNullException("packets");
             else if (packets.Count() < 2) goto PreparePackets; //Only a single packet can just be prepared.
-            
+
             RtcpPacket first = packets.First();
 
             if (first.Padding) throw new InvalidOperationException("Only the last packet in a compound RtcpPacket may have padding");
 
-            int firstPayloadType = first.PayloadType, ssrc = first.SynchronizationSourceIdentifier, totalLength = (int)first.Length;
+            int firstPayloadType = first.PayloadType, ssrc = first.SynchronizationSourceIdentifier, totalLength = first.Length;
 
             //When respecting RFC3550 the first packet must be a SendersReport or Receivers report with the version of 2, the version is implicit from the header at this point.
             if (false == IsValidRtcpHeader(first.Header, first.Version)) throw new InvalidOperationException("A Compound packet must start with either a SendersReport or a ReceiversReport.");
@@ -168,7 +167,7 @@ namespace Media
             foreach (RtcpPacket packet in packets.Skip(1))
             {
                 //Summize the length
-                totalLength += (int)packet.Length;
+                totalLength += packet.Length;
 
                 //New ssrc resets the required packets in the sequence
                 if (packet.SynchronizationSourceIdentifier != ssrc) hasSourceDescription = hasCName = false;
@@ -180,7 +179,7 @@ namespace Media
                     hasSourceDescription = true;
 
                     //if not already checked for a cname check now
-                    if (packet.BlockCount > 0) using (SourceDescriptionReport asReport = new SourceDescriptionReport(packet, false)) if ((hasCName = asReport.HasCName)) break;
+                    if (packet.BlockCount > 0) using (SourceDescriptionReport asReport = new(packet, false)) if ((hasCName = asReport.HasCName)) break;
                 }
             }
 
@@ -191,7 +190,7 @@ namespace Media
             int paddingAmount = totalLength & 3; // totalLength % 4;
 
             //Add the padding to the last packet
-            if(paddingAmount > 0)
+            if (paddingAmount > 0)
             {
                 //Get the last packet
                 RtcpPacket last = packets.Last();
@@ -223,7 +222,7 @@ namespace Media
                             }
                         default: //1 - 254
                             {
-                                
+
                                 //Calulcate how much padding would be present in total
                                 int totalPadding = existingPaddingAmount + paddingAmount;
 
@@ -287,9 +286,9 @@ namespace Media
 
             //Could use GetAllocate or InternalToBytes to reduce allocations
 
-        PreparePackets:
+            PreparePackets:
             //Return the projection of the sequence containing the compound data
-             return packets.SelectMany(p => p.Prepare());
+            return packets.SelectMany(p => p.Prepare());
         }
 
         //Needs an interface defined in Media.Cryptography
@@ -328,7 +327,7 @@ namespace Media
             bool hasSourceDescription = false, hasCName = false;
 
             //Get all packets contained in the buffer.
-            foreach (RtcpPacket currentPacket in RtcpPacket.GetPackets(array, offset, count, version, null, ssrc, shouldDispose)) 
+            foreach (RtcpPacket currentPacket in RtcpPacket.GetPackets(array, offset, count, version, null, ssrc, shouldDispose))
             {
 
                 //Determine who the packet is from and what type it is.
@@ -337,7 +336,7 @@ namespace Media
                 //The first packet in a compound packet needs to be validated
                 if (parsedPackets is 0 && !IsValidRtcpHeader(currentPacket.Header, currentPacket.Version)) yield break;
                 else if (currentPacket.Version != version || skipUnknownTypes && RtcpPacket.GetImplementationForPayloadType((byte)currentPacket.PayloadType) is null) yield break;
-                
+
                 //Count the packets parsed
                 ++parsedPackets;
 
@@ -348,7 +347,7 @@ namespace Media
                     hasSourceDescription = true;
 
                     //if not already checked for a cname check now
-                    if (currentPacket.BlockCount > 0) using (SourceDescriptionReport asReport = new SourceDescriptionReport(currentPacket, false)) if ((hasCName = asReport.HasCName)) break;
+                    if (currentPacket.BlockCount > 0) using (SourceDescriptionReport asReport = new(currentPacket, false)) if ((hasCName = asReport.HasCName)) break;
                 }
 
                 if (hasSourceDescription && false == hasCName) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(currentPacket, "Invalid compound data, Source Description report did not have a CName SourceDescriptionItem.");
@@ -431,15 +430,17 @@ namespace Media
 
         /// <summary>
         /// Generates a sequence of null octets (0x00) terminated with the given value
-        /// Throws an OverflowException if amount is greater than <see cref="Byte.MaxValue"/>
+        /// Throws an OverflowException if amount is greater than <see cref="byte.MaxValue"/>
         /// </summary>
         /// <param name="amount">The amount of padding to create</param>
         /// <returns>The seqeuence containing indicated padding</returns>
         public static IEnumerable<byte> CreatePadding(int amount) //int? codeAmount
         {
-            if (amount <= 0) return Enumerable.Empty<byte>();
-            if (amount > byte.MaxValue) throw Common.Binary.CreateOverflowException("amount", amount, byte.MinValue.ToString(), byte.MaxValue.ToString());
-            return Enumerable.Concat(Enumerable.Repeat(default(byte), amount - 1), Media.Common.Extensions.Linq.LinqExtensions.Yield(((byte)amount)));
+            return amount <= 0
+                ? Enumerable.Empty<byte>()
+                : amount > byte.MaxValue
+                ? throw Common.Binary.CreateOverflowException("amount", amount, byte.MinValue.ToString(), byte.MaxValue.ToString())
+                : Enumerable.Concat(Enumerable.Repeat(default(byte), amount - 1), Media.Common.Extensions.Linq.LinqExtensions.Yield(((byte)amount)));
         }
 
         #endregion
@@ -513,7 +514,7 @@ namespace Media
         //Values required for updating sequence number would be kept in state class and UpdateSequenceNumber on context would call the state would call this function...
 
         //The point at which rollover occurs on the SequenceNumber
-        const uint RTP_SEQ_MOD = (1 << 16); //65536
+        private const uint RTP_SEQ_MOD = (1 << 16); //65536
 
         public const int DefaultMaxDropout = 500, DefaultMaxMisorder = 100, DefaultMinimumSequentalRtpPackets = 2;
 
@@ -537,7 +538,7 @@ namespace Media
         //    u_int32 jitter;         /* estimated jitter */
         //   /* ... */       
         //} source;
-         
+
 
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -575,7 +576,7 @@ namespace Media
                 {
                     RtpProbation--;
 
-                    RtpMaxSeq = (ushort)sequenceNumber;
+                    RtpMaxSeq = sequenceNumber;
 
                     //If no more probation is required then reset the coutners and indicate the packet is in state
                     if (RtpProbation is 0)
@@ -591,7 +592,7 @@ namespace Media
                 RtpProbation = (uint)(MinimumSequentialValidRtpPackets - 1);
 
                 //Reset the sequence number
-                RtpMaxSeq = (ushort)sequenceNumber;
+                RtpMaxSeq = sequenceNumber;
 
                 //The packet is not in state
                 return false;
@@ -608,7 +609,7 @@ namespace Media
                 }
 
                 //Set the maximum sequence number
-                RtpMaxSeq = (ushort)sequenceNumber;
+                RtpMaxSeq = sequenceNumber;
             }
             else if (udelta <= RTP_SEQ_MOD - MaxMisorder)
             {
@@ -637,13 +638,13 @@ namespace Media
 
             //The RtpPacket is in state
             return true;
-        }        
+        }
 
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void ResetRtpValidationCounters(ref ushort sequenceNumber, ref uint RtpBaseSeq, ref ushort RtpMaxSeq, ref uint RtpBadSeq, ref uint RtpSeqCycles, ref uint RtpReceivedPrior, ref uint RtpPacketsRecieved)
         {
-            RtpBaseSeq = RtpMaxSeq = (ushort)sequenceNumber;
+            RtpBaseSeq = RtpMaxSeq = sequenceNumber;
             RtpBadSeq = RTP_SEQ_MOD + 1;   /* so seq == bad_seq is false */
             RtpSeqCycles = RtpReceivedPrior = RtpPacketsRecieved = 0;
         }
@@ -658,7 +659,7 @@ namespace Media
             //should allow a backoff to occur in reporting and possibly eventually to be turned off.
             fraction = 0;
 
-            uint extended_max = (uint)(RtpSeqCycles + RtpMaxSeq);
+            uint extended_max = RtpSeqCycles + RtpMaxSeq;
 
             int expected = (int)(extended_max - RtpBaseSeq + 1);
 
@@ -670,18 +671,11 @@ namespace Media
 
             int received_interval = (int)(RtpPacketsRecieved - RtpReceivedPrior);
 
-            RtpReceivedPrior = (uint)RtpPacketsRecieved;
+            RtpReceivedPrior = RtpPacketsRecieved;
 
             int lost_interval = expected_interval - received_interval;
 
-            if (expected_interval is 0 || lost_interval <= 0)
-            {
-                fraction = 0;
-            }
-            else
-            {
-                fraction = (uint)((lost_interval << 8) / expected_interval);
-            }
+            fraction = expected_interval is 0 || lost_interval <= 0 ? 0 : (uint)((lost_interval << 8) / expected_interval);
         }
 
 
@@ -854,7 +848,7 @@ namespace Media
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static byte PacketOctet(int version, byte remainingBits)
             {
-                return (byte)(version << 6 | (byte)remainingBits);
+                return (byte)(version << 6 | remainingBits);
             }
 
             /// <summary>
@@ -891,7 +885,7 @@ namespace Media
 
                 set { m_Memory[0] = value; }
             }
-            
+
             internal byte Last8Bits
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1104,7 +1098,7 @@ namespace Media
                     if (unsigned > Binary.SevenBitMaxValue)
                         throw Binary.CreateOverflowException("RtpPayloadType", unsigned, byte.MinValue.ToString(), sbyte.MaxValue.ToString());
 
-                    Last8Bits = PackOctet(RtpMarker, (byte)unsigned);
+                    Last8Bits = PackOctet(RtpMarker, unsigned);
                 }
             }
 
@@ -1146,7 +1140,7 @@ namespace Media
             /// <param name="shouldDispose">indicates if memory will disposed when <see cref="Dispose"/> is called</param>
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public CommonHeaderBits(CommonHeaderBits other, bool reference = false, bool shouldDispose = true)
-                :base(shouldDispose)
+                : base(shouldDispose)
             {
                 if (reference)
                 {
@@ -1246,7 +1240,7 @@ namespace Media
             public CommonHeaderBits(int version, bool padding, bool extension, bool marker, int payloadTypeBits, byte otherBits, bool shouldDispose = true)
                 : this(CommonHeaderBits.PackOctet(version, padding, extension, otherBits), CommonHeaderBits.PackOctet(marker, payloadTypeBits), shouldDispose)
             {
-               
+
             }
 
             #endregion
@@ -1281,7 +1275,7 @@ namespace Media
             #endregion
 
             #region Overrides
-            
+
             protected override void Dispose(bool disposing)
             {
                 if (disposing is false || ShouldDispose is false) return;
@@ -1305,9 +1299,7 @@ namespace Media
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public override bool Equals(object obj)
             {
-                if (System.Object.ReferenceEquals(this, obj)) return true;
-
-                return obj is CommonHeaderBits b && Equals(b);
+                return object.ReferenceEquals(this, obj) || obj is CommonHeaderBits b && Equals(b);
             }
 
             #endregion
@@ -1356,7 +1348,7 @@ namespace Media
         /// <see href="http://tools.ietf.org/html/rfc3550">Page 15, paragraph `CSRC list`</see>
         /// </summary>
         public sealed class SourceList : SuppressedFinalizerDisposable, IEnumerator<uint>, IEnumerable<uint>, IReportBlock
-            /*, IReadOnlyCollection<uint> */ //Only needed if modifications to a SourceList are allowed at run time.
+        /*, IReadOnlyCollection<uint> */ //Only needed if modifications to a SourceList are allowed at run time.
         {
             #region Constants / Statics
 
@@ -1375,7 +1367,7 @@ namespace Media
             /// </summary>
             public const int MaxSize = ItemSize * MaxItems;
 
-            internal static readonly SourceList Empty = new SourceList(0, false);
+            internal static readonly SourceList Empty = new(0, false);
 
             #endregion
 
@@ -1384,16 +1376,15 @@ namespace Media
             /// <summary>
             /// The memory which contains the SourceList
             /// </summary>
-            readonly Common.MemorySegment m_Binary = Common.MemorySegment.Empty;
-
-            int m_CurrentOffset, //The current offset in parsing the binary
-                m_SourceCount, //The amount of ContributingSources to read given from the CC nybble in a RtpHeader
-                m_Read;//The amount of ContributingSources read so far.
+            private readonly Common.MemorySegment m_Binary = Common.MemorySegment.Empty;
+            private int m_CurrentOffset;
+            private readonly int m_SourceCount;
+            private int m_Read;
 
             /// <summary>
             /// The current source item.
             /// </summary>
-            uint m_CurrentSource;
+            private uint m_CurrentSource;
 
             #endregion
 
@@ -1418,7 +1409,7 @@ namespace Media
                 foreach (var ssrc in sources.Skip(start))
                 {
                     binary = binary.Concat(Binary.GetBytes(ssrc, Common.Binary.IsLittleEndian)).ToArray();
-                    
+
                     //Increment for the added value and determine if the maximum is reached.
                     if (++m_SourceCount >= SourceList.MaxItems) break;
                 }
@@ -1473,7 +1464,7 @@ namespace Media
             /// <param name="sourceCount">The count of sources expected in the SourceList</param>
             /// <param name="data">The data contained in the SourceList.</param>
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            public SourceList(int sourceCount, bool shouldDispose = true) 
+            public SourceList(int sourceCount, bool shouldDispose = true)
                 : base(shouldDispose)
             {
                 if (0 == (m_SourceCount = Common.Binary.Min(SourceList.MaxItems, sourceCount))) return;
@@ -1495,7 +1486,7 @@ namespace Media
                 m_SourceCount = goodbyeReport.Header.BlockCount;
 
                 //Make a new reference to the payload at the correct offset and size
-                m_Binary = m_SourceCount == 1 ? goodbyeReport.Header.GetSendersSynchronizationSourceIdentifierSegment() : new Common.MemorySegment(goodbyeReport.Payload.Array, 
+                m_Binary = m_SourceCount == 1 ? goodbyeReport.Header.GetSendersSynchronizationSourceIdentifierSegment() : new Common.MemorySegment(goodbyeReport.Payload.Array,
                     goodbyeReport.Payload.Offset,
                     //Take whatever is higher, 0 or the amount given by ReportBlockOctets - the extension and the padding.
                     Common.Binary.Max(0, goodbyeReport.ReportBlockOctets - (goodbyeReport.ReasonForLeavingLength + goodbyeReport.PaddingOctets)));
@@ -1514,7 +1505,7 @@ namespace Media
             }
 
             public SourceList(SourceList other, bool selfReference = false, bool shouldDispose = true) //bool selfReference..
-                : base(shouldDispose) 
+                : base(shouldDispose)
             {
                 m_Binary = selfReference ? other.m_Binary : new MemorySegment(other.m_Binary);
 
@@ -1551,8 +1542,7 @@ namespace Media
                 {
                     //CheckDisposed();
                     //if (m_CurrentOffset == m_Binary.Offset) throw new InvalidOperationException("Enumeration has not started yet.");
-                    if (m_Read <= 0) throw new InvalidOperationException("Enumeration has not started yet.");
-                    return m_CurrentSource;
+                    return m_Read <= 0 ? throw new InvalidOperationException("Enumeration has not started yet.") : m_CurrentSource;
                 }
             }
 
@@ -1564,8 +1554,7 @@ namespace Media
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    if (m_Read <= 0) throw new InvalidOperationException("Enumeration has not started yet.");
-                    return (int)m_CurrentSource;
+                    return m_Read <= 0 ? throw new InvalidOperationException("Enumeration has not started yet.") : (int)m_CurrentSource;
                 }
             }
 
@@ -1721,7 +1710,7 @@ namespace Media
                 m_Read = 0;
 
                 //Reset the current source
-                m_CurrentSource = default(uint);
+                m_CurrentSource = default;
             }
 
             /// <summary>
@@ -1751,7 +1740,7 @@ namespace Media
             /// <param name="offset">The offset in the vector</param>
             /// <returns>True if the copy succeeded otherwise false.</returns>
             public bool TryCopyTo(byte[] other, int offset)
-            {                
+            {
                 try
                 {
                     CheckDisposed();
@@ -1804,7 +1793,7 @@ namespace Media
 
             IEnumerator<uint> IEnumerable<uint>.GetEnumerator()
             {
-                using (SourceList enumerator = new SourceList(this))
+                using (SourceList enumerator = new(this))
                 {
                     if (enumerator.m_Read > 0) yield return m_CurrentSource;
 
@@ -1895,7 +1884,7 @@ namespace Media
         //{ StaticProfiles, DynamicProfiles }
 
         // Register, Unregister, Reassign
-      
+
         #endregion
     }
 }
@@ -1910,7 +1899,7 @@ namespace Media.UnitTests
     {
         public static void TestSourceList()
         {
-            using Media.RFC3550.SourceList sourceList = new RFC3550.SourceList(0);
+            using Media.RFC3550.SourceList sourceList = new(0);
 
             if (sourceList.Count != 0) throw new System.Exception("Count");
         }

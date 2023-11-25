@@ -94,7 +94,7 @@ namespace Media.Common.Extensions.Generic.Dictionary
         {
             any = null;
 
-            value = default(TValue);
+            value = default;
 
             try
             {
@@ -122,21 +122,19 @@ namespace Media.Common.Extensions.Generic.Dictionary
 
         public static bool TryRemove<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, ref TKey key)
         {
-            Exception any; 
-            
-            return TryRemove(dictionary, ref key, out any);
+
+            return TryRemove(dictionary, ref key, out Exception any);
         }
 
         public static bool TryRemove<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, out TValue value) { return TryRemove(dictionary, ref key, out value); }
-        
+
         public static bool TryRemove<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, TKey key, out TValue value, out Exception any)
         { return TryRemove(dictionary, ref key, out value, out any); }
 
         public static bool TryRemove<TKey, TValue>(this Dictionary<TKey, TValue> dictionary, ref TKey key, out TValue value)
         {
-            Exception ex;
 
-            return TryRemove(dictionary, key, out value, out ex);
+            return TryRemove(dictionary, key, out value, out Exception ex);
         }
     }
 }

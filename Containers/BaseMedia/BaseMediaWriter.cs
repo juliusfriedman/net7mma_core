@@ -1,14 +1,14 @@
 ﻿using Media.Common;
 using Media.Container;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System;
 
 namespace Media.Containers.BaseMedia;
 
 public class BaseMediaWriter : MediaFileWriter
 {
-    private readonly List<Mp4Box> boxes = new List<Mp4Box>();
+    private readonly List<Mp4Box> boxes = [];
 
     public override Node Root => boxes[0];
 
@@ -47,9 +47,10 @@ public class BaseMediaWriter : MediaFileWriter
     public override Track CreateTrack(Media.Sdp.MediaType mediaType)
     {
         var trakBox = new TrakBox(this, new MdiaBox(this, new MdhdBox(this, 0, 0, 0, 0, 0x55C4, 0), new HdlrBox(this, 0), new MinfBox(this, null)));
-        var track = new Track(trakBox, "track", 1, DateTime.UtcNow, DateTime.UtcNow, 1, 0, 0, TimeSpan.Zero, TimeSpan.Zero, 0, mediaType, new byte[4]);
-
-        track.UserData = new Dictionary<string, object>();
+        var track = new Track(trakBox, "track", 1, DateTime.UtcNow, DateTime.UtcNow, 1, 0, 0, TimeSpan.Zero, TimeSpan.Zero, 0, mediaType, new byte[4])
+        {
+            UserData = new Dictionary<string, object>()
+        };
 
         return track;
     }

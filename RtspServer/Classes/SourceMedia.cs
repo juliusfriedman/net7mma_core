@@ -73,9 +73,9 @@ namespace Media.Rtsp.Server
         internal string m_Name;
         internal Uri m_Source;
         internal NetworkCredential m_SourceCred;
-        internal HashSet<string> m_Aliases = new ();
+        internal HashSet<string> m_Aliases = [];
         //internal bool m_Child = false;
-        public virtual Sdp.SessionDescription SessionDescription { get; internal protected set; }
+        public virtual Sdp.SessionDescription SessionDescription { get; protected internal set; }
 
         //Maybe should be m_AllowUdp?
         internal bool m_ForceTCP;//= true; // To force clients to utilize TCP, Interleaved in Rtsp or Rtp
@@ -97,7 +97,10 @@ namespace Media.Rtsp.Server
         public TimeSpan Uptime
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { if (m_StartedTimeUtc.HasValue) return DateTime.UtcNow - m_StartedTimeUtc.Value; return TimeSpan.MinValue; }
+            get
+            {
+                return m_StartedTimeUtc.HasValue ? DateTime.UtcNow - m_StartedTimeUtc.Value : TimeSpan.MinValue;
+            }
         }
 
         /// <summary>
@@ -108,7 +111,7 @@ namespace Media.Rtsp.Server
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return m_Id; }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { m_Id = value; }
+            protected internal set { m_Id = value; }
         }
 
         /// <summary>
@@ -208,7 +211,7 @@ namespace Media.Rtsp.Server
         #region Constructor        
 
         public SourceMedia(string name, Uri source, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             //The stream name cannot be null or consist only of whitespace
             if (string.IsNullOrWhiteSpace(name))
@@ -278,8 +281,8 @@ namespace Media.Rtsp.Server
         {
             if (IsDisabled) return;
 
-            State = StreamState.Started; 
-            
+            State = StreamState.Started;
+
             m_StartedTimeUtc = DateTime.UtcNow;
         }
 
@@ -296,7 +299,7 @@ namespace Media.Rtsp.Server
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void AddAlias(string name)
         {
-            if (m_Aliases.Any(a=> a.Equals(name, StringComparison.OrdinalIgnoreCase))) return;
+            if (m_Aliases.Any(a => a.Equals(name, StringComparison.OrdinalIgnoreCase))) return;
 
             m_Aliases.Add(name);
         }

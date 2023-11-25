@@ -38,25 +38,23 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Media.Common;
+using System;
+using System.Linq;
 
 #endregion
 namespace Media.Rtcp
 {
     #region ReceiversReport
 
-        /// <summary>
-        /// Provides a managed implemenation of the ReceiversReport defined in http://tools.ietf.org/html/rfc3550#section-6.4.2
-        /// </summary>
+    /// <summary>
+    /// Provides a managed implemenation of the ReceiversReport defined in http://tools.ietf.org/html/rfc3550#section-6.4.2
+    /// </summary>
     public class ReceiversReport : RtcpReport
     {
         #region Constants and Statics
 
-        new public const int PayloadType = 201;
+        public new const int PayloadType = 201;
 
         #endregion
 
@@ -104,7 +102,7 @@ namespace Media.Rtcp
 
     }
 
-        #endregion
+    #endregion
 }
 
 
@@ -120,7 +118,7 @@ namespace Media.UnitTests
         /// O( )
         /// </summary>
         public static void TestAConstructor_And_Reserialization()
-        {            
+        {
             //Permute every possible value in the 5 bit BlockCount
             for (byte ReportBlockCounter = byte.MinValue; ReportBlockCounter <= Media.Common.Binary.FiveBitMaxValue; ++ReportBlockCounter)
             {
@@ -131,7 +129,7 @@ namespace Media.UnitTests
                     int RandomId = RFC3550.Random32(Utility.Random.Next());
 
                     //Create a SendersReport instance using the specified options.
-                    using (Media.Rtcp.ReceiversReport p = new Rtcp.ReceiversReport(0, PaddingCounter, ReportBlockCounter, RandomId))
+                    using (Media.Rtcp.ReceiversReport p = new(0, PaddingCounter, ReportBlockCounter, RandomId))
                     {
                         //Check IsComplete
                         System.Diagnostics.Debug.Assert(p.IsComplete, "IsComplete must be true.");
@@ -162,7 +160,7 @@ namespace Media.UnitTests
                         }
 
                         //Serialize and Deserialize and verify again
-                        using (Rtcp.ReceiversReport s = new Rtcp.ReceiversReport(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0), true))
+                        using (Rtcp.ReceiversReport s = new(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0), true))
                         {
                             //Check SynchronizationSourceIdentifier
                             System.Diagnostics.Debug.Assert(s.SynchronizationSourceIdentifier == p.SynchronizationSourceIdentifier, "Unexpected SynchronizationSourceIdentifier");

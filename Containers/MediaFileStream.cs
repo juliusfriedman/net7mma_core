@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 namespace Media.Container
 {
     /// <summary>
@@ -11,14 +11,14 @@ namespace Media.Container
     {
         #region Statics
 
-        const string CurrentWorkingDirectory = ".", ParentDirectory = "..";
+        private const string CurrentWorkingDirectory = ".", ParentDirectory = "..";
 
         public static System.IO.FileInfo GetCurrentWorkingDirectory()
         {
             return new System.IO.FileInfo(CurrentWorkingDirectory);
         }
 
-        static Dictionary<string, MediaFileStream> m_ExtensionMap = new Dictionary<string, MediaFileStream>();
+        private static readonly Dictionary<string, MediaFileStream> m_ExtensionMap = [];
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         public static bool TryRegisterExtension(string extenstion, MediaFileStream implementation)
@@ -51,9 +51,8 @@ namespace Media.Container
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         public static IEnumerable<string> GetRegisteredExtensions() { return m_ExtensionMap.Keys; }
 
-        static Type MediaFileStreamType = typeof(MediaFileStream);
-
-        static Type[] ConstructorTypes = new Type[] { typeof(Microsoft.Win32.SafeHandles.SafeFileHandle), typeof(System.Uri), typeof(System.IO.FileAccess), typeof(bool), typeof(System.Action) }; //new Type[] { typeof(string), typeof(System.IO.FileAccess) };
+        private static readonly Type MediaFileStreamType = typeof(MediaFileStream);
+        private static readonly Type[] ConstructorTypes = new Type[] { typeof(Microsoft.Win32.SafeHandles.SafeFileHandle), typeof(System.Uri), typeof(System.IO.FileAccess), typeof(bool), typeof(System.Action) }; //new Type[] { typeof(string), typeof(System.IO.FileAccess) };
 
         public static MediaFileStream GetCompatbileImplementation(string fileName, AppDomain domain = null, System.IO.FileMode mode = System.IO.FileMode.Open, System.IO.FileAccess access = System.IO.FileAccess.ReadWrite)
         {
@@ -64,7 +63,7 @@ namespace Media.Container
 
             //object[] args = new object[] { fileName };
 
-            System.IO.FileStream fs = new System.IO.FileStream(fileName, mode, access);
+            System.IO.FileStream fs = new(fileName, mode, access);
 
             object[] args = null;
 
@@ -74,15 +73,15 @@ namespace Media.Container
 
             sharedFinalizer = () =>
             {
-                if (false == final) return; 
-                
+                if (false == final) return;
+
                 if (fs is not null)
                 {
-                    fs.Dispose(); 
-                    
+                    fs.Dispose();
+
                     fs = null;
                 }
-                
+
                 if (args is not null) args = null;
 
                 if (sharedFinalizer is not null) sharedFinalizer = null;
@@ -103,16 +102,16 @@ namespace Media.Container
 
                     MediaFileStream created = (MediaFileStream)derivedType.GetConstructor(ConstructorTypes).Invoke(args);
 
-                    using(var rootNode = created.Root)
+                    using (var rootNode = created.Root)
                         if (rootNode is not null && rootNode.IsComplete)
-                    {
-                        args = null;
+                        {
+                            args = null;
 
-                        //Ensure the finalizer can now run.
-                        final = true;
+                            //Ensure the finalizer can now run.
+                            final = true;
 
-                        return created;
-                    }
+                            return created;
+                        }
 
                     //The created MediaFileStream is useless for this type of file.
                     created.Dispose();
@@ -135,13 +134,12 @@ namespace Media.Container
 
         #region Fields
 
-        bool m_Disposed, m_ShouldDispose = true;
+        private bool m_Disposed, m_ShouldDispose = true;
+        private readonly Uri m_Source;
 
-        readonly Uri m_Source;
+        protected internal System.IO.FileInfo FileInfo;
 
-        internal protected System.IO.FileInfo FileInfo;
-
-        internal protected long m_Position, m_Length;
+        protected internal long m_Position, m_Length;
 
         #endregion
 
@@ -209,15 +207,15 @@ namespace Media.Container
 
         //event BufferingComplete
 
-        readonly Action AfterClose;
+        private readonly Action AfterClose;
 
         //Could also use FileOptions.DeleteOnClose, Could also just have an Extension method.
-        void DeleteFromFileInfoIfExists()
+        private void DeleteFromFileInfoIfExists()
         {
             if (/*IsDisposed is false && */ FileInfo is not null && FileInfo.Exists) FileInfo.Delete();
         }
 
-        bool TryDeleteFromFileInfoIfExists()
+        private bool TryDeleteFromFileInfoIfExists()
         {
             try { DeleteFromFileInfoIfExists(); return true; }
             catch { return false; }
@@ -251,7 +249,7 @@ namespace Media.Container
             ////    m_Length = e.Total;
 
             ////};
-            
+
             //Wait for the end of the transaction or the root to be valid
             //Buffering && Root is null
             while (result.IsTransactionDone is false && Root is null) result.AsyncWaitHandle.WaitOne(0);
@@ -278,7 +276,7 @@ namespace Media.Container
             //Start position would be useful here for resuming or chunking downloading
 
             //E.g. for a large file make N readers with offset positions, of N * size, download each part and then write to the result stream when its required
-            
+
             //Static copy to path func
             AfterClose = () =>
             {
@@ -289,7 +287,7 @@ namespace Media.Container
             };
         }
 
-        void IStreamCopyTransactionResultCompleted(object sender, Common.Extensions.Stream.StreamExtensions.ITransactionResult t)
+        private void IStreamCopyTransactionResultCompleted(object sender, Common.Extensions.Stream.StreamExtensions.ITransactionResult t)
         {
             Buffering = false;
 
@@ -336,28 +334,27 @@ namespace Media.Container
                 if (m_NodeCache is not null)
                     m_NodeCache.Clear();
                 else
-                    m_NodeCache = new SortedDictionary<long, Node>();
+                    m_NodeCache = [];
         }
 
         public void RemoveCachingPolicy() { RemoveCachingPolicy(m_NodeCachingPolicy); }
 
         public void RemoveCachingPolicy(NodeAction n)
         {
-            if(m_NodeCachingPolicy is not null) m_NodeCachingPolicy -= n;
+            if (m_NodeCachingPolicy is not null) m_NodeCachingPolicy -= n;
         }
 
         public delegate bool NodeAction(Node n);
 
-        NodeAction m_NodeCachingPolicy;
+        private NodeAction m_NodeCachingPolicy;
+        private SortedDictionary<long, Node> m_NodeCache;
 
-        SortedDictionary<long, Node> m_NodeCache;
-
-        bool TryCacheNodeInstance(Node n)
+        private bool TryCacheNodeInstance(Node n)
         {
             return TryCacheNode(n, true, true, true);
         }
 
-        bool IgnoreNode(Node n)
+        private bool IgnoreNode(Node n)
         {
             return true;
         }
@@ -405,12 +402,12 @@ namespace Media.Container
         public override void Close()
         {
             if (IsDisposed) return;
-            
+
             m_Position = m_Length = -1;
-            
+
             base.Close();
-            
-            if(AfterClose is not null) AfterClose();
+
+            if (AfterClose is not null) AfterClose();
 
             FileInfo = null;
         }
@@ -485,7 +482,7 @@ namespace Media.Container
         }
 
         public virtual void RefreshFileInfo(bool updateLength = true)
-        {            
+        {
             //If the FileInfo is not null
             if (FileInfo is not null)
             {
@@ -503,10 +500,11 @@ namespace Media.Container
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         public virtual byte[] ReadBytes(long count)
         {
-            if (count <= 0) return Media.Common.MemorySegment.EmptyBytes; 
-            byte[] result = new byte[count]; 
-            long i = 0; 
-            /*do*/while ((count -= i += Read(result, (int)i, (int)count)) > 0) ; 
+            if (count <= 0) return Media.Common.MemorySegment.EmptyBytes;
+            byte[] result = new byte[count];
+            long i = 0;
+            /*do*/
+            while ((count -= i += Read(result, (int)i, (int)count)) > 0) ;
             return result;
         }
 
@@ -538,7 +536,7 @@ namespace Media.Container
             {
                 if (position != stream.Seek(position, System.IO.SeekOrigin.Begin)) throw new InvalidOperationException("Unable to obtain the given position");
 
-                int read = 0; while ((count -= read += stream.Read(buffer, read, count)) > 0) ;                
+                int read = 0; while ((count -= read += stream.Read(buffer, read, count)) > 0) ;
 
                 RefreshFileInfo(refreshFileInfo);
 
@@ -581,10 +579,10 @@ namespace Media.Container
         public virtual void Append(byte[] buffer, int offset, int count) { WriteAt(Length, buffer, offset, count); }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
-        internal protected long GetPosition() { return Position; }
+        protected internal long GetPosition() { return Position; }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
-        internal protected long GetLength() { return Length; }
+        protected internal long GetLength() { return Length; }
 
         #endregion
 
@@ -646,7 +644,7 @@ namespace Media.Container
     //    public IdentifierTransaction(System.IO.Stream s, byte[] dest, int off, int len)
     //        : base(s, dest, off, len)
     //    {
-            
+
     //    }
     //}
 

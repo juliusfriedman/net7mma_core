@@ -48,11 +48,11 @@ namespace Media.Cryptography
 
         #region Fields
 
-        byte[] _data;
-        ABCDStruct _abcd;
-        long _totalLength;
-        int _dataSize;
-        byte[] HashValue;
+        private byte[] _data;
+        private ABCDStruct _abcd;
+        private long _totalLength;
+        private int _dataSize;
+        private byte[] HashValue;
 
         #endregion
 
@@ -71,16 +71,18 @@ namespace Media.Cryptography
 
         #region Private - Instance
 
-        void Initialize()
+        private void Initialize()
         {
             _data = new byte[AlignValue];
             _totalLength = _dataSize = Zero;
-            _abcd = new ABCDStruct();
-            //Intitial values as defined in RFC 1321
-            _abcd.A = AA;
-            _abcd.B = BB;
-            _abcd.C = CC;
-            _abcd.D = DD;
+            _abcd = new ABCDStruct
+            {
+                //Intitial values as defined in RFC 1321
+                A = AA,
+                B = BB,
+                C = CC,
+                D = DD
+            };
         }
 
         #endregion [Private - Instance]
@@ -90,18 +92,18 @@ namespace Media.Cryptography
         internal void HashCore(byte[] array, int ibStart, int cbSize)
         {
             int startIndex = ibStart;
-            
+
             int totalArrayLength = _dataSize + cbSize;
-            
+
             if (totalArrayLength >= AlignValue)
             {
                 Array.Copy(array, startIndex, _data, _dataSize, AlignValue - _dataSize);
-                
+
                 // Process message of 64 bytes (512 bits)
                 MD5.GetHashBlock(_data, ref _abcd, Zero);
-                
+
                 startIndex += AlignValue - _dataSize;
-                
+
                 totalArrayLength -= AlignValue;
 
                 while (totalArrayLength >= AlignValue)
@@ -114,7 +116,7 @@ namespace Media.Cryptography
 
                     startIndex += AlignValue;
                 }
-                
+
                 _dataSize = totalArrayLength;
 
                 Array.Copy(array, startIndex, _data, Zero, totalArrayLength);
@@ -161,15 +163,18 @@ namespace Media.Cryptography
 
         public static string GetHashString(byte[] input)
         {
-            if (null == input) throw new System.ArgumentNullException("input", "Unable to calculate hash over null input data");
-            return new StringBuilder(new String(Encoding.UTF8.GetChars(GetHash(input)))).ToString();
+            return null == input
+                ? throw new System.ArgumentNullException("input", "Unable to calculate hash over null input data")
+                : new StringBuilder(new string(Encoding.UTF8.GetChars(GetHash(input)))).ToString();
         }
 
         public static string GetHashString(string input, Encoding encoding)
         {
-            if (null == input) throw new System.ArgumentNullException("input", "Unable to calculate hash over null input data");
-            if (null == encoding) throw new System.ArgumentNullException("encoding", "Unable to calculate hash over a string without a default encoding. Consider using the GetHashString(string) overload to use UTF8 Encoding");
-            return GetHashString(encoding.GetBytes(input));
+            return null == input
+                ? throw new System.ArgumentNullException("input", "Unable to calculate hash over null input data")
+                : null == encoding
+                ? throw new System.ArgumentNullException("encoding", "Unable to calculate hash over a string without a default encoding. Consider using the GetHashString(string) overload to use UTF8 Encoding")
+                : GetHashString(encoding.GetBytes(input));
         }
 
         public static string GetHashString(string input)
@@ -184,7 +189,7 @@ namespace Media.Cryptography
             if (null == input) throw new System.ArgumentNullException("input", "Unable to calculate hash over null input data");
 
             //Intitial values defined in RFC 1321
-            ABCDStruct abcd = new ABCDStruct()
+            ABCDStruct abcd = new()
             {
                 A = AA,
                 B = BB,
@@ -203,7 +208,7 @@ namespace Media.Cryptography
 
                 startIndex += HashAlignValue;
             }
-            
+
             // The final data block. 
             return MD5.GetHashFinalBlock(input, startIndex, inputLength - startIndex, ref abcd, inputLength * BitsInByte);
 
@@ -277,31 +282,31 @@ namespace Media.Cryptography
             //Use the buffer to copy the data which converts it in place but only if on little endian
             if (false == isBigEndian) Buffer.BlockCopy(input, ibStart, result, 0, HashAlignValue);
             else for (int i = 0; i < BitsInWord; i++) //Read 16 uint values (use length for custom hash)
-            {
-                //4 bytes from i each time,
-                //0 - 3, 
-                //4 - 7, 
-                //8 - 11,
-                //12 - 15
+                {
+                    //4 bytes from i each time,
+                    //0 - 3, 
+                    //4 - 7, 
+                    //8 - 11,
+                    //12 - 15
 
-                //result[i] = (uint)input[ibStart + i * 4];
+                    //result[i] = (uint)input[ibStart + i * 4];
 
-                //result[i] += (uint)input[ibStart + i * 4 + 1] << 8;
+                    //result[i] += (uint)input[ibStart + i * 4 + 1] << 8;
 
-                //result[i] += (uint)input[ibStart + i * 4 + 2] << 16;
+                    //result[i] += (uint)input[ibStart + i * 4 + 2] << 16;
 
-                //result[i] += (uint)input[ibStart + i * 4 + 3] << 24;
+                    //result[i] += (uint)input[ibStart + i * 4 + 3] << 24;
 
-                //This is done with ReadU32, ibStart is moved 4 bytes for each value. (All values are ensured to be in little endian)
-                //Enumerable gets the range check elimination better than most for loops
-                result[i] = Common.Binary.ReadU32(input, ref ibStart, isBigEndian);
-            }
+                    //This is done with ReadU32, ibStart is moved 4 bytes for each value. (All values are ensured to be in little endian)
+                    //Enumerable gets the range check elimination better than most for loops
+                    result[i] = Common.Binary.ReadU32(input, ref ibStart, isBigEndian);
+                }
 
             return result;
         }
 
         //
-        internal static byte[] GetHashFinalBlock(byte[] input, int ibStart, int cbSize, ref ABCDStruct ABCD, Int64 len)
+        internal static byte[] GetHashFinalBlock(byte[] input, int ibStart, int cbSize, ref ABCDStruct ABCD, long len)
         {
             byte[] working = new byte[HashAlignValue];
             byte[] length = new byte[BitsInByte];
@@ -335,7 +340,7 @@ namespace Media.Cryptography
 
                 GetHashBlock(working, ref ABCD, Zero);
             }
-            
+
             byte[] output = new byte[BitsInWord];
 
             //Write in Little Endian

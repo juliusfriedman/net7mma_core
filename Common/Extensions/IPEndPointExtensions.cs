@@ -44,17 +44,17 @@ namespace Media.Common.Extensions.IPEndPoint
 
         public const string SchemeSeperator = "://";
 
-        public static readonly System.Net.IPEndPoint Any = new System.Net.IPEndPoint(System.Net.IPAddress.Any, 0);
+        public static readonly System.Net.IPEndPoint Any = new(System.Net.IPAddress.Any, 0);
 
-        public static readonly System.Net.IPEndPoint IPv6Any = new System.Net.IPEndPoint(System.Net.IPAddress.IPv6Any, 0);
+        public static readonly System.Net.IPEndPoint IPv6Any = new(System.Net.IPAddress.IPv6Any, 0);
 
         public static bool IsMulticast(this System.Net.IPEndPoint endPoint) { return Common.Extensions.IPAddress.IPAddressExtensions.IsMulticast(endPoint.Address); }
 
         public static System.Uri ToUri(this System.Net.IPEndPoint endPoint, string scheme = null)
         {
-            if (endPoint is null) throw new System.ArgumentNullException();                
-
-            return new System.Uri(string.IsNullOrWhiteSpace(scheme) ? endPoint.ToString() : string.Join(SchemeSeperator, scheme, endPoint.ToString()));
+            return endPoint is null
+                ? throw new System.ArgumentNullException()
+                : new System.Uri(string.IsNullOrWhiteSpace(scheme) ? endPoint.ToString() : string.Join(SchemeSeperator, scheme, endPoint.ToString()));
         }
 
         public static System.Net.IPEndPoint Parse(string text)
@@ -63,12 +63,9 @@ namespace Media.Common.Extensions.IPEndPoint
 
             string[] parts = text.Split(PortSeperator);
 
-            if (parts.Length > 1)
-            {
-                return new System.Net.IPEndPoint(System.Net.IPAddress.Parse(parts[0]), int.Parse(parts[1]));
-            }
-
-            return new System.Net.IPEndPoint(System.Net.IPAddress.Parse(parts[0]), 0);
+            return parts.Length > 1
+                ? new System.Net.IPEndPoint(System.Net.IPAddress.Parse(parts[0]), int.Parse(parts[1]))
+                : new System.Net.IPEndPoint(System.Net.IPAddress.Parse(parts[0]), 0);
         }
 
         public static bool TryParse(string text, out System.Net.IPEndPoint result)
@@ -82,7 +79,7 @@ namespace Media.Common.Extensions.IPEndPoint
             catch
             {
                 result = null;
-                
+
                 return false;
             }
         }

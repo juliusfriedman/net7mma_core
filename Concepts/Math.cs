@@ -68,7 +68,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #endregion
 
-#pragma warning disable 1691, 1692
 
 #pragma warning disable CA1724
 
@@ -90,9 +89,9 @@ namespace Media.Concepts.Math
     {
         #region DivideBy15Fast
 
-        void DivideBy15Fast(ref uint x)
+        private void DivideBy15Fast(ref uint x)
         {
-            uint s,t;
+            uint s, t;
 
             s = x >> 4;
 
@@ -103,10 +102,10 @@ namespace Media.Concepts.Math
             t = (t + (t >> 8) >> 4) + s;
         }
 
-        void DivideBy15Fast(ref ushort x)
+        private void DivideBy15Fast(ref ushort x)
         {
             ++x;
-            
+
             x += (ushort)(x << 4);
 
             x += (ushort)(x >> 8);
@@ -116,7 +115,7 @@ namespace Media.Concepts.Math
             x >>= 8;
         }
 
-        void DivideBy15Fast(ref long x)
+        private void DivideBy15Fast(ref long x)
         {
             x = (x >> 4) + (x >> 8);
 
@@ -229,8 +228,7 @@ namespace Media.Concepts.Math
         /// <inheritdoc cref="Divide(long, ulong, long, out long, out long, bool)"/>
         public static long Divide(long aH, ulong aL, long b, out long remainder, bool roundDown)
         {
-            long resultHi;
-            ulong resultLo = Divide(aH, aL, b, out resultHi, out remainder, roundDown);
+            ulong resultLo = Divide(aH, aL, b, out long resultHi, out remainder, roundDown);
             if (resultHi == ((long)resultLo >= 0 ? 0 : -1L))
                 return (long)resultLo;
             else
@@ -276,8 +274,7 @@ namespace Media.Concepts.Math
             if ((negativeB = (b < 0)))
                 b = -b;
 
-            ulong resultHiU, remainderU;
-            ulong resultLo = Divide((ulong)aH, aL, (ulong)b, out resultHiU, out remainderU);
+            ulong resultLo = Divide((ulong)aH, aL, (ulong)b, out ulong resultHiU, out ulong remainderU);
             resultHi = (long)resultHiU;
             if (negativeA == negativeB)
             {
@@ -313,9 +310,7 @@ namespace Media.Concepts.Math
                 return (remainder = ulong.MaxValue);
 
             ulong resultHi, resultLo = Divide(aH, aL, b, out resultHi, out remainder);
-            if (resultHi != 0)
-                return ulong.MaxValue;
-            return resultLo;
+            return resultHi != 0 ? ulong.MaxValue : resultLo;
         }
 
         /// <summary>Divides an unsigned 128-bit number by an unsigned 64-bit 
@@ -493,10 +488,7 @@ namespace Media.Concepts.Math
                 return ShiftLeftFast(aH, ref aL, amount);
             else
             {
-                if (amount >= 128)
-                    aH = 0;
-                else
-                    aH = aL << (amount - 64);
+                aH = amount >= 128 ? 0 : aL << (amount - 64);
                 aL = 0;
             }
             return aH;
@@ -574,10 +566,7 @@ namespace Media.Concepts.Math
                 return ShiftRightFast(aH, ref aL, amount);
             else
             {
-                if (amount >= 128)
-                    aL = 0;
-                else
-                    aL = aH >> (amount - 64);
+                aL = amount >= 128 ? 0 : aH >> (amount - 64);
                 aH = 0;
             }
             return aH;
@@ -651,19 +640,13 @@ namespace Media.Concepts.Math
         /// <inheritdoc cref="Add(ulong, ref ulong, ulong)"/>
         public static long Add(long aH, ref ulong aL, long amount)
         {
-            if (amount >= 0)
-                return (long)Add((ulong)aH, ref aL, (ulong)amount);
-            else
-                return (long)Subtract((ulong)aH, ref aL, (ulong)(-amount));
+            return amount >= 0 ? (long)Add((ulong)aH, ref aL, (ulong)amount) : (long)Subtract((ulong)aH, ref aL, (ulong)(-amount));
         }
 
         /// <inheritdoc cref="Subtract(ulong, ref ulong, ulong)"/>
         public static long Subtract(long aH, ref ulong aL, long amount)
         {
-            if (amount >= 0)
-                return (long)Subtract((ulong)aH, ref aL, (ulong)amount);
-            else
-                return (long)Add((ulong)aH, ref aL, (ulong)(-amount));
+            return amount >= 0 ? (long)Subtract((ulong)aH, ref aL, (ulong)amount) : (long)Add((ulong)aH, ref aL, (ulong)(-amount));
         }
 
         #endregion
@@ -715,16 +698,14 @@ namespace Media.Concepts.Math
         /// <inheritdoc cref="MulShift(int,int,int)"/>
         public static long MulShift(long a, long mulBy, int shiftBy)
         {
-            long rH;
-            ulong rL = Multiply(a, mulBy, out rH);
+            ulong rL = Multiply(a, mulBy, out long rH);
             ShiftRight(rH, ref rL, shiftBy);
             return (long)rL;
         }
         /// <inheritdoc cref="MulShift(int,int,int)"/>
         public static ulong MulShift(ulong a, ulong mulBy, int shiftBy)
         {
-            ulong rH;
-            ulong rL = Multiply(a, mulBy, out rH);
+            ulong rL = Multiply(a, mulBy, out ulong rH);
             ShiftRight(rH, ref rL, shiftBy);
             return rL;
         }
@@ -764,8 +745,7 @@ namespace Media.Concepts.Math
         /// </remarks>
         public static long MulDiv(long a, long mulBy, long divBy, out long remainder)
         {
-            long mH;
-            ulong mL = Multiply(a, mulBy, out mH);
+            ulong mL = Multiply(a, mulBy, out long mH);
             return Divide(mH, mL, divBy, out remainder, false);
         }
         /// <inheritdoc cref="MulDiv(int,int,int,out int)"/>
@@ -774,8 +754,7 @@ namespace Media.Concepts.Math
         /// (ulong.MaxValue).</remarks>
         public static ulong MulDiv(ulong a, ulong mulBy, ulong divBy, out ulong remainder)
         {
-            ulong mH;
-            ulong mL = Multiply(a, mulBy, out mH);
+            ulong mL = Multiply(a, mulBy, out ulong mH);
             return Divide(mH, mL, divBy, out remainder);
         }
 
@@ -792,16 +771,14 @@ namespace Media.Concepts.Math
         /// <inheritdoc cref="MulDiv(long, long, long, out long)"/>
         public static long MulDiv(long a, long mulBy, long divBy)
         {
-            long mH, remainder;
-            ulong mL = Multiply(a, mulBy, out mH);
-            return Divide(mH, mL, divBy, out remainder, false);
+            ulong mL = Multiply(a, mulBy, out long mH);
+            return Divide(mH, mL, divBy, out long remainder, false);
         }
         /// <inheritdoc cref="MulDiv(ulong, ulong, ulong, out ulong)"/>
         public static ulong MulDiv(ulong a, ulong mulBy, ulong divBy)
         {
-            ulong mH, remainder;
-            ulong mL = Multiply(a, mulBy, out mH);
-            return Divide(mH, mL, divBy, out remainder);
+            ulong mL = Multiply(a, mulBy, out ulong mH);
+            return Divide(mH, mL, divBy, out ulong remainder);
         }
         #endregion
 
@@ -852,9 +829,7 @@ namespace Media.Concepts.Math
         /// </remarks>
         public static int Log2Floor(int x)
         {
-            if (x < 0)
-                return -1;
-            return Log2Floor((uint)x);
+            return x < 0 ? -1 : Log2Floor((uint)x);
         }
 
         [System.CLSCompliant(false)]
@@ -862,9 +837,7 @@ namespace Media.Concepts.Math
         public static int Log2Floor(ref ulong x)
         {
             uint xHi = (uint)(x >> 32);
-            if (xHi != 0)
-                return 32 + Log2Floor(xHi);
-            return Log2Floor((uint)x);
+            return xHi != 0 ? 32 + Log2Floor(xHi) : Log2Floor((uint)x);
         }
 
         /// <inheritdoc cref="Log2Floor(int)"/>
@@ -875,7 +848,7 @@ namespace Media.Concepts.Math
             ulong unsigned = Concepts.Classes.Unsafe.UInt64ToInt64Bits(ref x);
             return Log2Floor(ref unsigned);
         }
-        
+
         /// <summary>Gets the next higher power of 2, e.g. 4=>8, 13=>16.</summary>
         /// <remarks>For negative values of x, NextPowerOf2((uint)x) is 0.</remarks>
         [System.CLSCompliant(false)]

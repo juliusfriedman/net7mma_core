@@ -214,7 +214,7 @@ public class DrefBox : FullBox
         ++EntryCount;
 
         // Create a Data Entry Url Box
-        DataEntryUrlBox dataEntryUrlBox = new DataEntryUrlBox(Master as BaseMediaWriter, dataUrl);
+        DataEntryUrlBox dataEntryUrlBox = new(Master as BaseMediaWriter, dataUrl);
 
         AddChildBox(dataEntryUrlBox);
     }
@@ -732,7 +732,7 @@ public class SttsBox : FullBox
 {
     public int EntryCount
     {
-        get => Binary.Read32(Data, OffsetToData, Binary.IsLittleEndian); 
+        get => Binary.Read32(Data, OffsetToData, Binary.IsLittleEndian);
         set => Binary.Write32(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
     }
 
@@ -867,14 +867,14 @@ public class TfraBox : FullBox
         get
         {
             var offset = OffsetToData + 10;
-            while(offset < DataSize)
+            while (offset < DataSize)
             {
                 //This allocated for the data already
                 var tfra = new TrackFragmentRandomAccessEntryBox(Master as BaseMediaWriter, Version);
 
                 //Reassign rather than copy
                 tfra.Data = new MemorySegment(Data.Array, offset, tfra.Length);
-                
+
                 yield return tfra;
 
                 offset += tfra.Length;
@@ -1110,7 +1110,7 @@ public class MvexBox : Mp4Box
 
     public void AddTrexBox(uint trackId, uint defaultSampleDescriptionIndex, uint defaultSampleDuration, uint defaultSampleSize, uint defaultSampleFlags)
     {
-        TrexBox trexBox = new TrexBox(Master as BaseMediaWriter, trackId, defaultSampleDescriptionIndex, defaultSampleDuration, defaultSampleSize, defaultSampleFlags);
+        TrexBox trexBox = new(Master as BaseMediaWriter, trackId, defaultSampleDescriptionIndex, defaultSampleDuration, defaultSampleSize, defaultSampleFlags);
         AddChildBox(trexBox);
     }
 }
@@ -1287,12 +1287,9 @@ public class TkhdBox : FullBox
     public TkhdBox(BaseMediaWriter writer, ushort version, uint flags)
         : base(writer, Encoding.ASCII.GetBytes("tkhd"), (byte)version, flags)
     {
-        if (version is 0)
-            Data = new(new byte[84]);
-        else if (version == 1)
-            Data = new(new byte[92]);
-        else
-            throw new ArgumentException("Invalid version. Version must be 0 or 1.");
+        Data = version is 0
+            ? new(new byte[84])
+            : version == 1 ? new(new byte[92]) : throw new ArgumentException("Invalid version. Version must be 0 or 1.");
 
         Version = (byte)version;
         Flags = flags;
@@ -1402,7 +1399,7 @@ public class UserMetadataBox : KeyValueBox
 public class MoovBox : Mp4Box
 {
     public MvhdBox MovieHeaderBox { get; }
-    public List<TrakBox> Tracks { get; } = new List<TrakBox>();
+    public List<TrakBox> Tracks { get; } = [];
     public UdtaBox UserDataBox { get; }
 
     public MoovBox(BaseMediaWriter writer, uint timeScale, uint duration, uint preferredRate, ushort preferredVolume, ushort[] matrix, byte[] predefined, uint nextTrackId)
@@ -1438,7 +1435,7 @@ public class Avc1Box : Mp4Box
         : base(writer, Encoding.UTF8.GetBytes("avc1"), 0)
     {
         // Create the AVC Configuration Box (avcC) using the provided data
-        AvcCBox avcCBox = new AvcCBox(writer, avcCData);
+        AvcCBox avcCBox = new(writer, avcCData);
 
         AddChildBox(avcCBox);
     }
@@ -1548,10 +1545,10 @@ public class VisualSampleEntryBox : SampleEntryBox
         set
         {
             //if (value.Count() != 3)
-                //throw new ArgumentException("PreDefined2 must contain 3 elements.");
+            //throw new ArgumentException("PreDefined2 must contain 3 elements.");
 
             int i = 0;
-            foreach(var val in value)
+            foreach (var val in value)
             {
                 Binary.Write32(Data.Array, OffsetToData + 10 + i++ * 4, Binary.IsLittleEndian, val);
             }

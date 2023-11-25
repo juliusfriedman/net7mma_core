@@ -39,12 +39,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #region Using Statements
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net;
-using System.Net.Sockets;
-using Media.Common;
 
 #endregion
 
@@ -58,7 +52,7 @@ namespace Media
     {
         #region Properties
 
-        public readonly static Random Random = Random.Shared;
+        public static readonly Random Random = Random.Shared;
 
         #endregion
 

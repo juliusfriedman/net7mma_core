@@ -1,9 +1,7 @@
-﻿using System;
+﻿using Media.Container;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Media.Container;
 
 namespace Media.Containers.Gxf
 {
@@ -56,7 +54,7 @@ namespace Media.Containers.Gxf
 
         #region Constants
 
-        const int IdentifierParts = 6, IdentiferSize = IdentifierParts * 2, LengthSize = 4, MinimumSize = IdentiferSize + LengthSize, VersionMajor = 0, VersionMinor = 1;
+        private const int IdentifierParts = 6, IdentiferSize = IdentifierParts * 2, LengthSize = 4, MinimumSize = IdentiferSize + LengthSize, VersionMajor = 0, VersionMinor = 1;
 
         #endregion
 
@@ -64,8 +62,7 @@ namespace Media.Containers.Gxf
 
         public static string ToTextualConvention(byte[] identifier)
         {
-            if (identifier is null) return Media.Common.Extensions.String.StringExtensions.UnknownString;
-            return ((Identifier)identifier[0]).ToString();
+            return identifier is null ? Media.Common.Extensions.String.StringExtensions.UnknownString : ((Identifier)identifier[0]).ToString();
         }
 
         #endregion
@@ -97,7 +94,7 @@ namespace Media.Containers.Gxf
         public Node ReadElement(Identifier identifier, long offset, long count)
         {
             long position = Position;
-            Node result =  ReadElements(offset, count, identifier).FirstOrDefault();
+            Node result = ReadElements(offset, count, identifier).FirstOrDefault();
             Position = position;
             return result;
         }
@@ -136,11 +133,11 @@ namespace Media.Containers.Gxf
 
             if (length >> 24 > 0 || length < MinimumSize) length = 0;
 
-            if (Common.Binary.ReadU32(identifier, IdentifierParts, Common.Binary.IsLittleEndian) > VersionMajor 
+            return Common.Binary.ReadU32(identifier, IdentifierParts, Common.Binary.IsLittleEndian) > VersionMajor
                 ||
-                identifier[IdentifierParts + 1] != (byte)Identifier.PacketStartA && identifier[IdentifierParts + 2] != (byte)Identifier.PacketStartB) throw new InvalidOperationException("Invalid Packet Header");
-
-            return new Node(this, identifier, LengthSize, Position, length, length <= Remaining);
+                identifier[IdentifierParts + 1] != (byte)Identifier.PacketStartA && identifier[IdentifierParts + 2] != (byte)Identifier.PacketStartB
+                ? throw new InvalidOperationException("Invalid Packet Header")
+                : new Node(this, identifier, LengthSize, Position, length, length <= Remaining);
         }
         public override IEnumerator<Node> GetEnumerator()
         {
@@ -158,7 +155,7 @@ namespace Media.Containers.Gxf
 
         //Parse Map, Material Packet
 
-        List<Track> m_Tracks;
+        private List<Track> m_Tracks;
 
         public override IEnumerable<Track> GetTracks()
         {
@@ -210,6 +207,6 @@ namespace Media.Containers.Gxf
         {
             get { return Root; }
         }
-       
+
     }
 }

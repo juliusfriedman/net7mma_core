@@ -35,9 +35,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 namespace Media.Rtp
 {
-	/// <summary>
+    /// <summary>
     /// The constants of a <see cref="RtpClient"/> instance.
-	/// </summary>
+    /// </summary>
     public partial class RtpClient
     {
         #region Constants / Statics
@@ -45,12 +45,12 @@ namespace Media.Rtp
         /// <summary>
         /// The default amount which is used a multiplier to set the ReceiveBufferSize
         /// </summary>
-        const int DefaultRecieveBufferSizeMultiplier = 1000; //8192000 is almost 9 MB
+        private const int DefaultRecieveBufferSizeMultiplier = 1000; //8192000 is almost 9 MB
 
         /// <summary>
         /// The default amount which is used a multiplier to set the SendBufferSize
         /// </summary>
-        const int DefaultSendBufferSizeMultiplier = 1000; 
+        private const int DefaultSendBufferSizeMultiplier = 1000;
 
         internal static void ConfigureRtpThread(System.Threading.Thread thread)//,Common.ILogging = null
         {
@@ -66,7 +66,7 @@ namespace Media.Rtp
         //Most routers / firewalls will let traffic back through if the person from behind initiated the traffic.
         //Send some bytes to ensure the reciever is awake and ready... (SIP / RELOAD / ICE / STUN / TURN may have something specific and better)
         //e.g Port mapping request http://tools.ietf.org/html/rfc6284#section-4.2 
-        static readonly byte[] WakeUpBytes = new byte[] { 0x70, 0x70, 0x70, 0x70 };
+        private static readonly byte[] WakeUpBytes = new byte[] { 0x70, 0x70, 0x70, 0x70 };
 
         //Choose better name,,, 
         //And depending on how memory is aligned 36 may be a palindrome

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Common.Loggers
 {
@@ -14,16 +10,15 @@ namespace Media.Common.Loggers
 
         #region Fields
 
-        System.Text.Encoding m_Encoding = System.Text.Encoding.Default;
-
-        System.IO.FileInfo m_FileInfo;
+        private System.Text.Encoding m_Encoding = System.Text.Encoding.Default;
+        private System.IO.FileInfo m_FileInfo;
 
         #endregion
 
         #region Constructor
 
         public FileLogger(System.IO.FileInfo fileInfo, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             m_FileInfo = fileInfo;
         }
@@ -90,9 +85,8 @@ namespace Media.Common.Loggers
             {
                 using (var stream = m_FileInfo.Open(System.IO.FileMode.Append, System.IO.FileAccess.Write))
                 {
-                    int len;
 
-                    stream.Write(GetBytes(message, out len), 0, len);
+                    stream.Write(GetBytes(message, out int len), 0, len);
                 }
             }
             catch

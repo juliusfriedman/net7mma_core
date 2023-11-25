@@ -1,25 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Concepts.Classes
 {
     public abstract class Bus : Common.SuppressedFinalizerDisposable
     {
-        public readonly Timer Clock = new Timer(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);
+        public readonly Timer Clock = new(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);
 
         public Bus() : base(false) { Clock.Start(); }
     }
 
     public class ClockedBus : Bus
     {
-        long FrequencyHz, Maximum, End;
-
-        readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<byte[]> Input = new Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<byte[]>(), Output = new Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<byte[]>();
-
-        readonly double m_Bias;
+        private long FrequencyHz, Maximum, End;
+        private readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<byte[]> Input = new(), Output = new();
+        private readonly double m_Bias;
 
         public ClockedBus(long frequencyHz, double bias = 1.5)
         {
@@ -60,7 +54,7 @@ namespace Media.Concepts.Classes
 
                 try { if (Clock.Producer.Count > 10) Clock.Producer.Clear(); }
                 catch { }
-            } 
+            }
         }
 
         public override void Dispose()
@@ -76,11 +70,15 @@ namespace Media.Concepts.Classes
             base.Dispose();
         }
 
-        long sample = 0, steps = 0, count = 0, avg = 0, elapsed = 0, cache = 1;
+        private long sample = 0;
+        private long steps = 0;
+        private long count = 0;
+        private long avg = 0;
+        private long elapsed = 0;
+        private readonly long cache = 1;
+        private bool inv;
 
-        bool inv;
-
-        void Clock_Tick(ref long ticks)
+        private void Clock_Tick(ref long ticks)
         {
             if (ShouldDispose is false && IsDisposed is false)
             {
@@ -153,7 +151,7 @@ namespace Media.UnitTests
         {
             System.Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(1))
+            using (Media.Concepts.Classes.ClockedBus cb = new(1))
             {
                 while (false == System.Console.KeyAvailable || System.Console.ReadKey(true).Key == ConsoleKey.Q)
                 {
@@ -170,7 +168,7 @@ namespace Media.UnitTests
         {
             System.Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(5))
+            using (Media.Concepts.Classes.ClockedBus cb = new(5))
             {
                 while (false == System.Console.KeyAvailable || System.Console.ReadKey(true).Key == ConsoleKey.Q)
                 {
@@ -186,7 +184,7 @@ namespace Media.UnitTests
         {
             System.Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(7))
+            using (Media.Concepts.Classes.ClockedBus cb = new(7))
             {
                 while (false == System.Console.KeyAvailable)
                 {
@@ -206,25 +204,25 @@ namespace Media.UnitTests
 
             int times = 1;
 
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(times))
+            using (Media.Concepts.Classes.ClockedBus cb = new(times))
             {
                 while (false == System.Console.KeyAvailable) for (int i = 2, e = 21; i < e; ++i)
-                {
-                    if (System.Console.KeyAvailable) goto Done;
+                    {
+                        if (System.Console.KeyAvailable) goto Done;
 
-                    cb.Clock.m_Clock.NanoSleep(i * i * 10);
+                        cb.Clock.m_Clock.NanoSleep(i * i * 10);
 
-                    if (System.Console.KeyAvailable) goto Done;
+                        if (System.Console.KeyAvailable) goto Done;
 
-                    if (i <= 10) cb.SetFrequency(times * i);
-                    else cb.SetFrequency((e - i) * times);
+                        if (i <= 10) cb.SetFrequency(times * i);
+                        else cb.SetFrequency((e - i) * times);
 
-                    if (System.Console.KeyAvailable) goto Done;
+                        if (System.Console.KeyAvailable) goto Done;
 
-                    cb.Clock.m_Clock.NanoSleep(i * i * 100);
+                        cb.Clock.m_Clock.NanoSleep(i * i * 100);
 
-                    if (System.Console.KeyAvailable) goto Done;
-                }
+                        if (System.Console.KeyAvailable) goto Done;
+                    }
             }
 
             Done:
@@ -240,27 +238,27 @@ namespace Media.UnitTests
 
             int times = 2;
 
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(times))
+            using (Media.Concepts.Classes.ClockedBus cb = new(times))
             {
                 while (false == System.Console.KeyAvailable) for (int i = 0, e = System.Console.WindowWidth; i < e; ++i)
                         for (int j = 0, z = System.Console.WindowHeight; j < z; ++j)
-                    {
-                        if (System.Console.KeyAvailable) goto Done;
+                        {
+                            if (System.Console.KeyAvailable) goto Done;
 
-                        System.Console.SetCursorPosition(i, j);
+                            System.Console.SetCursorPosition(i, j);
 
-                        cb.Clock.m_Clock.NanoSleep(i * i * 10);
+                            cb.Clock.m_Clock.NanoSleep(i * i * 10);
 
-                        if (System.Console.KeyAvailable) goto Done;
+                            if (System.Console.KeyAvailable) goto Done;
 
-                        if (i <= 10) cb.SetFrequency(times * i);
-                        else cb.SetFrequency((e - i) * times);
+                            if (i <= 10) cb.SetFrequency(times * i);
+                            else cb.SetFrequency((e - i) * times);
 
-                        if (System.Console.KeyAvailable) goto Done;
-                    }
+                            if (System.Console.KeyAvailable) goto Done;
+                        }
             }
 
-        Done:
+            Done:
 
             while (System.Console.KeyAvailable) System.Console.ReadKey(true);
 
@@ -271,7 +269,7 @@ namespace Media.UnitTests
         {
             System.Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(10))
+            using (Media.Concepts.Classes.ClockedBus cb = new(10))
             {
                 while (false == System.Console.KeyAvailable || System.Console.ReadKey(true).Key == ConsoleKey.Q)
                 {
@@ -290,7 +288,7 @@ namespace Media.UnitTests
         {
             System.Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(175))
+            using (Media.Concepts.Classes.ClockedBus cb = new(175))
             {
                 while (false == System.Console.KeyAvailable)
                 {
@@ -302,12 +300,12 @@ namespace Media.UnitTests
             while (System.Console.KeyAvailable) System.Console.ReadKey(true);
 
             System.Console.WriteLine("Done");
-            
+
         }
 
         public void TestForSevenHundredMegaHertz()
         {
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(700))
+            using (Media.Concepts.Classes.ClockedBus cb = new(700))
             {
                 while (false == System.Console.KeyAvailable)
                 {
@@ -326,7 +324,7 @@ namespace Media.UnitTests
         {
             System.Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(1000))
+            using (Media.Concepts.Classes.ClockedBus cb = new(1000))
             {
                 while (false == System.Console.KeyAvailable)
                 {

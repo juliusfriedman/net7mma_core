@@ -49,8 +49,8 @@ namespace Media.Concepts.Classes.B
     /// <summary>
     /// An interface which represents an api to which there is `mens rea` in addition to <see cref="IBias"/>
     /// </summary>
-    public interface 
-        
+    public interface
+
         IDecision : IBias
     {
         /// <summary>
@@ -83,7 +83,7 @@ namespace Media.Concepts.Classes.B
         /// Performs no logic.
         /// </summary>
         /// <param name="b"></param>
-        static void Realize(bool b)
+        private static void Realize(bool b)
         {
             return;
         }
@@ -92,7 +92,7 @@ namespace Media.Concepts.Classes.B
         /// Throws an <see cref="System.Exception"/> when true.
         /// </summary>
         /// <param name="b"></param>
-        static void ExceptIfTrue(bool b)
+        private static void ExceptIfTrue(bool b)
         {
             if (b is false) return;
 
@@ -103,7 +103,7 @@ namespace Media.Concepts.Classes.B
         /// Throws an <see cref="System.Exception"/> when false.
         /// </summary>
         /// <param name="b"></param>
-        static void ExceptIfFalse(bool b)
+        private static void ExceptIfFalse(bool b)
         {
             if (b) return;
 
@@ -117,12 +117,12 @@ namespace Media.Concepts.Classes.B
         /// <summary>
         /// Judge
         /// </summary>
-        System.Action<bool> Iudex;
+        private readonly System.Action<bool> Iudex;
 
         /// <summary>
         /// The bias
         /// </summary>
-        bool Bias;
+        private bool Bias;
 
         /// <summary>
         /// Indicates the consciousness
@@ -130,7 +130,7 @@ namespace Media.Concepts.Classes.B
         public bool Conscious
         {
             get;
-            internal protected set;
+            protected internal set;
         }
 
         /// <summary>

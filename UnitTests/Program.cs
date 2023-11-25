@@ -62,7 +62,7 @@ namespace Media.UnitTests
         /// <summary>
         /// The UnitTests which will be run to test the implemenation logic
         /// </summary>
-        static Action[] LogicTests = new Action[] { 
+        private static readonly Action[] LogicTests = new Action[] {
             TestInvocations,
             //Experimental Classes (Should not be used in real code)
             TestStopWatch,
@@ -75,11 +75,11 @@ namespace Media.UnitTests
             //Common
             TestRuntimeExtensions,
             TestOperatingSystemExtensions,
-            TestEncodingExtensions, 
-            TestUtility, 
-            TestBinary, 
+            TestEncodingExtensions,
+            TestUtility,
+            TestBinary,
             TestCommonClasses,
-            TestExpressionExtensions,            
+            TestExpressionExtensions,
             TestMachine,
             //Cryptography
             TestCryptography,
@@ -105,8 +105,8 @@ namespace Media.UnitTests
             TestRtspMessage, 
             //RtpClient
             TestRtpClient,
-            Media.UnitTests.RtpClientUnitTests.TestProcessFrameData.BackToBackRtspMessages, 
-            Media.UnitTests.RtpClientUnitTests.TestProcessFrameData.Issue17245_Case1_Iteration, 
+            Media.UnitTests.RtpClientUnitTests.TestProcessFrameData.BackToBackRtspMessages,
+            Media.UnitTests.RtpClientUnitTests.TestProcessFrameData.Issue17245_Case1_Iteration,
             Media.UnitTests.RtpClientUnitTests.TestProcessFrameData.Issue17245_Case2_Iteration,
             Media.UnitTests.RtpClientUnitTests.TestInterleavedFraming,
             Media.UnitTests.RtpClientUnitTests.TestIndependentFraming,           
@@ -134,7 +134,7 @@ namespace Media.UnitTests
         /// <summary>
         /// This is where the Tests.Program is currently running.
         /// </summary>
-        static string executingAssemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
+        private static readonly string executingAssemblyLocation = System.Reflection.Assembly.GetExecutingAssembly().Location;
 
         /// <summary>
         /// The entry point of the unit testing application
@@ -154,9 +154,7 @@ namespace Media.UnitTests
 
             RunTest(RtspClientTests);
 
-            RunTest(TestServer);
-
-            async void TestServer() => await RunTestAsync(TestServerAsync).ConfigureAwait(false);
+            await RunTestAsync(TestServerAsync).ConfigureAwait(false);
         }
 
         #region Unit Tests
@@ -175,7 +173,7 @@ namespace Media.UnitTests
 
             if (Common.Extensions.RuntimeExtensions.IsiOS) System.Console.WriteLine("IsiOS");
 
-            if (Common.Extensions.RuntimeExtensions.IsWatchKit) System.Console.WriteLine("IsWatchKit");           
+            if (Common.Extensions.RuntimeExtensions.IsWatchKit) System.Console.WriteLine("IsWatchKit");
         }
 
         public static void TestOperatingSystemExtensions()
@@ -201,7 +199,7 @@ namespace Media.UnitTests
             //Each octet reflects it's offset in hexidecimal
             // 0 - 9 in hex is the same as decimal
             byte[] haystack = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15 },
-                //Something to look for in the above
+                   //Something to look for in the above
                    needle = new byte[] { 0x14, 0x15 };
 
             //For all 20 bytes look for them in the ensure haystack starting at the beginning
@@ -233,11 +231,10 @@ namespace Media.UnitTests
 
         #region http://stackoverflow.com/questions/37077434/async-version-of-generic-extensions?noredirect=1#comment61700684_37077434
 
-        static void _TestLogicForBeginInvoke(byte[] i)
+        private static void _TestLogicForBeginInvoke(byte[] i)
         {
-            int local;
 
-            System.Console.WriteLine("Delegate0=>" + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(i, out local) ? "0" : local.ToString()));
+            System.Console.WriteLine("Delegate0=>" + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(i, out int local) ? "0" : local.ToString()));
 
             System.Threading.Thread.Sleep(1);
 
@@ -260,17 +257,16 @@ namespace Media.UnitTests
             System.Console.WriteLine("Delegate0=>" + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(i, out local) ? "0" : local.ToString()));
         }
 
-        static void _TestLogicForBeginInvoke(ref byte[] i)
+        private static void _TestLogicForBeginInvoke(ref byte[] i)
         {
             _TestOtherLogicForBeginInvoke(i);
 
             System.Console.WriteLine("Tested1");
 
             System.Threading.Thread.Sleep(3);
-            
-            int local;
 
-            System.Console.WriteLine("Delegate1=>" + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(i, out local) ? "0" : local.ToString()));
+
+            System.Console.WriteLine("Delegate1=>" + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(i, out int local) ? "0" : local.ToString()));
 
             System.Threading.Thread.Sleep(1);
 
@@ -285,26 +281,24 @@ namespace Media.UnitTests
             System.Console.WriteLine("Delegate1=>" + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(i, out local) ? "0" : local.ToString()));
         }
 
-        static void _TestOtherLogicForBeginInvoke(byte[] i)
+        private static void _TestOtherLogicForBeginInvoke(byte[] i)
         {
-            int local;
 
-            System.Console.WriteLine("Delegate2=>" + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(i, out local) ? "0" : local.ToString()));
+            System.Console.WriteLine("Delegate2=>" + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(i, out int local) ? "0" : local.ToString()));
 
             System.Threading.Thread.Sleep(1);
 
             System.Console.WriteLine("Tested2");
         }
 
-        static void _Callback(IAsyncResult iar)
+        private static void _Callback(IAsyncResult iar)
         {
             System.Console.WriteLine("Callback.CompletedSynchronously " + iar.CompletedSynchronously);
 
             System.Console.WriteLine("Callback.IsCompleted " + iar.IsCompleted);
 
-            int local;
 
-            System.Console.WriteLine("Callback.local " + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(iar.AsyncState as System.Array, out local) ? "0" : local.ToString()));
+            System.Console.WriteLine("Callback.local " + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(iar.AsyncState as System.Array, out int local) ? "0" : local.ToString()));
 
             System.Threading.Thread.Sleep(10);
 
@@ -331,7 +325,7 @@ namespace Media.UnitTests
         /// This is because the call and it's stack were already prepared and is possibly more efficient then using the cleanup and restore just to do the same logic which would be able 
         /// to be performed by retaining the state.
         /// </summary>
-        static void TestInvocations()
+        private static void TestInvocations()
         {
             TestInvocations(false);
 
@@ -346,10 +340,10 @@ namespace Media.UnitTests
         /// Arrays can only communicate data to or from the caller within the version of the array given to a call without the `ref` annotation.
         /// </summary>
         /// <param name="useLocal"></param>
-        static void TestInvocations(bool useLocal = false)
+        private static void TestInvocations(bool useLocal = false)
         {
             //Callback is written after Tested and NotDone.
-            System.Action<byte[]> call = new System.Action<byte[]>(_TestLogicForBeginInvoke);
+            System.Action<byte[]> call = new(_TestLogicForBeginInvoke);
 
             //This variable can be used in either the invocation or the callback but you must access it by reference.
             byte[] data = new byte[0];
@@ -381,7 +375,7 @@ namespace Media.UnitTests
                     System.Threading.Thread.Yield();
 
                     System.Console.WriteLine(".Resize1");
-                    
+
                     //When the local is used the call semantic is totally different as the version is maintained through the local.
                     if (useLocal)
                     {
@@ -430,9 +424,9 @@ namespace Media.UnitTests
             //Can only be called once, should be called to free the thread assigned to calling the logic assoicated with BeginInvoke and the callback.
             call.EndInvoke(callInvocation);
 
-            System.Console.WriteLine(".EndInvoke " + callInvocation.IsCompleted + "," + times);            
+            System.Console.WriteLine(".EndInvoke " + callInvocation.IsCompleted + "," + times);
 
-            List<IAsyncResult> calls = new List<IAsyncResult>();
+            List<IAsyncResult> calls = [];
 
             //Call again up to 5 times
             while (++times < 5)
@@ -448,7 +442,7 @@ namespace Media.UnitTests
 
                 _TestLogicForBeginInvoke(ref data);
 
-                System.Console.WriteLine(".NotDone2=>" + times + ", " + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(data, out register) ? "0" : register.ToString()));                
+                System.Console.WriteLine(".NotDone2=>" + times + ", " + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(data, out register) ? "0" : register.ToString()));
             }
 
             foreach (IAsyncResult storedCallInvocation in calls)
@@ -464,7 +458,7 @@ namespace Media.UnitTests
 
         public static void RtspClientTests()
         {
-            foreach (var TestObject in new[] 
+            foreach (var TestObject in new[]
             {
                 //Local VLC...
                 new
@@ -830,7 +824,7 @@ namespace Media.UnitTests
 
                 double protocolVersion = 1.0;
 
-            TestStart:
+                TestStart:
                 try
                 {
                     TestRtspClient(TestObject.Uri, TestObject.Creds, proto, null, protocolVersion);
@@ -872,7 +866,7 @@ namespace Media.UnitTests
 
             };
 
-            using (Media.Common.Loggers.ConsoleLogger cl = new Common.Loggers.ConsoleLogger())
+            using (Media.Common.Loggers.ConsoleLogger cl = new())
             {
                 cl.Log("@input a uri[Enter]:");
 
@@ -884,20 +878,19 @@ namespace Media.UnitTests
                     input = "http://www.example.com";
                 }
 
-                System.Uri uri;
 
-                if (System.Uri.TryCreate(input, UriKind.RelativeOrAbsolute, out uri) is false)
+                if (System.Uri.TryCreate(input, UriKind.RelativeOrAbsolute, out Uri uri) is false)
                 {
                     cl.LogException(new System.InvalidOperationException("uri"));
 
                     return;
                 }
 
-                using (Media.Http.HttpClient httpClient = new Http.HttpClient(uri))
+                using (Media.Http.HttpClient httpClient = new(uri))
                 {
                     cl.Log("httpClient@" + httpClient.InternalId);
 
-                    using (Http.HttpMessage httpMessage = new Http.HttpMessage(Http.HttpMessageType.Request))
+                    using (Http.HttpMessage httpMessage = new(Http.HttpMessageType.Request))
                     {
                         cl.Log("@input httpClient.MethodString[Enter]:");
 
@@ -942,7 +935,7 @@ namespace Media.UnitTests
                                 cl.Log("Sent: " + httpMessage);
                                 cl.Log("Received: " + httpResponse.ToString());
                             }
-                           
+
                             //Set the version of the message and protocol
                             httpClient.ProtocolVersion = httpMessage.Version = 1.1;
 
@@ -988,7 +981,7 @@ namespace Media.UnitTests
             }
         }
 
-        static void TestRtpClient()
+        private static void TestRtpClient()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RtpClientUnitTests), TypeOfVoid);
 
@@ -1004,7 +997,7 @@ namespace Media.UnitTests
         /// <summary>
         /// Tests the RtpClient.
         /// </summary>
-        static void TestRtpClient(bool tcp = true)
+        private static void TestRtpClient(bool tcp = true)
         {
 
             //Notes need to set EndTime on each context.
@@ -1025,16 +1018,17 @@ namespace Media.UnitTests
                 using (var sender = new Media.Rtp.RtpClient(null, false, false))
                 {
                     //Create a Session Description
-                    Media.Sdp.SessionDescription SessionDescription = new Media.Sdp.SessionDescription(1);
+                    Media.Sdp.SessionDescription SessionDescription = new(1)
+                    {
+                        new Media.Sdp.SessionDescriptionLine("c=IN IP4 " + localIp.ToString()),
 
-                    SessionDescription.Add(new Media.Sdp.SessionDescriptionLine("c=IN IP4 " + localIp.ToString()));
-
-                    //Add a MediaDescription to our Sdp on any port 17777 for RTP/AVP Transport using the RtpJpegPayloadType
-                    SessionDescription.Add(new Media.Sdp.MediaDescription(Media.Sdp.MediaType.video, (tcp ? "TCP/" : string.Empty) + Media.Rtp.RtpClient.RtpAvpProfileIdentifier, Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame.RtpJpegPayloadType, 17777));
+                        //Add a MediaDescription to our Sdp on any port 17777 for RTP/AVP Transport using the RtpJpegPayloadType
+                        new Media.Sdp.MediaDescription(Media.Sdp.MediaType.video, (tcp ? "TCP/" : string.Empty) + Media.Rtp.RtpClient.RtpAvpProfileIdentifier, Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame.RtpJpegPayloadType, 17777)
+                    };
 
                     sender.RtcpPacketSent += (s, p, t) => TryPrintClientPacket(s, false, p);
                     sender.RtcpPacketReceieved += (s, p, t) => TryPrintClientPacket(s, true, p);
-                    sender.RtpPacketSent += (s, p, t) => TryPrintClientPacket(s, false, p);                                        
+                    sender.RtpPacketSent += (s, p, t) => TryPrintClientPacket(s, false, p);
 
                     //Using a receiver
                     using (var receiver = new Media.Rtp.RtpClient())
@@ -1053,8 +1047,8 @@ namespace Media.UnitTests
 
                         //Create two transport contexts, one for the sender and one for the receiver.
                         //The Id of the parties must be known in advance in this stand alone example. (A conference would support more then 1 participant)
-                        Media.Rtp.RtpClient.TransportContext sendersContext = new Media.Rtp.RtpClient.TransportContext(0, 1, sendersId, SessionDescription.MediaDescriptions.First(), true, receiversId),
-                            receiversContext = new Media.Rtp.RtpClient.TransportContext(0, 1, receiversId, SessionDescription.MediaDescriptions.First(), true, sendersId);
+                        Media.Rtp.RtpClient.TransportContext sendersContext = new(0, 1, sendersId, SessionDescription.MediaDescriptions.First(), true, receiversId),
+                            receiversContext = new(0, 1, receiversId, SessionDescription.MediaDescriptions.First(), true, sendersId);
 
                         if (tcp) consoleWriter.WriteLine("TCP TEST");
                         else consoleWriter.WriteLine("UDP TEST");
@@ -1138,7 +1132,7 @@ namespace Media.UnitTests
                         consoleWriter.WriteLine(System.Threading.Thread.CurrentThread.ManagedThreadId + " - Connection Established,  Encoding Frame");
 
                         //Make a frame
-                        Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame testFrame = new Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame(new System.IO.FileStream(".\\Media\\JpegTest\\video.jpg", System.IO.FileMode.Open, System.IO.FileAccess.Read), 25, (int)sendersContext.SynchronizationSourceIdentifier, 0, (long)Media.Ntp.NetworkTimeProtocol.DateTimeToNptTimestamp(DateTime.UtcNow));
+                        Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame testFrame = new(new System.IO.FileStream(".\\Media\\JpegTest\\video.jpg", System.IO.FileMode.Open, System.IO.FileAccess.Read), 25, sendersContext.SynchronizationSourceIdentifier, 0, (long)Media.Ntp.NetworkTimeProtocol.DateTimeToNptTimestamp(DateTime.UtcNow));
 
                         consoleWriter.WriteLine(System.Threading.Thread.CurrentThread.ManagedThreadId + "Sending Encoded Frame");
 
@@ -1215,12 +1209,12 @@ namespace Media.UnitTests
                 }//Disposes the sender
                 consoleWriter.WriteLine(System.Threading.Thread.CurrentThread.ManagedThreadId + "Exit");
             }
-        }        
+        }
 
-        static void TestRtpDumpReader(string path, Media.RtpTools.FileFormat? knownFormat = null)
+        private static void TestRtpDumpReader(string path, Media.RtpTools.FileFormat? knownFormat = null)
         {
             //Always use an unknown format for the reader allows each item to be formatted differently
-            using (Media.RtpTools.RtpDump.DumpReader reader = new Media.RtpTools.RtpDump.DumpReader(path, knownFormat))
+            using (Media.RtpTools.RtpDump.DumpReader reader = new(path, knownFormat))
             {
 
                 Console.WriteLine(string.Format(TestingFormat, "Successfully Opened", path));
@@ -1283,12 +1277,12 @@ namespace Media.UnitTests
 
                         //If so then there is only another RD_packet_t structure here describing a rtpPacket?
 
-                    PrintRtpOrVatPacketInformation:
+                        PrintRtpOrVatPacketInformation:
                         //Create a RtpHeaer from the Pointer
-                        using (Media.Rtp.RtpHeader header = new Media.Rtp.RtpHeader(data, offset))
+                        using (Media.Rtp.RtpHeader header = new(data, offset))
                         {
                             if (offset < max) //Use the created packet so it can be disposed
-                                using (Media.Rtp.RtpPacket p = new Media.Rtp.RtpPacket(header, new Media.Common.MemorySegment(data, offset + Media.Rtp.RtpHeader.Length, max - Media.Rtp.RtpHeader.Length), false))
+                                using (Media.Rtp.RtpPacket p = new(header, new Media.Common.MemorySegment(data, offset + Media.Rtp.RtpHeader.Length, max - Media.Rtp.RtpHeader.Length), false))
                                 {
                                     //Write information about the packet to the console
                                     Console.BackgroundColor = ConsoleColor.Green;
@@ -1308,12 +1302,12 @@ namespace Media.UnitTests
         /// </summary>
         /// <param name="path">The path to write the packets to</param>
         /// <param name="format">The format the packets should be written in</param>
-        static void TestRtpDumpWriter(string path, Media.RtpTools.FileFormat format)
+        private static void TestRtpDumpWriter(string path, Media.RtpTools.FileFormat format)
         {
-            System.Net.IPEndPoint testingEndPoint = new System.Net.IPEndPoint(System.Net.IPAddress.Any, 7);
+            System.Net.IPEndPoint testingEndPoint = new(System.Net.IPAddress.Any, 7);
 
             //Use a write to write a RtpPacket
-            using (Media.RtpTools.RtpDump.DumpWriter dumpWriter = new Media.RtpTools.RtpDump.DumpWriter(path, format, testingEndPoint))
+            using (Media.RtpTools.RtpDump.DumpWriter dumpWriter = new(path, format, testingEndPoint))
             {
                 //Create a RtpPacket and
                 using (var rtpPacket = new Media.Rtp.RtpPacket(new Media.Rtp.RtpHeader(2, true, true, true, 7, 7, 7, 7, 7), new byte[0x01]))
@@ -1333,7 +1327,7 @@ namespace Media.UnitTests
                 //----Write some more examples
 
                 //Senders Report
-                using (Media.Rtcp.RtcpPacket packet = new Media.Rtcp.RtcpPacket(new byte[] { 0x80, 0xc8, 0x00, 0x06, 0x43, 0x4a, 0x5f, 0x93, 0xd4, 0x92, 0xce, 0xd4, 0x2c, 0x49, 0xba, 0x5e, 0xc4, 0xd0, 0x9f, 0xf4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, 0))
+                using (Media.Rtcp.RtcpPacket packet = new(new byte[] { 0x80, 0xc8, 0x00, 0x06, 0x43, 0x4a, 0x5f, 0x93, 0xd4, 0x92, 0xce, 0xd4, 0x2c, 0x49, 0xba, 0x5e, 0xc4, 0xd0, 0x9f, 0xf4, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, 0))
                 {
                     //Write it
                     dumpWriter.WritePacket(packet);
@@ -1341,8 +1335,7 @@ namespace Media.UnitTests
 
 
                 //Recievers Report and Source Description
-                using (Media.Rtcp.RtcpPacket packet = new Media.Rtcp.RtcpPacket
-                    (new byte[] { 
+                using (Media.Rtcp.RtcpPacket packet = new(new byte[] { 
                                    //RR
                                    0x81,0xc9,0x00,0x07,
                                    0x69,0xf2,0x79,0x50,
@@ -1365,7 +1358,7 @@ namespace Media.UnitTests
             }//Done writing packets with the writer
         }
 
-        static void TestRtpTools()
+        private static void TestRtpTools()
         {
             string currentPath = System.IO.Path.GetDirectoryName(executingAssemblyLocation);
 
@@ -1429,13 +1422,13 @@ namespace Media.UnitTests
             //Maintain a count of how many packets were written for next test
             int writeCount;
 
-            using (Media.RtpTools.RtpDump.DumpReader reader = new Media.RtpTools.RtpDump.DumpReader(currentPath + @"\Media\bark.rtp"))
+            using (Media.RtpTools.RtpDump.DumpReader reader = new(currentPath + @"\Media\bark.rtp"))
             {
                 //Each item will be returned as a byte[] reguardless of format
                 //reader.ReadBinaryFileHeader();
 
                 //Write a file with the same attributes as the example file, needs to use DateTimeOffset
-                using (Media.RtpTools.RtpDump.DumpWriter writer = new Media.RtpTools.RtpDump.DumpWriter(currentPath + @"\mybark.rtp", reader.Format, new System.Net.IPEndPoint(0, 7))) //should have reader.Source
+                using (Media.RtpTools.RtpDump.DumpWriter writer = new(currentPath + @"\mybark.rtp", reader.Format, new System.Net.IPEndPoint(0, 7))) //should have reader.Source
                 {
 
                     Console.WriteLine("Successfully opened bark.rtpdump");
@@ -1477,7 +1470,7 @@ namespace Media.UnitTests
                             }
                             else
                             {
-                                Media.Rtp.RtpPacket rtpPacket = new Media.Rtp.RtpPacket(data, 0);
+                                Media.Rtp.RtpPacket rtpPacket = new(data, 0);
                                 Console.WriteLine("Found Rtp Packet: SequenceNum=" + rtpPacket.SequenceNumber + " , Timestamp=" + rtpPacket.Timestamp + (rtpPacket.Marker ? " MARKER" : string.Empty));
                                 writer.WritePacket(rtpPacket);
                             }
@@ -1506,7 +1499,7 @@ namespace Media.UnitTests
             System.IO.File.Delete(currentPath + @"\ShortDump.rtpdump");
         }
 
-        static void TestRtspClient(string location, System.Net.NetworkCredential cred = null, Media.Rtsp.RtspClient.ClientProtocolType? protocol = null, System.Net.AuthenticationSchemes? authenticationScheme = System.Net.AuthenticationSchemes.None, double protocolVersion = 1.0)
+        private static void TestRtspClient(string location, System.Net.NetworkCredential cred = null, Media.Rtsp.RtspClient.ClientProtocolType? protocol = null, System.Net.AuthenticationSchemes? authenticationScheme = System.Net.AuthenticationSchemes.None, double protocolVersion = 1.0)
         {
             //For display
             int emptyFrames = 0, incompleteFrames = 0, rtspInterleaved = 0, totalFrames = 0;
@@ -1541,17 +1534,17 @@ namespace Media.UnitTests
                 client.ProtocolVersion = protocolVersion;
 
                 //FileInfo to represent the log
-                System.IO.FileInfo rtspLog = new System.IO.FileInfo("rtspLog" + DateTime.UtcNow.ToFileTimeUtc() + ".log.txt");
+                System.IO.FileInfo rtspLog = new("rtspLog" + DateTime.UtcNow.ToFileTimeUtc() + ".log.txt");
 
                 //Create a log to write the responses to.
-                using (Media.Common.Loggers.FileLogger logWriter = new Media.Common.Loggers.FileLogger(rtspLog))
+                using (Media.Common.Loggers.FileLogger logWriter = new(rtspLog))
                 {
                     //Attach the logger to the client
                     client.Logger = logWriter;
 
                     //Attach the Rtp logger, should possibly have IsShared on ILogger.
 
-                    using (Media.Common.Loggers.ConsoleLogger consoleLogger = new Media.Common.Loggers.ConsoleLogger())
+                    using (Media.Common.Loggers.ConsoleLogger consoleLogger = new())
                     {
                         client.Client.Logger = consoleLogger;
 
@@ -1589,19 +1582,19 @@ namespace Media.UnitTests
                         client.OnDisconnect += (sender, args) => Console.WriteLine("\t*****************Disconnected from :" + client.CurrentLocation);
 
                         //Define an event for RtpPackets Received.
-                        Media.Rtp.RtpClient.RtpPacketHandler rtpPacketReceived = (sender, rtpPacket, context) => TryPrintClientPacket(sender, true, (Media.Common.IPacket)rtpPacket, context);
+                        Media.Rtp.RtpClient.RtpPacketHandler rtpPacketReceived = (sender, rtpPacket, context) => TryPrintClientPacket(sender, true, rtpPacket, context);
 
                         //Define an even for RtcpPackets Received
-                        Media.Rtp.RtpClient.RtcpPacketHandler rtcpPacketReceived = (sender, rtcpPacket, context) => TryPrintClientPacket(sender, true, (Media.Common.IPacket)rtcpPacket, context);
+                        Media.Rtp.RtpClient.RtcpPacketHandler rtcpPacketReceived = (sender, rtcpPacket, context) => TryPrintClientPacket(sender, true, rtcpPacket, context);
 
                         //Define an even for RtcpPackets sent
-                        Media.Rtp.RtpClient.RtcpPacketHandler rtcpPacketSent = (sender, rtcpPacket, context) => TryPrintClientPacket(sender, false, (Media.Common.IPacket)rtcpPacket, context);
+                        Media.Rtp.RtpClient.RtcpPacketHandler rtcpPacketSent = (sender, rtcpPacket, context) => TryPrintClientPacket(sender, false, rtcpPacket, context);
 
                         //Define an even for RtpPackets sent
-                        Media.Rtp.RtpClient.RtcpPacketHandler rtpPacketSent = (sender, rtpPacket, context) => TryPrintClientPacket(sender, false, (Media.Common.IPacket)rtpPacket, context);
+                        Media.Rtp.RtpClient.RtcpPacketHandler rtpPacketSent = (sender, rtpPacket, context) => TryPrintClientPacket(sender, false, rtpPacket, context);
 
                         //Keep tracking of frames with missing packets.
-                        HashSet<Media.Rtp.RtpFrame> missing = new HashSet<Media.Rtp.RtpFrame>();
+                        HashSet<Media.Rtp.RtpFrame> missing = [];
 
                         //Define an event for Rtp Frames Changed.
                         Media.Rtp.RtpClient.RtpFrameHandler rtpFrameReceived = (sender, rtpFrame, context, final) =>
@@ -1688,7 +1681,7 @@ namespace Media.UnitTests
 
                                 Console.ForegroundColor = ConsoleColor.DarkGray;
                             }
-                        };                        
+                        };
 
                         //Define an event to handle Rtsp Response events
                         //Note that this event is also used to handle `pushed` responses which the server sent to the RtspClient without a request.
@@ -1714,10 +1707,9 @@ namespace Media.UnitTests
 
                                 if (request is not null)
                                 {
-                                    if (request.RtspMessageType == Media.Rtsp.RtspMessageType.Request)
-                                        output = "Client Received Server Sent " + request.RtspMessageType + " :" + request.ToString();
-                                    else
-                                        output = "Client Received " + request.RtspMessageType + " :" + request.ToString();
+                                    output = request.RtspMessageType == Media.Rtsp.RtspMessageType.Request
+                                        ? "Client Received Server Sent " + request.RtspMessageType + " :" + request.ToString()
+                                        : "Client Received " + request.RtspMessageType + " :" + request.ToString();
                                 }
 
                                 logWriter.Log(output);
@@ -1813,7 +1805,7 @@ namespace Media.UnitTests
                         //client.UserAgent = "LibVLC/2.1.5 (LIVE555 Streaming Media v2014.05.27)";
 
                         //client.DisableKeepAliveRequest = true;
-                Start:
+                        Start:
 
                         //Allow the client to switch protocols if data is not received.
                         client.AllowAlternateTransport = true;
@@ -2023,7 +2015,7 @@ namespace Media.UnitTests
                                         {
                                             Console.WriteLine("Sending DESCRIBE Wildcard");
 
-                                            using (Media.Rtsp.RtspMessage describe = new Media.Rtsp.RtspMessage(Media.Rtsp.RtspMessageType.Request)
+                                            using (Media.Rtsp.RtspMessage describe = new(Media.Rtsp.RtspMessageType.Request)
                                             {
                                                 RtspMethod = Media.Rtsp.RtspMethod.DESCRIBE,
                                                 Location = Media.Rtsp.RtspMessage.Wildcard
@@ -2041,7 +2033,7 @@ namespace Media.UnitTests
                                     case ConsoleKey.Z:
                                         {
 
-                                            foreach(var kvp in client.m_Playing)
+                                            foreach (var kvp in client.m_Playing)
                                             {
                                                 Console.WriteLine("@" + kvp.Key.ToString() + "@");
 
@@ -2089,9 +2081,9 @@ namespace Media.UnitTests
                                 Media.Rtsp.RtspMessage one = null, two = null;
 
                                 //Send a few requests just because
-                                if (client.SupportedMethods.Contains(Media.Rtsp.RtspMethod.GET_PARAMETER.ToString()))
-                                    one = client.SendGetParameter();
-                                else one = client.SendOptions(true);
+                                one = client.SupportedMethods.Contains(Media.Rtsp.RtspMethod.GET_PARAMETER.ToString())
+                                    ? client.SendGetParameter()
+                                    : client.SendOptions(true);
 
                                 if (one is not null) Console.WriteLine(one);
 
@@ -2173,7 +2165,7 @@ namespace Media.UnitTests
         /// <summary>
         /// Tests the Media.RtspServer by creating a server, loading/exposing a stream and waiting for a keypress to terminate
         /// </summary>
-        static async Task TestServerAsync()
+        private static async Task TestServerAsync()
         {
             Console.WriteLine(nameof(TestServerAsync));
 
@@ -2197,7 +2189,7 @@ namespace Media.UnitTests
                 Console.WriteLine("Server Starting on: " + serverIp);
 
                 //Setup a Media.RtspServer on serverPort
-                await using (Media.Rtsp.RtspServer server = new Media.Rtsp.RtspServer(serverIp, serverPort)
+                await using (Media.Rtsp.RtspServer server = new(serverIp, serverPort)
                 {
                     Logger = new Media.Rtsp.Server.Loggers.RtspServerConsoleLogger(),
                     ClientSessionLogger = new Media.Rtsp.Server.Loggers.RtspServerConsoleLogger()
@@ -2304,7 +2296,7 @@ namespace Media.UnitTests
 
                     //Traffic
                     var sources = new List<Rtsp.Server.MediaTypes.RtspSource>();
-                    for(int i = 1; i <= 9; ++i)
+                    for (int i = 1; i <= 9; ++i)
                     {
                         var source = new Media.Rtsp.Server.MediaTypes.RtspSource($"R2_05{i}", $"rtsp://8.15.251.101:1935/rtplive/R2_05{i}", Rtsp.RtspClient.ClientProtocolType.Tcp, 0, null, null, null, true);
                         source.RtpClient.ThreadEvents = true;
@@ -2337,30 +2329,36 @@ namespace Media.UnitTests
                     //server.AddMedia(new Media.Rtsp.Server.Media.MJPEGMedia("HttpTestMJpeg", new Uri("http://extcam-16.se.axis.com/axis-cgi/mjpg/video.cgi?")));
 
                     //Make a 1080p MJPEG Stream
-                    Media.Rtsp.Server.MediaTypes.RFC2435Media mirror = new Media.Rtsp.Server.MediaTypes.RFC2435Media("Mirror", null, false, 1920, 1088, true, 25);
+                    Media.Rtsp.Server.MediaTypes.RFC2435Media mirror = new("Mirror", null, false, 1920, 1088, true, 25);
                     server.TryAddMedia(mirror);
 
                     //Make a H264 Stream (Working but transform of data need improvement)
-                    Media.Rtsp.Server.MediaTypes.RFC6184Media h264Stream = new Rtsp.Server.MediaTypes.RFC6184Media(720, 480, "h264Stream", null, false);
+                    Media.Rtsp.Server.MediaTypes.RFC6184Media h264Stream = new(720, 480, "h264Stream", null, false);
                     server.TryAddMedia(h264Stream);
 
                     //Make a H264 Stream (Working 100%)
-                    Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new Rtsp.Server.MediaTypes.RFC6184Media(320, 240, "TestCard", null, false);
+                    Media.Rtsp.Server.MediaTypes.RFC6184Media tinyStream = new(320, 240, "TestCard", null, false);
                     server.TryAddMedia(tinyStream);
 
                     //Make some RtpAudioSink (working 100%)
-                    Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmaStream = new Rtsp.Server.MediaTypes.RtpAudioSink("pcma", null, 8, 1, 8000);
-                    pcmaStream.Codec = new ALawCodec();
-                    
-                    //Could share codes where initialization is the same.
-                    Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmuStream = new Rtsp.Server.MediaTypes.RtpAudioSink("pcmu", null, 0, 1, 8000);
-                    pcmuStream.Codec = new MulawCodec();
+                    Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmaStream = new("pcma", null, 8, 1, 8000)
+                    {
+                        Codec = new ALawCodec()
+                    };
 
-                    Media.Rtsp.Server.MediaTypes.RtpAudioSink noiseStream = new Rtsp.Server.MediaTypes.RtpAudioSink("noiseStream", null, 0, 1, 8000);
-                    noiseStream.Codec = new MulawCodec();
+                    //Could share codes where initialization is the same.
+                    Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmuStream = new("pcmu", null, 0, 1, 8000)
+                    {
+                        Codec = new MulawCodec()
+                    };
+
+                    Media.Rtsp.Server.MediaTypes.RtpAudioSink noiseStream = new("noiseStream", null, 0, 1, 8000)
+                    {
+                        Codec = new MulawCodec()
+                    };
 
                     //(Working 100%)
-                    Media.Rtsp.Server.MediaTypes.RtpAudioSink rtpDumpAudioStream = new Rtsp.Server.MediaTypes.RtpAudioSink("rtpDump", null, 0, 1, 8000);
+                    Media.Rtsp.Server.MediaTypes.RtpAudioSink rtpDumpAudioStream = new("rtpDump", null, 0, 1, 8000);
 
                     server.TryAddMedia(pcmaStream);
                     server.TryAddMedia(pcmuStream);
@@ -2375,7 +2373,7 @@ namespace Media.UnitTests
                     //server.TryAddMedia(mulawStream);
 
                     //Width, Height, FPS
-                    TestCard testCard = new TestCard(320, 240, 60);
+                    TestCard testCard = new(320, 240, 60);
 
                     //Add the track to the SessionDescription
                     //2 tracks will be setup by the client.
@@ -2419,13 +2417,13 @@ namespace Media.UnitTests
                         tinyStream.AddFrame(newFrame);
                     };
 
-                    System.Threading.Thread captureThread = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart((o) =>
+                    System.Threading.Thread captureThread = new(new System.Threading.ParameterizedThreadStart((o) =>
                     {
 
                         //Put some audio in the audio stream
                         byte[] audio;
 
-                    Start:
+                        Start:
 
                         using (var bmpScreenshot = new System.Drawing.Bitmap(mirror.Width, mirror.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
                         {
@@ -2490,7 +2488,7 @@ namespace Media.UnitTests
 
                     rtpDumpAudioStream.Loop = true;
 
-                    System.Threading.Thread rtpToolThread = new System.Threading.Thread(new System.Threading.ParameterizedThreadStart((o) =>
+                    System.Threading.Thread rtpToolThread = new(new System.Threading.ParameterizedThreadStart((o) =>
                     {
                         string currentPath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 
@@ -2502,7 +2500,7 @@ namespace Media.UnitTests
                             {
                                 if (entry.IsRtcp)
                                     continue;
-                                using (RtpPacket rtp = new RtpPacket(entry.Blob, entry.Pointer + RtpToolEntry.sizeOf_RD_packet_T))
+                                using (RtpPacket rtp = new(entry.Blob, entry.Pointer + RtpToolEntry.sizeOf_RD_packet_T))
                                 {
                                     //Streams lookup the packet by the ssrc, this could be changed to use the payload type etc
                                     rtp.SynchronizationSourceIdentifier = rtpDumpAudioStream.SourceId;
@@ -2510,7 +2508,7 @@ namespace Media.UnitTests
                                 }
                             }
                         }
-                    }));                    
+                    }));
 
                     //Start the server
                     await server.StartAsync();
@@ -2537,7 +2535,7 @@ namespace Media.UnitTests
                     Console.WriteLine("Press 'C' to See how many clients are connected.");
                     //if (sampleStream is not null) Console.WriteLine("Press 'F' to See statistics for " + sampleStream.Name);
 
-                    System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;                    
+                    System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;
 
                     while (true)
                     {
@@ -2651,15 +2649,12 @@ namespace Media.UnitTests
                                     Console.WriteLine("Performing Load Test");
                                     System.Threading.ThreadPool.QueueUserWorkItem((_) =>
                                     {
-
-                                        Media.Rtsp.RtspServer localServer = _ as Media.Rtsp.RtspServer;
-
-                                        bool input = localServer is null ? true : localServer.IsRunning;
+                                        bool input = _ is not Media.Rtsp.RtspServer localServer || localServer.IsRunning;
 
                                         string name;
 
-                                    //If the server is running Read a line to get the stream name.
-                                    if (input)
+                                        //If the server is running Read a line to get the stream name.
+                                        if (input)
                                         {
                                             Console.WriteLine("Input RtspServer stream Name or Id");
 
@@ -2787,10 +2782,11 @@ namespace Media.UnitTests
                                         new Sdp.SessionDescriptionLine("a=type:broadcast")
                                     };
 
-                                    var compositeSource = new Media.Rtsp.Server.MediaTypes.RtpVideoSink("Composite", compositeSession);
-
-                                    //Use a smaller clock rate to improve the frame rate.
-                                    compositeSource.ClockRate = 5;
+                                    var compositeSource = new Media.Rtsp.Server.MediaTypes.RtpVideoSink("Composite", compositeSession)
+                                    {
+                                        //Use a smaller clock rate to improve the frame rate.
+                                        ClockRate = 5
+                                    };
 
                                     compositeSource.Start();
 
@@ -2867,7 +2863,7 @@ namespace Media.UnitTests
                             case ConsoleKey.A:
                                 {
                                     //If we didn't already add the audio track
-                                    if(tinyStream.SessionDescription.MediaDescriptions.Count() == 1)
+                                    if (tinyStream.SessionDescription.MediaDescriptions.Count() == 1)
                                     {
                                         tinyStream.SessionDescription.Add(pcmuStream.SessionDescription.MediaDescriptions.First());
                                         tinyStream.RtpClient.TransportContexts.Add(pcmuStream.RtpClient.TransportContexts.First());
@@ -2898,7 +2894,7 @@ namespace Media.UnitTests
                         }
                     }
 
-                End:
+                    End:
                     System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Normal;
 
                     server.DisableHttpTransport();
@@ -2928,7 +2924,7 @@ namespace Media.UnitTests
         /// <summary>
         /// Tests the Rtp and Media.RtspClient in various modes (Against the server)
         /// </summary>
-        static void SubTestLoad(Media.Rtsp.RtspServer server, string streamUri = null, int runs = 100, int recieveByteLimit = 0, int sessionTimeoutSeconds = 1800)
+        private static void SubTestLoad(Media.Rtsp.RtspServer server, string streamUri = null, int runs = 100, int recieveByteLimit = 0, int sessionTimeoutSeconds = 1800)
         {
             //100 times about a GB in total
 
@@ -2943,14 +2939,9 @@ namespace Media.UnitTests
                 if (server.UdpEnabled) dop /= 2;
                 dop /= 2;//Tcp
 
-                if (string.IsNullOrWhiteSpace(streamUri))
-                {
-                    streamUri = server.m_ServerIP + ":" + server.m_ServerPort + "/live/" + server.MediaStreams.Skip(Utility.Random.Next(0, server.MediaStreams.Count())).First().Name;
-                }
-                else
-                {
-                    streamUri = server.LocalEndPoint.ToString() + "/live/" + streamUri;
-                }
+                streamUri = string.IsNullOrWhiteSpace(streamUri)
+                    ? server.m_ServerIP + ":" + server.m_ServerPort + "/live/" + server.MediaStreams.Skip(Utility.Random.Next(0, server.MediaStreams.Count())).First().Name
+                    : server.LocalEndPoint.ToString() + "/live/" + streamUri;
 
                 allowHttp = server.HttpEnabled;
 
@@ -2979,7 +2970,7 @@ namespace Media.UnitTests
                 if (allowHttp && Media.Common.Binary.IsEven(ref i))
                 {
                     //Use Media.Rtsp / Http
-                    using (Media.Rtsp.RtspClient httpClient = new Media.Rtsp.RtspClient("http://" + streamUri))
+                    using (Media.Rtsp.RtspClient httpClient = new("http://" + streamUri))
                     {
                         try
                         {
@@ -3005,7 +2996,7 @@ namespace Media.UnitTests
                 else if (allowUdp)
                 {
                     //Use Media.Rtsp / Udp
-                    using (Media.Rtsp.RtspClient udpClient = new Media.Rtsp.RtspClient("rtspu://" + streamUri))
+                    using (Media.Rtsp.RtspClient udpClient = new("rtspu://" + streamUri))
                     {
                         try
                         {
@@ -3034,7 +3025,7 @@ namespace Media.UnitTests
                 {
 
                     //Use Media.Rtsp / Tcp todo, (rtspt://)
-                    using (Media.Rtsp.RtspClient client = new Media.Rtsp.RtspClient("rtsp://" + streamUri, Media.Common.Binary.IsEven(ref i) ? Media.Rtsp.RtspClient.ClientProtocolType.Tcp : Media.Rtsp.RtspClient.ClientProtocolType.Udp))
+                    using (Media.Rtsp.RtspClient client = new("rtsp://" + streamUri, Media.Common.Binary.IsEven(ref i) ? Media.Rtsp.RtspClient.ClientProtocolType.Tcp : Media.Rtsp.RtspClient.ClientProtocolType.Udp))
                     {
                         try
                         {
@@ -3077,7 +3068,7 @@ namespace Media.UnitTests
         }
 
         //Should be seperate file with more tests with known types, audio and video and also known values in the data e.g. audio unit size and length, video unit size and length.
-        static void TestRFC3640AudioFrame()
+        private static void TestRFC3640AudioFrame()
         {
             //The data contained in x Packets, each packet in this example has a marker.
             byte[][] packetBytes = new byte[][]
@@ -3108,16 +3099,16 @@ namespace Media.UnitTests
                 foreach (byte[] packet in packetBytes)
                 {
                     //Create the managed packet from that binary data
-                    using (Media.Rtp.RtpPacket aManagedPacket = new Media.Rtp.RtpPacket(packet, 0))
-                    {                        
+                    using (Media.Rtp.RtpPacket aManagedPacket = new(packet, 0))
+                    {
                         //Create a RtpFrame from the managed packet
-                        using (Media.Rtp.RtpFrame managedFrame = new Media.Rtp.RtpFrame(aManagedPacket))
+                        using (Media.Rtp.RtpFrame managedFrame = new(aManagedPacket))
                         {
                             //E.g. if aManagedPacket.Marker then create the frame and Depacketize, in this example all packets have a marker.
 
                             //The rtp profile contains the logic required to `depacketize` the data.
                             //E.g take it from it's RtpPacket form and into something a decoder can utilize
-                            using (Media.Rtsp.Server.MediaTypes.RFC3640Media.RFC3640Frame profileFrame = new Media.Rtsp.Server.MediaTypes.RFC3640Media.RFC3640Frame(managedFrame))
+                            using (Media.Rtsp.Server.MediaTypes.RFC3640Media.RFC3640Frame profileFrame = new(managedFrame))
                             {
                                 //Example of Media Description
                                 //a=rtpmap:97 mpeg4-generic/8000/1
@@ -3125,10 +3116,9 @@ namespace Media.UnitTests
 
                                 //According to the data contained in the stream this is how many bytes are contained in the complete access unit which did not appear
                                 //In the data being depacketized, while this value is > 0 the file will likely not be playable.
-                                int remainingInNextPacket, unitsParsed;
 
                                 //Depacketize the contained data into a buffer on the managed frame instance.
-                                profileFrame.Depacketize(out unitsParsed, out remainingInNextPacket,  //Keep track of how many access units were contained and how many bytes which were not present in the access unit which were specified by it's size
+                                profileFrame.Depacketize(out int unitsParsed, out int remainingInNextPacket,  //Keep track of how many access units were contained and how many bytes which were not present in the access unit which were specified by it's size
                                     true, //This is specified by the profile (SDP)
                                     2, 1, 11,  //These values come from the config = portion (1588)
                                     13, 3, 3, //These values from from the profile
@@ -3167,7 +3157,7 @@ namespace Media.UnitTests
             if (System.IO.File.Exists(outputFileName)) System.IO.File.Delete(outputFileName);
         }
 
-        static void TestRFC6184VideoFrame()
+        private static void TestRFC6184VideoFrame()
         {
             //The data contained in x Packets
             byte[][] packetBytes = new byte[][]
@@ -3215,10 +3205,10 @@ namespace Media.UnitTests
                  */
 
                 //Create a RFC6184Frame
-                using (Media.Rtsp.Server.MediaTypes.RFC6184Media.RFC6184Frame profileFrame = new Media.Rtsp.Server.MediaTypes.RFC6184Media.RFC6184Frame(97))
-                {                    
+                using (Media.Rtsp.Server.MediaTypes.RFC6184Media.RFC6184Frame profileFrame = new(97))
+                {
 
-                    
+
 
                     //Take each packet in the examples
                     foreach (byte[] packet in packetBytes)
@@ -3245,10 +3235,10 @@ namespace Media.UnitTests
 
                     //If there is not a sps or pps in band and this is the first frame given to a decoder then it needs to contain a SPS and PPS
                     //This is typically retrieved from the SessionDescription or CodecPrivateData but only the very first time.
-                    if (/*false == m_InitializedStream && */ false == profileFrame.ContainedUnitTypes.Any(nalType => nalType == Media.Codecs.Video.H264.NalUnitType.SequenceParameterSet || nalType == Media.Codecs.Video.H264.NalUnitType.PictureParameterSet) /*false == profileFrame.ContainsSequenceParameterSet || false == profileFrame.ContainsPictureParameterSet*/)
+                    if (/*false == m_InitializedStream && */ false == profileFrame.ContainedUnitTypes.Any(nalType => nalType is Media.Codecs.Video.H264.NalUnitType.SequenceParameterSet or Media.Codecs.Video.H264.NalUnitType.PictureParameterSet) /*false == profileFrame.ContainsSequenceParameterSet || false == profileFrame.ContainsPictureParameterSet*/)
                     {
                         //From the MediaDescription.FmtpLine from the SessionDescription which describes the media.
-                        Media.Sdp.Lines.FormatTypeLine fmtp = new Media.Sdp.Lines.FormatTypeLine(Media.Sdp.SessionDescriptionLine.Parse("a=fmtp:97 packetization-mode=1;profile-level-id=42C01E;sprop-parameter-sets=Z0LAHtkDxWhAAAADAEAAAAwDxYuS,aMuMsg=="));
+                        Media.Sdp.Lines.FormatTypeLine fmtp = new(Media.Sdp.SessionDescriptionLine.Parse("a=fmtp:97 packetization-mode=1;profile-level-id=42C01E;sprop-parameter-sets=Z0LAHtkDxWhAAAADAEAAAAwDxYuS,aMuMsg=="));
 
                         if (false == fmtp.HasFormatSpecificParameters) throw new System.Exception("HasFormatSpecificParameters is false");
 
@@ -3257,26 +3247,26 @@ namespace Media.UnitTests
 
                         //If there was a fmtp line then iterate the parts contained.
                         foreach (string p in fmtp.FormatSpecificParameters)
+                        {
+                            //Determine where in the string the desired token in.
+                            string token = Common.Extensions.String.StringExtensions.Substring(p, "sprop-parameter-sets=");
+
+                            //If present extract it.
+                            if (false == string.IsNullOrWhiteSpace(token))
                             {
-                                //Determine where in the string the desired token in.
-                                string token = Common.Extensions.String.StringExtensions.Substring(p, "sprop-parameter-sets=");
+                                //Get the strings which corresponds to the data without the datum split by ','
+                                string[] data = token.Split(',');
 
-                                //If present extract it.
-                                if (false == string.IsNullOrWhiteSpace(token))
-                                {
-                                    //Get the strings which corresponds to the data without the datum split by ','
-                                    string[] data = token.Split(',');
+                                //If there is any data then assign it
 
-                                    //If there is any data then assign it
+                                if (data.Length > 0) sps = System.Convert.FromBase64String(data[0]);
 
-                                    if (data.Length > 0) sps = System.Convert.FromBase64String(data[0]);
+                                if (data.Length > 1) pps = System.Convert.FromBase64String(data[1]);
 
-                                    if (data.Length > 1) pps = System.Convert.FromBase64String(data[1]);
-                                    
-                                    //Done
-                                    break;
-                                }
+                                //Done
+                                break;
                             }
+                        }
 
                         //Prepend the SPS if it was found
                         if (sps is not null)
@@ -3309,7 +3299,7 @@ namespace Media.UnitTests
                         //Don't do this again for subsequent frames in the stream...
                         //m_InitializedStream = true;
                     }
-                    
+
                     //Write the data in the frame to the FileStream
                     profileFrame.Buffer.CopyTo(fs);
                 }
@@ -3325,12 +3315,12 @@ namespace Media.UnitTests
         /// <summary>
         /// Performs the Unit Tests for the SessionDescriptionProtocol classes
         /// </summary>
-        static void TestSdp()
+        private static void TestSdp()
         {
             #region Old Way of `testing`
 
             //Test parsing a ssp.
-            Media.Sdp.SessionDescription sd = new Media.Sdp.SessionDescription(@"v=0
+            Media.Sdp.SessionDescription sd = new(@"v=0
 o=jdoe 2890844526 2890842807 IN IP4 10.47.16.5
 s=SDP Seminar
 i=A Seminar on the session description protocol
@@ -3349,7 +3339,7 @@ a=rtpmap:99 h263-1998/90000");
 
             if (connectionLine is null) throw new Exception("Cannot find Connection Line");
 
-             //Test parsing a sdp which has a weird connection line.
+            //Test parsing a sdp which has a weird connection line.
             sd = new Media.Sdp.SessionDescription(@"v=0
 o=- 1109162014219182 0 IN IP4 0.0.0.0
 s=HIK Media Server V3.0.0
@@ -3473,7 +3463,7 @@ a=appversion:1.0");
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(SDPUnitTests), TypeOfVoid);
         }
 
-        static void TestContainerImplementations()
+        private static void TestContainerImplementations()
         {
 
             string localPath = System.IO.Path.GetDirectoryName(executingAssemblyLocation);
@@ -3484,7 +3474,7 @@ a=appversion:1.0");
 
             if (System.IO.Directory.Exists(localPath + "/Media/Video/mp4/") || System.IO.Directory.Exists(localPath + "/Media/Video/mov/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Video/mp4/").Concat(System.IO.Directory.GetFiles(localPath + "/Media/Video/mov/")))
                 {
-                    using (Media.Containers.BaseMedia.BaseMediaReader reader = new Media.Containers.BaseMedia.BaseMediaReader(fileName))
+                    using (Media.Containers.BaseMedia.BaseMediaReader reader = new(fileName))
                     {
                         Console.WriteLine("Path:" + reader.Source);
                         Console.WriteLine("Total Size:" + reader.Length);
@@ -3536,7 +3526,7 @@ a=appversion:1.0");
 
             #region RiffReader
 
-            if (System.IO.Directory.Exists(localPath + "/Media/Video/avi/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Video/avi/")) using (Media.Containers.Riff.RiffReader reader = new Media.Containers.Riff.RiffReader(fileName))
+            if (System.IO.Directory.Exists(localPath + "/Media/Video/avi/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Video/avi/")) using (Media.Containers.Riff.RiffReader reader = new(fileName))
                     {
                         Console.WriteLine("Path:" + reader.Source);
                         Console.WriteLine("Total Size:" + reader.Length);
@@ -3610,7 +3600,7 @@ a=appversion:1.0");
 
             #region RiffReader on Wave Files
 
-            if (System.IO.Directory.Exists(localPath + "/Media/Audio/wav/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Audio/wav/")) using (Media.Containers.Riff.RiffReader reader = new Media.Containers.Riff.RiffReader(fileName))
+            if (System.IO.Directory.Exists(localPath + "/Media/Audio/wav/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Audio/wav/")) using (Media.Containers.Riff.RiffReader reader = new(fileName))
                     {
                         Console.WriteLine("Path:" + reader.Source);
                         Console.WriteLine("Total Size:" + reader.Length);
@@ -3688,7 +3678,7 @@ a=appversion:1.0");
 
             if (System.IO.Directory.Exists(localPath + "/Media/Video/mkv/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Video/mkv/"))
                 {
-                    using (Media.Containers.Matroska.MatroskaReader reader = new Media.Containers.Matroska.MatroskaReader(fileName))
+                    using (Media.Containers.Matroska.MatroskaReader reader = new(fileName))
                     {
                         Console.WriteLine("Path:" + reader.Source);
                         Console.WriteLine("Total Size:" + reader.Length);
@@ -3743,7 +3733,7 @@ a=appversion:1.0");
 
             if (System.IO.Directory.Exists(localPath + "/Media/Video/asf/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Video/asf/"))
                 {
-                    using (Media.Containers.Asf.AsfReader reader = new Media.Containers.Asf.AsfReader(fileName))
+                    using (Media.Containers.Asf.AsfReader reader = new(fileName))
                     {
                         Console.WriteLine("Path:" + reader.Source);
                         Console.WriteLine("Total Size:" + reader.Length);
@@ -3800,7 +3790,7 @@ a=appversion:1.0");
 
             if (System.IO.Directory.Exists(localPath + "/Media/Video/mxf/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Video/mxf/"))
                 {
-                    using (Media.Containers.Mxf.MxfReader reader = new Media.Containers.Mxf.MxfReader(fileName))
+                    using (Media.Containers.Mxf.MxfReader reader = new(fileName))
                     {
                         Console.WriteLine("Path:" + reader.Source);
                         Console.WriteLine("Total Size:" + reader.Length);
@@ -3888,7 +3878,7 @@ a=appversion:1.0");
 
             if (System.IO.Directory.Exists(localPath + "/Media/Video/ogg/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Video/ogg/"))
                 {
-                    using (Media.Containers.Ogg.OggReader reader = new Media.Containers.Ogg.OggReader(fileName))
+                    using (Media.Containers.Ogg.OggReader reader = new(fileName))
                     {
                         Console.WriteLine("Path:" + reader.Source);
                         Console.WriteLine("Total Size:" + reader.Length);
@@ -3928,7 +3918,7 @@ a=appversion:1.0");
 
             if (System.IO.Directory.Exists(localPath + "/Media/Video/nut/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Video/nut/"))
                 {
-                    using (Media.Containers.Nut.NutReader reader = new Media.Containers.Nut.NutReader(fileName))
+                    using (Media.Containers.Nut.NutReader reader = new(fileName))
                     {
                         Console.WriteLine("Path:" + reader.Source);
                         Console.WriteLine("Total Size:" + reader.Length);
@@ -4001,7 +3991,7 @@ a=appversion:1.0");
 
             if (System.IO.Directory.Exists(localPath + "/Media/Video/pes/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Video/pes/"))
                 {
-                    using (Media.Containers.Mpeg.PacketizedElementaryStreamReader reader = new Media.Containers.Mpeg.PacketizedElementaryStreamReader(fileName))
+                    using (Media.Containers.Mpeg.PacketizedElementaryStreamReader reader = new(fileName))
                     {
                         Console.WriteLine("Path:" + reader.Source);
                         Console.WriteLine("Total Size:" + reader.Length);
@@ -4034,7 +4024,7 @@ a=appversion:1.0");
 
             if (System.IO.Directory.Exists(localPath + "/Media/Video/ps/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Video/ps/"))
                 {
-                    using (Media.Containers.Mpeg.ProgramStreamReader reader = new Media.Containers.Mpeg.ProgramStreamReader(fileName))
+                    using (Media.Containers.Mpeg.ProgramStreamReader reader = new(fileName))
                     {
                         Console.WriteLine("Path:" + reader.Source);
                         Console.WriteLine("Total Size:" + reader.Length);
@@ -4069,7 +4059,7 @@ a=appversion:1.0");
 
             if (System.IO.Directory.Exists(localPath + "/Media/Video/ts/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Video/ts/"))
                 {
-                    using (Media.Containers.Mpeg.TransportStreamReader reader = new Media.Containers.Mpeg.TransportStreamReader(fileName))
+                    using (Media.Containers.Mpeg.TransportStreamReader reader = new(fileName))
                     {
                         Console.WriteLine("Path:" + reader.Source);
                         Console.WriteLine("Total Size:" + reader.Length);
@@ -4118,7 +4108,7 @@ a=appversion:1.0");
 
             if (System.IO.Directory.Exists(localPath + "/Media/Audio/")) foreach (string fileName in System.IO.Directory.GetFiles(localPath + "/Media/Audio/flac/"))
                 {
-                    using (Media.Codecs.Flac.FlacReader reader = new Media.Codecs.Flac.FlacReader(fileName))
+                    using (Media.Codecs.Flac.FlacReader reader = new(fileName))
                     {
                         Console.WriteLine("Path:" + reader.Source);
                         Console.WriteLine("Total Size:" + reader.Length);
@@ -4158,12 +4148,12 @@ a=appversion:1.0");
             #endregion
         }
 
-        static void TestBaseMediaWriters()
+        private static void TestBaseMediaWriters()
         {
             Media.UnitTests.Mp4WriterUnitTests.WriteMp4AudioTest();
         }
 
-        static void TestRiffWriter()
+        private static void TestRiffWriter()
         {
             Media.Containers.Riff.UnitTests.WriteManaged();
             Media.Containers.Riff.UnitTests.WriteRaw();
@@ -4174,23 +4164,23 @@ a=appversion:1.0");
         /// <summary>
         /// Performs the Unit Tests for the Media.Common.Extensions.Encoding.EncodingExtensions class
         /// </summary>
-        static void TestEncodingExtensions()
+        private static void TestEncodingExtensions()
         {
             //Perform the tests
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.EncodingExtensionsTests), TypeOfVoid);
         }
 
-        static void TestMachine()
+        private static void TestMachine()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.MachineUnitTests), TypeOfVoid);
         }
 
-        static void TestExpressionExtensions()
+        private static void TestExpressionExtensions()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.SymbolExtensionsUnitTests), TypeOfVoid);
         }
 
-        static void TestHardware()
+        private static void TestHardware()
         {
             //--- Hardware.Intrinsics
 
@@ -4330,7 +4320,7 @@ a=appversion:1.0");
             }
         }
 
-        static void TestUnsafe()
+        private static void TestUnsafe()
         {
             //--- CommonIntermediateLanguage / Unsafe
 
@@ -4375,7 +4365,7 @@ a=appversion:1.0");
             //Concepts.Classes.Generic<int>.Write(ref test);
         }
 
-        static void TestMath()
+        private static void TestMath()
         {
             uint expect = uint.MinValue;
 
@@ -4400,12 +4390,12 @@ a=appversion:1.0");
             if (false.Equals(expect.Equals(quotient))) throw new System.Exception();
         }
 
-        static void TestGenericArray()
+        private static void TestGenericArray()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.GenericArrayTests), TypeOfVoid);
         }
 
-        static void TestPool()
+        private static void TestPool()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.PoolTests), TypeOfVoid);
         }
@@ -4413,7 +4403,7 @@ a=appversion:1.0");
         /// <summary>
         /// 
         /// </summary>
-        static void TestTimer()
+        private static void TestTimer()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.TimerTests), TypeOfVoid);
         }
@@ -4421,7 +4411,7 @@ a=appversion:1.0");
         /// <summary>
         /// 
         /// </summary>
-        static void TestClock()
+        private static void TestClock()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.ClockTests), TypeOfVoid);
         }
@@ -4429,7 +4419,7 @@ a=appversion:1.0");
         /// <summary>
         /// 
         /// </summary>
-        static void TestStopWatch()
+        private static void TestStopWatch()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.StopWatchTests), TypeOfVoid);
         }
@@ -4437,7 +4427,7 @@ a=appversion:1.0");
         /// <summary>
         /// 
         /// </summary>
-        static void TestRtpFrame()
+        private static void TestRtpFrame()
         {
 
             //Perform the tests
@@ -4447,22 +4437,22 @@ a=appversion:1.0");
         /// <summary>
         /// 
         /// </summary>
-        static void TestRFC2435JpegFrame()
+        private static void TestRFC2435JpegFrame()
         {
             //Perform the tests
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RFC2435UnitTest), TypeOfVoid);
         }
 
-        static void TestNtp()
+        private static void TestNtp()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.NetworkTimeProtocolUnitTests), TypeOfVoid);
-        }        
+        }
 
         /// <summary>
         /// 
         /// </summary>
-        static void TestRtpRtcp()
-        {           
+        private static void TestRtpRtcp()
+        {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RtpHeaderUnitTests), TypeOfVoid);
 
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RtpExtensionUnitTests), TypeOfVoid);
@@ -4490,7 +4480,7 @@ a=appversion:1.0");
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(RtpRtcpTests), TypeOfVoid);
         }
 
-        static void TestCryptography()
+        private static void TestCryptography()
         {
             //Todo
             //Test md5 against c# version and test vectors.
@@ -4498,7 +4488,7 @@ a=appversion:1.0");
 
         }
 
-        static void TestSegmentStream()
+        private static void TestSegmentStream()
         {
             //Todo, test the SegmentStream
         }
@@ -4506,22 +4496,22 @@ a=appversion:1.0");
         /// <summary>
         /// 
         /// </summary>
-        static void TestRtspMessage()
+        private static void TestRtspMessage()
         {
             //Perform the tests
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RtspMessgeUnitTests), TypeOfVoid);
         }
 
-        static void TestSipMessage()
+        private static void TestSipMessage()
         {
             //Perform the tests
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.SipMessgeUnitTests), TypeOfVoid);
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
-        static void TestHttpMessage()
+        private static void TestHttpMessage()
         {
             //Perform the tests
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.HttpMessgeUnitTests), TypeOfVoid);
@@ -4557,7 +4547,7 @@ a=appversion:1.0");
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.ConcurrentLinkedStackSlimTests), TypeOfVoid);
         }
 
-        static void TestCodec()
+        private static void TestCodec()
         {
             //Other types from Codec
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RFC2361UnitTests), TypeOfVoid);
@@ -4565,12 +4555,12 @@ a=appversion:1.0");
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.MediaBufferUnitTests), TypeOfVoid);
         }
 
-        static void TestAudioBuffer()
+        private static void TestAudioBuffer()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.AudioUnitTests), TypeOfVoid);
         }
 
-        static void TestImageBuffer()
+        private static void TestImageBuffer()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.ImageUnitTests), TypeOfVoid);
         }
@@ -4579,18 +4569,18 @@ a=appversion:1.0");
 
         #region Methods (To Support Unit Tests)
 
-        static Type TypeOfVoid = typeof(void);        
+        private static readonly Type TypeOfVoid = typeof(void);
 
-        static void CreateInstanceAndInvokeAllMethodsWithReturnType(Type instanceType, Type returnType, bool writeNames = true)
+        private static void CreateInstanceAndInvokeAllMethodsWithReturnType(Type instanceType, Type returnType, bool writeNames = true)
         {
-            Object typedInstance = instanceType.IsAbstract ? null : Activator.CreateInstance(instanceType);
+            object typedInstance = instanceType.IsAbstract ? null : Activator.CreateInstance(instanceType);
 
             //Write the name if desired
             if (writeNames) writeInfo("Running all tests within: " + instanceType.Name);
 
             //Get the methods of the class
             foreach (var method in instanceType.GetMethods())
-                //System.Reflection.IntrospectionExtensions.GetTypeInfo(instanceType).DeclaredMethods) // gives also the anonymous methods!!!
+            //System.Reflection.IntrospectionExtensions.GetTypeInfo(instanceType).DeclaredMethods) // gives also the anonymous methods!!!
             {
                 //Ensure for the void type
                 if (method.ReturnType != returnType) continue;
@@ -4605,7 +4595,7 @@ a=appversion:1.0");
             typedInstance = null;
         }
 
-        static void writeError(Exception ex)
+        private static void writeError(Exception ex)
         {
             Console.BackgroundColor = ConsoleColor.Red;
             Console.WriteLine("Test Failed!");
@@ -4614,7 +4604,7 @@ a=appversion:1.0");
             Console.BackgroundColor = ConsoleColor.Black;
         }
 
-        static void writeInfo(string message, ConsoleColor? backgroundColor = null, ConsoleColor? foregroundColor= null)
+        private static void writeInfo(string message, ConsoleColor? backgroundColor = null, ConsoleColor? foregroundColor = null)
         {
 
             ConsoleColor? previousBackgroundColor = null, previousForegroundColor = null;
@@ -4644,7 +4634,7 @@ a=appversion:1.0");
             }
         }
 
-        static void TraceMessage(string message,
+        private static void TraceMessage(string message,
           [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
           [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
           [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
@@ -4656,16 +4646,23 @@ a=appversion:1.0");
             Console.WriteLine(string.Format(TestingFormat, message, memberName ?? "No MethodName Provided"));
         }
 
-        static void RunTest(Action test, int count = 1, bool waitForGoAhead = true)
+        private static void RunTest(Action test, int count = 1, bool waitForGoAhead = true)
         {
-            System.Console.Clear();
-            Console.WriteLine("About to run test: " + test.Method.Name);
-            Console.WriteLine("Press Q to skip or any other key to continue.");
-            RunTestAsync(() => { test(); return Task.CompletedTask; }, count, waitForGoAhead).GetAwaiter().GetResult();
+            RunTestAsync(() =>
+            {
+                test();
+                return Task.CompletedTask;
+            }, count, waitForGoAhead, test.Method.Name)
+            .GetAwaiter()
+            .GetResult();
         }
 
-        static async Task RunTestAsync(Func<Task> test, int count = 1, bool waitForGoAhead = true)
+        private static async Task RunTestAsync(Func<Task> test, int count = 1, bool waitForGoAhead = true, string testName = default)
         {
+            System.Console.Clear();
+            Console.WriteLine("About to run test: " + testName ?? test.Method.Name);
+            Console.WriteLine("Press Q to skip or any other key to continue.");
+
             //If the debugger is attached get a ConsoleKey, the key is Q return.
             if (waitForGoAhead && /*System.Diagnostics.Debugger.IsAttached && */ Console.ReadKey(true).Key == ConsoleKey.Q) return;
             else
@@ -4674,7 +4671,7 @@ a=appversion:1.0");
 
                 int remaining = count, failures = 0, successes = 0; bool multipleTests = count > 1;
 
-                if (multipleTests) log = new Dictionary<int, Exception>();
+                if (multipleTests) log = [];
 
                 foreach (var testIndex in Enumerable.Range(0, count).AsParallel())
                 {
@@ -4759,7 +4756,7 @@ a=appversion:1.0");
 
         internal static void TryPrintClientPacket(object sender, bool incomingFlag, Media.Common.IPacket packet, Common.IDisposed context = null, bool writePayload = false)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(context) && Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;            
+            if (Common.IDisposedExtensions.IsNullOrDisposed(context) && Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
             //Notes, racing to handle the event, should clone the packet if you really need to handle it at this level.
 
@@ -4778,18 +4775,13 @@ a=appversion:1.0");
                 {
                     if (Media.Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
-                    if (packet.IsComplete) Console.ForegroundColor = ConsoleColor.Blue;
-                    else Console.ForegroundColor = ConsoleColor.Red;
+                    Console.ForegroundColor = packet.IsComplete ? ConsoleColor.Blue : ConsoleColor.Red;
 
                     Media.Rtp.RtpClient client = context is not null ? null : ((Media.Rtp.RtpClient)sender);
 
-                    Media.Rtp.RtpClient.TransportContext matched = null;
-
-                    if (client is not null) matched = client.GetContextForPacket(rtpPacket);
-                    else matched = (Media.Rtp.RtpClient.TransportContext)context;
-
+                    RtpClient.TransportContext matched = client is not null ? client.GetContextForPacket(rtpPacket) : (Media.Rtp.RtpClient.TransportContext)context;
                     if (matched is null)
-                    {                        
+                    {
 
                         if (Media.Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
@@ -4826,7 +4818,7 @@ a=appversion:1.0");
                 {
                     bool complete = rtcpPacket.IsComplete;
 
-                    if (complete) if (rtcpPacket.Transferred.HasValue) Console.ForegroundColor = ConsoleColor.Green; else Console.ForegroundColor = ConsoleColor.DarkGreen;
+                    if (complete) Console.ForegroundColor = rtcpPacket.Transferred.HasValue ? ConsoleColor.Green : ConsoleColor.DarkGreen;
                     else if (Media.Common.IDisposedExtensions.IsNullOrDisposed(rtcpPacket)) return;
                     else Console.ForegroundColor = ConsoleColor.Yellow;
 
@@ -4883,7 +4875,7 @@ a=appversion:1.0");
                     {
                         //Could dump the packet contents here.
                         Console.WriteLine(Media.RtpTools.RtpSend.ToTextualConvention(Media.RtpTools.FileFormat.Ascii, rtcpPacket));
-                    }                    
+                    }
 
                 }
             }
@@ -4893,7 +4885,7 @@ a=appversion:1.0");
 
         }
 
-        static void PrintRtcpInformation(Media.Rtcp.RtcpPacket p)
+        private static void PrintRtcpInformation(Media.Rtcp.RtcpPacket p)
         {
             Console.BackgroundColor = ConsoleColor.Blue;
             TryPrintClientPacket(null, true, p);
@@ -4908,7 +4900,7 @@ a=appversion:1.0");
                         Console.WriteLine(string.Format(TestingFormat, "SendersReport From", p.SynchronizationSourceIdentifier));
                         Console.WriteLine(string.Format(TestingFormat, "Length", p.Length));
 
-                        using (Media.Rtcp.SendersReport sr = new Media.Rtcp.SendersReport(p, false))
+                        using (Media.Rtcp.SendersReport sr = new(p, false))
                         {
                             Console.WriteLine(string.Format(TestingFormat, "NtpTime", sr.NtpDateTime));
 
@@ -4941,7 +4933,7 @@ a=appversion:1.0");
                 case Media.Rtcp.SourceDescriptionReport.PayloadType:
                     {
                         //Create a SourceDescriptionReport from the packet instance to access the SourceDescriptionChunks
-                        using (Media.Rtcp.SourceDescriptionReport sourceDescription = new Media.Rtcp.SourceDescriptionReport(p, false))
+                        using (Media.Rtcp.SourceDescriptionReport sourceDescription = new(p, false))
                         {
 
                             Console.WriteLine(string.Format(TestingFormat, "SourceDescription From", sourceDescription.SynchronizationSourceIdentifier));
@@ -4989,7 +4981,7 @@ a=appversion:1.0");
 
             Console.WriteLine(client.InternalId + " - Sending Partial " + method);
 
-            using (Media.Rtsp.RtspMessage message = new Media.Rtsp.RtspMessage(Media.Rtsp.RtspMessageType.Request)
+            using (Media.Rtsp.RtspMessage message = new(Media.Rtsp.RtspMessageType.Request)
             {
                 RtspMethod = method,
                 Location = location ?? Media.Rtsp.RtspMessage.Wildcard

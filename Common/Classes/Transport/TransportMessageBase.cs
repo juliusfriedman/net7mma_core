@@ -38,7 +38,7 @@ namespace Media.Common
         public TransportMessageBase(string protocol)
             : base(true)
         {
-            if (string.IsNullOrWhiteSpace(protocol)) 
+            if (string.IsNullOrWhiteSpace(protocol))
                 throw new ArgumentException("Cannot be null or consist only of whitespace.", "protocol");
 
             Protocol = protocol;

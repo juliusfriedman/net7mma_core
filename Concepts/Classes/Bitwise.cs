@@ -147,6 +147,6 @@ namespace Media.Concepts.Classes
         #endregion
 
         //private constructor
-        Bitwise() { }
+        private Bitwise() { }
     }
 }

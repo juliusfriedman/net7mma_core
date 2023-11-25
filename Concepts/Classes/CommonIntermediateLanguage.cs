@@ -42,11 +42,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //netMF older versions will need Emit class.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using Media;
 
 /*
 Copyright (c) 2013 juliusfriedman@gmail.com
@@ -521,7 +516,7 @@ namespace Media.Concepts.Classes
             //Works but has to be generated for each type.
             #region SizeOf
 
-            System.Reflection.Emit.DynamicMethod sizeOfMethod = new System.Reflection.Emit.DynamicMethod("_SizeOf", typeof(int), System.Type.EmptyTypes);
+            System.Reflection.Emit.DynamicMethod sizeOfMethod = new("_SizeOf", typeof(int), System.Type.EmptyTypes);
 
             generator = sizeOfMethod.GetILGenerator();
 
@@ -539,7 +534,7 @@ namespace Media.Concepts.Classes
 
             #region UnalignedRead
 
-            System.Reflection.Emit.DynamicMethod unalignedReadMethod = new System.Reflection.Emit.DynamicMethod("_UnalignedRead", typeOfT, args);
+            System.Reflection.Emit.DynamicMethod unalignedReadMethod = new("_UnalignedRead", typeOfT, args);
 
             generator = unalignedReadMethod.GetILGenerator();
 
@@ -570,7 +565,7 @@ namespace Media.Concepts.Classes
             //Could destabalize the runtime
             #region As
 
-            System.Reflection.Emit.DynamicMethod asMethod = new System.Reflection.Emit.DynamicMethod("__As", typeOfT, new System.Type[]{ typeof(object) });
+            System.Reflection.Emit.DynamicMethod asMethod = new("__As", typeOfT, new System.Type[] { typeof(object) });
 
             generator = asMethod.GetILGenerator();
 
@@ -584,10 +579,10 @@ namespace Media.Concepts.Classes
             #endregion
 
             //Not yet working, requires an argument for where to read IntPtr
-            
+
             #region Read
 
-            System.Reflection.Emit.DynamicMethod readMethod = new System.Reflection.Emit.DynamicMethod("_Read", typeOfT, args);
+            System.Reflection.Emit.DynamicMethod readMethod = new("_Read", typeOfT, args);
 
             generator = readMethod.GetILGenerator();
 
@@ -605,7 +600,7 @@ namespace Media.Concepts.Classes
 
             #region Write
 
-            System.Reflection.Emit.DynamicMethod writeMethod = new System.Reflection.Emit.DynamicMethod("_Write", null, args);
+            System.Reflection.Emit.DynamicMethod writeMethod = new("_Write", null, args);
 
             generator = writeMethod.GetILGenerator();
 
@@ -632,10 +627,8 @@ namespace Media.Concepts.Classes
         public static System.Type TypeOfVoid = typeof(void);
 
         public static System.Type TypeOfIntPtr = typeof(nint);
-
-        static readonly System.Action<nint, byte, int> InitblkDelegate;
-
-        static readonly System.Action<nint, nint, int> CpyblkDelegate;
+        private static readonly System.Action<nint, byte, int> InitblkDelegate;
+        private static readonly System.Action<nint, nint, int> CpyblkDelegate;
 
         //static readonly System.Func<System.Type, int> SizeOfDelegate;
 
@@ -645,13 +638,10 @@ namespace Media.Concepts.Classes
 
         //static readonly System.Func<nint, int, byte[], int> CallIndirectDelegate1;
 
-        static readonly System.Action<nint> CallIndirectPointerStdCall;
-
-        static readonly System.Func<nint, nint> CallIndirectPointerIntPtr;
-
-        static readonly System.Func<nint, ulong> CallIndirectPointerULongStdCall, CallIndirectPointerULongThisCall, CallIndirectPointerULongCdelc, CallIndirectPointerULongFastCall;
-
-        static readonly System.Func<nint, uint> CallIndirectPointerUIntStdCall;
+        private static readonly System.Action<nint> CallIndirectPointerStdCall;
+        private static readonly System.Func<nint, nint> CallIndirectPointerIntPtr;
+        private static readonly System.Func<nint, ulong> CallIndirectPointerULongStdCall, CallIndirectPointerULongThisCall, CallIndirectPointerULongCdelc, CallIndirectPointerULongFastCall;
+        private static readonly System.Func<nint, uint> CallIndirectPointerUIntStdCall;
 
         //https://msdn.microsoft.com/ja-jp/windows/ms693373(v=vs.110)
         /*
@@ -719,20 +709,19 @@ namespace Media.Concepts.Classes
         /// <param name="result">The variable which receives the result</param>
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal unsafe static void CallIndirect<T>(nint ptr, ref T result)
+        internal static unsafe void CallIndirect<T>(nint ptr, ref T result)
         {
             if (ptr == nint.Zero)
             {
                 return;
             }
 
-            result = default(T);
+            result = default;
 
             //The result in most cases is actually the value not a pointer to it...
-            nint resultPointer;
 
             //Get the address of the result or the result itself.
-            CallIndirect(ptr, out resultPointer);
+            CallIndirect(ptr, out nint resultPointer);
 
             //Determine the size of T (Unsafe.SizeOf<T>)
             int size = Unsafe.ArrayOfTwoElements<T>.AddressingDifference();
@@ -747,7 +736,7 @@ namespace Media.Concepts.Classes
             //int* sourcePointer = (int*)&resultPointer;
 
             //Copy from the source pointer to the handl
-            System.Buffer.MemoryCopy((void*)&resultPointer, (void*)&resultReference, size, size);
+            System.Buffer.MemoryCopy(&resultPointer, &resultReference, size, size);
 
             //Also works but allocates a new instance
             //result = As<nint, T>(resultPointer);
@@ -761,7 +750,7 @@ namespace Media.Concepts.Classes
         /// <param name="t">The element to convert</param>
         /// <returns>An instance of U with the memory of T</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static TResult As<TSource, TResult>(TSource t)
+        public static unsafe TResult As<TSource, TResult>(TSource t)
         {
             //Determine the size of T
             int sizeOfT = Unsafe.ArrayOfTwoElements<TSource>.AddressingDifference();
@@ -770,7 +759,7 @@ namespace Media.Concepts.Classes
             System.TypedReference trSource = __makeref(t);
 
             //Make a default value for the result, if TResult needs new a constraint should be added and overloads.
-            TResult result = default(TResult);
+            TResult result = default;
 
             //Make a local reference to the result
             System.TypedReference trResult = __makeref(result);
@@ -788,7 +777,7 @@ namespace Media.Concepts.Classes
             //int* destPointer = (int*)&trResult;
 
             //Copy from the source pointer to the handle
-            System.Buffer.MemoryCopy((void*)&trSource, (void*)&trResult, sizeOfT, sizeOfT);
+            System.Buffer.MemoryCopy(&trSource, &trResult, sizeOfT, sizeOfT);
 
             //Return the reference value of the result
             return __refvalue(trResult, TResult);
@@ -799,9 +788,8 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ulong CallIndirect(nint ptr) // ref
         {
-            ulong result;
 
-            CallIndirect(ptr, out result);
+            CallIndirect(ptr, out ulong result);
 
             return result;
         }
@@ -825,7 +813,7 @@ namespace Media.Concepts.Classes
             System.Type CommonIntermediaLanguageType = typeof(CommonIntermediateLanguage);
 
             #region Initblk
-            System.Reflection.Emit.DynamicMethod initBlkMethod = new System.Reflection.Emit.DynamicMethod("Initblk",
+            System.Reflection.Emit.DynamicMethod initBlkMethod = new("Initblk",
                 System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
                 TypeOfVoid, new[] { TypeOfIntPtr, typeof(byte), typeof(int) }, CommonIntermediaLanguageType, true);
 
@@ -842,25 +830,25 @@ namespace Media.Concepts.Classes
 
             #region Cpyblk
 
-            System.Reflection.Emit.DynamicMethod cpyBlkMethod = new System.Reflection.Emit.DynamicMethod("Cpyblk",
+            System.Reflection.Emit.DynamicMethod cpyBlkMethod = new("Cpyblk",
                 System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
                 TypeOfVoid, new[] { TypeOfIntPtr, TypeOfIntPtr, typeof(int) }, CommonIntermediaLanguageType, true);
 
-             generator = cpyBlkMethod.GetILGenerator();
+            generator = cpyBlkMethod.GetILGenerator();
 
-             generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);//dst
-             generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_1);//src
-             generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_2);//len
-             generator.Emit(System.Reflection.Emit.OpCodes.Cpblk);
-             generator.Emit(System.Reflection.Emit.OpCodes.Ret);             
+            generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_0);//dst
+            generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_1);//src
+            generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_2);//len
+            generator.Emit(System.Reflection.Emit.OpCodes.Cpblk);
+            generator.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-             CpyblkDelegate = (System.Action<nint, nint, int>)cpyBlkMethod.CreateDelegate(typeof(System.Action<nint, nint, int>));
+            CpyblkDelegate = (System.Action<nint, nint, int>)cpyBlkMethod.CreateDelegate(typeof(System.Action<nint, nint, int>));
 
             #endregion
 
             #region Calli
 
-             System.Reflection.Emit.DynamicMethod calliMethod;/* = new System.Reflection.Emit.DynamicMethod("Calli_1",
+            System.Reflection.Emit.DynamicMethod calliMethod;/* = new System.Reflection.Emit.DynamicMethod("Calli_1",
                  System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
                  typeof(int), new[] { TypeOfIntPtr, typeof(int), typeof(byte[]) }, CommonIntermediaLanguageType, true);
 
@@ -875,92 +863,92 @@ namespace Media.Concepts.Classes
 
              CallIndirectDelegate1 = (System.Func<nint, int, byte[], int>)calliMethod.CreateDelegate(typeof(System.Func<nint, int, byte[], int>));*/
 
-             //--- IntPtr
+            //--- IntPtr
 
-             calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_IntPtr",
-                  System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
-                  TypeOfIntPtr, new[] { TypeOfIntPtr }, CommonIntermediaLanguageType, true);
+            calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_IntPtr",
+                 System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
+                 TypeOfIntPtr, new[] { TypeOfIntPtr }, CommonIntermediaLanguageType, true);
 
-             generator = calliMethod.GetILGenerator();
-             generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); //ptr             
-             generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.StdCall, TypeOfIntPtr, System.Type.EmptyTypes);
-             generator.Emit(System.Reflection.Emit.OpCodes.Ret);
+            generator = calliMethod.GetILGenerator();
+            generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); //ptr             
+            generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.StdCall, TypeOfIntPtr, System.Type.EmptyTypes);
+            generator.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-             CallIndirectPointerIntPtr = (System.Func<nint, nint>)calliMethod.CreateDelegate(typeof(System.Func<nint, nint>));
+            CallIndirectPointerIntPtr = (System.Func<nint, nint>)calliMethod.CreateDelegate(typeof(System.Func<nint, nint>));
 
-             //--- void
+            //--- void
 
-             calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_Void",
-                  System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
-                  TypeOfVoid, new[] { TypeOfIntPtr }, CommonIntermediaLanguageType, true);
+            calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_Void",
+                 System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
+                 TypeOfVoid, new[] { TypeOfIntPtr }, CommonIntermediaLanguageType, true);
 
-             generator = calliMethod.GetILGenerator();
-             generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); //ptr
-             generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.StdCall, TypeOfVoid, System.Type.EmptyTypes);
-             generator.Emit(System.Reflection.Emit.OpCodes.Ret);
+            generator = calliMethod.GetILGenerator();
+            generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); //ptr
+            generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.StdCall, TypeOfVoid, System.Type.EmptyTypes);
+            generator.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-             CallIndirectPointerStdCall = (System.Action<nint>)calliMethod.CreateDelegate(typeof(System.Action<nint>));            
+            CallIndirectPointerStdCall = (System.Action<nint>)calliMethod.CreateDelegate(typeof(System.Action<nint>));
 
             //--- uint
 
-             calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_uint",
-                   System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
-                   typeof(uint), new[] { TypeOfIntPtr }, CommonIntermediaLanguageType, true);
+            calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_uint",
+                  System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
+                  typeof(uint), new[] { TypeOfIntPtr }, CommonIntermediaLanguageType, true);
 
-             generator = calliMethod.GetILGenerator();
-             generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); //ptr
-             generator.Emit(System.Reflection.Emit.OpCodes.Conv_I); // Convert to native int, pushing native int on stack.
-             generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.StdCall, typeof(uint), System.Type.EmptyTypes);
-             generator.Emit(System.Reflection.Emit.OpCodes.Ret);
+            generator = calliMethod.GetILGenerator();
+            generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); //ptr
+            generator.Emit(System.Reflection.Emit.OpCodes.Conv_I); // Convert to native int, pushing native int on stack.
+            generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.StdCall, typeof(uint), System.Type.EmptyTypes);
+            generator.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-             CallIndirectPointerUIntStdCall = (System.Func<nint, uint>)calliMethod.CreateDelegate(typeof(System.Func<nint, uint>));
+            CallIndirectPointerUIntStdCall = (System.Func<nint, uint>)calliMethod.CreateDelegate(typeof(System.Func<nint, uint>));
 
 
-             //--- ulong
+            //--- ulong
 
-             calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_ThisCall_ulong",
+            calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_ThisCall_ulong",
+                 System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
+                 typeof(ulong), new[] { TypeOfIntPtr }, CommonIntermediaLanguageType, true);
+
+            generator = calliMethod.GetILGenerator();
+            generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); //ptr
+            generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.ThisCall, typeof(ulong), System.Type.EmptyTypes);
+            generator.Emit(System.Reflection.Emit.OpCodes.Ret);
+
+            CallIndirectPointerULongThisCall = (System.Func<nint, ulong>)calliMethod.CreateDelegate(typeof(System.Func<nint, ulong>));
+
+            calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_Cdecl_ulong",
                   System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
                   typeof(ulong), new[] { TypeOfIntPtr }, CommonIntermediaLanguageType, true);
 
-             generator = calliMethod.GetILGenerator();
-             generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); //ptr
-             generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.ThisCall, typeof(ulong), System.Type.EmptyTypes);
-             generator.Emit(System.Reflection.Emit.OpCodes.Ret);
+            generator = calliMethod.GetILGenerator();
+            generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); //ptr
+            generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.Cdecl, typeof(ulong), System.Type.EmptyTypes);
+            generator.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-             CallIndirectPointerULongThisCall = (System.Func<nint, ulong>)calliMethod.CreateDelegate(typeof(System.Func<nint, ulong>));
+            CallIndirectPointerULongCdelc = (System.Func<nint, ulong>)calliMethod.CreateDelegate(typeof(System.Func<nint, ulong>));
 
-             calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_Cdecl_ulong",
+            calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_FastCall_ulong",
                    System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
                    typeof(ulong), new[] { TypeOfIntPtr }, CommonIntermediaLanguageType, true);
 
-             generator = calliMethod.GetILGenerator();
-             generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); //ptr
-             generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.Cdecl, typeof(ulong), System.Type.EmptyTypes);
-             generator.Emit(System.Reflection.Emit.OpCodes.Ret);
+            generator = calliMethod.GetILGenerator();
+            generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); //ptr
+            generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.FastCall, typeof(ulong), System.Type.EmptyTypes);
+            generator.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-             CallIndirectPointerULongCdelc = (System.Func<nint, ulong>)calliMethod.CreateDelegate(typeof(System.Func<nint, ulong>));
+            CallIndirectPointerULongFastCall = (System.Func<nint, ulong>)calliMethod.CreateDelegate(typeof(System.Func<nint, ulong>));
 
-             calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_FastCall_ulong",
-                    System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
-                    typeof(ulong), new[] { TypeOfIntPtr }, CommonIntermediaLanguageType, true);
+            calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_StdCall_ulong",
+                 System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
+                 typeof(ulong), new[] { TypeOfIntPtr }, CommonIntermediaLanguageType, true);
 
-             generator = calliMethod.GetILGenerator();
-             generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); //ptr
-             generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.FastCall, typeof(ulong), System.Type.EmptyTypes);
-             generator.Emit(System.Reflection.Emit.OpCodes.Ret);
+            generator = calliMethod.GetILGenerator();
+            generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); //ptr
+            generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.StdCall, typeof(ulong), System.Type.EmptyTypes);
+            generator.Emit(System.Reflection.Emit.OpCodes.Ret);
 
-             CallIndirectPointerULongFastCall = (System.Func<nint, ulong>)calliMethod.CreateDelegate(typeof(System.Func<nint, ulong>));
-
-             calliMethod = new System.Reflection.Emit.DynamicMethod("Calli_StdCall_ulong",
-                  System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
-                  typeof(ulong), new[] { TypeOfIntPtr }, CommonIntermediaLanguageType, true);
-
-             generator = calliMethod.GetILGenerator();
-             generator.Emit(System.Reflection.Emit.OpCodes.Ldarg_0); //ptr
-             generator.EmitCalli(System.Reflection.Emit.OpCodes.Calli, System.Runtime.InteropServices.CallingConvention.StdCall, typeof(ulong), System.Type.EmptyTypes);
-             generator.Emit(System.Reflection.Emit.OpCodes.Ret);
-
-             CallIndirectPointerULongStdCall = (System.Func<nint, ulong>)calliMethod.CreateDelegate(typeof(System.Func<nint, ulong>));
+            CallIndirectPointerULongStdCall = (System.Func<nint, ulong>)calliMethod.CreateDelegate(typeof(System.Func<nint, ulong>));
 
             #endregion
 
@@ -1056,7 +1044,7 @@ namespace Media.Concepts.Classes
 
             //// //System.Reflection.MethodInfo getTypeFromHandle = typeof(System.Type).GetMethod("GetTypeFromHandle");
             //// //generator.Emit(System.Reflection.Emit.OpCodes.Call, getTypeFromHandle); 
-            
+
             //////Type handle is on the top 
 
             //// //Works to get the type handle, can't get the type without a local , then would need to read the local's type which is not faster then just writing this in pure il.
@@ -1113,7 +1101,7 @@ namespace Media.Concepts.Classes
         {
             InitblkDelegate(System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(array, offset), what, length);
         }
-        
+
         [System.CLSCompliant(false)]
         public static void InitBlock(byte[] array, int offset, byte what, int length)
         {
@@ -1184,11 +1172,11 @@ namespace Media.Concepts.Classes
         }
 
         //Note that 4.6 Has System.Buffer.MemoryCopy 
-            //=>Internal Memove and Memcopy uses optomized copy impl which can be replicated /used for other types also.
-            //https://github.com/dotnet/corefx/issues/493
+        //=>Internal Memove and Memcopy uses optomized copy impl which can be replicated /used for other types also.
+        //https://github.com/dotnet/corefx/issues/493
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static void CopyBlock<T>(T[] src, int srcOffset, T[] dst, int dstOffset, int length) //CopyBlock (void *)
+        public static unsafe void CopyBlock<T>(T[] src, int srcOffset, T[] dst, int dstOffset, int length) //CopyBlock (void *)
         {
             System.Buffer.MemoryCopy((void*)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<T>(src, srcOffset), (void*)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<T>(dst, dstOffset), length, length);
         }
@@ -1228,7 +1216,7 @@ namespace Media.Concepts.Classes
         {
             System.Array array = Common.MemorySegment.EmptyBytes;
 
-            return (int)((int)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(array, 0) - (int)Unsafe.AddressOf(ref array));
+            return (int)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(array, 0) - (int)Unsafe.AddressOf(ref array);
         }
 
         //Rebase - Array Header modified to point to offset and length is subtracted, could provide old header as output for reversing the operation.
@@ -1244,13 +1232,13 @@ namespace Media.Concepts.Classes
         /// </summary>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public unsafe static int StringHeaderSize()
+        public static unsafe int StringHeaderSize()
         {
             //Determine the overhead of the clr header.
             string s = string.Empty;
             fixed (char* t = s)
             {
-                return (int)((int)(nint)t - (int)Unsafe.AddressOf<string>(ref s));
+                return (int)(nint)t - (int)Unsafe.AddressOf<string>(ref s);
             }
         }
 

@@ -66,7 +66,7 @@ namespace Media.Common.Extensions.TimeSpan
             CentisecondsPerTick = 0.00001m, //1e-5
             TicksPerPicosecond = 0.0000001m, //1e-7
             MillisecondsPerPicosecond = 1e-9m, //1 Pico
-            CentisecondsPerPicosecond = 1e-10m, 
+            CentisecondsPerPicosecond = 1e-10m,
             JiffiesPerPicosecond = CentisecondsPerPicosecond,
             SecondsPerPicosecond = 1e-12m;
 
@@ -126,7 +126,7 @@ namespace Media.Common.Extensions.TimeSpan
         /// <param name="ts"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static double TotalMicroseconds(this System.TimeSpan ts) { unchecked{ return ts.TotalMilliseconds* MicrosecondsPerMillisecond; } }
+        public static double TotalMicroseconds(this System.TimeSpan ts) { unchecked { return ts.TotalMilliseconds * MicrosecondsPerMillisecond; } }
 
         /// <summary>
         /// Calulcates the total amount of Nanoseconds (ns) in the given <see cref="TimeSpan"/>
@@ -134,7 +134,7 @@ namespace Media.Common.Extensions.TimeSpan
         /// <param name="ts"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static double TotalNanoseconds(this System.TimeSpan ts) { unchecked{ return ts.TotalMilliseconds* NanosecondsPerMillisecond; } }
+        public static double TotalNanoseconds(this System.TimeSpan ts) { unchecked { return ts.TotalMilliseconds * NanosecondsPerMillisecond; } }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static System.TimeSpan FromMicroseconds(double microSeconds) { unchecked { return System.TimeSpan.FromTicks((long)(microSeconds * OneMicrosecond.Ticks)); } }
@@ -163,7 +163,7 @@ namespace Media.Common.Extensions.TimeSpan
         {
             return a > b ? b : a;
         }
-        
+
         public static System.TimeSpan Min(System.TimeSpan a, System.TimeSpan b) { return Min(ref a, ref b); }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -184,7 +184,7 @@ namespace Media.Common.Extensions.TimeSpan
         //    internal long Value;
 
         //    public int Seconds { get { return (int)Value; } }  // seconds
-                                                                 //& int.MaxValue
+        //& int.MaxValue
         //    public int Microseconds { get { return (int)(Value << Binary.BitsPerInteger); } } // and microseconds
 
         //    public TimeValue(long microSeconds)

@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 
 namespace Media.Rtsp.Server.MediaTypes
 {
@@ -36,7 +33,7 @@ namespace Media.Rtsp.Server.MediaTypes
             {
                 temporalReference = Math.Max(0, Math.Min(1023, temporalReference));
                 return new byte[] { (byte)(headerExtension ? 1 : 0 | (byte)(temporalReference >>= 1)),
-                (byte)((temporalReference << 8) | (active ? 1 : 0)), 
+                (byte)((temporalReference << 8) | (active ? 1 : 0)),
                 (byte)((newPicture ? 1 : 0) | (sequenceHeader ? 2 : 0) | (sliceBegin ? 3 : 0) | (sliceEnd ? 4 : 0) | (byte)(pictureType >> 5)),
                 (byte)(fbv ? 0x80 : 0 | (bfc >> 1 | (ffv ? 0x80 : 0) | ffc)) };
             }
@@ -80,7 +77,7 @@ namespace Media.Rtsp.Server.MediaTypes
             //{
             //    return base.Assemble(useExtensions, profileHeaderSize);
             //}
-        }        
+        }
 
         public RFC2250Media(int width, int height, string name, string directory = null, bool watch = true)
             : base(name, directory, watch, width, height, false)
@@ -346,19 +343,19 @@ namespace Media.Rtsp.Server.MediaTypes
             // using the MPEG1 format
             // The MemoryStream ms is provided to store the bitstream 
             // produced by encoding the image's blocks
-            private MemoryStream ms = new MemoryStream();
-            private double[,] cosine = new double[8, 8];
-            private double SQRT2o2 = Math.Sqrt(2.0) / 2.0;
+            private readonly MemoryStream ms = new();
+            private readonly double[,] cosine = new double[8, 8];
+            private readonly double SQRT2o2 = Math.Sqrt(2.0) / 2.0;
 
             // MPEG1 default quantization matrix
-            private byte[,] defaultQ = new byte[8, 8] {{8,16,19,22,26,27,29,34},
-										    {16,16,22,24,27,29,34,37},
-										    {19,22,26,27,29,34,34,38},
-										    {22,22,26,27,29,34,37,40},
-										    {22,26,27,29,32,35,40,48},
-										    {26,27,29,32,35,40,48,58},
-										    {26,27,29,34,38,46,56,69},
-										    {27,29,35,38,46,56,69,83}};
+            private readonly byte[,] defaultQ = new byte[8, 8] {{8,16,19,22,26,27,29,34},
+                                            {16,16,22,24,27,29,34,37},
+                                            {19,22,26,27,29,34,34,38},
+                                            {22,22,26,27,29,34,37,40},
+                                            {22,26,27,29,32,35,40,48},
+                                            {26,27,29,32,35,40,48,58},
+                                            {26,27,29,34,38,46,56,69},
+                                            {27,29,35,38,46,56,69,83}};
 
             // MPEG1 default DC Huffman codes 
             public int[] DCLumCode = new int[9] { 4, 0, 1, 5, 6, 14, 30, 62, 126 };
@@ -367,8 +364,8 @@ namespace Media.Rtsp.Server.MediaTypes
             public int[] DCChromSize = new int[9] { 2, 2, 2, 3, 4, 5, 6, 7, 8 };
 
             // MPEG1 default AC Huffman codes
-            private int[] ACcode = new int[111] {
-		    6,6,10,14,12,14,10,8,14,10,78,70,68,64,28,26,16,	// AC=1, run=0->16    
+            private readonly int[] ACcode = new int[111] {
+            6,6,10,14,12,14,10,8,14,10,78,70,68,64,28,26,16,	// AC=1, run=0->16    
 		    62,52,50,46,44,62,60,58,56,54,62,60,58,56,54,		// AC=1, run=17->31   
 		    8,12,8,72,30,18,60,42,34,34,32,52,50,48,46,44,42,	// AC=2, run=0->16   
 		    10,74,22,56,36,36,40,		// AC=3, run=0->6		
@@ -376,48 +373,48 @@ namespace Media.Rtsp.Server.MediaTypes
 		    76,54,40,				// AC=5, run=0->2	
 		    66,44,					// AC=6	
 		    20,42,
-		    58,62,
-		    48,60,
-		    38,58,
-		    32,56,
-		    52,54,
-		    50,52,
-		    48,50,
-		    46,38,
-		    62,36,
-		    62,34,
-		    58,32,
-		    56,54,52,50,48,46,44,42,40,38,36,34,32,		// AC=19->31, run=0	
+            58,62,
+            48,60,
+            38,58,
+            32,56,
+            52,54,
+            50,52,
+            48,50,
+            46,38,
+            62,36,
+            62,34,
+            58,32,
+            56,54,52,50,48,46,44,42,40,38,36,34,32,		// AC=19->31, run=0	
 		    48,46,44,42,40,38,36,34,32};			// AC=32->40, run=0
 
-            private int[] ACsize = new int[111] {
-		    3,4,5,6,6,7,7,7,8,8,9,9,9,9,11,11,11,	// AC=1, run=0->16
+            private readonly int[] ACsize = new int[111] {
+            3,4,5,6,6,7,7,7,8,8,9,9,9,9,11,11,11,	// AC=1, run=0->16
 		    13,13,13,13,13,14,14,14,14,14,17,17,17,17,17,	// AC=1, run=17->31
 		    5,7,8,9,11,11,13,13,13,14,14,17,17,17,17,17,17,	// AC=2, run=0->16
 		    6,9,11,13,13,14,17,				// AC=3, run=0->6
 		    8,11,13,14,					// AC=4, run=0->3
-		    9,13,14,					
-		    9,14,
-		    11,14,
-		    13,16,
-		    13,16,
-		    13,16,
-		    13,16,
-		    14,16,
-		    14,16,
-		    14,16,
-		    14,17,
-		    15,17,
-		    15,17,
-		    15,17,
-		    15,15,15,15,15,15,15,15,15,15,15,15,15,				// AC=19->31, run=0
+		    9,13,14,
+            9,14,
+            11,14,
+            13,16,
+            13,16,
+            13,16,
+            13,16,
+            14,16,
+            14,16,
+            14,16,
+            14,17,
+            15,17,
+            15,17,
+            15,17,
+            15,15,15,15,15,15,15,15,15,15,15,15,15,				// AC=19->31, run=0
 		    16,16,16,16,16,16,16,16,16};					// AC=32->40, run=0	
 
             // MPEG1 sequence header
-            public byte[] seqHeaderBits = new byte[100] 
-				      {
-						      0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-					      0,0,0,0,0,0,0,1,1,0,1,1,0,0,1,1,	// Sequence Header
+            public byte[] seqHeaderBits = new byte[100]
+                      {
+                              0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                          0,0,0,0,0,0,0,1,1,0,1,1,0,0,1,1,	// Sequence Header
 					      0,0,0,1,0,1,1,0,0,0,0,0,		// HSize = 352
 					      0,0,0,0,1,1,1,1,0,0,0,0,		// VSize = 240
 					      1,1,0,0,0,1,0,0,		// Pel Shape=1.125,Picture Rate=29.97
@@ -428,18 +425,18 @@ namespace Media.Rtsp.Server.MediaTypes
 
             // MPEG1 GOP header
             public byte[] GOPHeaderBits = new byte[68]
-				    {
-						    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-					    0,0,0,0,0,0,0,1,1,0,1,1,1,0,0,0,	// GOP Header
+                    {
+                            0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0,0,0,0,0,0,0,1,1,0,1,1,1,0,0,0,	// GOP Header
 					    1,0,0,0,0,0,0,0,0,0,0,0,
-					    1,0,0,0,0,0,0,0,0,0,0,0,0,		// Time Code = 00:00:00
+                        1,0,0,0,0,0,0,0,0,0,0,0,0,		// Time Code = 00:00:00
 					    1,0,0,0,0,0,0,255,255,255,255};		// Closed GOP, Broken Link
 
             // MPEG1 picture header
             public byte[] picHeaderBits = new byte[68]
-				    {
-						    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-					    0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,	// Picture Header
+                    {
+                            0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,	// Picture Header
 					    0,0,0,0,0,0,0,0,0,0,			// Temporal Reference
 					    0,0,1,					// Picture Type = I Frame
 					    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,	// VBV Delay = 32768
@@ -447,9 +444,9 @@ namespace Media.Rtsp.Server.MediaTypes
 
             // MPEG1 slice header
             public byte[] sliceHeaderBits = new byte[44]
-				    {
-						    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-					    0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,	// Slice Header
+                    {
+                            0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+                        0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,	// Slice Header
 					    0,1,0,0,0,					// Q Scale = 8
 					    0,255,255,255,255,255,255};				// Extra Slice Bit
 
@@ -488,14 +485,8 @@ namespace Media.Rtsp.Server.MediaTypes
                             for (j = 0; j < 8; j++)
                                 B[k1, k2] += A[i, j] * cosine[k1, i] * cosine[k2, j];
 
-                        if (k1 is 0)
-                            Cu = SQRT2o2;
-                        else
-                            Cu = 1.0;
-                        if (k2 is 0)
-                            Cv = SQRT2o2;
-                        else
-                            Cv = 1.0;
+                        Cu = k1 is 0 ? SQRT2o2 : 1.0;
+                        Cv = k2 is 0 ? SQRT2o2 : 1.0;
 
                         B[k1, k2] *= (0.25 * Cu * Cv);
                     }
@@ -511,7 +502,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 for (i = 0; i < 8; i++)
                     for (j = 0; j < 8; j++)
-                        S1[i, j] = (int)Math.Round((S[i, j] / (double)defaultQ[i, j]));
+                        S1[i, j] = (int)Math.Round((S[i, j] / defaultQ[i, j]));
 
                 return S1;	// Return quantized Frequency Component matrix
             }
@@ -580,10 +571,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 if (invert)
                     for (i = esi[cat]; i < esi[cat] + cat; i++)
                     {
-                        if (DCbits[i] is 0)
-                            DCbits[i] = 1;
-                        else
-                            DCbits[i] = 0;
+                        DCbits[i] = DCbits[i] is 0 ? (byte)1 : (byte)0;
                     }
 
                 return DCbits;	// Return array of bits representing DC value
@@ -594,11 +582,11 @@ namespace Media.Rtsp.Server.MediaTypes
             public int[] Zigzag(int[,] S1)
             {
                 int[] index = new int[64] {0,1,7,8,-7,-7,1,7,7,7,8,
-							     -7,-7,-7,-7,1,7,7,7,7,7,8,
-							     -7,-7,-7,-7,-7,-7,1,7,7,7,7,7,7,7,1,
-							     -7,-7,-7,-7,-7,-7,8,7,7,7,7,7,1,
-							     -7,-7,-7,-7,8,7,7,7,1,
-							     -7,-7,8,7,1};
+                                 -7,-7,-7,-7,1,7,7,7,7,7,8,
+                                 -7,-7,-7,-7,-7,-7,1,7,7,7,7,7,7,7,1,
+                                 -7,-7,-7,-7,-7,-7,8,7,7,7,7,7,1,
+                                 -7,-7,-7,-7,8,7,7,7,1,
+                                 -7,-7,8,7,1};
                 int i;
                 int[] zz = new int[64];
                 int a, b;
@@ -724,10 +712,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     else
                     {
                         code = escapecode(run, AC);
-                        if (Math.Abs(AC) >= 128)
-                            size = 28;
-                        else
-                            size = 20;
+                        size = Math.Abs(AC) >= 128 ? 28 : 20;
                     }
 
                     // Write bits for Huffman code into bits[] array
@@ -760,23 +745,12 @@ namespace Media.Rtsp.Server.MediaTypes
                 //	For negative values from -1 to -127, use 2's complement value.
                 //	For negative values from -128 to -255, use 16 bit value with MSB=1,
                 //	and 2's complement of AC.
-                if (AC > 0)
-                    intval = AC;
-                else
-                {
-                    if (AC >= -127)
-                        intval = 256 + AC;
-                    else
-                        intval = 32768 + 256 + AC;
-                }
+                intval = AC > 0 ? AC : AC >= -127 ? 256 + AC : 32768 + 256 + AC;
 
                 //	Construct escape code using 000001 as first 6 bits, 
                 //	binary representation of run as next 6 bits,
                 //	and either 8 or 16 bits representation of AC from above.
-                if (Math.Abs(AC) < 128)
-                    code = 16384 + 256 * run + intval;
-                else
-                    code = 4194304 + 65536 * run + intval;
+                code = Math.Abs(AC) < 128 ? 16384 + 256 * run + intval : 4194304 + 65536 * run + intval;
 
                 return (code);
             }
@@ -910,7 +884,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     for (j = 0; j < 16; j++)
                     {
                         tempdouble = (219.0 * (0.30 * img.GetPixel((hblock * 16 + j), (vblock * 16 + i)).R +
-                            0.59 * img.GetPixel((hblock * 16 + j), (vblock * 16 + i)).G + 
+                            0.59 * img.GetPixel((hblock * 16 + j), (vblock * 16 + i)).G +
                             0.11 * img.GetPixel((hblock * 16 + j), (vblock * 16 + i)).B) / 255.0) + 16.0;
                         Y[i, j] = (byte)(Math.Round(tempdouble));	// Y is limited from 16 to 235
                     }

@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Media.Rtsp.Server.MediaTypes
+﻿namespace Media.Rtsp.Server.MediaTypes
 {
     using System;
     using System.Drawing;
     using System.IO;
+    using System.Net;
     using System.Text;
     using System.Threading;
-    using System.Net;
-    using System.Security;
 
     /// <summary>
     /// JPEG video source.
@@ -208,7 +201,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         return true;
 
                     // the thread is not running, free resources
-                    Free();                    
+                    Free();
                 }
                 return false;
             }

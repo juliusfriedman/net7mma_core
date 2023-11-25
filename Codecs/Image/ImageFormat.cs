@@ -71,7 +71,7 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(Common.Binary.ByteOrder.Little, Codec.DataLayout.Packed, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(DeltaChannelId, bitsPerComponent)
+                new(DeltaChannelId, bitsPerComponent)
             });
         }
 
@@ -79,7 +79,7 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(Common.Binary.ByteOrder.Little, Codec.DataLayout.Packed, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(LumaChannelId, bitsPerComponent)
+                new(LumaChannelId, bitsPerComponent)
             });
         }
 
@@ -87,9 +87,9 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(RedChannelId, bitsPerComponent),
-                new Codec.MediaComponent(GreenChannelId, bitsPerComponent),
-                new Codec.MediaComponent(BlueChannelId, bitsPerComponent)
+                new(RedChannelId, bitsPerComponent),
+                new(GreenChannelId, bitsPerComponent),
+                new(BlueChannelId, bitsPerComponent)
             });
         }
 
@@ -97,10 +97,10 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(premultipliedAlpha ? PreMultipliedAlphaChannelId :AlphaChannelId, bitsPerComponent),
-                new Codec.MediaComponent(RedChannelId, bitsPerComponent),
-                new Codec.MediaComponent(GreenChannelId, bitsPerComponent),
-                new Codec.MediaComponent(BlueChannelId, bitsPerComponent)
+                new(premultipliedAlpha ? PreMultipliedAlphaChannelId :AlphaChannelId, bitsPerComponent),
+                new(RedChannelId, bitsPerComponent),
+                new(GreenChannelId, bitsPerComponent),
+                new(BlueChannelId, bitsPerComponent)
             });
         }
 
@@ -108,20 +108,20 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(RedChannelId, bitsPerComponent),
-                new Codec.MediaComponent(GreenChannelId, bitsPerComponent),
-                new Codec.MediaComponent(BlueChannelId, bitsPerComponent),
-                new Codec.MediaComponent(premultipliedAlpha ? PreMultipliedAlphaChannelId : AlphaChannelId, bitsPerComponent)
+                new(RedChannelId, bitsPerComponent),
+                new(GreenChannelId, bitsPerComponent),
+                new(BlueChannelId, bitsPerComponent),
+                new(premultipliedAlpha ? PreMultipliedAlphaChannelId : AlphaChannelId, bitsPerComponent)
             });
         }
 
-        public static ImageFormat BGR(int bitsPerComponent, Common.Binary.ByteOrder byteOrder = Common.Binary.ByteOrder.Little, Codec.DataLayout  dataLayout = Codec.DataLayout.Packed)
+        public static ImageFormat BGR(int bitsPerComponent, Common.Binary.ByteOrder byteOrder = Common.Binary.ByteOrder.Little, Codec.DataLayout dataLayout = Codec.DataLayout.Packed)
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(BlueChannelId, bitsPerComponent),
-                new Codec.MediaComponent(GreenChannelId, bitsPerComponent),
-                new Codec.MediaComponent(RedChannelId, bitsPerComponent)
+                new(BlueChannelId, bitsPerComponent),
+                new(GreenChannelId, bitsPerComponent),
+                new(RedChannelId, bitsPerComponent)
             });
         }
 
@@ -129,10 +129,10 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(BlueChannelId, bitsPerComponent),
-                new Codec.MediaComponent(GreenChannelId, bitsPerComponent),
-                new Codec.MediaComponent(RedChannelId, bitsPerComponent),
-                new Codec.MediaComponent(premultipliedAlpha ? PreMultipliedAlphaChannelId : AlphaChannelId, bitsPerComponent)
+                new(BlueChannelId, bitsPerComponent),
+                new(GreenChannelId, bitsPerComponent),
+                new(RedChannelId, bitsPerComponent),
+                new(premultipliedAlpha ? PreMultipliedAlphaChannelId : AlphaChannelId, bitsPerComponent)
             });
         }
 
@@ -140,10 +140,10 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(premultipliedAlpha ? PreMultipliedAlphaChannelId : AlphaChannelId, bitsPerComponent),
-                new Codec.MediaComponent(BlueChannelId, bitsPerComponent),
-                new Codec.MediaComponent(GreenChannelId, bitsPerComponent),
-                new Codec.MediaComponent(RedChannelId, bitsPerComponent)                
+                new(premultipliedAlpha ? PreMultipliedAlphaChannelId : AlphaChannelId, bitsPerComponent),
+                new(BlueChannelId, bitsPerComponent),
+                new(GreenChannelId, bitsPerComponent),
+                new(RedChannelId, bitsPerComponent)
             });
         }
 
@@ -153,9 +153,9 @@ namespace Media.Codecs.Image
             //public static readonly ImageFormat YUV = new ImageFormat(Common.Binary.ByteOrder.Little, Codec.DataLayout.Packed, 3, 8, new byte[] { LumaChannelId, ChromaMajorChannelId, ChromaMinorChannelId });
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(LumaChannelId, bitsPerComponent),
-                new Codec.MediaComponent(ChromaMajorChannelId, bitsPerComponent),
-                new Codec.MediaComponent(ChromaMinorChannelId, bitsPerComponent)
+                new(LumaChannelId, bitsPerComponent),
+                new(ChromaMajorChannelId, bitsPerComponent),
+                new(ChromaMinorChannelId, bitsPerComponent)
             });
         }
 
@@ -163,10 +163,10 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(LumaChannelId, bitsPerComponent),
-                new Codec.MediaComponent(ChromaMajorChannelId, bitsPerComponent),
-                new Codec.MediaComponent(ChromaMinorChannelId, bitsPerComponent),
-                new Codec.MediaComponent(premultipliedAlpha ? PreMultipliedAlphaChannelId : AlphaChannelId, bitsPerComponent)
+                new(LumaChannelId, bitsPerComponent),
+                new(ChromaMajorChannelId, bitsPerComponent),
+                new(ChromaMinorChannelId, bitsPerComponent),
+                new(premultipliedAlpha ? PreMultipliedAlphaChannelId : AlphaChannelId, bitsPerComponent)
             });
         }
 
@@ -174,10 +174,10 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(premultipliedAlpha ? PreMultipliedAlphaChannelId : AlphaChannelId, bitsPerComponent),
-                new Codec.MediaComponent(LumaChannelId, bitsPerComponent),
-                new Codec.MediaComponent(ChromaMajorChannelId, bitsPerComponent),
-                new Codec.MediaComponent(ChromaMinorChannelId, bitsPerComponent)
+                new(premultipliedAlpha ? PreMultipliedAlphaChannelId : AlphaChannelId, bitsPerComponent),
+                new(LumaChannelId, bitsPerComponent),
+                new(ChromaMajorChannelId, bitsPerComponent),
+                new(ChromaMinorChannelId, bitsPerComponent)
             });
         }
 
@@ -185,9 +185,9 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(ChromaMinorChannelId, bitsPerComponent),
-                new Codec.MediaComponent(ChromaMajorChannelId, bitsPerComponent),
-                new Codec.MediaComponent(LumaChannelId, bitsPerComponent)
+                new(ChromaMinorChannelId, bitsPerComponent),
+                new(ChromaMajorChannelId, bitsPerComponent),
+                new(LumaChannelId, bitsPerComponent)
             });
         }
 
@@ -195,10 +195,10 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(ChromaMinorChannelId, bitsPerComponent),
-                new Codec.MediaComponent(ChromaMajorChannelId, bitsPerComponent),
-                new Codec.MediaComponent(LumaChannelId, bitsPerComponent),
-                new Codec.MediaComponent(premultipliedAlpha ? PreMultipliedAlphaChannelId : AlphaChannelId, bitsPerComponent)
+                new(ChromaMinorChannelId, bitsPerComponent),
+                new(ChromaMajorChannelId, bitsPerComponent),
+                new(LumaChannelId, bitsPerComponent),
+                new(premultipliedAlpha ? PreMultipliedAlphaChannelId : AlphaChannelId, bitsPerComponent)
             });
         }
 
@@ -206,10 +206,10 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(AlphaChannelId, bitsPerComponent),
-                new Codec.MediaComponent(ChromaMinorChannelId, bitsPerComponent),
-                new Codec.MediaComponent(ChromaMajorChannelId, bitsPerComponent),
-                new Codec.MediaComponent(premultipliedAlpha ? PreMultipliedAlphaChannelId : LumaChannelId, bitsPerComponent)                
+                new(AlphaChannelId, bitsPerComponent),
+                new(ChromaMinorChannelId, bitsPerComponent),
+                new(ChromaMajorChannelId, bitsPerComponent),
+                new(premultipliedAlpha ? PreMultipliedAlphaChannelId : LumaChannelId, bitsPerComponent)
             });
         }
 
@@ -219,9 +219,9 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(LumaChannelId, sizes[0]),
-                new Codec.MediaComponent(ChromaMajorChannelId, sizes[1]),
-                new Codec.MediaComponent(ChromaMinorChannelId, sizes[2])
+                new(LumaChannelId, sizes[0]),
+                new(ChromaMajorChannelId, sizes[1]),
+                new(ChromaMinorChannelId, sizes[2])
             });
         }
 
@@ -229,9 +229,9 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(RedChannelId, sizes[0]),
-                new Codec.MediaComponent(GreenChannelId, sizes[1]),
-                new Codec.MediaComponent(BlueChannelId, sizes[2])
+                new(RedChannelId, sizes[0]),
+                new(GreenChannelId, sizes[1]),
+                new(BlueChannelId, sizes[2])
             });
         }
 
@@ -241,9 +241,9 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(RedChannelId, 5),
-                new Codec.MediaComponent(GreenChannelId, 6),
-                new Codec.MediaComponent(BlueChannelId, 5)
+                new(RedChannelId, 5),
+                new(GreenChannelId, 6),
+                new(BlueChannelId, 5)
             });
         }
 
@@ -252,10 +252,10 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(AlphaChannelId, 2),
-                new Codec.MediaComponent(RedChannelId, 10),
-                new Codec.MediaComponent(GreenChannelId, 10),
-                new Codec.MediaComponent(BlueChannelId, 10)
+                new(AlphaChannelId, 2),
+                new(RedChannelId, 10),
+                new(GreenChannelId, 10),
+                new(BlueChannelId, 10)
             });
         }
 
@@ -263,9 +263,9 @@ namespace Media.Codecs.Image
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
-                new Codec.MediaComponent(LumaChannelId, 5),
-                new Codec.MediaComponent(ChromaMajorChannelId, 6),
-                new Codec.MediaComponent(ChromaMinorChannelId, 5)
+                new(LumaChannelId, 5),
+                new(ChromaMajorChannelId, 6),
+                new(ChromaMinorChannelId, 5)
             });
         }
 
@@ -311,7 +311,7 @@ namespace Media.Codecs.Image
         #region Constructors
 
         public ImageFormat(Common.Binary.ByteOrder byteOrder, Codec.DataLayout dataLayout, int components, int bitsPerComponent, byte[] componentIds)
-            : base(Codec.MediaType.Image,byteOrder, dataLayout, components, bitsPerComponent, componentIds)
+            : base(Codec.MediaType.Image, byteOrder, dataLayout, components, bitsPerComponent, componentIds)
         {
             //No sub sampling
             Heights = Widths = new int[components];
@@ -355,7 +355,7 @@ namespace Media.Codecs.Image
 
             //This needs to be able to reflect 4:4:4 or less
             //This is how this needs to look.
-            
+
             //Sub Sampling | int | Example
             //           4 |   0 | 8 >> 0 = 8
             //           2 |   1 | 8 >> 1 = 4
@@ -409,7 +409,7 @@ namespace Media.Codecs.Image
             }
         }
 
-        public string FormatString => Encoding.ASCII.GetString(Components.Select(c => c.Id).ToArray()); 
+        public string FormatString => Encoding.ASCII.GetString(Components.Select(c => c.Id).ToArray());
 
         #endregion
     }
@@ -465,7 +465,7 @@ namespace Media.Codecs.Image
     //    /// Amount to shift the luma width right to find the chroma width.
     //    /// </summary>
     //    public readonly int Log2ChromaWidth;
-        
+
     //    /// <summary>
     //    /// Amount to shift the luma height right to find the chroma height.
     //    /// </summary>

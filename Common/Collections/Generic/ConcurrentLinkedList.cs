@@ -52,12 +52,12 @@ namespace Media.Common.Collections.Generic
         /// <summary>
         /// The head and tail.
         /// </summary>
-        LinkedNode<T> Head, Tail;
+        private LinkedNode<T> Head, Tail;
 
         /// <summary>
         /// The count of contained nodes
         /// </summary>
-        long m_Count = 0;
+        private long m_Count = 0;
 
         /// <summary>
         /// Gets the amount of elements allowed to be contained.
@@ -140,14 +140,7 @@ namespace Media.Common.Collections.Generic
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected LinkedNode<T> AddFirst(ref T value)
         {
-            if (Head is null)
-            {
-                Head = new LinkedNode<T>(ref value);
-            }
-            else
-            {
-                Head = LinkedNode<T>.InsertBefore(Head, ref value);
-            }
+            Head = Head is null ? new LinkedNode<T>(ref value) : LinkedNode<T>.InsertBefore(Head, ref value);
 
             System.Threading.Interlocked.Increment(ref m_Count);
 
@@ -162,14 +155,7 @@ namespace Media.Common.Collections.Generic
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected LinkedNode<T> AddLast(ref T value)
         {
-            if (Head is null)
-            {
-                Tail = new LinkedNode<T>(ref value);
-            }
-            else
-            {
-                Tail = LinkedNode<T>.InsertBefore(Head, ref value);
-            }
+            Tail = Head is null ? new LinkedNode<T>(ref value) : LinkedNode<T>.InsertBefore(Head, ref value);
 
             System.Threading.Interlocked.Increment(ref m_Count);
 

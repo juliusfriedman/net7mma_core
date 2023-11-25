@@ -94,7 +94,7 @@ namespace Media.Common.Extensions.NetworkInterface
                 }
             }
 
-            return default(System.Net.NetworkInformation.NetworkInterface);
+            return default;
         }
 
         /// <summary>
@@ -105,11 +105,11 @@ namespace Media.Common.Extensions.NetworkInterface
         /// <returns>If any, the interfaces which correspond to the given criteria.</returns>
         public static System.Collections.Generic.IEnumerable<System.Net.NetworkInformation.NetworkInterface> GetNetworkInterface(System.Net.NetworkInformation.OperationalStatus status, params System.Net.NetworkInformation.NetworkInterfaceType[] interfaceTypes)
         {
-            if(interfaceTypes is null) yield break;
+            if (interfaceTypes is null) yield break;
 
             foreach (System.Net.NetworkInformation.NetworkInterface networkInterface in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
             {
-                if(0 >= System.Array.IndexOf(interfaceTypes, networkInterface.NetworkInterfaceType) && networkInterface.OperationalStatus.Equals(status)) yield return networkInterface;
+                if (0 >= System.Array.IndexOf(interfaceTypes, networkInterface.NetworkInterfaceType) && networkInterface.OperationalStatus.Equals(status)) yield return networkInterface;
             }
         }
 
@@ -125,16 +125,16 @@ namespace Media.Common.Extensions.NetworkInterface
 
         public static System.Net.NetworkInformation.NetworkInterface GetNetworkInterface(System.Net.IPEndPoint localEndPoint)
         {
-            if (localEndPoint is null) throw new System.ArgumentNullException(nameof(localEndPoint));
-
-            return GetNetworkInterface(localEndPoint.Address);
+            return localEndPoint is null
+                ? throw new System.ArgumentNullException(nameof(localEndPoint))
+                : GetNetworkInterface(localEndPoint.Address);
         }
 
         public static System.Net.NetworkInformation.NetworkInterface GetNetworkInterface(System.Net.Sockets.Socket socket)
         {
             if (socket is null) throw new System.ArgumentNullException(nameof(socket));
             else if (socket.Handle == nint.Zero) return null;
-            
+
             System.Net.IPEndPoint localEndPoint = socket.IsBound is false ? Common.Extensions.IPEndPoint.IPEndPointExtensions.Any : (System.Net.IPEndPoint)socket.LocalEndPoint;
 
             return GetNetworkInterface(localEndPoint);
@@ -152,9 +152,7 @@ namespace Media.Common.Extensions.NetworkInterface
 
             long speed = networkInterface.Speed;
 
-            if (speed <= 0) return 0;
-
-            return  (networkInterface.Speed / Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMillisecond);
+            return speed <= 0 ? 0 : networkInterface.Speed / Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMillisecond;
         }
 
         /// <summary>
@@ -190,9 +188,7 @@ namespace Media.Common.Extensions.NetworkInterface
         /// <returns></returns>
         public static double GetInterframeGapNanoseconds(this System.Net.NetworkInformation.NetworkInterface networkInterface)
         {
-            if(networkInterface is null) return 0;
-
-            return CaulculateInterframeGapNanoseconds(networkInterface.Speed);
+            return networkInterface is null ? 0 : CaulculateInterframeGapNanoseconds(networkInterface.Speed);
         }
 
         /// <summary>
@@ -208,7 +204,7 @@ namespace Media.Common.Extensions.NetworkInterface
         public static System.Net.IPAddress GetFirstMulticastIPAddress(System.Net.NetworkInformation.NetworkInterface networkInterface, System.Net.Sockets.AddressFamily addressFamily)
         {
             //Filter interfaces which are not usable.
-            if (networkInterface is null || 
+            if (networkInterface is null ||
                 false == networkInterface.SupportsMulticast ||
                 networkInterface.OperationalStatus != System.Net.NetworkInformation.OperationalStatus.Up)// The interface is not up (should probably ignore...?)
             {
@@ -233,9 +229,9 @@ namespace Media.Common.Extensions.NetworkInterface
         }
 
         public static System.Net.IPAddress GetFirstUnicastIPAddress(System.Net.NetworkInformation.NetworkInterface networkInterface, System.Net.Sockets.AddressFamily addressFamily)
-        {            
+        {
             //Filter interfaces which are not usable.
-            if (networkInterface is null || 
+            if (networkInterface is null ||
                 networkInterface.OperationalStatus != System.Net.NetworkInformation.OperationalStatus.Up)// The interface is not up
             {
                 return System.Net.IPAddress.None;
@@ -310,7 +306,7 @@ namespace Media.UnitTests
                 if ((int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(microTime) != (int)gapMicros) throw new System.Exception("TotalMicroseconds");
 
                 //Calculate how much difference there is when converting from the microsecond term to the nano second term.
-                double diff = gapMicros * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMicrosecond  - Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalNanoseconds(microTime);
+                double diff = gapMicros * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMicrosecond - Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalNanoseconds(microTime);
 
                 //If there was any difference 
                 if (diff > 0)

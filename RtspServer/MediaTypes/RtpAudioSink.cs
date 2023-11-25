@@ -1,7 +1,4 @@
-﻿using Media;
-using Media.Codec.Interfaces;
-using Media.Codecs.Audio.Alaw;
-using Media.Codecs.Audio.Mulaw;
+﻿using Media.Codec.Interfaces;
 using Media.Common;
 using Media.Common.Collections.Generic;
 using Media.Common.Extensions.IPEndPoint;
@@ -11,15 +8,14 @@ using Media.Sdp;
 using Media.Sdp.Lines;
 using System;
 using System.Collections.Generic;
-using System.Net.Sockets;
 
 namespace Media.Rtsp.Server.MediaTypes;
 
 public class RtpAudioSink : RtpSink
 {
-    internal protected readonly ConcurrentLinkedQueueSlim<RtpFrame> Frames = new ConcurrentLinkedQueueSlim<RtpFrame>();
+    protected internal readonly ConcurrentLinkedQueueSlim<RtpFrame> Frames = new();
 
-    internal protected int m_FramesSentCounter = 0;
+    protected internal int m_FramesSentCounter = 0;
 
     /// <summary>
     /// The number of channels in this audio sink.
@@ -39,7 +35,7 @@ public class RtpAudioSink : RtpSink
     /// <summary>
     /// The coded used to encode or decode
     /// </summary>
-    public ICodec Codec { get; internal protected set; }
+    public ICodec Codec { get; protected internal set; }
 
     /// <summary>
     /// Creates an audio sink and assigns <see cref="PayloadType"/>, <see cref="Channels"/> and <see cref="ClockRate"/>
@@ -82,9 +78,8 @@ public class RtpAudioSink : RtpSink
                     }
 
                     //Dequeue a frame or die
-                    RtpFrame frame;
 
-                    if (!Frames.TryDequeue(out frame) || IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) continue;
+                    if (!Frames.TryDequeue(out RtpFrame frame) || IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) continue;
 
                     //Get the transportChannel for the packet
                     RtpClient.TransportContext transportContext = RtpClient.GetContextBySourceId(frame.SynchronizationSourceIdentifier);
@@ -107,7 +102,7 @@ public class RtpAudioSink : RtpSink
                         //Take all the packet from the frame                            
                         IEnumerable<RtpPacket> packets = frame;
 
-                        if (Loop) frame = new RtpFrame();
+                        if (Loop) frame = [];
 
                         //Iterate each packet in the frame
                         foreach (RtpPacket packet in packets)
@@ -119,16 +114,12 @@ public class RtpAudioSink : RtpSink
                             packet.Timestamp = transportContext.RtpTimestamp;
 
                             //Assign next sequence number
-                            switch (transportContext.RecieveSequenceNumber)
+                            packet.SequenceNumber = transportContext.RecieveSequenceNumber switch
                             {
-                                case ushort.MaxValue:
-                                    packet.SequenceNumber = transportContext.RecieveSequenceNumber = 0;
-                                    break;
+                                ushort.MaxValue => transportContext.RecieveSequenceNumber = 0,
                                 //Increment the sequence number on the transportChannel and assign the result to the packet
-                                default:
-                                    packet.SequenceNumber = ++transportContext.RecieveSequenceNumber;
-                                    break;
-                            }
+                                _ => ++transportContext.RecieveSequenceNumber,
+                            };
 
                             //Fire an event so the server sends a packet to all clients connected to this source
                             if (false == RtpClient.FrameChangedEventsEnabled) RtpClient.OnRtpPacketReceieved(packet, transportContext);
@@ -290,10 +281,10 @@ public class RtpAudioSink : RtpSink
         transportContext.RtpTimestamp += ClockRate;
 
         //Create a frame
-        RtpFrame newFrame = new RtpFrame();
+        RtpFrame newFrame = [];
 
         //Create the packet
-        RtpPacket newPacket = new RtpPacket(length + RtpHeader.Length)
+        RtpPacket newPacket = new(length + RtpHeader.Length)
         {
             Version = transportContext.Version,
             SynchronizationSourceIdentifier = SourceId,
@@ -305,17 +296,12 @@ public class RtpAudioSink : RtpSink
         Array.Copy(data, offset, newPacket.Payload.Array, newPacket.Payload.Offset, length);
 
         //Assign next sequence number
-        switch (transportContext.SendSequenceNumber)
+        newPacket.SequenceNumber = transportContext.SendSequenceNumber switch
         {
-            case ushort.MaxValue:
-                newPacket.SequenceNumber = transportContext.SendSequenceNumber = 0;
-                break;
+            ushort.MaxValue => transportContext.SendSequenceNumber = 0,
             //Increment the sequence number on the transportChannel and assign the result to the packet
-            default:
-                newPacket.SequenceNumber = ++transportContext.SendSequenceNumber;
-                break;
-        }
-
+            _ => ++transportContext.SendSequenceNumber,
+        };
         newFrame.Add(newPacket);
 
         //Return the value indicating if the frame was queued.

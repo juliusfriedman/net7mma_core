@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Media.RtspServer.MediaTypes
+﻿namespace Media.RtspServer.MediaTypes
 {
-    class HttpMedia
+    internal class HttpMedia
     {
         //Media which Http based, possibly a long stream or something with boundaries etc.
     }

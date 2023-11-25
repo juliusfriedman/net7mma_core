@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Media.Concepts.Classes.Sockets
+﻿namespace Media.Concepts.Classes.Sockets
 {
     /// <summary>
     /// Contains methods for setting SocketFlags via stored values.
@@ -71,23 +65,18 @@ namespace Media.Concepts.Classes.Sockets
         public int Receive(System.Net.Sockets.Socket socket, byte[] data, ref int offset, ref int count, ref System.Net.Sockets.SocketFlags flags, out System.Net.Sockets.SocketError error)
         {
             return socket.Receive(data, offset, count, flags, out error);
-        }        
+        }
 
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public int IsFatalError(ref System.Net.Sockets.SocketError error, System.Net.Sockets.Socket socket)
         {
-            switch (error)
+            return error switch
             {
-                case System.Net.Sockets.SocketError.ConnectionAborted:
-                case System.Net.Sockets.SocketError.ConnectionReset:
-                case System.Net.Sockets.SocketError.Shutdown:
-                    return 1;
-                case System.Net.Sockets.SocketError.Success:
-                    return 0;
-                case System.Net.Sockets.SocketError.SocketError:
-                default: return (int)error;
-            }
+                System.Net.Sockets.SocketError.ConnectionAborted or System.Net.Sockets.SocketError.ConnectionReset or System.Net.Sockets.SocketError.Shutdown => 1,
+                System.Net.Sockets.SocketError.Success => 0,
+                _ => (int)error,
+            };
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -97,7 +86,7 @@ namespace Media.Concepts.Classes.Sockets
 
             do
             {
-                local= Receive(socket, data, ref offset, ref count, ref flags, out error);
+                local = Receive(socket, data, ref offset, ref count, ref flags, out error);
 
                 total += local;
 

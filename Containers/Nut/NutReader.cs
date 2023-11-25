@@ -33,11 +33,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * 
  * v//
  */
+using Media.Container;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Media.Container;
 
 namespace Media.Containers.Nut
 {
@@ -83,15 +83,14 @@ namespace Media.Containers.Nut
 
         #region Constants
 
-        const int MinimumVersion = 2, MaximumVersion = 4, StableVersion = 3, 
+        private const int MinimumVersion = 2, MaximumVersion = 4, StableVersion = 3,
             LengthBits = 7,
-            IdentifierSize = LengthBits + 1, 
-            MinimumSize = IdentifierSize + 1, 
+            IdentifierSize = LengthBits + 1,
+            MinimumSize = IdentifierSize + 1,
             IdentifierBytesSize = IdentifierSize - 1,
             MaximumHeaderOptions = 256,
             ForwardPointerWithChecksum = 4096, MultiByteLength = 0x80, LengthMask = sbyte.MaxValue, MaximumEllisionTotal = 1024, DefaultMaxDistance = MaximumEllisionTotal * 32 - 1;
-
-        const byte NutByte = (byte)'N';
+        private const byte NutByte = (byte)'N';
 
         #endregion
 
@@ -105,7 +104,7 @@ namespace Media.Containers.Nut
             Stream = (long)(0x11405BF2F9DBUL + (((ulong)(NutByte << 8) + 'S') << 48)),
             SyncPoint = (long)(0xE4ADEECA4569UL + (((ulong)(NutByte << 8) + 'K') << 48)),
             Index = (long)(0xDD672F23E64EUL + (((ulong)(NutByte << 8) + 'X') << 48)),
-            Info = (long)(0xAB68B596BA78UL  + (((ulong)(NutByte << 8) + 'I') << 48))
+            Info = (long)(0xAB68B596BA78UL + (((ulong)(NutByte << 8) + 'I') << 48))
         }
 
         #region Statics        
@@ -117,44 +116,32 @@ namespace Media.Containers.Nut
 
         public static bool IsFrame(Node node)
         {
-            if (node is null) throw new ArgumentNullException("node");
-
-            return node.Identifier[0] == default(byte);
+            return node is null ? throw new ArgumentNullException("node") : node.Identifier[0] == default(byte);
         }
 
         public static bool IsNutNode(Node node)
         {
-            if (node is null) throw new ArgumentNullException("node");
-
-            return node.Identifier[0] == NutByte;
+            return node is null ? throw new ArgumentNullException("node") : node.Identifier[0] == NutByte;
         }
 
         public static FrameFlags GetFrameFlags(NutReader reader, Node node)
         {
 
-            if(node is null) throw new ArgumentNullException("node");
-
-            if (!IsFrame(node)) return FrameFlags.Unknown;
-
-            return (FrameFlags)reader.HeaderOptions[node.Identifier[IdentifierBytesSize]].Item1;
+            return node is null
+                ? throw new ArgumentNullException("node")
+                : !IsFrame(node) ? FrameFlags.Unknown : (FrameFlags)reader.HeaderOptions[node.Identifier[IdentifierBytesSize]].Item1;
         }
 
         public static int GetStreamId(Node node)
         {
-            if (node is null) throw new ArgumentNullException("node");
-
-            if (!IsFrame(node)) return -1;
-
-            return node.Identifier[6];
+            return node is null ? throw new ArgumentNullException("node") : !IsFrame(node) ? -1 : node.Identifier[6];
         }
 
         public static byte[] GetFrameHeader(NutReader reader, Node node)
         {
-            if (node is null) throw new ArgumentNullException("node");
-
-            if (!IsFrame(node)) return Media.Common.MemorySegment.EmptyBytes;
-
-            return reader.EllisionHeaders[node.Identifier[5]];
+            return node is null
+                ? throw new ArgumentNullException("node")
+                : !IsFrame(node) ? Media.Common.MemorySegment.EmptyBytes : reader.EllisionHeaders[node.Identifier[5]];
         }
 
         public static byte[] GetFrameData(NutReader reader, Node node, out byte[] sideData, out byte[] metaData)
@@ -182,7 +169,7 @@ namespace Media.Containers.Nut
 
                     int dataSize = (int)(node.DataSize - sidedata_size);
 
-                    frameData = Enumerable.Concat(frameData,  node.Data.Take(dataSize));
+                    frameData = Enumerable.Concat(frameData, node.Data.Take(dataSize));
 
                     sideData = node.Data.Skip(dataSize).ToArray();
                 }
@@ -193,7 +180,7 @@ namespace Media.Containers.Nut
                     using (var stream = node.DataStream)
                     {
                         int size = (int)reader.DecodeVariableLength(stream, out bytesReadNow);
-                        
+
                         //Side Data Count (From Info) and read
                         if (size > 0)
                         {
@@ -221,7 +208,7 @@ namespace Media.Containers.Nut
                         }
 
                         //The position of this stream is now @ the end of the data which does not belong to the frame itself.
-                        frameData = Enumerable.Concat(frameData,  node.Data.Skip(bytesReadTotal));
+                        frameData = Enumerable.Concat(frameData, node.Data.Skip(bytesReadTotal));
                     }
                 }
             }
@@ -242,7 +229,7 @@ namespace Media.Containers.Nut
 
         public NutReader(System.IO.FileStream source, System.IO.FileAccess access = System.IO.FileAccess.Read) : base(source, access) { }
 
-        public NutReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { } 
+        public NutReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { }
 
         public IEnumerable<Node> ReadTags(long offset, long count, params StartCode[] names)
         {
@@ -301,7 +288,7 @@ namespace Media.Containers.Nut
 
         public DateTime Modified { get { return FileInfo.LastWriteTimeUtc; } }
 
-        string m_FileIdString;
+        private string m_FileIdString;
 
         public string FileIdString
         {
@@ -312,11 +299,11 @@ namespace Media.Containers.Nut
             }
         }
 
-        void ParseFileIdString()
+        private void ParseFileIdString()
         {
             if (false == string.IsNullOrEmpty(m_FileIdString)) return;
 
-            List<byte> bytes = new List<byte>(24);
+            List<byte> bytes = new(24);
 
             while (Remaining > 0 && Position < DefaultMaxDistance)
             {
@@ -330,9 +317,8 @@ namespace Media.Containers.Nut
             m_FileIdString = Encoding.UTF8.GetString(bytes.ToArray());
         }
 
-        int? m_MajorVersion, m_MinorVersion, m_StreamCount, m_MaxDistance;
-
-        List<long> m_TimeBases;
+        private int? m_MajorVersion, m_MinorVersion, m_StreamCount, m_MaxDistance;
+        private List<long> m_TimeBases;
 
         public List<long> TimeBases
         {
@@ -343,9 +329,8 @@ namespace Media.Containers.Nut
             }
         }
 
-        long? m_EllisionHeaderCount, m_MainHeaderFlags;
-
-        List<byte[]> m_EllisionHeaders;
+        private long? m_EllisionHeaderCount, m_MainHeaderFlags;
+        private List<byte[]> m_EllisionHeaders;
 
         public Version Version
         {
@@ -364,8 +349,7 @@ namespace Media.Containers.Nut
         {
             get
             {
-                if (false == HasMainHeaderFlags) return HeaderFlags.Unknown;
-                return (HeaderFlags)m_MainHeaderFlags.Value;
+                return false == HasMainHeaderFlags ? HeaderFlags.Unknown : (HeaderFlags)m_MainHeaderFlags.Value;
             }
         }
 
@@ -416,19 +400,19 @@ namespace Media.Containers.Nut
             }
         }
 
-        List<Tuple<long, long, long, long, long, long, long, Tuple<long, long>>> m_HeaderOptions;
+        private List<Tuple<long, long, long, long, long, long, long, Tuple<long, long>>> m_HeaderOptions;
 
-        void ParseMainHeader()
+        private void ParseMainHeader()
         {
-            if (m_MaxDistance.HasValue) return;            
+            if (m_MaxDistance.HasValue) return;
 
-            using (var root = Root) using(var stream = root.DataStream)
+            using (var root = Root) using (var stream = root.DataStream)
             {
-                int bytesRead = 0, end = (int)root.DataSize;
+                int end = (int)root.DataSize;
 
-                m_MajorVersion = (int)DecodeVariableLength(stream, out bytesRead);
+                m_MajorVersion = (int)DecodeVariableLength(stream, out int bytesRead);
 
-                if (m_MajorVersion < MinimumVersion || m_MajorVersion > MaximumVersion) throw new InvalidOperationException("Unsupported Version");
+                if (m_MajorVersion is < MinimumVersion or > MaximumVersion) throw new InvalidOperationException("Unsupported Version");
 
                 //2.4 reads minor version
                 if (m_MajorVersion > StableVersion) m_MinorVersion = (int)DecodeVariableLength(stream, out bytesRead);
@@ -466,7 +450,7 @@ namespace Media.Containers.Nut
                 long count = 0;
 
                 //This is essentially an index, could be byte[]64... but spec is under development...
-                m_HeaderOptions = new List<Tuple<long, long, long, long, long, long, long, Tuple<long, long>>>();
+                m_HeaderOptions = [];
 
                 for (int i = 0; i < MaximumHeaderOptions;)
                 {
@@ -480,8 +464,7 @@ namespace Media.Containers.Nut
 
                     if (tmp_fields > 2) tmp_stream = DecodeVariableLength(stream, out bytesRead);
 
-                    if (tmp_fields > 3) tmp_size = DecodeVariableLength(stream, out bytesRead);
-                    else tmp_size = 0;
+                    tmp_size = tmp_fields > 3 ? DecodeVariableLength(stream, out bytesRead) : 0;
 
                     if (tmp_fields > 4) tmp_res = DecodeVariableLength(stream, out bytesRead);
                     tmp_res = 0;
@@ -498,11 +481,10 @@ namespace Media.Containers.Nut
                     {
                         //Signed
                         tmp_match = DecodeVariableLength(stream, out bytesRead);
-                        
+
                         //Sanity
-                        if ((tmp_match <= short.MinValue || tmp_match > short.MaxValue)
-                            &&
-                            tmp_match != 1 - (1 << 62)) throw new InvalidOperationException("absolute delta match time must be less than or equal to short.MaxValue");
+                        if (tmp_match is (<= short.MinValue or > short.MaxValue) and
+                            not (1 - (1 << 62))) throw new InvalidOperationException("absolute delta match time must be less than or equal to short.MaxValue");
                     }
 
                     if (tmp_fields > 7) tmp_head_idx = DecodeVariableLength(stream, out bytesRead);
@@ -548,7 +530,7 @@ namespace Media.Containers.Nut
                 The length of each elision_header except header 0 MUST be < 256 and >0.
                 The sum of the lengthes of all elision_headers MUST be <=1024.
                 */
-                
+
                 //The first Ellision Header must be 0
                 m_EllisionHeaders = new List<byte[]>((int)m_EllisionHeaderCount + 1) { Media.Common.MemorySegment.EmptyBytes };
 
@@ -562,7 +544,7 @@ namespace Media.Containers.Nut
                     position += bytesRead;
 
                     //FROM FFMPEG Should ensure every value is > 0 && < 256
-                    if (headerLength < 0 || headerLength > MaximumHeaderOptions) throw new InvalidOperationException("headerLength Must be > 0 && < 256, found: " + headerLength);
+                    if (headerLength is < 0 or > MaximumHeaderOptions) throw new InvalidOperationException("headerLength Must be > 0 && < 256, found: " + headerLength);
 
                     //Get the header data
                     byte[] headerData = new byte[headerLength];
@@ -576,12 +558,11 @@ namespace Media.Containers.Nut
                 }
 
                 //Sanity
-                if (m_EllisionHeaderCount > 0 && m_EllisionHeaders.Sum(h=> h.Length) > MaximumEllisionTotal)  throw new InvalidOperationException("Invalid Ellision Header Summation");
+                if (m_EllisionHeaderCount > 0 && m_EllisionHeaders.Sum(h => h.Length) > MaximumEllisionTotal) throw new InvalidOperationException("Invalid Ellision Header Summation");
 
                 // flags had been effectively introduced in version 4.
                 // If there are at least 4 bytes? 
-                if (HasMainHeaderFlags && end - position > 4) m_MainHeaderFlags = DecodeVariableLength(stream, out bytesRead);
-                else m_MainHeaderFlags = (long)HeaderFlags.Unknown;
+                m_MainHeaderFlags = HasMainHeaderFlags && end - position > 4 ? DecodeVariableLength(stream, out bytesRead) : (long)HeaderFlags.Unknown;
 
                 //reserved_bytes can be ignored.
             }
@@ -604,9 +585,8 @@ namespace Media.Containers.Nut
 
                 Read(identifier, 1, IdentifierBytesSize);
 
-                int lengthSize = 0;
 
-                long length = DecodeVariableLength(this, out lengthSize);
+                long length = DecodeVariableLength(this, out int lengthSize);
 
                 return new Node(this, identifier, lengthSize, Position, length, length <= Remaining);
             }
@@ -646,7 +626,7 @@ namespace Media.Containers.Nut
 
                 long size_mul = HeaderOptions[nextByte].Item3;
 
-                long size_msb = 0, size_lsb = HeaderOptions[nextByte].Item4, 
+                long size_msb = 0, size_lsb = HeaderOptions[nextByte].Item4,
                      // Size in bytes at the end inside data which represent frame sidedata and frame metadata.
                      sidedata_size = HeaderOptions[nextByte].Rest.Item2;
 
@@ -669,7 +649,7 @@ namespace Media.Containers.Nut
                 {
                     streamId = DecodeVariableLength(this, out bytesReadNow);
                     bytesReadTotal += bytesReadNow;
-                    if (streamId > MaximumHeaderOptions) throw new InvalidOperationException("StreamId cannot be > 256"); 
+                    if (streamId > MaximumHeaderOptions) throw new InvalidOperationException("StreamId cannot be > 256");
                 }
 
                 //Check for the PTS
@@ -703,7 +683,7 @@ namespace Media.Containers.Nut
                 if (frameFlags.HasFlag(FrameFlags.HeaderIndex))
                 {
                     header_idx = (int)DecodeVariableLength(this, out bytesReadNow);
-                    if (header_idx > m_HeaderOptions.Count()) throw new InvalidOperationException("Invalid header index found: '" +  header_idx + "'. Cannot indicate a header which does not exist");
+                    if (header_idx > m_HeaderOptions.Count()) throw new InvalidOperationException("Invalid header index found: '" + header_idx + "'. Cannot indicate a header which does not exist");
                     bytesReadTotal += bytesReadNow;
                 }
 
@@ -769,7 +749,7 @@ namespace Media.Containers.Nut
 
                     if (length != 0) throw new InvalidOperationException("EOR Frames must have size 0");
                 }
-                
+
                 //Check for Checksum flag only because if it is present length is not checked.
                 if (frameFlags.HasFlag(FrameFlags.Checksum))
                 {
@@ -781,8 +761,8 @@ namespace Media.Containers.Nut
                     //length += 4;
                 }
                 else if (false == (HasMainHeaderFlags && false == MainHeaderFlags.HasFlag(HeaderFlags.Pipe))
-                    && 
-                    length > (2 * MaximumDistance)) throw new InvalidOperationException("frame size > 2 max_distance and no checksum");               
+                    &&
+                    length > (2 * MaximumDistance)) throw new InvalidOperationException("frame size > 2 max_distance and no checksum");
 
                 //Can store 3 more bytes in identifier (PTS) @ 1
                 //LengthSize is negitive which indicates its variable length from Position
@@ -798,21 +778,20 @@ namespace Media.Containers.Nut
 
                 if (result is null) yield break;
 
-                yield return result;                
+                yield return result;
 
-                Skip(result.DataSize);               
+                Skip(result.DataSize);
             }
         }
 
-        List<Track> m_Tracks;
+        private List<Track> m_Tracks;
+        private Dictionary<int, Node> m_StreamPackages;
 
-        Dictionary<int, Node> m_StreamPackages;
-
-        void ParseStreamPackages()
+        private void ParseStreamPackages()
         {
             if (m_StreamPackages is not null) return;
 
-            m_StreamPackages = new Dictionary<int, Node>();
+            m_StreamPackages = [];
 
             int bytesRead = 0;
 
@@ -847,7 +826,7 @@ namespace Media.Containers.Nut
             */
 
             //Read all Stream Packages
-            foreach (var tag in ReadTags(FileIdString.Length, Length - FileIdString.Length, StartCode.Stream).ToArray()) 
+            foreach (var tag in ReadTags(FileIdString.Length, Length - FileIdString.Length, StartCode.Stream).ToArray())
                 m_StreamPackages.Add((int)DecodeVariableLength(tag.DataStream, out bytesRead), tag);
 
             //if (StreamCount != m_StreamPackages.Count) throw new InvalidOperationException("StreamCount does not match Packages with a Stream StartCode.");
@@ -871,7 +850,7 @@ namespace Media.Containers.Nut
 
             ParseStreamPackages();
 
-            List<Track> tracks = new List<Track>();
+            List<Track> tracks = [];
 
             foreach (var streamId in m_StreamPackages.Keys)
             {
@@ -883,9 +862,8 @@ namespace Media.Containers.Nut
 
                 using (var stream = streamPackage.DataStream)
                 {
-                    int bytesRead = 0;
 
-                    long tempStreamId = DecodeVariableLength(stream, out bytesRead);
+                    long tempStreamId = DecodeVariableLength(stream, out int bytesRead);
 
                     if (tempStreamId != streamId) throw new InvalidOperationException("Stream Package Mismatch");
 
@@ -925,7 +903,7 @@ namespace Media.Containers.Nut
                                 break;
                             }
                     }
-                    
+
                     //timeBaseId
                     long tempTimeBase = DecodeVariableLength(stream, out bytesRead);
 
@@ -994,7 +972,7 @@ namespace Media.Containers.Nut
 
                     //Duration is off by about 30 seconds? must include rate or some conversion...
 
-                    Track created = new Track(streamPackage, string.Empty, streamId, FileInfo.CreationTimeUtc, FileInfo.LastWriteTimeUtc, sampleCount, height, width, TimeSpan.FromMilliseconds(decode_delay), TimeSpan.FromSeconds(duration), rate, mediaType, codecIndication, channels, bitDepth);
+                    Track created = new(streamPackage, string.Empty, streamId, FileInfo.CreationTimeUtc, FileInfo.LastWriteTimeUtc, sampleCount, height, width, TimeSpan.FromMilliseconds(decode_delay), TimeSpan.FromSeconds(duration), rate, mediaType, codecIndication, channels, bitDepth);
 
                     yield return created;
 
@@ -1025,8 +1003,7 @@ namespace Media.Containers.Nut
 
         public override string ToTextualConvention(Container.Node node)
         {
-            if (node.Master.Equals(this)) return NutReader.ToTextualConvention(node.Identifier);
-            return base.ToTextualConvention(node);
+            return node.Master.Equals(this) ? NutReader.ToTextualConvention(node.Identifier) : base.ToTextualConvention(node);
         }
 
         public override Node TableOfContents

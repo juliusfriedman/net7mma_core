@@ -53,7 +53,7 @@ namespace Media.Rtp
         /// <summary>
         /// One id may correspond to multiple context's, determine how context will find rtpClient if needed.
         /// </summary>
-        internal Common.Collections.Generic.ConcurrentThesaurus<int, RtpClient.TransportContext> SourceTable = new Common.Collections.Generic.ConcurrentThesaurus<int, RtpClient.TransportContext>();
+        internal Common.Collections.Generic.ConcurrentThesaurus<int, RtpClient.TransportContext> SourceTable = [];
 
         //Offer ; Answer 
 
@@ -71,7 +71,7 @@ namespace Media.Rtp
         
          */
 
-        Conference() { throw new System.NotImplementedException("See comments"); }
+        private Conference() { throw new System.NotImplementedException("See comments"); }
 
         //When adding a client iterate all SourceContext and set SendRtcpReports = false;
         //Attach event for RtcpPacket reception and then determine here what to send and to who

@@ -38,7 +38,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
-using Media.Common.Extensions.Generic.Dictionary;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,7 +69,7 @@ namespace Media.Common.Collections.Generic
             public T Value;
 
             public Node Next;
-                     
+
             //Create and have no value, Deleted, Has Value
             //Flags, Allocated, Deleted, Stored, Native
 
@@ -108,7 +107,7 @@ namespace Media.Common.Collections.Generic
         /// <summary>
         /// The count of contained nodes
         /// </summary>
-        long m_Count = 0;
+        private long m_Count = 0;
 
         //Todo
         //Capacity, ICollection
@@ -125,7 +124,7 @@ namespace Media.Common.Collections.Generic
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return System.Threading.Interlocked.Read(ref m_Count); }
         }
-        
+
         /// <summary>
         /// Indicates if no elements are contained.
         /// </summary>
@@ -164,9 +163,9 @@ namespace Media.Common.Collections.Generic
         {
             switch (System.Threading.Interlocked.Read(ref m_Count))
             {
-                case Common.Binary.LongZero:  
+                case Common.Binary.LongZero:
                     //Store
-                    t = default(T);
+                    t = default;
 
                     //Return
                     return false;
@@ -182,7 +181,7 @@ namespace Media.Common.Collections.Generic
 
                     //Decrement (1) @ Count
                     System.Threading.Interlocked.Decrement(ref m_Count);
-                    
+
                     //Return
                     return true;
             }
@@ -200,7 +199,7 @@ namespace Media.Common.Collections.Generic
             //    return false;
             //}
 
-            
+
 
             ////Return true
             //return true;
@@ -248,11 +247,11 @@ namespace Media.Common.Collections.Generic
             //    Next = First
             //};
 
-            switch (System.Threading.Interlocked.Read(ref m_Count))
+            First = System.Threading.Interlocked.Read(ref m_Count) switch
             {
-                case Common.Binary.LongZero: First = Last = new Node(ref t); break;
-                default: First = new Node(ref t, First); break;
-            }
+                Common.Binary.LongZero => Last = new Node(ref t),
+                _ => new Node(ref t, First),
+            };
 
 
             //Increment (1) @ Count
@@ -288,9 +287,8 @@ namespace Media.Common.Collections.Generic
 
         public void Clear(bool all = true)
         {
-            Node First, Last;
 
-            Clear(all, out First, out Last);
+            Clear(all, out Node First, out Node Last);
         }
 
         #endregion
@@ -300,7 +298,7 @@ namespace Media.Common.Collections.Generic
         /// </summary>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        IEnumerator<T> GetEnumerator()
+        private IEnumerator<T> GetEnumerator()
         {
             Node Current = Last;
 
@@ -331,13 +329,10 @@ namespace Media.UnitTests
     /// </summary>
     internal class ConcurrentLinkedStackSlimTests
     {
-        readonly Media.Common.Collections.Generic.ConcurrentLinkedStackSlim<long> LinkedStack = new Common.Collections.Generic.ConcurrentLinkedStackSlim<long>();
-
-        long LastInputOutput = 0;
-
-        int Amount = 100;
-
-        int ThreadCount = Environment.ProcessorCount;
+        private readonly Media.Common.Collections.Generic.ConcurrentLinkedStackSlim<long> LinkedStack = new();
+        private long LastInputOutput = 0;
+        private readonly int Amount = 100;
+        private readonly int ThreadCount = Environment.ProcessorCount;
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void TestsPush()
@@ -409,12 +404,12 @@ namespace Media.UnitTests
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void TestsThreading()
         {
-            System.Threading.ManualResetEvent mre = new System.Threading.ManualResetEvent(false);
+            System.Threading.ManualResetEvent mre = new(false);
 
             int countIn = 0;
 
             //In a thread populate
-            System.Threading.Thread enqueueThread = new System.Threading.Thread(() =>
+            System.Threading.Thread enqueueThread = new(() =>
             {
                 while (countIn < Amount)
                 {
@@ -441,13 +436,12 @@ namespace Media.UnitTests
             int countOut = 0;
 
             //In another thread write
-            System.Threading.Thread dequeueThread = new System.Threading.Thread(() =>
+            System.Threading.Thread dequeueThread = new(() =>
             {
                 while (countOut < Amount)
                 {
-                    long dequeue;
 
-                    if (LinkedStack.TryPop(out dequeue))
+                    if (LinkedStack.TryPop(out long dequeue))
                     {
                         ++countOut;
 
@@ -520,7 +514,7 @@ namespace Media.UnitTests
         {
             int MultiThreadAmount = Amount * 10;
 
-            System.Threading.ManualResetEvent sharedResetEvent = new System.Threading.ManualResetEvent(false);
+            System.Threading.ManualResetEvent sharedResetEvent = new(false);
 
             int statLevelCountIn = 0;
 
@@ -634,9 +628,8 @@ namespace Media.UnitTests
 
                     while (threadLocalCountOut < MultiThreadAmount)
                     {
-                        long pop;
 
-                        if (LinkedStack.TryPop(out pop))
+                        if (LinkedStack.TryPop(out long pop))
                         {
                             ++threadLocalCountOut;
 
@@ -685,7 +678,7 @@ namespace Media.UnitTests
                 sharedResetEvent.WaitOne(ThreadCount);
             }
 
-            if (statLevelCountIn != stackLevelCountOut) throw new System.Exception("count:" + statLevelCountIn +"," + stackLevelCountOut);
+            if (statLevelCountIn != stackLevelCountOut) throw new System.Exception("count:" + statLevelCountIn + "," + stackLevelCountOut);
 
             if (false == LinkedStack.IsEmpty) throw new System.Exception("IsEmpty," + LinkedStack.Count);
 

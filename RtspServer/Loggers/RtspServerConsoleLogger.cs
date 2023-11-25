@@ -45,7 +45,7 @@ namespace Media.Rtsp.Server.Loggers
         public ConsoleColor RequestColor = ConsoleColor.Cyan, ResponseColor = ConsoleColor.DarkCyan, ExceptionColor = ConsoleColor.Red, NormalColor = ConsoleColor.Green;
 
         //This could be a DebuggingLogger or something else...
-        readonly Media.Common.ILogging Logger = new Media.Common.Loggers.ConsoleLogger();
+        private readonly Media.Common.ILogging Logger = new Media.Common.Loggers.ConsoleLogger();
 
         internal override void LogRequest(RtspMessage request, ClientSession session)
         {

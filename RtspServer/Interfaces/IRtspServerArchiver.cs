@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Media.RtspServer.Interfaces
+﻿namespace Media.RtspServer.Interfaces
 {
-    interface IRtspServerArchiver
+    internal interface IRtspServerArchiver
     {
 
         //Archiving, StartDateUtc, EndDateUtc

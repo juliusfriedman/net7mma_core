@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Text;
 namespace Media.Http
 {
@@ -12,11 +11,11 @@ namespace Media.Http
 
         public const char HyphenSign = (char)Common.ASCII.HyphenSign, SemiColon = (char)Common.ASCII.SemiColon, Comma = (char)Common.ASCII.Comma;
 
-        internal protected static string[] TimeSplit = new string[] { HyphenSign.ToString(), SemiColon.ToString() };
+        protected internal static string[] TimeSplit = new string[] { HyphenSign.ToString(), SemiColon.ToString() };
 
-        internal protected static char[] SpaceSplit = new char[] { (char)Common.ASCII.Space, Comma };
+        protected internal static char[] SpaceSplit = new char[] { (char)Common.ASCII.Space, Comma };
 
-        internal protected static char[] ValueSplit = new char[] { (char)Common.ASCII.EqualsSign, SemiColon };
+        protected internal static char[] ValueSplit = new char[] { (char)Common.ASCII.EqualsSign, SemiColon };
 
         public const string Allow = "Allow";
         public const string Accept = "Accept";
@@ -59,7 +58,7 @@ namespace Media.Http
         public const string RequestStatus = " Request-Status";
         public const string Session = "Session";
         public const string Server = "Server";
-        
+
         //https://www.ietf.org/rfc/rfc2616.txt @ 14.39 TE
         public const string TE = "TE"; //Extension Transfer Encodings..
 
@@ -72,7 +71,7 @@ namespace Media.Http
         public const string Via = "Via";
         public const string WWWAuthenticate = "WWW-Authenticate";
 
-        internal protected HttpHeaders() { }
+        protected internal HttpHeaders() { }
 
         //Could move to HeaderFields to avoid the duplicate name ...
 
@@ -106,7 +105,7 @@ namespace Media.Http
 
             public const string MinFresh = min_fresh;
 
-            internal const string min_stale = "min-stale";            
+            internal const string min_stale = "min-stale";
 
             public const string MinStale = min_stale;
 
@@ -156,7 +155,7 @@ namespace Media.Http
         public static string DigestAuthorizationHeader(Encoding encoding, HttpMethod method, Uri location, System.Net.NetworkCredential credential, string qopPart = null, string ncPart = null, string nOncePart = null, string cnOncePart = null, string opaquePart = null, bool rfc2069 = false, string algorithmPart = null, string bodyPart = null) { return AuthorizationHeader(encoding, method.ToString(), location, System.Net.AuthenticationSchemes.Digest, credential, qopPart, ncPart, nOncePart, cnOncePart, opaquePart, rfc2069, algorithmPart, bodyPart); }
 
         //string method
-        internal protected static string AuthorizationHeader(Encoding encoding, string methodString, Uri location, System.Net.AuthenticationSchemes scheme, System.Net.NetworkCredential credential, string qopPart = null, string ncPart = null, string nOncePart = null, string cnOncePart = null, string opaquePart = null, bool rfc2069 = false, string algorithmPart = null, string bodyPart = null)
+        protected internal static string AuthorizationHeader(Encoding encoding, string methodString, Uri location, System.Net.AuthenticationSchemes scheme, System.Net.NetworkCredential credential, string qopPart = null, string ncPart = null, string nOncePart = null, string cnOncePart = null, string opaquePart = null, bool rfc2069 = false, string algorithmPart = null, string bodyPart = null)
         {
             string result = string.Empty;
 
@@ -186,7 +185,7 @@ namespace Media.Http
 
                         string usernamePart = credential.UserName,
                            realmPart = credential.Domain ?? "//",
-                           uriPart = location is not null && location.IsAbsoluteUri ? location.AbsoluteUri : new String((char)Common.ASCII.BackSlash, 1);
+                           uriPart = location is not null && location.IsAbsoluteUri ? location.AbsoluteUri : new string((char)Common.ASCII.BackSlash, 1);
 
                         if (string.IsNullOrWhiteSpace(nOncePart))
                         {
@@ -197,8 +196,7 @@ namespace Media.Http
                         //Need to look at this again
                         if (false == string.IsNullOrWhiteSpace(qopPart))
                         {
-                            if (false == string.IsNullOrWhiteSpace(ncPart)) ncPart = (int.Parse(ncPart) + 1).ToString();
-                            else ncPart = "00000001";
+                            ncPart = false == string.IsNullOrWhiteSpace(ncPart) ? (int.Parse(ncPart) + 1).ToString() : "00000001";
 
                             if (string.IsNullOrWhiteSpace(cnOncePart)) cnOncePart = Utility.Random.Next(int.MaxValue).ToString("X");
                         }
@@ -216,7 +214,7 @@ namespace Media.Http
                         //If there is a Quality of Protection
                         if (qopPart is not null)
                         {
-                            if (qopPart .Equals(Http.HeaderFields.Authorization.Attributes.qop, StringComparison.OrdinalIgnoreCase))
+                            if (qopPart.Equals(Http.HeaderFields.Authorization.Attributes.qop, StringComparison.OrdinalIgnoreCase))
                             {
                                 HA2 = Cryptography.MD5.GetHash(encoding.GetBytes(string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", methodString, uriPart)));
                                 //The MD5 hash of the combined HA1 result, server nonce (nonce), request counter (nc), client nonce (cnonce), quality of protection code (qop) and HA2 result is calculated. The result is the "response" value provided by the client.
@@ -292,31 +290,31 @@ namespace Media.Http
 
             //Todo, instead of split use substring...
 
-            Common.Collections.Generic.ConcurrentThesaurus<string, string> result = new Common.Collections.Generic.ConcurrentThesaurus<string, string>();
+            Common.Collections.Generic.ConcurrentThesaurus<string, string> result = [];
 
             //Todo, lazy split..
 
             //Digest realm="testrealm@host.com",\r\n  \t qop="auth,auth-int",   nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", opaque="5ccc069c403ebaf9f0171e9517f40e41"
             string[] majors = SplitSpace(input);
 
-            if(count > 0) foreach (string part in majors)
-            {
-                if (string.IsNullOrWhiteSpace(part)) continue;
+            if (count > 0) foreach (string part in majors)
+                {
+                    if (string.IsNullOrWhiteSpace(part)) continue;
 
-                string[] parts = SplitEqual(part);
+                    string[] parts = SplitEqual(part);
 
-                if (parts.Length > 1)
-                    result.Add(parts[0], parts[1]);
-                else
-                    result.Add(parts[0], string.Empty);
+                    if (parts.Length > 1)
+                        result.Add(parts[0], parts[1]);
+                    else
+                        result.Add(parts[0], string.Empty);
 
-                if (--count <= 0) break;
-            }
+                    if (--count <= 0) break;
+                }
 
             return result;
         }
     }
 
-    
+
 
 }

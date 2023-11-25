@@ -35,12 +35,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 
 
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Text;
 using Media.Common;
 using Media.Container;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
 namespace Media.Containers.Matroska
 {
@@ -615,23 +615,22 @@ namespace Media.Containers.Matroska
     /// </summary>
     public class MatroskaReader : MediaFileStream, IMediaContainer
     {
-        const int DefaulTimeCodeScale = (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMillisecond, DefaultMaxIdSize = 4, DefaultMaxSizeLength = 8;
+        private const int DefaulTimeCodeScale = (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMillisecond, DefaultMaxIdSize = 4, DefaultMaxSizeLength = 8;
+        private static readonly DateTime BaseDate = new(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        static DateTime BaseDate = new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
-        static byte[] ReadIdentifier(System.IO.Stream reader, out int length)
+        private static byte[] ReadIdentifier(System.IO.Stream reader, out int length)
         {
 
             //Lookup for length?
 
             //if(reader.Remaining < 2) return null;
-            
+
             // Get the header byte
-            Byte header_byte = (byte)reader.ReadByte();
-            
+            byte header_byte = (byte)reader.ReadByte();
+
             // Define a mask
-            Byte mask = 0x80, id_length = 1;
-            
+            byte mask = 0x80, id_length = 1;
+
             // Figure out the size in bytes
             while (id_length <= 4 && (header_byte & mask) is 0)
             {
@@ -654,18 +653,19 @@ namespace Media.Containers.Matroska
 
             return Media.Common.Extensions.Linq.LinqExtensions.Yield(header_byte).ToArray();
         }
-         //
-        static byte[] ReadLength(System.IO.Stream reader, out int length)
+
+        //
+        private static byte[] ReadLength(System.IO.Stream reader, out int length)
         {
             //if (reader.Remaining < 2) return null;
 
             // Get the header byte
-            Byte header_byte = (byte)reader.ReadByte();
+            byte header_byte = (byte)reader.ReadByte();
 
             //Lookup for length?
 
             // Define a mask
-            Byte mask = 0x80, size_length = 1;
+            byte mask = 0x80, size_length = 1;
 
             // Figure out the size in bytes (Should check MaxSize in the header)
             while (size_length <= 8 && (header_byte & mask) is 0)
@@ -694,7 +694,7 @@ namespace Media.Containers.Matroska
 
         public static string ToTextualConvention(byte[] identifier, int offset = 0)
         {
-            return ((Identifier)Common.Binary.Read32(identifier, offset, Common.Binary.IsLittleEndian)).ToString(); 
+            return ((Identifier)Common.Binary.Read32(identifier, offset, Common.Binary.IsLittleEndian)).ToString();
         }
 
         public MatroskaReader(string filename, System.IO.FileAccess access = System.IO.FileAccess.Read) : base(filename, access) { }
@@ -703,7 +703,7 @@ namespace Media.Containers.Matroska
 
         public MatroskaReader(System.IO.FileStream source, System.IO.FileAccess access = System.IO.FileAccess.Read) : base(source, access) { }
 
-        public MatroskaReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { } 
+        public MatroskaReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { }
 
         public Node ReadElement(Identifier identifier, long position = 0) { return ReadElement((int)identifier, position); }
 
@@ -728,7 +728,7 @@ namespace Media.Containers.Matroska
 
             foreach (var element in this)
             {
-                if (identifiers is null || identifiers .Count () is 0 || identifiers.Contains(Common.Binary.Read32(element.Identifier, 0, Common.Binary.IsLittleEndian)))
+                if (identifiers is null || identifiers.Count() is 0 || identifiers.Contains(Common.Binary.Read32(element.Identifier, 0, Common.Binary.IsLittleEndian)))
                 {
                     yield return element;
                     continue;
@@ -744,9 +744,9 @@ namespace Media.Containers.Matroska
         {
             if (Remaining <= 2) throw new System.IO.EndOfStreamException();
 
-            int read = 0, rTotal = 0;
+            int rTotal = 0;
 
-            byte[] identifier = ReadIdentifier(this, out read);
+            byte[] identifier = ReadIdentifier(this, out int read);
 
             rTotal += read;
 
@@ -782,7 +782,7 @@ namespace Media.Containers.Matroska
                         }
                 }
             }
-        }      
+        }
 
         public override Node Root
         {
@@ -791,209 +791,207 @@ namespace Media.Containers.Matroska
 
         public override string ToTextualConvention(Node node)
         {
-            if (node.Master.Equals(this)) return MatroskaReader.ToTextualConvention(node.Identifier);
-            return base.ToTextualConvention(node);
+            return node.Master.Equals(this) ? MatroskaReader.ToTextualConvention(node.Identifier) : base.ToTextualConvention(node);
         }
 
-        void ParseEbmlHeader()
+        private void ParseEbmlHeader()
         {
 
             using (var ebml = Root)
             {
-                if(ebml is not null) using (var stream = ebml.DataStream)
-                {
-                    long offset = stream.Position, streamLength = stream.Length;
-
-                    //Read the Tracks Segment Info Header
-                    byte[] identifer, len, buffer = new byte[32];
-
-                    long length;
-
-                    int read = 0;
-
-                    //Read all elements in the Segment Info Data
-                    while (offset < streamLength)
+                if (ebml is not null) using (var stream = ebml.DataStream)
                     {
-                        identifer = ReadIdentifier(stream, out read);
+                        long offset = stream.Position, streamLength = stream.Length;
 
-                        Identifier found = (Identifier)Common.Binary.ReadInteger(identifer, 0, read, Common.Binary.IsLittleEndian);
+                        //Read the Tracks Segment Info Header
+                        byte[] identifer, len, buffer = new byte[32];
 
-                        offset += read;
+                        long length;
 
-                        len = ReadLength(stream, out read);
+                        int read = 0;
 
-                        offset += read;
-
-                        length = Common.Binary.ReadInteger(len, 0, read, Media.Common.Binary.IsBigEndian);
-
-                        //Determine what to do based on the found Identifier
-                        switch (found)
+                        //Read all elements in the Segment Info Data
+                        while (offset < streamLength)
                         {
-                            case Identifier.EBMLHeader: continue;
-                            case Identifier.EBMLVersion:
-                                {
-                                    stream.Read(buffer, 0, (int)length);
-                                    m_EbmlVersion = (int)Common.Binary.ReadInteger(buffer, 0, (int)length, Media.Common.Binary.IsBigEndian);
-                                    goto default;
-                                }
-                            case Identifier.EBMLReadVersion:
-                                {
-                                    stream.Read(buffer, 0, (int)length);
-                                    m_EbmlReadVersion = (int)Common.Binary.ReadInteger(buffer, 0, (int)length, Media.Common.Binary.IsBigEndian);
-                                    goto default;
-                                }
-                            case Identifier.EBMLMaxIDLength:
-                                {
-                                    stream.Read(buffer, 0, (int)length);
-                                    m_MaxIDLength = (int)Common.Binary.ReadInteger(buffer, 0, (int)length, Media.Common.Binary.IsBigEndian);
-                                    goto default;
-                                }
-                            case Identifier.EBMLMaxSizeLength:
-                                {
-                                    stream.Read(buffer, 0, (int)length);
-                                    m_MaxSizeLength = (int)Common.Binary.ReadInteger(buffer, 0, (int)length, Media.Common.Binary.IsBigEndian);
-                                    goto default;
-                                }
-                            case Identifier.EBMLDocType:
-                                {
-                                    stream.Read(buffer, 0, (int)length);
-                                    m_DocType = Encoding.UTF8.GetString(buffer, 0, (int)length);
-                                    goto default;
-                                }
-                            case Identifier.EBMLDocTypeVersion:
-                                {
-                                    stream.Read(buffer, 0, (int)length);
-                                    m_DocTypeVersion = (int)Common.Binary.ReadInteger(buffer, 0, (int)length, Media.Common.Binary.IsBigEndian);
-                                    goto default;
-                                }
-                            case Identifier.EBMLDocTypeReadVersion:
-                                {
-                                    m_DocTypeReadVersion = (int)Common.Binary.ReadInteger(buffer, 0, (int)length, Media.Common.Binary.IsBigEndian);
-                                    stream.Read(buffer, 0, (int)length);
-                                    goto default;
-                                }
-                            default:
-                                {
-                                    offset += length;
-                                    continue;
-                                }
+                            identifer = ReadIdentifier(stream, out read);
+
+                            Identifier found = (Identifier)Common.Binary.ReadInteger(identifer, 0, read, Common.Binary.IsLittleEndian);
+
+                            offset += read;
+
+                            len = ReadLength(stream, out read);
+
+                            offset += read;
+
+                            length = Common.Binary.ReadInteger(len, 0, read, Media.Common.Binary.IsBigEndian);
+
+                            //Determine what to do based on the found Identifier
+                            switch (found)
+                            {
+                                case Identifier.EBMLHeader: continue;
+                                case Identifier.EBMLVersion:
+                                    {
+                                        stream.Read(buffer, 0, (int)length);
+                                        m_EbmlVersion = (int)Common.Binary.ReadInteger(buffer, 0, (int)length, Media.Common.Binary.IsBigEndian);
+                                        goto default;
+                                    }
+                                case Identifier.EBMLReadVersion:
+                                    {
+                                        stream.Read(buffer, 0, (int)length);
+                                        m_EbmlReadVersion = (int)Common.Binary.ReadInteger(buffer, 0, (int)length, Media.Common.Binary.IsBigEndian);
+                                        goto default;
+                                    }
+                                case Identifier.EBMLMaxIDLength:
+                                    {
+                                        stream.Read(buffer, 0, (int)length);
+                                        m_MaxIDLength = (int)Common.Binary.ReadInteger(buffer, 0, (int)length, Media.Common.Binary.IsBigEndian);
+                                        goto default;
+                                    }
+                                case Identifier.EBMLMaxSizeLength:
+                                    {
+                                        stream.Read(buffer, 0, (int)length);
+                                        m_MaxSizeLength = (int)Common.Binary.ReadInteger(buffer, 0, (int)length, Media.Common.Binary.IsBigEndian);
+                                        goto default;
+                                    }
+                                case Identifier.EBMLDocType:
+                                    {
+                                        stream.Read(buffer, 0, (int)length);
+                                        m_DocType = Encoding.UTF8.GetString(buffer, 0, (int)length);
+                                        goto default;
+                                    }
+                                case Identifier.EBMLDocTypeVersion:
+                                    {
+                                        stream.Read(buffer, 0, (int)length);
+                                        m_DocTypeVersion = (int)Common.Binary.ReadInteger(buffer, 0, (int)length, Media.Common.Binary.IsBigEndian);
+                                        goto default;
+                                    }
+                                case Identifier.EBMLDocTypeReadVersion:
+                                    {
+                                        m_DocTypeReadVersion = (int)Common.Binary.ReadInteger(buffer, 0, (int)length, Media.Common.Binary.IsBigEndian);
+                                        stream.Read(buffer, 0, (int)length);
+                                        goto default;
+                                    }
+                                default:
+                                    {
+                                        offset += length;
+                                        continue;
+                                    }
+                            }
                         }
                     }
-                }
             }
 
             //should ensure all have value.
 
         }
 
-        void ParseSegmentInfo()
+        private void ParseSegmentInfo()
         {
             using (var matroskaSegmentInfo = ReadElement(Identifier.SegmentInfo, Root.DataOffset))
             {
 
                 if (matroskaSegmentInfo is not null) using (var stream = matroskaSegmentInfo.DataStream)
-                {
-
-                    long offset = stream.Position, streamLength = stream.Length;
-
-                    //Read the Tracks Segment Info Header
-                    byte[] identifer, len, buffer = new byte[32];
-
-                    long length;
-
-                    int read = 0;
-                    //Read all elements in the Segment Info Data
-                    while (offset < streamLength)
                     {
 
-                        identifer = ReadIdentifier(stream, out read);
+                        long offset = stream.Position, streamLength = stream.Length;
 
-                        offset += read;
+                        //Read the Tracks Segment Info Header
+                        byte[] identifer, len, buffer = new byte[32];
 
-                        len = ReadLength(stream, out read);
+                        long length;
 
-                        offset += read;
-
-                        length = Common.Binary.Read64(len, 0, Common.Binary.IsLittleEndian);
-
-                        Identifier found = (Identifier)Common.Binary.Read32(identifer, 0, Common.Binary.IsLittleEndian);
-
-                        //Determine what to do based on the found Identifier
-                        switch (found)
+                        int read = 0;
+                        //Read all elements in the Segment Info Data
+                        while (offset < streamLength)
                         {
-                            case Identifier.Duration:
-                                {
-                                    stream.Read(buffer, 0, (int)length);
-                                    //m_Duration = TimeSpan.FromMilliseconds((double)(Common.Binary.ReadInteger(buffer, 0, (int)length, Common.Binary.IsLittleEndian) * m_TimeCodeScale * 1000) / 1000000);
 
-                                    //m_Duration = TimeSpan.FromSeconds(TimeSpan.FromMilliseconds((Common.Binary.ReadInteger(buffer, 0, (int)length, Media.Common.Binary.IsBigEndian) / TimeCodeScale) / TimeSpan.TicksPerMillisecond).TotalHours * m_TimeCodeScale);
+                            identifer = ReadIdentifier(stream, out read);
 
-                                    m_Duration = TimeSpan.FromTicks(Common.Binary.ReadInteger(buffer, 0, (int)length, Media.Common.Binary.IsBigEndian) / m_TimeCodeScale);
+                            offset += read;
 
-                                    offset += length;
-                                    continue;
-                                }
-                            case Identifier.DateUTC:
-                                {
-                                    stream.Read(buffer, 0, (int)length);
-                                    m_Created = BaseDate.AddMilliseconds(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerSecond / Common.Binary.ReadInteger(buffer, 0, (int)length, Common.Binary.IsLittleEndian));
-                                    offset += length;
-                                    continue;
-                                }
-                            case Identifier.TimeCodeScale:
-                                {
-                                    stream.Read(buffer, 0, (int)length);
-                                    m_TimeCodeScale = Common.Binary.ReadInteger(buffer, 0, (int)length, Common.Binary.IsLittleEndian);
-                                    offset += length;
-                                    continue;
-                                }
-                            case Identifier.Title:
-                                {
-                                    stream.Read(buffer, 0, (int)length);
-                                    m_Title = Encoding.UTF8.GetString(buffer, 0, (int)length);
-                                    offset += length;
-                                    continue;
-                                }
-                            case Identifier.MuxingApp:
-                                {
-                                    stream.Read(buffer, 0, (int)length);
-                                    m_MuxingApp = Encoding.UTF8.GetString(buffer, 0, (int)length);
-                                    offset += length;
-                                    continue;
-                                }
-                            case Identifier.WrittingApp:
-                                {
-                                    stream.Read(buffer, 0, (int)length);
-                                    m_WritingApp = Encoding.UTF8.GetString(buffer, 0, (int)length);
-                                    offset += length;
-                                    continue;
-                                }
-                            default:
-                                {
-                                    stream.Position += length;
-                                    offset += length;
-                                    continue;
-                                }
+                            len = ReadLength(stream, out read);
+
+                            offset += read;
+
+                            length = Common.Binary.Read64(len, 0, Common.Binary.IsLittleEndian);
+
+                            Identifier found = (Identifier)Common.Binary.Read32(identifer, 0, Common.Binary.IsLittleEndian);
+
+                            //Determine what to do based on the found Identifier
+                            switch (found)
+                            {
+                                case Identifier.Duration:
+                                    {
+                                        stream.Read(buffer, 0, (int)length);
+                                        //m_Duration = TimeSpan.FromMilliseconds((double)(Common.Binary.ReadInteger(buffer, 0, (int)length, Common.Binary.IsLittleEndian) * m_TimeCodeScale * 1000) / 1000000);
+
+                                        //m_Duration = TimeSpan.FromSeconds(TimeSpan.FromMilliseconds((Common.Binary.ReadInteger(buffer, 0, (int)length, Media.Common.Binary.IsBigEndian) / TimeCodeScale) / TimeSpan.TicksPerMillisecond).TotalHours * m_TimeCodeScale);
+
+                                        m_Duration = TimeSpan.FromTicks(Common.Binary.ReadInteger(buffer, 0, (int)length, Media.Common.Binary.IsBigEndian) / m_TimeCodeScale);
+
+                                        offset += length;
+                                        continue;
+                                    }
+                                case Identifier.DateUTC:
+                                    {
+                                        stream.Read(buffer, 0, (int)length);
+                                        m_Created = BaseDate.AddMilliseconds(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerSecond / Common.Binary.ReadInteger(buffer, 0, (int)length, Common.Binary.IsLittleEndian));
+                                        offset += length;
+                                        continue;
+                                    }
+                                case Identifier.TimeCodeScale:
+                                    {
+                                        stream.Read(buffer, 0, (int)length);
+                                        m_TimeCodeScale = Common.Binary.ReadInteger(buffer, 0, (int)length, Common.Binary.IsLittleEndian);
+                                        offset += length;
+                                        continue;
+                                    }
+                                case Identifier.Title:
+                                    {
+                                        stream.Read(buffer, 0, (int)length);
+                                        m_Title = Encoding.UTF8.GetString(buffer, 0, (int)length);
+                                        offset += length;
+                                        continue;
+                                    }
+                                case Identifier.MuxingApp:
+                                    {
+                                        stream.Read(buffer, 0, (int)length);
+                                        m_MuxingApp = Encoding.UTF8.GetString(buffer, 0, (int)length);
+                                        offset += length;
+                                        continue;
+                                    }
+                                case Identifier.WrittingApp:
+                                    {
+                                        stream.Read(buffer, 0, (int)length);
+                                        m_WritingApp = Encoding.UTF8.GetString(buffer, 0, (int)length);
+                                        offset += length;
+                                        continue;
+                                    }
+                                default:
+                                    {
+                                        stream.Position += length;
+                                        offset += length;
+                                        continue;
+                                    }
+                            }
                         }
                     }
-                }
             }
 
             if (!m_Duration.HasValue) m_Duration = TimeSpan.Zero;
 
             if (!m_Created.HasValue) m_Created = FileInfo.CreationTimeUtc;
 
-            if (m_MuxingApp is null) m_MuxingApp = string.Empty;
+            m_MuxingApp ??= string.Empty;
 
-            if (m_WritingApp is null) m_WritingApp = string.Empty;
+            m_WritingApp ??= string.Empty;
 
             //Not in spec....
             m_Modified = FileInfo.LastWriteTimeUtc;
-        }        
+        }
 
-        long m_TimeCodeScale = DefaulTimeCodeScale;
-
-        DateTime? m_Created, m_Modified;
+        private long m_TimeCodeScale = DefaulTimeCodeScale;
+        private DateTime? m_Created, m_Modified;
 
         public DateTime Created
         {
@@ -1041,11 +1039,9 @@ namespace Media.Containers.Matroska
             }
         }
 
-        string m_DocType, m_MuxingApp, m_WritingApp, m_Title;
-
-        int m_MaxIDLength = DefaultMaxIdSize, m_MaxSizeLength = DefaultMaxSizeLength;
-
-        int? m_EbmlVersion, m_EbmlReadVersion, m_DocTypeVersion, m_DocTypeReadVersion;
+        private string m_DocType, m_MuxingApp, m_WritingApp, m_Title;
+        private int m_MaxIDLength = DefaultMaxIdSize, m_MaxSizeLength = DefaultMaxSizeLength;
+        private int? m_EbmlVersion, m_EbmlReadVersion, m_DocTypeVersion, m_DocTypeReadVersion;
 
         public int EbmlVersion
         {
@@ -1110,7 +1106,7 @@ namespace Media.Containers.Matroska
             }
         }
 
-        TimeSpan? m_Duration;
+        private TimeSpan? m_Duration;
 
         public TimeSpan Duration
         {
@@ -1139,8 +1135,8 @@ namespace Media.Containers.Matroska
             //Not parsed because some utilities which join files do not propertly create additional entries
             get { return ReadElement(Identifier.SeekHead, Root.DataOffset); }
         }
-        
-        List<Track> m_Tracks;
+
+        private List<Track> m_Tracks;
 
         public override IEnumerable<Track> GetTracks()
         {
@@ -1201,22 +1197,22 @@ namespace Media.Containers.Matroska
                         //Determine what to do based on the found Identifier
                         switch (found)
                         {
-                            
-                            case Identifier.TrackVideo: 
+
+                            case Identifier.TrackVideo:
                             case Identifier.TrackAudio:
                                 continue;
                             case Identifier.TrackType:
                                 {
                                     byte info = (byte)stream.ReadByte();
 
-                                    if ((info & 1) == (int)info) mediaType = Sdp.MediaType.video;
-                                    else if ((info & 2) == (int)info) mediaType = Sdp.MediaType.audio;
+                                    if ((info & 1) == info) mediaType = Sdp.MediaType.video;
+                                    else if ((info & 2) == info) mediaType = Sdp.MediaType.audio;
                                     //Complex = 3
                                     //Logo = 0x10
                                     //Subtitle
-                                    else if ((info & 0x11) == (int)info) mediaType = Sdp.MediaType.text;
+                                    else if ((info & 0x11) == info) mediaType = Sdp.MediaType.text;
                                     //Buttons = 0x12
-                                    else if ((info & 0x20) == (int)info) mediaType = Sdp.MediaType.control;
+                                    else if ((info & 0x20) == info) mediaType = Sdp.MediaType.control;
                                     ++offset;
                                     continue;
                                 }
@@ -1238,7 +1234,7 @@ namespace Media.Containers.Matroska
                                     bitsPerSample = (byte)stream.ReadByte();
                                     ++offset;
                                     continue;
-                                }                           
+                                }
                             case Identifier.AudioChannels:
                                 {
                                     channels = (byte)stream.ReadByte();
@@ -1258,15 +1254,16 @@ namespace Media.Containers.Matroska
                                     //Really the sample Rate?
                                     //Number of nanoseconds (not scaled via TimecodeScale) per frame ('frame' in the  sense -- one element put into a (Simple)Block).
                                     stream.Read(buffer, 0, (int)length);
-                                    if (mediaType == Sdp.MediaType.video)rate =  Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerSecond / (double)Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
-                                    else rate = (double)Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
+                                    rate = mediaType == Sdp.MediaType.video
+                                        ? Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerSecond / Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian)
+                                        : Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
                                     offset += length;
                                     continue;
                                 }
                             case Identifier.VideoFrameRate: //DEPRECATED
                                 {
                                     stream.Read(buffer, 0, (int)length);
-                                    rate = (double)Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
+                                    rate = Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
                                     trackDuration = (ulong)(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerSecond * rate);
                                     offset += length;
                                     continue;
@@ -1293,7 +1290,7 @@ namespace Media.Containers.Matroska
                                 {
                                     stream.Read(buffer, 0, (int)length);
                                     //Rescale
-                                    rate /= (double)Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
+                                    rate /= Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
                                     offset += length;
                                     continue;
                                 }
@@ -1352,51 +1349,51 @@ namespace Media.Containers.Matroska
                     //Need to find all CueTimes to accurately describe duration and start time and sample count...
                     // is WONDERFUL                    
                     //Only do this one time for now...
-                    if(sampleCount is 0) foreach (var elem in ReadElements(trackEntryElement.DataOffset, Identifier.Cues))
-                    {
-                        using (var cueStream = elem.DataStream)
+                    if (sampleCount is 0) foreach (var elem in ReadElements(trackEntryElement.DataOffset, Identifier.Cues))
                         {
-                            long cueOffset = cueStream.Position, cueLength = cueStream.Length;
-
-                            //Read all elements in the Tracks Element's Data
-                            while (cueOffset < cueLength)
+                            using (var cueStream = elem.DataStream)
                             {
-                                identifier = ReadIdentifier(cueStream, out read);
+                                long cueOffset = cueStream.Position, cueLength = cueStream.Length;
 
-                                Identifier found = (Identifier)Common.Binary.Read32(identifier, 0, Common.Binary.IsLittleEndian);
-
-                                cueOffset += read;
-
-                                var len = ReadLength(cueStream, out read);
-
-                                cueOffset += read;
-
-                                length = Common.Binary.Read64(len, 0, Common.Binary.IsLittleEndian);
-
-                                //Determine what to do based on the found Identifier
-                                switch (found)
+                                //Read all elements in the Tracks Element's Data
+                                while (cueOffset < cueLength)
                                 {
-                                    case Identifier.CuePoint: continue;
-                                    case Identifier.CueTime:
-                                        {
-                                            ++sampleCount;
-                                            cueStream.Read(buffer, 0, (int)length);
-                                            trackDuration += Media.Common.Binary.ReadU32(buffer, 0, Common.Binary.IsLittleEndian);
-                                            cueOffset += length;
-                                            continue;
-                                        }
-                                    default:
-                                        {
-                                            cueStream.Position += length;
-                                            cueOffset += length;
-                                            continue;
-                                        }
+                                    identifier = ReadIdentifier(cueStream, out read);
+
+                                    Identifier found = (Identifier)Common.Binary.Read32(identifier, 0, Common.Binary.IsLittleEndian);
+
+                                    cueOffset += read;
+
+                                    var len = ReadLength(cueStream, out read);
+
+                                    cueOffset += read;
+
+                                    length = Common.Binary.Read64(len, 0, Common.Binary.IsLittleEndian);
+
+                                    //Determine what to do based on the found Identifier
+                                    switch (found)
+                                    {
+                                        case Identifier.CuePoint: continue;
+                                        case Identifier.CueTime:
+                                            {
+                                                ++sampleCount;
+                                                cueStream.Read(buffer, 0, (int)length);
+                                                trackDuration += Media.Common.Binary.ReadU32(buffer, 0, Common.Binary.IsLittleEndian);
+                                                cueOffset += length;
+                                                continue;
+                                            }
+                                        default:
+                                            {
+                                                cueStream.Position += length;
+                                                cueOffset += length;
+                                                continue;
+                                            }
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    Track track = new Track(trackEntryElement, trackName, (int)trackId, m_Created.Value, m_Modified.Value, (int)sampleCount, (int)height, (int)width, TimeSpan.Zero, TimeSpan.FromMilliseconds((trackDuration / Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerSecond) * timeCodeScale / TimeSpan.TicksPerMillisecond), rate, mediaType, codecIndication, channels, bitsPerSample);
+                    Track track = new(trackEntryElement, trackName, (int)trackId, m_Created.Value, m_Modified.Value, (int)sampleCount, (int)height, (int)width, TimeSpan.Zero, TimeSpan.FromMilliseconds((trackDuration / Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerSecond) * timeCodeScale / TimeSpan.TicksPerMillisecond), rate, mediaType, codecIndication, channels, bitsPerSample);
 
                     yield return track;
 
@@ -1404,7 +1401,7 @@ namespace Media.Containers.Matroska
 
                     //Reset reading properties
 
-                    trackId = height = width = startTime =  0;
+                    trackId = height = width = startTime = 0;
 
                     timeCodeScale = (ulong)m_TimeCodeScale;
 
@@ -1417,7 +1414,7 @@ namespace Media.Containers.Matroska
                     mediaType = Sdp.MediaType.unknown;
                 }
             }
-            
+
             m_Tracks = tracks;
 
             Position = position;

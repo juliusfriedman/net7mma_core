@@ -173,7 +173,7 @@ namespace Media.Ntp
                 //0.001 Centisecond = 10 Microsecond
                 //1 Tick = 0.1 Microsecond
                 //0.1 * 100 Nanos Per Tick = 100
-                                                                                            //System.TimeSpan.TicksPerSecond is fine here also...
+                //System.TimeSpan.TicksPerSecond is fine here also...
                 long ticks = seconds * System.TimeSpan.TicksPerSecond + ((long)(fractions * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TenMicrosecondsPerPicosecond) >> Common.Binary.BitsPerInteger);
 
                 //Adding a tick here can make the diff 0
@@ -215,11 +215,11 @@ namespace Media.Ntp
         public static System.TimeSpan NtpUnixDifference = System.TimeSpan.FromSeconds(NtpUnixDifferenceSeconds);
 
         //When the First Epoch will wrap (The real Y2k)
-        public static System.DateTime UtcEpoch2036 = new System.DateTime(2036, 2, 7, 6, 28, 16, System.DateTimeKind.Utc);
+        public static System.DateTime UtcEpoch2036 = new(2036, 2, 7, 6, 28, 16, System.DateTimeKind.Utc);
 
-        public static System.DateTime UtcEpoch1900 = new System.DateTime(1900, 1, 1, 0, 0, 0, System.DateTimeKind.Utc);
+        public static System.DateTime UtcEpoch1900 = new(1900, 1, 1, 0, 0, 0, System.DateTimeKind.Utc);
 
-        public static System.DateTime UtcEpoch1970 = new System.DateTime(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc);
+        public static System.DateTime UtcEpoch1970 = new(1970, 1, 1, 0, 0, 0, System.DateTimeKind.Utc);
     }
 }
 
@@ -241,7 +241,7 @@ namespace Media.UnitTests
 
             System.DateTime result = Media.Ntp.NetworkTimeProtocol.NptTimestampToDateTime(ref test);
 
-            System.DateTime expected = new System.DateTime(1995, 11, 10, 11, 33, 25, 125, System.DateTimeKind.Utc);
+            System.DateTime expected = new(1995, 11, 10, 11, 33, 25, 125, System.DateTimeKind.Utc);
 
             if (result != expected) throw new System.Exception("Incorrect date: " + result);
 
@@ -266,7 +266,7 @@ namespace Media.UnitTests
 
             //reverse should equal 12992241732673339392 (test) = 0xb44d_b705_2000_0000
 
-            if (reverse != test) throw new System.Exception("DateTimeToNptTimestamp:" + reverse + ", Error: " + (test - reverse)); 
+            if (reverse != test) throw new System.Exception("DateTimeToNptTimestamp:" + reverse + ", Error: " + (test - reverse));
 
             reverse = Media.Ntp.NetworkTimeProtocol.DateTimeToNptTimestamp32(ref result);
 

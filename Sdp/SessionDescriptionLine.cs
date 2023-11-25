@@ -36,7 +36,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Media.Sdp
@@ -47,7 +46,7 @@ namespace Media.Sdp
     /// Low level class for dealing with Sdp lines with a format of 'X=V{st:sv0,sv1;svN}'    
     /// </summary>
     /// <remarks>Should use byte[]</remarks>
-    public class SessionDescriptionLine : IEnumerable<String>, ICloneable//, IUpdateable
+    public class SessionDescriptionLine : IEnumerable<string>, ICloneable//, IUpdateable
     {
         #region Statics
 
@@ -65,7 +64,7 @@ namespace Media.Sdp
             //X= should maybe be allowed and continued to be parsed as a line, if more data occurs on the same line and the token is repeated it can be considered a continuation and ignored
             if (sdpLine.Length <= 2) return null;
             else if (sdpLine[1] != SessionDescription.EqualsSign) return null;
-            
+
             char type = sdpLine[0];
 
             //Invalid Line, other types? (check grammar)
@@ -139,9 +138,9 @@ namespace Media.Sdp
         internal char m_Type;
 
         //array would allow easier parsing,
-        internal readonly protected string m_Seperator = string.Empty;
+        protected internal readonly string m_Seperator = string.Empty;
 
-        internal readonly protected List<string> m_Parts;
+        protected internal readonly List<string> m_Parts;
 
         internal readonly Encoding m_Encoding = SessionDescription.DefaultEncoding;
 
@@ -158,13 +157,13 @@ namespace Media.Sdp
         /// <summary>
         /// Gets the Encoding of the line.
         /// </summary>
-        Encoding Encoding { get { return m_Encoding; } }
+        private Encoding Encoding { get { return m_Encoding; } }
 
         /// <summary>
         /// Gets the Type of the line.
         /// </summary>
         public char Type { get { return m_Type; } }
-        
+
         /// <summary>
         /// Gets the Parts of the line.
         /// </summary>
@@ -196,7 +195,7 @@ namespace Media.Sdp
 
                     total += m_Encoding.GetByteCount(part);
                 }
-                                                                //Each part gets a type, =, all parts are joined with 'm_Seperator' and lines are ended with `\r\n\`.
+                //Each part gets a type, =, all parts are joined with 'm_Seperator' and lines are ended with `\r\n\`.
                 //return total + m_Encoding.GetByteCount(new char[] { m_Type, SessionDescription.EqualsSign, SessionDescription.NewLine, SessionDescription.LineFeed });                
 
                 //Sorta efficiently as the array creation is implicit, should make static arry
@@ -205,7 +204,7 @@ namespace Media.Sdp
                 //return total + CalucateRequiredLength(m_Encoding, m_Type); ;
 
             }
-        }        
+        }
 
         //UnderModification
 
@@ -222,7 +221,7 @@ namespace Media.Sdp
         //Todo, add string[] field for state, keep all parts contigious
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected virtual void ClearState(int part)
+        protected internal virtual void ClearState(int part)
         {
             //part < 0 == all state, otherwise the state for the given part
         }
@@ -239,7 +238,7 @@ namespace Media.Sdp
         /// <param name="index">The index</param>
         /// <returns>String.Empty if the result was out of range, otherwise the value at the specified index.</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal protected string GetPart(int index)
+        protected internal string GetPart(int index)
         {
             return m_Parts.Count > index ? m_Parts[index] : string.Empty;
         }
@@ -255,7 +254,7 @@ namespace Media.Sdp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal void SetPart(int index, string value)
         {
-            if (value is null) value = string.Empty;
+            value ??= string.Empty;
 
             if (m_Parts.Count > index) m_Parts[index] = value;
         }
@@ -311,8 +310,7 @@ namespace Media.Sdp
 
             m_Seperator = seperator ?? other.m_Seperator;
 
-            if(reference) m_Parts = other.m_Parts;
-            else m_Parts = new List<string>(other.m_Parts);
+            m_Parts = reference ? other.m_Parts : new List<string>(other.m_Parts);
         }
 
         /// <summary>
@@ -323,7 +321,7 @@ namespace Media.Sdp
         public SessionDescriptionLine(char type, int partCount = 0)
         {
             m_Parts = new List<string>(partCount);
-            
+
             EnsureParts(partCount);
 
             m_Type = type;
@@ -339,7 +337,7 @@ namespace Media.Sdp
         {
             //Does not allow null or empty seperator
             if (string.IsNullOrEmpty(seperator)) seperator = SessionDescription.SpaceString;
-            
+
             //Assign value
             m_Seperator = seperator;
         }
@@ -360,8 +358,8 @@ namespace Media.Sdp
             if (string.IsNullOrWhiteSpace(line)) throw new InvalidOperationException("line cannot be null or consist only of whitespace");
 
             //m_AssumedPart &&
-            if (line.Length < 2 
-                || 
+            if (line.Length < 2
+                ||
                 line[1] != SessionDescription.EqualsSign) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Invalid SessionDescriptionLine: \"" + line + "\"");
 
             if (false == string.IsNullOrEmpty(seperator)) m_Seperator = seperator;
@@ -370,7 +368,7 @@ namespace Media.Sdp
             m_Type = char.ToLower(line[0]);
 
             //Split the parts (creates new string array)
-            
+
             //a=<flag>|<name>|:<value> where value = {...,...,...;x;y;z}
 
             //Could also add Space to the ToArray to ensure spaces are removed if all derived types agree spaces seperate their tokens.
@@ -378,7 +376,7 @@ namespace Media.Sdp
             if (partCount > 0)
             {
                 m_Parts = new List<string>(line.Substring(2).Split(Common.Extensions.Object.ObjectExtensions.ToArray<string>(m_Seperator), partCount, StringSplitOptions.RemoveEmptyEntries));
-                
+
                 //Should have option to throw less parts than expected or truncate extra parts?
                 EnsureParts(partCount);
             }
@@ -390,8 +388,8 @@ namespace Media.Sdp
         public SessionDescriptionLine(string[] sdpLines, ref int index)
             : this(sdpLines[index++]) { }
 
-        public SessionDescriptionLine(string[] sdpLines, ref int index, string seperator, char expected, int partCount = 0)            
-            :this(sdpLines[index++], seperator, partCount)
+        public SessionDescriptionLine(string[] sdpLines, ref int index, string seperator, char expected, int partCount = 0)
+            : this(sdpLines[index++], seperator, partCount)
         {
             if (m_Type != expected) throw new InvalidOperationException("Expected: " + expected + ", Found: " + m_Type);
         }
@@ -424,14 +422,12 @@ namespace Media.Sdp
         public override bool Equals(object obj)
         {
             //System.Object
-            if (object.ReferenceEquals(this, obj)) return true;
-
-            return obj is SessionDescriptionLine l && Equals(l);
+            return object.ReferenceEquals(this, obj) || obj is SessionDescriptionLine l && Equals(l);
         }
 
         //ToString should be implemented by GetEnumerator and String.Join(string.Empty, GetEnumerator)
 
-        internal protected string ToString(string seperator = null)
+        protected internal string ToString(string seperator = null)
         {
             StringBuilder result;
 
@@ -498,10 +494,10 @@ namespace Media.Sdp
             //Widens char to string
 
             //Include the type if desired.
-            if(type) yield return m_Type.ToString();
+            if (type) yield return m_Type.ToString();
 
             //Inlcude the equals size is desired
-            if(equals) yield return SessionDescription.EqualsSign.ToString();
+            if (equals) yield return SessionDescription.EqualsSign.ToString();
 
             //Track the amount of parts output.
             int count = 0;

@@ -71,7 +71,7 @@ namespace Media.Codec
         /// Constructs a Transformation with an Unknown MediaType and Quality
         /// </summary>
         /// <param name="shouldDispose">False if the Transformation should not be allowed to dispose, True by default</param>
-        internal protected Transformation(bool shouldDispose)
+        protected internal Transformation(bool shouldDispose)
             : base(shouldDispose)
         {
 

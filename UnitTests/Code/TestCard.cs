@@ -1,8 +1,7 @@
 ﻿
-using System.Globalization;
 using System;
 using System.Diagnostics;
-using Media.Codec;
+using System.Globalization;
 
 namespace UnitTests.Code;
 
@@ -25,43 +24,43 @@ public class TestCard
 
 
     // Local variables
-    private Stopwatch stopwatch;
-    private System.Timers.Timer frame_timer;
+    private readonly Stopwatch stopwatch;
+    private readonly System.Timers.Timer frame_timer;
 
     //Create the ImageFormat based on YUV packed but in Planar format with a full height luma plane and half hight chroma planes
-    Media.Codecs.Image.ImageFormat Yuv420P = new Media.Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Media.Common.Binary.ByteOrder.Little, Media.Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
-    Media.Codecs.Image.Image yuvImage;
+    private readonly Media.Codecs.Image.ImageFormat Yuv420P = new(Media.Codecs.Image.ImageFormat.YUV(8, Media.Common.Binary.ByteOrder.Little, Media.Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
+    private readonly Media.Codecs.Image.Image yuvImage;
 
-    private byte[] yuv_frame = null;
+    private readonly byte[] yuv_frame = null;
     private int x_position = 0;
     private int y_position = 0;
-    private int fps = 0;
-    private int width = 0;
-    private int height = 0;
+    private readonly int fps = 0;
+    private readonly int width = 0;
+    private readonly int height = 0;
     //private Object generate_lock = new Object();
     private long frame_count = 0;
 
-    private System.Timers.Timer audio_timer;
-    const int audio_duration_ms = 20; // duration of sound samples for mono PCM audio. Hinted at in origial RTP standard from 1996 that mentions 160 audio samples
+    private readonly System.Timers.Timer audio_timer;
+    private const int audio_duration_ms = 20; // duration of sound samples for mono PCM audio. Hinted at in origial RTP standard from 1996 that mentions 160 audio samples
     private long audio_count = 0;
 
     // ASCII Font
     // Created by Roger Hardiman using an online generation tool
     // http://www.riyas.org/2013/12/online-led-matrix-font-generator-with.html
 
-    byte[] ascii_0 = { 0x00, 0x3c, 0x42, 0x42, 0x42, 0x42, 0x42, 0x3c };
-    byte[] ascii_1 = { 0x00, 0x08, 0x18, 0x28, 0x08, 0x08, 0x08, 0x3e };
-    byte[] ascii_2 = { 0x00, 0x3e, 0x42, 0x02, 0x0c, 0x30, 0x40, 0x7e };
-    byte[] ascii_3 = { 0x00, 0x7c, 0x02, 0x02, 0x3c, 0x02, 0x02, 0x7c };
-    byte[] ascii_4 = { 0x00, 0x0c, 0x14, 0x24, 0x44, 0x7e, 0x04, 0x04 };
-    byte[] ascii_5 = { 0x00, 0x7e, 0x40, 0x40, 0x7c, 0x02, 0x02, 0x7c };
-    byte[] ascii_6 = { 0x00, 0x3e, 0x40, 0x40, 0x7c, 0x42, 0x42, 0x3c };
-    byte[] ascii_7 = { 0x00, 0x7e, 0x02, 0x02, 0x04, 0x08, 0x10, 0x20 };
-    byte[] ascii_8 = { 0x00, 0x3c, 0x42, 0x42, 0x3c, 0x42, 0x42, 0x3c };
-    byte[] ascii_9 = { 0x00, 0x3c, 0x42, 0x42, 0x3c, 0x02, 0x02, 0x3e };
-    byte[] ascii_colon = { 0x00, 0x00, 0x18, 0x18, 0x00, 0x18, 0x18, 0x00 };
-    byte[] ascii_space = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-    byte[] ascii_dot = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x18, 0x18, 0x00 };
+    private readonly byte[] ascii_0 = { 0x00, 0x3c, 0x42, 0x42, 0x42, 0x42, 0x42, 0x3c };
+    private readonly byte[] ascii_1 = { 0x00, 0x08, 0x18, 0x28, 0x08, 0x08, 0x08, 0x3e };
+    private readonly byte[] ascii_2 = { 0x00, 0x3e, 0x42, 0x02, 0x0c, 0x30, 0x40, 0x7e };
+    private readonly byte[] ascii_3 = { 0x00, 0x7c, 0x02, 0x02, 0x3c, 0x02, 0x02, 0x7c };
+    private readonly byte[] ascii_4 = { 0x00, 0x0c, 0x14, 0x24, 0x44, 0x7e, 0x04, 0x04 };
+    private readonly byte[] ascii_5 = { 0x00, 0x7e, 0x40, 0x40, 0x7c, 0x02, 0x02, 0x7c };
+    private readonly byte[] ascii_6 = { 0x00, 0x3e, 0x40, 0x40, 0x7c, 0x42, 0x42, 0x3c };
+    private readonly byte[] ascii_7 = { 0x00, 0x7e, 0x02, 0x02, 0x04, 0x08, 0x10, 0x20 };
+    private readonly byte[] ascii_8 = { 0x00, 0x3c, 0x42, 0x42, 0x3c, 0x42, 0x42, 0x3c };
+    private readonly byte[] ascii_9 = { 0x00, 0x3c, 0x42, 0x42, 0x3c, 0x02, 0x02, 0x3e };
+    private readonly byte[] ascii_colon = { 0x00, 0x00, 0x18, 0x18, 0x00, 0x18, 0x18, 0x00 };
+    private readonly byte[] ascii_space = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+    private readonly byte[] ascii_dot = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x18, 0x18, 0x00 };
 
     // Constructor
     public TestCard(int width, int height, int fps)
@@ -76,14 +75,16 @@ public class TestCard
 
         // Set all values to 127
         Array.Fill<byte>(yuv_frame, 127);
-        
+
         stopwatch = new Stopwatch();
         stopwatch.Start();
 
         // Start timer. The Timer will generate each YUV frame
-        frame_timer = new System.Timers.Timer();
-        frame_timer.Interval = 1; // on first pass timer will fire straight away (cannot have zero interval)
-        frame_timer.AutoReset = false; // do not restart timer after the time has elapsed
+        frame_timer = new System.Timers.Timer
+        {
+            Interval = 1, // on first pass timer will fire straight away (cannot have zero interval)
+            AutoReset = false // do not restart timer after the time has elapsed
+        };
         frame_timer.Elapsed += (object sender, System.Timers.ElapsedEventArgs e) =>
         {
             // send a video frame
@@ -101,9 +102,11 @@ public class TestCard
         frame_timer.Start();
 
         // Start timer. The Timer will generate each Audio frame
-        audio_timer = new System.Timers.Timer();
-        audio_timer.Interval = 1; // on first pass timer will fire straight away (cannot have zero interval)
-        audio_timer.AutoReset = false; // do not restart timer after the time has elapsed
+        audio_timer = new System.Timers.Timer
+        {
+            Interval = 1, // on first pass timer will fire straight away (cannot have zero interval)
+            AutoReset = false // do not restart timer after the time has elapsed
+        };
         audio_timer.Elapsed += (object sender, System.Timers.ElapsedEventArgs e) =>
         {
             // send an audio frame
@@ -142,7 +145,7 @@ public class TestCard
             DateTime now_utc = DateTime.UtcNow;
             DateTime now_local = now_utc.ToLocalTime();
 
-            String overlay;
+            string overlay;
 
             if (width >= 96)
             {
@@ -202,17 +205,16 @@ public class TestCard
             byte pixel_value = yuv_frame[(y_position * width) + x_position];
 
             // change brightness of pixel			
-            if (pixel_value > 128) pixel_value = 30;
-            else pixel_value = 230;
+            pixel_value = pixel_value > 128 ? (byte)30 : (byte)230;
 
             yuv_frame[(y_position * width) + x_position] = pixel_value;
 
             // move the x and y position
-            x_position = x_position + 5;
+            x_position += 5;
             if (x_position >= width)
             {
                 x_position = 0;
-                y_position = y_position + 1;
+                y_position++;
             }
 
             if (y_position >= height)
@@ -229,8 +231,8 @@ public class TestCard
     }
 
     // 8 KHz audio / 20ms samples
-    const int frame_size = 8000 * audio_duration_ms / 1000;  // = 8000 / (1000/audio_duration_ms)
-    short[] audio_frame = new short[frame_size]; // This is an array of 16 bit values
+    private const int frame_size = 8000 * audio_duration_ms / 1000;  // = 8000 / (1000/audio_duration_ms)
+    private readonly short[] audio_frame = new short[frame_size]; // This is an array of 16 bit values
 
     private void Send_Audio_Frame()
     {
@@ -240,7 +242,7 @@ public class TestCard
             DateTime now_utc = DateTime.UtcNow;
             DateTime now_local = now_utc.ToLocalTime();
 
-            long timestamp_ms = ((long)(now_utc.Ticks / TimeSpan.TicksPerMillisecond));
+            long timestamp_ms = now_utc.Ticks / TimeSpan.TicksPerMillisecond;
 
             // Add beep sounds.
             // We add a 0.1 second beep every second
@@ -254,11 +256,11 @@ public class TestCard
             long currentSeconds = (timestamp_ms / 1000);
             long currentMilliSeconds = timestamp_ms % 1000;
 
-            int soundToPlay = 0; // 0 = silence
-            if (((currentSeconds % 60) is 0) && (currentMilliSeconds < 300)) soundToPlay = 1;
-            else if (((currentSeconds % 10) is 0) && (currentMilliSeconds < 100)) soundToPlay = 1;
-            else if (((currentSeconds % 10) != 0) && (currentMilliSeconds < 100)) soundToPlay = 2;
-            else soundToPlay = 0;
+            int soundToPlay = ((currentSeconds % 60) is 0) && (currentMilliSeconds < 300)
+                ? 1
+                : ((currentSeconds % 10) is 0) && (currentMilliSeconds < 100)
+                ? 1
+                : ((currentSeconds % 10) != 0) && (currentMilliSeconds < 100) ? 2 : 0; // 0 = silence
 
             // Add the sound
             for (int i = 0; i < audio_frame.Length; i++)

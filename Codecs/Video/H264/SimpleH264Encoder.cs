@@ -34,7 +34,7 @@ public class SimpleH264Encoder : IDisposable
 
 
         /*! Buffer  */
-        private byte[] m_buffer = new byte[BUFFER_SIZE_BITS];
+        private readonly byte[] m_buffer = new byte[BUFFER_SIZE_BITS];
 
         /*! Bit buffer index  */
         private int m_nLastbitinbuffer;
@@ -45,7 +45,7 @@ public class SimpleH264Encoder : IDisposable
         /*! Pointer to output file */
         //private FILE m_pOutFile;
         //Byte Array used for output
-        readonly private List<byte> m_pOutFile;
+        private readonly List<byte> m_pOutFile;
 
         //! Clears the buffer
         private void clearbuffer()
@@ -67,7 +67,7 @@ public class SimpleH264Encoder : IDisposable
         {
             int lrc = 0;
 
-            uint lmask = (uint)Math.Pow((uint)2, (uint)nNumbit);
+            uint lmask = (uint)Math.Pow(2, (uint)nNumbit);
             if ((lval & lmask) > 0)
             {
                 lrc = 1;
@@ -99,11 +99,11 @@ public class SimpleH264Encoder : IDisposable
             //Change the bit
             if (nVal > 0)
             {
-                nValTmp = (nValTmp | (int)Math.Pow(2, nBitPosInByte));
+                nValTmp |= (int)Math.Pow(2, nBitPosInByte);
             }
             else
             {
-                nValTmp = (nValTmp & ~((int)Math.Pow(2, nBitPosInByte)));
+                nValTmp &= ~((int)Math.Pow(2, nBitPosInByte));
             }
 
             //Save the new byte value to the buffer
@@ -138,7 +138,7 @@ public class SimpleH264Encoder : IDisposable
             //Add all byte to buffer
             m_buffer[nBytePos] = (byte)nVal;
 
-            m_nLastbitinbuffer = m_nLastbitinbuffer + 8;
+            m_nLastbitinbuffer += 8;
         }
 
         //! Save all buffer to file
@@ -228,8 +228,8 @@ public class SimpleH264Encoder : IDisposable
                 //Move the index
                 m_buffer[m_nStartingbyte] = 0;
                 m_nStartingbyte++;
-                m_nStartingbyte = m_nStartingbyte % (24 / 8);
-                m_nLastbitinbuffer = m_nLastbitinbuffer - 8;
+                m_nStartingbyte %= (24 / 8);
+                m_nLastbitinbuffer -= 8;
             }
         }
 
@@ -301,7 +301,7 @@ public class SimpleH264Encoder : IDisposable
 
         public void addbits(uint lval, int nNumbits)
         {
-            if ((nNumbits <= 0) || (nNumbits > 64))
+            if (nNumbits is <= 0 or > 64)
             {
                 throw new System.Exception("Error: numbits must be between 1 ... 64");
             }
@@ -360,7 +360,7 @@ public class SimpleH264Encoder : IDisposable
             int nr = m_nLastbitinbuffer % 8;
             if ((nr % 8) != 0)
             {
-                m_nLastbitinbuffer = m_nLastbitinbuffer + (8 - nr);
+                m_nLastbitinbuffer += (8 - nr);
             }
         }
 
@@ -401,11 +401,11 @@ public class SimpleH264Encoder : IDisposable
         }
     }
 
-    ﻿/* * CJOCh264encoder.cpp
-    *
-    *  Created on: Aug 17, 2014
-    *      Author: Jordi Cenzano (www.jordicenzano.name)
-    */
+    /* * CJOCh264encoder.cpp
+   *
+   *  Created on: Aug 17, 2014
+   *      Author: Jordi Cenzano (www.jordicenzano.name)
+   */
 
     /*
     * CJOCh264encoder.h
@@ -466,12 +466,12 @@ public class SimpleH264Encoder : IDisposable
             public uint nCmbwidth; //!< Y (Crominance) macroblock width in pixels
             public uint nCmbheight; //!< Y (Crominance) macroblock height in pixels
 
-            public YUV420p_frame_t yuv420pframe = new YUV420p_frame_t(); //!< Pointer to current frame data
+            public YUV420p_frame_t yuv420pframe = new(); //!< Pointer to current frame data
             public uint nyuv420pframesize; //!< Size in bytes of yuv420pframe
         }
 
         /*! The frame var*/
-        private frame_t m_frame = new frame_t();
+        private readonly frame_t m_frame = new();
 
         /*! The frames per second var*/
         private uint m_nFps;
@@ -818,12 +818,9 @@ public class SimpleH264Encoder : IDisposable
         //Returns the frame pointer to load the video frame
         public byte[] GetFramePtr()
         {
-            if (m_frame.yuv420pframe.pYCbCr is null)
-            {
-                throw new System.Exception("Error: video frame is null (not initialized)");
-            }
-
-            return m_frame.yuv420pframe.pYCbCr;
+            return m_frame.yuv420pframe.pYCbCr is null
+                ? throw new System.Exception("Error: video frame is null (not initialized)")
+                : m_frame.yuv420pframe.pYCbCr;
         }
 
         //! Returns the allocated frame memory in bytes
@@ -892,12 +889,10 @@ public class SimpleH264Encoder : IDisposable
 
     #region Fields
 
-    CJOCh264encoder h264encoder = null;
-
-    uint width = 0;
-    uint height = 0;
-
-    readonly List<byte> nal = new List<byte>();
+    private CJOCh264encoder h264encoder = null;
+    private readonly uint width = 0;
+    private readonly uint height = 0;
+    private readonly List<byte> nal = [];
 
     #endregion
 

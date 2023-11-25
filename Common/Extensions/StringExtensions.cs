@@ -130,7 +130,7 @@ namespace Media.Common.Extensions.String
             try
             {
                 count = count < 0 ? value.Length : count;
-                
+
                 //Start with the value and the same capacity as there may be no capitols..
                 sb = new System.Text.StringBuilder(value, offset, count, count);
 
@@ -186,15 +186,15 @@ namespace Media.Common.Extensions.String
         /// <summary>
         /// Given a source string find the pattern and extract the data thereafter.
         /// </summary>
-        /// <param name="source">The source <see cref="System.String"/></param>
+        /// <param name="source">The source <see cref="string"/></param>
         /// <param name="startIndex">in <paramref name="source"/></param>
         /// <param name="count">from <paramref name="startIndex"/>, ensured to result in a value outside of the length of <paramref name="source"/></param>
-        /// <param name="pattern">The <see cref="System.String"/> to find in <paramref name="source"/></param>
+        /// <param name="pattern">The <see cref="string"/> to find in <paramref name="source"/></param>
         /// <param name="comparison"><see cref="System.StringComparison"/></param>
         /// <returns>
         /// <see cref="String.Empty"/> if no result was found or <paramref name="source"/> was null or empty. 
         /// When <paramref name="pattern"/> is null or empty <paramref name="source"/> is returned. 
-        /// Otherwise the <see cref="System.String"/> which does not include the <paramref name="pattern"/>
+        /// Otherwise the <see cref="string"/> which does not include the <paramref name="pattern"/>
         /// </returns>
         /// <remarks>8 bytes in worst case space complexity, time complexity is O(count) in worst cast</remarks>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -326,11 +326,9 @@ namespace Media.Common.Extensions.String
                 yield break;
             }
 
-            System.Func<char, bool> predicate;
-            if (separator is not null && separator.Length != 0)
-                predicate = (c) => Common.Extensions.Array.ArrayExtensions.Contains(separator, c);
-            else predicate = char.IsWhiteSpace;
-
+            System.Func<char, bool> predicate = separator is not null && separator.Length != 0
+                ? ((c) => Common.Extensions.Array.ArrayExtensions.Contains(separator, c))
+                : char.IsWhiteSpace;
             bool removeEmptyEntries = (options & System.StringSplitOptions.RemoveEmptyEntries) != 0;
             int ct = 0;
             var sb = new System.Text.StringBuilder();

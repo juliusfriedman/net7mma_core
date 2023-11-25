@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Media.Common;
+using Media.Container;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Media.Common;
-using Media.Container;
 
 //FLAC is a codec not a container.
 //https://github.com/filoe/cscore/blob/master/CSCore/Codecs/FLAC/FlacFrameHeader.cs
@@ -16,12 +16,12 @@ namespace Media.Codecs.Flac
         /// <summary>
         /// ASCII "fLaC"
         /// </summary>
-        static byte[] fLaCBytes = System.Text.Encoding.ASCII.GetBytes("fLaC");
+        private static readonly byte[] fLaCBytes = System.Text.Encoding.ASCII.GetBytes("fLaC");
 
         /// <summary>
         /// The value used to ensure frames are read correctly.
         /// </summary>
-        static uint FrameSync = 0b11111111111110;
+        private static readonly uint FrameSync = 0b11111111111110;
 
         /// <summary>
         /// Used to decode a sampleRate code
@@ -72,7 +72,7 @@ namespace Media.Codecs.Flac
         /// <summary>
         /// Used to determine how many bytes are allocated to read a <see cref=nameof(node)/>
         /// </summary>
-        const int IdentifierSize = 4, 
+        private const int IdentifierSize = 4,
             MinimumReadSize = IdentifierSize;
 
         #endregion
@@ -90,7 +90,7 @@ namespace Media.Codecs.Flac
             SeekTable = 3,
             VorbisComment = 4,
             CueSheet = 5,
-            Picture = 6,            
+            Picture = 6,
             //Reserved = 7, //-126
             Invalid = 127
         }
@@ -149,8 +149,7 @@ namespace Media.Codecs.Flac
         /// <returns></returns>
         internal static bool ReadUTF8_64Signed(System.IO.Stream stream, byte[] buffer, ref int offset, out long result)
         {
-            ulong r;
-            var returnValue = ReadUTF8_64(stream, buffer, ref offset, out r);
+            var returnValue = ReadUTF8_64(stream, buffer, ref offset, out ulong r);
             result = (long)r;
             return returnValue;
         }
@@ -158,7 +157,7 @@ namespace Media.Codecs.Flac
         internal static bool ReadUTF8_64(System.IO.Stream stream, byte[] buffer, ref int offset, out ulong result)
         {
             //Should be ReadBits(8);
-            uint x = (uint)(buffer[++offset] = (byte)stream.ReadByte());
+            uint x = buffer[++offset] = (byte)stream.ReadByte();
             ulong v;
             int i;
 
@@ -223,8 +222,7 @@ namespace Media.Codecs.Flac
 
         internal static bool ReadUTF8_32Signed(System.IO.Stream stream, byte[] buffer, ref int offset, out int result)
         {
-            uint r;
-            var returnValue = ReadUTF8_32(stream, buffer, ref offset, out r);
+            var returnValue = ReadUTF8_32(stream, buffer, ref offset, out uint r);
             result = (int)r;
             return returnValue;
         }
@@ -304,26 +302,22 @@ namespace Media.Codecs.Flac
 
         public static bool IsLastBlock(Node node)
         {
-            if (node is null) throw new ArgumentNullException(nameof(node));
-            return IsLastBlock(ref node.Identifier[0]);
+            return node is null ? throw new ArgumentNullException(nameof(node)) : IsLastBlock(ref node.Identifier[0]);
         }
 
         public static bool IsReservedBlock(Node node)
         {
-            if (node is null) throw new ArgumentNullException(nameof(node));
-            return IsReservedBlock(GetBlockType(ref node.Identifier[0]));
+            return node is null ? throw new ArgumentNullException(nameof(node)) : IsReservedBlock(GetBlockType(ref node.Identifier[0]));
         }
 
         public static bool IsInvalid(Node node)
         {
-            if (node is null) throw new ArgumentNullException(nameof(node));
-            return IsInvalid(ref node.Identifier[0]);
+            return node is null ? throw new ArgumentNullException(nameof(node)) : IsInvalid(ref node.Identifier[0]);
         }
 
         public static bool IsFrameHeader(Node node)
         {
-            if (node is null) throw new ArgumentNullException(nameof(node));
-            return IsFrameHeader(node.Identifier);
+            return node is null ? throw new ArgumentNullException(nameof(node)) : IsFrameHeader(node.Identifier);
         }
 
         public static bool IsInvalid(ref byte blockType) { return IsInvalid(GetBlockType(ref blockType)); }
@@ -333,7 +327,7 @@ namespace Media.Codecs.Flac
         public static bool IsReservedBlock(BlockType blockType)
         {
             byte byteLockType = (byte)blockType;
-            return byteLockType >= 7 && byteLockType <= 126;
+            return byteLockType is >= 7 and <= 126;
         }
 
         public static bool IsInvalid(BlockType blockType) { return blockType == BlockType.Invalid; }
@@ -342,17 +336,18 @@ namespace Media.Codecs.Flac
 
         public static bool IsFrameHeader(byte[] identifier)
         {
-            if (identifier is null) throw new ArgumentNullException(nameof(identifier));
-            if (identifier.Length < 2) throw new ArgumentOutOfRangeException(nameof(identifier));
-            return Media.Common.Binary.ReadBitsMSB(identifier, 0, 14) == FrameSync;
+            return identifier is null
+                ? throw new ArgumentNullException(nameof(identifier))
+                : identifier.Length < 2
+                ? throw new ArgumentOutOfRangeException(nameof(identifier))
+                : Media.Common.Binary.ReadBitsMSB(identifier, 0, 14) == FrameSync;
         }
 
         #region Frame Methods
 
         public static int GetBlockSize(Node node)
         {
-            if (node is null) throw new ArgumentNullException(nameof(node));
-            return GetBlockSize(node.Identifier);
+            return node is null ? throw new ArgumentNullException(nameof(node)) : GetBlockSize(node.Identifier);
         }
 
         public static int GetBlockSize(byte[] identifier)
@@ -366,18 +361,13 @@ namespace Media.Codecs.Flac
             {
                 throw new InvalidOperationException("Invalid Blocksize value: 0");
             }
-            if (val == 1)
-                blocksize = 192;
-            else if (val >= 2 && val <= 5)
-                blocksize = 576 << (val - 2);
-            else if (val == 6 || val == 7)
-                blocksize = val;
-            else if (val >= 8 && val <= 15)
-                blocksize = 256 << (val - 8);
-            else
-            {
-                throw new InvalidOperationException("Invalid Blocksize value: " + val);
-            }
+            blocksize = val == 1
+                ? 192
+                : val is >= 2 and <= 5
+                ? 576 << (val - 2)
+                : val is 6 or 7
+                ? val
+                : val is >= 8 and <= 15 ? 256 << (val - 8) : throw new InvalidOperationException("Invalid Blocksize value: " + val);
 
             return blocksize;
 
@@ -386,8 +376,7 @@ namespace Media.Codecs.Flac
 
         public static int GetSampleRate(Node node)
         {
-            if (node is null) throw new ArgumentNullException(nameof(node));
-            return GetSampleRate(node.Identifier);
+            return node is null ? throw new ArgumentNullException(nameof(node)) : GetSampleRate(node.Identifier);
         }
 
         public static int GetSampleRate(byte[] identifier)
@@ -396,20 +385,16 @@ namespace Media.Codecs.Flac
 
             //samplerate
             int sampleRate = identifier[2] & 0x0F;
-            if (sampleRate >= 1 && sampleRate <= 11)
-                sampleRate = SampleRateTable[sampleRate];           
-            else
-            {
-                throw new InvalidOperationException("Invalid SampleRate value: " + sampleRate);
-            }
+            sampleRate = sampleRate is >= 1 and <= 11
+                ? SampleRateTable[sampleRate]
+                : throw new InvalidOperationException("Invalid SampleRate value: " + sampleRate);
             return sampleRate;
             #endregion samplerate
         }
 
         public static int GetChannels(Node node, out ChannelAssignment channelAssignment)
         {
-            if (node is null) throw new ArgumentNullException(nameof(node));
-            return GetChannels(node.Identifier, out channelAssignment);
+            return node is null ? throw new ArgumentNullException(nameof(node)) : GetChannels(node.Identifier, out channelAssignment);
         }
 
         public static int GetChannels(byte[] identifier, out ChannelAssignment channelAssignment)
@@ -442,9 +427,9 @@ namespace Media.Codecs.Flac
         /// </summary>
         /// <param name=nameof(node)></param>
         /// <returns></returns>
-        public static int GetBitsPerSample(Node node) {
-            if (node is null) throw new ArgumentNullException(nameof(node));
-            return GetBitsPerSample(node.Identifier);
+        public static int GetBitsPerSample(Node node)
+        {
+            return node is null ? throw new ArgumentNullException(nameof(node)) : GetBitsPerSample(node.Identifier);
         }
 
         public static int GetBitsPerSample(byte[] identififer)
@@ -452,12 +437,9 @@ namespace Media.Codecs.Flac
             #region bitspersample
 
             int bitsPerSample = (identififer[3] & 0x0E) >> 1;
-            if (bitsPerSample == 3 || bitsPerSample >= 7 || bitsPerSample < 0)
-            {
-                throw new InvalidOperationException("Invalid BitsPerSampleIndex");
-            }
-            else
-                bitsPerSample = BitPerSampleTable[bitsPerSample];
+            bitsPerSample = bitsPerSample is 3 or >= 7 or < 0
+                ? throw new InvalidOperationException("Invalid BitsPerSampleIndex")
+                : BitPerSampleTable[bitsPerSample];
             return bitsPerSample;
             #endregion bitspersample
         }
@@ -471,21 +453,18 @@ namespace Media.Codecs.Flac
         /// <summary>
         /// Where the <see cref="fLaCBytes"/> were found in the stream.
         /// </summary>
-        long m_FlacPosition = -1;
+        private long m_FlacPosition = -1;
 
         /// <summary>
         /// Any <see cref="Track"/> instances, Typically only 1 per file / stream.
         /// </summary>
-        List<Track> m_Tracks = null;
-
-        int? m_MinBlockSize = 0, m_MaxBlockSize = 0,
+        private List<Track> m_Tracks = null;
+        private int? m_MinBlockSize = 0, m_MaxBlockSize = 0,
              m_MinFrameSize = 0, m_MaxFrameSize = 0,
-             m_SampleRate = 0, m_Channels = 0, 
+             m_SampleRate = 0, m_Channels = 0,
              m_BitsPerSample = 0;
-        
-        ulong? m_TotalSamples = 0;
-
-        string m_Md5 = string.Empty, m_Title = string.Empty;
+        private ulong? m_TotalSamples = 0;
+        private string m_Md5 = string.Empty, m_Title = string.Empty;
         #endregion
 
         #region Properties
@@ -494,18 +473,18 @@ namespace Media.Codecs.Flac
         {
             get
             {
-                if (m_MinBlockSize.HasValue) return (int)m_MinBlockSize.Value;
+                if (m_MinBlockSize.HasValue) return m_MinBlockSize.Value;
                 ParseStreamInfo(Root);
-                return (int)m_MinBlockSize.GetValueOrDefault();
+                return m_MinBlockSize.GetValueOrDefault();
             }
         }
         public int MaxBlockSize
         {
             get
             {
-                if (m_MaxBlockSize.HasValue) return (int)m_MaxBlockSize.Value;
+                if (m_MaxBlockSize.HasValue) return m_MaxBlockSize.Value;
                 ParseStreamInfo(Root);
-                return (int)m_MaxBlockSize.GetValueOrDefault();
+                return m_MaxBlockSize.GetValueOrDefault();
             }
         }
 
@@ -513,19 +492,19 @@ namespace Media.Codecs.Flac
         {
             get
             {
-                if (m_MinFrameSize.HasValue) return (int)m_MinFrameSize.Value;
+                if (m_MinFrameSize.HasValue) return m_MinFrameSize.Value;
                 ParseStreamInfo(Root);
-                return (int)m_MinFrameSize.GetValueOrDefault();
+                return m_MinFrameSize.GetValueOrDefault();
             }
         }
-        
+
         public int MaxFrameSize
         {
             get
             {
-                if (m_MaxFrameSize.HasValue) return (int)m_MaxFrameSize.Value;
+                if (m_MaxFrameSize.HasValue) return m_MaxFrameSize.Value;
                 ParseStreamInfo();
-                return (int)m_MaxFrameSize.GetValueOrDefault();
+                return m_MaxFrameSize.GetValueOrDefault();
             }
         }
 
@@ -584,7 +563,7 @@ namespace Media.Codecs.Flac
         #endregion
 
         #region Methods
-        
+
         /// <summary>
         /// Reads the "fLaC" stream marker as defined by <see cref="fLaCBytes"/> and stores the position of the occurance in <see cref="m_FlacPosition"/>.
         /// Throws <see cref="InvalidOperationException"/> when not enough bytes are present OR the "fLaC" marker cannot be found.
@@ -595,11 +574,11 @@ namespace Media.Codecs.Flac
             while (Position + IdentifierSize < Length)
             {
                 Loop:
-                    for (int i = 0; i < fLaCBytes.Length; ++i)
-                        if (ReadByte() != fLaCBytes[i]) goto Loop;
+                for (int i = 0; i < fLaCBytes.Length; ++i)
+                    if (ReadByte() != fLaCBytes[i]) goto Loop;
                 m_FlacPosition = Position - fLaCBytes.Length;
                 return;
-                
+
             }
             throw new InvalidOperationException("Cannot find fLaC marker.");
         }
@@ -628,8 +607,8 @@ namespace Media.Codecs.Flac
 
                 //If contained the found or the unmasked found then return the page
                 yield return block;
-                
-            Continue:
+
+                Continue:
                 count -= block.TotalSize;
 
                 if (count <= 0) yield break;
@@ -638,7 +617,7 @@ namespace Media.Codecs.Flac
             }
 
             Position = position;
-        }      
+        }
 
         /// <summary>
         /// Reads the next block from the underlying.
@@ -695,21 +674,19 @@ namespace Media.Codecs.Flac
                     {
                         lengthSize += 8;
                         Array.Resize(ref identifier, lengthSize + 1);
-                        ulong samplenumber;
-                        if (false == ReadUTF8_64(this, identifier, ref pos, out samplenumber) && samplenumber != ulong.MaxValue)
+                        if (false == ReadUTF8_64(this, identifier, ref pos, out ulong samplenumber) && samplenumber != ulong.MaxValue)
                         {
                             //BlockingStrategy = BlockingStrategy.VariableBlockSize;
                             //SampleNumber = (long)samplenumber;
                             throw new Exception("Invalid UTF8 Samplenumber coding.");
-                            
+
                         }
                     }
                     else //fixed blocksize
                     {
                         lengthSize += 4;
                         Array.Resize(ref identifier, lengthSize + 1);
-                        uint framenumber;
-                        if (false == ReadUTF8_32(this, identifier, ref pos, out framenumber) && framenumber != uint.MaxValue)
+                        if (false == ReadUTF8_32(this, identifier, ref pos, out uint framenumber) && framenumber != uint.MaxValue)
                         {
                             throw new Exception("Invalid UTF8 Framenumber coding.");
                             //BlockingStrategy = BlockingStrategy.FixedBlockSize;
@@ -738,12 +715,7 @@ namespace Media.Codecs.Flac
                         {
                             val = (val << 8) | (identifier[++pos] = (byte)ReadByte());
                         }
-                        if (sampleRateCode == 12)
-                            sampleRateCode = val * 1000;
-                        else if (sampleRateCode == 13)
-                            sampleRateCode = val;
-                        else
-                            sampleRateCode = val * 10;
+                        sampleRateCode = sampleRateCode == 12 ? val * 1000 : sampleRateCode == 13 ? val : val * 10;
                     }
 
                     #endregion read hints
@@ -769,26 +741,26 @@ namespace Media.Codecs.Flac
         /// Parses a <see cref="BlockType.StreamInfo"/> <see cref="Media.Container.Node"/>
         /// </summary>
         /// <param name=nameof(node)>The <see cref="Media.Container.Node"/> to parse</param>
-        internal protected void ParseStreamInfo(Container.Node node = null)
+        protected internal void ParseStreamInfo(Container.Node node = null)
         {
-            node = node ?? Root;
+            node ??= Root;
             VerifyBlockType(node, BlockType.StreamInfo);
             //METADATA_BLOCK_STREAMINFO
-            using (System.IO.BinaryReader bi = new System.IO.BinaryReader(node.DataStream))
+            using (System.IO.BinaryReader bi = new(node.DataStream))
             {
-                using (BitReader br = new BitReader(bi.BaseStream, Binary.BitOrder.MostSignificant, IdentifierSize * 2, true))
+                using (BitReader br = new(bi.BaseStream, Binary.BitOrder.MostSignificant, IdentifierSize * 2, true))
                 {
                     m_MinBlockSize = Common.Binary.ReadU16(node.Data, 0, BitConverter.IsLittleEndian); //br.Read16();
-                    
+
                     m_MaxBlockSize = Common.Binary.ReadU16(node.Data, 2, BitConverter.IsLittleEndian);
-                    
+
                     m_MinFrameSize = (int)Common.Binary.ReadU24(node.Data, 4, BitConverter.IsLittleEndian);
-                    
+
                     m_MaxFrameSize = (int)Common.Binary.ReadU24(node.Data, 7, BitConverter.IsLittleEndian);
 
                     m_SampleRate = (int)Common.Binary.ReadUInt64MSB(node.Data.Array, 10, 20, 0); //e.g. Common.Binary.ReadBitsMSB(node.Data, Common.Binary.BytesToBits(10), 20)
 
-                    m_Channels = 1 + (int)Common.Binary.ReadUInt64MSB(node.Data.Array, 12, 3, 4); 
+                    m_Channels = 1 + (int)Common.Binary.ReadUInt64MSB(node.Data.Array, 12, 3, 4);
 
                     m_BitsPerSample = 1 + (int)Common.Binary.ReadUInt64MSB(node.Data.Array, 12, 5, 7);
 
@@ -803,11 +775,11 @@ namespace Media.Codecs.Flac
         /// Parses a <see cref="BlockType.VorbisComment"/> <see cref="Media.Container.Node"/>
         /// </summary>
         /// <param name=nameof(node)>The <see cref="Media.Container.Node"/> to parse</param>
-        internal protected List<KeyValuePair<string, string>> ParseVorbisComment(Media.Container.Node node)
+        protected internal List<KeyValuePair<string, string>> ParseVorbisComment(Media.Container.Node node)
         {
             VerifyBlockType(node, BlockType.VorbisComment);
 
-            List<KeyValuePair<string, string>> results = new List<KeyValuePair<string, string>>();
+            List<KeyValuePair<string, string>> results = [];
 
             int offset = 0;
             //https://www.xiph.org/vorbis/doc/v-comment.html
@@ -889,23 +861,23 @@ namespace Media.Codecs.Flac
         /// Parses a <see cref="BlockType.SeekTable"/> <see cref="Media.Container.Node"/>
         /// </summary>
         /// <param name=nameof(node)>The <see cref="Media.Container.Node"/> to parse</param>
-        internal protected List<Tuple<long, long, short>> ParseSeekTable(Media.Container.Node node)
+        protected internal List<Tuple<long, long, short>> ParseSeekTable(Media.Container.Node node)
         {
             VerifyBlockType(node, BlockType.SeekTable);
             ///	NOTE
             /// The number of seek points is implied by the metadata header 'length' field, i.e.equal to length / 18.
-            List <Tuple<long, long, short>> seekPoints = new List<Tuple<long, long, short>>((int)(node is null ? 0 : node.DataSize / 18));
-            if (node is not null) for (int i = 0, e = (int)node.DataSize; i < e; i+=18)
-            {
-                //Add the decoded seekpoint
-                seekPoints.Add(new Tuple<long, long, short>(Common.Binary.Read64(node.Data, i, BitConverter.IsLittleEndian),
-                    Common.Binary.Read64(node.Data, i + 8, BitConverter.IsLittleEndian), 
-                    Common.Binary.Read16(node.Data, i + 10, BitConverter.IsLittleEndian)));
-            }
+            List<Tuple<long, long, short>> seekPoints = new((int)(node is null ? 0 : node.DataSize / 18));
+            if (node is not null) for (int i = 0, e = (int)node.DataSize; i < e; i += 18)
+                {
+                    //Add the decoded seekpoint
+                    seekPoints.Add(new Tuple<long, long, short>(Common.Binary.Read64(node.Data, i, BitConverter.IsLittleEndian),
+                        Common.Binary.Read64(node.Data, i + 8, BitConverter.IsLittleEndian),
+                        Common.Binary.Read16(node.Data, i + 10, BitConverter.IsLittleEndian)));
+                }
             return seekPoints;
         }
 
-        internal protected uint ReadUnary()
+        protected internal uint ReadUnary()
         {
 
             //int i;
@@ -913,7 +885,7 @@ namespace Media.Codecs.Flac
             //return i;
 
             uint result = 0;
-            using(Common.BitReader br = new BitReader(this, Binary.BitOrder.MostSignificant, 32, true))
+            using (Common.BitReader br = new(this, Binary.BitOrder.MostSignificant, 32, true))
             {
                 uint unaryindicator = (uint)(br.Read24() >> 24);
 
@@ -930,7 +902,7 @@ namespace Media.Codecs.Flac
             }
         }
 
-        internal protected int ReadUnarySigned()
+        protected internal int ReadUnarySigned()
         {
             var value = ReadUnary();
             return (int)(value >> 1 ^ -((int)(value & 1)));
@@ -944,13 +916,9 @@ namespace Media.Codecs.Flac
 
         public override string ToTextualConvention(Node block)
         {
-            if (block.Master.Equals(this))
-            {
-                if (IsFrameHeader(block.Identifier)) return "FrameHeader";
-                return GetBlockType(block).ToString();
-            }
-
-            return base.ToTextualConvention(block);
+            return block.Master.Equals(this)
+                ? IsFrameHeader(block.Identifier) ? "FrameHeader" : GetBlockType(block).ToString()
+                : base.ToTextualConvention(block);
         }
 
         public override IEnumerator<Node> GetEnumerator()
@@ -986,10 +954,10 @@ namespace Media.Codecs.Flac
 
             Track lastTrack = null;
 
-            m_Tracks = new List<Track>();
+            m_Tracks = [];
 
             //Loop for K StreamInfo blocks and the single VorbisComment.
-            foreach(var block in ReadBlocks(0, Length, BlockType.StreamInfo, BlockType.VorbisComment))
+            foreach (var block in ReadBlocks(0, Length, BlockType.StreamInfo, BlockType.VorbisComment))
             {
 
                 List<KeyValuePair<string, string>> vorbisInfo;
@@ -1023,7 +991,7 @@ namespace Media.Codecs.Flac
 
                             continue;
                         }
-                }                
+                }
             }
 
             m_Tracks.Add(lastTrack);

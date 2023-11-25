@@ -35,8 +35,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Media.Sdp
@@ -65,7 +65,7 @@ namespace Media.Sdp
                          ; 64-bit representation used elsewhere, time
                          ; in SDP does not wrap in the year 2036.
          
-         */       
+         */
 
         #region Properties
 
@@ -162,15 +162,15 @@ namespace Media.Sdp
         #endregion
 
         //Todo remove?
-        internal protected readonly Lines.SessionTimeDescriptionLine TimeDescriptionLine;
+        protected internal readonly Lines.SessionTimeDescriptionLine TimeDescriptionLine;
 
         #region Constructor
 
         public TimeDescription(bool shouldDispose = true) : base(shouldDispose)
         {
-            TimeDescriptionLine = new Lines.SessionTimeDescriptionLine();
+            TimeDescriptionLine = [];
 
-            RepeatLines = new List<Lines.SessionRepeatTimeLine>();
+            RepeatLines = [];
         }
 
         public TimeDescription(int startTime, int stopTime)
@@ -226,8 +226,7 @@ namespace Media.Sdp
 
             StopTime = other.StopTime;
 
-            if (referenceRepeatTimes) RepeatLines = other.RepeatLines;
-            else RepeatLines = new List<Lines.SessionRepeatTimeLine>(other.RepeatLines);
+            RepeatLines = referenceRepeatTimes ? other.RepeatLines : new List<Lines.SessionRepeatTimeLine>(other.RepeatLines);
         }
 
         public TimeDescription(long sessionStart, long sessionStop)
@@ -261,9 +260,9 @@ namespace Media.Sdp
         public string ToString(SessionDescription sdp = null)
         {
             StringBuilder builder = new();
-            
+
             builder.Append(TimeDescriptionLine.ToString());
-            
+
             foreach (Lines.SessionRepeatTimeLine repeatTime in RepeatLines)
             {
                 builder.Append(repeatTime.ToString());
@@ -305,7 +304,7 @@ namespace Media.Sdp
     }
 
     #endregion
-    
+
     //Could be Extension methods
 
     //Should be has started?

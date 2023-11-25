@@ -56,7 +56,7 @@ namespace Media.Containers.Mpeg
 
         public ProgramStreamReader(System.IO.FileStream source, System.IO.FileAccess access = System.IO.FileAccess.Read) : base(source, access) { }
 
-        public ProgramStreamReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, bufferSize) { } 
+        public ProgramStreamReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, bufferSize) { }
 
         //Might need the data not the identifier
         public static string ToTextualConvention(byte[] identifier)
@@ -81,7 +81,7 @@ namespace Media.Containers.Mpeg
             {
                 //If no names were specified or they were and the identifier marker was contained return the node
                 if (names is null || names.Length is 0 || names.Contains(node.Identifier[3])) yield return node;
-                
+
                 //Decrease by TotalSize of the node
                 count -= node.TotalSize;
 
@@ -109,7 +109,7 @@ namespace Media.Containers.Mpeg
             Position = position;
 
             return result;
-        }      
+        }
 
         /// <summary>
         /// 
@@ -201,8 +201,7 @@ namespace Media.Containers.Mpeg
                     case Mpeg.StreamTypes.PackHeader:
                         {
                             //Decoder the SCR
-                            double scr;
-                            ParsePackHeader(next, out scr);
+                            ParsePackHeader(next, out double scr);
 
                             //Set the SystemClockRate
                             m_SystemClockRate = scr;
@@ -228,8 +227,7 @@ namespace Media.Containers.Mpeg
 
         public override string ToTextualConvention(Container.Node node)
         {
-            if (node.Master.Equals(this)) return ProgramStreamReader.ToTextualConvention(node.Identifier);
-            return base.ToTextualConvention(node);
+            return node.Master.Equals(this) ? ProgramStreamReader.ToTextualConvention(node.Identifier) : base.ToTextualConvention(node);
         }
 
         //Find a Pack Header?
@@ -242,7 +240,7 @@ namespace Media.Containers.Mpeg
                 //Should just be read from position....
                 Container.Node result = FindNode(Mpeg.StreamTypes.PackHeader, 0, Length);
 
-                if(CanSeek) Position = position;
+                if (CanSeek) Position = position;
 
                 return result;
             }
@@ -254,7 +252,7 @@ namespace Media.Containers.Mpeg
             get { throw new NotImplementedException(); }
         }
 
-        double? m_SystemClockRate;
+        private double? m_SystemClockRate;
 
         /// <summary>
         /// Decodes the SystemClockRate found in the Root node.
@@ -265,8 +263,7 @@ namespace Media.Containers.Mpeg
             {
                 if (false == m_SystemClockRate.HasValue)
                 {
-                    double result;
-                    ParsePackHeader(Root, out result);
+                    ParsePackHeader(Root, out double result);
                     m_SystemClockRate = result;
                 }
 
@@ -307,7 +304,7 @@ namespace Media.Containers.Mpeg
 
             //m_PackHeaderVersion could be ser here..
 
-             //Determine which version of the Pack Header this is
+            //Determine which version of the Pack Header this is
             switch (node.Identifier[4] >> 6)
             {
                 case 0: //MPEG 1
@@ -315,7 +312,7 @@ namespace Media.Containers.Mpeg
                         //Decode the SCR
 
                         //Todo, use ReadBigEndianInteger or BitStream
-                        high = (double)((node.Identifier[5] >> 3) & 0x01);
+                        high = (node.Identifier[5] >> 3) & 0x01;
 
                         low = ((uint)((node.Identifier[5] >> 1) & 0x03) << 30) |
                             (uint)(node.Identifier[6] << 22) |
@@ -330,7 +327,7 @@ namespace Media.Containers.Mpeg
                         //Decode the SCR
 
                         //Todo, use ReadBigEndianInteger or BitStream
-                        high = (double)((node.Identifier[5] & 0x20) >> 5);
+                        high = (node.Identifier[5] & 0x20) >> 5;
 
                         low = ((uint)((node.Identifier[5] & 0x18) >> 3) << 30) |
                             (uint)((node.Identifier[5] & 0x03) << 28) |
@@ -351,7 +348,7 @@ namespace Media.Containers.Mpeg
             scr = (((high * 0x10000) * 0x10000) + low) / 90000.0;
         }
 
-        System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<bool, ushort, Container.Node>> m_StreamBoundEntries = new System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<bool, ushort, Container.Node>>();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<bool, ushort, Container.Node>> m_StreamBoundEntries = new();
 
         protected virtual void ParseSystemsHeader(Container.Node node)
         {
@@ -399,7 +396,7 @@ namespace Media.Containers.Mpeg
             //For DVD-Video this value will always be 1.
 
             byte video_boud = (byte)(temp & 0xE0);
-            
+
             //1-bit boolean. If CSPS_flag is TRUE (1) this specifies which restraint is applicable to the packet rate, otherwise the flag has no meaning. 
             //For DVD-Video this flag must be FALSE (0).
 
@@ -426,7 +423,7 @@ namespace Media.Containers.Mpeg
                 byte streamId = node.Data[offset++];
 
                 //Use constants from StreamType and see if a switch could be better.
-                if (streamId < 0xBC && streamId != 0xB8 && streamId != 0xB9) throw new InvalidOperationException("All Entries in the System Header must apply to a stream with an id >= 0xBC");
+                if (streamId is < 0xBC and not 0xB8 and not 0xB9) throw new InvalidOperationException("All Entries in the System Header must apply to a stream with an id >= 0xBC");
 
                 /*
                  1-bit boolean. False (0) indicates the multiplier is 128, TRUE (1) indicates the multiplier is 1024. 

@@ -43,7 +43,7 @@ namespace Media.Common.Extensions.IPAddress
         private static void CheckIPVersion(System.Net.IPAddress ipAddress, System.Net.IPAddress mask, out byte[] addressBytes, out byte[] maskBytes)
         {
             if (ipAddress is null) throw new System.ArgumentNullException("ipAddress");
-        
+
             if (mask is null) throw new System.ArgumentNullException("mask");
 
             addressBytes = ipAddress.GetAddressBytes();
@@ -58,10 +58,8 @@ namespace Media.Common.Extensions.IPAddress
 
         public static System.Net.IPAddress And(this System.Net.IPAddress ipAddress, System.Net.IPAddress mask)
         {
-            byte[] addressBytes;
-            byte[] maskBytes;
 
-            CheckIPVersion(ipAddress, mask, out addressBytes, out maskBytes);
+            CheckIPVersion(ipAddress, mask, out byte[] addressBytes, out byte[] maskBytes);
 
             byte[] resultBytes = new byte[addressBytes.Length];
 
@@ -73,21 +71,21 @@ namespace Media.Common.Extensions.IPAddress
             return new System.Net.IPAddress(resultBytes);
         }
 
-        private static System.Net.IPAddress emptyIpv4 = System.Net.IPAddress.Parse("0.0.0.0");
-        private static System.Net.IPAddress intranetMask1v4 = System.Net.IPAddress.Parse("10.255.255.255");
-        private static System.Net.IPAddress intranetMask2v4 = System.Net.IPAddress.Parse("172.16.0.0");
-        private static System.Net.IPAddress intranetMask3v4 = System.Net.IPAddress.Parse("172.31.255.255");
-        private static System.Net.IPAddress intranetMask4v4 = System.Net.IPAddress.Parse("192.168.255.255");
+        private static readonly System.Net.IPAddress emptyIpv4 = System.Net.IPAddress.Parse("0.0.0.0");
+        private static readonly System.Net.IPAddress intranetMask1v4 = System.Net.IPAddress.Parse("10.255.255.255");
+        private static readonly System.Net.IPAddress intranetMask2v4 = System.Net.IPAddress.Parse("172.16.0.0");
+        private static readonly System.Net.IPAddress intranetMask3v4 = System.Net.IPAddress.Parse("172.31.255.255");
+        private static readonly System.Net.IPAddress intranetMask4v4 = System.Net.IPAddress.Parse("192.168.255.255");
 
         //Should check if ipV6 is even supported before defining them.
         //Shoul be null and then in Static constructor should check =>
         //System.Net.Sockets.Socket.OSSupportsIPv6 or try GetIPv6Properties().Index > -999 from the networkInterface...
 
-        private static System.Net.IPAddress emptyIpv6 = System.Net.IPAddress.IPv6Any;
-        private static System.Net.IPAddress intranetMask1v6 = System.Net.IPAddress.Parse("::ffff:10.255.255.255");
-        private static System.Net.IPAddress intranetMask2v6 = System.Net.IPAddress.Parse("::ffff:172.16.0.0");
-        private static System.Net.IPAddress intranetMask3v6 = System.Net.IPAddress.Parse("::ffff:172.31.255.255");
-        private static System.Net.IPAddress intranetMask4v6 = System.Net.IPAddress.Parse("::ffff:192.168.255.255");
+        private static readonly System.Net.IPAddress emptyIpv6 = System.Net.IPAddress.IPv6Any;
+        private static readonly System.Net.IPAddress intranetMask1v6 = System.Net.IPAddress.Parse("::ffff:10.255.255.255");
+        private static readonly System.Net.IPAddress intranetMask2v6 = System.Net.IPAddress.Parse("::ffff:172.16.0.0");
+        private static readonly System.Net.IPAddress intranetMask3v6 = System.Net.IPAddress.Parse("::ffff:172.31.255.255");
+        private static readonly System.Net.IPAddress intranetMask4v6 = System.Net.IPAddress.Parse("::ffff:192.168.255.255");
 
         /// <summary>
         /// Retuns true if the ip address is one of the following
@@ -99,7 +97,7 @@ namespace Media.Common.Extensions.IPAddress
         /// </summary>
         /// <returns></returns>
         public static bool IsOnIntranet(this System.Net.IPAddress ipAddress) //Nat
-        {            
+        {
             bool onIntranet = System.Net.IPAddress.IsLoopback(ipAddress);
 
             if (false == onIntranet)
@@ -143,7 +141,6 @@ namespace Media.Common.Extensions.IPAddress
         {
             if (ipAddress is null) return false;
 
-            byte[] addressBytes;
 
             switch (ipAddress.AddressFamily)
             {
@@ -168,7 +165,7 @@ namespace Media.Common.Extensions.IPAddress
                         byte highIP = (byte)(ipAddress.Address & byte.MaxValue); // ipAddress.GetAddressBytes()[0];
 #pragma warning restore CS0618 // Type or member is obsolete
 
-                        return highIP >= 224 && highIP <= 239;
+                        return highIP is >= 224 and <= 239;
 #endif
                     }
                 case System.Net.Sockets.AddressFamily.InterNetworkV6:
@@ -179,7 +176,7 @@ namespace Media.Common.Extensions.IPAddress
                         //could use out overload and check in place or pass out to MapToIpv4...
 
                         //Check if mapped to v6 from v4 and unmap
-                        if (IPAddressExtensions.IsIPv4MappedToIPv6(ipAddress, out addressBytes)) //(ipAddress.IsIPv4MappedToIPv6)
+                        if (IPAddressExtensions.IsIPv4MappedToIPv6(ipAddress, out byte[] addressBytes)) //(ipAddress.IsIPv4MappedToIPv6)
                         {
                             ipAddress = IPAddressExtensions.MapToIPv4(addressBytes); //ipAddress.MapToIPv4();
 
@@ -197,9 +194,8 @@ namespace Media.Common.Extensions.IPAddress
 
         public static bool IsIPv4MappedToIPv6(this System.Net.IPAddress addr)
         {
-            byte[] allocated; 
-            
-            return IsIPv4MappedToIPv6(addr, out allocated);
+
+            return IsIPv4MappedToIPv6(addr, out byte[] allocated);
         }
 
         internal static bool IsIPv4MappedToIPv6(this System.Net.IPAddress addr, out byte[] addrBytes)
@@ -221,7 +217,7 @@ namespace Media.Common.Extensions.IPAddress
 
             //First 32 bits must be 0 when mapped.
             if (Common.Binary.ReadInteger(addrBytes, 0, 4, Media.Common.Binary.IsLittleEndian) != 0) return false;
-            
+
             //0xff when mapped
             return Common.Binary.ReadU16(addrBytes, 10, Media.Common.Binary.IsLittleEndian) == ushort.MaxValue;
         }
@@ -230,11 +226,11 @@ namespace Media.Common.Extensions.IPAddress
 
         //Could check for method on type at runtime and if present store the location and call with the instance via reflection...
 
-        public static System.Net.IPAddress MapToIPv4(this System.Net.IPAddress addr) 
+        public static System.Net.IPAddress MapToIPv4(this System.Net.IPAddress addr)
         {
-            if (addr.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6) throw new System.ArgumentException("Must pass an IPv6 address to MapToIPv4");
-
-            return MapToIPv4(addr.GetAddressBytes());
+            return addr.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6
+                ? throw new System.ArgumentException("Must pass an IPv6 address to MapToIPv4")
+                : MapToIPv4(addr.GetAddressBytes());
         }
 
         //The last 4 bytes correspond to the IP6 address if map bytes are filled

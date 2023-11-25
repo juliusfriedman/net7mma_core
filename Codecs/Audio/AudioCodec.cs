@@ -46,7 +46,7 @@ namespace Media.Codecs.Audio
         public AudioCodec(string name, Common.Binary.ByteOrder defaultByteOrder = Common.Binary.ByteOrder.Unknown, int defaultComponentCount = 0, int defaultBitsPerComponent = 0)
             : base(name, Codec.MediaType.Audio, defaultByteOrder, defaultComponentCount, defaultBitsPerComponent)
         {
-            
+
         }
     }
 }

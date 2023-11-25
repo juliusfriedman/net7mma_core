@@ -38,7 +38,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
-using Media.Common.Extensions.Generic.Dictionary;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,7 +69,7 @@ namespace Media.Common.Collections.Generic
             public T Value;
 
             public Node Next;
-                     
+
             //Create and have no value, Deleted, Has Value
             //Flags, Allocated, Deleted, Stored, Native
 
@@ -108,11 +107,11 @@ namespace Media.Common.Collections.Generic
 
         //    System.Type TypeOfLinkedListNodeT = typeof(LinkedListNode<T>);
 
-            
+
 
         //    //or the ctor
         //    System.Collections.Generic.IEnumerable<System.Reflection.ConstructorInfo> ctors = System.Reflection.IntrospectionExtensions.GetTypeInfo(TypeOfLinkedListNodeT).DeclaredConstructors;
-            
+
         //    Constructor = ctors.LastOrDefault();
         //    //ctors[0].Invoke(new object[] { list, value });
 
@@ -194,7 +193,7 @@ namespace Media.Common.Collections.Generic
         /// <summary>
         /// The count of contained nodes
         /// </summary>
-        long m_Count = 0;
+        private long m_Count = 0;
 
         //Todo
         //Capacity, ICollection
@@ -211,7 +210,7 @@ namespace Media.Common.Collections.Generic
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return System.Threading.Interlocked.Read(ref m_Count); }
         }
-        
+
         /// <summary>
         /// Indicates if no elements are contained.
         /// </summary>
@@ -229,7 +228,7 @@ namespace Media.Common.Collections.Generic
         /// Constructs a LinkedQueue
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        
+
         public ConcurrentLinkedQueueSlim()
         {
 
@@ -252,7 +251,7 @@ namespace Media.Common.Collections.Generic
             {
                 case Common.Binary.LongZero:
                     // Store
-                    t = default(T);
+                    t = default;
 
                     //Return
                     return false;
@@ -344,12 +343,11 @@ namespace Media.Common.Collections.Generic
             //if (/*Count is Common.Binary.LongZero ||*/ First is null)) 
             //else Last = Last.Next = new Node(ref t);
 
-            switch (System.Threading.Interlocked.Read(ref m_Count))
-                {
-                    case Common.Binary.LongZero: Last = First = new Node(ref t); break;
-                    default: Last = Last.Next = new Node(ref t); break;
-                    //default: Last = System.Threading.Interlocked.Exchange<Node>(ref Last.Next, new Node(ref t)) ?? Last.Next; break;
-            }
+            Last = System.Threading.Interlocked.Read(ref m_Count) switch
+            {
+                Common.Binary.LongZero => First = new Node(ref t),
+                _ => Last.Next = new Node(ref t),
+            };
 
             //Increment (1) @ Count
             System.Threading.Interlocked.Increment(ref m_Count);
@@ -384,9 +382,8 @@ namespace Media.Common.Collections.Generic
 
         public void Clear(bool all = true)
         {
-            Node First, Last;
 
-            Clear(all, out First, out Last);
+            Clear(all, out Node First, out Node Last);
         }
 
         #endregion
@@ -396,7 +393,7 @@ namespace Media.Common.Collections.Generic
         /// </summary>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        IEnumerator<T> GetEnumerator()
+        private IEnumerator<T> GetEnumerator()
         {
             Node Current = First ?? Last;
 
@@ -428,13 +425,10 @@ namespace Media.UnitTests
     /// </summary>
     internal class ConcurrentLinkedQueueSlimTests
     {
-        readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<long> LinkedQueue = new Common.Collections.Generic.ConcurrentLinkedQueueSlim<long>();
-
-        long LastInputOutput = 0;
-
-        int Amount = 100;
-
-        int ThreadCount = Environment.ProcessorCount;
+        private readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<long> LinkedQueue = new();
+        private long LastInputOutput = 0;
+        private readonly int Amount = 100;
+        private readonly int ThreadCount = Environment.ProcessorCount;
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void TestsEnqueue()
@@ -467,9 +461,7 @@ namespace Media.UnitTests
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void TestsDequeue()
         {
-            List<System.Exception> exceptions = new List<Exception>();
-
-            if (LinkedQueue is null) exceptions.Add(new System.Exception("LinkedQueue is null"));
+            List<System.Exception> exceptions = LinkedQueue is null ? [new System.Exception("LinkedQueue is null")] : [];
 
             if (exceptions.Count > 0) throw new System.Exception("Errors Occured", new System.Exception(string.Join(Environment.NewLine, exceptions.Select(e => e.Message))));
 
@@ -520,12 +512,12 @@ namespace Media.UnitTests
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void TestsThreading()
         {
-            System.Threading.ManualResetEvent mre = new System.Threading.ManualResetEvent(false);
+            System.Threading.ManualResetEvent mre = new(false);
 
             int countIn = 0;
 
             //In a thread populate
-            System.Threading.Thread enqueueThread = new System.Threading.Thread(() =>
+            System.Threading.Thread enqueueThread = new(() =>
             {
                 while (countIn < Amount)
                 {
@@ -552,13 +544,12 @@ namespace Media.UnitTests
             int countOut = 0;
 
             //In another thread write
-            System.Threading.Thread dequeueThread = new System.Threading.Thread(() =>
+            System.Threading.Thread dequeueThread = new(() =>
             {
                 while (countOut < Amount)
                 {
-                    long dequeue;
 
-                    if (LinkedQueue.TryDequeue(out dequeue))
+                    if (LinkedQueue.TryDequeue(out long dequeue))
                     {
                         ++countOut;
 
@@ -595,12 +586,12 @@ namespace Media.UnitTests
                         System.Console.WriteLine("Enumerate Count: " + LinkedQueue.Count);
 
                         long peek = 0;
-                        
-                        if(LinkedQueue.TryPeek(ref peek)) System.Console.WriteLine("Enumerate TryPeek: " + peek);
+
+                        if (LinkedQueue.TryPeek(ref peek)) System.Console.WriteLine("Enumerate TryPeek: " + peek);
 
                         if (false == LinkedQueue.IsEmpty)
                         {
-                            if(LinkedQueue.Last is not null)
+                            if (LinkedQueue.Last is not null)
                                 System.Console.WriteLine("Enumerate Last: " + LinkedQueue.Last.Value);
 
                             if (LinkedQueue.First is not null)
@@ -635,7 +626,7 @@ namespace Media.UnitTests
         {
             int MultiThreadAmount = Amount * 10;
 
-            System.Threading.ManualResetEvent sharedResetEvent = new System.Threading.ManualResetEvent(false);
+            System.Threading.ManualResetEvent sharedResetEvent = new(false);
 
             int statLevelCountIn = 0;
 
@@ -652,7 +643,8 @@ namespace Media.UnitTests
 
             System.Threading.Thread[] enumerateThreads = new System.Threading.Thread[ThreadCount];
 
-            Func<System.Threading.Thread> createEnumerateThread = () => {
+            Func<System.Threading.Thread> createEnumerateThread = () =>
+            {
 
                 if (enumerateCount >= ThreadCount) enumerateCount = 0;
 
@@ -675,7 +667,7 @@ namespace Media.UnitTests
                             System.Console.WriteLine(System.Threading.Thread.CurrentThread.Name + "=> Last = " + System.Threading.Thread.VolatileRead(ref LinkedQueue.Last.Value));
                         }
                     }
-                    catch(Exception)
+                    catch (Exception)
                     {
                         System.Console.WriteLine(System.Threading.Thread.CurrentThread.Name + " => Exception");
                     }
@@ -748,9 +740,8 @@ namespace Media.UnitTests
 
                     while (threadLocalCountOut < MultiThreadAmount)
                     {
-                        long dequeue;
 
-                        if (LinkedQueue.TryDequeue(out dequeue))
+                        if (LinkedQueue.TryDequeue(out long dequeue))
                         {
                             ++threadLocalCountOut;
 
@@ -783,7 +774,7 @@ namespace Media.UnitTests
             }
 
             System.Linq.ParallelEnumerable.ForAll(enqueueThreads.AsParallel(), t => t.Start());
-            
+
             System.Linq.ParallelEnumerable.ForAll(dequeueThreads.AsParallel(), t => t.Start());
 
             while (stackLevelCountOut is 0 && statLevelCountIn is 0) sharedResetEvent.WaitOne(0);
@@ -841,7 +832,7 @@ namespace Media.UnitTests
             {
                 try
                 {
-                                                                                    //Multiply ThreadCount by 100
+                    //Multiply ThreadCount by 100
                     if (true == LinkedQueue.IsEmpty && false == (LastInputOutput == ThreadCount * (((10 >> 3) << 7) - 28))) throw new System.Exception("IsEmpty");
                 }
                 catch

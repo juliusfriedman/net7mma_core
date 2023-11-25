@@ -50,13 +50,13 @@ namespace Media.Common.Extensions.Delegate
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static System.Delegate ConvertTo(this System.Delegate self, System.Type type)
         {
-            if (type is null) { throw new System.ArgumentNullException("type"); }
-            if (self is null) { return null; }
-
-            if (self.GetType() == type)
-                return self;
-
-            return System.Delegate.Combine(
+            return type is null
+                ? throw new System.ArgumentNullException("type")
+                : self is null
+                ? null
+                : self.GetType() == type
+                ? self
+                : System.Delegate.Combine(
                 self.GetInvocationList()
                     .Select(i => System.Delegate.CreateDelegate(type, i.Target, i.Method))
                     .ToArray());
@@ -65,7 +65,7 @@ namespace Media.Common.Extensions.Delegate
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void CreateDelegate(ref System.Delegate self, System.Type type = null)
         {
-            if(self is not null) foreach(var inv in self.GetInvocationList())
+            if (self is not null) foreach (var inv in self.GetInvocationList())
                     self = System.Delegate.Combine(self, System.Delegate.CreateDelegate(type ?? inv.Method.ReturnType, inv.Target, inv.Method));
         }
 
@@ -76,9 +76,9 @@ namespace Media.Common.Extensions.Delegate
         /// <returns></returns>
         public static System.Delegate CreateDelegate(System.Reflection.MethodInfo method)
         {
-            if (method is null) throw new System.ArgumentNullException("method");
-
-            return method.CreateDelegate(System.Linq.Expressions.Expression.GetDelegateType(method.GetParameters().Select(p => p.ParameterType).Concat(Media.Common.Extensions.Linq.LinqExtensions.Yield(method.ReturnType)).ToArray()));
+            return method is null
+                ? throw new System.ArgumentNullException("method")
+                : method.CreateDelegate(System.Linq.Expressions.Expression.GetDelegateType(method.GetParameters().Select(p => p.ParameterType).Concat(Media.Common.Extensions.Linq.LinqExtensions.Yield(method.ReturnType)).ToArray()));
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -95,7 +95,7 @@ namespace Media.Common.Extensions.Delegate
             do
             {
                 oldBaseDel = baseDel;
-                newBaseDel = (T)(System.Object)System.Delegate.Combine((System.Delegate)(object)oldBaseDel, newDel);
+                newBaseDel = (T)(object)System.Delegate.Combine((System.Delegate)(object)oldBaseDel, newDel);
             } while (System.Threading.Interlocked.CompareExchange(ref baseDel, newBaseDel, oldBaseDel) != oldBaseDel);
         }
 
@@ -107,7 +107,7 @@ namespace Media.Common.Extensions.Delegate
             do
             {
                 oldBaseDel = baseDel;
-                newBaseDel = (T)(System.Object)System.Delegate.Remove((System.Delegate)(object)oldBaseDel, newDel);
+                newBaseDel = (T)(object)System.Delegate.Remove((System.Delegate)(object)oldBaseDel, newDel);
             } while (System.Threading.Interlocked.CompareExchange(ref baseDel, newBaseDel, oldBaseDel) != oldBaseDel);
         }
     }
@@ -123,14 +123,13 @@ namespace Media.Common.Extensions.Delegate
     //http://www.codeproject.com/Articles/1104555/The-Function-Decorator-Pattern-Reanimation-of-Func @ ActionExtensions
     public static class FuncExtensions
     {
-        public static System.Func<TArg, TResult> GetOrCache<TArg, TResult, TCache>(this System.Func<TArg, TResult> func, TCache cache) 
+        public static System.Func<TArg, TResult> GetOrCache<TArg, TResult, TCache>(this System.Func<TArg, TResult> func, TCache cache)
             where TCache : class, System.Collections.Generic.IDictionary<TArg, TResult>
         {
             return (arg) =>
             {
-                TResult value;
 
-                if (cache.TryGetValue(arg, out value))
+                if (cache.TryGetValue(arg, out TResult value))
                 {
                     return value;
                 }
@@ -142,7 +141,7 @@ namespace Media.Common.Extensions.Delegate
                 return value;
             };
         }
-  
+
         public static System.Func<TArg, TResult> WaitExecute<TArg, TResult>(this System.Func<TArg, TResult> func, System.TimeSpan amount)
         {
             return (arg) =>

@@ -39,7 +39,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
@@ -55,7 +54,7 @@ public class SDPUnitTests
     /// </summary>
     public void TestSessionDescriptionLine()
     {
-        Media.Sdp.SessionDescriptionLine line = new Media.Sdp.SessionDescriptionLine('x', string.Empty)
+        Media.Sdp.SessionDescriptionLine line = new('x', string.Empty)
         {
             "a", "b", "c"
         };
@@ -69,7 +68,7 @@ public class SDPUnitTests
         System.Diagnostics.Debug.Assert(line.m_Parts.Count == 3, "Did not have correct Part Count");
 
         //Create a exact copy but in a new instance
-        Media.Sdp.SessionDescriptionLine linf = new Media.Sdp.SessionDescriptionLine('x', string.Empty)
+        Media.Sdp.SessionDescriptionLine linf = new('x', string.Empty)
         {
             "a", "b", "c"
         };
@@ -100,9 +99,9 @@ public class SDPUnitTests
     {
         string testVector = "b=RS:0";
 
-        Media.Sdp.SessionDescriptionLine line = new Media.Sdp.SessionDescriptionLine(testVector);
+        Media.Sdp.SessionDescriptionLine line = new(testVector);
 
-        Media.Sdp.Lines.SessionBandwidthLine Line = new Media.Sdp.Lines.SessionBandwidthLine(line);
+        Media.Sdp.Lines.SessionBandwidthLine Line = new(line);
 
         //Media.Sdp.Lines.SessionBandwidthLine TBLineFromString = new Media.Sdp.Lines.SessionBandwidthLine(testVector);
 
@@ -117,9 +116,9 @@ public class SDPUnitTests
     {
         string testVector = "c=IN IP4 10.0.0.4";
 
-        Media.Sdp.SessionDescriptionLine line = new Media.Sdp.SessionDescriptionLine(testVector);
+        Media.Sdp.SessionDescriptionLine line = new(testVector);
 
-        Media.Sdp.Lines.SessionConnectionLine Line = new Media.Sdp.Lines.SessionConnectionLine(line);
+        Media.Sdp.Lines.SessionConnectionLine Line = new(line);
 
         System.Diagnostics.Debug.Assert(line.ToString() == Line.ToString(), "Not String Equal");
 
@@ -133,9 +132,9 @@ public class SDPUnitTests
     {
         string testVector = "o=jdoe 2890844526 2890842807 IN IP4 www.com";
 
-        Media.Sdp.SessionDescriptionLine line = new Media.Sdp.SessionDescriptionLine(testVector);
+        Media.Sdp.SessionDescriptionLine line = new(testVector);
 
-        Media.Sdp.Lines.SessionOriginLine Line = new Media.Sdp.Lines.SessionOriginLine(line);
+        Media.Sdp.Lines.SessionOriginLine Line = new(line);
 
         System.Diagnostics.Debug.Assert(Line.SessionId == "2890844526", "Unexpected SessionId");
 
@@ -156,9 +155,9 @@ public class SDPUnitTests
     {
         string testVector = "z=2882844526 -1h 2898848070 0 0 -3600 0";
 
-        Media.Sdp.Lines.SessionTimeZoneLine line = new Media.Sdp.Lines.SessionTimeZoneLine(new Media.Sdp.SessionDescriptionLine(testVector));
+        Media.Sdp.Lines.SessionTimeZoneLine line = new(new Media.Sdp.SessionDescriptionLine(testVector));
 
-        Media.Sdp.Lines.SessionTimeZoneLine Line = new Media.Sdp.Lines.SessionTimeZoneLine(line);
+        Media.Sdp.Lines.SessionTimeZoneLine Line = new(line);
 
         //7 Total parts
         //0 - 2882844526 -1h //Start
@@ -280,7 +279,7 @@ r=7d 1h 0 25h";
 
         int index = 0;
 
-        Media.Sdp.TimeDescription line = new Media.Sdp.TimeDescription(vector, ref index);
+        Media.Sdp.TimeDescription line = new(vector, ref index);
 
         System.Diagnostics.Debug.Assert(line.StartTime == 3034423619, "Expected StartTime not found");
 
@@ -288,7 +287,7 @@ r=7d 1h 0 25h";
 
         System.Diagnostics.Debug.Assert(line.RepeatLines.Count == 2, "Expected RepeatTimes Count not found");
 
-        TimeSpan expected = new TimeSpan(8, 2, 0, 0);
+        TimeSpan expected = new(8, 2, 0, 0);
 
         foreach (var repeatTime in line.RepeatLines)
         {
@@ -306,7 +305,7 @@ r=7d 1h 0 25h";
 
         //Verify repeat times.
 
-        Media.Sdp.TimeDescription Line = new Media.Sdp.TimeDescription(line.NtpStartDateTime, line.NtpStopDateTime);
+        Media.Sdp.TimeDescription Line = new(line.NtpStartDateTime, line.NtpStopDateTime);
 
         System.Diagnostics.Debug.Assert(line.NtpStartDateTime == Line.NtpStartDateTime, "Expected NtpStartDateTime not found");
 
@@ -390,11 +389,9 @@ r=7d 1h 0 25h";
 
         foreach (var test in testVectors)
         {
-            string type;
 
-            System.TimeSpan start, end;
 
-            if (false == Media.Sdp.SessionDescription.TryParseRange(test.Item1, out type, out start, out end)) throw new System.Exception("TryParseRange");
+            if (false == Media.Sdp.SessionDescription.TryParseRange(test.Item1, out string type, out TimeSpan start, out TimeSpan end)) throw new System.Exception("TryParseRange");
 
             if (false == type.StartsWith("smpte", StringComparison.OrdinalIgnoreCase)) throw new System.Exception("TryParseRange -> Type");
 
@@ -445,11 +442,9 @@ r=7d 1h 0 25h";
 
         foreach (var test in testVectors)
         {
-            string type;
 
-            System.TimeSpan start, end;
 
-            if (false == Media.Sdp.SessionDescription.TryParseRange(test.Item1, out type, out start, out end)) throw new System.Exception("TryParseRange");
+            if (false == Media.Sdp.SessionDescription.TryParseRange(test.Item1, out string type, out TimeSpan start, out TimeSpan end)) throw new System.Exception("TryParseRange");
 
             if (type != "npt") throw new System.Exception("TryParseRange -> Type");
 
@@ -476,11 +471,9 @@ r=7d 1h 0 25h";
 
         foreach (var test in testVectors)
         {
-            string type;
 
-            System.TimeSpan start, end;
 
-            if (false == Media.Sdp.SessionDescription.TryParseRange(test.Item1, out type, out start, out end)) throw new System.Exception("TryParseRange");
+            if (false == Media.Sdp.SessionDescription.TryParseRange(test.Item1, out string type, out TimeSpan start, out TimeSpan end)) throw new System.Exception("TryParseRange");
 
             if (type != "clock") throw new System.Exception("TryParseRange -> Type");
 
@@ -495,7 +488,7 @@ r=7d 1h 0 25h";
     {
         string testVector = "a=range : npt = 1 - 1\r\n";
 
-        Media.Sdp.SessionDescriptionLine line = new Media.Sdp.SessionDescriptionLine(testVector);
+        Media.Sdp.SessionDescriptionLine line = new(testVector);
 
         if (string.Compare(line.ToString(), testVector) != 0) throw new System.Exception("ToString");
 
@@ -503,7 +496,7 @@ r=7d 1h 0 25h";
 
         if (string.Compare(line.ToString(), testVector) != 0) throw new System.Exception("ToString");
 
-        Media.Sdp.Lines.SessionAttributeLine attributeLine = new Media.Sdp.Lines.SessionAttributeLine(line);
+        Media.Sdp.Lines.SessionAttributeLine attributeLine = new(line);
 
         if (string.Compare(attributeLine.ToString(), testVector) != 0) throw new System.Exception("ToString");
 
@@ -677,7 +670,7 @@ r=7d 1h 0 25h";
 
             System.Diagnostics.Debug.Assert(md.m_Lines.Count == 3, "Unexpected m_Lines.Count");
 
-            Media.Sdp.Lines.SessionMediaDescriptionLine line = new Media.Sdp.Lines.SessionMediaDescriptionLine("m=audio 49230 RTP/AVP 96 97 98\r\n");
+            Media.Sdp.Lines.SessionMediaDescriptionLine line = new("m=audio 49230 RTP/AVP 96 97 98\r\n");
 
             System.Diagnostics.Debug.Assert(line.PayloadTypes.Count() == md.PayloadTypes.Count(), "PayloadTypes Count doesn't match");
 
@@ -759,7 +752,7 @@ r=7d 1h 0 25h";
             "a=ptime:20" + Media.Sdp.SessionDescription.NewLineString +
             "a=sendrecv";
 
-        Media.Sdp.SessionDescription sdp = new Media.Sdp.SessionDescription(sdpStr);
+        Media.Sdp.SessionDescription sdp = new(sdpStr);
 
         System.Diagnostics.Debug.WriteLine(sdp.ToString());
 
@@ -835,7 +828,7 @@ a=fmtp:96 profile-level-id=3;config=000001B003000001B509000001000000012000C88880
 a=control:track1
 ";
 
-        using (Media.Sdp.SessionDescription sdp = new Media.Sdp.SessionDescription(testVector))
+        using (Media.Sdp.SessionDescription sdp = new(testVector))
         {
             //This string should be equal exactly, but because the class corrects of the lines the order it's not exactly the same.
             //T= is before the media description in the example..
@@ -843,7 +836,7 @@ a=control:track1
 
             foreach (Media.Sdp.MediaDescription md in sdp.MediaDescriptions)
             {
-                Media.Sdp.Lines.SessionConnectionLine cLine = new Media.Sdp.Lines.SessionConnectionLine(md.ConnectionLine);
+                Media.Sdp.Lines.SessionConnectionLine cLine = new(md.ConnectionLine);
 
                 System.Diagnostics.Debug.Assert(string.Compare(cLine.ConnectionNetworkType, Media.Sdp.Lines.SessionConnectionLine.InConnectionToken) is 0, "Unexpected ConnectionNetworkType");
 
@@ -876,7 +869,7 @@ a=control:track1
     {
         string testVector = "c=IN IP4 232.248.50.1/255/2";
 
-        Media.Sdp.Lines.SessionConnectionLine cLine = new Media.Sdp.Lines.SessionConnectionLine(testVector);
+        Media.Sdp.Lines.SessionConnectionLine cLine = new(testVector);
 
         System.Diagnostics.Debug.Assert(string.Compare(cLine.ConnectionNetworkType, Media.Sdp.Lines.SessionConnectionLine.InConnectionToken) is 0, "Unexpected ConnectionNetworkType");
 
@@ -913,7 +906,7 @@ a=control:track1
         Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
         //Should have o=?
-        string originatorAndSession = String.Format("{0} {1} {2} {3} {4} {5}", "-", "62464", "0", "IN", "IP4", "10.1.1.2");
+        string originatorAndSession = string.Format("{0} {1} {2} {3} {4} {5}", "-", "62464", "0", "IN", "IP4", "10.1.1.2");
 
         string profile = "RTP/AVP";
 
@@ -959,7 +952,7 @@ a=control:track1
     {
         Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
-        using (Media.Sdp.SessionDescription sdp = new Media.Sdp.SessionDescription(0, "v√ƒ", "Bandit"))
+        using (Media.Sdp.SessionDescription sdp = new(0, "v√ƒ", "Bandit"))
         {
 
             //update version was specified false so the verison of the document should have updated.
@@ -1011,7 +1004,7 @@ a=control:track1
 
         string sdpStr = "v=0\r\no=- 5 2 IN IP4 10.1.1.2\r\ns=CounterPath Bria\r\nc=IN IP4 144.137.16.240\r\nt=0 0\r\nm=audio 34640 RTP/AVP 0 8 101\r\na=sendrecv\r\na=rtpmap:101 telephone-event/8000\r\na=fmtp:101 0-15\r\na=alt:1 1 : STu/ZtOu 7hiLQmUp 10.1.1.2 34640\r\n";
 
-        Media.Sdp.SessionDescription sdp = new Media.Sdp.SessionDescription(sdpStr);
+        Media.Sdp.SessionDescription sdp = new(sdpStr);
 
         System.Diagnostics.Debug.WriteLine(sdp.ToString());
 
@@ -1039,7 +1032,7 @@ a=control:track1
           "a=candidate:1 1 UDP 2130706431 10.0.1.1 8998 typ host" + Media.Sdp.SessionDescription.NewLineString +
           "a=candidate:2 1 UDP 1694498815 192.0.2.3 45664 typ srflx raddr 10.0.1.1 rport 8998";
 
-        Media.Sdp.SessionDescription sdp = new Media.Sdp.SessionDescription(sdpStr);
+        Media.Sdp.SessionDescription sdp = new(sdpStr);
 
         System.Diagnostics.Debug.WriteLine(sdp.ToString());
 
@@ -1070,7 +1063,7 @@ a=control:track1
             "a=sendrecv" + Media.Sdp.SessionDescription.NewLineString +
             "a=rtcp-fb:* nack pli";
 
-        Media.Sdp.SessionDescription sdp = new Media.Sdp.SessionDescription(sdpStr);
+        Media.Sdp.SessionDescription sdp = new(sdpStr);
 
         System.Diagnostics.Debug.WriteLine(sdp.ToString());
 
@@ -1102,7 +1095,7 @@ a=control:track1
 
         System.Diagnostics.Debug.WriteLine(sdpStr);
 
-        using (Media.Sdp.SessionDescription sdp = new Media.Sdp.SessionDescription(sdpStr))
+        using (Media.Sdp.SessionDescription sdp = new(sdpStr))
         {
             System.Diagnostics.Debug.WriteLine(sdp.ToString());
 
@@ -1126,7 +1119,7 @@ a=control:track1
 
             System.Diagnostics.Debug.Assert(8 == sdp.MediaDescriptions.Where(x => x.MediaType == Media.Sdp.MediaType.audio).First().PayloadTypes.Last());
 
-            Media.Sdp.Lines.SessionMediaDescriptionLine line = new Media.Sdp.Lines.SessionMediaDescriptionLine("m=audio 18544 RTP/AVP 0 8");
+            Media.Sdp.Lines.SessionMediaDescriptionLine line = new("m=audio 18544 RTP/AVP 0 8");
 
             System.Diagnostics.Debug.Assert(line.MediaType == Media.Sdp.MediaType.audio);
 
@@ -1202,7 +1195,7 @@ c=IN IP4 0.0.0.0
 b=AS:64
 a=control:track2";
 
-        Media.Sdp.SessionDescription sessionDescription = new Media.Sdp.SessionDescription(testVector);
+        Media.Sdp.SessionDescription sessionDescription = new(testVector);
 
         //Ensure 2 media descriptions were found
         System.Diagnostics.Debug.Assert(sessionDescription.MediaDescriptions.Count() == 2, "Did not find all Media Descriptions '2'");
@@ -1264,7 +1257,7 @@ a=control:trackID=2
 a=fmtp:96 streamtype=5; profile-level-id=255; mode=AAC-hbr; config=11900000000000000000; objectType=64; sizeLength=13; indexLength=3; indexDeltaLength=3
 a=mpeg4-esid:101";
 
-        Media.Sdp.SessionDescription sd = new Media.Sdp.SessionDescription(testVector);
+        Media.Sdp.SessionDescription sd = new(testVector);
 
         Console.WriteLine(sd.ToString());
 
@@ -1294,7 +1287,7 @@ a=fmtp:102 width=1280;height=720;depth=0;framerate=30000;fieldrate=30000;
 a=framerate:30
 a=rtpmap:102 H264/90000";
 
-        using (Media.Sdp.SessionDescription sd = new Media.Sdp.SessionDescription(testVector))
+        using (Media.Sdp.SessionDescription sd = new(testVector))
         {
             Console.WriteLine(sd.ToString());
 
@@ -1374,7 +1367,7 @@ a=fmtp:96 packetization-mode=1;profile-level-id=640028;sprop-parameter-sets=Z2QA
 a=control:track0
 a=rtcp-fb:96 nack";
 
-        using (Media.Sdp.SessionDescription sd = new Media.Sdp.SessionDescription(testVector))
+        using (Media.Sdp.SessionDescription sd = new(testVector))
         {
             Console.WriteLine(sd.ToString());
 
@@ -1433,7 +1426,7 @@ a=rtcp-fb:96 nack";
      a=cdsc: 4 image udptl t38
      a=cdsc: 5 image tcp t38";
 
-        using (Media.Sdp.SessionDescription sd = new Media.Sdp.SessionDescription(sdpContents))
+        using (Media.Sdp.SessionDescription sd = new(sdpContents))
         {
             Media.Sdp.MediaDescription mediaDescription = sd.MediaDescriptions.FirstOrDefault();
 
@@ -1444,7 +1437,7 @@ a=rtcp-fb:96 nack";
 
             var line = mediaDescription.RtpMapLine;
 
-            Media.Sdp.Lines.RtpMapLine rtpMapLine = new Media.Sdp.Lines.RtpMapLine(line);
+            Media.Sdp.Lines.RtpMapLine rtpMapLine = new(line);
 
             if ("telephone-event" != rtpMapLine.EncodingParametersToken) throw new Exception("EncodingParametersToken");
 
@@ -1461,7 +1454,7 @@ a=rtcp-fb:96 nack";
 
             line = mediaDescription.FmtpLine;
 
-            Media.Sdp.Lines.FormatTypeLine fmtpLine = new Media.Sdp.Lines.FormatTypeLine(line);
+            Media.Sdp.Lines.FormatTypeLine fmtpLine = new(line);
 
             if ("96" != fmtpLine.FormatToken) throw new Exception("FormatToken");
 
@@ -1507,7 +1500,7 @@ a=rtcp-fb:96 nack";
       a=pcfg:2 m=2 t=1 a=1 pt=2:103
       a=pcfg:3 m=4 t=2 pt=4:18";
 
-        using (Media.Sdp.SessionDescription sd = new Media.Sdp.SessionDescription(sdpContents))
+        using (Media.Sdp.SessionDescription sd = new(sdpContents))
         {
             Media.Sdp.MediaDescription mediaDescription = sd.MediaDescriptions.FirstOrDefault();
 
@@ -1515,7 +1508,7 @@ a=rtcp-fb:96 nack";
 
             var line = mediaDescription.Lines.Skip(3).FirstOrDefault();
 
-            if (!(line is Media.Sdp.Lines.SessionAttributeLine)) throw new Exception("line is not SessionAttributeLine");
+            if (line is not Media.Sdp.Lines.SessionAttributeLine) throw new Exception("line is not SessionAttributeLine");
 
             if (line.ToString() != "a=mpeg4-iod: \"data:application/mpeg4-iod;base64,AoE8AA8BHgEBAQOBDAABQG5kYXRhOmFwcGxpY2F0aW9uL21wZWc0LW9kLWF1O2Jhc2U2NCxBVGdCR3dVZkF4Y0F5U1FBWlFRTklCRUFGM0FBQVBvQUFBRERVQVlCQkE9PQEbAp8DFQBlBQQNQBUAB9AAAD6AAAA+gAYBAwQNAQUAAMgAAAAAAAAAAAYJAQAAAAAAAAAAA2EAAkA+ZGF0YTphcHBsaWNhdGlvbi9tcGVnNC1iaWZzLWF1O2Jhc2U2NCx3QkFTZ1RBcUJYSmhCSWhRUlFVL0FBPT0EEgINAAAUAAAAAAAAAAAFAwAAQAYJAQAAAAAAAAAA\"\r\n") throw new Exception("InitialObjectDescriptor");
 
@@ -1523,7 +1516,7 @@ a=rtcp-fb:96 nack";
 
             if (line != mediaDescription.Lines.Skip(4).FirstOrDefault()) throw new Exception("line is not the RtpMapLine");
 
-            Media.Sdp.Lines.RtpMapLine rtpMapLine = new Media.Sdp.Lines.RtpMapLine(line);
+            Media.Sdp.Lines.RtpMapLine rtpMapLine = new(line);
 
             if (rtpMapLine.EncodingParametersToken != "PCMU/8000/1") throw new Exception("EncodingParameters");
 
@@ -1544,7 +1537,7 @@ a=rtcp-fb:96 nack";
 
             line = mediaDescription.FmtpLine;
 
-            Media.Sdp.Lines.FormatTypeLine fmtpLine = new Media.Sdp.Lines.FormatTypeLine(line);
+            Media.Sdp.Lines.FormatTypeLine fmtpLine = new(line);
 
             if ("18" != fmtpLine.FormatToken) throw new Exception("FormatToken");
 

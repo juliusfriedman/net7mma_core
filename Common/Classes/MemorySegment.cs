@@ -57,7 +57,7 @@ namespace Media.Common
         public static readonly byte[] EmptyBytes = new byte[0];
 
         //Length can be set by other classes through reflection.
-        public static readonly MemorySegment Empty = new MemorySegment(EmptyBytes, false);
+        public static readonly MemorySegment Empty = new(EmptyBytes, false);
 
         /// <summary>
         /// Creates a new instance using a copy of the data in the source
@@ -69,9 +69,9 @@ namespace Media.Common
         /// <returns></returns>
         public static MemorySegment CreateCopy(byte[] source, int offset, int count, bool shouldDispose = true)
         {
-            MemorySegment result = new MemorySegment(count, shouldDispose);
+            MemorySegment result = new(count, shouldDispose);
 
-            if(source is not null) System.Array.Copy(source, offset, result.m_Array, 0, count);
+            if (source is not null) System.Array.Copy(source, offset, result.m_Array, 0, count);
 
             return result;
         }
@@ -80,9 +80,9 @@ namespace Media.Common
 
         #region Fields
 
-        internal protected byte[] m_Array;
+        protected internal byte[] m_Array;
 
-        internal protected long m_Offset, m_Length;
+        protected internal long m_Offset, m_Length;
 
         //public readonly Binary.ByteOrder ByteOrder;
 
@@ -101,9 +101,9 @@ namespace Media.Common
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return (int)m_Length; }
-            
+
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { m_Length = value; }
+            protected internal set { m_Length = value; }
         }
 
         /// <summary>
@@ -113,9 +113,9 @@ namespace Media.Common
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return m_Length; }
-            
+
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { m_Length = value; }
+            protected internal set { m_Length = value; }
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace Media.Common
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             //could just have a Resize method
-            internal protected set { m_Offset = value; }
+            protected internal set { m_Offset = value; }
         }
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace Media.Common
             get { return m_Offset; }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { m_Offset = value; }
+            protected internal set { m_Offset = value; }
         }
 
         /// <summary>
@@ -152,7 +152,7 @@ namespace Media.Common
             get { return m_Array; }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { m_Array = value; } 
+            protected internal set { m_Array = value; }
         }
 
         #endregion
@@ -162,19 +162,19 @@ namespace Media.Common
         /// <summary>
         /// Should never run unless immediately finalized.
         /// </summary>
-//        ~MemorySegment()
-//        {
-//            m_Array = null; 
-            
-//            m_Length = 0;
+        //        ~MemorySegment()
+        //        {
+        //            m_Array = null; 
 
-//            Dispose(ShouldDispose = true);
+        //            m_Length = 0;
 
-//#if DEBUG
-//            System.Diagnostics.Debug.WriteLine(ToString() + "@Finalize Completed");
-//#endif
-//        }
-        
+        //            Dispose(ShouldDispose = true);
+
+        //#if DEBUG
+        //            System.Diagnostics.Debug.WriteLine(ToString() + "@Finalize Completed");
+        //#endif
+        //        }
+
         #region Chained
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -182,7 +182,7 @@ namespace Media.Common
             : base(shouldDispose)
         {
             if (reference is null) throw new ArgumentNullException("reference");
-            
+
             m_Array = reference;
 
             m_Length = m_Array.LongLength;
@@ -216,7 +216,7 @@ namespace Media.Common
         /// <param name="size"></param>
         /// <param name="shouldDispose"></param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public MemorySegment(long size, bool shouldDispose = true) 
+        public MemorySegment(long size, bool shouldDispose = true)
             : base(shouldDispose)
         {
             if (size < 0) throw new ArgumentException(nameof(size));
@@ -420,9 +420,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            if (System.Object.ReferenceEquals(this, obj)) return true;
-
-            return obj is MemorySegment other && Equals(other);
+            return object.ReferenceEquals(this, obj) || obj is MemorySegment other && Equals(other);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -472,7 +470,7 @@ namespace Media.Common
     /// </summary>
     public class BitSegment : MemorySegment
     {
-        ulong m_BitOffset, m_BitCount;
+        private ulong m_BitOffset, m_BitCount;
 
         public int BitCount
         {
@@ -533,17 +531,17 @@ namespace Media.Common
 
         public static MemorySegment Slice(this MemorySegment segment, int offset) => Slice(segment, offset, segment.Count - offset);
 
-        public static MemorySegment Slice(this MemorySegment segment, int offset, int count) => new MemorySegment(segment.Array, segment.Offset + offset, count);
+        public static MemorySegment Slice(this MemorySegment segment, int offset, int count) => new(segment.Array, segment.Offset + offset, count);
 
         public static void CopyTo(this MemorySegment segment, MemorySegment other) => Buffer.BlockCopy(segment.Array, segment.Offset, other.Array, other.Offset, segment.Count);
 
         public static void CopyFrom(this MemorySegment segment, MemorySegment other) => Buffer.BlockCopy(other.Array, other.Offset, segment.Array, segment.Offset, other.Count);
 
-        public static System.IO.MemoryStream ToMemoryStream(this MemorySegment segment) => new System.IO.MemoryStream(segment.Array, segment.Offset, segment.Count, true);
+        public static System.IO.MemoryStream ToMemoryStream(this MemorySegment segment) => new(segment.Array, segment.Offset, segment.Count, true);
 
-        public static Span<byte> ToSpan(this MemorySegment segment) => new Span<byte>(segment.Array, segment.Offset, segment.Count);
+        public static Span<byte> ToSpan(this MemorySegment segment) => new(segment.Array, segment.Offset, segment.Count);
 
-        public static Memory<byte> ToMemory(this MemorySegment segment) => new Memory<byte>(segment.Array, segment.Offset, segment.Count);
+        public static Memory<byte> ToMemory(this MemorySegment segment) => new(segment.Array, segment.Offset, segment.Count);
 
         public static byte[] ToArray(this MemorySegment segment)
         {
@@ -628,7 +626,7 @@ namespace Media.Common
                     //Continue
                     continue;
                 }
-                
+
                 //Reset the count, the match needs to be found in order.
                 needed = count;
 
@@ -1029,7 +1027,7 @@ namespace Media.UnitTests
     {
         public void TestConstructorAndDispose()
         {
-            using (Common.MemorySegment test = new Common.MemorySegment(4))
+            using (Common.MemorySegment test = new(4))
             {
                 if (test.Offset != 0) throw new System.Exception("Offset");
 

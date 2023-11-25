@@ -30,7 +30,7 @@
         /// An array where the index is the 16-bit PCM input, and the value is
         /// the mu-law result.
         /// </summary>
-        private static byte[] pcmToMuLawMap;
+        private static readonly byte[] pcmToMuLawMap;
 
         static MuLawEncoder()
         {

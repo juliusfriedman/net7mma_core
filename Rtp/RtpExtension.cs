@@ -38,11 +38,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
+using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Media.Common;
 
 #endregion
 
@@ -67,7 +66,7 @@ namespace Media.Rtp
         public const int MinimumSize = 4;
 
         //should be method...
-        public static InvalidOperationException InvalidExtension = new InvalidOperationException(string.Format("The given array does not contain the required amount of elements ({0}) to create a RtpExtension.", MinimumSize));
+        public static InvalidOperationException InvalidExtension = new(string.Format("The given array does not contain the required amount of elements ({0}) to create a RtpExtension.", MinimumSize));
 
         #endregion
 
@@ -76,7 +75,7 @@ namespace Media.Rtp
         /// <summary>
         /// Reference to the binary data which is thought to contain the RtpExtension.
         /// </summary>
-        readonly Common.MemorySegment m_MemorySegment;
+        private readonly Common.MemorySegment m_MemorySegment;
 
         #endregion
 
@@ -133,7 +132,10 @@ namespace Media.Rtp
         public bool IsComplete
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { if (IsDisposed) return false; return m_MemorySegment.Count >= Size; }
+            get
+            {
+                return !IsDisposed && m_MemorySegment.Count >= Size;
+            }
         }
 
         /// <summary>
@@ -158,7 +160,7 @@ namespace Media.Rtp
         /// <param name="data">The optional extension data itself not including the Flags or LengthInWords fields.</param>
         /// <param name="offset">The optional offset into data to being copying.</param>
         public RtpExtension(int sizeInBytes, short flags = 0, byte[] data = null, int offset = 0, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             //Allocate memory for the binary
             m_MemorySegment = new Common.MemorySegment(new byte[MinimumSize + sizeInBytes], 0, MinimumSize + sizeInBytes);
@@ -219,14 +221,14 @@ namespace Media.Rtp
 
         #endregion
 
-        IEnumerable<byte> GetEnumerableImplementation()
+        private IEnumerable<byte> GetEnumerableImplementation()
         {
             return m_MemorySegment;//.Array.Skip(m_MemorySegment.Offset).Take(Size);
         }
 
         IEnumerator<byte> IEnumerable<byte>.GetEnumerator()
         {
-            return GetEnumerableImplementation().GetEnumerator();   
+            return GetEnumerableImplementation().GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
@@ -250,7 +252,7 @@ namespace Media.UnitTests
         /// </summary>
         public static void TestAConstructor_And_Reserialization()
         {
-            using (Rtp.RtpExtension extension = new Rtp.RtpExtension(ushort.MinValue, unchecked((short)ushort.MaxValue)))
+            using (Rtp.RtpExtension extension = new(ushort.MinValue, unchecked((short)ushort.MaxValue)))
             {
                 //Check Flags
                 if (extension.Flags != ushort.MinValue) throw new Exception("Unexpected Flags");
@@ -258,7 +260,7 @@ namespace Media.UnitTests
                 //Size
                 if (extension.Size != Rtp.RtpExtension.MinimumSize) throw new Exception("Unexpected Size");
 
-                using (Rtp.RtpExtension s = new Rtp.RtpExtension(extension.ToArray(), 0, Rtp.RtpExtension.MinimumSize))
+                using (Rtp.RtpExtension s = new(extension.ToArray(), 0, Rtp.RtpExtension.MinimumSize))
                 {
                     //Check Flags
                     if (s.Flags != ushort.MinValue) throw new Exception("Unexpected Flags");
@@ -307,7 +309,7 @@ namespace Media.UnitTests
                                           0xBE, 0xE5, 0x39, 0x8D, // etc. 
                                       };
 
-            Media.Rtp.RtpPacket testPacket = new Media.Rtp.RtpPacket(m_SamplePacketBytes, 0);
+            Media.Rtp.RtpPacket testPacket = new(m_SamplePacketBytes, 0);
 
             if (false == testPacket.Extension) throw new Exception("Unexpected Header.Extension");
 

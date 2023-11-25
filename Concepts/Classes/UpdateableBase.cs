@@ -45,15 +45,14 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// An instance which will never dispose and is always under modification.
         /// </summary>
-        public static UpdateableBase AlwaysUnderModification = new UpdateableBase(true, 0, System.TimeSpan.Zero, false);
+        public static UpdateableBase AlwaysUnderModification = new(true, 0, System.TimeSpan.Zero, false);
 
         #endregion
 
         #region Fields
 
-        readonly System.Threading.ManualResetEventSlim m_ResetEvent;
-
-        readonly System.Threading.CancellationTokenSource m_TokenSource;
+        private readonly System.Threading.ManualResetEventSlim m_ResetEvent;
+        private readonly System.Threading.CancellationTokenSource m_TokenSource;
 
         #endregion
 
@@ -80,7 +79,7 @@ namespace Media.Concepts.Classes
         #region Constrcutor
 
         public UpdateableBase(bool initialState, int spinCount, System.TimeSpan delay, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             m_ResetEvent = new System.Threading.ManualResetEventSlim(initialState, spinCount);
 
@@ -88,10 +87,10 @@ namespace Media.Concepts.Classes
         }
 
         public UpdateableBase(bool initialState, int spinCount, System.TimeSpan delay, bool shouldDispose = true, params System.Threading.CancellationToken[] token)
-            :this(initialState, spinCount, delay, shouldDispose)
+            : this(initialState, spinCount, delay, shouldDispose)
         {
             //Recreate the TokenSource from the TokenSource's Token and the TokenSource created from linking the existing tokens.
-            m_TokenSource = System.Threading.CancellationTokenSource.CreateLinkedTokenSource(m_TokenSource.Token, 
+            m_TokenSource = System.Threading.CancellationTokenSource.CreateLinkedTokenSource(m_TokenSource.Token,
                     System.Threading.CancellationTokenSource.CreateLinkedTokenSource(token).Token);
         }
 

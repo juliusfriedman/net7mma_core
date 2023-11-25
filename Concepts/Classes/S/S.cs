@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Media.Concepts.Classes.S
+﻿namespace Media.Concepts.Classes.S
 {
     #region S
 
@@ -81,7 +75,7 @@ namespace Media.Concepts.Classes.S
     /// </remarks>
     public class S /*.  uch, pace, ell   .*/ : Media.Concepts.Classes.I.ICore
     {
-        public S(Number x, Number y, Number z, 
+        public S(Number x, Number y, Number z,
             Number α, Number β, Number γ)
         {
             Real = new System.Numerics.Vector3(x.ToSingle(), y.ToSingle(), z.ToSingle());
@@ -89,19 +83,19 @@ namespace Media.Concepts.Classes.S
             Imaginary = new System.Numerics.Vector3(α.ToSingle(), β.ToSingle(), γ.ToSingle());
         }
 
-        public S(Number x, Number y, Number z, 
-            Number α, Number β, Number γ, 
+        public S(Number x, Number y, Number z,
+            Number α, Number β, Number γ,
             Energies.IEnergy e)
             : this(x, y, z, α, β, γ)
         {
             Energy = e;
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
         /// <remarks>Should be properties or methods</remarks>
-        System.Numerics.Vector3 Real, Imaginary;
+        private System.Numerics.Vector3 Real, Imaginary;
 
         /// <summary>
         /// `e`
@@ -115,9 +109,9 @@ namespace Media.Concepts.Classes.S
         /// <param name="f"></param>
         /// <param name="imaginary"></param>
         /// <returns></returns>
-        static public System.Numerics.Vector3 Measure(S s, Frequencies.IFrequency f, out System.Numerics.Vector3 imaginary)
+        public static System.Numerics.Vector3 Measure(S s, Frequencies.IFrequency f, out System.Numerics.Vector3 imaginary)
         {
-            System.Numerics.Vector3 measure = new System.Numerics.Vector3(f.TotalMegahertz * s.Energy.TotalJoules);
+            System.Numerics.Vector3 measure = new(f.TotalMegahertz * s.Energy.TotalJoules);
 
             imaginary = s.Imaginary - measure;
 
@@ -131,7 +125,7 @@ namespace Media.Concepts.Classes.S
         /// <param name="f"></param>
         /// <param name="imaginary"></param>
         /// <returns></returns>
-        static public S Entangle(S s, Frequencies.IFrequency f, out System.Numerics.Vector3 imaginary)
+        public static S Entangle(S s, Frequencies.IFrequency f, out System.Numerics.Vector3 imaginary)
         {
             imaginary = s.Real;
 

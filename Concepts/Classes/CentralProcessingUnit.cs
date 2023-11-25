@@ -58,10 +58,10 @@ namespace Media.Concepts.Classes
         {
             Unknown,
             Centaur,
-            Advanced,            
+            Advanced,
             Intel,
             MicroDevices,
-            Motorola,    
+            Motorola,
             VIA,
             Cyrix = VIA,
             Transmeta,
@@ -92,29 +92,29 @@ namespace Media.Concepts.Classes
         /// <returns></returns>
         public static Vendor GetVendor(string vendorString)
         {
-            switch (Concepts.Hardware.Intrinsics.CpuId.GetVendorString())
+            return Concepts.Hardware.Intrinsics.CpuId.GetVendorString() switch
             {
+                // Actual Hardware
+                Concepts.Hardware.Intrinsics.CpuId.VendorStrings.GenuineIntel => Vendor.Intel,
+                //early engineering samples of AMD K5 processor
+                Concepts.Hardware.Intrinsics.CpuId.VendorStrings.AMDisbetter_ or Concepts.Hardware.Intrinsics.CpuId.VendorStrings.AuthenticAMD => Vendor.AMD,
+                Concepts.Hardware.Intrinsics.CpuId.VendorStrings.CentaurHauls => Vendor.Centaur,
+                Concepts.Hardware.Intrinsics.CpuId.VendorStrings.CyrixInstead => Vendor.Cyrix,
+                //Transmets
+                Concepts.Hardware.Intrinsics.CpuId.VendorStrings.TransmetaCPU or Concepts.Hardware.Intrinsics.CpuId.VendorStrings.GenuineTMx86 => Vendor.Transmeta,
+                Concepts.Hardware.Intrinsics.CpuId.VendorStrings.Geode_by_NSC => Vendor.NationalSemiConductor,
+                Concepts.Hardware.Intrinsics.CpuId.VendorStrings.NexGen => Vendor.NexGen,
+                Concepts.Hardware.Intrinsics.CpuId.VendorStrings.Vortext86_SoC => Vendor.Vortex,
+                //Virtual Machines
+                Concepts.Hardware.Intrinsics.CpuId.VendorStrings.KVMKVMKVM => Vendor.KVM,
+                Concepts.Hardware.Intrinsics.CpuId.VendorStrings.Microsoft_Hv => Vendor.Microsoft,
+                Concepts.Hardware.Intrinsics.CpuId.VendorStrings._lrpepyh_vr => Vendor.Parallels,
+                Concepts.Hardware.Intrinsics.CpuId.VendorStrings.VMwareVMware => Vendor.VMware,
+                Concepts.Hardware.Intrinsics.CpuId.VendorStrings.XenVMMXenVMM => Vendor.Xen,
                 //case null:
                 //case "":
-                default: return Vendor.Unknown;
-                // Actual Hardware
-                case Concepts.Hardware.Intrinsics.CpuId.VendorStrings.GenuineIntel: return Vendor.Intel;
-                case Concepts.Hardware.Intrinsics.CpuId.VendorStrings.AMDisbetter_: //early engineering samples of AMD K5 processor
-                case Concepts.Hardware.Intrinsics.CpuId.VendorStrings.AuthenticAMD: return Vendor.AMD;
-                case Concepts.Hardware.Intrinsics.CpuId.VendorStrings.CentaurHauls: return Vendor.Centaur;
-                case Concepts.Hardware.Intrinsics.CpuId.VendorStrings.CyrixInstead: return Vendor.Cyrix;
-                case Concepts.Hardware.Intrinsics.CpuId.VendorStrings.TransmetaCPU: //Transmets
-                case Concepts.Hardware.Intrinsics.CpuId.VendorStrings.GenuineTMx86: return Vendor.Transmeta;
-                case Concepts.Hardware.Intrinsics.CpuId.VendorStrings.Geode_by_NSC: return Vendor.NationalSemiConductor;
-                case Concepts.Hardware.Intrinsics.CpuId.VendorStrings.NexGen: return Vendor.NexGen;
-                case Concepts.Hardware.Intrinsics.CpuId.VendorStrings.Vortext86_SoC: return Vendor.Vortex;
-                //Virtual Machines
-                case Concepts.Hardware.Intrinsics.CpuId.VendorStrings.KVMKVMKVM: return Vendor.KVM;
-                case Concepts.Hardware.Intrinsics.CpuId.VendorStrings.Microsoft_Hv: return Vendor.Microsoft;
-                case Concepts.Hardware.Intrinsics.CpuId.VendorStrings._lrpepyh_vr: return Vendor.Parallels;
-                case Concepts.Hardware.Intrinsics.CpuId.VendorStrings.VMwareVMware: return Vendor.VMware;
-                case Concepts.Hardware.Intrinsics.CpuId.VendorStrings.XenVMMXenVMM: return Vendor.Xen;
-            }
+                _ => Vendor.Unknown,
+            };
         }
 
 
