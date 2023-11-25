@@ -1337,18 +1337,7 @@ namespace Media.Rtp
                         {
                             using Rtp.RtpHeader rtpHeader = new RtpHeader(buffer, offset + sessionRequired);
                             
-                            //The context was obtained by the frameChannel
-                            //Use the SSRC to determine where it should be handled.
-                            //If there is no context the packet is incompatible
                             expectRtp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextBySourceId(rtpHeader.SynchronizationSourceIdentifier))) ? false : true;
-
-                            //(Could also check SequenceNumber to prevent duplicate packets from being processed.)
-
-                            ////Verify extensions (handled by ValidatePacket)
-                            //if (header.Extension)
-                            //{
-
-                            //}
                         }
                         else incompatible = false;
                     }
