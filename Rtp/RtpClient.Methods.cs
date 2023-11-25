@@ -1211,8 +1211,11 @@ namespace Media.Rtp
 
             if (received <= 0 || sessionRequired < 0 || received < sessionRequired) return -1;
 
+            //The amount of data needed for the frame comes from TryReadFrameHeader
+            bool isInterleaved = sessionRequired >= InterleavedOverhead;
+
             //When there was something to delemit the frames then we can do a quick search for it.
-            if(sessionRequired >= InterleavedOverhead)
+            if (isInterleaved)
             {
                 //Look for the frame control octet
                 int startOfFrame = System.Array.IndexOf(buffer, BigEndianFrameControl, bufferOffset, received);
@@ -1257,8 +1260,6 @@ namespace Media.Rtp
                 }
             }
 
-            //The amount of data needed for the frame comes from TryReadFrameHeader
-            bool isInterleaved = sessionRequired >= InterleavedOverhead;
             int frameLength = TryReadFrameHeader(buffer, bufferOffset, out frameChannel, isInterleaved ? BigEndianFrameControl : null, isInterleaved, sessionRequired);
 
             //Assign a context if there is a frame of any size
@@ -1272,6 +1273,9 @@ namespace Media.Rtp
             }
             else if (frameLength >= 0) //Have to determine context by inspecting packet headers...
             {
+                //Increase the result by the size of the header
+                frameLength += sessionRequired;
+
                 #region Verify Packet Headers
 
                 //Use CommonHeaderBits on the data after the Interleaved Frame Header
