@@ -126,6 +126,9 @@ public class RtpVideoSink : RtpSink
         //We would use that if we wanted to use this AudioStream without the server.
         //See the notes about having a Generic.Dictionary to support various tracks
 
+        RtpClient.TransportContexts.ForEach(tc => tc.Dispose());
+        RtpClient.TransportContexts.Clear();
+
         //Create a context
         RtpClient.TryAddContext(new RtpClient.TransportContext(
             dataChannel: 0, //Data Channel
