@@ -34,6 +34,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * v//
  */
 using Media.Common.Extensions.Socket;
+using System.Xml.Linq;
 
 namespace Media.Rtp
 {
@@ -1265,6 +1266,95 @@ namespace Media.Rtp
 
                 //Increase the result by the size of the header
                 frameLength += sessionRequired;
+            }
+            else if (frameLength >= 0) //Have to determine context by inspecting packet headers...
+            {
+                #region Verify Packet Headers
+
+                //Use CommonHeaderBits on the data after the Interleaved Frame Header
+                using RFC3550.CommonHeaderBits common = new RFC3550.CommonHeaderBits(buffer, offset + sessionRequired);
+
+                //Try to mark the packetas compatible and find a context
+                bool incompatible = false, expectRtcp = false, expectRtp = false;
+
+                int remainingInBuffer = received - (offset + sessionRequired);
+
+                //Perform a set of checks and set weather or not Rtp or Rtcp was expected.                                  
+                if (incompatible is false)
+                {
+                    //Determine if the packet is Rtcp 
+                    if (remainingInBuffer <= sessionRequired + Rtcp.RtcpHeader.Length)
+                    {
+                        //Remove the context
+                        context = null;
+
+                        //return the frameLength read...
+                        return frameLength;
+                    }
+
+                    //use a rtcp header to extract the information in the packet
+                    using Rtcp.RtcpHeader header = new Rtcp.RtcpHeader(buffer, offset + sessionRequired);
+                    
+                    //Get the length in 'words' (by adding one)
+                    //A length of 0 means 1 word
+                    //A length of 65535 means only the header (no ssrc [or payload])
+                    ushort lengthInWordsPlusOne = (ushort)(header.LengthInWordsMinusOne + 1);
+
+                    //Store any rtcp length so we can verify its not 0 and then additionally ensure its value is not larger then the frameLength
+                    //Convert to bytes
+                    int rtcpLen = lengthInWordsPlusOne * 4;
+
+                    //Check that the supposed  amount of contained words is greater than or equal to the frame length conveyed by the application layer framing
+                    //it must also be larger than the buffer
+                    incompatible = rtcpLen >= frameLength || rtcpLen >= bufferLength;
+
+                    //if rtcpLen >= ushort.MaxValue the packet may possibly span multiple segments unless a large buffer is used.
+
+                    if (incompatible is false && //It was not already ruled incomaptible
+                        lengthInWordsPlusOne > 0 && //If there is supposed to be SSRC in the packet
+                        header.Size > Rtcp.RtcpHeader.Length)
+                    {
+                        //Determine if Rtcp is expected
+                        //Perform another lookup and check compatibility
+                        expectRtcp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextBySourceId(header.SendersSynchronizationSourceIdentifier))) ? false : true;
+                    }
+
+                    //May be mixing channels...
+                    if (expectRtcp is false)
+                    {
+                        //Rtp
+                        if (remainingInBuffer <= sessionRequired + Rtp.RtpHeader.Length)
+                        {
+                            //Remove the context
+                            context = null;
+
+                            //return the frameLength read...
+                            return frameLength;
+                        }
+
+                        //the context by payload type is null is not discovering the identity check the SSRC.
+                        if (Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextByPayloadType(common.RtpPayloadType)) is false /*&& relevent.InDiscovery is false*/)
+                        {
+                            using Rtp.RtpHeader header = new RtpHeader(buffer, offset + sessionRequired);
+                            
+                            //The context was obtained by the frameChannel
+                            //Use the SSRC to determine where it should be handled.
+                            //If there is no context the packet is incompatible
+                            expectRtp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextBySourceId(header.SynchronizationSourceIdentifier))) ? false : true;
+
+                            //(Could also check SequenceNumber to prevent duplicate packets from being processed.)
+
+                            ////Verify extensions (handled by ValidatePacket)
+                            //if (header.Extension)
+                            //{
+
+                            //}
+                        }
+                        else incompatible = false;
+                    }
+                }
+
+                #endregion
             }
 
             //Return the amount of bytes or -1 if any error occured.
