@@ -1833,7 +1833,7 @@ namespace Media.Rtp
                                             {
                                                 //Determine if Rtcp is expected
                                                 //Perform another lookup and check compatibility
-                                                expectRtcp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(GetContextBySourceId(header.SendersSynchronizationSourceIdentifier))) ? false : true;
+                                                expectRtcp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(relevent = GetContextBySourceId(header.SendersSynchronizationSourceIdentifier))) ? false : true;
                                             }
                                         }
                                     }
@@ -1851,14 +1851,14 @@ namespace Media.Rtp
                                         }
 
                                         //the context by payload type is null is not discovering the identity check the SSRC.
-                                        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(GetContextByPayloadType(common.RtpPayloadType))) /*&& relevent.InDiscovery is false*/)
+                                        if (false.Equals(Common.IDisposedExtensions.IsNullOrDisposed(relevent = GetContextByPayloadType(common.RtpPayloadType))) /*&& relevent.InDiscovery is false*/)
                                         {
                                             using (Rtp.RtpHeader header = new RtpHeader(buffer, offset + sessionRequired))
                                             {
                                                 //The context was obtained by the frameChannel
                                                 //Use the SSRC to determine where it should be handled.
                                                 //If there is no context the packet is incompatible
-                                                expectRtp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(GetContextBySourceId(header.SynchronizationSourceIdentifier))) ? false : true;
+                                                expectRtp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(relevent = GetContextBySourceId(header.SynchronizationSourceIdentifier))) ? false : true;
 
                                                 //(Could also check SequenceNumber to prevent duplicate packets from being processed.)
 
@@ -2107,7 +2107,6 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal protected /*virtual*/ void ParseAndHandleData(Common.MemorySegment memory, ref bool parseRtcp, ref bool parseRtp, ref int remaining, ref int expected)
         {
-
             if (Common.IDisposedExtensions.IsNullOrDisposed(memory) || memory.Count is 0 || remaining <= 0) return;
 
             //handle demultiplex scenarios e.g. RFC5761
