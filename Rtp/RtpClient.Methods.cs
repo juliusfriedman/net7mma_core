@@ -1648,7 +1648,7 @@ namespace Media.Rtp
             //TODO handle receiving when no $ and Channel is presenent... e.g. RFC4571
             //Would only be 2 then...
 
-            int sessionRequired = /*TransportContexts.Any() ? TransportContexts.Min(tc => tc.MinimumPacketSize) :*/ InterleavedOverhead;
+            int sessionRequired = TransportContexts.Any(tc => tc.MediaDescription.MediaProtocol.StartsWith("TCP")) ? 2 : InterleavedOverhead;
 
             //Todo, we allow a buffer to be given so we must also check if its changed to null...
 
@@ -2007,7 +2007,7 @@ namespace Media.Rtp
                     //Parse the data in the buffer
                     using (Common.MemorySegment memory = hasFrameHeader ? new Common.MemorySegment(buffer, offset + sessionRequired, Common.Binary.Min(frameLength - sessionRequired, remainingInBuffer)) : new Common.MemorySegment(buffer, offset, remainingInBuffer))
                     {
-                        registerX = memory.Count;
+                        registerX = Common.Binary.Max(Common.Binary.Zero, memory.Count);
 
                         //Don't use 0 as flow control here. Raising what potentially be multiple events would be dumb.
                         if (registerX is 0)

@@ -744,7 +744,8 @@ namespace Media.UnitTests
 
                 test.TransportContexts.Add(new Rtp.RtpClient.TransportContext(0, 1, 0)
                 {
-                    MinimumPacketSize = 2
+                    MinimumPacketSize = 2,
+                    MediaDescription = new Sdp.MediaDescription( Sdp.MediaType.application, "TCP/RTP/AVP", 97, 0)
                 });
 
                 Media.Rtsp.RtspMessage lastInterleaved = null;
