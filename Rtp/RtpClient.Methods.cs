@@ -1333,7 +1333,7 @@ namespace Media.Rtp
                         }
 
                         //the context by payload type is null is not discovering the identity check the SSRC.
-                        if (Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextByPayloadType(commonHeaderBits.RtpPayloadType)) is false /*&& relevent.InDiscovery is false*/)
+                        if (Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextByPayloadType(commonHeaderBits.RtpPayloadType)) is false && context.InDiscovery is false)
                         {
                             using Rtp.RtpHeader rtpHeader = new RtpHeader(buffer, offset + sessionRequired);
                             
