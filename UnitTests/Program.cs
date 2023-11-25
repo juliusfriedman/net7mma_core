@@ -154,9 +154,7 @@ namespace Media.UnitTests
 
             RunTest(RtspClientTests);
 
-            RunTest(TestServer);
-
-            static async void TestServer() => await RunTestAsync(TestServerAsync).ConfigureAwait(false);
+            await RunTestAsync(TestServerAsync).ConfigureAwait(false);
         }
 
         #region Unit Tests
@@ -4650,14 +4648,21 @@ a=appversion:1.0");
 
         private static void RunTest(Action test, int count = 1, bool waitForGoAhead = true)
         {
-            System.Console.Clear();
-            Console.WriteLine("About to run test: " + test.Method.Name);
-            Console.WriteLine("Press Q to skip or any other key to continue.");
-            RunTestAsync(() => { test(); return Task.CompletedTask; }, count, waitForGoAhead).GetAwaiter().GetResult();
+            RunTestAsync(() =>
+            {
+                test();
+                return Task.CompletedTask;
+            }, count, waitForGoAhead, test.Method.Name)
+            .GetAwaiter()
+            .GetResult();
         }
 
-        private static async Task RunTestAsync(Func<Task> test, int count = 1, bool waitForGoAhead = true)
+        private static async Task RunTestAsync(Func<Task> test, int count = 1, bool waitForGoAhead = true, string testName = default)
         {
+            System.Console.Clear();
+            Console.WriteLine("About to run test: " + testName ?? test.Method.Name);
+            Console.WriteLine("Press Q to skip or any other key to continue.");
+
             //If the debugger is attached get a ConsoleKey, the key is Q return.
             if (waitForGoAhead && /*System.Diagnostics.Debugger.IsAttached && */ Console.ReadKey(true).Key == ConsoleKey.Q) return;
             else
