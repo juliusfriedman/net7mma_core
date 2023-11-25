@@ -73,7 +73,7 @@ namespace Media.Rtsp.Server
         internal string m_Name;
         internal Uri m_Source;
         internal NetworkCredential m_SourceCred;
-        internal HashSet<string> m_Aliases = new();
+        internal HashSet<string> m_Aliases = [];
         //internal bool m_Child = false;
         public virtual Sdp.SessionDescription SessionDescription { get; internal protected set; }
 

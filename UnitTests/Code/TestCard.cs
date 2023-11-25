@@ -28,7 +28,7 @@ public class TestCard
     private System.Timers.Timer frame_timer;
 
     //Create the ImageFormat based on YUV packed but in Planar format with a full height luma plane and half hight chroma planes
-    Media.Codecs.Image.ImageFormat Yuv420P = new Media.Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Media.Common.Binary.ByteOrder.Little, Media.Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
+    Media.Codecs.Image.ImageFormat Yuv420P = new(Media.Codecs.Image.ImageFormat.YUV(8, Media.Common.Binary.ByteOrder.Little, Media.Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
     Media.Codecs.Image.Image yuvImage;
 
     private byte[] yuv_frame = null;
@@ -80,9 +80,11 @@ public class TestCard
         stopwatch.Start();
 
         // Start timer. The Timer will generate each YUV frame
-        frame_timer = new System.Timers.Timer();
-        frame_timer.Interval = 1; // on first pass timer will fire straight away (cannot have zero interval)
-        frame_timer.AutoReset = false; // do not restart timer after the time has elapsed
+        frame_timer = new System.Timers.Timer
+        {
+            Interval = 1, // on first pass timer will fire straight away (cannot have zero interval)
+            AutoReset = false // do not restart timer after the time has elapsed
+        };
         frame_timer.Elapsed += (object sender, System.Timers.ElapsedEventArgs e) =>
         {
             // send a video frame
@@ -100,9 +102,11 @@ public class TestCard
         frame_timer.Start();
 
         // Start timer. The Timer will generate each Audio frame
-        audio_timer = new System.Timers.Timer();
-        audio_timer.Interval = 1; // on first pass timer will fire straight away (cannot have zero interval)
-        audio_timer.AutoReset = false; // do not restart timer after the time has elapsed
+        audio_timer = new System.Timers.Timer
+        {
+            Interval = 1, // on first pass timer will fire straight away (cannot have zero interval)
+            AutoReset = false // do not restart timer after the time has elapsed
+        };
         audio_timer.Elapsed += (object sender, System.Timers.ElapsedEventArgs e) =>
         {
             // send an audio frame
@@ -207,11 +211,11 @@ public class TestCard
             yuv_frame[(y_position * width) + x_position] = pixel_value;
 
             // move the x and y position
-            x_position = x_position + 5;
+            x_position += 5;
             if (x_position >= width)
             {
                 x_position = 0;
-                y_position = y_position + 1;
+                y_position++;
             }
 
             if (y_position >= height)
@@ -239,7 +243,7 @@ public class TestCard
             DateTime now_utc = DateTime.UtcNow;
             DateTime now_local = now_utc.ToLocalTime();
 
-            long timestamp_ms = ((long)(now_utc.Ticks / TimeSpan.TicksPerMillisecond));
+            long timestamp_ms = now_utc.Ticks / TimeSpan.TicksPerMillisecond;
 
             // Add beep sounds.
             // We add a 0.1 second beep every second

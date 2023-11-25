@@ -652,7 +652,7 @@ namespace Media.UnitTests
                                 for (ushort lengthIn32BitWords = ushort.MaxValue; lengthIn32BitWords == ushort.MaxValue || lengthIn32BitWords <= Media.Common.Binary.BitsPerByte; ++lengthIn32BitWords)
                                 {
                                     //Always specify a value for the ssrc, if the length is 65535 this means there is no ssrc...
-                                    using (Rtcp.RtcpHeader test = new Rtcp.RtcpHeader(VersionCounter, PayloadCounter, bitValue, ReportBlockCounter, 7, lengthIn32BitWords))
+                                    using (Rtcp.RtcpHeader test = new(VersionCounter, PayloadCounter, bitValue, ReportBlockCounter, 7, lengthIn32BitWords))
                                     {
                                         //Should possibly allow for this ...
                                         if (lengthIn32BitWords != ushort.MaxValue && test.SendersSynchronizationSourceIdentifier != 7) throw new Exception("Unexpected SendersSynchronizationSourceIdentifier");
@@ -672,7 +672,7 @@ namespace Media.UnitTests
 
                                         //Test Serialization from an array and Deserialization from the array
 
-                                        using (Rtcp.RtcpHeader deserialized = new Rtcp.RtcpHeader(test.ToArray()))
+                                        using (Rtcp.RtcpHeader deserialized = new(test.ToArray()))
                                         {
                                             if (test.SendersSynchronizationSourceIdentifier != 0 &&
                                                 test.Size > Rtcp.RtcpHeader.Length &&

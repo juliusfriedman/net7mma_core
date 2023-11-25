@@ -252,9 +252,8 @@ namespace Media.Sdp
 
             public static bool TryParseBandwidthLine(Media.Sdp.SessionDescriptionLine line, out int result)
             {
-                string token;
 
-                return TryParseBandwidthLine(line, out token, out result);
+                return TryParseBandwidthLine(line, out string token, out result);
             }
 
             public static bool TryParseBandwidthLine(Media.Sdp.SessionDescriptionLine line, out string token, out int result)
@@ -747,9 +746,8 @@ namespace Media.Sdp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    int result;
 
-                    int.TryParse(VersionToken, out result);
+                    int.TryParse(VersionToken, out int result);
 
                     return result;
                 }
@@ -1130,10 +1128,9 @@ namespace Media.Sdp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    Uri result;
 
                     //UriDecode?
-                    Uri.TryCreate(m_Parts[0], UriKind.RelativeOrAbsolute, out result);
+                    Uri.TryCreate(m_Parts[0], UriKind.RelativeOrAbsolute, out Uri result);
 
                     return result;
                 }
@@ -1659,7 +1656,7 @@ namespace Media.Sdp
             internal const char TimeType = 't';
 
             //internal protected for setters or this can be changed on accident.
-            public static SessionTimeDescriptionLine Permanent = new SessionTimeDescriptionLine(0, 0);
+            public static SessionTimeDescriptionLine Permanent = new(0, 0);
 
             //Method for Permanent or Unbounded?
 

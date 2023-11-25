@@ -318,7 +318,7 @@ namespace Media.Containers.Mpeg
             }
         }
 
-        HashSet<TransportStreamUnit.PacketIdentifier> m_ProgramIds = new HashSet<TransportStreamUnit.PacketIdentifier>();
+        HashSet<TransportStreamUnit.PacketIdentifier> m_ProgramIds = [];
 
         public override string ToTextualConvention(Container.Node node)
         {
@@ -326,7 +326,7 @@ namespace Media.Containers.Mpeg
             return base.ToTextualConvention(node);
         }
 
-        System.Collections.Concurrent.ConcurrentDictionary<ushort, TransportStreamUnit.PacketIdentifier> m_ProgramAssociations = new System.Collections.Concurrent.ConcurrentDictionary<ushort, TransportStreamUnit.PacketIdentifier>();
+        System.Collections.Concurrent.ConcurrentDictionary<ushort, TransportStreamUnit.PacketIdentifier> m_ProgramAssociations = new();
 
         static internal int ReadPointerField(Container.Node node, int offset = 0)
         {
@@ -418,7 +418,7 @@ namespace Media.Containers.Mpeg
             //CRC
         }
 
-        System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<TransportStreamUnit.PacketIdentifier, ushort>> m_ProgramDescriptions = new System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<TransportStreamUnit.PacketIdentifier, ushort>>();
+        System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<TransportStreamUnit.PacketIdentifier, ushort>> m_ProgramDescriptions = new();
 
         internal protected virtual void ParseDescriptionTable(Container.Node node)
         {

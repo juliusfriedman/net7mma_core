@@ -66,7 +66,7 @@ namespace Media.Rtp
         public const int MinimumSize = 4;
 
         //should be method...
-        public static InvalidOperationException InvalidExtension = new InvalidOperationException(string.Format("The given array does not contain the required amount of elements ({0}) to create a RtpExtension.", MinimumSize));
+        public static InvalidOperationException InvalidExtension = new(string.Format("The given array does not contain the required amount of elements ({0}) to create a RtpExtension.", MinimumSize));
 
         #endregion
 
@@ -249,7 +249,7 @@ namespace Media.UnitTests
         /// </summary>
         public static void TestAConstructor_And_Reserialization()
         {
-            using (Rtp.RtpExtension extension = new Rtp.RtpExtension(ushort.MinValue, unchecked((short)ushort.MaxValue)))
+            using (Rtp.RtpExtension extension = new(ushort.MinValue, unchecked((short)ushort.MaxValue)))
             {
                 //Check Flags
                 if (extension.Flags != ushort.MinValue) throw new Exception("Unexpected Flags");
@@ -257,7 +257,7 @@ namespace Media.UnitTests
                 //Size
                 if (extension.Size != Rtp.RtpExtension.MinimumSize) throw new Exception("Unexpected Size");
 
-                using (Rtp.RtpExtension s = new Rtp.RtpExtension(extension.ToArray(), 0, Rtp.RtpExtension.MinimumSize))
+                using (Rtp.RtpExtension s = new(extension.ToArray(), 0, Rtp.RtpExtension.MinimumSize))
                 {
                     //Check Flags
                     if (s.Flags != ushort.MinValue) throw new Exception("Unexpected Flags");
@@ -306,7 +306,7 @@ namespace Media.UnitTests
                                           0xBE, 0xE5, 0x39, 0x8D, // etc. 
                                       };
 
-            Media.Rtp.RtpPacket testPacket = new Media.Rtp.RtpPacket(m_SamplePacketBytes, 0);
+            Media.Rtp.RtpPacket testPacket = new(m_SamplePacketBytes, 0);
 
             if (false == testPacket.Extension) throw new Exception("Unexpected Header.Extension");
 

@@ -8,7 +8,7 @@ namespace Media.Containers.Riff;
 
 public class RiffWriter : MediaFileWriter
 {
-    private readonly List<Chunk> chunks = new List<Chunk>();
+    private readonly List<Chunk> chunks = [];
 
     public override Node Root => chunks[0];
 
@@ -136,14 +136,14 @@ public class UnitTests
         System.IO.File.WriteAllBytes(outputFilePath, Common.MemorySegment.Empty.Array);
 
         // Create the RiffWriter with the appropriate type and subtype for Wave files.
-        using (RiffWriter writer = new RiffWriter(new Uri("file://" + outputFilePath), FourCharacterCode.RIFF, FourCharacterCode.WAVE))
+        using (RiffWriter writer = new(new Uri("file://" + outputFilePath), FourCharacterCode.RIFF, FourCharacterCode.WAVE))
         {
             // Create the necessary chunks for the Wave file.
             // Note: We will use default values for FmtChunk since they are not important for this example.
-            FmtChunk fmtChunk = new FmtChunk(writer, 1, 1, (uint)sampleRate, 16); // 1 channel, 16 bits per sample
+            FmtChunk fmtChunk = new(writer, 1, 1, (uint)sampleRate, 16); // 1 channel, 16 bits per sample
 
             // Add the audio data (samples) to the DataChunk.
-            using (DataChunk dataChunk = new DataChunk(writer, ConvertAudioDataToBytes(audioData)))
+            using (DataChunk dataChunk = new(writer, ConvertAudioDataToBytes(audioData)))
             {
                 // Add the chunks to the RiffWriter.
                 writer.AddChunk(fmtChunk);
@@ -170,8 +170,8 @@ public class UnitTests
         using (var writer = new RiffWriter(new Uri("file://" + outputFilePath), FourCharacterCode.RIFF, FourCharacterCode.WAVE))
         {
             // Create the necessary chunks for the Wave file
-            FmtChunk fmtChunk = new FmtChunk(writer, 1, 1, 44100, 16); // 1 channel, 16 bits per sample
-            DataChunk dataChunk = new DataChunk(writer, ConvertAudioDataToBytes(audioData));
+            FmtChunk fmtChunk = new(writer, 1, 1, 44100, 16); // 1 channel, 16 bits per sample
+            DataChunk dataChunk = new(writer, ConvertAudioDataToBytes(audioData));
 
             writer.AddChunk(fmtChunk);
             writer.AddChunk(dataChunk);

@@ -354,7 +354,7 @@
             }
             int bytes = (Binary.Log2i(val) + Common.Binary.Quattuor) / Common.Binary.Quinque;
             int shift = (bytes - 1) * Common.Binary.Sex;
-            WriteBits(Common.Binary.BitsPerByte, ((uint)Binary.TrīgintāDuoBitSize - ((uint)Binary.TrīgintāDuoBitSize >> bytes)) | (val >> shift));
+            WriteBits(Common.Binary.BitsPerByte, (Binary.TrīgintāDuoBitSize - ((uint)Binary.TrīgintāDuoBitSize >> bytes)) | (val >> shift));
             while (shift >= Common.Binary.Sex)
             {
                 shift -= Common.Binary.Sex;

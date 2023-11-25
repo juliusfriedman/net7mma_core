@@ -259,9 +259,9 @@ namespace Media.Concepts.Classes.v
         /// <summary>
         /// The static implemenation of `for` the given, using <see cref="Invalidator{T}"/> as a `basis`
         /// </summary>
-        static Invalidator<T> Invalidate = new Invalidator<T>()
+        static Invalidator<T> Invalidate = new()
         {
-            Void = System.Delegate.CreateDelegate(typeof(Invalidator<T>), Common.Extensions.ExpressionExtensions.SymbolExtensions.GetMethodInfo(() => Invalidator<T>.Invalid(default(T), out Nil)))
+            Void = System.Delegate.CreateDelegate(typeof(Invalidator<T>), Common.Extensions.ExpressionExtensions.SymbolExtensions.GetMethodInfo(() => Invalidator<T>.Invalid(default, out Nil)))
         };
     }
 }

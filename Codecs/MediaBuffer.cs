@@ -184,7 +184,7 @@ namespace Media.UnitTests
             try
             {
                 //Make a media buffer with all supported layouts and byte orders and sample sizes...
-                using (Media.Codec.MediaBuffer mb = new Media.Codec.MediaBuffer(new Codec.MediaFormat(Codec.MediaType.Unknown, Common.Binary.ByteOrder.Unknown, Codec.DataLayout.Unknown, null), null))
+                using (Media.Codec.MediaBuffer mb = new(new Codec.MediaFormat(Codec.MediaType.Unknown, Common.Binary.ByteOrder.Unknown, Codec.DataLayout.Unknown, null), null))
                 {
 
                 }

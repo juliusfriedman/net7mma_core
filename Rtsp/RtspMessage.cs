@@ -301,7 +301,7 @@ namespace Media.Rtsp
             if (message.RtspMessageType == RtspMessageType.Invalid) return null;
 
             //Our result in a List
-            List<byte> result = new();
+            List<byte> result = [];
 
             //Our RtspMessage base64 encoded
             byte[] messageBytes;
@@ -360,7 +360,7 @@ namespace Media.Rtsp
             if (offset > message.Length) throw new ArgumentOutOfRangeException(nameof(offset));
 
             //Use a default encoding if none was given
-            if (encoding is null) encoding = RtspMessage.DefaultEncoding;
+            encoding ??= RtspMessage.DefaultEncoding;
 
             //Parse the HTTP 
             string Message = encoding.GetString(message, offset, message.Length - offset);
@@ -984,7 +984,7 @@ namespace Media.UnitTests
 
             foreach (Media.Rtsp.RtspMethod method in Enum.GetValues(typeof(Media.Rtsp.RtspMethod)))
             {
-                using (Media.Rtsp.RtspMessage request = new Media.Rtsp.RtspMessage(Media.Rtsp.RtspMessageType.Request))
+                using (Media.Rtsp.RtspMessage request = new(Media.Rtsp.RtspMessageType.Request))
                 {
                     request.Location = new Uri(TestLocation);
 
@@ -996,7 +996,7 @@ namespace Media.UnitTests
 
                     byte[] bytes = request.ToBytes();
 
-                    using (Media.Rtsp.RtspMessage serialized = new Media.Rtsp.RtspMessage(bytes))
+                    using (Media.Rtsp.RtspMessage serialized = new(bytes))
                     {
                         if (false == (serialized.RtspMethod == request.RtspMethod &&
                         serialized.Location == request.Location &&
@@ -1013,7 +1013,7 @@ namespace Media.UnitTests
 
                     bytes = request.ToBytes();
 
-                    using (Media.Rtsp.RtspMessage serialized = new Media.Rtsp.RtspMessage(bytes))
+                    using (Media.Rtsp.RtspMessage serialized = new(bytes))
                     {
                         if (false == (serialized.RtspMethod == request.RtspMethod &&
                         serialized.Location == request.Location &&
@@ -1030,7 +1030,7 @@ namespace Media.UnitTests
 
                     bytes = request.ToBytes();
 
-                    using (Media.Rtsp.RtspMessage serialized = new Media.Rtsp.RtspMessage(bytes))
+                    using (Media.Rtsp.RtspMessage serialized = new(bytes))
                     {
                         if (false == (serialized.RtspStatusCode == request.RtspStatusCode &&
                         serialized.CSeq == request.CSeq &&
@@ -1047,7 +1047,7 @@ namespace Media.UnitTests
 
                     bytes = request.ToBytes();
 
-                    using (Media.Rtsp.RtspMessage serialized = new Media.Rtsp.RtspMessage(bytes))
+                    using (Media.Rtsp.RtspMessage serialized = new(bytes))
                     {
                         if (false == (serialized.RtspStatusCode == request.RtspStatusCode &&
                         serialized.CSeq == request.CSeq &&
@@ -1070,7 +1070,7 @@ namespace Media.UnitTests
 
             foreach (Media.Rtsp.RtspStatusCode statusCode in Enum.GetValues(typeof(Media.Rtsp.RtspStatusCode)))
             {
-                using (Media.Rtsp.RtspMessage response = new Media.Rtsp.RtspMessage(Media.Rtsp.RtspMessageType.Response)
+                using (Media.Rtsp.RtspMessage response = new(Media.Rtsp.RtspMessageType.Response)
                 {
                     Version = 7,
                     CSeq = 7,
@@ -1079,7 +1079,7 @@ namespace Media.UnitTests
                 {
                     byte[] bytes = response.ToBytes();
 
-                    using (Media.Rtsp.RtspMessage serialized = new Media.Rtsp.RtspMessage(bytes))
+                    using (Media.Rtsp.RtspMessage serialized = new(bytes))
                     {
                         if (false == (serialized.RtspStatusCode == response.RtspStatusCode &&
                         serialized.CSeq == response.CSeq &&
@@ -1097,7 +1097,7 @@ namespace Media.UnitTests
 
                         bytes = response.ToBytes();
 
-                        using (Media.Rtsp.RtspMessage serialized = new Media.Rtsp.RtspMessage(bytes))
+                        using (Media.Rtsp.RtspMessage serialized = new(bytes))
                         {
                             if (false == (serialized.RtspStatusCode == response.RtspStatusCode &&
                             serialized.CSeq == response.CSeq &&
@@ -1115,7 +1115,7 @@ namespace Media.UnitTests
 
                     bytes = response.ToBytes();
 
-                    using (Media.Rtsp.RtspMessage serialized = new Media.Rtsp.RtspMessage(bytes))
+                    using (Media.Rtsp.RtspMessage serialized = new(bytes))
                     {
                         if (false == (serialized.RtspStatusCode == response.RtspStatusCode &&
                         serialized.CSeq == response.CSeq &&
@@ -1135,7 +1135,7 @@ namespace Media.UnitTests
 
             string TestHeaderName = "h", TestHeaderValue = "v", TestBody = "Body Data ! 1234567890-A";
 
-            using (Media.Rtsp.RtspMessage response = new Media.Rtsp.RtspMessage(Media.Rtsp.RtspMessageType.Response)
+            using (Media.Rtsp.RtspMessage response = new(Media.Rtsp.RtspMessageType.Response)
             {
                 Version = 7,
                 CSeq = 7,
@@ -1160,7 +1160,7 @@ namespace Media.UnitTests
 
                 byte[] bytes = response.ToBytes();
 
-                using (Media.Rtsp.RtspMessage serialized = new Media.Rtsp.RtspMessage(bytes))
+                using (Media.Rtsp.RtspMessage serialized = new(bytes))
                 {
                     if (serialized.RtspStatusCode != response.RtspStatusCode ||
                     serialized.CSeq != response.CSeq ||
@@ -1181,7 +1181,7 @@ namespace Media.UnitTests
 
                 bytes = response.ToBytes();
 
-                using (Media.Rtsp.RtspMessage serialized = new Media.Rtsp.RtspMessage(bytes))
+                using (Media.Rtsp.RtspMessage serialized = new(bytes))
                 {
                     if (serialized.RtspStatusCode != response.RtspStatusCode ||
                     serialized.CSeq != response.CSeq &&
@@ -1205,7 +1205,7 @@ namespace Media.UnitTests
 
                     bytes = response.ToBytes();
 
-                    using (Media.Rtsp.RtspMessage serialized = new Media.Rtsp.RtspMessage(bytes))
+                    using (Media.Rtsp.RtspMessage serialized = new(bytes))
                     {
                         if (serialized.RtspStatusCode != response.RtspStatusCode ||
                         serialized.CSeq != response.CSeq ||
@@ -1224,7 +1224,7 @@ namespace Media.UnitTests
 
                 bytes = response.ToBytes();
 
-                using (Media.Rtsp.RtspMessage serialized = new Media.Rtsp.RtspMessage(bytes))
+                using (Media.Rtsp.RtspMessage serialized = new(bytes))
                 {
                     if (serialized.RtspStatusCode != response.RtspStatusCode ||
                         serialized.CSeq != response.CSeq ||
@@ -1245,7 +1245,7 @@ namespace Media.UnitTests
             byte[] bytes = Media.Common.Extensions.String.StringExtensions.HexStringToBytes("525453502f312e3020323030204f4b0d0a435365633a20310d0a5075626c69633a2044455343524942452c2054454152444f574e2c2053455455502c20504c41592c2050415553450d0a0d0a");
 
             //Make a message from the bytes
-            using (Media.Rtsp.RtspMessage serialized = new Media.Rtsp.RtspMessage(bytes))
+            using (Media.Rtsp.RtspMessage serialized = new(bytes))
             {
                 //Ensure the message length is not larger then the binary length
                 if (serialized.Length > bytes.Length) throw new Exception("Length Test Failed");
@@ -1447,21 +1447,13 @@ namespace Media.UnitTests
 
             //Transport: RTP/AVP;multicast;destination=232.248.50.1;source=10.0.57.24;port=18888-18889;ttl=255
 
-            int ssrc, ttl,
-                rtpServerPort, rtcpServerPort,
-                rtpClientPort, rtcpClientPort;
 
-            bool unicast, multicast,
-                interleaved;
 
-            byte dataChannel, controlChannel;
 
-            System.Net.IPAddress sourceIp, destinationIp;
 
             //never give protocol, some weird client or server may have this wonderful datum at random places.
-            string mode;
 
-            if (false == Media.Rtsp.RtspHeaders.TryParseTransportHeader(testVector, out ssrc, out sourceIp, out rtpServerPort, out rtcpServerPort, out rtpClientPort, out rtcpClientPort, out interleaved, out dataChannel, out controlChannel, out mode, out unicast, out multicast, out destinationIp, out ttl))
+            if (false == Media.Rtsp.RtspHeaders.TryParseTransportHeader(testVector, out int ssrc, out System.Net.IPAddress sourceIp, out int rtpServerPort, out int rtcpServerPort, out int rtpClientPort, out int rtcpClientPort, out bool interleaved, out byte dataChannel, out byte controlChannel, out string mode, out bool unicast, out bool multicast, out System.Net.IPAddress destinationIp, out int ttl))
             {
                 throw new Exception("Unexpected TryParseTransportHeader result");
             }
@@ -1503,7 +1495,7 @@ namespace Media.UnitTests
 
         public void TestCompleteFrom()
         {
-            using (Media.Rtsp.RtspMessage message = new Media.Rtsp.RtspMessage(Media.Rtsp.RtspMessageType.Response))
+            using (Media.Rtsp.RtspMessage message = new(Media.Rtsp.RtspMessageType.Response))
             {
                 message.RtspStatusCode = Media.Rtsp.RtspStatusCode.OK;
 
@@ -1541,11 +1533,11 @@ namespace Media.UnitTests
                     offset = 0;
 
                     //Complete a message in chunks
-                    using (Media.Rtsp.RtspMessage toComplete = new Rtsp.RtspMessage(Media.Common.MemorySegment.EmptyBytes))
+                    using (Media.Rtsp.RtspMessage toComplete = new(Media.Common.MemorySegment.EmptyBytes))
                     {
 
                         //Store the sizes encountered
-                        List<int> chunkSizes = new List<int>();
+                        List<int> chunkSizes = [];
 
                         int currentSize = size;
 
@@ -1559,7 +1551,7 @@ namespace Media.UnitTests
                             chunkSizes.Add(chunkSize);
 
                             //Make a segment to that chunk
-                            using (Common.MemorySegment chunkData = new Common.MemorySegment(buffer, offset, chunkSize))
+                            using (Common.MemorySegment chunkData = new(buffer, offset, chunkSize))
                             {
                                 //Keep track of how much data was just used to complete the message using that chunk
                                 int justUsed = toComplete.CompleteFrom(null, chunkData);
@@ -1583,7 +1575,7 @@ namespace Media.UnitTests
                             toComplete.CSeq != message.CSeq ||
                             toComplete.Version != message.Version ||
                             toComplete.HeaderCount != message.HeaderCount ||
-                            toComplete.GetHeaders().Where(h => message.ContainsHeader(h)).Any(h => string.Compare(toComplete[h], message[h]) > 0)) throw new Exception("TestCompleteFrom Failed! ChunkSizes =>" + string.Join(",", chunkSizes));
+                            toComplete.GetHeaders().Where(message.ContainsHeader).Any(h => string.Compare(toComplete[h], message[h]) > 0)) throw new Exception("TestCompleteFrom Failed! ChunkSizes =>" + string.Join(",", chunkSizes));
 
                         //The header UserAgent should be different as it contains an invalid header in the message
                         //Todo determine if this should be overlooked in Equals?
@@ -1595,7 +1587,7 @@ namespace Media.UnitTests
 
         public void TestCompleteFromWithBody()
         {
-            using (Media.Rtsp.RtspMessage message = new Media.Rtsp.RtspMessage(Media.Rtsp.RtspMessageType.Response, 1.0, Media.Rtsp.RtspMessage.DefaultEncoding)
+            using (Media.Rtsp.RtspMessage message = new(Media.Rtsp.RtspMessageType.Response, 1.0, Media.Rtsp.RtspMessage.DefaultEncoding)
             {
                 RtspStatusCode = Media.Rtsp.RtspStatusCode.OK,
                 CSeq = Media.Utility.Random.Next(byte.MinValue, int.MaxValue),
@@ -1640,11 +1632,11 @@ namespace Media.UnitTests
                     offset = 0;
 
                     //Complete a message in chunks
-                    using (Media.Rtsp.RtspMessage toComplete = new Rtsp.RtspMessage(Media.Common.MemorySegment.EmptyBytes))
+                    using (Media.Rtsp.RtspMessage toComplete = new(Media.Common.MemorySegment.EmptyBytes))
                     {
 
                         //Store the sizes encountered
-                        List<int> chunkSizes = new List<int>();
+                        List<int> chunkSizes = [];
 
                         int currentSize = size;
 
@@ -1658,7 +1650,7 @@ namespace Media.UnitTests
                             chunkSizes.Add(chunkSize);
 
                             //Make a segment to that chunk
-                            using (Common.MemorySegment chunkData = new Common.MemorySegment(buffer, offset, chunkSize))
+                            using (Common.MemorySegment chunkData = new(buffer, offset, chunkSize))
                             {
                                 //Keep track of how much data was just used to complete the message using that chunk
                                 int justUsed = toComplete.CompleteFrom(null, chunkData);
@@ -1682,7 +1674,7 @@ namespace Media.UnitTests
                             toComplete.CSeq != message.CSeq ||
                             toComplete.Version != message.Version ||
                             toComplete.HeaderCount != message.HeaderCount ||
-                            toComplete.GetHeaders().Where(h => message.ContainsHeader(h)).Any(h => string.Compare(toComplete[h], message[h]) > 0) ||
+                            toComplete.GetHeaders().Where(message.ContainsHeader).Any(h => string.Compare(toComplete[h], message[h]) > 0) ||
                             string.Compare(toComplete.Body, message.Body, false) != 0) throw new Exception("TestCompleteFrom Failed! ChunkSizes =>" + string.Join(",", chunkSizes));
 
                         //The header UserAgent should be different as it contains an invalid header in the message
@@ -1695,7 +1687,7 @@ namespace Media.UnitTests
 
         public void TestCompleteFromWith0LengthBody()
         {
-            using (Media.Rtsp.RtspMessage message = new Media.Rtsp.RtspMessage(Media.Rtsp.RtspMessageType.Response, 1.0, Media.Rtsp.RtspMessage.DefaultEncoding)
+            using (Media.Rtsp.RtspMessage message = new(Media.Rtsp.RtspMessageType.Response, 1.0, Media.Rtsp.RtspMessage.DefaultEncoding)
             {
                 RtspStatusCode = Media.Rtsp.RtspStatusCode.OK,
                 CSeq = Media.Utility.Random.Next(byte.MinValue, int.MaxValue),
@@ -1750,10 +1742,10 @@ namespace Media.UnitTests
                     offset = 0;
 
                     //Complete a message in chunks
-                    using (Media.Rtsp.RtspMessage toComplete = new Rtsp.RtspMessage(Media.Common.MemorySegment.EmptyBytes))
+                    using (Media.Rtsp.RtspMessage toComplete = new(Media.Common.MemorySegment.EmptyBytes))
                     {
                         //Store the sizes encountered
-                        List<int> chunkSizes = new List<int>();
+                        List<int> chunkSizes = [];
 
                         int currentSize = size;
 
@@ -1767,7 +1759,7 @@ namespace Media.UnitTests
                             chunkSizes.Add(chunkSize);
 
                             //Make a segment to that chunk
-                            using (Common.MemorySegment chunkData = new Common.MemorySegment(buffer, offset, chunkSize))
+                            using (Common.MemorySegment chunkData = new(buffer, offset, chunkSize))
                             {
                                 //Keep track of how much data was just used to complete the message using that chunk
                                 int justUsed = toComplete.CompleteFrom(null, chunkData);
@@ -1792,7 +1784,7 @@ namespace Media.UnitTests
                             toComplete.CSeq != message.CSeq ||
                             toComplete.Version != message.Version ||
                             toComplete.HeaderCount != message.HeaderCount ||
-                            toComplete.GetHeaders().Where(h => message.ContainsHeader(h)).Any(h => string.Compare(toComplete[h], message[h]) > 0) ||
+                            toComplete.GetHeaders().Where(message.ContainsHeader).Any(h => string.Compare(toComplete[h], message[h]) > 0) ||
                             string.Compare(toComplete.Body, message.Body) != 0) throw new Exception("TestCompleteFrom Failed! ChunkSizes =>" + string.Join(",", chunkSizes));
 
                         //The header UserAgent should be different as it contains an invalid header in the message
@@ -1805,7 +1797,7 @@ namespace Media.UnitTests
 
         public void TestCompleteFromWithSpacesLeadingBody()
         {
-            using (Media.Rtsp.RtspMessage message = new Media.Rtsp.RtspMessage(Media.Rtsp.RtspMessageType.Response, 1.0, Media.Rtsp.RtspMessage.DefaultEncoding)
+            using (Media.Rtsp.RtspMessage message = new(Media.Rtsp.RtspMessageType.Response, 1.0, Media.Rtsp.RtspMessage.DefaultEncoding)
             {
                 RtspStatusCode = Media.Rtsp.RtspStatusCode.OK,
                 CSeq = Media.Utility.Random.Next(byte.MinValue, int.MaxValue),
@@ -1863,10 +1855,10 @@ namespace Media.UnitTests
                     offset = 0;
 
                     //Complete a message in chunks
-                    using (Media.Rtsp.RtspMessage toComplete = new Rtsp.RtspMessage(Media.Common.MemorySegment.EmptyBytes))
+                    using (Media.Rtsp.RtspMessage toComplete = new(Media.Common.MemorySegment.EmptyBytes))
                     {
                         //Store the sizes encountered
-                        List<int> chunkSizes = new List<int>();
+                        List<int> chunkSizes = [];
 
                         int currentSize = size;
 
@@ -1880,7 +1872,7 @@ namespace Media.UnitTests
                             chunkSizes.Add(chunkSize);
 
                             //Make a segment to that chunk
-                            using (Common.MemorySegment chunkData = new Common.MemorySegment(buffer, offset, chunkSize))
+                            using (Common.MemorySegment chunkData = new(buffer, offset, chunkSize))
                             {
                                 //Keep track of how much data was just used to complete the message using that chunk
                                 int justUsed = toComplete.CompleteFrom(null, chunkData);
@@ -1905,7 +1897,7 @@ namespace Media.UnitTests
                             toComplete.CSeq != message.CSeq ||
                             toComplete.Version != message.Version ||
                             toComplete.HeaderCount != message.HeaderCount ||
-                            toComplete.GetHeaders().Where(h => message.ContainsHeader(h)).Any(h => string.Compare(toComplete[h], message[h]) > 0) ||
+                            toComplete.GetHeaders().Where(message.ContainsHeader).Any(h => string.Compare(toComplete[h], message[h]) > 0) ||
                             string.Compare(toComplete.Body, message.Body) != 0) throw new Exception("TestCompleteFrom Failed! ChunkSizes =>" + string.Join(",", chunkSizes));
 
                         //The header UserAgent should be different as it contains an invalid header in the message

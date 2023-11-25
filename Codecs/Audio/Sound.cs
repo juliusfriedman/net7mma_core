@@ -52,7 +52,7 @@ public class Sound : AudioBuffer
     {
     }
 
-    public WaveFormat WaveFormat => new WaveFormat(WaveFormatId.Pcm, AudioFormat.Channels, AudioFormat.SampleRate, AudioFormat.BitsPerSample);
+    public WaveFormat WaveFormat => new(WaveFormatId.Pcm, AudioFormat.Channels, AudioFormat.SampleRate, AudioFormat.BitsPerSample);
 
     public void SaveWave(Stream stream)
     {

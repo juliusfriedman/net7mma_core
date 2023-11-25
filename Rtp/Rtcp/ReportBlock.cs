@@ -311,7 +311,7 @@ namespace Media.Rtcp
 
             base.Dispose(ShouldDispose);
 
-            IDisposable memory = (IDisposable)Memory;
+            IDisposable memory = Memory;
 
             if (memory is not null)
             {
@@ -347,7 +347,7 @@ namespace Media.UnitTests
                 DelaySinceLastSendersReport = RFC3550.Random32(Utility.Random.Next());
 
             //Create the ReportBlock using the random values
-            using (Rtcp.ReportBlock rb = new Rtcp.ReportBlock(RandomId,
+            using (Rtcp.ReportBlock rb = new(RandomId,
                 FractionsLost, CumulativePacketsLost,
                 ExtendedHighestSequenceNumberReceived,
                 InterarrivalJitterEstimate,
@@ -382,7 +382,7 @@ namespace Media.UnitTests
                 System.Diagnostics.Debug.Assert(rb.DelaySinceLastSendersReport == DelaySinceLastSendersReport, "Unexpected DelaySinceLastSendersReport");
 
                 //Serialize, Deserialize and verify again
-                using (Rtcp.ReportBlock s = new Rtcp.ReportBlock(new Common.MemorySegment(rb.Prepare().ToArray())))
+                using (Rtcp.ReportBlock s = new(new Common.MemorySegment(rb.Prepare().ToArray())))
                 {
                     //Check IsComplete
                     System.Diagnostics.Debug.Assert(s.IsComplete, "IsComplete must be true.");

@@ -251,7 +251,7 @@ namespace Media.Common.Collections.Generic
             {
                 case Common.Binary.LongZero:
                     // Store
-                    t = default(T);
+                    t = default;
 
                     //Return
                     return false;
@@ -383,9 +383,8 @@ namespace Media.Common.Collections.Generic
 
         public void Clear(bool all = true)
         {
-            Node First, Last;
 
-            Clear(all, out First, out Last);
+            Clear(all, out Node First, out Node Last);
         }
 
         #endregion
@@ -427,7 +426,7 @@ namespace Media.UnitTests
     /// </summary>
     internal class ConcurrentLinkedQueueSlimTests
     {
-        readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<long> LinkedQueue = new Common.Collections.Generic.ConcurrentLinkedQueueSlim<long>();
+        readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<long> LinkedQueue = new();
 
         long LastInputOutput = 0;
 
@@ -466,9 +465,7 @@ namespace Media.UnitTests
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void TestsDequeue()
         {
-            List<System.Exception> exceptions = new List<Exception>();
-
-            if (LinkedQueue is null) exceptions.Add(new System.Exception("LinkedQueue is null"));
+            List<System.Exception> exceptions = LinkedQueue is null ? [new System.Exception("LinkedQueue is null")] : [];
 
             if (exceptions.Count > 0) throw new System.Exception("Errors Occured", new System.Exception(string.Join(Environment.NewLine, exceptions.Select(e => e.Message))));
 
@@ -519,12 +516,12 @@ namespace Media.UnitTests
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void TestsThreading()
         {
-            System.Threading.ManualResetEvent mre = new System.Threading.ManualResetEvent(false);
+            System.Threading.ManualResetEvent mre = new(false);
 
             int countIn = 0;
 
             //In a thread populate
-            System.Threading.Thread enqueueThread = new System.Threading.Thread(() =>
+            System.Threading.Thread enqueueThread = new(() =>
             {
                 while (countIn < Amount)
                 {
@@ -551,13 +548,12 @@ namespace Media.UnitTests
             int countOut = 0;
 
             //In another thread write
-            System.Threading.Thread dequeueThread = new System.Threading.Thread(() =>
+            System.Threading.Thread dequeueThread = new(() =>
             {
                 while (countOut < Amount)
                 {
-                    long dequeue;
 
-                    if (LinkedQueue.TryDequeue(out dequeue))
+                    if (LinkedQueue.TryDequeue(out long dequeue))
                     {
                         ++countOut;
 
@@ -634,7 +630,7 @@ namespace Media.UnitTests
         {
             int MultiThreadAmount = Amount * 10;
 
-            System.Threading.ManualResetEvent sharedResetEvent = new System.Threading.ManualResetEvent(false);
+            System.Threading.ManualResetEvent sharedResetEvent = new(false);
 
             int statLevelCountIn = 0;
 
@@ -748,9 +744,8 @@ namespace Media.UnitTests
 
                     while (threadLocalCountOut < MultiThreadAmount)
                     {
-                        long dequeue;
 
-                        if (LinkedQueue.TryDequeue(out dequeue))
+                        if (LinkedQueue.TryDequeue(out long dequeue))
                         {
                             ++threadLocalCountOut;
 

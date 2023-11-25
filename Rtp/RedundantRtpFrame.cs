@@ -90,16 +90,16 @@
                     //if (remaining < tempBlockLen) break;
 
                     //Get the payload
-                    Common.MemorySegment payload = new Common.MemorySegment(packet.Payload.Array, Common.Binary.BitsToBytes(ref bitOffset), tempBlockLen, shouldDispose);
+                    Common.MemorySegment payload = new(packet.Payload.Array, Common.Binary.BitsToBytes(ref bitOffset), tempBlockLen, shouldDispose);
 
                     //Create the header
-                    Rtp.RtpHeader header = new RtpHeader(packet.Version, false, false, marker, tempPayloadType, 0, packet.SynchronizationSourceIdentifier,
+                    Rtp.RtpHeader header = new(packet.Version, false, false, marker, tempPayloadType, 0, packet.SynchronizationSourceIdentifier,
                         packet.SequenceNumber,
                         packet.Timestamp + tempTimestamp,
                         shouldDispose);
 
                     //Create the packet
-                    RtpPacket result = new RtpPacket(header, payload, shouldDispose);
+                    RtpPacket result = new(header, payload, shouldDispose);
 
                     //Return the packet
                     yield return result;
@@ -143,9 +143,8 @@
             //Make one packet with the data of all packets
             //Must also include headers which is 4 * packets.Length + 1
 
-            int packetsLength;
 
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(packets, out packetsLength)) return null;
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(packets, out int packetsLength)) return null;
 
             //4 byte headers are only needed if there are more than 1 packet.
             int headersNeeded = packetsLength - 1;
@@ -154,7 +153,7 @@
             int size = RtpHeader.Length + ((4 * headersNeeded) + 1);
 
             //Create the packet with the known length
-            RtpPacket result = new RtpPacket(new byte[size], 0); //RtpHeader.Length + 4 * packetsLength - (packetsLength * RtpHeader.Length) + 1
+            RtpPacket result = new(new byte[size], 0); //RtpHeader.Length + 4 * packetsLength - (packetsLength * RtpHeader.Length) + 1
 
             int bitOffset = 0;
 
@@ -204,7 +203,7 @@
             //result.Payload.Array[payloadStart - 1] = (byte)(0x80 | packet.PayloadType);
 
             //Set the (F)irst bit
-            Common.Binary.WriteBitsMSB(result.Payload.Array, ref bitOffset, (ulong)1, 1);
+            Common.Binary.WriteBitsMSB(result.Payload.Array, ref bitOffset, 1, 1);
 
             //Write the payloadType
             Common.Binary.WriteBitsMSB(result.Payload.Array, ref bitOffset, (ulong)packets[packetIndex].PayloadType, 7);

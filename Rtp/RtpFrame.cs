@@ -205,7 +205,7 @@ namespace Media.Rtp
 
                 m_Packet = packet;
 
-                Parts = new List<Common.MemorySegment>();
+                Parts = [];
             }
 
             #endregion
@@ -555,10 +555,10 @@ namespace Media.Rtp
             Created = DateTime.UtcNow;
 
             //Create the list
-            Packets = new List<RtpPacket>();
+            Packets = [];
 
             //Create the list
-            Depacketized = new SortedList<double, Common.MemorySegment>();
+            Depacketized = [];
         }
 
         /// <summary>
@@ -663,7 +663,7 @@ namespace Media.Rtp
             else
             {
                 //Create the list
-                Depacketized = new SortedList<double, Common.MemorySegment>();
+                Depacketized = [];
 
                 //Can't create a new one because of the implications
                 //m_Buffer = f.m_Buffer; 
@@ -1938,7 +1938,7 @@ namespace Media.UnitTests
         public void TestAddingRandomPackets()
         {
             //Create a frame with an unspecified payload
-            using (Media.Rtp.RtpFrame frame = new Media.Rtp.RtpFrame())
+            using (Media.Rtp.RtpFrame frame = [])
             {
 
                 if (frame.SpecifiedPayloadType) throw new Exception("Frame must have SpecifiedPayloadType is false when not set in constructor.");
@@ -2125,7 +2125,7 @@ namespace Media.UnitTests
         public void TestAddingAndRemovingPackets()
         {
             //Create a frame
-            using (Media.Rtp.RtpFrame frame = new Media.Rtp.RtpFrame(0))
+            using (Media.Rtp.RtpFrame frame = new(0))
             {
 
                 //Add marker packet with seq = 0
@@ -2250,7 +2250,7 @@ namespace Media.UnitTests
         public void TestContains()
         {
             //Create a frame
-            using (Media.Rtp.RtpFrame frame = new Media.Rtp.RtpFrame(0))
+            using (Media.Rtp.RtpFrame frame = new(0))
             {
                 frame.Add(new Media.Rtp.RtpPacket(2, false, false, Media.Common.MemorySegment.EmptyBytes)
                 {
@@ -2283,7 +2283,7 @@ namespace Media.UnitTests
         public void TestIsMissingPackets()
         {
             //Create a frame
-            using (Media.Rtp.RtpFrame frame = new Media.Rtp.RtpFrame(0))
+            using (Media.Rtp.RtpFrame frame = new(0))
             {
                 //Add packets to the frame
                 for (int i = 0; i < 15; ++i)
@@ -2333,7 +2333,7 @@ namespace Media.UnitTests
             //Create a frame
             unchecked
             {
-                using (Media.Rtp.RtpFrame frame = new Media.Rtp.RtpFrame(0))
+                using (Media.Rtp.RtpFrame frame = new(0))
                 {
                     //Add 15 packets to the frame starting at 65530, ending at 9 (Wrapping at 65535)
                     for (ushort i = ushort.MaxValue - 5; i != 10; ++i)
@@ -2384,7 +2384,7 @@ namespace Media.UnitTests
             {
                 int expected = 0;
 
-                using (Media.Rtp.RtpFrame frame = new Media.Rtp.RtpFrame(0))
+                using (Media.Rtp.RtpFrame frame = new(0))
                 {
                     byte payloadValue = byte.MinValue;
 
@@ -2448,7 +2448,7 @@ namespace Media.UnitTests
 
                     //Also perform the same test with out of order packets by creating a new frame from random packets in frame.
 
-                    using (Media.Rtp.RtpFrame reorder = new Media.Rtp.RtpFrame(0))
+                    using (Media.Rtp.RtpFrame reorder = new(0))
                     {
                         int index;
 
@@ -2549,7 +2549,7 @@ namespace Media.UnitTests
                         //Todo, integrate with RtpFrame class.
                         //Test the SegmentStream (Not really part of this test yet because it's not used.)
 
-                        using (Common.SegmentStream test = new Common.SegmentStream(reorder.Depacketized.Values))
+                        using (Common.SegmentStream test = new(reorder.Depacketized.Values))
                         {
                             expected = 0;
 

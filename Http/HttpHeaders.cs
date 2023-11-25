@@ -291,7 +291,7 @@ namespace Media.Http
 
             //Todo, instead of split use substring...
 
-            Common.Collections.Generic.ConcurrentThesaurus<string, string> result = new Common.Collections.Generic.ConcurrentThesaurus<string, string>();
+            Common.Collections.Generic.ConcurrentThesaurus<string, string> result = [];
 
             //Todo, lazy split..
 

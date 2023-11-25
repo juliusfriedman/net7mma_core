@@ -51,7 +51,7 @@ namespace Media.Concepts.Collections
         /// <summary>
         /// The storage mechanism
         /// </summary>
-        protected System.Collections.Generic.LinkedList<T> LinkedList = new LinkedList<T>();
+        protected System.Collections.Generic.LinkedList<T> LinkedList = new();
 
         /// <summary>
         /// Peek the first item from storage without checking <see cref="Count"/>.
@@ -186,7 +186,7 @@ namespace Media.Concepts.Collections
         {
             if (Count <= 0)
             {
-                data = default(T);
+                data = default;
 
                 return false;
             }
@@ -214,7 +214,7 @@ namespace Media.Concepts.Collections
         {
             if (Count <= 0)
             {
-                data = default(T);
+                data = default;
 
                 return false;
             }
@@ -265,7 +265,7 @@ namespace Media.Concepts.Collections
         {
             if (Count <= 0)
             {
-                data = default(T);
+                data = default;
 
                 return false;
             }
@@ -293,7 +293,7 @@ namespace Media.Concepts.Collections
         {
             if (Count <= 0)
             {
-                data = default(T);
+                data = default;
 
                 return false;
             }

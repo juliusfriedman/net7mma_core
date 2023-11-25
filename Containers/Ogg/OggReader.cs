@@ -335,11 +335,11 @@ namespace Media.Containers.Ogg
 
             if (m_PageBegins is not null || m_PageEnds is not null || m_InfoPages is not null) return;
 
-            m_PageBegins = new Dictionary<int, Node>();
+            m_PageBegins = [];
 
-            m_PageEnds = new Dictionary<int, Node>();
+            m_PageEnds = [];
 
-            m_InfoPages = new Common.Collections.Generic.ConcurrentThesaurus<int, Node>();
+            m_InfoPages = [];
 
             long position = Position;
 
@@ -416,7 +416,7 @@ namespace Media.Containers.Ogg
 
             ParsePages();
 
-            List<Track> tracks = new List<Track>();
+            List<Track> tracks = [];
 
             //Title Persists
             string title = string.Empty;
@@ -433,15 +433,14 @@ namespace Media.Containers.Ogg
 
                 double rate = 0, duration = 0;
 
-                byte channels = default(byte), bitDepth = default(byte);
+                byte channels = default, bitDepth = default;
 
                 //The startPage
                 Node startPage = streamBegin.Value;
 
-                Node endPage;
 
                 //If no Page End then treat stream as continious
-                if (!m_PageEnds.TryGetValue(serialNumber, out endPage))
+                if (!m_PageEnds.TryGetValue(serialNumber, out Node endPage))
                 {
                     endPage = startPage;
                     duration = -1;
@@ -1079,10 +1078,9 @@ namespace Media.Containers.Ogg
                 }
 
                 // Process Vorbis Comments for the page if found.
-                IEnumerable<Node> infoPages;
 
                 //If the stream had any info pages parse them
-                if (m_InfoPages.TryGetValue(serialNumber, out infoPages)) foreach (var infoPage in infoPages)
+                if (m_InfoPages.TryGetValue(serialNumber, out IEnumerable<Node> infoPages)) foreach (var infoPage in infoPages)
                     {
                         //Check for vorbis style comments
                         string vorbis = System.Text.Encoding.UTF8.GetString(infoPage.Data.Array, 1, 6);
@@ -1157,7 +1155,7 @@ namespace Media.Containers.Ogg
                     }
 
                 //Create the track
-                Track created = new Track(startPage, title,
+                Track created = new(startPage, title,
                       //Serial Number
                       serialNumber,
                       //Created, Modified

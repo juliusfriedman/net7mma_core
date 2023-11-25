@@ -46,16 +46,16 @@ namespace Media.UnitTests
     public class RtpRtcpTests
     {
         //Declare a few exceptions
-        static Exception versionException = new Exception("Unable to set the version"),
-        extensionException = new Exception("Incorrectly set the Extensions Bit"),
-        contributingSourceException = new Exception("Incorrectly set the ContributingSource nibble"),
-        inValidHeaderException = new Exception("Invalid header."),
-        reportBlockException = new Exception("Incorrectly set the ReportBlock 7 bits"),
-        paddingException = new Exception("Incorreclty set the Padding Bit"),
-        timestampException = new Exception("Incorrect Timestamp value"),
-        sequenceNumberException = new Exception("Sequence Number Incorrect"),
-        markerException = new Exception("Marker is not set"),
-        payloadException = new Exception("Incorreclty set PayloadType bits");
+        static Exception versionException = new("Unable to set the version"),
+        extensionException = new("Incorrectly set the Extensions Bit"),
+        contributingSourceException = new("Incorrectly set the ContributingSource nibble"),
+        inValidHeaderException = new("Invalid header."),
+        reportBlockException = new("Incorrectly set the ReportBlock 7 bits"),
+        paddingException = new("Incorreclty set the Padding Bit"),
+        timestampException = new("Incorrect Timestamp value"),
+        sequenceNumberException = new("Sequence Number Incorrect"),
+        markerException = new("Marker is not set"),
+        payloadException = new("Incorreclty set PayloadType bits");
 
         /// <summary>
         /// A format for the output which occurs when unit testing.
@@ -69,12 +69,13 @@ namespace Media.UnitTests
             Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
             //Create a RtpPacket instance
-            Media.Rtp.RtpPacket p = new Media.Rtp.RtpPacket(new Media.Rtp.RtpHeader(0, false, false), Enumerable.Empty<byte>());
-
-            //Set a few values
-            p.Timestamp = 987654321;
-            p.SequenceNumber = 7;
-            p.ContributingSourceCount = 7;
+            Media.Rtp.RtpPacket p = new(new Media.Rtp.RtpHeader(0, false, false), Enumerable.Empty<byte>())
+            {
+                //Set a few values
+                Timestamp = 987654321,
+                SequenceNumber = 7,
+                ContributingSourceCount = 7
+            };
 
             System.Diagnostics.Debug.Assert(p.SequenceNumber == 7, sequenceNumberException.Message);
 
@@ -234,7 +235,7 @@ namespace Media.UnitTests
                                           0xBE, 0xE5, 0x39, 0x8D, // etc. 
                                       };
 
-            Media.Rtp.RtpPacket testPacket = new Media.Rtp.RtpPacket(m_SamplePacketBytes, 0);
+            Media.Rtp.RtpPacket testPacket = new(m_SamplePacketBytes, 0);
 
             if (testPacket.Extension)
             {
@@ -410,7 +411,7 @@ namespace Media.UnitTests
                 Console.WriteLine(string.Format(TestingFormat, "\tPayloadType " + implementation.Key, "Implemented By" + implementation.Value.Name));
 
             //Create a RtpPacket instance
-            Media.Rtcp.RtcpPacket p = new Media.Rtcp.RtcpPacket(new Media.Rtcp.RtcpHeader(0, 0, false, 0), Enumerable.Empty<byte>());
+            Media.Rtcp.RtcpPacket p = new(new Media.Rtcp.RtcpHeader(0, 0, false, 0), Enumerable.Empty<byte>());
 
             //Check the Padding bit after modification
             System.Diagnostics.Debug.Assert(p.SynchronizationSourceIdentifier is 0, "SynchronizationSourceIdentifier should equal 0");
@@ -530,10 +531,10 @@ namespace Media.UnitTests
             byte[] output;
 
             //Keep a copy of these exceptions to throw in case some error occurs.
-            Exception invalidLength = new Exception("Invalid Length"), invalidData = new Exception("Invalid Data in packet"), invalidPadding = new Exception("Invalid Padding"), incompleteFalse = new Exception("Packet IsComplete is false");
+            Exception invalidLength = new("Invalid Length"), invalidData = new("Invalid Data in packet"), invalidPadding = new("Invalid Padding"), incompleteFalse = new("Packet IsComplete is false");
 
             //Create a Media.RtcpPacket with only a header (results in 8 octets of 0x00 which make up the header)
-            Media.Rtcp.RtcpPacket rtcpPacket = new Media.Rtcp.RtcpPacket(0, 0, 0, 0, 0, 0);
+            Media.Rtcp.RtcpPacket rtcpPacket = new(0, 0, 0, 0, 0, 0);
 
             //Prepare a sequence which contains the data in the packet including the header
             IEnumerable<byte> preparedPacket = rtcpPacket.Prepare();
@@ -628,13 +629,13 @@ namespace Media.UnitTests
             if (rtcpPacket.Length != example.Length) throw new Exception("Invalid Length.");
 
             //Make a SendersReport to access the SendersInformation and ReportBlocks, do not dispose the packet when done with the report
-            using (Media.Rtcp.SendersReport sr = new Media.Rtcp.SendersReport(rtcpPacket, false))
+            using (Media.Rtcp.SendersReport sr = new(rtcpPacket, false))
             {
                 //Check the invalid block count
                 if (sr.BlockCount != 1) throw new Exception("Invalid Block Count!");
                 else Console.WriteLine(sr.BlockCount);//16, should be 1
 
-                if ((uint)sr.SynchronizationSourceIdentifier != (uint)2738258998) throw new Exception("Invalid Senders SSRC!");
+                if ((uint)sr.SynchronizationSourceIdentifier != 2738258998) throw new Exception("Invalid Senders SSRC!");
                 else Console.WriteLine(sr.SynchronizationSourceIdentifier);//0xa3368436
 
                 if ((ulong)sr.NtpTimestamp != 15323127630501249024) throw new Exception("Invalid NtpTimestamp!");
@@ -747,7 +748,7 @@ namespace Media.UnitTests
 
             if (rtcpPacket.Length != 32) throw new Exception("Incorrect Length");
 
-            using (Media.Rtcp.ReceiversReport rr = new Media.Rtcp.ReceiversReport(rtcpPacket, false))
+            using (Media.Rtcp.ReceiversReport rr = new(rtcpPacket, false))
             {
                 Console.WriteLine(rr.SynchronizationSourceIdentifier);//1777498448
 
@@ -807,7 +808,7 @@ namespace Media.UnitTests
             if (rtcpPacket.Header.LengthInWordsMinusOne != 4 || rtcpPacket.Length != 20) throw new Exception("Result Packet Does Not Match Example");
 
             //Create a SourceDescriptionReport from the packet instance to access the SourceDescriptionChunks
-            using (Media.Rtcp.SourceDescriptionReport sourceDescription = new Media.Rtcp.SourceDescriptionReport(rtcpPacket, false))
+            using (Media.Rtcp.SourceDescriptionReport sourceDescription = new(rtcpPacket, false))
             {
                 foreach (var chunk in sourceDescription.GetChunkIterator())
                 {
@@ -830,7 +831,7 @@ namespace Media.UnitTests
             }
 
 
-            Rtcp.ReceiversReport report = new Rtcp.ReceiversReport(2, 0, 0);
+            Rtcp.ReceiversReport report = new(2, 0, 0);
 
             if (report.Length != 8 || report.Header.LengthInWordsMinusOne != 1) throw new Exception("Invalid Length");
 
@@ -845,7 +846,7 @@ namespace Media.UnitTests
             rtcpPacket = new Media.Rtcp.RtcpPacket(example, 0);
 
             //Make a ApplicationSpecificReport instance
-            Media.Rtcp.ApplicationSpecificReport app = new Media.Rtcp.ApplicationSpecificReport(rtcpPacket);
+            Media.Rtcp.ApplicationSpecificReport app = new(rtcpPacket);
 
             //Check the name to be equal to qtsi
             if (!app.Name.SequenceEqual(System.Text.Encoding.UTF8.GetBytes("qtsi"))) throw new Exception("Invalid App Packet Type");
@@ -858,7 +859,7 @@ namespace Media.UnitTests
             for (int i = 0, e = example.Length; i < e; ++i) if (example[i] != output[i]) throw new Exception("Result Packet Does Not Match Example");
 
             //Test making a packet with a known length in bytes
-            Media.Rtcp.SourceDescriptionReport sd = new Media.Rtcp.SourceDescriptionReport(2);
+            Media.Rtcp.SourceDescriptionReport sd = new(2);
             byte[] sdOut = sd.Prepare().ToArray();
 
             //1 word when the ssrc is present but would be an invalid sdes because blockCount = 0
@@ -866,7 +867,7 @@ namespace Media.UnitTests
 
             sd = new Media.Rtcp.SourceDescriptionReport(2);
             byte[] itemData = System.Text.Encoding.UTF8.GetBytes("FLABIA-PC");
-            sd.Add((Media.Rtcp.IReportBlock)new Media.Rtcp.SourceDescriptionReport.SourceDescriptionChunk((int)0x1AB7C080, new Media.Rtcp.SourceDescriptionReport.SourceDescriptionItem(Media.Rtcp.SourceDescriptionReport.SourceDescriptionItem.SourceDescriptionItemType.CName, itemData.Length, itemData, 0))); // SSRC(4) ItemType(1), Length(1), ItemValue(9) = 15 Bytes
+            sd.Add((Media.Rtcp.IReportBlock)new Media.Rtcp.SourceDescriptionReport.SourceDescriptionChunk(0x1AB7C080, new Media.Rtcp.SourceDescriptionReport.SourceDescriptionItem(Media.Rtcp.SourceDescriptionReport.SourceDescriptionItem.SourceDescriptionItemType.CName, itemData.Length, itemData, 0))); // SSRC(4) ItemType(1), Length(1), ItemValue(9) = 15 Bytes
             rtcpPacket = sd; // Header = 4 Bytes in a SourceDescription, The First Chunk is `Overlapped` in the header.
             //asPacket now contains 11 octets in the payload.
             //asPacket now has 1 block (1 chunk of 15 bytes)
@@ -880,7 +881,7 @@ namespace Media.UnitTests
 
             itemData = System.Text.Encoding.UTF8.GetBytes("jfriedman@OPERATIONS-PC");//23 bytes, + 2 bytes header = 25 + csrc octets == 29.
 
-            var sdesChunk = new Media.Rtcp.SourceDescriptionReport.SourceDescriptionChunk((int)0x1AB7C080, new Media.Rtcp.SourceDescriptionReport.SourceDescriptionItem(Media.Rtcp.SourceDescriptionReport.SourceDescriptionItem.SourceDescriptionItemType.CName, itemData.Length, itemData, 0));
+            var sdesChunk = new Media.Rtcp.SourceDescriptionReport.SourceDescriptionChunk(0x1AB7C080, new Media.Rtcp.SourceDescriptionReport.SourceDescriptionItem(Media.Rtcp.SourceDescriptionReport.SourceDescriptionItem.SourceDescriptionItemType.CName, itemData.Length, itemData, 0));
 
             if (sdesChunk.Items.Count() != 1) throw new Exception("Invalid Items Count");
 
@@ -906,7 +907,7 @@ namespace Media.UnitTests
                 0x40, 0x04, 0x71, 0x59  //Extension Data (Reason For Leaving)...
             };
 
-            Rtcp.GoodbyeReport gb = new Rtcp.GoodbyeReport(new Rtcp.RtcpPacket(goodbye, 0));
+            Rtcp.GoodbyeReport gb = new(new Rtcp.RtcpPacket(goodbye, 0));
 
             if (false == gb.IsComplete) throw new Exception("Not Complete");
 

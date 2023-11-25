@@ -233,12 +233,12 @@ namespace Media.UnitTests
         public static void Test_AudioFormat_AudioBuffer_Constructor()
         {
             //Construct a new AudioFormat with one component, sampled at 8000hz, all samples are signed 8 bit and in little endian order.
-            Media.Codecs.Audio.AudioFormat audioFormat = new Codecs.Audio.AudioFormat(8000, true, Common.Binary.ByteOrder.Little, Media.Codec.DataLayout.Packed, new Media.Codec.MediaComponent[]{
-                new Media.Codec.MediaComponent(0, 8)
+            Media.Codecs.Audio.AudioFormat audioFormat = new(8000, true, Common.Binary.ByteOrder.Little, Media.Codec.DataLayout.Packed, new Media.Codec.MediaComponent[]{
+                new(0, 8)
             });
 
             //Could be given in place to the constructor.
-            using (Media.Codecs.Audio.AudioBuffer audio = new Codecs.Audio.AudioBuffer(audioFormat))
+            using (Media.Codecs.Audio.AudioBuffer audio = new(audioFormat))
             {
                 if (audio.Channels != 1) throw new System.InvalidOperationException();
 
@@ -251,19 +251,19 @@ namespace Media.UnitTests
         public static void Test_AudioTransformer()
         {
             //Construct a new AudioFormat with one component, sampled at 8000hz, all samples are signed 8 bit and in little endian order.
-            Media.Codecs.Audio.AudioFormat audioFormat = new Codecs.Audio.AudioFormat(8000, true, Common.Binary.ByteOrder.Little, Media.Codec.DataLayout.Packed, new Media.Codec.MediaComponent[]{
-                new Media.Codec.MediaComponent(0, 8)
+            Media.Codecs.Audio.AudioFormat audioFormat = new(8000, true, Common.Binary.ByteOrder.Little, Media.Codec.DataLayout.Packed, new Media.Codec.MediaComponent[]{
+                new(0, 8)
             });
 
             //Could be given in place to the constructor.
-            using (Media.Codecs.Audio.AudioBuffer source = new Codecs.Audio.AudioBuffer(audioFormat))
+            using (Media.Codecs.Audio.AudioBuffer source = new(audioFormat))
             {
                 //Example for upsampling by a factor of 2
                 int sampleFactor = 2;
 
-                using (Media.Codecs.Audio.AudioBuffer destination = new Codecs.Audio.AudioBuffer(new Codecs.Audio.AudioFormat(source.SampleRate * sampleFactor, source.AudioFormat.IsSigned, source.AudioFormat.ByteOrder, source.DataLayout, audioFormat.Components)))
+                using (Media.Codecs.Audio.AudioBuffer destination = new(new Codecs.Audio.AudioFormat(source.SampleRate * sampleFactor, source.AudioFormat.IsSigned, source.AudioFormat.ByteOrder, source.DataLayout, audioFormat.Components)))
                 {
-                    using (Media.Codecs.Audio.AudioTransformer audioTransformer = new Codecs.Audio.AudioTransformer(source, destination, sampleFactor, TransformationQuality.None))
+                    using (Media.Codecs.Audio.AudioTransformer audioTransformer = new(source, destination, sampleFactor, TransformationQuality.None))
                     {
                         audioTransformer.Transform();
                     }
@@ -272,9 +272,9 @@ namespace Media.UnitTests
                 //Example for downsample by a factor of 2
                 sampleFactor = -2;
 
-                using (Media.Codecs.Audio.AudioBuffer destination = new Codecs.Audio.AudioBuffer(new Codecs.Audio.AudioFormat(Math.Abs(source.SampleRate * sampleFactor), source.AudioFormat.IsSigned, source.AudioFormat.ByteOrder, source.DataLayout, audioFormat.Components)))
+                using (Media.Codecs.Audio.AudioBuffer destination = new(new Codecs.Audio.AudioFormat(Math.Abs(source.SampleRate * sampleFactor), source.AudioFormat.IsSigned, source.AudioFormat.ByteOrder, source.DataLayout, audioFormat.Components)))
                 {
-                    using (Media.Codecs.Audio.AudioTransformer audioTransformer = new Codecs.Audio.AudioTransformer(source, destination, sampleFactor, TransformationQuality.None))
+                    using (Media.Codecs.Audio.AudioTransformer audioTransformer = new(source, destination, sampleFactor, TransformationQuality.None))
                     {
                         audioTransformer.Transform();
                     }

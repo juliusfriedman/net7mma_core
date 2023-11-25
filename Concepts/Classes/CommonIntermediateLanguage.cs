@@ -516,7 +516,7 @@ namespace Media.Concepts.Classes
             //Works but has to be generated for each type.
             #region SizeOf
 
-            System.Reflection.Emit.DynamicMethod sizeOfMethod = new System.Reflection.Emit.DynamicMethod("_SizeOf", typeof(int), System.Type.EmptyTypes);
+            System.Reflection.Emit.DynamicMethod sizeOfMethod = new("_SizeOf", typeof(int), System.Type.EmptyTypes);
 
             generator = sizeOfMethod.GetILGenerator();
 
@@ -534,7 +534,7 @@ namespace Media.Concepts.Classes
 
             #region UnalignedRead
 
-            System.Reflection.Emit.DynamicMethod unalignedReadMethod = new System.Reflection.Emit.DynamicMethod("_UnalignedRead", typeOfT, args);
+            System.Reflection.Emit.DynamicMethod unalignedReadMethod = new("_UnalignedRead", typeOfT, args);
 
             generator = unalignedReadMethod.GetILGenerator();
 
@@ -565,7 +565,7 @@ namespace Media.Concepts.Classes
             //Could destabalize the runtime
             #region As
 
-            System.Reflection.Emit.DynamicMethod asMethod = new System.Reflection.Emit.DynamicMethod("__As", typeOfT, new System.Type[] { typeof(object) });
+            System.Reflection.Emit.DynamicMethod asMethod = new("__As", typeOfT, new System.Type[] { typeof(object) });
 
             generator = asMethod.GetILGenerator();
 
@@ -582,7 +582,7 @@ namespace Media.Concepts.Classes
 
             #region Read
 
-            System.Reflection.Emit.DynamicMethod readMethod = new System.Reflection.Emit.DynamicMethod("_Read", typeOfT, args);
+            System.Reflection.Emit.DynamicMethod readMethod = new("_Read", typeOfT, args);
 
             generator = readMethod.GetILGenerator();
 
@@ -600,7 +600,7 @@ namespace Media.Concepts.Classes
 
             #region Write
 
-            System.Reflection.Emit.DynamicMethod writeMethod = new System.Reflection.Emit.DynamicMethod("_Write", null, args);
+            System.Reflection.Emit.DynamicMethod writeMethod = new("_Write", null, args);
 
             generator = writeMethod.GetILGenerator();
 
@@ -721,13 +721,12 @@ namespace Media.Concepts.Classes
                 return;
             }
 
-            result = default(T);
+            result = default;
 
             //The result in most cases is actually the value not a pointer to it...
-            nint resultPointer;
 
             //Get the address of the result or the result itself.
-            CallIndirect(ptr, out resultPointer);
+            CallIndirect(ptr, out nint resultPointer);
 
             //Determine the size of T (Unsafe.SizeOf<T>)
             int size = Unsafe.ArrayOfTwoElements<T>.AddressingDifference();
@@ -742,7 +741,7 @@ namespace Media.Concepts.Classes
             //int* sourcePointer = (int*)&resultPointer;
 
             //Copy from the source pointer to the handl
-            System.Buffer.MemoryCopy((void*)&resultPointer, (void*)&resultReference, size, size);
+            System.Buffer.MemoryCopy(&resultPointer, &resultReference, size, size);
 
             //Also works but allocates a new instance
             //result = As<nint, T>(resultPointer);
@@ -765,7 +764,7 @@ namespace Media.Concepts.Classes
             System.TypedReference trSource = __makeref(t);
 
             //Make a default value for the result, if TResult needs new a constraint should be added and overloads.
-            TResult result = default(TResult);
+            TResult result = default;
 
             //Make a local reference to the result
             System.TypedReference trResult = __makeref(result);
@@ -783,7 +782,7 @@ namespace Media.Concepts.Classes
             //int* destPointer = (int*)&trResult;
 
             //Copy from the source pointer to the handle
-            System.Buffer.MemoryCopy((void*)&trSource, (void*)&trResult, sizeOfT, sizeOfT);
+            System.Buffer.MemoryCopy(&trSource, &trResult, sizeOfT, sizeOfT);
 
             //Return the reference value of the result
             return __refvalue(trResult, TResult);
@@ -794,9 +793,8 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ulong CallIndirect(nint ptr) // ref
         {
-            ulong result;
 
-            CallIndirect(ptr, out result);
+            CallIndirect(ptr, out ulong result);
 
             return result;
         }
@@ -820,7 +818,7 @@ namespace Media.Concepts.Classes
             System.Type CommonIntermediaLanguageType = typeof(CommonIntermediateLanguage);
 
             #region Initblk
-            System.Reflection.Emit.DynamicMethod initBlkMethod = new System.Reflection.Emit.DynamicMethod("Initblk",
+            System.Reflection.Emit.DynamicMethod initBlkMethod = new("Initblk",
                 System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
                 TypeOfVoid, new[] { TypeOfIntPtr, typeof(byte), typeof(int) }, CommonIntermediaLanguageType, true);
 
@@ -837,7 +835,7 @@ namespace Media.Concepts.Classes
 
             #region Cpyblk
 
-            System.Reflection.Emit.DynamicMethod cpyBlkMethod = new System.Reflection.Emit.DynamicMethod("Cpyblk",
+            System.Reflection.Emit.DynamicMethod cpyBlkMethod = new("Cpyblk",
                 System.Reflection.MethodAttributes.Public | System.Reflection.MethodAttributes.Static, System.Reflection.CallingConventions.Standard,
                 TypeOfVoid, new[] { TypeOfIntPtr, TypeOfIntPtr, typeof(int) }, CommonIntermediaLanguageType, true);
 
@@ -1223,7 +1221,7 @@ namespace Media.Concepts.Classes
         {
             System.Array array = Common.MemorySegment.EmptyBytes;
 
-            return (int)((int)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(array, 0) - (int)Unsafe.AddressOf(ref array));
+            return (int)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement(array, 0) - (int)Unsafe.AddressOf(ref array);
         }
 
         //Rebase - Array Header modified to point to offset and length is subtracted, could provide old header as output for reversing the operation.
@@ -1245,7 +1243,7 @@ namespace Media.Concepts.Classes
             string s = string.Empty;
             fixed (char* t = s)
             {
-                return (int)((int)(nint)t - (int)Unsafe.AddressOf<string>(ref s));
+                return (int)(nint)t - (int)Unsafe.AddressOf<string>(ref s);
             }
         }
 

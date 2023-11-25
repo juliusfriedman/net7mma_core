@@ -113,7 +113,7 @@ namespace Media.Concepts.Experimental
                 finally { error = error || false == base.MoveNext(); }
                 IEnumerator<T> enumerator = Enumerator;
                 error = false == enumerator.MoveNext();
-                if (false == error) Current = (T)enumerator.Current;
+                if (false == error) Current = enumerator.Current;
                 return false == error;
             }
             finally { OnPostIncrement(); if (error || Index > VirtualCount) OnEnd(); }
@@ -194,12 +194,12 @@ namespace Media.Concepts.Experimental
 
         public static Iterator operator +(Iterator<T> it, Iterator<T> that)
         {
-            return (it as IEnumerable<T>).Concat(that) as Iterator;
+            return it.Concat(that) as Iterator;
         }
 
         public static Iterator operator -(Iterator<T> it, Iterator<T> that)
         {
-            return (it as IEnumerable<T>).Skip(that.Count) as Iterator;
+            return it.Skip(that.Count) as Iterator;
         }
 
         int Iterator.VirtualCount
@@ -439,7 +439,7 @@ namespace Media.Concepts.Experimental
         {
             if (m_Disposed) return;
             Index = VirtualIndex;
-            t = default(T);
+            t = default;
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
@@ -553,18 +553,18 @@ namespace Media.Concepts.Experimental
     {
         public readonly int SegmentCapacity = -1;
 
-        List<List<T>> m_Segments = new List<List<T>>();
+        List<List<T>> m_Segments = [];
 
-        List<T> m_CurrentSegment = new List<T>();
+        List<T> m_CurrentSegment = [];
 
         public IEnumerable<ArraySegment<T>> Segments
         {
-            get { return (this as IEnumerable<ArraySegment<T>>); }
+            get { return this; }
         }
 
         public IEnumerable<List<T>> Lists
         {
-            get { return (this as IEnumerable<List<T>>); }
+            get { return this; }
         }
 
         /// <summary>
@@ -644,7 +644,7 @@ namespace Media.Concepts.Experimental
             {
                 List<T> found = FindSegmentForIndex(ref index);
                 if (found is not null) return found[System.Math.Min(found.Count - 1, index)];
-                else return default(T);
+                else return default;
             }
             set
             {
@@ -796,7 +796,7 @@ namespace Media.Concepts.Experimental
             else if (count + offset > Length) throw new ArgumentOutOfRangeException("count must refer to a location within the buffer with respect to offset.");
 
             if (count is 0) return Enumerable.Empty<byte>();
-            buffer = buffer ?? new byte[count];
+            buffer ??= new byte[count];
             int len = count;
             while ((len -= m_Stream.Read(buffer, offset, count)) > 0
                 &&
@@ -899,9 +899,9 @@ namespace Media.Concepts.Experimental
             //additional byte
             //Rest of old stream
             //long preInsert = m_Stream.Position;
-            EnumerableByteStream newPointer = new EnumerableByteStream((new EnumerableByteStream(m_Stream, 0, index - 1) as IEnumerable<byte>).
+            EnumerableByteStream newPointer = new(new EnumerableByteStream(m_Stream, 0, index - 1).
                 Concat(item.Yield()).
-                Concat(new EnumerableByteStream(m_Stream, index - 1, Count - index + 1) as IEnumerable<byte>));
+                Concat(new EnumerableByteStream(m_Stream, index - 1, Count - index + 1)));
             //m_Stream = LinkedStream.LinkAll(new EnumerableByteStream(m_Stream, 0, index - 1), new EnumerableByteStream(item), new EnumerableByteStream(m_Stream, index - 1, Count - index + 1));
             m_Self = newPointer;
             //m_Stream.Position = preInsert;
@@ -1037,7 +1037,7 @@ namespace Media.Concepts.Experimental
     public class CachingEnumerableByteStream : EnumerableByteStream
     {
         //Same as above but with a Cache for previously read bytes
-        List<byte> m_ReadCache = new List<byte>(), m_WriteCache = new List<byte>();
+        List<byte> m_ReadCache = [], m_WriteCache = [];
 
         public CachingEnumerableByteStream(System.IO.Stream stream)
             : base(stream)
@@ -1111,7 +1111,7 @@ namespace Media.Concepts.Experimental
             get
             {
                 if (m_Disposed) return null;
-                if (m_CurrentStream is null) m_CurrentStream = m_Enumerator.Current;
+                m_CurrentStream ??= m_Enumerator.Current;
                 return m_CurrentStream;
             }
         }
@@ -1178,7 +1178,7 @@ namespace Media.Concepts.Experimental
 
         public LinkedStream(IEnumerable<EnumerableByteStream> streams)
         {
-            if (streams is null) streams = Enumerable.Empty<EnumerableByteStream>();
+            streams ??= Enumerable.Empty<EnumerableByteStream>();
             m_Streams = streams;
             m_Enumerator = GetEnumerator();
             m_Enumerator.MoveNext();
@@ -1199,7 +1199,7 @@ namespace Media.Concepts.Experimental
         /// <returns>The resulting MemoryStream</returns>
         public System.IO.MemoryStream Flatten()
         {
-            System.IO.MemoryStream memory = new System.IO.MemoryStream((int)TotalLength);
+            System.IO.MemoryStream memory = new((int)TotalLength);
             foreach (System.IO.Stream stream in m_Streams) stream.CopyTo(memory);
             return memory;
         }
@@ -1221,7 +1221,7 @@ namespace Media.Concepts.Experimental
         public LinkedStream SubStream(ulong absoluteIndex, ulong count)
         {
 
-            LinkedStream result = new LinkedStream(new EnumerableByteStream(new System.IO.MemoryStream()));
+            LinkedStream result = new(new EnumerableByteStream(new System.IO.MemoryStream()));
 
             if (count is 0) return result;
 
@@ -1294,7 +1294,7 @@ namespace Media.Concepts.Experimental
                         while (read < count)
                         {
                             if (CurrentStream.Position < offset && CurrentStream.CanSeek) CurrentStream.Seek(offset, System.IO.SeekOrigin.Begin);
-                            read += CurrentStream.Read(buffer, (int)offset, (int)count - (int)read);
+                            read += CurrentStream.Read(buffer, (int)offset, (int)count - read);
                             if (CurrentStream.Position >= CurrentStream.Length && read < count) if (!MoveNext()) break;
                             //if (read != -1) m_AbsolutePosition += (uint)read;
                         }
@@ -1403,7 +1403,7 @@ namespace Media.Concepts.Experimental
         internal protected int CoreWrite(byte[] buffer, ulong offset, ulong count, System.IO.SeekOrigin readOrigin = System.IO.SeekOrigin.Current)
         {
             //Select the stream to write based on the offset
-            SelectStream((ulong)offset);
+            SelectStream(offset);
             switch (readOrigin)
             {
                 case System.IO.SeekOrigin.Current:

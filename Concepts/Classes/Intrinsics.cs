@@ -369,7 +369,7 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ulong GetTimestampUnsigned()
         {
-            using (PlatformRtdsc rtdsc = new PlatformRtdsc())
+            using (PlatformRtdsc rtdsc = new())
             {
                 return rtdsc.ReadTimestampCounterUnsigned();
             }
@@ -382,7 +382,7 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static long GetTimestamp()
         {
-            using (PlatformRtdsc rtdsc = new PlatformRtdsc())
+            using (PlatformRtdsc rtdsc = new())
             {
                 return rtdsc.ReadTimestampCounter();
             }
@@ -469,7 +469,7 @@ namespace Media.Concepts.Hardware
                 machine ? Common.Machine.IsX64() ? x64Rdtscp : x86Rdtscp : nint.Size == Common.Binary.BytesPerLong ? x64RdtscCpuid : x86Rdtscp,
                 true, //Restore should be determined based on state and otherwise
                 shouldDispose),
-            (System.Func<ulong>)DiagnosticStopWatchGetTimestamp)
+            DiagnosticStopWatchGetTimestamp)
         {
 
         }
@@ -528,9 +528,8 @@ namespace Media.Concepts.Hardware
                 //Create the Allocator
                 Allocator = (entryPoint) =>
                 {
-                    int codeSize;
 
-                    if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(entryPoint.Instructions, out codeSize)) return;
+                    if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(entryPoint.Instructions, out int codeSize)) return;
 
                     entryPoint.InstructionPointer = WindowsEntryPoint.VirtualAlloc(
                       entryPoint.InstructionPointer, //Use whatever CodePointer was already
@@ -549,9 +548,8 @@ namespace Media.Concepts.Hardware
                 Protector = (entryPoint) =>
                 {
                     // Change the access of the allocated memory from R/W to Execute
-                    uint oldProtection;
 
-                    if (false == WindowsEntryPoint.VirtualProtect(entryPoint.InstructionPointer, (nint)entryPoint.Instructions.Length, WindowsEntryPoint.MemoryProtection.Execute, out oldProtection)) throw new System.ComponentModel.Win32Exception();
+                    if (false == WindowsEntryPoint.VirtualProtect(entryPoint.InstructionPointer, entryPoint.Instructions.Length, WindowsEntryPoint.MemoryProtection.Execute, out uint oldProtection)) throw new System.ComponentModel.Win32Exception();
                 };
 
                 //Create the De-Allocator
@@ -563,13 +561,12 @@ namespace Media.Concepts.Hardware
                 //Create the Allocator
                 Allocator = (entryPoint) =>
                 {
-                    int codeSize;
 
-                    if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(entryPoint.Instructions, out codeSize)) return;
+                    if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(entryPoint.Instructions, out int codeSize)) return;
 
                     entryPoint.InstructionPointer = UnixEntryPoint.Mmap(entryPoint.InstructionPointer, //Use whatever pointer was already set
                         (ulong)codeSize, //The size of the code
-                        UnixEntryPoint.MmapProtsExecuteReadWrite, UnixEntryPoint.MmapFlagsAnonymousPrivate, -1, (long)0);
+                        UnixEntryPoint.MmapProtsExecuteReadWrite, UnixEntryPoint.MmapFlagsAnonymousPrivate, -1, 0);
 
                     if (nint.Zero.Equals(entryPoint.InstructionPointer)) throw new System.Security.SecurityException(UnixEntryPoint.GetLastError().ToString());
 
@@ -580,9 +577,8 @@ namespace Media.Concepts.Hardware
                 //Create the Protector
                 Protector = (entryPoint) =>
                 {
-                    int register;
 
-                    if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(entryPoint.Instructions, out register)) return;
+                    if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(entryPoint.Instructions, out int register)) return;
 
                     if (false == (0 == (register = UnixEntryPoint.MProtect(entryPoint.InstructionPointer, (ulong)register, UnixEntryPoint.MmapProtsExecuteWrite))))
                     {
@@ -598,9 +594,8 @@ namespace Media.Concepts.Hardware
                 //Create the De-Allocator
                 ReverseAllocator = (entryPoint) =>
                 {
-                    int codeSize;
 
-                    if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(entryPoint.Instructions, out codeSize)) return;
+                    if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(entryPoint.Instructions, out int codeSize)) return;
 
                     if (false == (0 == (UnixEntryPoint.Munmap(entryPoint.InstructionPointer, (ulong)codeSize))))
                     {
@@ -853,9 +848,8 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected internal override void VirtualAllocate()
         {
-            int codeSize;
 
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(Instructions, out codeSize)) return;
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(Instructions, out int codeSize)) return;
 
             InstructionPointer = VirtualAlloc(
               InstructionPointer, //Use whatever CodePointer was already
@@ -896,9 +890,8 @@ namespace Media.Concepts.Hardware
         protected internal override void VirtualProtect()
         {
             // Change the access of the allocated memory to Execute
-            uint oldProtection;
 
-            if (false == VirtualProtect(InstructionPointer, (nint)Instructions.Length, MemoryProtection.Execute, out oldProtection))
+            if (false == VirtualProtect(InstructionPointer, Instructions.Length, MemoryProtection.Execute, out uint oldProtection))
             {
                 int lastError = System.Runtime.InteropServices.Marshal.GetLastWin32Error();
 #if DEBUG
@@ -938,7 +931,7 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal static nint GetPageBaseAddress(nint pointer)
         {
-            return (nint)((long)pointer & ~(PAGE_SIZE - 1));
+            return (nint)(pointer & ~(PAGE_SIZE - 1));
         }
 
         static System.Type MonoPosix = System.Type.GetType("Mono.Posix");
@@ -1070,9 +1063,8 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected internal override void VirtualAllocate()
         {
-            int codeSize;
 
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(Instructions, out codeSize)) return;
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(Instructions, out int codeSize)) return;
 
             InstructionPointer = Mmap(InstructionPointer, (ulong)codeSize, MmapProtsExecuteReadWrite, MmapFlagsAnonymousPrivate, -1, 0);
 
@@ -1090,9 +1082,8 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected internal override void VirtualFree()
         {
-            int codeSize;
 
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(Instructions, out codeSize)) return;
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(Instructions, out int codeSize)) return;
 
             if (0 != Munmap(InstructionPointer, (ulong)codeSize))
             {
@@ -1113,9 +1104,8 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected internal override void VirtualProtect()
         {
-            int register;
 
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(Instructions, out register)) return;
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(Instructions, out int register)) return;
 
             if (0 != (register = MProtect(InstructionPointer, (ulong)register, MmapProtsExecuteWrite)))
             {
@@ -1145,7 +1135,7 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// When an intrinsic is compiled it will store it's metadata token and state so that if it's not supported it can be known later on in runtime.
         /// </summary>
-        internal static System.Collections.Generic.Dictionary<int, PlatformIntrinsic.IntrinsicState> RuntimeIntrinsicInformation = new System.Collections.Generic.Dictionary<int, PlatformIntrinsic.IntrinsicState>();
+        internal static System.Collections.Generic.Dictionary<int, PlatformIntrinsic.IntrinsicState> RuntimeIntrinsicInformation = [];
 
         //Todo, should combine these calls..
 
@@ -1157,9 +1147,8 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal static PlatformIntrinsic.IntrinsicState GetRuntimeState(int metadataToken)
         {
-            PlatformIntrinsic.IntrinsicState state;
 
-            Intrinsics.RuntimeIntrinsicInformation.TryGetValue(metadataToken, out state);
+            Intrinsics.RuntimeIntrinsicInformation.TryGetValue(metadataToken, out PlatformIntrinsic.IntrinsicState state);
 
             return state;
         }
@@ -1930,9 +1919,8 @@ namespace Media.Concepts.Hardware
             {
                 if (Common.IDisposedExtensions.IsNullOrDisposed(intrinsic) || CpuId.GetMaximumFeatureLevel() == -1) return false;
 
-                CpuId.CpuIdFeature feature;
 
-                if (false == System.Enum.TryParse<CpuId.CpuIdFeature>(intrinsic.GetType().Name, true, out feature)) return false;
+                if (false == System.Enum.TryParse<CpuId.CpuIdFeature>(intrinsic.GetType().Name, true, out CpuIdFeature feature)) return false;
 
                 return CpuId.Supports(feature);
             }
@@ -2031,12 +2019,12 @@ namespace Media.Concepts.Hardware
             /// Key => First 32 bits is the level, last 32 bits is the subLeaf
             /// Value => Results from cpuid
             /// </summary>
-            readonly static System.Collections.Generic.Dictionary<ulong, Common.MemorySegment> CpuIdResults = new System.Collections.Generic.Dictionary<ulong, Common.MemorySegment>();
+            readonly static System.Collections.Generic.Dictionary<ulong, Common.MemorySegment> CpuIdResults = [];
 
             /// <summary>
             /// 
             /// </summary>
-            readonly static System.Collections.Generic.Dictionary<CpuIdFeature, CpuIdFeatureAttribute> FeatureInformation = new System.Collections.Generic.Dictionary<CpuIdFeature, CpuIdFeatureAttribute>();
+            readonly static System.Collections.Generic.Dictionary<CpuIdFeature, CpuIdFeatureAttribute> FeatureInformation = [];
 
             //const int InfoSize = 16;
 
@@ -2051,21 +2039,20 @@ namespace Media.Concepts.Hardware
                 //Key by the level
                 ulong key = (((ulong)level << Common.Binary.BitsPerInteger) | (uint)subLeaf);
 
-                Common.MemorySegment previous;
 
                 //If the dictionary has the key then return the data already retrieved
-                if (CpuIdResults.TryGetValue(key, out previous)) return previous;
+                if (CpuIdResults.TryGetValue(key, out Common.MemorySegment previous)) return previous;
 
                 System.Array.Clear(CpuId.CpuIdBuffer, 0, 16);
 
-                var registers = System.Runtime.Intrinsics.X86.X86Base.CpuId(level, subLeaf);
+                var (Eax, Ebx, Ecx, Edx) = System.Runtime.Intrinsics.X86.X86Base.CpuId(level, subLeaf);
 
                 previous = CpuId.CpuIdResults[key] = Common.MemorySegment.CreateCopy(CpuIdBuffer, 0, 16);
 
-                Common.Binary.Write32(previous.Array, previous.Offset, false, registers.Eax);
-                Common.Binary.Write32(previous.Array, previous.Offset + 4, false, registers.Ebx);
-                Common.Binary.Write32(previous.Array, previous.Offset + 8, false, registers.Ecx);
-                Common.Binary.Write32(previous.Array, previous.Offset + 12, false, registers.Edx);
+                Common.Binary.Write32(previous.Array, previous.Offset, false, Eax);
+                Common.Binary.Write32(previous.Array, previous.Offset + 4, false, Ebx);
+                Common.Binary.Write32(previous.Array, previous.Offset + 8, false, Ecx);
+                Common.Binary.Write32(previous.Array, previous.Offset + 12, false, Edx);
 
 
                 ////Invoke CPUID
@@ -2132,7 +2119,7 @@ namespace Media.Concepts.Hardware
             {
                 if (false == (0 == CpuId.MaximumFeatureLevel) | false == string.IsNullOrEmpty(CpuId.VendorString)) return CpuId.VendorString;
 
-                using (CpuId cpuId = new CpuId())
+                using (CpuId cpuId = new())
                 {
                     return CpuId.VendorString;
                 }
@@ -2142,7 +2129,7 @@ namespace Media.Concepts.Hardware
             {
                 if (false == string.IsNullOrEmpty(CpuId.VendorString) | false == (0 == CpuId.MaximumFeatureLevel)) return CpuId.MaximumFeatureLevel;
 
-                using (CpuId cpuId = new CpuId())
+                using (CpuId cpuId = new())
                 {
                     return CpuId.MaximumFeatureLevel;
                 }
@@ -2155,7 +2142,7 @@ namespace Media.Concepts.Hardware
             {
                 if (false == (-2147483648 == CpuId.MaximumExtendedFeatureLevel)) return CpuId.MaximumExtendedFeatureLevel;
 
-                using (CpuId cpuId = new CpuId())
+                using (CpuId cpuId = new())
                 {
                     //Invoke with the level 
                     cpuId.Invoke(MaximumExtendedFeatureLevel, ref CpuId.CpuIdBuffer);
@@ -2184,7 +2171,7 @@ namespace Media.Concepts.Hardware
                 //If the feature isn't support return the VendorString.
                 if (CpuId.GetMaximumExtendedFeatureLevel() is 0) return CpuId.ProcessorBrandString = CpuId.GetVendorString();
 
-                System.Text.StringBuilder builder = new System.Text.StringBuilder(128);
+                System.Text.StringBuilder builder = new(128);
 
                 //Get the extended brand string
                 //2147483646 + 4
@@ -2827,11 +2814,11 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             static void Fallback(byte[] buffer)
             {
-                var registers = System.Runtime.Intrinsics.X86.X86Base.CpuId(Common.Binary.Read32(buffer, 0, false), Common.Binary.Read32(buffer, 4, false));
-                Common.Binary.Write32(buffer, 0, false, registers.Eax);
-                Common.Binary.Write32(buffer, 4, false, registers.Ebx);
-                Common.Binary.Write32(buffer, 8, false, registers.Ecx);
-                Common.Binary.Write32(buffer, 12, false, registers.Edx);
+                var (Eax, Ebx, Ecx, Edx) = System.Runtime.Intrinsics.X86.X86Base.CpuId(Common.Binary.Read32(buffer, 0, false), Common.Binary.Read32(buffer, 4, false));
+                Common.Binary.Write32(buffer, 0, false, Eax);
+                Common.Binary.Write32(buffer, 4, false, Ebx);
+                Common.Binary.Write32(buffer, 8, false, Ecx);
+                Common.Binary.Write32(buffer, 12, false, Edx);
             }
 
             #endregion
@@ -2938,7 +2925,7 @@ namespace Media.Concepts.Hardware
                             //Store the new maximum feature level
                             MaximumFeatureLevel = Common.Binary.Read32(CpuIdBuffer, 0, false);
 
-                            System.Text.StringBuilder builder = new System.Text.StringBuilder(32);
+                            System.Text.StringBuilder builder = new(32);
 
                             builder.Append(System.Text.ASCIIEncoding.ASCII.GetChars(CpuIdBuffer, 4, 4));
                             builder.Append(System.Text.ASCIIEncoding.ASCII.GetChars(CpuIdBuffer, 12, 4));
@@ -2963,9 +2950,8 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public void Invoke(int level, ref byte[] buffer, int subLeaf = 0)
             {
-                int length;
 
-                if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer, out length)) throw new System.ArgumentNullException("buffer");
+                if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer, out int length)) throw new System.ArgumentNullException("buffer");
                 else if (length < 16) throw new System.InvalidOperationException("buffer must have room to store at least 4 32 bit values.");
 
                 CpuIdEx(buffer);
@@ -2974,9 +2960,8 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public void Invoke(ref byte[] buffer)
             {
-                int length;
 
-                if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer, out length)) throw new System.ArgumentNullException("buffer");
+                if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer, out int length)) throw new System.ArgumentNullException("buffer");
                 else if (length < 16) throw new System.InvalidOperationException("buffer must have room to store at least 4 32 bit values.");
 
                 CpuIdEx(buffer);
@@ -3040,7 +3025,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static ulong GetTimestampUnsigned()
             {
-                using (Rtdsc rtdsc = new Rtdsc())
+                using (Rtdsc rtdsc = new())
                 {
                     return rtdsc.ReadTimestampCounterUnsigned();
                 }
@@ -3053,7 +3038,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static long GetTimestamp()
             {
-                using (Rtdsc rtdsc = new Rtdsc())
+                using (Rtdsc rtdsc = new())
                 {
                     return rtdsc.ReadTimestampCounter();
                 }
@@ -3229,7 +3214,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static ulong GetRandom64()
             {
-                using (Rdrand rtdsc = new Rdrand())
+                using (Rdrand rtdsc = new())
                 {
                     return rtdsc.GenerateRandom();
                 }
@@ -3242,7 +3227,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static long GetRandom63()
             {
-                using (Rdrand rtdsc = new Rdrand())
+                using (Rdrand rtdsc = new())
                 {
                     return (long)rtdsc.GenerateRandom();
                 }
@@ -3256,7 +3241,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static uint GetRandom32()
             {
-                using (Rdrand rtdsc = new Rdrand())
+                using (Rdrand rtdsc = new())
                 {
                     return (uint)rtdsc.GenerateRandom();
                 }
@@ -3270,7 +3255,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static int GetRandom31()
             {
-                using (Rdrand rtdsc = new Rdrand())
+                using (Rdrand rtdsc = new())
                 {
                     return (int)rtdsc.GenerateRandom();
                 }
@@ -3284,7 +3269,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static ushort GetRandom16()
             {
-                using (Rdrand rtdsc = new Rdrand())
+                using (Rdrand rtdsc = new())
                 {
                     return (ushort)rtdsc.GenerateRandom();
                 }
@@ -3298,7 +3283,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static short GetRandom15()
             {
-                using (Rdrand rtdsc = new Rdrand())
+                using (Rdrand rtdsc = new())
                 {
                     return (short)rtdsc.GenerateRandom();
                 }
@@ -3311,7 +3296,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static byte GetRandom8()
             {
-                using (Rdrand rtdsc = new Rdrand())
+                using (Rdrand rtdsc = new())
                 {
                     return (byte)rtdsc.GenerateRandom();
                 }
@@ -3325,7 +3310,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static sbyte GetRandom7()
             {
-                using (Rdrand rtdsc = new Rdrand())
+                using (Rdrand rtdsc = new())
                 {
                     return (sbyte)rtdsc.GenerateRandom();
                 }
@@ -3407,10 +3392,11 @@ namespace Media.Concepts.Hardware
                             RandomDelegate = Fallback;
 
                             //Allocate a new EntryPoint
-                            EntryPoint = new PlatformMethod(ShouldDispose);
-
-                            //Setup the InstructionPointer
-                            EntryPoint.InstructionPointer = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(RandomDelegate);
+                            EntryPoint = new PlatformMethod(ShouldDispose)
+                            {
+                                //Setup the InstructionPointer
+                                InstructionPointer = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(RandomDelegate)
+                            };
 
                             break;
                         }
@@ -3517,10 +3503,9 @@ namespace Media.Concepts.Hardware
                 if (length <= 0) return;
 
                 //Determine the max offset
-                int max;
 
                 //If the array was null or empty return
-                if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(bytes, out max)) return;
+                if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(bytes, out int max)) return;
 
                 //There is already an offset
                 max -= offset;
@@ -3598,7 +3583,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static ulong GetSeed64()
             {
-                using (Rdseed rdseed = new Rdseed())
+                using (Rdseed rdseed = new())
                 {
                     return rdseed.GenerateSeed();
                 }
@@ -3611,7 +3596,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static long GetSeed63()
             {
-                using (Rdseed rdseed = new Rdseed())
+                using (Rdseed rdseed = new())
                 {
                     return (long)rdseed.GenerateSeed();
                 }
@@ -3625,7 +3610,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static uint GetSeed32()
             {
-                using (Rdseed rdseed = new Rdseed())
+                using (Rdseed rdseed = new())
                 {
                     return (uint)rdseed.GenerateSeed();
                 }
@@ -3639,7 +3624,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static int GetSeed31()
             {
-                using (Rdseed rdseed = new Rdseed())
+                using (Rdseed rdseed = new())
                 {
                     return (int)rdseed.GenerateSeed();
                 }
@@ -3653,7 +3638,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static ushort GetSeed16()
             {
-                using (Rdseed rdseed = new Rdseed())
+                using (Rdseed rdseed = new())
                 {
                     return (ushort)rdseed.GenerateSeed();
                 }
@@ -3667,7 +3652,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static short GetSeed15()
             {
-                using (Rdseed rdseed = new Rdseed())
+                using (Rdseed rdseed = new())
                 {
                     return (short)rdseed.GenerateSeed();
                 }
@@ -3680,7 +3665,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static byte GetSeed8()
             {
-                using (Rdseed rdseed = new Rdseed())
+                using (Rdseed rdseed = new())
                 {
                     return (byte)rdseed.GenerateSeed();
                 }
@@ -3694,7 +3679,7 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static sbyte GetSeed7()
             {
-                using (Rdseed rdseed = new Rdseed())
+                using (Rdseed rdseed = new())
                 {
                     return (sbyte)rdseed.GenerateSeed();
                 }
@@ -3769,10 +3754,11 @@ namespace Media.Concepts.Hardware
                             SeedDelegate = Fallback;
 
                             //Allocate a new EntryPoint
-                            EntryPoint = new PlatformMethod(ShouldDispose);
-
-                            //Setup the InstructionPointer
-                            EntryPoint.InstructionPointer = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(SeedDelegate);
+                            EntryPoint = new PlatformMethod(ShouldDispose)
+                            {
+                                //Setup the InstructionPointer
+                                InstructionPointer = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(SeedDelegate)
+                            };
 
                             break;
                         }

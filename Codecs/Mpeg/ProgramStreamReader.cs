@@ -201,8 +201,7 @@ namespace Media.Containers.Mpeg
                     case Mpeg.StreamTypes.PackHeader:
                         {
                             //Decoder the SCR
-                            double scr;
-                            ParsePackHeader(next, out scr);
+                            ParsePackHeader(next, out double scr);
 
                             //Set the SystemClockRate
                             m_SystemClockRate = scr;
@@ -265,8 +264,7 @@ namespace Media.Containers.Mpeg
             {
                 if (false == m_SystemClockRate.HasValue)
                 {
-                    double result;
-                    ParsePackHeader(Root, out result);
+                    ParsePackHeader(Root, out double result);
                     m_SystemClockRate = result;
                 }
 
@@ -315,7 +313,7 @@ namespace Media.Containers.Mpeg
                         //Decode the SCR
 
                         //Todo, use ReadBigEndianInteger or BitStream
-                        high = (double)((node.Identifier[5] >> 3) & 0x01);
+                        high = (node.Identifier[5] >> 3) & 0x01;
 
                         low = ((uint)((node.Identifier[5] >> 1) & 0x03) << 30) |
                             (uint)(node.Identifier[6] << 22) |
@@ -330,7 +328,7 @@ namespace Media.Containers.Mpeg
                         //Decode the SCR
 
                         //Todo, use ReadBigEndianInteger or BitStream
-                        high = (double)((node.Identifier[5] & 0x20) >> 5);
+                        high = (node.Identifier[5] & 0x20) >> 5;
 
                         low = ((uint)((node.Identifier[5] & 0x18) >> 3) << 30) |
                             (uint)((node.Identifier[5] & 0x03) << 28) |
@@ -351,7 +349,7 @@ namespace Media.Containers.Mpeg
             scr = (((high * 0x10000) * 0x10000) + low) / 90000.0;
         }
 
-        System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<bool, ushort, Container.Node>> m_StreamBoundEntries = new System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<bool, ushort, Container.Node>>();
+        System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<bool, ushort, Container.Node>> m_StreamBoundEntries = new();
 
         protected virtual void ParseSystemsHeader(Container.Node node)
         {

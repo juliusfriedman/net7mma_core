@@ -168,9 +168,9 @@ namespace Media.Sdp
 
         public TimeDescription(bool shouldDispose = true) : base(shouldDispose)
         {
-            TimeDescriptionLine = new Lines.SessionTimeDescriptionLine();
+            TimeDescriptionLine = [];
 
-            RepeatLines = new List<Lines.SessionRepeatTimeLine>();
+            RepeatLines = [];
         }
 
         public TimeDescription(int startTime, int stopTime)

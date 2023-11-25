@@ -51,7 +51,7 @@ namespace Media.Common.Extensions.Process
         public static void SetAffinity(this System.Diagnostics.Process process, long affinityFlags, int threads = 0, int idealProcessor = -1)
         {
             //use the process or the current process.
-            process = process ?? System.Diagnostics.Process.GetCurrentProcess();
+            process ??= System.Diagnostics.Process.GetCurrentProcess();
 
             //Set the flags
             process.ProcessorAffinity = (nint)affinityFlags;

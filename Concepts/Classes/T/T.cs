@@ -159,9 +159,8 @@ namespace Media.Concepts.Classes.T
         {
             if (IsStringType)
             {
-                string typeName;
 
-                if (TryGetString(out typeName) is false)
+                if (TryGetString(out string typeName) is false)
                 {
                     value = null;
 
@@ -296,7 +295,7 @@ namespace Media.Concepts.Classes.T
         /// Only accesible from this type or reflection.
         /// </summary>
         readonly System.Collections.Generic.Dictionary<System.Type, System.Tuple<System.Reflection.ConstructorInfo[], System.Reflection.ParameterInfo[][]>> m_SupportedTypes =
-            new System.Collections.Generic.Dictionary<System.Type, System.Tuple<System.Reflection.ConstructorInfo[], System.Reflection.ParameterInfo[][]>>();
+            [];
 
         /// <summary>
         /// The <see cref="System.Types"/> which are supported.
@@ -410,7 +409,7 @@ namespace Media.Concepts.Classes.T
         // if we know instance type\subtype (eg interface) and know an index
         public T Create<T>(ref int supportedTypeIndex, ref int version, object[] paramerters)
         {
-            T typed = default(T);
+            T typed = default;
 
             object untyped = Create(ref supportedTypeIndex, ref version, paramerters);
 

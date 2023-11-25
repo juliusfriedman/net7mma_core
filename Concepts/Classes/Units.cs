@@ -306,13 +306,13 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// The smallest and largest positive values.
         /// </summary>
-        public static readonly IdealUnit MinValue = new IdealUnit(-0.0), MaxValue = new IdealUnit(double.MaxValue);
+        public static readonly IdealUnit MinValue = new(-0.0), MaxValue = new(double.MaxValue);
 
         //@Sprintf
-        static readonly List<string> IndirectUnitSymbols = new List<string>()
-            {
+        static readonly List<string> IndirectUnitSymbols =
+            [
                 "{{0}}"
-            };
+            ];
 
         /// <summary>
         /// The Error
@@ -530,14 +530,14 @@ namespace Media.Concepts.Classes
             /// </summary>
             public static readonly Distance MinValue = Physics.ℓP;
 
-            public static readonly Distance PositiveInfinity = new Distance(Number.PositiveInfinty);
+            public static readonly Distance PositiveInfinity = new(Number.PositiveInfinty);
 
-            public static readonly Distance NegitiveInfinity = new Distance(Number.NegitiveInfinity);
+            public static readonly Distance NegitiveInfinity = new(Number.NegitiveInfinity);
 
-            public static readonly Distance Zero = new Distance(Number.Zero);
+            public static readonly Distance Zero = new(Number.Zero);
 
-            static readonly List<string> DistanceSymbols = new List<string>()
-            {
+            static readonly List<string> DistanceSymbols =
+            [
                 "ℓP",
                 "mil",
                 "in",
@@ -550,7 +550,7 @@ namespace Media.Concepts.Classes
                 "cm",
                 "m",
                 "km"
-            };
+            ];
 
             public Distance()
                 : base(M)
@@ -720,9 +720,9 @@ namespace Media.Concepts.Classes
 
             public static implicit operator Frequency(double t) { return new Frequency(t); }
 
-            public static readonly Frequency Zero = new Frequency(Number.Zero);
+            public static readonly Frequency Zero = new(Number.Zero);
 
-            public static readonly Frequency One = new Frequency(new Number(Hz)); //Hz
+            public static readonly Frequency One = new(new Number(Hz)); //Hz
 
             //Should be Number to avoid readonly ValueType
 
@@ -744,14 +744,14 @@ namespace Media.Concepts.Classes
                 return F >= min && F <= max;
             }
 
-            static readonly List<string> FrequencySymbols = new List<string>()
-            {
+            static readonly List<string> FrequencySymbols =
+            [
                 "Hz",
                 "KHz",
                 "MHz",
                 "GHz",
                 "THz"
-            };
+            ];
 
             public Frequency()
                 : base(Hz)
@@ -935,12 +935,12 @@ namespace Media.Concepts.Classes
 
             public const char Degrees = '°';
 
-            static readonly List<string> TempratureSymbols = new List<string>()
-            {
+            static readonly List<string> TempratureSymbols =
+            [
                 "C",
                 "F",
                 "K",
-            };
+            ];
 
             public Temperature()
                 : base(One.Units)
@@ -1087,14 +1087,14 @@ namespace Media.Concepts.Classes
 
             public const double GramsPerKilogram = 1000;
 
-            static readonly List<string> MassSymbols = new List<string>()
-            {
+            static readonly List<string> MassSymbols =
+            [
                 "u",
                 "o",
                 "lb",
                 "kg",
                 "g",
-            };
+            ];
 
             public Mass()
                 : base(Kg)
@@ -1322,11 +1322,11 @@ namespace Media.Concepts.Classes
 
             public const double AuttojoulePerJoule = 1000000000000000000;
 
-            static readonly List<string> EnergySymbols = new List<string>()
-            {
+            static readonly List<string> EnergySymbols =
+            [
                 "J",
                 //"Btu",
-            };
+            ];
 
 
             public Energy(double joules)
@@ -1570,15 +1570,15 @@ namespace Media.Concepts.Classes
 
             public const double MetersPerSecond = 1;
 
-            public static readonly Velocity MaxValue = new Velocity(Physics.c);//the speed of light = 299 792 458 meters per second
+            public static readonly Velocity MaxValue = new(Physics.c);//the speed of light = 299 792 458 meters per second
 
-            static readonly List<string> VelocitySymbols = new List<string>()
-            {
+            static readonly List<string> VelocitySymbols =
+            [
                 "mph",
                 "fps",
                 "kph",
                 "mps",
-            };
+            ];
 
             public Velocity()
                 : base(MetersPerSecond) { }
@@ -1734,10 +1734,10 @@ namespace Media.Concepts.Classes
             //0.0000001 Converts from erg
             //10000000 Converts to erg
 
-            static readonly List<string> ForceSymbols = new List<string>()
-            {
+            static readonly List<string> ForceSymbols =
+            [
                 "N"
-            };
+            ];
 
             /// <summary>
             /// Constructs the default 1 newton = 1 joule/meter
@@ -1883,12 +1883,12 @@ namespace Media.Concepts.Classes
 
             public static implicit operator Wavelength(double t) { return new Wavelength(t); }
 
-            static readonly List<string> WavelengthSymbols = new List<string>()
-            {
+            static readonly List<string> WavelengthSymbols =
+            [
                 "nm",
                 "μm",
                 "m"
-            };
+            ];
 
             public const double Nm = 1D;
 

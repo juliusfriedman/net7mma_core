@@ -268,11 +268,11 @@ namespace Media.UnitTests
                         int RandomId = RFC3550.Random32(Utility.Random.Next());
 
                         //Create the Name and ApplicationDependentData
-                        IEnumerable<byte> NameData = Array.ConvertAll(Enumerable.Range(1, (int)Rtcp.ApplicationSpecificReport.NameSize).ToArray(), Convert.ToByte),
-                            ApplicationDependentData = Array.ConvertAll(Enumerable.Range(1, (int)ApplicationSpecificDataLength).ToArray(), Convert.ToByte);
+                        IEnumerable<byte> NameData = Array.ConvertAll(Enumerable.Range(1, Rtcp.ApplicationSpecificReport.NameSize).ToArray(), Convert.ToByte),
+                            ApplicationDependentData = Array.ConvertAll(Enumerable.Range(1, ApplicationSpecificDataLength).ToArray(), Convert.ToByte);
 
                         //Create a GoodbyeReport instance using the specified options.
-                        using (Media.Rtcp.ApplicationSpecificReport p = new Rtcp.ApplicationSpecificReport(0, PaddingCounter, RandomId, SubTypeCounter, NameData.ToArray(), ApplicationDependentData.ToArray()))
+                        using (Media.Rtcp.ApplicationSpecificReport p = new(0, PaddingCounter, RandomId, SubTypeCounter, NameData.ToArray(), ApplicationDependentData.ToArray()))
                         {
                             //Check IsComplete
                             System.Diagnostics.Debug.Assert(p.IsComplete, "IsComplete must be true.");
@@ -305,7 +305,7 @@ namespace Media.UnitTests
                             System.Diagnostics.Debug.Assert(p.PaddingData.Take(PaddingCounter - 1).All(b => b is 0), "Unexpected PaddingData");
 
                             //Serialize and Deserialize the packet and verify again
-                            using (Media.Rtcp.ApplicationSpecificReport s = new Rtcp.ApplicationSpecificReport(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0)))
+                            using (Media.Rtcp.ApplicationSpecificReport s = new(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0)))
                             {
                                 //Check the Payload.Count
                                 System.Diagnostics.Debug.Assert(s.Payload.Count == p.Payload.Count, "Unexpected Payload Count");

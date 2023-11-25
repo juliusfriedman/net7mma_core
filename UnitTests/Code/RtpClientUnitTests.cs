@@ -55,9 +55,9 @@ namespace Media.UnitTests
         //Shows what happpens when packets get out of order too badely..
         public void TestFrameChangedEvents()
         {
-            using (Common.Loggers.ConsoleLogger consoleLogger = new Common.Loggers.ConsoleLogger())
+            using (Common.Loggers.ConsoleLogger consoleLogger = new())
             {
-                using (Rtp.RtpClient rtpClient = new Rtp.RtpClient())
+                using (Rtp.RtpClient rtpClient = new())
                 {
 
                     rtpClient.Logger = consoleLogger;
@@ -69,10 +69,11 @@ namespace Media.UnitTests
 
                     int count = 0, fcount = 0;
 
-                    Rtp.RtpClient.TransportContext tc = new Rtp.RtpClient.TransportContext(0, 1, 0);
-
-                    //Needed to resolve packet payload and avoid exception when validating packet... :(
-                    tc.MediaDescription = new Sdp.MediaDescription(Sdp.MediaType.unknown, "RTP", 0, 0);
+                    Rtp.RtpClient.TransportContext tc = new(0, 1, 0)
+                    {
+                        //Needed to resolve packet payload and avoid exception when validating packet... :(
+                        MediaDescription = new Sdp.MediaDescription(Sdp.MediaType.unknown, "RTP", 0, 0)
+                    };
 
                     rtpClient.AddContext(tc);
 
@@ -93,7 +94,7 @@ namespace Media.UnitTests
 
                     int tests = 4;
 
-                    Rtp.RtpPacket rtpPacket = new Rtp.RtpPacket(12)
+                    Rtp.RtpPacket rtpPacket = new(12)
                     {
                         Marker = true //Each packet should cause a frame change event and is its own frame
                     };
@@ -188,9 +189,9 @@ namespace Media.UnitTests
                     _client.OutOfBandData += ProcessInterleaveData;
                     _client.RtpPacketReceieved += ProcessRtpPacket;
 
-                    Media.Sdp.MediaDescription md = new Media.Sdp.MediaDescription(Media.Sdp.MediaType.video, "H.264", 0, 999);
+                    Media.Sdp.MediaDescription md = new(Media.Sdp.MediaType.video, "H.264", 0, 999);
 
-                    Media.Rtp.RtpClient.TransportContext tc = new Media.Rtp.RtpClient.TransportContext(0, 1,
+                    Media.Rtp.RtpClient.TransportContext tc = new(0, 1,
                         Media.RFC3550.Random32(9876), md, false, _senderSSRC);
                     //  Create a Duplexed reciever using the RtspClient socket.
                     tc.Initialize(_receiving);
@@ -217,7 +218,7 @@ namespace Media.UnitTests
 
                     try
                     {
-                        Media.Rtsp.RtspMessage interleaved = new Media.Rtsp.RtspMessage(data, offset, length);
+                        Media.Rtsp.RtspMessage interleaved = new(data, offset, length);
 
                         if (interleaved.RtspMessageType == Media.Rtsp.RtspMessageType.Invalid && lastInterleaved is not null)
                         {
@@ -302,7 +303,7 @@ namespace Media.UnitTests
 
                 int partNumber = 0;
 
-                System.Text.StringBuilder sb = new System.Text.StringBuilder();
+                System.Text.StringBuilder sb = new();
                 while (sb.Length < size)
                 {
                     sb.Append("EncapsulatedPacketPayloadContentPartNumber" + ++partNumber + "$");
@@ -338,39 +339,39 @@ namespace Media.UnitTests
                 Console.WriteLine("No yellow rows!!!");
                 Console.WriteLine("");
 
-                TestFramework tf = new TestFramework();
+                TestFramework tf = new();
 
                 Console.WriteLine(line + sequenceNumber);
                 byte[] buffer = GeneratePayload(1400);
-                Media.Rtp.RtpPacket p1 = new Media.Rtp.RtpPacket(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
+                Media.Rtp.RtpPacket p1 = new(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
                 buffer = p1.Prepare().ToArray();
                 tf.Send(GenerateEncapsulatingHeader(buffer.Length));
                 tf.Send(buffer);
 
                 Console.WriteLine(line + sequenceNumber);
                 buffer = GeneratePayload(1400);
-                Media.Rtp.RtpPacket p2 = new Media.Rtp.RtpPacket(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
+                Media.Rtp.RtpPacket p2 = new(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
                 buffer = p2.Prepare().ToArray();
                 tf.Send(GenerateEncapsulatingHeader(buffer.Length));
                 tf.Send(buffer);
 
                 Console.WriteLine(line + sequenceNumber);
                 buffer = GeneratePayload(breakingPaketLength); //  Length 1245 to 1247 looses packets and it does not recover
-                Media.Rtp.RtpPacket p3 = new Media.Rtp.RtpPacket(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
+                Media.Rtp.RtpPacket p3 = new(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
                 buffer = p3.Prepare().ToArray();
                 tf.Send(GenerateEncapsulatingHeader(buffer.Length));
                 tf.Send(buffer);
 
                 Console.WriteLine(line + sequenceNumber);
                 buffer = GeneratePayload(1400);
-                Media.Rtp.RtpPacket p4 = new Media.Rtp.RtpPacket(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
+                Media.Rtp.RtpPacket p4 = new(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
                 buffer = p4.Prepare().ToArray();
                 tf.Send(GenerateEncapsulatingHeader(buffer.Length));
                 tf.Send(buffer);
 
                 Console.WriteLine(line + sequenceNumber);
                 buffer = GeneratePayload(1400);
-                Media.Rtp.RtpPacket p5 = new Media.Rtp.RtpPacket(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
+                Media.Rtp.RtpPacket p5 = new(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
                 buffer = p5.Prepare().ToArray();
                 tf.Send(GenerateEncapsulatingHeader(buffer.Length));
                 tf.Send(buffer);
@@ -407,31 +408,33 @@ namespace Media.UnitTests
                 Console.WriteLine("Correct output is 3 rows saying 'ProcessRtpPacket()...', 1 yellow row, and finaly a single row 'ProcessRtpPacket()...':");
                 Console.WriteLine("");
 
-                TestFramework tf = new TestFramework();
+                TestFramework tf = new();
                 //Console.WriteLine(line + sequenceNumber);
                 byte[] buffer = GeneratePayload(1400);
-                Media.Rtp.RtpPacket p1 = new Media.Rtp.RtpPacket(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
+                Media.Rtp.RtpPacket p1 = new(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
                 buffer = p1.Prepare().ToArray();
                 tf.Send(GenerateEncapsulatingHeader(buffer.Length));
                 tf.Send(buffer);
 
                 //Console.WriteLine(line + sequenceNumber);
                 buffer = GeneratePayload(1400);
-                Media.Rtp.RtpPacket p2 = new Media.Rtp.RtpPacket(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
+                Media.Rtp.RtpPacket p2 = new(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
                 buffer = p2.Prepare().ToArray();
                 tf.Send(GenerateEncapsulatingHeader(buffer.Length));
                 tf.Send(buffer);
 
                 //Console.WriteLine(line + sequenceNumber);
                 buffer = GeneratePayload(breakingPaketLength);
-                Media.Rtp.RtpPacket p3 = new Media.Rtp.RtpPacket(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
+                Media.Rtp.RtpPacket p3 = new(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
                 buffer = p3.Prepare().ToArray();
                 tf.Send(GenerateEncapsulatingHeader(buffer.Length));
                 tf.Send(buffer);
 
-                Media.Rtsp.RtspMessage keepAlive = new Media.Rtsp.RtspMessage(Media.Rtsp.RtspMessageType.Response);
-                keepAlive.RtspStatusCode = Media.Rtsp.RtspStatusCode.OK;
-                keepAlive.CSeq = 34;
+                Media.Rtsp.RtspMessage keepAlive = new(Media.Rtsp.RtspMessageType.Response)
+                {
+                    RtspStatusCode = Media.Rtsp.RtspStatusCode.OK,
+                    CSeq = 34
+                };
                 keepAlive.SetHeader(Media.Rtsp.RtspHeaders.Session, "A9B8C7D6");
                 keepAlive.SetHeader(Media.Rtsp.RtspHeaders.UserAgent, "Testing $UserAgent $009\r\n$\0:\0");
                 keepAlive.SetHeader("Ignore", "$UserAgent $009\r\n$\0\0\aRTSP/1.0");
@@ -442,7 +445,7 @@ namespace Media.UnitTests
 
                 //Console.WriteLine(line + sequenceNumber);
                 buffer = GeneratePayload(1400);
-                Media.Rtp.RtpPacket p4 = new Media.Rtp.RtpPacket(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
+                Media.Rtp.RtpPacket p4 = new(2, false, false, false, 0, 0, _senderSSRC, sequenceNumber++, _timeStamp, buffer);
                 buffer = p4.Prepare().ToArray();
                 tf.Send(GenerateEncapsulatingHeader(buffer.Length));
                 tf.Send(buffer);
@@ -495,19 +498,23 @@ namespace Media.UnitTests
                 Console.WriteLine("Correct output would be 2 'ProcessInterleaveData():...' detailing RTSP responses CSeq 34 and 35:");
                 Console.WriteLine("");
 
-                TestFramework tf = new TestFramework();
+                TestFramework tf = new();
 
-                Media.Rtsp.RtspMessage keepAlive = new Media.Rtsp.RtspMessage(Media.Rtsp.RtspMessageType.Response);
-                keepAlive.RtspStatusCode = Media.Rtsp.RtspStatusCode.OK;
-                keepAlive.CSeq = 34;
+                Media.Rtsp.RtspMessage keepAlive = new(Media.Rtsp.RtspMessageType.Response)
+                {
+                    RtspStatusCode = Media.Rtsp.RtspStatusCode.OK,
+                    CSeq = 34
+                };
                 keepAlive.SetHeader(Media.Rtsp.RtspHeaders.Session, "A9B8C7D6");
                 keepAlive.SetHeader(Media.Rtsp.RtspHeaders.Date, DateTime.Now.ToUniversalTime().ToString("r"));
                 byte[] buffer = keepAlive.Prepare().ToArray();
                 tf.Send(buffer);
 
-                keepAlive = new Media.Rtsp.RtspMessage(Media.Rtsp.RtspMessageType.Response);
-                keepAlive.RtspStatusCode = Media.Rtsp.RtspStatusCode.OK;
-                keepAlive.CSeq = 35;
+                keepAlive = new Media.Rtsp.RtspMessage(Media.Rtsp.RtspMessageType.Response)
+                {
+                    RtspStatusCode = Media.Rtsp.RtspStatusCode.OK,
+                    CSeq = 35
+                };
                 keepAlive.SetHeader(Media.Rtsp.RtspHeaders.Session, "A9B8C7D6");
                 keepAlive.SetHeader(Media.Rtsp.RtspHeaders.Date, DateTime.Now.ToUniversalTime().ToString("r"));
                 buffer = keepAlive.Prepare().ToArray();
@@ -526,7 +533,7 @@ namespace Media.UnitTests
             Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
             //Create a rtp client to mock the test
-            using (Media.Rtp.RtpClient test = new Media.Rtp.RtpClient())
+            using (Media.Rtp.RtpClient test = new())
             {
 
                 Media.Rtsp.RtspMessage lastInterleaved = null;
@@ -540,7 +547,7 @@ namespace Media.UnitTests
                     Console.WriteLine("\tInterleaved (@" + offset + ", count=" + count + ") =>" + System.Text.Encoding.ASCII.GetString(data, offset, count));
 
                     GetMessage:
-                    Media.Rtsp.RtspMessage interleaved = new Media.Rtsp.RtspMessage(data, offset, count);
+                    Media.Rtsp.RtspMessage interleaved = new(data, offset, count);
 
                     if (interleaved.RtspMessageType == Media.Rtsp.RtspMessageType.Invalid && lastInterleaved is not null)
                     {
@@ -616,7 +623,7 @@ namespace Media.UnitTests
                     //Get the data indicated
                     //var data = header.Concat(Enumerable.Repeat(default(byte), actualLength));
 
-                    List<byte> allData = new List<byte>();
+                    List<byte> allData = [];
 
                     //Add more data until actualLength is less then length
                     while (actualLength < length)
@@ -739,7 +746,7 @@ namespace Media.UnitTests
             Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
             //Create a rtp client to mock the test
-            using (Media.Rtp.RtpClient test = new Media.Rtp.RtpClient())
+            using (Media.Rtp.RtpClient test = new())
             {
 
                 test.TransportContexts.Add(new Rtp.RtpClient.TransportContext(0, 1, 0)
@@ -759,7 +766,7 @@ namespace Media.UnitTests
                     Console.WriteLine("\tInterleaved (@" + offset + ", count=" + count + ") =>" + System.Text.Encoding.ASCII.GetString(data, offset, count));
 
                     GetMessage:
-                    Media.Rtsp.RtspMessage interleaved = new Media.Rtsp.RtspMessage(data, offset, count);
+                    Media.Rtsp.RtspMessage interleaved = new(data, offset, count);
 
                     if (interleaved.RtspMessageType == Media.Rtsp.RtspMessageType.Invalid && lastInterleaved is not null)
                     {
@@ -832,7 +839,7 @@ namespace Media.UnitTests
                     //Get the data indicated
                     //var data = header.Concat(Enumerable.Repeat(default(byte), actualLength));
 
-                    List<byte> allData = new List<byte>();
+                    List<byte> allData = [];
 
                     //Add more data until actualLength is less then length
                     while (actualLength < length)
@@ -955,9 +962,9 @@ namespace Media.UnitTests
             //UnitTestBase
             Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
-            Media.Rtp.RtpClient rtpClient = default(Media.Rtp.RtpClient);
+            Media.Rtp.RtpClient rtpClient = default;
 
-            try { rtpClient = Media.Rtp.RtpClient.FromSessionDescription(default(Media.Sdp.SessionDescription)); }
+            try { rtpClient = Media.Rtp.RtpClient.FromSessionDescription(default); }
             catch { }
 
             System.Diagnostics.Debug.Assert(rtpClient is null, "Must not have created a RtpClient from a null SessionDescription");

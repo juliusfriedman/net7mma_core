@@ -96,10 +96,10 @@ public class RiffReader : MediaFileStream, IMediaContainer
             throw new Exception("FourCC strings with offset must be 4 characters long " + FourCC);
         }
 
-        int result = ((int)FourCC[offset + 3]) << 24
-                    | ((int)FourCC[offset + 2]) << 16
-                    | ((int)FourCC[offset + 1]) << 8
-                    | ((int)FourCC[offset + 0]);
+        int result = FourCC[offset + 3] << 24
+                    | FourCC[offset + 2] << 16
+                    | FourCC[offset + 1] << 8
+                    | FourCC[offset + 0];
 
         return result;
     }
@@ -111,20 +111,20 @@ public class RiffReader : MediaFileStream, IMediaContainer
             throw new Exception("FourCC char arrays with offset must contain 4 characters" + new string(FourCC, offset, FourCC.Length - offset));
         }
 
-        int result = ((int)FourCC[offset + 3]) << 24
-                    | ((int)FourCC[offset + 2]) << 16
-                    | ((int)FourCC[offset + 1]) << 8
-                    | ((int)FourCC[offset + 0]);
+        int result = FourCC[offset + 3] << 24
+                    | FourCC[offset + 2] << 16
+                    | FourCC[offset + 1] << 8
+                    | FourCC[offset + 0];
 
         return result;
     }
 
     public static int ToFourCC(char c0, char c1, char c2, char c3)
     {
-        int result = ((int)c3) << 24
-                    | ((int)c2) << 16
-                    | ((int)c1) << 8
-                    | ((int)c0);
+        int result = c3 << 24
+                    | c2 << 16
+                    | c1 << 8
+                    | c0;
 
         return result;
     }
@@ -136,15 +136,15 @@ public class RiffReader : MediaFileStream, IMediaContainer
         return RiffReader.ParentChunks.Contains(fourCC);
     }
 
-    public static readonly HashSet<FourCharacterCode> ParentChunks = new HashSet<FourCharacterCode>()
-    {
+    public static readonly HashSet<FourCharacterCode> ParentChunks =
+    [
         FourCharacterCode.RIFF,
         FourCharacterCode.RIFX,
         FourCharacterCode.RF64,
         FourCharacterCode.ON2,
         FourCharacterCode.odml,
         FourCharacterCode.LIST,
-    };
+    ];
 
     public static bool HasSubType(Node chunk)
     {
@@ -700,7 +700,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
                 default:
                     {
                         if (false == m_TotalFrames.HasValue) ParseAviHeader();
-                        return TimeSpan.FromMilliseconds((double)m_TotalFrames.Value * m_MicroSecPerFrame.Value / (double)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond);
+                        return TimeSpan.FromMilliseconds((double)m_TotalFrames.Value * m_MicroSecPerFrame.Value / Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond);
                     }
             }
         }
@@ -896,7 +896,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
         if (SubType == FourCharacterCode.WAVE)
         {
             if (false == m_SampleRate.HasValue) ParseFmt();
-            Track track = new Track(ReadChunk(FourCharacterCode.data), string.Empty, (int)(Length / BlockAlign), FileInfo.CreationTimeUtc, FileInfo.LastWriteTimeUtc,
+            Track track = new(ReadChunk(FourCharacterCode.data), string.Empty, (int)(Length / BlockAlign), FileInfo.CreationTimeUtc, FileInfo.LastWriteTimeUtc,
                 BlockAlign, 0, 0, TimeSpan.Zero, TimeSpan.FromSeconds(Length / (SampleRate * Channels * BitsPerSample / Common.Binary.BitsPerByte)),
                 m_SampleRate.Value, Sdp.MediaType.audio, Common.Binary.GetBytes(m_Format.Value, Common.Binary.IsBigEndian), (byte)m_NumChannels.Value, (byte)m_BitsPerSample.Value,
                 true);
@@ -1061,11 +1061,11 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
                     //Variable BitRate must also take into account the size of each chunk / nBlockAlign * duration per frame.
 
-                    Track created = new Track(strhChunk, trackName, ++trackId, Created, Modified, sampleCount, height, width,
+                    Track created = new(strhChunk, trackName, ++trackId, Created, Modified, sampleCount, height, width,
                         TimeSpan.FromMilliseconds(startTime / timeScale),
                         mediaType == Sdp.MediaType.audio ?
-                            TimeSpan.FromSeconds((double)duration / (double)rate) :
-                            TimeSpan.FromMilliseconds((double)duration * m_MicroSecPerFrame.Value / (double)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond),
+                            TimeSpan.FromSeconds(duration / (double)rate) :
+                            TimeSpan.FromMilliseconds((double)duration * m_MicroSecPerFrame.Value / Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond),
                         rate / timeScale, mediaType, codecIndication, channels, bitDepth);
 
                     yield return created;

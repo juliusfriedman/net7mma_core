@@ -104,7 +104,7 @@ namespace Media.Rtcp
                 int lengthInBytes = headerSize > remains ? 0 : Binary.MachineWordsToBytes((ushort)(header.LengthInWordsMinusOne + 1));
 
                 //Create a packet using the existing header and the bytes left in the packet
-                using RtcpPacket newPacket = new RtcpPacket(header, lengthInBytes == 0 ? MemorySegment.Empty : new MemorySegment(array, offset + headerSize, Binary.Clamp(lengthInBytes - headerSize, 0, remains - headerSize)), shouldDispose);
+                using RtcpPacket newPacket = new(header, lengthInBytes == 0 ? MemorySegment.Empty : new MemorySegment(array, offset + headerSize, Binary.Clamp(lengthInBytes - headerSize, 0, remains - headerSize)), shouldDispose);
 
                 lengthInBytes = headerSize + newPacket.Payload.Count;
 
@@ -776,14 +776,13 @@ namespace Media.Rtcp
                     else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
                 }
 
-                System.Net.Sockets.SocketError error;
 
                 int recieved = 0;
 
                 //Read from the stream, decrementing from octetsRemaining what was read.
                 while (octetsRemaining > 0)
                 {
-                    int rec = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out error);
+                    int rec = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out System.Net.Sockets.SocketError error);
                     offset += rec;
                     octetsRemaining -= rec;
                     recieved += rec;
@@ -810,7 +809,7 @@ namespace Media.Rtcp
 
         public DateTime? Transferred { get; set; }
 
-        long Common.IPacket.Length { get { return (long)Length; } }
+        long Common.IPacket.Length { get { return Length; } }
 
         #endregion
 
@@ -828,12 +827,12 @@ namespace Media.Rtcp
         /// Maps the PayloadType field to the implementation which best represents it.
         /// Derived instance which can be instantied are found in this collection after <see cref="MapDerivedImplementations"/> is called.
         /// </summary>
-        internal protected static Dictionary<byte, Type> ImplementationMap = new Dictionary<byte, Type>();
+        internal protected static Dictionary<byte, Type> ImplementationMap = [];
 
         /// <summary>
         /// Provides a collection of abstractions which dervive from RtcpPacket, e.g. RtcpReport.
         /// </summary>
-        internal protected static HashSet<Type> Abstractions = new HashSet<Type>();
+        internal protected static HashSet<Type> Abstractions = [];
 
         /// <summary>
         /// Builds the <see cref="ImplementationMap"/> from all loaded types
@@ -868,8 +867,7 @@ namespace Media.Rtcp
         /// <returns></returns>
         public static Type GetImplementationForPayloadType(byte payloadType)
         {
-            Type result = null;
-            if (ImplementationMap.TryGetValue(payloadType, out result)) return result;
+            if (ImplementationMap.TryGetValue(payloadType, out Type result)) return result;
             return null;
         }
 
@@ -1041,7 +1039,7 @@ namespace Media.Rtcp
         {
             if (IsDisposed)
             {
-                buffer = default(System.Collections.Generic.IList<System.ArraySegment<byte>>);
+                buffer = default;
 
                 return false;
             }
@@ -1103,7 +1101,7 @@ namespace Media.UnitTests
                                 for (byte PaddingCounter = byte.MinValue; PaddingCounter <= Media.Common.Binary.FiveBitMaxValue; ++PaddingCounter)
                                 {
                                     //Create a RtpPacket instance using the specified options
-                                    using (Media.Rtcp.RtcpPacket p = new Rtcp.RtcpPacket(VersionCounter, PayloadCounter, PaddingCounter, 7, ushort.MaxValue, ReportBlockCounter))
+                                    using (Media.Rtcp.RtcpPacket p = new(VersionCounter, PayloadCounter, PaddingCounter, 7, ushort.MaxValue, ReportBlockCounter))
                                     {
                                         //Check the Version
                                         System.Diagnostics.Debug.Assert(p.Version == VersionCounter, "Unexpected Version");
@@ -1137,7 +1135,7 @@ namespace Media.UnitTests
                                         System.Diagnostics.Debug.Assert(serialized.Length == p.Length, "Unexpected Binary Data Serialized");
 
                                         //Make a managed packet from the serialized data and re-verify
-                                        using (Media.Rtcp.RtcpPacket s = new Rtcp.RtcpPacket(serialized, 0))
+                                        using (Media.Rtcp.RtcpPacket s = new(serialized, 0))
                                         {
                                             //Check the IsComplete
                                             System.Diagnostics.Debug.Assert(s.IsComplete, "Not Complete");

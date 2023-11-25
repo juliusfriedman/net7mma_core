@@ -340,7 +340,7 @@ namespace Media.UnitTests
                     int RandomId = RFC3550.Random32(Utility.Random.Next());
 
                     //Create a SendersReport instance using the specified options.
-                    using (Media.Rtcp.SendersReport p = new Rtcp.SendersReport(0, PaddingCounter, ReportBlockCounter, RandomId))
+                    using (Media.Rtcp.SendersReport p = new(0, PaddingCounter, ReportBlockCounter, RandomId))
                     {
                         //Check SendersInformation
                         System.Diagnostics.Debug.Assert(p.SendersInformation.Count() == Rtcp.SendersReport.SendersInformationSize, "Unexpected SendersInformation Count");
@@ -376,7 +376,7 @@ namespace Media.UnitTests
                         }
 
                         //Serialize and Deserialize and verify again
-                        using (Rtcp.SendersReport s = new Rtcp.SendersReport(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0), true))
+                        using (Rtcp.SendersReport s = new(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0), true))
                         {
                             //Check SynchronizationSourceIdentifier
                             System.Diagnostics.Debug.Assert(s.SynchronizationSourceIdentifier == p.SynchronizationSourceIdentifier, "Unexpected SynchronizationSourceIdentifier");
@@ -425,10 +425,10 @@ namespace Media.UnitTests
             int RandomId = RFC3550.Random32(Utility.Random.Next());
 
             //Create a SendersReport instance using the specified options.
-            using (Media.Rtcp.SendersReport p = new Rtcp.SendersReport(2, 0, 0, RandomId))
+            using (Media.Rtcp.SendersReport p = new(2, 0, 0, RandomId))
             {
                 //Let LSR =
-                DateTime ExpectedDateTime = new DateTime(1995, 11, 10, 11, 33, 25, 125, DateTimeKind.Utc); //n = LSR //
+                DateTime ExpectedDateTime = new(1995, 11, 10, 11, 33, 25, 125, DateTimeKind.Utc); //n = LSR //
 
                 //sec = 0xb44d_b705 
                 p.NtpMSW = -1269975291; //unchecked((int)3024992005);
@@ -446,7 +446,7 @@ namespace Media.UnitTests
                 const double ExpectedDelay = 5.250;
 
                 //Let A = 
-                DateTime A = new DateTime(1995, 11, 10, 11, 33, 36, 500, DateTimeKind.Utc); //.ToString("s.ffff")
+                DateTime A = new(1995, 11, 10, 11, 33, 36, 500, DateTimeKind.Utc); //.ToString("s.ffff")
 
                 //The delay, expressed in units of 1/65536 seconds, between receiving the last SR packet from source SSRC_n and sending this reception report block. If no SR packet has been received yet from SSRC_n, the DLSR field is set to zero.
                 TimeSpan delay = A.Subtract(TimeSpan.FromSeconds(ExpectedDelay)).Subtract(ExpectedDateTime);

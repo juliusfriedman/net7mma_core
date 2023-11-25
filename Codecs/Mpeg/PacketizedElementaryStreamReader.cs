@@ -156,7 +156,7 @@ namespace Media.Containers.Mpeg
         }
 
         //Entry {esId, { esType, esData } }
-        protected System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<byte, Common.MemorySegment>> m_ProgramStreams = new System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<byte, Common.MemorySegment>>();
+        protected System.Collections.Concurrent.ConcurrentDictionary<byte, Tuple<byte, Common.MemorySegment>> m_ProgramStreams = new();
 
         protected virtual void ParseProgramStreamMap(Container.Node node)
         {

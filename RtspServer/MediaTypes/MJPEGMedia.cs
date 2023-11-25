@@ -337,7 +337,7 @@
             byte[] jpegMagic = [0xFF, 0xD8, 0xFF];
             int jpegMagicLength = 3;
 
-            ASCIIEncoding encoding = new ASCIIEncoding();
+            ASCIIEncoding encoding = new();
 
             while (!stopEvent.WaitOne(0, false))
             {

@@ -58,10 +58,8 @@ namespace Media.Common.Extensions.IPAddress
 
         public static System.Net.IPAddress And(this System.Net.IPAddress ipAddress, System.Net.IPAddress mask)
         {
-            byte[] addressBytes;
-            byte[] maskBytes;
 
-            CheckIPVersion(ipAddress, mask, out addressBytes, out maskBytes);
+            CheckIPVersion(ipAddress, mask, out byte[] addressBytes, out byte[] maskBytes);
 
             byte[] resultBytes = new byte[addressBytes.Length];
 
@@ -143,7 +141,6 @@ namespace Media.Common.Extensions.IPAddress
         {
             if (ipAddress is null) return false;
 
-            byte[] addressBytes;
 
             switch (ipAddress.AddressFamily)
             {
@@ -179,7 +176,7 @@ namespace Media.Common.Extensions.IPAddress
                         //could use out overload and check in place or pass out to MapToIpv4...
 
                         //Check if mapped to v6 from v4 and unmap
-                        if (IPAddressExtensions.IsIPv4MappedToIPv6(ipAddress, out addressBytes)) //(ipAddress.IsIPv4MappedToIPv6)
+                        if (IPAddressExtensions.IsIPv4MappedToIPv6(ipAddress, out byte[] addressBytes)) //(ipAddress.IsIPv4MappedToIPv6)
                         {
                             ipAddress = IPAddressExtensions.MapToIPv4(addressBytes); //ipAddress.MapToIPv4();
 
@@ -197,9 +194,8 @@ namespace Media.Common.Extensions.IPAddress
 
         public static bool IsIPv4MappedToIPv6(this System.Net.IPAddress addr)
         {
-            byte[] allocated;
 
-            return IsIPv4MappedToIPv6(addr, out allocated);
+            return IsIPv4MappedToIPv6(addr, out byte[] allocated);
         }
 
         internal static bool IsIPv4MappedToIPv6(this System.Net.IPAddress addr, out byte[] addrBytes)

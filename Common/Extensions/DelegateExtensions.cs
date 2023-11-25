@@ -128,9 +128,8 @@ namespace Media.Common.Extensions.Delegate
         {
             return (arg) =>
             {
-                TResult value;
 
-                if (cache.TryGetValue(arg, out value))
+                if (cache.TryGetValue(arg, out TResult value))
                 {
                     return value;
                 }

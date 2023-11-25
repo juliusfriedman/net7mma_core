@@ -165,7 +165,7 @@ namespace Media.Common.Collections.Generic
             {
                 case Common.Binary.LongZero:
                     //Store
-                    t = default(T);
+                    t = default;
 
                     //Return
                     return false;
@@ -287,9 +287,8 @@ namespace Media.Common.Collections.Generic
 
         public void Clear(bool all = true)
         {
-            Node First, Last;
 
-            Clear(all, out First, out Last);
+            Clear(all, out Node First, out Node Last);
         }
 
         #endregion
@@ -330,7 +329,7 @@ namespace Media.UnitTests
     /// </summary>
     internal class ConcurrentLinkedStackSlimTests
     {
-        readonly Media.Common.Collections.Generic.ConcurrentLinkedStackSlim<long> LinkedStack = new Common.Collections.Generic.ConcurrentLinkedStackSlim<long>();
+        readonly Media.Common.Collections.Generic.ConcurrentLinkedStackSlim<long> LinkedStack = new();
 
         long LastInputOutput = 0;
 
@@ -408,12 +407,12 @@ namespace Media.UnitTests
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void TestsThreading()
         {
-            System.Threading.ManualResetEvent mre = new System.Threading.ManualResetEvent(false);
+            System.Threading.ManualResetEvent mre = new(false);
 
             int countIn = 0;
 
             //In a thread populate
-            System.Threading.Thread enqueueThread = new System.Threading.Thread(() =>
+            System.Threading.Thread enqueueThread = new(() =>
             {
                 while (countIn < Amount)
                 {
@@ -440,13 +439,12 @@ namespace Media.UnitTests
             int countOut = 0;
 
             //In another thread write
-            System.Threading.Thread dequeueThread = new System.Threading.Thread(() =>
+            System.Threading.Thread dequeueThread = new(() =>
             {
                 while (countOut < Amount)
                 {
-                    long dequeue;
 
-                    if (LinkedStack.TryPop(out dequeue))
+                    if (LinkedStack.TryPop(out long dequeue))
                     {
                         ++countOut;
 
@@ -519,7 +517,7 @@ namespace Media.UnitTests
         {
             int MultiThreadAmount = Amount * 10;
 
-            System.Threading.ManualResetEvent sharedResetEvent = new System.Threading.ManualResetEvent(false);
+            System.Threading.ManualResetEvent sharedResetEvent = new(false);
 
             int statLevelCountIn = 0;
 
@@ -633,9 +631,8 @@ namespace Media.UnitTests
 
                     while (threadLocalCountOut < MultiThreadAmount)
                     {
-                        long pop;
 
-                        if (LinkedStack.TryPop(out pop))
+                        if (LinkedStack.TryPop(out long pop))
                         {
                             ++threadLocalCountOut;
 

@@ -184,11 +184,10 @@ namespace Media.Concepts.Classes.Threading
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         static int SortByLength(T[] x, T[] y)
         {
-            int a, b;
 
-            Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(x, out a);
+            Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(x, out int a);
 
-            Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(y, out b);
+            Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(y, out int b);
 
             return a - b;
         }
@@ -281,11 +280,10 @@ namespace Media.Concepts.Classes.Threading
             {
                 int result = 0;
 
-                int length;
 
                 for (int i = m_Pool.Length - 1; i >= 0; --i)
                 {
-                    if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(m_Pool[i], out length)) continue;
+                    if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(m_Pool[i], out int length)) continue;
 
                     result += length;
                 }
@@ -326,10 +324,9 @@ namespace Media.Concepts.Classes.Threading
             //Access the leaf by id
             T[] leaf = m_Pool[id];
 
-            int existingSize;
 
             //Ensure not null
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(leaf, out existingSize))
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(leaf, out int existingSize))
             {
                 AllocateLeaf(id, size, out leaf);
             }
@@ -345,10 +342,9 @@ namespace Media.Concepts.Classes.Threading
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void EnsureCapacity(int poolSize)
         {
-            int existingSize;
 
             //Ensure not null
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(m_Pool, out existingSize))
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(m_Pool, out int existingSize))
             {
                 AllocatePool(this, poolSize);
             }
@@ -440,7 +436,7 @@ namespace Media.Concepts.Classes.Threading
             //Ensure the capacity of pool with respect to the thread
             EnsureCapacity(id);
 
-            Lease lease = new Lease(this, id, /*emure * */size, Get(id, size));
+            Lease lease = new(this, id, /*emure * */size, Get(id, size));
 
             //Track the reference
             m_Leases.Add(lease);
@@ -508,9 +504,9 @@ namespace Media.UnitTests
         /// </remarks>
         public void TestPool()
         {
-            Media.Concepts.Classes.Threading.Pool<byte> test = new Media.Concepts.Classes.Threading.Pool<byte>(-1);
+            Media.Concepts.Classes.Threading.Pool<byte> test = new(-1);
 
-            System.Collections.Generic.List<byte[]> allocations = new System.Collections.Generic.List<byte[]>();
+            System.Collections.Generic.List<byte[]> allocations = [];
 
             int minimumAllocation = 1000;
 

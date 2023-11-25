@@ -107,7 +107,7 @@ namespace Media.Concepts.Classes
         public System.DateTimeOffset Now
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return System.DateTimeOffset.Now.ToOffset(Offset).Add(new System.TimeSpan((long)(AverageOperationsPerTick / System.TimeSpan.TicksPerMillisecond))); }
+            get { return System.DateTimeOffset.Now.ToOffset(Offset).Add(new System.TimeSpan(AverageOperationsPerTick / System.TimeSpan.TicksPerMillisecond)); }
         }
 
         /// <summary>
@@ -219,7 +219,7 @@ namespace Media.Concepts.Classes
 
             System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Highest;
 
-            Clock.NanoSleep((long)nanos, AverageOperationsPerTick);
+            Clock.NanoSleep(nanos, AverageOperationsPerTick);
 
             System.Threading.Thread.CurrentThread.Priority = previous;
         }
@@ -251,7 +251,7 @@ namespace Media.Concepts.Classes
                     while (--nanos >= 2)
                     {
                         /* if(--nanos % 2 is 0) */
-                        NanoSleep((long)0); //nanos -= 1 + (ops / (ulong)AverageOperationsPerTick);// *10;
+                        NanoSleep(0); //nanos -= 1 + (ops / (ulong)AverageOperationsPerTick);// *10;
                     }
                 }
                 catch
@@ -275,7 +275,7 @@ namespace Media.UnitTests
         /// A static instance can be useful to warm a type but should not be relied upon for absolute time requirements.
         /// You will notice based on it's properties that it may or may not have been started just before a system clock update and can only update at the same frequency of that clock.
         /// </notes>
-        static Media.Concepts.Classes.Clock staticClock = new Concepts.Classes.Clock(false);
+        static Media.Concepts.Classes.Clock staticClock = new(false);
 
         public void TestStaticClock()
         {

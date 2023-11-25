@@ -24,7 +24,7 @@ namespace Media.Common
 
         public DateTimeOffset LastHandled { get; protected set; }
 
-        public readonly HashSet<object> Ignore = new HashSet<object>() { null };
+        public readonly HashSet<object> Ignore = [null];
 
         public bool IgnoreSender(object o) { return Ignore.Add(o); }
 
@@ -195,7 +195,7 @@ namespace Media.Common
         {
             ShouldDispose = shouldDispose;
 
-            Consumed = default(T);
+            Consumed = default;
 
             Event = @event;
 

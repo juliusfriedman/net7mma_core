@@ -8,7 +8,7 @@ namespace Media.Codecs.Image.Transformations
     public sealed class RGB : ImageTransformation
     {
 
-        static ImageTransform TransformToYUV420 = new ImageTransform(TransformRGBToYUV420);
+        static ImageTransform TransformToYUV420 = new(TransformRGBToYUV420);
 
         //Needs a way to verify the source is actually RGB and dest is actually YUV420
         public static void TransformRGBToYUV420(Image source, Image dest)
@@ -450,10 +450,9 @@ namespace Media.Codecs.Image.Transformations
                         }
                         else
                         {
-                            int leftOverbits = 0;
 
                             //Move the offset the required amount of bytes
-                            offsetStart += Math.DivRem(Common.Binary.BitsPerByte, usedBits, out leftOverbits);
+                            offsetStart += Math.DivRem(Common.Binary.BitsPerByte, usedBits, out int leftOverbits);
 
                             //Move the bit offset for any odd bits
                             bitOffset += leftOverbits;

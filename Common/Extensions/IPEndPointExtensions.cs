@@ -44,9 +44,9 @@ namespace Media.Common.Extensions.IPEndPoint
 
         public const string SchemeSeperator = "://";
 
-        public static readonly System.Net.IPEndPoint Any = new System.Net.IPEndPoint(System.Net.IPAddress.Any, 0);
+        public static readonly System.Net.IPEndPoint Any = new(System.Net.IPAddress.Any, 0);
 
-        public static readonly System.Net.IPEndPoint IPv6Any = new System.Net.IPEndPoint(System.Net.IPAddress.IPv6Any, 0);
+        public static readonly System.Net.IPEndPoint IPv6Any = new(System.Net.IPAddress.IPv6Any, 0);
 
         public static bool IsMulticast(this System.Net.IPEndPoint endPoint) { return Common.Extensions.IPAddress.IPAddressExtensions.IsMulticast(endPoint.Address); }
 

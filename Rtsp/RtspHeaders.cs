@@ -677,7 +677,7 @@ namespace Media.Rtsp
         /// <returns></returns>
         public static string RtpInfoHeader(Uri url, int? seq, int? rtpTime, int? ssrc)
         {
-            StringBuilder result = new StringBuilder();
+            StringBuilder result = new();
 
             if (url is not null)
             {

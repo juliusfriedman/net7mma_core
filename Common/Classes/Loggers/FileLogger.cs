@@ -86,9 +86,8 @@ namespace Media.Common.Loggers
             {
                 using (var stream = m_FileInfo.Open(System.IO.FileMode.Append, System.IO.FileAccess.Write))
                 {
-                    int len;
 
-                    stream.Write(GetBytes(message, out len), 0, len);
+                    stream.Write(GetBytes(message, out int len), 0, len);
                 }
             }
             catch

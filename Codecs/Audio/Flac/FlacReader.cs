@@ -149,8 +149,7 @@ namespace Media.Codecs.Flac
         /// <returns></returns>
         internal static bool ReadUTF8_64Signed(System.IO.Stream stream, byte[] buffer, ref int offset, out long result)
         {
-            ulong r;
-            var returnValue = ReadUTF8_64(stream, buffer, ref offset, out r);
+            var returnValue = ReadUTF8_64(stream, buffer, ref offset, out ulong r);
             result = (long)r;
             return returnValue;
         }
@@ -158,7 +157,7 @@ namespace Media.Codecs.Flac
         internal static bool ReadUTF8_64(System.IO.Stream stream, byte[] buffer, ref int offset, out ulong result)
         {
             //Should be ReadBits(8);
-            uint x = (uint)(buffer[++offset] = (byte)stream.ReadByte());
+            uint x = buffer[++offset] = (byte)stream.ReadByte();
             ulong v;
             int i;
 
@@ -223,8 +222,7 @@ namespace Media.Codecs.Flac
 
         internal static bool ReadUTF8_32Signed(System.IO.Stream stream, byte[] buffer, ref int offset, out int result)
         {
-            uint r;
-            var returnValue = ReadUTF8_32(stream, buffer, ref offset, out r);
+            var returnValue = ReadUTF8_32(stream, buffer, ref offset, out uint r);
             result = (int)r;
             return returnValue;
         }
@@ -495,18 +493,18 @@ namespace Media.Codecs.Flac
         {
             get
             {
-                if (m_MinBlockSize.HasValue) return (int)m_MinBlockSize.Value;
+                if (m_MinBlockSize.HasValue) return m_MinBlockSize.Value;
                 ParseStreamInfo(Root);
-                return (int)m_MinBlockSize.GetValueOrDefault();
+                return m_MinBlockSize.GetValueOrDefault();
             }
         }
         public int MaxBlockSize
         {
             get
             {
-                if (m_MaxBlockSize.HasValue) return (int)m_MaxBlockSize.Value;
+                if (m_MaxBlockSize.HasValue) return m_MaxBlockSize.Value;
                 ParseStreamInfo(Root);
-                return (int)m_MaxBlockSize.GetValueOrDefault();
+                return m_MaxBlockSize.GetValueOrDefault();
             }
         }
 
@@ -514,9 +512,9 @@ namespace Media.Codecs.Flac
         {
             get
             {
-                if (m_MinFrameSize.HasValue) return (int)m_MinFrameSize.Value;
+                if (m_MinFrameSize.HasValue) return m_MinFrameSize.Value;
                 ParseStreamInfo(Root);
-                return (int)m_MinFrameSize.GetValueOrDefault();
+                return m_MinFrameSize.GetValueOrDefault();
             }
         }
 
@@ -524,9 +522,9 @@ namespace Media.Codecs.Flac
         {
             get
             {
-                if (m_MaxFrameSize.HasValue) return (int)m_MaxFrameSize.Value;
+                if (m_MaxFrameSize.HasValue) return m_MaxFrameSize.Value;
                 ParseStreamInfo();
-                return (int)m_MaxFrameSize.GetValueOrDefault();
+                return m_MaxFrameSize.GetValueOrDefault();
             }
         }
 
@@ -696,8 +694,7 @@ namespace Media.Codecs.Flac
                     {
                         lengthSize += 8;
                         Array.Resize(ref identifier, lengthSize + 1);
-                        ulong samplenumber;
-                        if (false == ReadUTF8_64(this, identifier, ref pos, out samplenumber) && samplenumber != ulong.MaxValue)
+                        if (false == ReadUTF8_64(this, identifier, ref pos, out ulong samplenumber) && samplenumber != ulong.MaxValue)
                         {
                             //BlockingStrategy = BlockingStrategy.VariableBlockSize;
                             //SampleNumber = (long)samplenumber;
@@ -709,8 +706,7 @@ namespace Media.Codecs.Flac
                     {
                         lengthSize += 4;
                         Array.Resize(ref identifier, lengthSize + 1);
-                        uint framenumber;
-                        if (false == ReadUTF8_32(this, identifier, ref pos, out framenumber) && framenumber != uint.MaxValue)
+                        if (false == ReadUTF8_32(this, identifier, ref pos, out uint framenumber) && framenumber != uint.MaxValue)
                         {
                             throw new Exception("Invalid UTF8 Framenumber coding.");
                             //BlockingStrategy = BlockingStrategy.FixedBlockSize;
@@ -772,12 +768,12 @@ namespace Media.Codecs.Flac
         /// <param name=nameof(node)>The <see cref="Media.Container.Node"/> to parse</param>
         internal protected void ParseStreamInfo(Container.Node node = null)
         {
-            node = node ?? Root;
+            node ??= Root;
             VerifyBlockType(node, BlockType.StreamInfo);
             //METADATA_BLOCK_STREAMINFO
-            using (System.IO.BinaryReader bi = new System.IO.BinaryReader(node.DataStream))
+            using (System.IO.BinaryReader bi = new(node.DataStream))
             {
-                using (BitReader br = new BitReader(bi.BaseStream, Binary.BitOrder.MostSignificant, IdentifierSize * 2, true))
+                using (BitReader br = new(bi.BaseStream, Binary.BitOrder.MostSignificant, IdentifierSize * 2, true))
                 {
                     m_MinBlockSize = Common.Binary.ReadU16(node.Data, 0, BitConverter.IsLittleEndian); //br.Read16();
 
@@ -808,7 +804,7 @@ namespace Media.Codecs.Flac
         {
             VerifyBlockType(node, BlockType.VorbisComment);
 
-            List<KeyValuePair<string, string>> results = new List<KeyValuePair<string, string>>();
+            List<KeyValuePair<string, string>> results = [];
 
             int offset = 0;
             //https://www.xiph.org/vorbis/doc/v-comment.html
@@ -895,7 +891,7 @@ namespace Media.Codecs.Flac
             VerifyBlockType(node, BlockType.SeekTable);
             ///	NOTE
             /// The number of seek points is implied by the metadata header 'length' field, i.e.equal to length / 18.
-            List<Tuple<long, long, short>> seekPoints = new List<Tuple<long, long, short>>((int)(node is null ? 0 : node.DataSize / 18));
+            List<Tuple<long, long, short>> seekPoints = new((int)(node is null ? 0 : node.DataSize / 18));
             if (node is not null) for (int i = 0, e = (int)node.DataSize; i < e; i += 18)
                 {
                     //Add the decoded seekpoint
@@ -914,7 +910,7 @@ namespace Media.Codecs.Flac
             //return i;
 
             uint result = 0;
-            using (Common.BitReader br = new BitReader(this, Binary.BitOrder.MostSignificant, 32, true))
+            using (Common.BitReader br = new(this, Binary.BitOrder.MostSignificant, 32, true))
             {
                 uint unaryindicator = (uint)(br.Read24() >> 24);
 
@@ -987,7 +983,7 @@ namespace Media.Codecs.Flac
 
             Track lastTrack = null;
 
-            m_Tracks = new List<Track>();
+            m_Tracks = [];
 
             //Loop for K StreamInfo blocks and the single VorbisComment.
             foreach (var block in ReadBlocks(0, Length, BlockType.StreamInfo, BlockType.VorbisComment))

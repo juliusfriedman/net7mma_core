@@ -266,7 +266,7 @@ namespace Media.Rtcp
                 count -= currentSize) //Subtract the currentSize each iteration
             {
                 //Create the report block using the payload data available, should probably Clamp(count, 0, ReportBlock.ReportBlockSize at report block size since the sdes has its own enumerator.
-                using (ReportBlock current = new ReportBlock(new Common.MemorySegment(Payload.Array, localOffset, count)))
+                using (ReportBlock current = new(new Common.MemorySegment(Payload.Array, localOffset, count)))
                 {
                     //Yield the current block
                     yield return current;

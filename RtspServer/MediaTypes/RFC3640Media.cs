@@ -128,7 +128,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 // fill in ADTS data
                 header[0] = byte.MaxValue;
 
-                header[1] = (byte)0xF1; //Sync
+                header[1] = 0xF1; //Sync
 
                 header[2] = (byte)(((profileId - 1) << 6) + (frequencyIndex << 2) + (channelConfiguration >> 2));
 
@@ -143,7 +143,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 //Should be bit rate
 
-                header[6] = (byte)0xFC;
+                header[6] = 0xFC;
 
                 return header;
             }
@@ -356,7 +356,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     if (auxDataSizeBits > 0)
                     {
                         //Calculate the amount of bytes in the auxillary data section
-                        auxLengthBytes = (int)Media.Common.Binary.BitsToBytes(ref auxDataSizeBits);
+                        auxLengthBytes = Media.Common.Binary.BitsToBytes(ref auxDataSizeBits);
 
                         //Ensure the amount of bytes indicated in the section are present in the contained data
                         if (max - offset < auxLengthBytes) throw new InvalidOperationException("Invalid Au Aux Data?");
@@ -581,7 +581,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         else remainsInAu = 0; //Nothing else remains if the auSize indicated was completely contained in the payload
 
                         //Project the data in the payload from the offset of the access unit until its declared size.
-                        using (Common.MemorySegment accessUnitData = new Common.MemorySegment(packet.Payload.Array, Common.Binary.BitsToBytes(ref bitOffset), auSize, false))  //offset, auSize))
+                        using (Common.MemorySegment accessUnitData = new(packet.Payload.Array, Common.Binary.BitsToBytes(ref bitOffset), auSize, false))  //offset, auSize))
                         {
                             //Prepend the accessUnitHeaer with the data to create a depacketized au if the option was specified
                             //var depacketizedAccessUnit = includeAuHeaders ? Enumerable.Concat(accessUnitHeader, accessUnitData) : accessUnitData;

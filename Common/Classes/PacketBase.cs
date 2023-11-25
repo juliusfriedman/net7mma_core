@@ -151,14 +151,14 @@
 
             if (IsDisposed)
             {
-                buffer = default(System.Collections.Generic.IList<System.ArraySegment<byte>>);
+                buffer = default;
 
                 return false;
             }
 
             buffer = new System.Collections.Generic.List<System.ArraySegment<byte>>()
             {
-                new System.ArraySegment<byte>(m_OwnedOctets)
+                new(m_OwnedOctets)
             };
 
             return true;
@@ -314,7 +314,7 @@
     /// </summary>
     class PacketInformation : ClassInterface<IStamp>, Media.Common.Interfaces.InterClass
     {
-        readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<System.Tuple<PacketStamp, Common.MemorySegment>> Queue = new Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<System.Tuple<PacketStamp, MemorySegment>>();
+        readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<System.Tuple<PacketStamp, Common.MemorySegment>> Queue = new();
 
         Class Interfaces.InterClass.Class
         {
@@ -447,14 +447,14 @@
 
             if (IsDisposed)
             {
-                buffer = default(System.Collections.Generic.IList<System.ArraySegment<byte>>);
+                buffer = default;
 
                 return false;
             }
 
             buffer = new System.Collections.Generic.List<System.ArraySegment<byte>>()
             {
-                new System.ArraySegment<byte>(m_OwnedOctets)
+                new(m_OwnedOctets)
             };
 
             return true;
@@ -467,9 +467,8 @@
             {
                 if (IsHolding) return Holding.Length;
 
-                long length;
 
-                Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(m_OwnedOctets, out length);
+                Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(m_OwnedOctets, out long length);
 
                 return length;
             }

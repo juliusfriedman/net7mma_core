@@ -48,7 +48,7 @@ namespace Media.Common.Collections.Generic
         //Used to floor, ciel, etc for the index on int versions
         //int Precision;
 
-        System.Collections.Generic.SortedList<double, object> List = new System.Collections.Generic.SortedList<double, object>();
+        System.Collections.Generic.SortedList<double, object> List = [];
 
         #endregion
 

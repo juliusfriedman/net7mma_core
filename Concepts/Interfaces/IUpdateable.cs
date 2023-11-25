@@ -109,7 +109,7 @@ namespace Media.Common
             return updateable.UpdateTokenSource.Token;
         }
 
-        static readonly System.InvalidOperationException InvalidStateException = new System.InvalidOperationException("Must obtain the CancellationToken from a call to BeginUpdate.");
+        static readonly System.InvalidOperationException InvalidStateException = new("Must obtain the CancellationToken from a call to BeginUpdate.");
 
         public static void EndUpdate(this IUpdateable updateable, System.Threading.CancellationToken token)
         {

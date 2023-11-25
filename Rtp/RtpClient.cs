@@ -266,7 +266,7 @@ namespace Media.Rtp
                 }
 
                 //Create the context
-                TransportContext tc = new TransportContext(dataChannel, controlChannel, RFC3550.Random32(Media.Rtcp.SourceDescriptionReport.PayloadType), mediaDescription,
+                TransportContext tc = new(dataChannel, controlChannel, RFC3550.Random32(Media.Rtcp.SourceDescriptionReport.PayloadType), mediaDescription,
                     rtcpEnabled, remoteSsrc, minimumSequentialpackets);
 
                 int reportReceivingEvery = 0,
@@ -470,7 +470,7 @@ namespace Media.Rtp
             {
                 //Make a Goodbye, indicate version in Client, allow reason for leaving 
                 //Todo add other parties where null with SourceList
-                return new GoodbyeReport(context.Version, ssrc ?? (int)context.SynchronizationSourceIdentifier, sourcesLeaving, reasonForLeaving);
+                return new GoodbyeReport(context.Version, ssrc ?? context.SynchronizationSourceIdentifier, sourcesLeaving, reasonForLeaving);
             }
 
             /* https://github.com/boundary/wireshark/blob/master/epan/dissectors/packet-rtp.c
@@ -505,63 +505,63 @@ namespace Media.Rtp
             public static SendersReport CreateSendersReport(TransportContext context, bool empty, bool rfc = true)
             {
                 //Create a SendersReport
-                SendersReport result = new SendersReport(context.Version, 0, context.SynchronizationSourceIdentifier);
+                SendersReport result = new(context.Version, 0, context.SynchronizationSourceIdentifier)
+                {
+                    //Use the values from the TransportChannel (Use .NtpTimestamp = 0 to Disable NTP)[Should allow for this to be disabled]
+                    //result.NtpTimestamp = context.SenderNtpTimestamp;// + context.SenderNtpOffset;
 
-                //Use the values from the TransportChannel (Use .NtpTimestamp = 0 to Disable NTP)[Should allow for this to be disabled]
-                //result.NtpTimestamp = context.SenderNtpTimestamp;// + context.SenderNtpOffset;
+                    //Might be correct to always sample
+                    //if (result.NtpTimestamp is 0) result.NtpDateTime = DateTime.UtcNow;
 
-                //Might be correct to always sample
-                //if (result.NtpTimestamp is 0) result.NtpDateTime = DateTime.UtcNow;
+                    NtpDateTime = DateTime.UtcNow,//.Add(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);//.AddSeconds(context.NtpOffset);
 
-                result.NtpDateTime = DateTime.UtcNow;//.Add(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);//.AddSeconds(context.NtpOffset);
+                    //result.NtpTimestamp = context.SenderNtpTimestamp;
 
-                //result.NtpTimestamp = context.SenderNtpTimestamp;
+                    //result.NtpDateTime -= (result.NtpDateTime - Ntp.NetworkTimeProtocol.NptTimestampToDateTime(context.SenderNtpTimestamp)).Duration().Add(TimeSpan.FromSeconds(context.SenderTransit));
 
-                //result.NtpDateTime -= (result.NtpDateTime - Ntp.NetworkTimeProtocol.NptTimestampToDateTime(context.SenderNtpTimestamp)).Duration().Add(TimeSpan.FromSeconds(context.SenderTransit));
+                    //Adjust?
+                    //result.NtpTimestamp += context.SenderNtpOffset;
 
-                //Adjust?
-                //result.NtpTimestamp += context.SenderNtpOffset;
+                    //Note that in most cases this timestamp will not be equal to the RTP timestamp in any adjacent data packet.  Rather, it MUST be  calculated from the corresponding NTP timestamp using the relationship between the RTP timestamp counter and real time as maintained by periodically checking the wallclock time at a sampling instant.
+                    ///result.RtpTimestamp = (int)result.NtpTimestamp; //(int)result.NtpTimestamp; //(int)Ntp.NetworkTimeProtocol.DateTimeToNptTimestamp32(result.NtpDateTime); //
 
-                //Note that in most cases this timestamp will not be equal to the RTP timestamp in any adjacent data packet.  Rather, it MUST be  calculated from the corresponding NTP timestamp using the relationship between the RTP timestamp counter and real time as maintained by periodically checking the wallclock time at a sampling instant.
-                ///result.RtpTimestamp = (int)result.NtpTimestamp; //(int)result.NtpTimestamp; //(int)Ntp.NetworkTimeProtocol.DateTimeToNptTimestamp32(result.NtpDateTime); //
+                    //new Media.Sdp.Lines.RtpMapLine(context.MediaDescription.RtpMapLine).ClockRate / 10, would need rate information from the sdp... 
 
-                //new Media.Sdp.Lines.RtpMapLine(context.MediaDescription.RtpMapLine).ClockRate / 10, would need rate information from the sdp... 
+                    RtpTimestamp = context.SenderRtpTimestamp,/// - context.SenderRtpTimestampCounter;// + context.SendSequenceNumber & 5;//(int)(context.SenderNtpOffset >> 32); context.MediaDescription.RtpMapLine
 
-                result.RtpTimestamp = context.SenderRtpTimestamp;/// - context.SenderRtpTimestampCounter;// + context.SendSequenceNumber & 5;//(int)(context.SenderNtpOffset >> 32); context.MediaDescription.RtpMapLine
+                    //if (context.MediaDescription.MediaType == Sdp.MediaType.audio) result.RtpTimestamp -= context.SenderRtpTimestamp;
 
-                //if (context.MediaDescription.MediaType == Sdp.MediaType.audio) result.RtpTimestamp -= context.SenderRtpTimestamp;
+                    //result.RtpTimestamp -= context.SenderRtpTimestamp - result.RtpTimestamp;
 
-                //result.RtpTimestamp -= context.SenderRtpTimestamp - result.RtpTimestamp;
+                    // result.RtpTimestamp += (int)Media.Ntp.NetworkTimeProtocol.DateTimeToNptTimestamp32(result.NtpDateTime) - result.RtpTimestamp;
 
-                // result.RtpTimestamp += (int)Media.Ntp.NetworkTimeProtocol.DateTimeToNptTimestamp32(result.NtpDateTime) - result.RtpTimestamp;
+                    //result.RtpTimestamp = (int)(result.NtpTimestamp >> 32);                
 
-                //result.RtpTimestamp = (int)(result.NtpTimestamp >> 32);                
+                    //If no data has been received this value will be 0, set it to the expected value based on the time.
+                    //if (result.RtpTimestamp is 0)
+                    //result.RtpTimestamp = (int)(context.SenderRtpTimestamp - result.RtpTimestamp);
 
-                //If no data has been received this value will be 0, set it to the expected value based on the time.
-                //if (result.RtpTimestamp is 0)
-                //result.RtpTimestamp = (int)(context.SenderRtpTimestamp - result.RtpTimestamp);
+                    //result.RtpTimestamp += result.RtpTimestamp % 9000;
 
-                //result.RtpTimestamp += result.RtpTimestamp % 9000;
-
-                //Counters
-                result.SendersOctetCount = (int)(rfc ? context.RfcRtpBytesSent : context.RtpBytesSent);
-                result.SendersPacketCount = (int)context.RtpPacketsSent;
+                    //Counters
+                    SendersOctetCount = (int)(rfc ? context.RfcRtpBytesSent : context.RtpBytesSent),
+                    SendersPacketCount = (int)context.RtpPacketsSent
+                };
 
                 //Ensure there is a remote party
                 //If source blocks are included include them and calculate their statistics
                 // && context.InDiscovery is false && context.IsValid) ??
                 if (empty is false && context.InDiscovery is false && context.IsValid) //&& context.TotalPacketsSent > 0)
                 {
-                    uint fraction, lost;
 
-                    RFC3550.CalculateFractionAndLoss(ref context.RtpBaseSeq, ref context.RtpMaxSeq, ref context.RtpSeqCycles, ref context.ValidRtpPacketsReceived, ref context.RtpReceivedPrior, ref context.RtpExpectedPrior, out fraction, out lost);
+                    RFC3550.CalculateFractionAndLoss(ref context.RtpBaseSeq, ref context.RtpMaxSeq, ref context.RtpSeqCycles, ref context.ValidRtpPacketsReceived, ref context.RtpReceivedPrior, ref context.RtpExpectedPrior, out uint fraction, out uint lost);
 
                     //0.0000152587890625 = 1/65536
 
                     //Todo, should be extended highest sequence number
 
                     //Create the ReportBlock based off the statistics of the last RtpPacket and last SendersReport
-                    result.Add(new ReportBlock((int)context.RemoteSynchronizationSourceIdentifier,
+                    result.Add(new ReportBlock(context.RemoteSynchronizationSourceIdentifier,
                         (byte)fraction,
                         (int)lost,
                         context.SendSequenceNumber,
@@ -584,14 +584,13 @@ namespace Media.Rtp
             /// <returns>The report created</returns>
             public static ReceiversReport CreateReceiversReport(TransportContext context, bool empty)
             {
-                ReceiversReport result = new ReceiversReport(context.Version, 0, context.SynchronizationSourceIdentifier);
+                ReceiversReport result = new(context.Version, 0, context.SynchronizationSourceIdentifier);
 
                 //if (false == empty && false == context.InDiscovery && context.IsValid && context.TotalRtpPacketsReceieved > 0)
                 if (empty is false && context.TotalRtpPacketsReceieved > 0)
                 {
-                    uint fraction, lost;
 
-                    RFC3550.CalculateFractionAndLoss(ref context.RtpBaseSeq, ref context.RtpMaxSeq, ref context.RtpSeqCycles, ref context.ValidRtpPacketsReceived, ref context.RtpReceivedPrior, ref context.RtpExpectedPrior, out fraction, out lost);
+                    RFC3550.CalculateFractionAndLoss(ref context.RtpBaseSeq, ref context.RtpMaxSeq, ref context.RtpSeqCycles, ref context.ValidRtpPacketsReceived, ref context.RtpReceivedPrior, ref context.RtpExpectedPrior, out uint fraction, out uint lost);
 
                     //Should be similar to the following
                     //uint dslr = Ntp.NetworkTimeProtocol.DateTimeToNptTimestamp32(DateTime.UtcNow - context.LastRtcpReportReceived);
@@ -600,7 +599,7 @@ namespace Media.Rtp
                     //Todo, should be extended highest sequence number
 
                     //Create the ReportBlock based off the statistics of the last RtpPacket and last SendersReport
-                    result.Add(new ReportBlock((int)context.RemoteSynchronizationSourceIdentifier,
+                    result.Add(new ReportBlock(context.RemoteSynchronizationSourceIdentifier,
                         (byte)fraction,
                         (int)lost,
                         context.RecieveSequenceNumber,
@@ -626,7 +625,7 @@ namespace Media.Rtp
                 return new SourceDescriptionReport(context.Version)
                 { 
                     //Todo, should have ip / port etc to identify multiple connections to the same server
-                    new Media.Rtcp.SourceDescriptionReport.SourceDescriptionChunk((int)context.SynchronizationSourceIdentifier, Common.Extensions.Linq.LinqExtensions.Yield((cName ?? Media.Rtcp.SourceDescriptionReport.SourceDescriptionItem.CName)).Concat(items ?? System.Linq.Enumerable.Empty<Media.Rtcp.SourceDescriptionReport.SourceDescriptionItem>()))
+                    new Media.Rtcp.SourceDescriptionReport.SourceDescriptionChunk(context.SynchronizationSourceIdentifier, Common.Extensions.Linq.LinqExtensions.Yield((cName ?? Media.Rtcp.SourceDescriptionReport.SourceDescriptionItem.CName)).Concat(items ?? System.Linq.Enumerable.Empty<Media.Rtcp.SourceDescriptionReport.SourceDescriptionItem>()))
                 };
 
                 //Tool, etc when bandwidth permits? also should vary each time?
@@ -734,7 +733,7 @@ namespace Media.Rtp
             /// </summary>
             //public readonly List<int> Recievers = new List<int>();
 
-            internal readonly HashSet<System.Net.IPAddress> MulticastGroups = new HashSet<IPAddress>();
+            internal readonly HashSet<System.Net.IPAddress> MulticastGroups = [];
 
             #endregion
 
@@ -2062,10 +2061,10 @@ namespace Media.Rtp
                         ContextMemory.Count > 0)
                     {
                         //Ensure the receive buffer size is updated for that context.
-                        Media.Common.ISocketReferenceExtensions.SetReceiveBufferSize(((Media.Common.ISocketReference)this), RecieveBufferSizeMultiplier * ContextMemory.Count);
+                        Media.Common.ISocketReferenceExtensions.SetReceiveBufferSize(this, RecieveBufferSizeMultiplier * ContextMemory.Count);
 
                         //Ensure the send buffer size if updated for that context.
-                        Media.Common.ISocketReferenceExtensions.SetSendBufferSize(((Media.Common.ISocketReference)this), SendBufferSizeMultiplier * ContextMemory.Count);
+                        Media.Common.ISocketReferenceExtensions.SetSendBufferSize(this, SendBufferSizeMultiplier * ContextMemory.Count);
                     }
                 }
                 catch
@@ -2098,7 +2097,7 @@ namespace Media.Rtp
 
                 RemoteRtp = remote;
 
-                Socket socket = new Socket(local.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                Socket socket = new(local.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
                 ConfigureSocket(socket);
 
@@ -2120,7 +2119,7 @@ namespace Media.Rtp
                 if (duplexed.ExclusiveAddressUse is false)
                 {
                     //Duplicte the socket's type for a Rtcp socket.
-                    Socket rtcpSocket = new Socket(duplexed.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    Socket rtcpSocket = new(duplexed.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
                     //Configure the duplicate
                     ConfigureSocket(rtcpSocket);
@@ -2499,7 +2498,7 @@ namespace Media.Rtp
                 packetVersion = packet.Version;
 
             //See if there is a context for the remote party. (Allows 0)
-            transportContext = transportContext ?? GetContextBySourceId(partyId);
+            transportContext ??= GetContextBySourceId(partyId);
 
             //Todo, if PersistIncomingRtcpReports reports then Clone the packet and store it on the context.
 
@@ -2554,7 +2553,7 @@ namespace Media.Rtp
                 if (payloadType == ReceiversReport.PayloadType)
                 {
                     //Create a wrapper around the packet to access the ReportBlocks
-                    using (ReceiversReport rr = new ReceiversReport(packet, false))
+                    using (ReceiversReport rr = new(packet, false))
                     {
                         //Iterate each contained ReportBlock
                         foreach (IReportBlock reportBlock in rr)
@@ -2602,7 +2601,7 @@ namespace Media.Rtp
                 else if (payloadType == GoodbyeReport.PayloadType) //The GoodbyeReport report from a remote party
                 {
                     //Create a wrapper around the packet to access the source list
-                    using (GoodbyeReport gb = new GoodbyeReport(packet, false))
+                    using (GoodbyeReport gb = new(packet, false))
                     {
                         using (RFC3550.SourceList sourceList = gb.GetSourceList())
                         {
@@ -2635,7 +2634,7 @@ namespace Media.Rtp
                 else if (payloadType == SendersReport.PayloadType) //The senders report from a remote party                    
                 {
                     //Create a wrapper around the packet to access the ReportBlocks
-                    using (SendersReport sr = new SendersReport(packet, false))
+                    using (SendersReport sr = new(packet, false))
                     {
                         //Take the timestamp as the senders
                         transportContext.NtpTimestamp = sr.NtpTimestamp;
@@ -2711,7 +2710,7 @@ namespace Media.Rtp
 
                     //Raise an event for the 'RtpPacket' received. 
                     //Todo Use the existing reference / memory of the RtcpPacket) or provide an implicit way to cast 
-                    using (RtpPacket rtp = new RtpPacket(packet.Prepare().ToArray(), 0))
+                    using (RtpPacket rtp = new(packet.Prepare().ToArray(), 0))
                     {
                         OnRtpPacketReceieved(rtp, transportContext);
                     }
@@ -4143,7 +4142,7 @@ namespace Media.Rtp
         /// <summary>
         /// Gets or sets the list of additional items which will be sent with the SourceDescriptionReport if AverageRtcpBandwidthExceeded is not exceeded.
         /// </summary>
-        public readonly List<SourceDescriptionReport.SourceDescriptionItem> AdditionalSourceDescriptionItems = new List<SourceDescriptionReport.SourceDescriptionItem>();
+        public readonly List<SourceDescriptionReport.SourceDescriptionItem> AdditionalSourceDescriptionItems = [];
 
         /// <summary>
         /// Gets a value indicating if the RtpClient is not disposed and the WorkerThread is alive.

@@ -152,10 +152,9 @@ namespace Media.Codec
             //Create the array
             Components = new MediaComponent[components];
 
-            long length;
 
             //Validate the length of the id array
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(componentIds, out length) || length < components) throw new System.ArgumentException("componentIds", "Must have the amount of elements indicated by 'components'");
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(componentIds, out long length) || length < components) throw new System.ArgumentException("componentIds", "Must have the amount of elements indicated by 'components'");
 
             //Calculate the size in bits of all components
             Size = bitsPerComponent * components;
@@ -183,10 +182,9 @@ namespace Media.Codec
             //Create the array
             Components = new MediaComponent[components];
 
-            long length;
 
             //Validate the sizes array
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(componentSizes, out length) || length < components) throw new System.ArgumentException("componentSizes", "Must have the amount of elements indicated by 'components'");
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(componentSizes, out long length) || length < components) throw new System.ArgumentException("componentSizes", "Must have the amount of elements indicated by 'components'");
 
             //Validate the length of the id array
             if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(componentIds, out length) || length < components) throw new System.ArgumentException("componentIds", "Must have the amount of elements indicated by 'components'");
@@ -272,7 +270,7 @@ namespace Media.Codec
         {
             get
             {
-                System.Collections.Generic.HashSet<byte> idSet = new System.Collections.Generic.HashSet<byte>();
+                System.Collections.Generic.HashSet<byte> idSet = [];
 
                 //Iterate each component
                 for (int i = 0; i < Components.Length; ++i)

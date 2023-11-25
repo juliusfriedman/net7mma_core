@@ -53,7 +53,7 @@ namespace Media.Rtp
         /// <summary>
         /// One id may correspond to multiple context's, determine how context will find rtpClient if needed.
         /// </summary>
-        internal Common.Collections.Generic.ConcurrentThesaurus<int, RtpClient.TransportContext> SourceTable = new Common.Collections.Generic.ConcurrentThesaurus<int, RtpClient.TransportContext>();
+        internal Common.Collections.Generic.ConcurrentThesaurus<int, RtpClient.TransportContext> SourceTable = [];
 
         //Offer ; Answer 
 

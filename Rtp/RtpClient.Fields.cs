@@ -59,23 +59,23 @@ namespace Media.Rtp
         //Collection to handle the dispatch of events.
         //Notes that Collections.Concurrent.Queue may be better suited for this in production until the ConcurrentLinkedQueue has been thoroughly engineered and tested.
         //The context, the item, final, recieved
-        readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<(RtpClient.TransportContext Context, Common.BaseDisposable Packet, bool Final, bool Received)> m_EventData = new Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<(RtpClient.TransportContext Context, Common.BaseDisposable Packet, bool Final, bool Received)>();
+        readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<(RtpClient.TransportContext Context, Common.BaseDisposable Packet, bool Final, bool Received)> m_EventData = new();
 
         //Todo, LinkedQueue and Clock.
-        readonly System.Threading.ManualResetEventSlim m_EventReady = new System.Threading.ManualResetEventSlim(false, 100); //should be caluclated based on memory and speed. SpinWait uses 10 as a default.
+        readonly System.Threading.ManualResetEventSlim m_EventReady = new(false, 100); //should be caluclated based on memory and speed. SpinWait uses 10 as a default.
 
         //Outgoing Packets, Not a Queue because you cant re-order a Queue (in place) and you can't take a range from the Queue (in a single operation)
         //Those things aside, ordering is not performed here and only single packets are iterated and would eliminate the need for removing after the operation.
         //Benchmark with Queue and ConcurrentQueue and a custom impl.
         //IPacket could also work in an implementaiton which sends evertyhing in the outgoing list at one time.
-        internal readonly System.Collections.Generic.List<RtpPacket> m_OutgoingRtpPackets = new System.Collections.Generic.List<RtpPacket>();
-        internal readonly System.Collections.Generic.List<Rtcp.RtcpPacket> m_OutgoingRtcpPackets = new System.Collections.Generic.List<Rtcp.RtcpPacket>();
+        internal readonly System.Collections.Generic.List<RtpPacket> m_OutgoingRtpPackets = [];
+        internal readonly System.Collections.Generic.List<Rtcp.RtcpPacket> m_OutgoingRtcpPackets = [];
 
         /// <summary>
         /// Any TransportContext's which are added go here for removal. This list can never be null.
         /// </summary>
         /// <notes>This possibly should be sorted but sorted lists cannot contain duplicates.</notes>
-        internal readonly System.Collections.Generic.List<TransportContext> TransportContexts = new System.Collections.Generic.List<TransportContext>();
+        internal readonly System.Collections.Generic.List<TransportContext> TransportContexts = [];
 
         /// <summary>
         /// Unique id assigned to each RtpClient instance. (16 byte overhead)

@@ -214,7 +214,7 @@ namespace Media.Http
         /// <summary>
         /// Any additional headers which may be required by the RtspClient.
         /// </summary>
-        public readonly Dictionary<string, string> AdditionalHeaders = new Dictionary<string, string>();
+        public readonly Dictionary<string, string> AdditionalHeaders = [];
 
         string m_UserAgent = "ASTI HTTP Client", m_AuthorizationHeader;
 
@@ -224,7 +224,7 @@ namespace Media.Http
         public Common.ILogging Logger;
 
         //Really needs to be Connection or session will also need to refer to a connection
-        internal Dictionary<string, HttpSession> m_Sessions = new Dictionary<string, HttpSession>();
+        internal Dictionary<string, HttpSession> m_Sessions = [];
 
         /// <summary>
         /// The inital, previous and current location's of the HttpClient
@@ -434,7 +434,7 @@ namespace Media.Http
                     if (m_CurrentLocation != value)
                     {
 
-                        if (m_InitialLocation is null) m_InitialLocation = value;
+                        m_InitialLocation ??= value;
 
                         //Backup the current location, (needs history list?)
                         m_PreviousLocation = m_CurrentLocation;
@@ -725,9 +725,8 @@ namespace Media.Http
         /// <returns></returns>
         public HttpMessage SendHttpMessage(HttpMessage message)
         {
-            SocketError error;
 
-            return SendHttpMessage(message, out error);
+            return SendHttpMessage(message, out SocketError error);
         }
 
         public HttpMessage SendHttpMessage(HttpMessage message, out SocketError error, bool useClientProtocolVersion = true, bool hasResponse = true, int attempts = 0)
@@ -1697,7 +1696,7 @@ namespace Media.Http
             unchecked
             {
                 //Validate the data received
-                HttpMessage message = new HttpMessage(data, offset, length);
+                HttpMessage message = new(data, offset, length);
 
                 //Determine what to do with the interleaved message
                 switch (message.MessageType)

@@ -4,7 +4,7 @@ namespace Media.Concepts.Classes
 {
     public abstract class Bus : Common.SuppressedFinalizerDisposable
     {
-        public readonly Timer Clock = new Timer(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);
+        public readonly Timer Clock = new(Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick);
 
         public Bus() : base(false) { Clock.Start(); }
     }
@@ -13,7 +13,7 @@ namespace Media.Concepts.Classes
     {
         long FrequencyHz, Maximum, End;
 
-        readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<byte[]> Input = new Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<byte[]>(), Output = new Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<byte[]>();
+        readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<byte[]> Input = new(), Output = new();
 
         readonly double m_Bias;
 
@@ -149,7 +149,7 @@ namespace Media.UnitTests
         {
             System.Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(1))
+            using (Media.Concepts.Classes.ClockedBus cb = new(1))
             {
                 while (false == System.Console.KeyAvailable || System.Console.ReadKey(true).Key == ConsoleKey.Q)
                 {
@@ -166,7 +166,7 @@ namespace Media.UnitTests
         {
             System.Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(5))
+            using (Media.Concepts.Classes.ClockedBus cb = new(5))
             {
                 while (false == System.Console.KeyAvailable || System.Console.ReadKey(true).Key == ConsoleKey.Q)
                 {
@@ -182,7 +182,7 @@ namespace Media.UnitTests
         {
             System.Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(7))
+            using (Media.Concepts.Classes.ClockedBus cb = new(7))
             {
                 while (false == System.Console.KeyAvailable)
                 {
@@ -202,7 +202,7 @@ namespace Media.UnitTests
 
             int times = 1;
 
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(times))
+            using (Media.Concepts.Classes.ClockedBus cb = new(times))
             {
                 while (false == System.Console.KeyAvailable) for (int i = 2, e = 21; i < e; ++i)
                     {
@@ -236,7 +236,7 @@ namespace Media.UnitTests
 
             int times = 2;
 
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(times))
+            using (Media.Concepts.Classes.ClockedBus cb = new(times))
             {
                 while (false == System.Console.KeyAvailable) for (int i = 0, e = System.Console.WindowWidth; i < e; ++i)
                         for (int j = 0, z = System.Console.WindowHeight; j < z; ++j)
@@ -267,7 +267,7 @@ namespace Media.UnitTests
         {
             System.Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(10))
+            using (Media.Concepts.Classes.ClockedBus cb = new(10))
             {
                 while (false == System.Console.KeyAvailable || System.Console.ReadKey(true).Key == ConsoleKey.Q)
                 {
@@ -286,7 +286,7 @@ namespace Media.UnitTests
         {
             System.Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(175))
+            using (Media.Concepts.Classes.ClockedBus cb = new(175))
             {
                 while (false == System.Console.KeyAvailable)
                 {
@@ -303,7 +303,7 @@ namespace Media.UnitTests
 
         public void TestForSevenHundredMegaHertz()
         {
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(700))
+            using (Media.Concepts.Classes.ClockedBus cb = new(700))
             {
                 while (false == System.Console.KeyAvailable)
                 {
@@ -322,7 +322,7 @@ namespace Media.UnitTests
         {
             System.Console.WriteLine(System.Reflection.MethodBase.GetCurrentMethod().Name);
 
-            using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(1000))
+            using (Media.Concepts.Classes.ClockedBus cb = new(1000))
             {
                 while (false == System.Console.KeyAvailable)
                 {

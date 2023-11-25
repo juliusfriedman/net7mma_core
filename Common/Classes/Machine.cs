@@ -151,9 +151,9 @@ namespace Media.Common
             /// <returns></returns>
             public static byte[] ShiftLeft(byte[] value, int bitcount)
             {
-                int length = value.Length, bits, rem;
+                int length = value.Length, bits;
 
-                bits = System.Math.DivRem(bitcount, Common.Binary.BitsPerByte, out rem);
+                bits = System.Math.DivRem(bitcount, Common.Binary.BitsPerByte, out int rem);
 
                 byte[] temp = new byte[length];
 
@@ -186,9 +186,9 @@ namespace Media.Common
             /// <returns></returns>
             public static byte[] ShiftRight(byte[] value, int bitcount)
             {
-                int length = value.Length, bits, rem;
+                int length = value.Length, bits;
 
-                bits = System.Math.DivRem(bitcount, Common.Binary.BitsPerByte, out rem);
+                bits = System.Math.DivRem(bitcount, Common.Binary.BitsPerByte, out int rem);
 
                 byte[] temp = new byte[length];
 
@@ -507,7 +507,7 @@ namespace Media.Common
 #if false == NATIVE
 
             //Use 128 as a value and get the memory associated with the integer representation of the value
-            byte[] memoryOf = System.BitConverter.GetBytes((int)Binary.SedecimBitSize); //Use ByteOrder
+            byte[] memoryOf = System.BitConverter.GetBytes(Binary.SedecimBitSize); //Use ByteOrder
 #endif
             //Iterate the memory looking for a non 0 value
             for (int offset = 0, endOffset = Media.Common.Binary.BytesPerInteger; offset < endOffset; ++offset)
@@ -625,10 +625,10 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int TwosComplement(ref int value) { unchecked { return (~value + Common.Binary.One); } }
 
-        public static int SignedMagnitude(int value) { int sign; return SignedMagnitude(ref value, out sign); }
+        public static int SignedMagnitude(int value) { return SignedMagnitude(ref value, out int sign); }
 
         [System.CLSCompliant(false)]
-        public static int SignedMagnitude(ref int value) { int sign; return SignedMagnitude(ref value, out sign); }
+        public static int SignedMagnitude(ref int value) { return SignedMagnitude(ref value, out int sign); }
 
         /// <summary>
         /// Converts value to twos complement if the value is negitive and returns the signed magnitude representation outputs the sign

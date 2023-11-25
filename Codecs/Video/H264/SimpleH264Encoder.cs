@@ -67,7 +67,7 @@ public class SimpleH264Encoder : IDisposable
         {
             int lrc = 0;
 
-            uint lmask = (uint)Math.Pow((uint)2, (uint)nNumbit);
+            uint lmask = (uint)Math.Pow(2, (uint)nNumbit);
             if ((lval & lmask) > 0)
             {
                 lrc = 1;
@@ -99,11 +99,11 @@ public class SimpleH264Encoder : IDisposable
             //Change the bit
             if (nVal > 0)
             {
-                nValTmp = (nValTmp | (int)Math.Pow(2, nBitPosInByte));
+                nValTmp |= (int)Math.Pow(2, nBitPosInByte);
             }
             else
             {
-                nValTmp = (nValTmp & ~((int)Math.Pow(2, nBitPosInByte)));
+                nValTmp &= ~((int)Math.Pow(2, nBitPosInByte));
             }
 
             //Save the new byte value to the buffer
@@ -138,7 +138,7 @@ public class SimpleH264Encoder : IDisposable
             //Add all byte to buffer
             m_buffer[nBytePos] = (byte)nVal;
 
-            m_nLastbitinbuffer = m_nLastbitinbuffer + 8;
+            m_nLastbitinbuffer += 8;
         }
 
         //! Save all buffer to file
@@ -228,8 +228,8 @@ public class SimpleH264Encoder : IDisposable
                 //Move the index
                 m_buffer[m_nStartingbyte] = 0;
                 m_nStartingbyte++;
-                m_nStartingbyte = m_nStartingbyte % (24 / 8);
-                m_nLastbitinbuffer = m_nLastbitinbuffer - 8;
+                m_nStartingbyte %= (24 / 8);
+                m_nLastbitinbuffer -= 8;
             }
         }
 
@@ -360,7 +360,7 @@ public class SimpleH264Encoder : IDisposable
             int nr = m_nLastbitinbuffer % 8;
             if ((nr % 8) != 0)
             {
-                m_nLastbitinbuffer = m_nLastbitinbuffer + (8 - nr);
+                m_nLastbitinbuffer += (8 - nr);
             }
         }
 
@@ -466,12 +466,12 @@ public class SimpleH264Encoder : IDisposable
             public uint nCmbwidth; //!< Y (Crominance) macroblock width in pixels
             public uint nCmbheight; //!< Y (Crominance) macroblock height in pixels
 
-            public YUV420p_frame_t yuv420pframe = new YUV420p_frame_t(); //!< Pointer to current frame data
+            public YUV420p_frame_t yuv420pframe = new(); //!< Pointer to current frame data
             public uint nyuv420pframesize; //!< Size in bytes of yuv420pframe
         }
 
         /*! The frame var*/
-        private frame_t m_frame = new frame_t();
+        private frame_t m_frame = new();
 
         /*! The frames per second var*/
         private uint m_nFps;
@@ -897,7 +897,7 @@ public class SimpleH264Encoder : IDisposable
     uint width = 0;
     uint height = 0;
 
-    readonly List<byte> nal = new List<byte>();
+    readonly List<byte> nal = [];
 
     #endregion
 

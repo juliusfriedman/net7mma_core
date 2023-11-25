@@ -517,14 +517,13 @@ namespace Media.Rtp
 
             if (m_IListSockets)
             {
-                System.Collections.Generic.List<System.ArraySegment<byte>> buffers = new();
-                System.Collections.Generic.IList<System.ArraySegment<byte>> packetBuffers;
+                System.Collections.Generic.List<System.ArraySegment<byte>> buffers = [];
 
                 //Try to get the buffer for each packet
                 foreach (Rtcp.RtcpPacket packet in packets)
                 {
                     //If we can
-                    if (packet.TryGetBuffers(out packetBuffers))
+                    if (packet.TryGetBuffers(out System.Collections.Generic.IList<System.ArraySegment<byte>> packetBuffers))
                     {
                         //Add those buffers
                         buffers.AddRange(packetBuffers);
@@ -687,9 +686,8 @@ namespace Media.Rtp
 
         internal /*virtual*/ bool SendReports(TransportContext context, bool force = false)
         {
-            System.Net.Sockets.SocketError error;
 
-            return SendReports(context, out error, force);
+            return SendReports(context, out System.Net.Sockets.SocketError error, force);
         }
 
         //Todo, remove virtuals or not.
@@ -953,9 +951,8 @@ namespace Media.Rtp
 
         public void SendRtpFrame(RtpFrame frame, int? ssrc = null)
         {
-            System.Net.Sockets.SocketError error;
 
-            SendRtpFrame(frame, out error, ssrc);
+            SendRtpFrame(frame, out System.Net.Sockets.SocketError error, ssrc);
         }
 
         /// <summary>
@@ -973,7 +970,7 @@ namespace Media.Rtp
 
             //TransportContext transportContext = ssrc.HasValue ? GetContextBySourceId(ssrc.Value) : GetContextForPacket(packet);
 
-            if (transportContext is null) transportContext = ssrc.HasValue ? GetContextBySourceId(ssrc.Value) : GetContextForPacket(packet);
+            transportContext ??= ssrc.HasValue ? GetContextBySourceId(ssrc.Value) : GetContextForPacket(packet);
 
             //If we don't have an transportContext to send on or the transportContext has not been identified
             if (Common.IDisposedExtensions.IsNullOrDisposed(transportContext) || transportContext.IsActive is false) return 0;
@@ -998,7 +995,6 @@ namespace Media.Rtp
 
             if (m_IListSockets)
             {
-                System.Collections.Generic.IList<System.ArraySegment<byte>> buffers;
 
                 if (ssrc.HasValue && false.Equals(ssrc.Value.Equals(packet.SynchronizationSourceIdentifier)))
                 {
@@ -1010,7 +1006,7 @@ namespace Media.Rtp
                 }
 
                 //If we can get the buffer from the packet
-                if (packet.TryGetBuffers(out buffers))
+                if (packet.TryGetBuffers(out System.Collections.Generic.IList<System.ArraySegment<byte>> buffers))
                 {
                     //If Tcp
                     if ((int)transportContext.RtpSocket.ProtocolType == (int)System.Net.Sockets.ProtocolType.Tcp)
@@ -1079,18 +1075,16 @@ namespace Media.Rtp
 
         public int SendRtpPacket(RtpPacket packet, int? ssrc = null)
         {
-            System.Net.Sockets.SocketError error;
 
             TransportContext transportContext = ssrc.HasValue ? GetContextBySourceId(ssrc.Value) : GetContextForPacket(packet);
 
-            return SendRtpPacket(packet, transportContext, out error, ssrc);
+            return SendRtpPacket(packet, transportContext, out System.Net.Sockets.SocketError error, ssrc);
         }
 
         public int SendRtpPacket(RtpPacket packet, TransportContext context)
         {
-            System.Net.Sockets.SocketError error;
 
-            return SendRtpPacket(packet, context, out error);
+            return SendRtpPacket(packet, context, out System.Net.Sockets.SocketError error);
         }
 
         #endregion
@@ -1279,7 +1273,7 @@ namespace Media.Rtp
                 #region Verify Packet Headers
 
                 //Use CommonHeaderBits on the data after the Interleaved Frame Header
-                using RFC3550.CommonHeaderBits commonHeaderBits = new RFC3550.CommonHeaderBits(buffer, offset + sessionRequired);
+                using RFC3550.CommonHeaderBits commonHeaderBits = new(buffer, offset + sessionRequired);
 
                 //Try to mark the packetas compatible and find a context
                 bool incompatible = false, expectRtcp = false, expectRtp = false;
@@ -1300,7 +1294,7 @@ namespace Media.Rtp
                     }
 
                     //use a rtcp header to extract the information in the packet
-                    using Rtcp.RtcpHeader rtcpHeader = new Rtcp.RtcpHeader(buffer, offset + sessionRequired);
+                    using Rtcp.RtcpHeader rtcpHeader = new(buffer, offset + sessionRequired);
 
                     //Get the length in 'words' (by adding one)
                     //A length of 0 means 1 word
@@ -1342,7 +1336,7 @@ namespace Media.Rtp
                         //the context by payload type is null is not discovering the identity check the SSRC.
                         if (Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextByPayloadType(commonHeaderBits.RtpPayloadType)) is false && context.InDiscovery is false)
                         {
-                            using Rtp.RtpHeader rtpHeader = new RtpHeader(buffer, offset + sessionRequired);
+                            using Rtp.RtpHeader rtpHeader = new(buffer, offset + sessionRequired);
 
                             expectRtp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextBySourceId(rtpHeader.SynchronizationSourceIdentifier))) ? false : true;
                         }
@@ -1758,7 +1752,7 @@ namespace Media.Rtp
                             #region Verify Packet Headers
 
                             //Use CommonHeaderBits on the data after the Interleaved Frame Header
-                            using (RFC3550.CommonHeaderBits common = new RFC3550.CommonHeaderBits(buffer, offset + sessionRequired))
+                            using (RFC3550.CommonHeaderBits common = new(buffer, offset + sessionRequired))
                             {
                                 //Check the version...
                                 incompatible = common.Version.Equals(relevent.Version) is false;
@@ -1805,7 +1799,7 @@ namespace Media.Rtp
                                         }
 
                                         //use a rtcp header to extract the information in the packet
-                                        using (Rtcp.RtcpHeader header = new Rtcp.RtcpHeader(buffer, offset + sessionRequired))
+                                        using (Rtcp.RtcpHeader header = new(buffer, offset + sessionRequired))
                                         {
                                             //Get the length in 'words' (by adding one)
                                             //A length of 0 means 1 word
@@ -1849,7 +1843,7 @@ namespace Media.Rtp
                                         //the context by payload type is null is not discovering the identity check the SSRC.
                                         if (Common.IDisposedExtensions.IsNullOrDisposed(GetContextByPayloadType(common.RtpPayloadType)) is false /*&& relevent.InDiscovery is false*/)
                                         {
-                                            using (Rtp.RtpHeader header = new RtpHeader(buffer, offset + sessionRequired))
+                                            using (Rtp.RtpHeader header = new(buffer, offset + sessionRequired))
                                             {
                                                 //The context was obtained by the frameChannel
                                                 //Use the SSRC to determine where it should be handled.
@@ -2120,7 +2114,7 @@ namespace Media.Rtp
                 // 209 - 223 is cited in the above as well as below
                 //RTCP packet types in the ranges 1-191 and 224-254 SHOULD only be used when other values have been exhausted.
 
-                using Media.RFC3550.CommonHeaderBits header = new Media.RFC3550.CommonHeaderBits(memory);
+                using Media.RFC3550.CommonHeaderBits header = new(memory);
 
                 //Could ensure version here to make reception more unified.
 
@@ -2161,7 +2155,7 @@ namespace Media.Rtp
             if (parseRtp && mRemaining >= RtpHeader.Length)
             {
                 //Use the packet to call Dispose.
-                using RtpPacket rtp = new RtpPacket(memory.Array, offset + index, Common.Binary.Min(ref mRemaining, ref count));
+                using RtpPacket rtp = new(memory.Array, offset + index, Common.Binary.Min(ref mRemaining, ref count));
 
                 //Handle the packet further  (could indicate truncated here)
                 HandleIncomingRtpPacket(this, rtp);

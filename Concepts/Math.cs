@@ -229,8 +229,7 @@ namespace Media.Concepts.Math
         /// <inheritdoc cref="Divide(long, ulong, long, out long, out long, bool)"/>
         public static long Divide(long aH, ulong aL, long b, out long remainder, bool roundDown)
         {
-            long resultHi;
-            ulong resultLo = Divide(aH, aL, b, out resultHi, out remainder, roundDown);
+            ulong resultLo = Divide(aH, aL, b, out long resultHi, out remainder, roundDown);
             if (resultHi == ((long)resultLo >= 0 ? 0 : -1L))
                 return (long)resultLo;
             else
@@ -276,8 +275,7 @@ namespace Media.Concepts.Math
             if ((negativeB = (b < 0)))
                 b = -b;
 
-            ulong resultHiU, remainderU;
-            ulong resultLo = Divide((ulong)aH, aL, (ulong)b, out resultHiU, out remainderU);
+            ulong resultLo = Divide((ulong)aH, aL, (ulong)b, out ulong resultHiU, out ulong remainderU);
             resultHi = (long)resultHiU;
             if (negativeA == negativeB)
             {
@@ -715,16 +713,14 @@ namespace Media.Concepts.Math
         /// <inheritdoc cref="MulShift(int,int,int)"/>
         public static long MulShift(long a, long mulBy, int shiftBy)
         {
-            long rH;
-            ulong rL = Multiply(a, mulBy, out rH);
+            ulong rL = Multiply(a, mulBy, out long rH);
             ShiftRight(rH, ref rL, shiftBy);
             return (long)rL;
         }
         /// <inheritdoc cref="MulShift(int,int,int)"/>
         public static ulong MulShift(ulong a, ulong mulBy, int shiftBy)
         {
-            ulong rH;
-            ulong rL = Multiply(a, mulBy, out rH);
+            ulong rL = Multiply(a, mulBy, out ulong rH);
             ShiftRight(rH, ref rL, shiftBy);
             return rL;
         }
@@ -764,8 +760,7 @@ namespace Media.Concepts.Math
         /// </remarks>
         public static long MulDiv(long a, long mulBy, long divBy, out long remainder)
         {
-            long mH;
-            ulong mL = Multiply(a, mulBy, out mH);
+            ulong mL = Multiply(a, mulBy, out long mH);
             return Divide(mH, mL, divBy, out remainder, false);
         }
         /// <inheritdoc cref="MulDiv(int,int,int,out int)"/>
@@ -774,8 +769,7 @@ namespace Media.Concepts.Math
         /// (ulong.MaxValue).</remarks>
         public static ulong MulDiv(ulong a, ulong mulBy, ulong divBy, out ulong remainder)
         {
-            ulong mH;
-            ulong mL = Multiply(a, mulBy, out mH);
+            ulong mL = Multiply(a, mulBy, out ulong mH);
             return Divide(mH, mL, divBy, out remainder);
         }
 
@@ -792,16 +786,14 @@ namespace Media.Concepts.Math
         /// <inheritdoc cref="MulDiv(long, long, long, out long)"/>
         public static long MulDiv(long a, long mulBy, long divBy)
         {
-            long mH, remainder;
-            ulong mL = Multiply(a, mulBy, out mH);
-            return Divide(mH, mL, divBy, out remainder, false);
+            ulong mL = Multiply(a, mulBy, out long mH);
+            return Divide(mH, mL, divBy, out long remainder, false);
         }
         /// <inheritdoc cref="MulDiv(ulong, ulong, ulong, out ulong)"/>
         public static ulong MulDiv(ulong a, ulong mulBy, ulong divBy)
         {
-            ulong mH, remainder;
-            ulong mL = Multiply(a, mulBy, out mH);
-            return Divide(mH, mL, divBy, out remainder);
+            ulong mL = Multiply(a, mulBy, out ulong mH);
+            return Divide(mH, mL, divBy, out ulong remainder);
         }
         #endregion
 

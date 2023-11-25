@@ -23,7 +23,7 @@ namespace Media.Sip
         {
             if (string.IsNullOrWhiteSpace(data)) throw new InvalidOperationException("data cannot be null or whitespace.");
 
-            if (encoding is null) encoding = SipMessage.DefaultEncoding;
+            encoding ??= SipMessage.DefaultEncoding;
 
             return new SipMessage(encoding.GetBytes(data), 0, encoding);
         }

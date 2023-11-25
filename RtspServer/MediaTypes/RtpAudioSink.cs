@@ -13,7 +13,7 @@ namespace Media.Rtsp.Server.MediaTypes;
 
 public class RtpAudioSink : RtpSink
 {
-    internal protected readonly ConcurrentLinkedQueueSlim<RtpFrame> Frames = new ConcurrentLinkedQueueSlim<RtpFrame>();
+    internal protected readonly ConcurrentLinkedQueueSlim<RtpFrame> Frames = new();
 
     internal protected int m_FramesSentCounter = 0;
 
@@ -78,9 +78,8 @@ public class RtpAudioSink : RtpSink
                     }
 
                     //Dequeue a frame or die
-                    RtpFrame frame;
 
-                    if (!Frames.TryDequeue(out frame) || IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) continue;
+                    if (!Frames.TryDequeue(out RtpFrame frame) || IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) continue;
 
                     //Get the transportChannel for the packet
                     RtpClient.TransportContext transportContext = RtpClient.GetContextBySourceId(frame.SynchronizationSourceIdentifier);
@@ -103,7 +102,7 @@ public class RtpAudioSink : RtpSink
                         //Take all the packet from the frame                            
                         IEnumerable<RtpPacket> packets = frame;
 
-                        if (Loop) frame = new RtpFrame();
+                        if (Loop) frame = [];
 
                         //Iterate each packet in the frame
                         foreach (RtpPacket packet in packets)
@@ -286,10 +285,10 @@ public class RtpAudioSink : RtpSink
         transportContext.RtpTimestamp += ClockRate;
 
         //Create a frame
-        RtpFrame newFrame = new RtpFrame();
+        RtpFrame newFrame = [];
 
         //Create the packet
-        RtpPacket newPacket = new RtpPacket(length + RtpHeader.Length)
+        RtpPacket newPacket = new(length + RtpHeader.Length)
         {
             Version = transportContext.Version,
             SynchronizationSourceIdentifier = SourceId,

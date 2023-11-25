@@ -129,7 +129,7 @@ namespace Media.UnitTests
                     int RandomId = RFC3550.Random32(Utility.Random.Next());
 
                     //Create a SendersReport instance using the specified options.
-                    using (Media.Rtcp.ReceiversReport p = new Rtcp.ReceiversReport(0, PaddingCounter, ReportBlockCounter, RandomId))
+                    using (Media.Rtcp.ReceiversReport p = new(0, PaddingCounter, ReportBlockCounter, RandomId))
                     {
                         //Check IsComplete
                         System.Diagnostics.Debug.Assert(p.IsComplete, "IsComplete must be true.");
@@ -160,7 +160,7 @@ namespace Media.UnitTests
                         }
 
                         //Serialize and Deserialize and verify again
-                        using (Rtcp.ReceiversReport s = new Rtcp.ReceiversReport(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0), true))
+                        using (Rtcp.ReceiversReport s = new(new Rtcp.RtcpPacket(p.Prepare().ToArray(), 0), true))
                         {
                             //Check SynchronizationSourceIdentifier
                             System.Diagnostics.Debug.Assert(s.SynchronizationSourceIdentifier == p.SynchronizationSourceIdentifier, "Unexpected SynchronizationSourceIdentifier");

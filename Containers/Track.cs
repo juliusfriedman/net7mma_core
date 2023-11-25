@@ -144,7 +144,7 @@ namespace Media.Container
         /// Used to store data segments which are realted to the track (such as undecoded bit stream data or raw samples) and assist with buffering.
         /// This stream is typically populated by the <see cref="Node.Master"/> after a call to <see cref="IMediaContainer.GetSample(Track, out TimeSpan)"/>.        
         /// </summary>
-        public Common.SegmentStream DataStream = new Common.SegmentStream();
+        public Common.SegmentStream DataStream = new();
 
         //Possibly add time to sample table implementation
 

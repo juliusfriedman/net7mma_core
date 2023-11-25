@@ -127,7 +127,7 @@ namespace Media.Common.Interfaces
                             OnRealization();
                         }
 
-                        System.Tuple<int, ulong, ulong> stack = new System.Tuple<int, ulong, ulong>((int)state, left, right);
+                        System.Tuple<int, ulong, ulong> stack = new((int)state, left, right);
 
                         OnUnknownData(ref stack);
 

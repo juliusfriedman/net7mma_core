@@ -79,7 +79,7 @@ namespace Media.Common.Extensions.Socket
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         public static System.Net.Sockets.Socket ReservePort(System.Net.Sockets.SocketType socketType, System.Net.Sockets.ProtocolType protocol, System.Net.IPAddress localIp, int port)
         {
-            System.Net.Sockets.Socket result = new System.Net.Sockets.Socket(localIp.AddressFamily, socketType, protocol);
+            System.Net.Sockets.Socket result = new(localIp.AddressFamily, socketType, protocol);
 
             Media.Common.Extensions.Socket.SocketExtensions.EnableAddressReuse(result);
 
@@ -263,9 +263,8 @@ namespace Media.Common.Extensions.Socket
 
         public static System.Net.IPAddress GetFirstUnicastIPAddress(System.Net.Sockets.AddressFamily addressFamily)
         {
-            System.Net.NetworkInformation.NetworkInterface networkInterface;
 
-            return GetFirstUnicastIPAddress(addressFamily, out networkInterface);
+            return GetFirstUnicastIPAddress(addressFamily, out System.Net.NetworkInformation.NetworkInterface networkInterface);
         }
 
         public static System.Net.IPAddress GetFirstUnicastIPAddress(System.Net.Sockets.AddressFamily addressFamily, out System.Net.NetworkInformation.NetworkInterface networkInterface)
@@ -344,9 +343,8 @@ namespace Media.Common.Extensions.Socket
 
         public static System.Net.IPAddress GetFirstMulticastIPAddress(System.Net.Sockets.AddressFamily addressFamily)
         {
-            System.Net.NetworkInformation.NetworkInterface networkInterface;
 
-            return GetFirstMulticastIPAddress(addressFamily, out networkInterface);
+            return GetFirstMulticastIPAddress(addressFamily, out System.Net.NetworkInformation.NetworkInterface networkInterface);
         }
 
         public static void SetMulticastTimeToLive(this System.Net.Sockets.Socket socket, int ttl)
@@ -1202,9 +1200,9 @@ namespace Media.Common.Extensions.Socket
             if (amount <= 0) return amount;
 
             //To hold what was received and the maximum amount to receive
-            int totalReceived = 0, max, attempt = 0, justReceived = 0;
+            int totalReceived = 0, attempt = 0, justReceived = 0;
 
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer, out max)) return 0;
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer, out int max)) return 0;
 
             //Account for the offset
             max -= offset;

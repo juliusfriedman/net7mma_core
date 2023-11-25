@@ -321,32 +321,32 @@ namespace Media.Common
         /// <summary>
         /// An exception utilized when a value larger than allowed is utilized in a quarter bit.
         /// </summary>
-        public static OverflowException QuarterBitOverflow = new OverflowException("Quarter bits cannot store values larger than 3.");
+        public static OverflowException QuarterBitOverflow = new("Quarter bits cannot store values larger than 3.");
 
         /// <summary>
         /// An exception utilized when a value larger than allowed is utilized in a nibble.
         /// </summary>
-        public static OverflowException NybbleOverflow = new OverflowException("Cannot store a number higher than 15 in a nybble.");
+        public static OverflowException NybbleOverflow = new("Cannot store a number higher than 15 in a nybble.");
 
         /// <summary>
         /// An exception utilized when a value larger than allowed is utilized in a 5 bit field.
         /// </summary>
-        public static OverflowException FiveBitOverflow = new OverflowException("Cannot store a number higher than 31 in 5 bits.");
+        public static OverflowException FiveBitOverflow = new("Cannot store a number higher than 31 in 5 bits.");
 
         /// <summary>
         /// An exception utilized when a value larger than allowed is utilized in a 6 bit field.
         /// </summary>
-        public static OverflowException SixBitOverflow = new OverflowException("Cannot store a number higher than 63 in 6 bits.");
+        public static OverflowException SixBitOverflow = new("Cannot store a number higher than 63 in 6 bits.");
 
         /// <summary>
         /// An exception utilized when a value larger than allowed is utilized in a 7 bit field (sbyte.MaxValue is not utilized because of the dependence on the value of sign bit)
         /// </summary>
-        public static OverflowException SevenBitOverflow = new OverflowException("Cannot store a number higher than 127 in a 7 bit structure.");
+        public static OverflowException SevenBitOverflow = new("Cannot store a number higher than 127 in a 7 bit structure.");
 
         /// <summary>
         /// An exception utilized when a value larger than allowed is utilized in a 16 bit field.
         /// </summary>
-        public static OverflowException SixteenBitOverflow = new OverflowException("Cannot store a number higher than 65535 in a 16 bit structue.");
+        public static OverflowException SixteenBitOverflow = new("Cannot store a number higher than 65535 in a 16 bit structue.");
 
         /// <summary>
         /// A string which contains has a format in which all Overflow exceptions Read by the ReadBinaryOverflowException function utilize.
@@ -946,7 +946,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int HammingWeight(ref int value)
         {
-            value = value - ((value >> 1) & 0x55555555);
+            value -= ((value >> 1) & 0x55555555);
 
             value = (value & 0x33333333) + ((value >> 2) & 0x33333333);
 
@@ -981,26 +981,26 @@ namespace Media.Common
 
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static int BitsSet(ref int i) { return Binary.GetBytes(i).Sum(b => BitsSet(b)); }
+        public static int BitsSet(ref int i) { return Binary.GetBytes(i).Sum(BitsSet); }
 
         public static int BitsSet(int i) { return BitsSet(ref i); }
 
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static int BitsSet(ref uint i) { return Binary.GetBytes(i).Sum(b => BitsSet(b)); }
+        public static int BitsSet(ref uint i) { return Binary.GetBytes(i).Sum(BitsSet); }
 
         [CLSCompliant(false)]
         public static int BitsSet(uint i) { return BitsSet(ref i); }
 
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static int BitsUnSet(ref int i) { return QuadrupleBitSize - Binary.GetBytes(i).Sum(b => BitsSet(b)); }
+        public static int BitsUnSet(ref int i) { return QuadrupleBitSize - Binary.GetBytes(i).Sum(BitsSet); }
 
         public static int BitsUnSet(int i) { return BitsUnSet(ref i); }
 
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static int BitsUnSet(ref uint i) { return QuadrupleBitSize - Binary.GetBytes(i).Sum(b => BitsSet(b)); }
+        public static int BitsUnSet(ref uint i) { return QuadrupleBitSize - Binary.GetBytes(i).Sum(BitsSet); }
 
         [CLSCompliant(false)]
         public static int BitsUnSet(uint i) { return BitsUnSet(ref i); }
@@ -1533,7 +1533,7 @@ namespace Media.Common
 
                 // Bits masked at the end of the number (because we don't want to read up until the full last byte)
                 byte maskedBitCount = (byte)((byteCount << Common.Binary.Tres) - totalBitCount); // (byteCount * 8) - totalBitCount
-                result = result >> maskedBitCount;
+                result >>= maskedBitCount;
 
                 return result;
             }
@@ -1600,7 +1600,7 @@ namespace Media.Common
 
                 // Bits masked at the end of the number (because we don't want to read up until the full last byte)
                 byte maskedBitCount = (byte)((byteCount << Common.Binary.Tres) - totalBitCount); // (byteCount * 8) - totalBitCount
-                result = result >> maskedBitCount;
+                result >>= maskedBitCount;
 
                 return result;
             }
@@ -2098,7 +2098,7 @@ namespace Media.Common
                         //if (enumerator.Current > byte.MinValue)
                         //{
                         //Combine the result of the calculation of the calulated value with the binary representation.
-                        value |= (uint)enumerator.Current * sign;
+                        value |= enumerator.Current * sign;
                         //}
 
                         //Move the sign shift left
@@ -3255,7 +3255,7 @@ namespace Media.UnitTests
             byte[] testBytes = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7 };
             bool reverse = false;
             //Test reading each byte
-            using (BitReader br = new BitReader(testBytes, Binary.SystemBitOrder, 0, 0, false))
+            using (BitReader br = new(testBytes, Binary.SystemBitOrder, 0, 0, false))
             {
                 //Fill the buffer so Peek can be used.
                 if (br.Fill() != br.BitPosition) throw new Exception("BitPosition");
@@ -3296,7 +3296,7 @@ namespace Media.UnitTests
             //Test Writing and Reading.
             for (ulong i = 0, r = 0; i <= ushort.MaxValue; ++i, r = (ulong)Binary.Reverse64((long)i))
             {
-                using (BitWriter bw = new BitWriter(testBytes, true, Common.Binary.SystemBitOrder))
+                using (BitWriter bw = new(testBytes, true, Common.Binary.SystemBitOrder))
                 {
                     //Write the value
                     bw.WriteU64(i, reverse);
@@ -3308,7 +3308,7 @@ namespace Media.UnitTests
                     if (bw.BaseStream.Position != Common.Binary.Zero) throw new Exception("BitWriter - Position");
 
                     //Use a BitReader to read the value
-                    using (BitReader br = new BitReader(bw.BaseStream))
+                    using (BitReader br = new(bw.BaseStream))
                     {
                         ulong result = (ulong)br.Read64(reverse);
                         if (result != i) throw new Exception(String.Format("BitWriter.Read64 - Expected:{0}, Found:{1}", i, result));
@@ -3326,7 +3326,7 @@ namespace Media.UnitTests
                     bw.WriteU64(i, reverse);
 
                     //Test reading that same value at various positions
-                    using (BitReader br = new BitReader(bw.BaseStream, testBytes.Length))
+                    using (BitReader br = new(bw.BaseStream, testBytes.Length))
                     {
                         br.BaseStream.Position = Common.Binary.Zero;
                         ulong result = (ulong)br.Read64(reverse);

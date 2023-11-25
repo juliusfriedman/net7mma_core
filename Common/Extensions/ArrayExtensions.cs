@@ -56,9 +56,8 @@ namespace Media.Common.Extensions.Array
 
         public static bool Contains<T>(this System.Array a, T t)
         {
-            int index;
 
-            return Contains(a, t, out index);
+            return Contains(a, t, out int index);
         }
 
         //4.6 Has System.Array.Empty<T>

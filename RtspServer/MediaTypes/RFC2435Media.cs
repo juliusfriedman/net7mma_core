@@ -264,7 +264,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 }
 
                 //assign the tables present
-                tables = new Common.MemorySegment(packet.Payload.Array, offset, (int)Length);
+                tables = new Common.MemorySegment(packet.Payload.Array, offset, Length);
 
                 //indicate success
                 return true;
@@ -294,9 +294,9 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 Media.Common.Binary.Write16(data, 2, Common.Binary.IsLittleEndian, count);
 
-                if (f) data[2] = (byte)((1) << 7);
+                if (f) data[2] = (1) << 7;
 
-                if (l) data[2] |= (byte)((1) << 6);
+                if (l) data[2] |= (1) << 6;
 
                 return data;
             }
@@ -320,9 +320,9 @@ namespace Media.Rtsp.Server.MediaTypes
             /// <returns></returns>
             public static byte[] CreateRtpJpegHeader(int typeSpecific, long fragmentOffset, int jpegType, int quality, int width, int height, byte[] dri, byte precisionTable, List<byte> qTables)
             {
-                List<byte> RtpJpegHeader = new List<byte>();
-
-                /*
+                List<byte> RtpJpegHeader =
+                [
+                    /*
                 0                   1                   2                   3
                 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -332,9 +332,10 @@ namespace Media.Rtsp.Server.MediaTypes
                 +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
                 */
 
-                //Type specific
-                //http://tools.ietf.org/search/rfc2435#section-3.1.1
-                RtpJpegHeader.Add((byte)typeSpecific);
+                    //Type specific
+                    //http://tools.ietf.org/search/rfc2435#section-3.1.1
+                    (byte)typeSpecific,
+                ];
 
                 //Three byte fragment offset
                 //http://tools.ietf.org/search/rfc2435#section-3.1.2
@@ -409,7 +410,7 @@ namespace Media.Rtsp.Server.MediaTypes
             /// <returns></returns>
             internal static byte[] CreateJPEGHeaders(byte typeSpec, byte jpegType, uint width, uint height, Common.MemorySegment tables, byte precision, ushort dri) //bool jfif
             {
-                List<byte> result = new List<byte>();
+                List<byte> result = [];
 
                 int tablesCount = tables.Count;
 
@@ -596,7 +597,7 @@ namespace Media.Rtsp.Server.MediaTypes
             }
 
 
-            static readonly Common.MemorySegment EndOfInformationMarkerSegment = new Common.MemorySegment(new byte[] { Media.Codecs.Image.Jpeg.Markers.Prefix, Media.Codecs.Image.Jpeg.Markers.EndOfInformation });
+            static readonly Common.MemorySegment EndOfInformationMarkerSegment = new(new byte[] { Media.Codecs.Image.Jpeg.Markers.Prefix, Media.Codecs.Image.Jpeg.Markers.EndOfInformation });
 
             // The default 'luma' and 'chroma' quantizer tables, in zigzag order and energy reduced
             static byte[] defaultQuantizers = new byte[]
@@ -707,7 +708,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 //Following the RFC @ Appendix A https://tools.ietf.org/html/rfc2435#appendix-A
 
                 //This implementation differs slightly in that it uses the text from 4.2 literally.
-                int q = (Q <= 50 ? (int)(5000 / factor) : 200 - factor * 2);
+                int q = (Q <= 50 ? 5000 / factor : 200 - factor * 2);
 
                 //Create 2 quantization tables from Seed quality value using the RFC quantizers
                 int tableSize = (precision > 0 ? 128 : 64);/// quantizer.Length / 2;
@@ -1051,14 +1052,16 @@ namespace Media.Rtsp.Server.MediaTypes
             //Todo, move to JPEG.
             internal static byte[] CreateHuffmanTableMarker(byte[] codeLens, byte[] symbols, int tableNo, int tableClass)
             {
-                List<byte> result = new List<byte>();
-                result.Add(Media.Codecs.Image.Jpeg.Markers.Prefix);
-                result.Add(Media.Codecs.Image.Jpeg.Markers.HuffmanTable);
-                result.Add(0x00); //Legnth
-                result.Add((byte)(3 + codeLens.Length + symbols.Length)); //Length
-                result.Add((byte)((tableClass << 4) | tableNo)); //Id
-                result.AddRange(codeLens);//Data
-                result.AddRange(symbols);
+                List<byte> result =
+                [
+                    Media.Codecs.Image.Jpeg.Markers.Prefix,
+                    Media.Codecs.Image.Jpeg.Markers.HuffmanTable,
+                    0x00, //Legnth
+                    (byte)(3 + codeLens.Length + symbols.Length), //Length
+                    (byte)((tableClass << 4) | tableNo), //Id
+                    .. codeLens,//Data
+                    .. symbols,
+                ];
                 return result.ToArray();
             }
 
@@ -1124,15 +1127,15 @@ namespace Media.Rtsp.Server.MediaTypes
                 }
 
                 //Save the image in Jpeg format and request the PropertyItems from the Jpeg format of the Image
-                using (System.IO.MemoryStream temp = new System.IO.MemoryStream(image.Height * image.Width * 3))
+                using (System.IO.MemoryStream temp = new(image.Height * image.Width * 3))
                 {
 
                     //Create Encoder Parameters for the Jpeg Encoder
-                    System.Drawing.Imaging.EncoderParameters parameters = new System.Drawing.Imaging.EncoderParameters(3);
+                    System.Drawing.Imaging.EncoderParameters parameters = new(3);
 
                     // Set the quality (Quality == 100 on GDI is prone to decoding errors?) It doesn't accept values > 100.
                     //This should probably clamp to 99
-                    parameters.Param[0] = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, (long)(imageQuality >= 100 ? 100 : imageQuality));
+                    parameters.Param[0] = new System.Drawing.Imaging.EncoderParameter(System.Drawing.Imaging.Encoder.Quality, imageQuality >= 100 ? 100 : imageQuality);
 
                     //Set the interlacing
                     if (interlaced)
@@ -1203,7 +1206,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 //Coeffecients which make up the sub-bands used to decode blocks of the jpeg encoded data
                 //The lengths of each sub-band is given by the bit in the RtpJpegPrecisionTable 1 = 16 bit (128 byte), 0 = 8 bit (64 byte)
-                List<byte> QuantizationTables = new List<byte>();
+                List<byte> QuantizationTables = [];
 
                 //Stream must support Seeking?
                 //Should be in Container.JPEG?
@@ -1236,7 +1239,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 //The current packet consists of a RtpHeader and the encoded payload.
                 //The encoded payload of the first packet will consist of the RtpJpegHeader (8 octets) as well as QTables and coeffecient data releated to the image.
-                Rtp.RtpPacket currentPacket = new Rtp.RtpPacket((streamLength < bytesPerPacket ? (int)streamLength : bytesPerPacket))
+                Rtp.RtpPacket currentPacket = new((streamLength < bytesPerPacket ? (int)streamLength : bytesPerPacket))
                 {
                     Version = 2,
 
@@ -1684,7 +1687,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                             lastPacket = true;
 
                                             //Set the last bit of the Dri Header in the last packet if Ri > 0 (first bit is still set! might have to unset??)
-                                            if (Ri > 0) RtpJpegHeader[10] ^= (byte)(1 << 7);
+                                            if (Ri > 0) RtpJpegHeader[10] ^= 1 << 7;
                                         }
 
 
@@ -2158,9 +2161,9 @@ namespace Media.Rtsp.Server.MediaTypes
                             }
 
                             //Copy the tables present
-                            tables = new Common.MemorySegment(packet.Payload.Array, offset, (int)Length);
+                            tables = new Common.MemorySegment(packet.Payload.Array, offset, Length);
 
-                            offset += (int)Length;
+                            offset += Length;
                         }
                     }
                     else // Create them from the given Quality parameter
@@ -2194,7 +2197,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 if (/*packet.SequenceNumber == m_HighestSequenceNumber &&*/ packet.Marker)
                 {
                     //Get the last value added if depacketized was not already assigned.
-                    if (depacketized is null) depacketized = Depacketized.Values.Last();
+                    depacketized ??= Depacketized.Values.Last();
 
                     //Check for EOI and if note present Add it at the FragmentOffset + 1
                     if (depacketized.Array[depacketized.Count - 2] != Media.Codecs.Image.Jpeg.Markers.EndOfInformation)
@@ -2277,7 +2280,7 @@ namespace Media.Rtsp.Server.MediaTypes
         //use 50 because that is where the rfc quality was based on
         public const int DefaultQuality = 50;
 
-        static List<string> SupportedImageFormats = new List<string>(System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders().SelectMany(enc => enc.FilenameExtension.Split((char)Common.ASCII.SemiColon)).Select(s => s.Substring(1).ToLowerInvariant()));
+        static List<string> SupportedImageFormats = new(System.Drawing.Imaging.ImageCodecInfo.GetImageEncoders().SelectMany(enc => enc.FilenameExtension.Split((char)Common.ASCII.SemiColon)).Select(s => s.Substring(1).ToLowerInvariant()));
 
         protected System.IO.FileSystemWatcher m_Watcher;
 
@@ -2291,9 +2294,11 @@ namespace Media.Rtsp.Server.MediaTypes
             //If we were told to watch and given a directory and the directory exists then make a FileSystemWatcher
             if (System.IO.Directory.Exists(base.Source.LocalPath) && watch)
             {
-                m_Watcher = new System.IO.FileSystemWatcher(base.Source.LocalPath);
-                m_Watcher.EnableRaisingEvents = true;
-                m_Watcher.NotifyFilter = System.IO.NotifyFilters.CreationTime;
+                m_Watcher = new System.IO.FileSystemWatcher(base.Source.LocalPath)
+                {
+                    EnableRaisingEvents = true,
+                    NotifyFilter = System.IO.NotifyFilters.CreationTime
+                };
                 m_Watcher.Created += FileCreated;
             }
         }
@@ -2504,14 +2509,14 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 Height = image.Height;
 
-                Frames.Enqueue(RFC2435Media.RFC2435Frame.Packetize(image, Quality, Interlaced, (int)SourceId));
+                Frames.Enqueue(RFC2435Media.RFC2435Frame.Packetize(image, Quality, Interlaced, SourceId));
             }
             else if (image.Width != Width || image.Height != Height)
             {
                 using (var thumb = image.GetThumbnailImage(Width, Height, null, IntPtr.Zero))
                 {
                     //could give timestamp here
-                    Frames.Enqueue(RFC2435Media.RFC2435Frame.Packetize(thumb, Quality, Interlaced, (int)SourceId));
+                    Frames.Enqueue(RFC2435Media.RFC2435Frame.Packetize(thumb, Quality, Interlaced, SourceId));
                 }
             }
         }
@@ -2541,9 +2546,8 @@ namespace Media.Rtsp.Server.MediaTypes
                         //int period = (clockRate * 1000 / m_Frames.Count);
 
                         //Dequeue a frame or die
-                        Rtp.RtpFrame frame;
 
-                        if (!Frames.TryDequeue(out frame) || Common.IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) continue;
+                        if (!Frames.TryDequeue(out Rtp.RtpFrame frame) || Common.IDisposedExtensions.IsNullOrDisposed(frame) || frame.IsEmpty) continue;
 
                         //Get the transportChannel for the packet
                         Rtp.RtpClient.TransportContext transportContext = RtpClient.GetContextBySourceId(frame.SynchronizationSourceIdentifier);
@@ -2559,7 +2563,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                             transportContext.RtpTimestamp += ClockRate * 1000;
 
-                            frame.Timestamp = (int)transportContext.RtpTimestamp;
+                            frame.Timestamp = transportContext.RtpTimestamp;
 
                             //Fire a frame changed event manually
                             if (RtpClient.FrameChangedEventsEnabled) RtpClient.OnRtpFrameChanged(frame, transportContext, true);
@@ -2572,7 +2576,7 @@ namespace Media.Rtsp.Server.MediaTypes
                             //Clear the frame to reset sequence numbers (could add method to do this)
                             //frame.RemoveAllPackets();
 
-                            if (Loop) frame = new Rtp.RtpFrame();
+                            if (Loop) frame = [];
 
                             //Todo, should provide access to property or provide a method which updates this property.
 
@@ -2753,13 +2757,13 @@ namespace Media.UnitTests
                 };
 
             //Allocate the frame to hold the packets
-            using (Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame restartFrame = new Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame())
+            using (Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame restartFrame = [])
             {
                 //Build a RtpFrame from the jpegPackets
                 foreach (byte[] binary in jpegPackets)
                 {
                     //Create a temporary packet
-                    Media.Rtp.RtpPacket interpreted = new Media.Rtp.RtpPacket(binary, 0);
+                    Media.Rtp.RtpPacket interpreted = new(binary, 0);
                     restartFrame.Add(interpreted);
                 }
 
@@ -2791,13 +2795,13 @@ namespace Media.UnitTests
                 };
 
             //Allocate the frame to hold the packets
-            using (Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame restartFrame = new Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame())
+            using (Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame restartFrame = [])
             {
                 //Build a RtpFrame from the jpegPackets
                 foreach (byte[] binary in jpegPackets)
                 {
                     //Create a temporary packet
-                    Media.Rtp.RtpPacket interpreted = new Media.Rtp.RtpPacket(binary, 0);
+                    Media.Rtp.RtpPacket interpreted = new(binary, 0);
                     restartFrame.Add(interpreted);
                 }
 
@@ -2831,13 +2835,13 @@ namespace Media.UnitTests
                 };
 
             //Allocate the frame to hold the packets
-            using (Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame restartFrame = new Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame())
+            using (Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame restartFrame = [])
             {
                 //Build a RtpFrame from the jpegPackets
                 foreach (byte[] binary in jpegPackets)
                 {
                     //Create a temporary packet
-                    Media.Rtp.RtpPacket interpreted = new Media.Rtp.RtpPacket(binary, 0);
+                    Media.Rtp.RtpPacket interpreted = new(binary, 0);
                     try { restartFrame.Add(interpreted); }
                     catch { break; } //jpegPackets has more then one frame
                 }
@@ -2875,13 +2879,13 @@ namespace Media.UnitTests
                 };
 
             //Allocate the frame to hold the packets
-            using (Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame restartFrame = new Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame())
+            using (Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame restartFrame = [])
             {
                 //Build a RtpFrame from the jpegPackets
                 foreach (byte[] binary in jpegPackets)
                 {
                     //Create a temporary packet
-                    Media.Rtp.RtpPacket interpreted = new Media.Rtp.RtpPacket(binary, 0);
+                    Media.Rtp.RtpPacket interpreted = new(binary, 0);
                     try { restartFrame.Add(interpreted); }
                     catch { break; } //jpegPackets has more then one frame
                 }
@@ -2971,7 +2975,7 @@ namespace Media.UnitTests
                 }
 
                 //Create a JpegFrame from existing RtpPackets
-                using (Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame x = new Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame())
+                using (Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame x = [])
                 {
                     foreach (Media.Rtp.RtpPacket p in f) x.Add(p);
 
@@ -3003,7 +3007,7 @@ namespace Media.UnitTests
                 }
 
                 //Create a JpegFrame from existing RtpPackets
-                using (Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame x = new Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame())
+                using (Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame x = [])
                 {
                     foreach (Media.Rtp.RtpPacket p in f) x.Add(p);
 
@@ -3034,7 +3038,7 @@ namespace Media.UnitTests
                 }
 
                 //Create a JpegFrame from existing RtpPackets
-                using (Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame x = new Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame())
+                using (Media.Rtsp.Server.MediaTypes.RFC2435Media.RFC2435Frame x = [])
                 {
                     foreach (Media.Rtp.RtpPacket p in f) x.Add(p);
 

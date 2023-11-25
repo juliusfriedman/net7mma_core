@@ -150,7 +150,7 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         void System.Collections.Generic.ICollection<T>.Clear()
         {
-            m_Source = default(T);
+            m_Source = default;
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -486,7 +486,7 @@ namespace Media.Concepts.Classes
         T[] m_Source; // = Unsafe.ReinterpretCast<System.Array, T[]>(m_Header.m_Array);
 
         //All implict reads are stored here for whatever purpose necessary, especially if they need to be sychronized or their header has been modified.
-        internal readonly System.Collections.Generic.HashSet<T[]> Allocations = new System.Collections.Generic.HashSet<T[]>();
+        internal readonly System.Collections.Generic.HashSet<T[]> Allocations = [];
 
         #endregion        
 
@@ -910,7 +910,7 @@ namespace Media.Concepts.Classes
             if (false == m_Header.IsNullObject()) System.Array.Clear(m_Source, m_Header.m_Offset, m_Header.m_Length);
             else
             {
-                T toWrite = default(T); for (int i = 0; i < m_Header.m_Length; ++i) UnsafeWrite(this, i, ref toWrite);
+                T toWrite = default; for (int i = 0; i < m_Header.m_Length; ++i) UnsafeWrite(this, i, ref toWrite);
             }
         }
 
@@ -1359,7 +1359,7 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
-            return (int)(m_Source.GetHashCode() ^ m_Header.m_Offset ^ m_Header.m_Length);
+            return m_Source.GetHashCode() ^ m_Header.m_Offset ^ m_Header.m_Length;
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1469,7 +1469,7 @@ namespace Media.UnitTests
     {
         public void TestArrayLike()
         {
-            Concepts.Classes.ArrayElement<int> intTest = new Concepts.Classes.ArrayElement<int>(0);
+            Concepts.Classes.ArrayElement<int> intTest = new(0);
 
             //Implicit conversion to array
             int[] array = intTest;
@@ -1488,7 +1488,7 @@ namespace Media.UnitTests
 
             System.Console.WriteLine(array[0]);
 
-            System.Collections.Generic.IList<int> iList = intTest as System.Collections.Generic.IList<int>;
+            System.Collections.Generic.IList<int> iList = intTest;
 
             System.Console.WriteLine(iList[0]);
 
@@ -1504,12 +1504,12 @@ namespace Media.UnitTests
 
             string testString = "test";
 
-            Concepts.Classes.ArrayElement<string> stringTest = new Concepts.Classes.ArrayElement<string>(testString);
+            Concepts.Classes.ArrayElement<string> stringTest = new(testString);
 
             //Weird but doesn't crash
             //System.Console.WriteLine(stringTest);
 
-            System.Collections.Generic.IList<string> iListS = stringTest as System.Collections.Generic.IList<string>;
+            System.Collections.Generic.IList<string> iListS = stringTest;
 
             if (false == System.Object.ReferenceEquals(iListS[0], testString)) throw new System.Exception("Not ReferenceEqual");
 
@@ -1535,19 +1535,18 @@ namespace Media.UnitTests
             int offset = 2, count = 2;
 
             //Populate this as a test which should not cause an System.Array allocation.
-            System.ArraySegment<byte> arraySegmentByte;
 
             //Make the generic array.
-            Concepts.Classes.Array<int> genericArray = new Concepts.Classes.Array<int>(clrArray, offset, count);
+            Concepts.Classes.Array<int> genericArray = new(clrArray, offset, count);
 
             //Take 16 bytes from the 4 integer values in the array above.
-            Concepts.Classes.Array<byte> testBytez = new Concepts.Classes.Array<byte>(clrArray, 0, 16);
+            Concepts.Classes.Array<byte> testBytez = new(clrArray, 0, 16);
 
             //Print the bytes
             foreach (var byteType in testBytez) System.Console.WriteLine("byteType: " + byteType);
 
             //Cast the generic array as Ilist
-            System.Collections.Generic.IList<int> iList = genericArray as System.Collections.Generic.IList<int>;
+            System.Collections.Generic.IList<int> iList = genericArray;
 
             //Show the members at index 3 of the CLR Array.
             System.Console.WriteLine(clrArray[2]);
@@ -1727,7 +1726,7 @@ namespace Media.UnitTests
             System.Console.WriteLine(string.Join(",", System.Array.ConvertAll<int, string>(clrArray, System.Convert.ToString)));
 
             //Get the bytes without causing an allocation
-            if (Concepts.Classes.Array<byte>.TryGetArray(testBytez, out arraySegmentByte))
+            if (Concepts.Classes.Array<byte>.TryGetArray(testBytez, out System.ArraySegment<byte> arraySegmentByte))
             {
                 foreach (var byteType in arraySegmentByte)
                 {
@@ -1770,9 +1769,9 @@ namespace Media.UnitTests
                         System.Console.WriteLine("q@" + (int)q);
 
                         //Preparing for ref overloads...
-                        void* vp = (void*)q;
+                        void* vp = q;
 
-                        Concepts.Classes.Array<byte> unsafeBytes = new Concepts.Classes.Array<byte>(vp, 0, 2);
+                        Concepts.Classes.Array<byte> unsafeBytes = new(vp, 0, 2);
 
                         //Dereference the pointer of q, cast to byte and compare against first the element in the generic array
                         //if not equal throw an exception
@@ -1786,15 +1785,15 @@ namespace Media.UnitTests
                     }
 
                     //could also make a special UnicodeByteArray / use Span which reads the string at aligned offsets to allow conversion to a byte[]
-                    Concepts.Classes.Array<byte> testBytes = new Concepts.Classes.Array<byte>(clrString);
+                    Concepts.Classes.Array<byte> testBytes = new(clrString);
 
-                    Concepts.Classes.Array<char> testChars = new Concepts.Classes.Array<char>(clrString);
+                    Concepts.Classes.Array<char> testChars = new(clrString);
 
-                    Concepts.Classes.Array<long> testLong = new Concepts.Classes.Array<long>(clrString);
+                    Concepts.Classes.Array<long> testLong = new(clrString);
 
-                    Concepts.Classes.Array<bool> testBool = new Concepts.Classes.Array<bool>(clrString);
+                    Concepts.Classes.Array<bool> testBool = new(clrString);
 
-                    Concepts.Classes.Array<System.Guid> testGuid = new Concepts.Classes.Array<System.Guid>(clrString);
+                    Concepts.Classes.Array<System.Guid> testGuid = new(clrString);
 
                     //Can't use the array :(
                     //System.Array.Sort(testBytes.m_Header.m_Array)

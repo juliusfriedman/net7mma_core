@@ -100,12 +100,11 @@ namespace Media.Containers.Mpeg
 
         public const byte ProgramStreamDirectory = byte.MaxValue;
 
-        internal static Dictionary<byte, string> StreamTypeMap = new Dictionary<byte, string>();
+        internal static Dictionary<byte, string> StreamTypeMap = [];
 
         public static string ToTextualConvention(byte b)
         {
-            string name;
-            if (StreamTypeMap.TryGetValue(b, out name)) return name;
+            if (StreamTypeMap.TryGetValue(b, out string name)) return name;
             if (IsMpeg1or2AudioStream(b)) return "Audio";
             if (IsMpeg1or2VideoStream(b)) return "Video";
             if (IsReserverd(b)) return "Reserved";

@@ -160,7 +160,7 @@ namespace Media.Common
             try
             {
                 //Make a builder to extract the number
-                System.Text.StringBuilder output = new System.Text.StringBuilder(input.Length);
+                System.Text.StringBuilder output = new(input.Length);
 
                 //Keep track of the sign if it was found
                 bool foundSign = false == sign.HasValue;

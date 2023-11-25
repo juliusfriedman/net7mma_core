@@ -273,7 +273,7 @@ namespace Media.Rtp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
             //The sequence number is stored in Netword Byte Order @ + 0x00 from the second octet (relative offset of 0x02 from the beginning of any header pointer)
-            get { /*CheckDisposed();*/ return (ushort)Binary.ReadU16(SegmentToLast10Bytes.Array, SegmentToLast10Bytes.Offset, Common.Binary.IsLittleEndian); }
+            get { /*CheckDisposed();*/ return Binary.ReadU16(SegmentToLast10Bytes.Array, SegmentToLast10Bytes.Offset, Common.Binary.IsLittleEndian); }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
             set { /*CheckDisposed();*/ Binary.Write16(SegmentToLast10Bytes.Array, SegmentToLast10Bytes.Offset, Common.Binary.IsLittleEndian, (ushort)value); }
@@ -327,10 +327,9 @@ namespace Media.Rtp
             : base(shouldDispose)
         {
             //Determine the length of the array
-            long octetsLength;
 
             //If the octets reference is null throw an exception
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(octets, out octetsLength)) throw new ArgumentException("octets must not be null and must contain at least 1 element given the deleniation of the offset parameter.", "octets");
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(octets, out long octetsLength)) throw new ArgumentException("octets must not be null and must contain at least 1 element given the deleniation of the offset parameter.", "octets");
 
             //Check range
             if (offset > octetsLength) throw new ArgumentOutOfRangeException("offset", "Cannot be greater than the length of octets");
@@ -338,7 +337,7 @@ namespace Media.Rtp
             //Todo, should not matter since this header instance would be allowed to be modified, saving the allocation here is not necessary.
             //The check is only relevent because octets my have less than 2 bytes which cannot be handled without exception in the CommonHeaderBits
             //Read a managed representation of the first two octets which are stored in Big ByteOrder / Network Byte Order
-            First16Bits = octetsLength == 1 ? new Media.RFC3550.CommonHeaderBits(octets[offset], default(byte)) : new Media.RFC3550.CommonHeaderBits(octets, offset);
+            First16Bits = octetsLength == 1 ? new Media.RFC3550.CommonHeaderBits(octets[offset], default) : new Media.RFC3550.CommonHeaderBits(octets, offset);
 
             //Allocate space for the other 10 octets
             Last10Bytes = new byte[10];
@@ -651,7 +650,7 @@ namespace Media.UnitTests
                             {
                                 int RandomId = Utility.Random.Next(), RandomSequenceNumber = Utility.Random.Next(ushort.MinValue, ushort.MaxValue), RandomTimestamp = Utility.Random.Next();
 
-                                using (Rtp.RtpHeader test = new Rtp.RtpHeader(VersionCounter,
+                                using (Rtp.RtpHeader test = new(VersionCounter,
                                     !bitValue, !bitValue, !bitValue,
                                     PayloadCounter,
                                     ContributingSourceCounter,
@@ -677,7 +676,7 @@ namespace Media.UnitTests
 
                                     //Test Serialization from an array and Deserialization from the array
 
-                                    using (Rtp.RtpHeader deserialized = new Rtp.RtpHeader(test.ToArray()))
+                                    using (Rtp.RtpHeader deserialized = new(test.ToArray()))
                                     {
                                         if (test.Padding != deserialized.Padding) throw new Exception("Unexpected BlockCount");
 

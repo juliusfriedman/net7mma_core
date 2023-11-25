@@ -7,7 +7,7 @@ namespace Media.Common.Loggers
     /// </summary>
     public class NullLogger : BaseLogger
     {
-        public static readonly NullLogger Default = new NullLogger(false);
+        public static readonly NullLogger Default = new(false);
 
         public NullLogger(bool shouldDispose) : base(shouldDispose) { }
 

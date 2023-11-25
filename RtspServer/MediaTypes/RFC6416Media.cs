@@ -52,7 +52,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             #region Static
 
-            static readonly Common.MemorySegment StartCodePrefixSegment = new Common.MemorySegment(Media.Containers.Mpeg.StartCodes.StartCodePrefix, false);
+            static readonly Common.MemorySegment StartCodePrefixSegment = new(Media.Containers.Mpeg.StartCodes.StartCodePrefix, false);
 
             public static Common.MemorySegment CreatePrefixedStartCodeSegment(byte byteCode)
             {

@@ -14,9 +14,8 @@ namespace Media.Codec
 
             System.Runtime.InteropServices.GuidAttribute attribute = (System.Runtime.InteropServices.GuidAttribute)attributes[0];
 
-            Guid result;
 
-            if (false == System.Guid.TryParse(attribute.Value, out result)) throw new System.InvalidOperationException("Invalid GuidAttribute Attribute Found");
+            if (false == System.Guid.TryParse(attribute.Value, out Guid result)) throw new System.InvalidOperationException("Invalid GuidAttribute Attribute Found");
 
             return result;
         }
@@ -92,7 +91,7 @@ namespace Media.Codec
         public virtual Media.Codec.Interfaces.IMediaBuffer CreateBuffer(byte[] data, long timestamp = 0, bool shouldDispose = true)
         {
             //Needs default MediaFormat and subsequently DefaultComponents
-            Media.Codec.MediaFormat format = new Media.Codec.MediaFormat(MediaTypes, DefaultByteOrder, DefaultDataLayout, null);
+            Media.Codec.MediaFormat format = new(MediaTypes, DefaultByteOrder, DefaultDataLayout, null);
 
             return new Media.Codec.MediaBuffer(format, new Common.MemorySegment(data), this, timestamp, shouldDispose);
         }

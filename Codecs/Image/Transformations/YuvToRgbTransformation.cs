@@ -130,11 +130,11 @@ public class VectorizedYuvToRgbTransformation : ImageTransformation
         int height = Source.Height;
 
         // Prepare Vector<float> constants for conversion formulas
-        Vector<float> vector1_13983 = new Vector<float>(1.13983f);
-        Vector<float> vector0_39465 = new Vector<float>(0.39465f);
-        Vector<float> vector0_58060 = new Vector<float>(0.58060f);
-        Vector<float> vector2_03211 = new Vector<float>(2.03211f);
-        Vector<float> vector128 = new Vector<float>(128f);
+        Vector<float> vector1_13983 = new(1.13983f);
+        Vector<float> vector0_39465 = new(0.39465f);
+        Vector<float> vector0_58060 = new(0.58060f);
+        Vector<float> vector2_03211 = new(2.03211f);
+        Vector<float> vector128 = new(128f);
 
         for (int y = 0; y < height; y++)
         {

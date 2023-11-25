@@ -668,7 +668,7 @@ namespace Media.Rtsp
 
             m_ServerPort = listenEndPoint.Port;
 
-            RequiredCredentials = new CredentialCache();
+            RequiredCredentials = [];
 
             ConfigureThread = ConfigureRtspServerThread;
 
@@ -1000,7 +1000,6 @@ namespace Media.Rtsp
 
             streamName = mediaLocation.Segments.Last().Replace("/", string.Empty).Trim();
 
-            Sdp.MediaType mediaType;
 
             //todo, give out track name for further retrival e.g. when playing or setting up it would be easier to reuse this value than to parse again.
 
@@ -1012,7 +1011,7 @@ namespace Media.Rtsp
                 if ((symbolIndex = streamName.IndexOf('=')) >= 0 &&
                     int.TryParse(Media.Common.ASCII.ExtractNumber(streamName, symbolIndex, streamName.Length), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out int trackId)
                     ||
-                    Enum.TryParse(streamName, out mediaType))
+                    Enum.TryParse(streamName, out Sdp.MediaType mediaType))
                 streamName = mediaLocation.Segments[mediaLocation.Segments.Length - 2].Replace("/", string.Empty).Trim();
 
             //If either the streamBase or the streamName is null or Whitespace then return null (no stream)
@@ -1436,7 +1435,7 @@ namespace Media.Rtsp
 
                 try
                 {
-                    await Task.Run(() => stream.Start());
+                    await Task.Run(stream.Start);
                 }
                 catch (Exception ex)
                 {
@@ -1470,7 +1469,7 @@ namespace Media.Rtsp
 
                 try
                 {
-                    await Task.Run(() => stream.Stop());
+                    await Task.Run(stream.Stop);
                 }
                 catch (Exception ex)
                 {
@@ -1782,7 +1781,7 @@ namespace Media.Rtsp
             try
             {
                 //Use a segment around the data received which is already in the buffer.
-                using (Common.MemorySegment data = new Common.MemorySegment(session.m_Buffer.Array, session.m_Buffer.Offset, received))
+                using (Common.MemorySegment data = new(session.m_Buffer.Array, session.m_Buffer.Offset, received))
                 {
                     //May be valid request data
                     //if (data[0].Equals(RtpClient.BigEndianFrameControl))
@@ -1795,7 +1794,7 @@ namespace Media.Rtsp
                     //using (Common.MemorySegment unprocessedData = new Common.MemorySegment(session.m_Buffer.Array, data.Offset + received, received))
                     //{
                     //Ensure the message is really Rtsp
-                    RtspMessage request = new RtspMessage(data);
+                    RtspMessage request = new(data);
 
                     //Check for validity
                     if (request.RtspMessageType == RtspMessageType.Request)
@@ -2221,16 +2220,14 @@ namespace Media.Rtsp
                 if (m_RequestHandlers.Count > 0)
                 {
                     //Determine if there is a custom handler for the mthod
-                    RtspRequestHandler custom;
 
                     //If there is
-                    if (m_RequestHandlers.TryGetValue(request.RtspMethod, out custom))
+                    if (m_RequestHandlers.TryGetValue(request.RtspMethod, out RtspRequestHandler custom))
                     {
                         //Then create the response
-                        RtspMessage response;
 
                         //By invoking the handler, if true is returned
-                        if (custom(request, out response))
+                        if (custom(request, out RtspMessage response))
                         {
                             //Use the response created by the custom handler
                             ProcessSendRtspMessage(response, session, sendResponse);
@@ -2372,7 +2369,7 @@ namespace Media.Rtsp
         internal void ProcessAnnounce(RtspMessage request, ClientSession session, bool sendResponse = true)
         {
 
-            Uri announceLocation = new Uri(Rtsp.Server.SourceMedia.UriScheme + request.MethodString);
+            Uri announceLocation = new(Rtsp.Server.SourceMedia.UriScheme + request.MethodString);
 
             if (AuthenticateRequest(request, announceLocation) is false)
             {
@@ -2617,9 +2614,10 @@ namespace Media.Rtsp
         internal virtual void ProcessAuthorizationRequired(Uri sourceLocation, ClientSession session, bool sendResponse = true)
         {
 
-            RtspMessage response = new RtspMessage(RtspMessageType.Response);
-
-            response.CSeq = session.LastRequest.CSeq;
+            RtspMessage response = new(RtspMessageType.Response)
+            {
+                CSeq = session.LastRequest.CSeq
+            };
 
             string authHeader = session.LastRequest.GetHeader(RtspHeaders.Authorization);
 
@@ -2885,11 +2883,11 @@ namespace Media.Rtsp
             //Determine if we have the track
             string track = request.Location.Segments.Last().Replace("/", string.Empty);
 
-            int trackId, symbolIndex;
+            int symbolIndex;
 
             Sdp.MediaDescription mediaDescription;
 
-            if ((symbolIndex = track.IndexOf('=')) >= 0 && int.TryParse(Media.Common.ASCII.ExtractNumber(track, symbolIndex, track.Length), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out trackId)) mediaDescription = found.SessionDescription.GetMediaDescription(trackId - 1);
+            if ((symbolIndex = track.IndexOf('=')) >= 0 && int.TryParse(Media.Common.ASCII.ExtractNumber(track, symbolIndex, track.Length), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out int trackId)) mediaDescription = found.SessionDescription.GetMediaDescription(trackId - 1);
             else mediaDescription = found.SessionDescription.MediaDescriptions.FirstOrDefault(md => string.Compare(track, md.MediaType.ToString(), true, System.Globalization.CultureInfo.InvariantCulture) is 0);
 
             ////Find the MediaDescription for the request based on the track variable

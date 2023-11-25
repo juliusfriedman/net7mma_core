@@ -261,7 +261,7 @@ namespace Media.Concepts.Classes.Threading
 
         System.Collections.Generic.IEnumerable<System.Exception> Aggregates = System.Linq.Enumerable.Empty<System.Exception>();
 
-        readonly System.Collections.Generic.HashSet<System.Func<System.Exception, bool>> ExceptionHandlers = new System.Collections.Generic.HashSet<System.Func<System.Exception, bool>>();
+        readonly System.Collections.Generic.HashSet<System.Func<System.Exception, bool>> ExceptionHandlers = [];
 
         public EnumerableException()
         {
@@ -408,13 +408,13 @@ namespace Media.Concepts.Classes.Threading
         //-- The fibers or actions
 
         public readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan>> Itinerarius =
-            new Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan>>();
+            new();
 
         public bool Add(System.Action action)
         {
             if (action is null) return false;
 
-            System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan> Item = new System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan>(action, UnderlyingThreadsPriorityInformation, System.Threading.Timeout.InfiniteTimeSpan);
+            System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan> Item = new(action, UnderlyingThreadsPriorityInformation, System.Threading.Timeout.InfiniteTimeSpan);
 
             while (Itinerarius.TryEnqueue(ref Item) is false &&
                 UpdateTokenSource.IsCancellationRequested is false)
@@ -425,7 +425,7 @@ namespace Media.Concepts.Classes.Threading
             return true;
         }
 
-        public readonly EnumerableException Exceptions = new EnumerableException();
+        public readonly EnumerableException Exceptions = new();
 
         static readonly System.Type StructureType = typeof(System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan>);
 
@@ -512,7 +512,7 @@ namespace Media.Concepts.Classes.Threading
 
         #region Async
 
-        readonly System.AggregateException AggregateExceptions = new System.AggregateException();
+        readonly System.AggregateException AggregateExceptions = new();
 
         readonly System.Func<System.Exception, bool> ExceptionHandler;
 
@@ -668,17 +668,17 @@ namespace Media.Concepts.Classes.Threading
         /// <summary>
         /// Dictionary of delegates
         /// </summary>
-        readonly System.Collections.Concurrent.ConcurrentDictionary<System.Delegate, DelegateHolder> DelegateDictionary = new System.Collections.Concurrent.ConcurrentDictionary<System.Delegate, DelegateHolder>();
+        readonly System.Collections.Concurrent.ConcurrentDictionary<System.Delegate, DelegateHolder> DelegateDictionary = new();
 
         /// <summary>
         /// List of delegates to be called, we need it because it is relatevely easy to implement a loop with list modification inside of it
         /// </summary>
-        readonly System.Collections.Generic.LinkedList<DelegateHolder> DelegateList = new System.Collections.Generic.LinkedList<DelegateHolder>();
+        readonly System.Collections.Generic.LinkedList<DelegateHolder> DelegateList = new();
 
         /// <summary>
         /// locker for delegates list
         /// </summary>
-        private readonly System.Threading.ReaderWriterLockSlim ReadWriteLock = new System.Threading.ReaderWriterLockSlim();
+        private readonly System.Threading.ReaderWriterLockSlim ReadWriteLock = new();
 
         /// <summary>
         /// Add delegate to list
@@ -686,7 +686,7 @@ namespace Media.Concepts.Classes.Threading
         /// <param name="value"></param>
         public void Add(System.Delegate value)
         {
-            DelegateHolder Holder = new DelegateHolder(value);
+            DelegateHolder Holder = new(value);
 
             if (false == DelegateDictionary.TryAdd(value, Holder)) return;
 
@@ -703,9 +703,8 @@ namespace Media.Concepts.Classes.Threading
         /// <param name="value"></param>
         public void Remove(System.Delegate value)
         {
-            DelegateHolder holder;
 
-            if (false == DelegateDictionary.TryRemove(value, out holder)) return;
+            if (false == DelegateDictionary.TryRemove(value, out DelegateHolder holder)) return;
 
             System.Threading.Monitor.Enter(holder);
 

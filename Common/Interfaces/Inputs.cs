@@ -184,7 +184,7 @@ namespace Media.Common.Interfaces
         {
             public const StringClass Nil = null;
 
-            public static readonly StringClass Empty = new StringClass(string.Empty);
+            public static readonly StringClass Empty = new(string.Empty);
 
             object Object;
 

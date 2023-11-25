@@ -55,7 +55,7 @@ namespace Media.Containers.BaseMedia
     public class BaseMediaReader : MediaFileStream
     {
 
-        static DateTime IsoBaseDateUtc = new DateTime(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        static DateTime IsoBaseDateUtc = new(1904, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         //Todo Make Generic.Dictionary and have a ToTextualConvention that tries the Generic.Dictionary first. (KnownParents)        
 
@@ -67,8 +67,8 @@ namespace Media.Containers.BaseMedia
         /// <summary>
         /// <see href="http://www.mp4ra.org/atoms.html">MP4REG</see>
         /// </summary>
-        public static List<string> ParentBoxes = new List<string>()
-        {
+        public static List<string> ParentBoxes =
+        [
             "moof", //movie fragment
             "mfhd", //movie fragment header
             "traf", //track fragment
@@ -124,7 +124,7 @@ namespace Media.Containers.BaseMedia
             "meco", //additional metadata container,
             "udta",
             "vnrp",
-        };
+        ];
 
         //could add level to node by extending or adding bytes to header.
         //Could also track in reader.
@@ -305,13 +305,12 @@ namespace Media.Containers.BaseMedia
             if (Remaining <= MinimumSize) throw new System.IO.EndOfStreamException();
 
             //Keep track of how many bytes used in the length
-            int lengthBytesRead = 0;
 
             //Keep the length bytes
             byte[] lengthBytes = new byte[LengthSize];
 
             //Read the length
-            ulong length = (ulong)ReadLength(this, out lengthBytesRead, lengthBytes, 0);
+            ulong length = (ulong)ReadLength(this, out int lengthBytesRead, lengthBytes, 0);
 
             //Keep the identifier bytes
             byte[] identifier = new byte[IdentifierSize];
@@ -566,7 +565,7 @@ namespace Media.Containers.BaseMedia
 
                 m_Modified = IsoBaseDateUtc.AddMilliseconds(modified * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond);
 
-                m_Duration = TimeSpan.FromSeconds((double)duration / (double)m_TimeScale.Value);
+                m_Duration = TimeSpan.FromSeconds(duration / (double)m_TimeScale.Value);
             }
         }
 
@@ -627,11 +626,11 @@ namespace Media.Containers.BaseMedia
 
                 double rate = 0;
 
-                List<Tuple<long, long>> sttsEntries = new List<Tuple<long, long>>();
+                List<Tuple<long, long>> sttsEntries = [];
 
-                List<long> stOffsets = new List<long>();
+                List<long> stOffsets = [];
 
-                List<int> stSizes = new List<int>();
+                List<int> stSizes = [];
 
                 TimeSpan startTime = TimeSpan.Zero;
 
@@ -682,7 +681,7 @@ namespace Media.Containers.BaseMedia
 
                                     stream.Read(rawData, 0, (int)length);
 
-                                    List<Tuple<int, int, float>> edits = new List<Tuple<int, int, float>>();
+                                    List<Tuple<int, int, float>> edits = [];
 
                                     //Skip Flags and Version
                                     offset = LengthSize;
@@ -1024,7 +1023,7 @@ namespace Media.Containers.BaseMedia
 
                                     for (int i = 0; i < chunkCount && offset < length; ++i)
                                     {
-                                        stOffsets.Add((long)Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian));
+                                        stOffsets.Add(Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian));
                                     }
 
                                     offset = (int)length;
@@ -1129,9 +1128,9 @@ namespace Media.Containers.BaseMedia
 
                 //TOdo calc methods in BaseMedia class with base times etc.. (will help with writers)
 
-                rate = mediaType == Sdp.MediaType.audio ? trackTimeScale : (double)((double)sampleCount / ((double)trackDuration / trackTimeScale));
+                rate = mediaType == Sdp.MediaType.audio ? trackTimeScale : (double)(sampleCount / ((double)trackDuration / trackTimeScale));
 
-                Track createdTrack = new Track(trakBox, name, trackId, trackCreated, trackModified, (long)sampleCount, width, height, startTime, calculatedDuration, rate, mediaType, codecIndication, channels, bitDepth, enabled);
+                Track createdTrack = new(trakBox, name, trackId, trackCreated, trackModified, (long)sampleCount, width, height, startTime, calculatedDuration, rate, mediaType, codecIndication, channels, bitDepth, enabled);
 
                 //Useful to support GetSample
                 var dataDictionary = new Dictionary<string, object>();

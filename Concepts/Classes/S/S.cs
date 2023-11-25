@@ -111,7 +111,7 @@
         /// <returns></returns>
         static public System.Numerics.Vector3 Measure(S s, Frequencies.IFrequency f, out System.Numerics.Vector3 imaginary)
         {
-            System.Numerics.Vector3 measure = new System.Numerics.Vector3(f.TotalMegahertz * s.Energy.TotalJoules);
+            System.Numerics.Vector3 measure = new(f.TotalMegahertz * s.Energy.TotalJoules);
 
             imaginary = s.Imaginary - measure;
 

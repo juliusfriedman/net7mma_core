@@ -111,7 +111,7 @@ namespace Media.Codecs.Audio
             return new AudioFormat(Codec.MediaFormat.SemiPlanar(other));
         }
 
-        public static AudioFormat WithSampleRate(int sampleRate, AudioFormat other) => new AudioFormat(sampleRate, other.IsSigned, other.IsBigEndian, other.DataLayout);
+        public static AudioFormat WithSampleRate(int sampleRate, AudioFormat other) => new(sampleRate, other.IsSigned, other.IsBigEndian, other.DataLayout);
 
         #endregion
 

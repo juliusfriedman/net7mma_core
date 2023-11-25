@@ -124,7 +124,7 @@ namespace Media.Common.Collections.Generic
             unchecked
             {
                 // avoid an arithmetic overflow
-                if (_position == int.MaxValue) _position = _position % Capacity;
+                if (_position == int.MaxValue) _position %= Capacity;
 
                 // add a new item to the current relative position within the
                 // buffer and increase the position
@@ -144,7 +144,7 @@ namespace Media.Common.Collections.Generic
         /// </summary>
         public void Clear()
         {
-            for (int i = 0; i < Count; ++i) _buffer[i] = default(T);
+            for (int i = 0; i < Count; ++i) _buffer[i] = default;
             _position = 0;
             Count = 0;
             ++_version;
@@ -334,7 +334,7 @@ namespace Media.Common.Collections.Generic
             // after deletion and set the item as empty
             int last = (_position - 1) % Capacity;
 
-            _buffer[last] = default(T);
+            _buffer[last] = default;
 
             // adjust storage information
 

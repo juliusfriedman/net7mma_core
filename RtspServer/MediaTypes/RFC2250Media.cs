@@ -343,7 +343,7 @@ namespace Media.Rtsp.Server.MediaTypes
             // using the MPEG1 format
             // The MemoryStream ms is provided to store the bitstream 
             // produced by encoding the image's blocks
-            private MemoryStream ms = new MemoryStream();
+            private MemoryStream ms = new();
             private double[,] cosine = new double[8, 8];
             private double SQRT2o2 = Math.Sqrt(2.0) / 2.0;
 
@@ -508,7 +508,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 for (i = 0; i < 8; i++)
                     for (j = 0; j < 8; j++)
-                        S1[i, j] = (int)Math.Round((S[i, j] / (double)defaultQ[i, j]));
+                        S1[i, j] = (int)Math.Round((S[i, j] / defaultQ[i, j]));
 
                 return S1;	// Return quantized Frequency Component matrix
             }

@@ -162,7 +162,7 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal static T Read<T>(nint address)
         {
-            T obj = default(T);
+            T obj = default;
 
             System.TypedReference tr = __makeref(obj);
 
@@ -194,7 +194,7 @@ namespace Media.Concepts.Classes
         static object Read(nint address)
         {
             //Create memory for a boxed object
-            object box = default(object);
+            object box = default;
 
             //Make a TypedReference to the object created
             System.TypedReference tr = __makeref(box);
@@ -259,7 +259,7 @@ namespace Media.Concepts.Classes
             if (type.IsPrimitive)
             {
                 // Make sure the array won't be moved around by the GC 
-                System.Runtime.InteropServices.GCHandle handleOutput = default(System.Runtime.InteropServices.GCHandle);
+                System.Runtime.InteropServices.GCHandle handleOutput = default;
 
                 try
                 {
@@ -289,11 +289,11 @@ namespace Media.Concepts.Classes
                     throw new System.InvalidOperationException(string.Format("{0} does not define a StructLayout attribute", type));
                 }
 
-                nint sourcePtr = new nint(source);
+                nint sourcePtr = new(source);
 
                 for (int i = 0; i < length; i++)
                 {
-                    nint p = new nint((byte*)source + i * sizeInBytes);
+                    nint p = new((byte*)source + i * sizeInBytes);
 
                     output[i] = (T)System.Runtime.InteropServices.Marshal.PtrToStructure(p, typeof(T));
                 }
@@ -311,7 +311,7 @@ namespace Media.Concepts.Classes
             T[] result = new T[length];
             for (int i = 0; i < length; i++)
             {
-                nint p = new nint((byte*)t + (i * tSizeInBytes));
+                nint p = new((byte*)t + (i * tSizeInBytes));
                 result[i] = (T)System.Runtime.InteropServices.Marshal.PtrToStructure(p, typeof(T));
             }
 
@@ -353,8 +353,8 @@ namespace Media.Concepts.Classes
 
         public static object AllocateAt(int address, nint typeHandle)
         {
-            System.Runtime.InteropServices.Marshal.WriteInt32((nint)(address), 0);
-            System.Runtime.InteropServices.Marshal.WriteInt32((nint)(address + 1 * sizeof(int)), (int)typeHandle);
+            System.Runtime.InteropServices.Marshal.WriteInt32(address, 0);
+            System.Runtime.InteropServices.Marshal.WriteInt32(address + 1 * sizeof(int), (int)typeHandle);
             object createdObject = null;
             unsafe
             {
@@ -366,10 +366,10 @@ namespace Media.Concepts.Classes
 
         public static bool TryAllocateAt<T>(nint address, nint typeHandle, out T t)
         {
-            System.Runtime.InteropServices.Marshal.WriteInt32((nint)(address), 0);
-            System.Runtime.InteropServices.Marshal.WriteInt32((nint)(address + 1 * sizeof(int)), (int)typeHandle);
-            t = default(T);
-            CommonIntermediateLanguage.InitBlock(address + 1 * sizeof(int), (byte)0, CommonIntermediateLanguage.SizeOf<T>());
+            System.Runtime.InteropServices.Marshal.WriteInt32(address, 0);
+            System.Runtime.InteropServices.Marshal.WriteInt32(address + 1 * sizeof(int), (int)typeHandle);
+            t = default;
+            CommonIntermediateLanguage.InitBlock(address + 1 * sizeof(int), 0, CommonIntermediateLanguage.SizeOf<T>());
             unsafe
             {
                 System.TypedReference newObjectReference = __makeref(t);
@@ -405,7 +405,7 @@ namespace Media.Concepts.Classes
             //Byte by byte convert to integer
             for (int i = 1; i < 5; ++i)
             {
-                jumpOffset = jumpOffset + (System.Runtime.InteropServices.Marshal.ReadByte(methodAddress, offset + i) << (i - 1) * 8);
+                jumpOffset += (System.Runtime.InteropServices.Marshal.ReadByte(methodAddress, offset + i) << (i - 1) * 8);
             }
 
             // Calculate absolute address
@@ -482,24 +482,30 @@ namespace Media.Concepts.Classes
 
             public static byte[] GetBytes(float[] floats)
             {
-                Inspector i = new Inspector();
-                i.FloatArray = floats;
+                Inspector i = new()
+                {
+                    FloatArray = floats
+                };
                 i.Length.Value = floats.Length << 2; //* 4;
                 return i.ByteArray;
             }
 
             public static float[] GetFloats(byte[] bytes)
             {
-                Inspector i = new Inspector();
-                i.ByteArray = bytes;
+                Inspector i = new()
+                {
+                    ByteArray = bytes
+                };
                 i.Length.Value = bytes.Length >> 2; // / 4;
                 return i.FloatArray;
             }
 
             public static byte[] GetTop4BytesFrom(object obj)
             {
-                Inspector i = new Inspector();
-                i.Object = obj;
+                Inspector i = new()
+                {
+                    Object = obj
+                };
                 return new byte[]
                 {
                     i.Octets.Byte_0,
@@ -511,8 +517,10 @@ namespace Media.Concepts.Classes
 
             public static byte[] GetBytesFrom(object obj, int size)
             {
-                Inspector i = new Inspector();
-                i.Object = obj;
+                Inspector i = new()
+                {
+                    Object = obj
+                };
                 i.Length.Value = size;
                 return i.ByteArray;
             }
@@ -894,7 +902,7 @@ namespace Media.Concepts.Classes
                 _elementSize = elementSize + 1;
                 _storage = new int[size * _elementSize];
                 _elements = new T[size];
-                _target = default(T);
+                _target = default;
             }
 
             public void Add(T item)
@@ -909,7 +917,7 @@ namespace Media.Concepts.Classes
                     for (int i = 1; i < _elementSize; ++i)
                     {
                         _storage[_currentIndex * _elementSize + i] = *itemAddress;
-                        itemAddress = itemAddress + 1;
+                        itemAddress++;
                     }
 
                     reference = __makeref(_storage);

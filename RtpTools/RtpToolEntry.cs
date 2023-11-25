@@ -312,7 +312,7 @@ namespace Media.RtpTools
         public string ToString(FileFormat? format = null)
         {
             //Get the format given or use the format of the Item existing
-            format = format ?? Format;
+            format ??= Format;
 
             //If the item was read in as Text it should have m_Format == Text just return the bytes as they were as to not waste memory
             if (format == FileFormat.Text && Format >= FileFormat.Text)

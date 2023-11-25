@@ -103,21 +103,21 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// The Planck Length in?? (meters)
         /// </summary>
-        public static Distances.Distance ℓP = new Distances.Distance(new System.Numerics.Complex(1.616199 * System.Math.Pow(10, -35), Uncertainties.StandardUncertainty));
+        public static Distances.Distance ℓP = new(new System.Numerics.Complex(1.616199 * System.Math.Pow(10, -35), Uncertainties.StandardUncertainty));
 
         //Need Weights
 
         /// <summary>
         /// {220} lattice spacing of silicon                            192.015 5714 e-12        0.000 0032 e-12          m
         /// </summary>
-        public static Distances.Distance LatticeSpacingOfSilicon = new Distances.Distance(new System.Numerics.Complex(192.0155714e-12, Uncertainties.EquivelanceUncertainty));
+        public static Distances.Distance LatticeSpacingOfSilicon = new(new System.Numerics.Complex(192.0155714e-12, Uncertainties.EquivelanceUncertainty));
 
         //alpha particle-electron mass ratio                          7294.299 5361            0.000 0029               
 
         //alpha particle-electron mass ratio                          7294.299 5361            0.000 0029
 
         //alpha particle mass in kk                                       6.644 656 75 e-27        0.000 000 29 e-27        kg
-        public static Masses.Mass AlphaParticleMass = new Masses.Mass(new System.Numerics.Complex(16.64465675e-27, Uncertainties.AlphaParticleMassUncertainty));
+        public static Masses.Mass AlphaParticleMass = new(new System.Numerics.Complex(16.64465675e-27, Uncertainties.AlphaParticleMassUncertainty));
 
         //Needs Atomic Mass
         //alpha particle mass in u                                    4.001 506 179 125        0.000 000 000 062        u
@@ -126,7 +126,7 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// alpha particle mass energy equivalent                       5.971 919 67 e-10        0.000 000 26 e-10        J
         /// </summary>
-        public static Energies.Energy AlphaParticleMassEnergyEquivalent = new Energies.Energy(new System.Numerics.Complex(5.97191967e-10, Uncertainties.EquivelanceUncertainty));
+        public static Energies.Energy AlphaParticleMassEnergyEquivalent = new(new System.Numerics.Complex(5.97191967e-10, Uncertainties.EquivelanceUncertainty));
 
 
         //alpha particle mass energy equivalent in MeV                3727.379 240             0.000 082                MeV

@@ -67,13 +67,13 @@ namespace Media.Sdp
             NewLine = (char)Common.ASCII.NewLine;
 
         internal static string
-            ForwardSlashString = new string(ForwardSlash, 1),
-            SpaceString = new string(Space, 1),
-            WildcardString = new string(Asterisk, 1),
-            LineFeedString = new string(LineFeed, 1),
-            CarriageReturnString = new string(NewLine, 1),
-            SemiColonString = new string(SemiColon, 1),
-            ColonString = new string(Colon, 1),
+            ForwardSlashString = new(ForwardSlash, 1),
+            SpaceString = new(Space, 1),
+            WildcardString = new(Asterisk, 1),
+            LineFeedString = new(LineFeed, 1),
+            CarriageReturnString = new(NewLine, 1),
+            SemiColonString = new(SemiColon, 1),
+            ColonString = new(Colon, 1),
             NewLineString = CarriageReturnString + LineFeedString;
 
         internal static char[] SpaceSplit = new char[] { Space },
@@ -192,10 +192,10 @@ namespace Media.Sdp
                         const string clockFormat = "yyyyMMdd\\THHmmsss.ff";
                         try
                         {
-                            DateTime now = DateTime.UtcNow, date;
+                            DateTime now = DateTime.UtcNow;
 
                             //Parse and determine the start time
-                            if (string.IsNullOrWhiteSpace(startTimeString) is false && DateTime.TryParseExact(startTimeString, clockFormat, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out date))
+                            if (string.IsNullOrWhiteSpace(startTimeString) is false && DateTime.TryParseExact(startTimeString, clockFormat, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime date))
                             {
                                 //Time in the past
                                 if (now > date) start = now - date;
@@ -326,13 +326,13 @@ namespace Media.Sdp
         internal protected Media.Sdp.Lines.SessionOriginLine m_OriginatorLine;
         internal protected Media.Sdp.Lines.SessionNameLine m_NameLine;
 
-        internal readonly protected List<MediaDescription> m_MediaDescriptions = new List<MediaDescription>();
-        internal readonly protected List<TimeDescription> m_TimeDescriptions = new List<TimeDescription>();
-        internal readonly protected List<SessionDescriptionLine> m_Lines = new List<SessionDescriptionLine>();
+        internal readonly protected List<MediaDescription> m_MediaDescriptions = [];
+        internal readonly protected List<TimeDescription> m_TimeDescriptions = [];
+        internal readonly protected List<SessionDescriptionLine> m_Lines = [];
 
-        System.Threading.ManualResetEventSlim m_Update = new System.Threading.ManualResetEventSlim(true);
+        System.Threading.ManualResetEventSlim m_Update = new(true);
 
-        System.Threading.CancellationTokenSource m_UpdateTokenSource = new System.Threading.CancellationTokenSource();
+        System.Threading.CancellationTokenSource m_UpdateTokenSource = new();
 
         #endregion
 
@@ -601,7 +601,7 @@ namespace Media.Sdp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return ((IEnumerable<SessionDescriptionLine>)this);
+                return this;
             }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             internal protected set
@@ -747,9 +747,9 @@ namespace Media.Sdp
         public SessionDescription(int version, bool shouldDispose = true)
             : base(shouldDispose)
         {
-            m_OriginatorLine = new Lines.SessionOriginLine();
+            m_OriginatorLine = [];
 
-            m_NameLine = new Sdp.Lines.SessionNameLine();
+            m_NameLine = [];
 
             SessionDescriptionVersion = version;
         }
@@ -791,9 +791,8 @@ namespace Media.Sdp
         public SessionDescription(string[] lines, int offset = 0, int length = -1, bool shouldDispose = true)
             : base(shouldDispose)
         {
-            int register;
 
-            if (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(lines, out register) ||
+            if (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(lines, out int register) ||
                 register < MinimumLines ||
                 register < length - offset) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(lines, string.Format("Invalid Session Description, At least {0} lines should be found.", MinimumLines));
 
@@ -858,9 +857,8 @@ namespace Media.Sdp
                     //    }
                     default:
                         {
-                            SessionDescriptionLine parsed;
 
-                            if (SessionDescriptionLine.TryParse(lines, ref offset, out parsed)) m_Lines.Add(parsed);
+                            if (SessionDescriptionLine.TryParse(lines, ref offset, out SessionDescriptionLine parsed)) m_Lines.Add(parsed);
                             else ++offset;//No advance was made on lineIndex by SessionDescriptionLine if parsed was null
 
                             continue;
@@ -1370,9 +1368,8 @@ namespace Media.Sdp
 
         public static bool SupportsAggregateMediaControl(this SessionDescription sdp, Uri baseUri = null)
         {
-            Uri result;
 
-            return SupportsAggregateMediaControl(sdp, out result, baseUri);
+            return SupportsAggregateMediaControl(sdp, out Uri result, baseUri);
         }
 
         /// <summary>

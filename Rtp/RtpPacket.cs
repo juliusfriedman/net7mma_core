@@ -728,13 +728,12 @@ namespace Media.Rtp
                 if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
                 else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
 
-                System.Net.Sockets.SocketError error;
 
                 //Read from the stream, decrementing from octetsRemaining what was read.
                 while (octetsRemaining > 0)
                 {
                     //Receive octetsRemaining or less
-                    int justReceived = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out error);
+                    int justReceived = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out System.Net.Sockets.SocketError error);
 
                     //Move the offset
                     offset += justReceived;
@@ -764,13 +763,12 @@ namespace Media.Rtp
                     if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
                     else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
 
-                    System.Net.Sockets.SocketError error;
 
                     //Read from the socket, decrementing from octetsRemaining what was read.
                     while (octetsRemaining > 0)
                     {
                         //Receive octetsRemaining or less
-                        int justReceived = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out error);
+                        int justReceived = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out System.Net.Sockets.SocketError error);
 
                         //Move the offset
                         offset += justReceived;
@@ -802,13 +800,12 @@ namespace Media.Rtp
                             if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
                             else m_OwnedOctets = m_OwnedOctets.Concat(new byte[octetsRemaining]).ToArray();
 
-                            System.Net.Sockets.SocketError error;
 
                             //Read from the stream, decrementing from octetsRemaining what was read.
                             while (octetsRemaining > 0)
                             {
                                 //Receive octetsRemaining or less
-                                int justReceived = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out error);
+                                int justReceived = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out System.Net.Sockets.SocketError error);
 
                                 //Move the offset
                                 offset += justReceived;
@@ -842,11 +839,10 @@ namespace Media.Rtp
                     //If the amount of bytes read in the padding is NOT equal to the last byte in the segment the RtpPacket is NOT complete
                     while (octetsRemaining > 0)
                     {
-                        System.Net.Sockets.SocketError error;
 
                         //Receive 1 byte
                         //Receive octetsRemaining or less
-                        int justReceived = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out error);
+                        int justReceived = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out System.Net.Sockets.SocketError error);
 
                         //Move the offset
                         offset += justReceived;
@@ -878,7 +874,7 @@ namespace Media.Rtp
 
         public DateTime? Transferred { get; set; }
 
-        long Common.IPacket.Length { get { return (long)Length; } }
+        long Common.IPacket.Length { get { return Length; } }
 
         public virtual bool IsCompressed { get { return Header.IsCompressed; } }
 
@@ -1060,7 +1056,7 @@ namespace Media.UnitTests
                             int RandomId = Utility.Random.Next(), RandomSequenceNumber = Utility.Random.Next(ushort.MinValue, ushort.MaxValue), RandomTimestamp = Utility.Random.Next();
 
                             //Create a RtpPacket instance using the specified options
-                            using (Media.Rtp.RtpPacket p = new Rtp.RtpPacket(VersionCounter,
+                            using (Media.Rtp.RtpPacket p = new(VersionCounter,
                                 bitValue, !bitValue, bitValue,
                                 PayloadCounter,
                                 ContributingSourceCounter,
@@ -1087,7 +1083,7 @@ namespace Media.UnitTests
                                 System.Diagnostics.Debug.Assert(p.Length == Media.Rtp.RtpHeader.Length, "Unexpected Length");
 
                                 //Serialize, Deserialize and verify again
-                                using (Media.Rtp.RtpPacket s = new Rtp.RtpPacket(p.Prepare().ToArray(), 0))
+                                using (Media.Rtp.RtpPacket s = new(p.Prepare().ToArray(), 0))
                                 {
                                     if (false == s.Prepare().SequenceEqual(p.Prepare())) throw new Exception("Unexpected Data");
 

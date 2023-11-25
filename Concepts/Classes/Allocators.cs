@@ -145,7 +145,7 @@ namespace Media.Concepts.Classes
     {
         public nint Allocate(long size)
         {
-            System.Collections.Generic.LinkedList<T> candidates = new System.Collections.Generic.LinkedList<T>();
+            System.Collections.Generic.LinkedList<T> candidates = new();
 
             nint pointer = nint.Zero;
 
@@ -160,7 +160,7 @@ namespace Media.Concepts.Classes
                 //If there is no size make a new object which allocated 12 or more bytes to make a gap, next allocation should be aligned.
                 if (size is 0)
                 {
-                    object gap = new object();
+                    object gap = new();
                 }
 
                 candidates.AddLast(new T());
@@ -245,9 +245,8 @@ namespace Media.Concepts.Classes
 
                 foreach (nint pointer in Allocations.Keys)
                 {
-                    System.Collections.Generic.IEnumerable<long> sizes;
 
-                    if (Allocations.TryGetValue(pointer, out sizes))
+                    if (Allocations.TryGetValue(pointer, out System.Collections.Generic.IEnumerable<long> sizes))
                     {
                         foreach (long size in sizes)
                         {
@@ -260,7 +259,7 @@ namespace Media.Concepts.Classes
             }
         }
 
-        Media.Common.Collections.Generic.ConcurrentThesaurus<nint, long> Allocations = new Common.Collections.Generic.ConcurrentThesaurus<nint, long>();
+        Media.Common.Collections.Generic.ConcurrentThesaurus<nint, long> Allocations = [];
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         nint IStorageAllocator.Allocate(long size)

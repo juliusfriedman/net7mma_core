@@ -118,7 +118,7 @@ namespace Media.Rtsp
         /// <summary>
         /// The media items which are in the play state.
         /// </summary>
-        internal readonly Dictionary<MediaDescription, MediaSessionState> m_Playing = new Dictionary<MediaDescription, MediaSessionState>();//Could just be a list but the dictionary offers faster indexing at the cost of more memory...
+        internal readonly Dictionary<MediaDescription, MediaSessionState> m_Playing = [];//Could just be a list but the dictionary offers faster indexing at the cost of more memory...
 
         /// <summary>
         /// A threading resource which is used to synchronize access to the underlying buffer during message parsing and completion.
@@ -138,22 +138,22 @@ namespace Media.Rtsp
         /// <summary>
         /// As given by the OPTIONS response or set otherwise.
         /// </summary>
-        public readonly HashSet<string> SupportedFeatures = new HashSet<string>();
+        public readonly HashSet<string> SupportedFeatures = [];
 
         /// <summary>
         /// Values which will be set in the Required tag.
         /// </summary>
-        public readonly HashSet<string> RequiredFeatures = new HashSet<string>();
+        public readonly HashSet<string> RequiredFeatures = [];
 
         /// <summary>
         /// Any additional headers which may be required by the RtspClient.
         /// </summary>
-        public readonly Dictionary<string, string> AdditionalHeaders = new Dictionary<string, string>();
+        public readonly Dictionary<string, string> AdditionalHeaders = [];
 
         /// <summary>
         /// Gets the methods supported by the server recieved in the options request.
         /// </summary>
-        public readonly HashSet<string> SupportedMethods = new HashSet<string>();
+        public readonly HashSet<string> SupportedMethods = [];
 
         //Todo, should be property with protected set.
 
@@ -680,7 +680,7 @@ namespace Media.Rtsp
             {
                 if (Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient)) return null;
 
-                TimeSpan? startTime = default(TimeSpan?);
+                TimeSpan? startTime = default;
 
                 foreach (RtpClient.TransportContext tc in m_RtpClient.GetTransportContexts()) if (startTime.HasValue is false || tc.m_StartTime > startTime) startTime = tc.m_StartTime;
 
@@ -698,7 +698,7 @@ namespace Media.Rtsp
             {
                 if (Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient)) return null;
 
-                TimeSpan? endTime = default(TimeSpan?);
+                TimeSpan? endTime = default;
 
                 foreach (RtpClient.TransportContext tc in m_RtpClient.GetTransportContexts()) if (endTime.HasValue is false || tc.m_EndTime > endTime) endTime = tc.m_EndTime;
 
@@ -1779,9 +1779,8 @@ namespace Media.Rtsp
                     authenticateHeader = authenticateHeader.Substring(staleIndex);
                 }
 
-                bool stl;
 
-                if (bool.TryParse(authenticateHeader, out stl))
+                if (bool.TryParse(authenticateHeader, out bool stl))
                 {
                     if (stl is false) return response;
                 }

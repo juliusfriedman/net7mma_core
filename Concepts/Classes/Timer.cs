@@ -86,7 +86,7 @@ namespace Media.Concepts.Classes
 
         //
 
-        readonly internal Clock m_Clock = new Clock();
+        readonly internal Clock m_Clock = new();
 
         readonly internal Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<long> Producer;
 
@@ -334,7 +334,7 @@ namespace Media.UnitTests
         public void TestForOneTick()
         {
             //Create a Timer that will elapse every `OneMicrosecond`
-            using (Media.Concepts.Classes.Timer t = new Media.Concepts.Classes.Timer(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick))
+            using (Media.Concepts.Classes.Timer t = new(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick))
             {
                 int count = 0;
 
@@ -351,7 +351,7 @@ namespace Media.UnitTests
 
                 t.Tick += (ref long st) => { ++lastCounter; };
 
-                System.Diagnostics.Stopwatch testSw = new System.Diagnostics.Stopwatch();
+                System.Diagnostics.Stopwatch testSw = new();
 
                 t.Start();
 
@@ -362,7 +362,7 @@ namespace Media.UnitTests
                 System.Console.WriteLine("Started: " + t.m_Started.ToString("MM/dd/yyyy hh:mm:ss.ffffff tt"));
 
                 //Sleep the frequency
-                System.TimeSpan s = new System.TimeSpan(((long)t.m_Ticks + testSw.ElapsedTicks));
+                System.TimeSpan s = new(((long)t.m_Ticks + testSw.ElapsedTicks));
 
                 while (s < t.Frequency)
                 {
@@ -427,7 +427,7 @@ namespace Media.UnitTests
         public void TestForOneMillisecond()
         {
             //Create a Timer that will elapse every `OneMicrosecond`
-            using (Media.Concepts.Classes.Timer t = new Media.Concepts.Classes.Timer(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneMillisecond))
+            using (Media.Concepts.Classes.Timer t = new(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneMillisecond))
             {
                 int count = 0;
 
@@ -444,7 +444,7 @@ namespace Media.UnitTests
 
                 t.Tick += (ref long st) => { ++lastCounter; };
 
-                System.Diagnostics.Stopwatch testSw = new System.Diagnostics.Stopwatch();
+                System.Diagnostics.Stopwatch testSw = new();
 
                 t.Start();
 
@@ -455,7 +455,7 @@ namespace Media.UnitTests
                 System.Console.WriteLine("Started: " + t.m_Started.ToString("MM/dd/yyyy hh:mm:ss.ffffff tt"));
 
                 //Sleep the frequency
-                System.TimeSpan s = new System.TimeSpan(((long)t.m_Ticks + testSw.ElapsedTicks));
+                System.TimeSpan s = new(((long)t.m_Ticks + testSw.ElapsedTicks));
 
                 while (s < t.Frequency)
                 {
@@ -521,7 +521,7 @@ namespace Media.UnitTests
         public void TestForOneMicrosecond()
         {
             //Create a Timer that will elapse every `OneMicrosecond`
-            using (Media.Concepts.Classes.Timer t = new Media.Concepts.Classes.Timer(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond))
+            using (Media.Concepts.Classes.Timer t = new(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond))
             {
                 int count = 0;
 
@@ -538,7 +538,7 @@ namespace Media.UnitTests
 
                 t.Tick += (ref long st) => { ++lastCounter; };
 
-                System.Diagnostics.Stopwatch testSw = new System.Diagnostics.Stopwatch();
+                System.Diagnostics.Stopwatch testSw = new();
 
                 t.Start();
 
@@ -549,7 +549,7 @@ namespace Media.UnitTests
                 System.Console.WriteLine("Started: " + t.m_Started.ToString("MM/dd/yyyy hh:mm:ss.ffffff tt"));
 
                 //Sleep the frequency
-                System.TimeSpan s = new System.TimeSpan(((long)t.m_Ticks + testSw.ElapsedTicks + 1));
+                System.TimeSpan s = new(((long)t.m_Ticks + testSw.ElapsedTicks + 1));
 
                 while (s < t.Frequency)
                 {
@@ -612,7 +612,7 @@ namespace Media.UnitTests
 
         public void TestForZero()
         {
-            using (Media.Concepts.Classes.Timer t = new Media.Concepts.Classes.Timer(System.TimeSpan.Zero))
+            using (Media.Concepts.Classes.Timer t = new(System.TimeSpan.Zero))
             {
                 int count = 0;
 
@@ -629,7 +629,7 @@ namespace Media.UnitTests
 
                 t.Tick += (ref long st) => { ++lastCounter; };
 
-                System.Diagnostics.Stopwatch testSw = new System.Diagnostics.Stopwatch();
+                System.Diagnostics.Stopwatch testSw = new();
 
                 t.Start();
 
@@ -640,7 +640,7 @@ namespace Media.UnitTests
                 System.Console.WriteLine("Started: " + t.m_Started.ToString("MM/dd/yyyy hh:mm:ss.ffffff tt"));
 
                 //Sleep the frequency
-                System.TimeSpan s = new System.TimeSpan(((long)t.m_Ticks + testSw.ElapsedTicks + 1));
+                System.TimeSpan s = new(((long)t.m_Ticks + testSw.ElapsedTicks + 1));
 
                 while (s < t.Frequency)
                 {
@@ -704,7 +704,7 @@ namespace Media.UnitTests
         public void TestForTwentyMicroseconds()
         {
             //Create a Timer that will elapse every `OneMicrosecond`
-            using (Media.Concepts.Classes.Timer t = new Media.Concepts.Classes.Timer(new System.TimeSpan(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond.Ticks * 20)))
+            using (Media.Concepts.Classes.Timer t = new(new System.TimeSpan(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond.Ticks * 20)))
             {
                 int count = 0;
 
@@ -721,7 +721,7 @@ namespace Media.UnitTests
 
                 t.Tick += (ref long st) => { ++lastCounter; };
 
-                System.Diagnostics.Stopwatch testSw = new System.Diagnostics.Stopwatch();
+                System.Diagnostics.Stopwatch testSw = new();
 
                 t.Start();
 
@@ -732,7 +732,7 @@ namespace Media.UnitTests
                 System.Console.WriteLine("Started: " + t.m_Started.ToString("MM/dd/yyyy hh:mm:ss.ffffff tt"));
 
                 //Sleep the frequency
-                System.TimeSpan s = new System.TimeSpan(((long)t.m_Ticks + testSw.ElapsedTicks + 1));
+                System.TimeSpan s = new(((long)t.m_Ticks + testSw.ElapsedTicks + 1));
 
                 while (s < t.Frequency)
                 {

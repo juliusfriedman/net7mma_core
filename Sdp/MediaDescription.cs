@@ -94,7 +94,7 @@ namespace Media.Sdp
         //LinesByType etc...
 
         //Keep in mind that adding/removing or changing lines should change the version of the parent SessionDescription
-        internal List<SessionDescriptionLine> m_Lines = new List<SessionDescriptionLine>();
+        internal List<SessionDescriptionLine> m_Lines = [];
 
         #endregion
 
@@ -145,7 +145,7 @@ namespace Media.Sdp
 
         public IEnumerable<SessionDescriptionLine> Lines
         {
-            get { return ((IEnumerable<SessionDescriptionLine>)this); }
+            get { return this; }
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace Media.Sdp
         public MediaDescription(MediaType mediaType, string mediaProtocol, string mediaFormat, int mediaPort = 0, bool shouldDispose = true)
             : base(shouldDispose)
         {
-            MediaDescriptionLine = new Sdp.Lines.SessionMediaDescriptionLine();
+            MediaDescriptionLine = [];
             MediaType = mediaType;
             MediaPort = mediaPort;
             MediaProtocol = mediaProtocol;
@@ -216,9 +216,8 @@ namespace Media.Sdp
                 }
                 else
                 {
-                    SessionDescriptionLine parsed;
 
-                    if (SessionDescriptionLine.TryParse(sdpLines, ref index, out parsed)) m_Lines.Add(parsed);
+                    if (SessionDescriptionLine.TryParse(sdpLines, ref index, out SessionDescriptionLine parsed)) m_Lines.Add(parsed);
                     else index++;
                 }
             }
@@ -349,7 +348,7 @@ namespace Media.Sdp
 
         public string ToString(SessionDescription sdp = null)
         {
-            StringBuilder buffer = new StringBuilder();
+            StringBuilder buffer = new();
 
             //Check if the mapping matches..., should not be done at this level.
             //All instance still need the sdp in ToString to check if the encoding matches?

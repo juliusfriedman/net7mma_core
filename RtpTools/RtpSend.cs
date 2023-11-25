@@ -225,7 +225,7 @@ namespace Media.RtpTools
             /// <summary>
             /// Used when no PayloadDescription is known this description is used.
             /// </summary>
-            public static PayloadDescription Unknown = new PayloadDescription()
+            public static PayloadDescription Unknown = new()
             {
                 EncodingName = "Unknown",
                 Clockrate = -1,
@@ -236,7 +236,7 @@ namespace Media.RtpTools
             /// <summary>
             /// Used for dynamic unknown formats
             /// </summary>
-            public static PayloadDescription Dynamic = new PayloadDescription()
+            public static PayloadDescription Dynamic = new()
             {
                 EncodingName = "Dynamic",
                 Clockrate = -1,
@@ -244,7 +244,7 @@ namespace Media.RtpTools
                 Channel = 0 //1
             };
 
-            public static PayloadDescription Reverved = new PayloadDescription()
+            public static PayloadDescription Reverved = new()
             {
                 EncodingName = "Reserved",
                 Clockrate = -1,
@@ -252,7 +252,7 @@ namespace Media.RtpTools
                 Channel = 0 //1
             };
 
-            public static PayloadDescription Unassigned = new PayloadDescription()
+            public static PayloadDescription Unassigned = new()
             {
                 EncodingName = "Unassigned",
                 Clockrate = -1,
@@ -260,7 +260,7 @@ namespace Media.RtpTools
                 Channel = 0 //1
             };
 
-            public static PayloadDescription ConflictAvoidance = new PayloadDescription()
+            public static PayloadDescription ConflictAvoidance = new()
             {
                 EncodingName = "RTCP conflict avoidance (Reserved)",
                 Clockrate = -1,
@@ -310,7 +310,7 @@ namespace Media.RtpTools
         /// <summary>
         /// Used internally, should possibly allow for registration and expansion.
         /// </summary>
-        static internal Dictionary<byte, PayloadDescription> PayloadDescriptions = new Dictionary<byte, PayloadDescription>()
+        static internal Dictionary<byte, PayloadDescription> PayloadDescriptions = new()
         {
             {0, new PayloadDescription() {EncodingName = "PCMU", Clockrate = 8000, Channel = 1, PayloadType = 0 } },
             {1, new PayloadDescription() {EncodingName = "1016", Clockrate = 8000, Channel = 1, PayloadType = 1 } },
@@ -462,13 +462,13 @@ namespace Media.RtpTools
         {
             if (sdes is null || sdes.IsDisposed) return string.Empty;
 
-            StringBuilder blockStringBuilder = new StringBuilder(sdes.BlockCount * Rtcp.SourceDescriptionReport.SourceDescriptionItem.ItemHeaderSize);
+            StringBuilder blockStringBuilder = new(sdes.BlockCount * Rtcp.SourceDescriptionReport.SourceDescriptionItem.ItemHeaderSize);
 
             //The blockString is formatted per chunk of the sdes
             foreach (Media.Rtcp.SourceDescriptionReport.SourceDescriptionChunk chunk in sdes)
             {
                 //A SDES packet description requires an item sub description in `QuotedFormat`
-                StringBuilder itemStringBuilder = new StringBuilder();
+                StringBuilder itemStringBuilder = new();
 
                 int countMinus1 = -1;
 
@@ -536,7 +536,7 @@ namespace Media.RtpTools
             StringBuilder hexPayload = format == FileFormat.Hex ? new StringBuilder(64) : null;
 
             //And the overall result in another
-            StringBuilder builder = new StringBuilder(64);
+            StringBuilder builder = new(64);
 
             int totalLength = 0;
 
@@ -598,7 +598,7 @@ namespace Media.RtpTools
                     source.Port.ToString());
             }
 
-            StringBuilder builder = new StringBuilder(64);
+            StringBuilder builder = new(64);
 
             //All Rtp are described with this format
             builder.Append(string.Format(RtpSend.Format,
@@ -645,7 +645,7 @@ namespace Media.RtpTools
                 //csrc=<CSRC>
                 //This is basically the same thing and a parsing semantic.
 
-                using (Media.RFC3550.SourceList sl = new Media.RFC3550.SourceList(packet))
+                using (Media.RFC3550.SourceList sl = new(packet))
                 {
                     if (!sl.IsComplete)
                     {
@@ -1024,9 +1024,8 @@ namespace Media.RtpTools
 
                                     token = token.Remove(token.Length - 1).Replace(HexSpecifier, string.Empty);
 
-                                    int ssrc = 0;
 
-                                    if (!int.TryParse(token, out ssrc)) //plain int                        
+                                    if (!int.TryParse(token, out int ssrc)) //plain int                        
                                         ssrc = int.Parse(token, System.Globalization.NumberStyles.HexNumber);//hex
 
                                     System.Diagnostics.Debug.WriteLine(ssrc);
@@ -1181,8 +1180,7 @@ namespace Media.RtpTools
             if (payloadType >= 35 && payloadType <= 71 || payloadType >= 77 && payloadType < RtpSend.PayloadDescription.Dynamic.PayloadType) return RtpSend.PayloadDescription.Unassigned.EncodingName;
 
             //Default to unknown if not found
-            RtpSend.PayloadDescription description;
-            if (false == RtpSend.PayloadDescriptions.TryGetValue((byte)packet.PayloadType, out description)) return RtpSend.PayloadDescription.Unknown.EncodingName;
+            if (false == RtpSend.PayloadDescriptions.TryGetValue((byte)packet.PayloadType, out RtpSend.PayloadDescription description)) return RtpSend.PayloadDescription.Unknown.EncodingName;
 
             //Return the name as found
             return description.EncodingName;

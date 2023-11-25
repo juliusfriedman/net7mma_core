@@ -94,7 +94,7 @@ namespace Media.Common.Extensions.NetworkInterface
                 }
             }
 
-            return default(System.Net.NetworkInformation.NetworkInterface);
+            return default;
         }
 
         /// <summary>

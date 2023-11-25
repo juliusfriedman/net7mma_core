@@ -59,7 +59,7 @@ namespace Media.Common.Extensions.Encoding
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int GetByteCount(this System.Text.Encoding encoding, params char[] chars)
         {
-            if (encoding is null) encoding = System.Text.Encoding.Default;
+            encoding ??= System.Text.Encoding.Default;
 
             return encoding.GetByteCount(chars);
         }
@@ -82,9 +82,9 @@ namespace Media.Common.Extensions.Encoding
 
         public static bool ReadDelimitedDataFrom(this System.Text.Encoding encoding, byte[] buffer, char[] delimits, long offset, long count, out string result, out long read, bool includeDelimits = true)
         {
-            int intCount = (int)count, intOffset = (int)offset, intRead = 0;
+            int intCount = (int)count, intOffset = (int)offset;
 
-            bool readResult = ReadDelimitedDataFrom(encoding, buffer, delimits, intOffset, intCount, out result, out intRead, out System.Exception any, includeDelimits);
+            bool readResult = ReadDelimitedDataFrom(encoding, buffer, delimits, intOffset, intCount, out result, out int intRead, out System.Exception any, includeDelimits);
 
             read = intRead;
 
@@ -103,11 +103,10 @@ namespace Media.Common.Extensions.Encoding
             //Todo, check for large delemits and use a hash or always use a hash.
             //System.Collections.Generic.HashSet<char> delimitsC = new System.Collections.Generic.HashSet<char>(delimits);
 
-            if (delimits is null) delimits = EmptyChar;
+            delimits ??= EmptyChar;
 
-            int max;
 
-            if (count is Common.Binary.Zero || Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer, out max))
+            if (count is Common.Binary.Zero || Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer, out int max))
             {
                 result = null;
 
@@ -138,11 +137,8 @@ namespace Media.Common.Extensions.Encoding
 
             toRead = delemitsLength <= Common.Binary.Zero ? count : Common.Binary.Max(1, delemitsLength);
 
-            bool complete;
 
-            int charsUsed;
 
-            int justRead;
 
             //Could use Pool to save allocatios until StringBuilder can handle char*
             char[] results = new char[toRead];
@@ -153,7 +149,7 @@ namespace Media.Common.Extensions.Encoding
 #if UNSAFE
                 unsafe { decoder.Convert((byte*)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<byte>(buffer, offset), count, (char*)System.Runtime.InteropServices.Marshal.UnsafeAddrOfPinnedArrayElement<char>(results, 0), toRead, count <= 0, out justRead, out charsUsed, out complete); }
 #else
-                decoder.Convert(buffer, offset, count, results, 0, toRead, count <= 0, out justRead, out charsUsed, out complete);
+                decoder.Convert(buffer, offset, count, results, 0, toRead, count <= 0, out int justRead, out int charsUsed, out bool complete);
 #endif
 
                 //If there are not enough bytes to decode the char
@@ -230,7 +226,7 @@ namespace Media.Common.Extensions.Encoding
             //Todo, check for large delemits and use a hash or always use a hash.
             //System.Collections.Generic.HashSet<char> delimitsC = new System.Collections.Generic.HashSet<char>(delimits);
 
-            if (delimits is null) delimits = EmptyChar;
+            delimits ??= EmptyChar;
 
             if (stream is null || stream.CanRead is false || count is Common.Binary.Zero)
             {
@@ -245,7 +241,7 @@ namespace Media.Common.Extensions.Encoding
             if (at >= stream.Length) return false;
 
             //Use default..
-            if (encoding is null) encoding = System.Text.Encoding.Default;
+            encoding ??= System.Text.Encoding.Default;
 
             System.Text.StringBuilder builder = null;
 
@@ -329,16 +325,14 @@ namespace Media.Common.Extensions.Encoding
         [CLSCompliant(false)]
         public static bool ReadDelimitedDataFrom(this System.Text.Encoding encoding, System.IO.Stream stream, char[] delimits, ulong count, out string result, out ulong read, bool includeDelimits = true)
         {
-            System.Exception encountered;
 
-            return ReadDelimitedDataFrom(encoding, stream, delimits, count, out result, out read, out encountered, includeDelimits);
+            return ReadDelimitedDataFrom(encoding, stream, delimits, count, out result, out read, out System.Exception encountered, includeDelimits);
         }
 
         public static bool ReadDelimitedDataFrom(this System.Text.Encoding encoding, System.IO.Stream stream, char[] delimits, long count, out string result, out long read, out System.Exception any, bool includeDelimits = true)
         {
-            ulong cast;
 
-            bool found = ReadDelimitedDataFrom(encoding, stream, delimits, (ulong)count, out result, out cast, out any, includeDelimits);
+            bool found = ReadDelimitedDataFrom(encoding, stream, delimits, (ulong)count, out result, out ulong cast, out any, includeDelimits);
 
             read = (int)cast;
 
@@ -347,9 +341,8 @@ namespace Media.Common.Extensions.Encoding
 
         public static bool ReadDelimitedDataFrom(this System.Text.Encoding encoding, System.IO.Stream stream, char[] delimits, int count, out string result, out int read, bool includeDelimits = true)
         {
-            ulong cast;
 
-            bool found = ReadDelimitedDataFrom(encoding, stream, delimits, (ulong)count, out result, out cast, includeDelimits);
+            bool found = ReadDelimitedDataFrom(encoding, stream, delimits, (ulong)count, out result, out ulong cast, includeDelimits);
 
             read = (int)cast;
 
@@ -358,9 +351,8 @@ namespace Media.Common.Extensions.Encoding
 
         public static bool ReadDelimitedDataFrom(this System.Text.Encoding encoding, System.IO.Stream stream, char[] delimits, long count, out string result, out long read, bool includeDelimits = true)
         {
-            ulong cast;
 
-            bool found = ReadDelimitedDataFrom(encoding, stream, delimits, (ulong)count, out result, out cast, includeDelimits);
+            bool found = ReadDelimitedDataFrom(encoding, stream, delimits, (ulong)count, out result, out ulong cast, includeDelimits);
 
             read = (long)cast;
 
@@ -405,7 +397,7 @@ namespace Media.Common.Extensions.Encoding
         public static char[] GetChars(this System.Text.Encoding encoding, byte[] toEncode, int offset, int count)
         {
             //Use default..
-            if (encoding is null) encoding = System.Text.Encoding.Default;
+            encoding ??= System.Text.Encoding.Default;
 
             return encoding.GetChars(toEncode, offset, count);
         }
@@ -444,7 +436,7 @@ namespace Media.Common.Extensions.Encoding
         public static char[] GetChars(this System.Text.Decoder decoder, byte[] toEncode, int offset, int count)
         {
             //Use default..
-            if (decoder is null) decoder = System.Text.Encoding.Default.GetDecoder();
+            decoder ??= System.Text.Encoding.Default.GetDecoder();
 
             return decoder.GetChars(toEncode, offset, count);
         }
@@ -516,13 +508,11 @@ namespace Media.UnitTests
                         //Go back to the beginning
                         ms.Position = 0;
 
-                        string actual;
 
-                        int read;
 
                         //Ensure that was read correctly using the binary length and not the string length
                         //(should try to over read)
-                        if (false != Media.Common.Extensions.Encoding.EncodingExtensions.ReadDelimitedDataFrom(encoding, ms, null, encodedDataLength, out actual, out read))
+                        if (false != Media.Common.Extensions.Encoding.EncodingExtensions.ReadDelimitedDataFrom(encoding, ms, null, encodedDataLength, out string actual, out int read))
                         {
                             throw new System.Exception("ReadDelimitedDataFrom failed.");
                         }

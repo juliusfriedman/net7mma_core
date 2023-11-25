@@ -270,7 +270,7 @@ namespace Media.Common.Extensions.Stream
             {
                 //internal readonly DisposeSink ds = new DisposeSink();
 
-                readonly LifetimeDisposable Composed = new LifetimeDisposable(false);
+                readonly LifetimeDisposable Composed = new(false);
 
                 internal System.IO.Stream ResponseStream;
 
@@ -360,7 +360,7 @@ namespace Media.Common.Extensions.Stream
             {
                 if (location is null) throw new System.ArgumentNullException("location");
 
-                using (WebClientEx webClient = new WebClientEx(location))
+                using (WebClientEx webClient = new(location))
                 {
                     if (credential is not null) webClient.Credentials = credential;
 
@@ -441,7 +441,7 @@ namespace Media.Common.Extensions.Stream
                 get { return this; }
             }
 
-            public readonly System.Threading.SemaphoreSlim SemaphoreSlim = new System.Threading.SemaphoreSlim(1);
+            public readonly System.Threading.SemaphoreSlim SemaphoreSlim = new(1);
 
             System.Threading.WaitHandle System.IAsyncResult.AsyncWaitHandle
             {

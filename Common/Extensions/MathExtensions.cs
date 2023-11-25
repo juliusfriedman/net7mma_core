@@ -62,7 +62,7 @@ namespace Media.Common.Extensions.Math
 
         public static long GreatestCommonDivisor(long a, long b) { return GreatestCommonDivisor(ref a, ref b); }
 
-        public static int GreatestCommonDivisor(int a, int b) { return (int)GreatestCommonDivisor((long)a, (long)b); }
+        public static int GreatestCommonDivisor(int a, int b) { return (int)GreatestCommonDivisor(a, (long)b); }
 
         [System.CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -73,7 +73,7 @@ namespace Media.Common.Extensions.Math
 
         public static long LeastCommonMultiple(long a, long b) { return LeastCommonMultiple(ref a, ref b); }
 
-        public static int LeastCommonMultiple(int a, int b) { return (int)LeastCommonMultiple((long)a, (long)b); }
+        public static int LeastCommonMultiple(int a, int b) { return (int)LeastCommonMultiple(a, (long)b); }
 
         [System.CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -100,7 +100,7 @@ namespace Media.Common.Extensions.Math
 
         public static long GreatestCommonMultiple(long a, long b) { return GreatestCommonMultiple(ref a, ref b); }
 
-        public static int GreatestCommonMultiple(int a, int b) { return (int)GreatestCommonMultiple((long)a, (long)b); }
+        public static int GreatestCommonMultiple(int a, int b) { return (int)GreatestCommonMultiple(a, (long)b); }
 
         public static byte Clamp(byte value, byte min, byte max)
         {

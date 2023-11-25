@@ -147,7 +147,7 @@ namespace Media.Rtsp//.Server
 
         //Session storage
         //Counters for authenticate and attempts should use static key names, maybe use a dictionary..
-        internal System.Collections.Hashtable Storage = System.Collections.Hashtable.Synchronized(new System.Collections.Hashtable());
+        internal System.Collections.Hashtable Storage = System.Collections.Hashtable.Synchronized([]);
 
         //Keep track of the last send or receive when using Async
         internal SocketAsyncEventArgs LastRecieve, LastSend;
@@ -163,15 +163,15 @@ namespace Media.Rtsp//.Server
         /// </summary>
         //internal HashSet<SourceStream> AttachedSources = new HashSet<SourceStream>();
 
-        internal readonly Dictionary<RtpClient.TransportContext, Media.Rtsp.Server.SourceMedia> Attached = new();
+        internal readonly Dictionary<RtpClient.TransportContext, Media.Rtsp.Server.SourceMedia> Attached = [];
 
-        internal readonly HashSet<Guid> Playing = new();
+        internal readonly HashSet<Guid> Playing = [];
 
         /// <summary>
         /// A one to many collection which is keyed by the source media's SSRC to which subsequently the values are packets which also came from the source
         /// Should be a Guid and be the Id of the Media.
         /// </summary>
-        internal Common.Collections.Generic.ConcurrentThesaurus<int, RtpPacket> PacketBuffer = new();
+        internal Common.Collections.Generic.ConcurrentThesaurus<int, RtpPacket> PacketBuffer = [];
 
         /// <summary>
         /// Used to assign the function which decides if packets `re good or bad.
@@ -674,7 +674,7 @@ namespace Media.Rtsp//.Server
                 //localContext.SenderTransit = tc.RtpTransit;
                 //localContext.SenderJitter = tc.RtpJitter;
 
-                using (Rtcp.SendersReport sr = new SendersReport(packet, false))
+                using (Rtcp.SendersReport sr = new(packet, false))
                 {
                     //Some senders may disable timestamps by using 0 here
                     localContext.SenderNtpTimestamp = sr.NtpTimestamp;
@@ -1012,16 +1012,15 @@ namespace Media.Rtsp//.Server
 
             //Prepare the RtpInfo header
             //Iterate the source's TransportContext's to Augment the RtpInfo header for the current request
-            List<string> rtpInfos = new();
+            List<string> rtpInfos = [];
 
             //rtsp://10.0.57.48/live/4899afda-facf-4332-8cfb-7ff5e79b6d04 
             //Check for bugs... playRequest.Location.Segments.Last()
             string lastSegment = playRequest.Location.Segments.Last();
 
-            Sdp.MediaType mediaType;
 
             //If the mediaType was specified there will be /audio or video and that will compare to the lastSegment, 3 previously would be parsed as text etc.
-            if (Enum.TryParse(lastSegment, true, out mediaType) && string.Compare(lastSegment, mediaType.ToString(), true) is 0)
+            if (Enum.TryParse(lastSegment, true, out Sdp.MediaType mediaType) && string.Compare(lastSegment, mediaType.ToString(), true) is 0)
             {
                 var sourceContext = sourceAvailable.FirstOrDefault(tc => tc.MediaDescription.MediaType == mediaType);
 
@@ -1218,7 +1217,7 @@ namespace Media.Rtsp//.Server
 
                 //a 256 byte array of channels in use would only be so useful as scanning it would take time.
 
-                HashSet<byte> unique = new();
+                HashSet<byte> unique = [];
 
                 foreach (var tc in interleavedConexts)
                 {
@@ -1254,7 +1253,7 @@ namespace Media.Rtsp//.Server
             bool rtcpDisabled = sourceStream.m_DisableQOS;
 
             //Values in the header we need
-            int clientRtpPort = -1, clientRtcpPort = -1, serverRtpPort = -1, serverRtcpPort = -1, localSsrc = 0, remoteSsrc = 0;
+            int clientRtpPort = -1, clientRtcpPort = -1, serverRtpPort = -1, serverRtcpPort = -1, remoteSsrc = 0;
 
             //Cache this to prevent having to go to get it every time down the line
             IPAddress sourceIp = IPAddress.Any, destinationIp = sourceIp;
@@ -1266,7 +1265,7 @@ namespace Media.Rtsp//.Server
             if (string.IsNullOrWhiteSpace(transportHeader) ||
                 transportHeader.Contains("RTP") is false || //Todo, IndexOf ignore case >= 0
                 false.Equals(RtspHeaders.TryParseTransportHeader(transportHeader,
-                    out localSsrc, out sourceIp, out serverRtpPort, out serverRtcpPort, out clientRtpPort, out clientRtcpPort,
+                    out int localSsrc, out sourceIp, out serverRtpPort, out serverRtcpPort, out clientRtpPort, out clientRtcpPort,
                     out bool interleaved, out byte dataChannel, out byte controlChannel, out string mode, out bool unicast, out bool multicast, out destinationIp, out int ttl)))
             {
                 return CreateRtspResponse(request, RtspStatusCode.BadRequest, null, "Invalid Transport Header");
@@ -1399,13 +1398,14 @@ namespace Media.Rtsp//.Server
                 if (Common.IDisposedExtensions.IsNullOrDisposed(m_RtpClient))
                 {
                     //Create a sender using a new segment on the existing buffer.
-                    m_RtpClient = new RtpClient(new Common.MemorySegment(m_Buffer));
+                    m_RtpClient = new RtpClient(new Common.MemorySegment(m_Buffer))
+                    {
+                        //Dont handle frame changed events from the client
+                        FrameChangedEventsEnabled = false,
 
-                    //Dont handle frame changed events from the client
-                    m_RtpClient.FrameChangedEventsEnabled = false;
-
-                    //Dont handle packets from the client
-                    m_RtpClient.HandleIncomingRtpPackets = false;
+                        //Dont handle packets from the client
+                        HandleIncomingRtpPackets = false
+                    };
 
                     //Attach the Interleaved data event
                     m_RtpClient.OutOfBandData += ProcessClientSessionBuffer;
@@ -1501,8 +1501,8 @@ namespace Media.Rtsp//.Server
 #endif
 
                     //Create a new Interleave (don't use what was given as data or control channels)
-                    setupContext = new RtpClient.TransportContext((byte)(dataChannel = 0),
-                        (byte)(controlChannel = 1),
+                    setupContext = new RtpClient.TransportContext(dataChannel = 0,
+                        controlChannel = 1,
                         localSsrc,
                         mediaDescription,
                         m_RtspSocket,

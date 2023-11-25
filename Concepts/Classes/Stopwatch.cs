@@ -200,10 +200,10 @@ namespace Media.UnitTests
     {
         public void TestForOneMicrosecond()
         {
-            System.Collections.Generic.List<System.Tuple<bool, System.TimeSpan, System.TimeSpan>> l = new System.Collections.Generic.List<System.Tuple<bool, System.TimeSpan, System.TimeSpan>>();
+            System.Collections.Generic.List<System.Tuple<bool, System.TimeSpan, System.TimeSpan>> l = [];
 
             //Create a Timer that will elapse every `OneMicrosecond`
-            for (int i = 0; i < 250; ++i) using (Media.Concepts.Classes.Stopwatch sw = new Media.Concepts.Classes.Stopwatch())
+            for (int i = 0; i < 250; ++i) using (Media.Concepts.Classes.Stopwatch sw = new())
                 {
                     var started = System.DateTime.UtcNow;
 
@@ -212,7 +212,7 @@ namespace Media.UnitTests
                     //Define some amount of time
                     System.TimeSpan sleepTime = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond;
 
-                    System.Diagnostics.Stopwatch testSw = new System.Diagnostics.Stopwatch();
+                    System.Diagnostics.Stopwatch testSw = new();
 
                     //Start
                     testSw.Start();

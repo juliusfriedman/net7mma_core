@@ -18,7 +18,7 @@ namespace Media.Container
             return new System.IO.FileInfo(CurrentWorkingDirectory);
         }
 
-        static Dictionary<string, MediaFileStream> m_ExtensionMap = new Dictionary<string, MediaFileStream>();
+        static Dictionary<string, MediaFileStream> m_ExtensionMap = [];
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         public static bool TryRegisterExtension(string extenstion, MediaFileStream implementation)
@@ -64,7 +64,7 @@ namespace Media.Container
 
             //object[] args = new object[] { fileName };
 
-            System.IO.FileStream fs = new System.IO.FileStream(fileName, mode, access);
+            System.IO.FileStream fs = new(fileName, mode, access);
 
             object[] args = null;
 
@@ -336,7 +336,7 @@ namespace Media.Container
                 if (m_NodeCache is not null)
                     m_NodeCache.Clear();
                 else
-                    m_NodeCache = new SortedDictionary<long, Node>();
+                    m_NodeCache = [];
         }
 
         public void RemoveCachingPolicy() { RemoveCachingPolicy(m_NodeCachingPolicy); }

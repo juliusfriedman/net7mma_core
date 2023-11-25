@@ -155,7 +155,7 @@ namespace Media
 
             if (first.Padding) throw new InvalidOperationException("Only the last packet in a compound RtcpPacket may have padding");
 
-            int firstPayloadType = first.PayloadType, ssrc = first.SynchronizationSourceIdentifier, totalLength = (int)first.Length;
+            int firstPayloadType = first.PayloadType, ssrc = first.SynchronizationSourceIdentifier, totalLength = first.Length;
 
             //When respecting RFC3550 the first packet must be a SendersReport or Receivers report with the version of 2, the version is implicit from the header at this point.
             if (false == IsValidRtcpHeader(first.Header, first.Version)) throw new InvalidOperationException("A Compound packet must start with either a SendersReport or a ReceiversReport.");
@@ -167,7 +167,7 @@ namespace Media
             foreach (RtcpPacket packet in packets.Skip(1))
             {
                 //Summize the length
-                totalLength += (int)packet.Length;
+                totalLength += packet.Length;
 
                 //New ssrc resets the required packets in the sequence
                 if (packet.SynchronizationSourceIdentifier != ssrc) hasSourceDescription = hasCName = false;
@@ -179,7 +179,7 @@ namespace Media
                     hasSourceDescription = true;
 
                     //if not already checked for a cname check now
-                    if (packet.BlockCount > 0) using (SourceDescriptionReport asReport = new SourceDescriptionReport(packet, false)) if ((hasCName = asReport.HasCName)) break;
+                    if (packet.BlockCount > 0) using (SourceDescriptionReport asReport = new(packet, false)) if ((hasCName = asReport.HasCName)) break;
                 }
             }
 
@@ -347,7 +347,7 @@ namespace Media
                     hasSourceDescription = true;
 
                     //if not already checked for a cname check now
-                    if (currentPacket.BlockCount > 0) using (SourceDescriptionReport asReport = new SourceDescriptionReport(currentPacket, false)) if ((hasCName = asReport.HasCName)) break;
+                    if (currentPacket.BlockCount > 0) using (SourceDescriptionReport asReport = new(currentPacket, false)) if ((hasCName = asReport.HasCName)) break;
                 }
 
                 if (hasSourceDescription && false == hasCName) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(currentPacket, "Invalid compound data, Source Description report did not have a CName SourceDescriptionItem.");
@@ -574,7 +574,7 @@ namespace Media
                 {
                     RtpProbation--;
 
-                    RtpMaxSeq = (ushort)sequenceNumber;
+                    RtpMaxSeq = sequenceNumber;
 
                     //If no more probation is required then reset the coutners and indicate the packet is in state
                     if (RtpProbation is 0)
@@ -590,7 +590,7 @@ namespace Media
                 RtpProbation = (uint)(MinimumSequentialValidRtpPackets - 1);
 
                 //Reset the sequence number
-                RtpMaxSeq = (ushort)sequenceNumber;
+                RtpMaxSeq = sequenceNumber;
 
                 //The packet is not in state
                 return false;
@@ -607,7 +607,7 @@ namespace Media
                 }
 
                 //Set the maximum sequence number
-                RtpMaxSeq = (ushort)sequenceNumber;
+                RtpMaxSeq = sequenceNumber;
             }
             else if (udelta <= RTP_SEQ_MOD - MaxMisorder)
             {
@@ -642,7 +642,7 @@ namespace Media
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void ResetRtpValidationCounters(ref ushort sequenceNumber, ref uint RtpBaseSeq, ref ushort RtpMaxSeq, ref uint RtpBadSeq, ref uint RtpSeqCycles, ref uint RtpReceivedPrior, ref uint RtpPacketsRecieved)
         {
-            RtpBaseSeq = RtpMaxSeq = (ushort)sequenceNumber;
+            RtpBaseSeq = RtpMaxSeq = sequenceNumber;
             RtpBadSeq = RTP_SEQ_MOD + 1;   /* so seq == bad_seq is false */
             RtpSeqCycles = RtpReceivedPrior = RtpPacketsRecieved = 0;
         }
@@ -657,7 +657,7 @@ namespace Media
             //should allow a backoff to occur in reporting and possibly eventually to be turned off.
             fraction = 0;
 
-            uint extended_max = (uint)(RtpSeqCycles + RtpMaxSeq);
+            uint extended_max = RtpSeqCycles + RtpMaxSeq;
 
             int expected = (int)(extended_max - RtpBaseSeq + 1);
 
@@ -669,7 +669,7 @@ namespace Media
 
             int received_interval = (int)(RtpPacketsRecieved - RtpReceivedPrior);
 
-            RtpReceivedPrior = (uint)RtpPacketsRecieved;
+            RtpReceivedPrior = RtpPacketsRecieved;
 
             int lost_interval = expected_interval - received_interval;
 
@@ -853,7 +853,7 @@ namespace Media
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static byte PacketOctet(int version, byte remainingBits)
             {
-                return (byte)(version << 6 | (byte)remainingBits);
+                return (byte)(version << 6 | remainingBits);
             }
 
             /// <summary>
@@ -1103,7 +1103,7 @@ namespace Media
                     if (unsigned > Binary.SevenBitMaxValue)
                         throw Binary.CreateOverflowException("RtpPayloadType", unsigned, byte.MinValue.ToString(), sbyte.MaxValue.ToString());
 
-                    Last8Bits = PackOctet(RtpMarker, (byte)unsigned);
+                    Last8Bits = PackOctet(RtpMarker, unsigned);
                 }
             }
 
@@ -1374,7 +1374,7 @@ namespace Media
             /// </summary>
             public const int MaxSize = ItemSize * MaxItems;
 
-            internal static readonly SourceList Empty = new SourceList(0, false);
+            internal static readonly SourceList Empty = new(0, false);
 
             #endregion
 
@@ -1720,7 +1720,7 @@ namespace Media
                 m_Read = 0;
 
                 //Reset the current source
-                m_CurrentSource = default(uint);
+                m_CurrentSource = default;
             }
 
             /// <summary>
@@ -1803,7 +1803,7 @@ namespace Media
 
             IEnumerator<uint> IEnumerable<uint>.GetEnumerator()
             {
-                using (SourceList enumerator = new SourceList(this))
+                using (SourceList enumerator = new(this))
                 {
                     if (enumerator.m_Read > 0) yield return m_CurrentSource;
 
@@ -1909,7 +1909,7 @@ namespace Media.UnitTests
     {
         public static void TestSourceList()
         {
-            using Media.RFC3550.SourceList sourceList = new RFC3550.SourceList(0);
+            using Media.RFC3550.SourceList sourceList = new(0);
 
             if (sourceList.Count != 0) throw new System.Exception("Count");
         }

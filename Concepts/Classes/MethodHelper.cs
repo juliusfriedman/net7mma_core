@@ -107,7 +107,7 @@ namespace Media.Concepts.Classes
 
         static void Main(string[] args)
         {
-            Target targetInstance = new Target();
+            Target targetInstance = new();
 
             System.Type targetType = typeof(Target);
 

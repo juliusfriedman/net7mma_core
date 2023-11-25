@@ -88,10 +88,10 @@ public class RFC7655Media : RtpAudioSink
         var transportContext = RtpClient.GetContextBySourceId(SourceId);
 
         //Create a frame
-        RtpFrame newFrame = new RtpFrame();
+        RtpFrame newFrame = [];
 
         //Create the packet
-        RtpPacket newPacket = new RtpPacket(length / 2 + RtpHeader.Length)
+        RtpPacket newPacket = new(length / 2 + RtpHeader.Length)
         {
             Timestamp = transportContext.SenderRtpTimestamp,
             SequenceNumber = transportContext.SendSequenceNumber,

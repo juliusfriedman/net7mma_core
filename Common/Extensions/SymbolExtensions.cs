@@ -172,7 +172,7 @@ namespace Media.Common.Extensions.ExpressionExtensions
         /// <returns></returns>
         public static MethodInfo LoadGetter(Expression<Action> expression)
         {
-            return GetPropertyInfo((LambdaExpression)expression).GetMethod;
+            return GetPropertyInfo(expression).GetMethod;
         }
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace Media.Common.Extensions.ExpressionExtensions
         /// <returns></returns>
         public static MethodInfo LoadSetter(Expression<Action> expression)
         {
-            return GetPropertyInfo((LambdaExpression)expression).SetMethod;
+            return GetPropertyInfo(expression).SetMethod;
         }
 
         /// <summary>
@@ -311,14 +311,14 @@ namespace Media.UnitTests
             }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoOptimization)]
-            public T Method() { return default(T); }
+            public T Method() { return default; }
         }
 
         #endregion
 
         public void TestExpressionExtensions()
         {
-            MyTestClass testClass = new MyTestClass();
+            MyTestClass testClass = new();
 
             //Todo ... show how to allow to TypedReference use inside the body
             //System.TypedReference member = __makeref(testClass.Test);

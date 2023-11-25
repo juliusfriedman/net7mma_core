@@ -14,7 +14,7 @@ namespace Media.Http
 
         public readonly string ContentName;
 
-        public readonly Dictionary<string, string> Headers = new Dictionary<string, string>();
+        public readonly Dictionary<string, string> Headers = [];
 
         //public virtual long TryCalculateLength() { return 0; }
 
@@ -91,7 +91,7 @@ namespace Media.Http
         {
             string boundary = message.GetHeader(HttpHeaders.ContentType).Split(';').FirstOrDefault(s => s.StartsWith("boundary")).Substring(9);
 
-            MultipartContent result = new MultipartContent(boundary, message.ContentEncoding);
+            MultipartContent result = new(boundary, message.ContentEncoding);
 
             Receive:
             int received = client.HttpSocket.Receive(client.Buffer.Array);
@@ -113,7 +113,7 @@ namespace Media.Http
 
         static StreamContent Stream(HttpClient client, HttpMessage request, System.IO.Stream backing)
         {
-            StreamContent result = new StreamContent(backing ?? new System.IO.MemoryStream(client.Buffer.Array));
+            StreamContent result = new(backing ?? new System.IO.MemoryStream(client.Buffer.Array));
 
             return result;
         }
@@ -131,7 +131,7 @@ namespace Media.Http
 
         public readonly Common.MemorySegment Boundary;
 
-        public readonly List<HttpContent> Contents = new();
+        public readonly List<HttpContent> Contents = [];
 
         public void Add(HttpContent content)
         {

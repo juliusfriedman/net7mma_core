@@ -75,12 +75,14 @@ namespace Media.Cryptography
         {
             _data = new byte[AlignValue];
             _totalLength = _dataSize = Zero;
-            _abcd = new ABCDStruct();
-            //Intitial values as defined in RFC 1321
-            _abcd.A = AA;
-            _abcd.B = BB;
-            _abcd.C = CC;
-            _abcd.D = DD;
+            _abcd = new ABCDStruct
+            {
+                //Intitial values as defined in RFC 1321
+                A = AA,
+                B = BB,
+                C = CC,
+                D = DD
+            };
         }
 
         #endregion [Private - Instance]
@@ -184,7 +186,7 @@ namespace Media.Cryptography
             if (null == input) throw new System.ArgumentNullException("input", "Unable to calculate hash over null input data");
 
             //Intitial values defined in RFC 1321
-            ABCDStruct abcd = new ABCDStruct()
+            ABCDStruct abcd = new()
             {
                 A = AA,
                 B = BB,

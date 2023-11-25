@@ -254,7 +254,7 @@ namespace Media.Sdp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal void SetPart(int index, string value)
         {
-            if (value is null) value = string.Empty;
+            value ??= string.Empty;
 
             if (m_Parts.Count > index) m_Parts[index] = value;
         }

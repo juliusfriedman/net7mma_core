@@ -617,7 +617,7 @@ namespace Media.Containers.Matroska
     {
         const int DefaulTimeCodeScale = (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMillisecond, DefaultMaxIdSize = 4, DefaultMaxSizeLength = 8;
 
-        static DateTime BaseDate = new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        static DateTime BaseDate = new(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         static byte[] ReadIdentifier(System.IO.Stream reader, out int length)
         {
@@ -744,9 +744,9 @@ namespace Media.Containers.Matroska
         {
             if (Remaining <= 2) throw new System.IO.EndOfStreamException();
 
-            int read = 0, rTotal = 0;
+            int rTotal = 0;
 
-            byte[] identifier = ReadIdentifier(this, out read);
+            byte[] identifier = ReadIdentifier(this, out int read);
 
             rTotal += read;
 
@@ -983,9 +983,9 @@ namespace Media.Containers.Matroska
 
             if (!m_Created.HasValue) m_Created = FileInfo.CreationTimeUtc;
 
-            if (m_MuxingApp is null) m_MuxingApp = string.Empty;
+            m_MuxingApp ??= string.Empty;
 
-            if (m_WritingApp is null) m_WritingApp = string.Empty;
+            m_WritingApp ??= string.Empty;
 
             //Not in spec....
             m_Modified = FileInfo.LastWriteTimeUtc;
@@ -1209,14 +1209,14 @@ namespace Media.Containers.Matroska
                                 {
                                     byte info = (byte)stream.ReadByte();
 
-                                    if ((info & 1) == (int)info) mediaType = Sdp.MediaType.video;
-                                    else if ((info & 2) == (int)info) mediaType = Sdp.MediaType.audio;
+                                    if ((info & 1) == info) mediaType = Sdp.MediaType.video;
+                                    else if ((info & 2) == info) mediaType = Sdp.MediaType.audio;
                                     //Complex = 3
                                     //Logo = 0x10
                                     //Subtitle
-                                    else if ((info & 0x11) == (int)info) mediaType = Sdp.MediaType.text;
+                                    else if ((info & 0x11) == info) mediaType = Sdp.MediaType.text;
                                     //Buttons = 0x12
-                                    else if ((info & 0x20) == (int)info) mediaType = Sdp.MediaType.control;
+                                    else if ((info & 0x20) == info) mediaType = Sdp.MediaType.control;
                                     ++offset;
                                     continue;
                                 }
@@ -1258,15 +1258,15 @@ namespace Media.Containers.Matroska
                                     //Really the sample Rate?
                                     //Number of nanoseconds (not scaled via TimecodeScale) per frame ('frame' in the  sense -- one element put into a (Simple)Block).
                                     stream.Read(buffer, 0, (int)length);
-                                    if (mediaType == Sdp.MediaType.video) rate = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerSecond / (double)Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
-                                    else rate = (double)Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
+                                    if (mediaType == Sdp.MediaType.video) rate = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerSecond / Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
+                                    else rate = Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
                                     offset += length;
                                     continue;
                                 }
                             case Identifier.VideoFrameRate: //DEPRECATED
                                 {
                                     stream.Read(buffer, 0, (int)length);
-                                    rate = (double)Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
+                                    rate = Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
                                     trackDuration = (ulong)(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerSecond * rate);
                                     offset += length;
                                     continue;
@@ -1293,7 +1293,7 @@ namespace Media.Containers.Matroska
                                 {
                                     stream.Read(buffer, 0, (int)length);
                                     //Rescale
-                                    rate /= (double)Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
+                                    rate /= Common.Binary.ReadInteger(buffer, 0, (int)length, length > 1 && Common.Binary.IsLittleEndian);
                                     offset += length;
                                     continue;
                                 }
@@ -1396,7 +1396,7 @@ namespace Media.Containers.Matroska
                             }
                         }
 
-                    Track track = new Track(trackEntryElement, trackName, (int)trackId, m_Created.Value, m_Modified.Value, (int)sampleCount, (int)height, (int)width, TimeSpan.Zero, TimeSpan.FromMilliseconds((trackDuration / Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerSecond) * timeCodeScale / TimeSpan.TicksPerMillisecond), rate, mediaType, codecIndication, channels, bitsPerSample);
+                    Track track = new(trackEntryElement, trackName, (int)trackId, m_Created.Value, m_Modified.Value, (int)sampleCount, (int)height, (int)width, TimeSpan.Zero, TimeSpan.FromMilliseconds((trackDuration / Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerSecond) * timeCodeScale / TimeSpan.TicksPerMillisecond), rate, mediaType, codecIndication, channels, bitsPerSample);
 
                     yield return track;
 

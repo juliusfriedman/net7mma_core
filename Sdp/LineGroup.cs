@@ -69,7 +69,7 @@ namespace Media.Sdp
                 //Could peek the type here.
 
                 //Must determine when to stop parsing
-                SessionDescriptionLine toAdd = new SessionDescriptionLine(sdpLines, ref index);
+                SessionDescriptionLine toAdd = new(sdpLines, ref index);
 
                 try
                 {

@@ -45,7 +45,7 @@ namespace Media.Concepts.Classes
         /// <summary>
         /// An instance which will never dispose and is always under modification.
         /// </summary>
-        public static UpdateableBase AlwaysUnderModification = new UpdateableBase(true, 0, System.TimeSpan.Zero, false);
+        public static UpdateableBase AlwaysUnderModification = new(true, 0, System.TimeSpan.Zero, false);
 
         #endregion
 

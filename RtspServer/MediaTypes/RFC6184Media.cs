@@ -66,9 +66,9 @@ namespace Media.Rtsp.Server.MediaTypes
 
             public static byte[] FullStartSequence = new byte[] { 0x00, 0x00, 0x00, 0x01 };
 
-            static readonly Common.MemorySegment FullStartSequenceSegment = new Common.MemorySegment(FullStartSequence, 0, 4, false);
+            static readonly Common.MemorySegment FullStartSequenceSegment = new(FullStartSequence, 0, 4, false);
 
-            static readonly Common.MemorySegment ShortStartSequenceSegment = new Common.MemorySegment(FullStartSequence, 1, 3, false);
+            static readonly Common.MemorySegment ShortStartSequenceSegment = new(FullStartSequence, 1, 3, false);
 
             public static byte[] CreateSingleTimeAggregationUnit(int? DON = null, params byte[][] nals)
             {
@@ -154,13 +154,13 @@ namespace Media.Rtsp.Server.MediaTypes
             public RFC6184Frame(byte payloadType)
                 : base(payloadType)
             {
-                m_ContainedNalTypes = new List<byte>();
+                m_ContainedNalTypes = [];
             }
 
             public RFC6184Frame(Rtp.RtpFrame existing, bool referencePackets = false, bool referenceBuffer = false, bool shouldDispose = true)
                 : base(existing, referencePackets, referenceBuffer, shouldDispose)
             {
-                m_ContainedNalTypes = new List<byte>();
+                m_ContainedNalTypes = [];
             }
 
             public RFC6184Frame(RFC6184Frame existing, bool referencePackets = false, bool referenceBuffer = false, bool shouldDispose = true)
@@ -280,7 +280,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     byte nalHeader = nal[offset++],
                         nalFNRI = (byte)(nalHeader & 0xE0), //Extract the F and NRI bit fields
                         nalType = (byte)(nalHeader & Common.Binary.FiveBitMaxValue), //Extract the Type
-                        fragmentType = (byte)(DON.HasValue ? Media.Codecs.Video.H264.NalUnitType.FragmentationUnitB : Media.Codecs.Video.H264.NalUnitType.FragmentationUnitA),
+                        fragmentType = DON.HasValue ? Media.Codecs.Video.H264.NalUnitType.FragmentationUnitB : Media.Codecs.Video.H264.NalUnitType.FragmentationUnitA,
                         fragmentIndicator = (byte)(nalFNRI | fragmentType);//Create the Fragment Indicator Octet
 
                     //Store the nalType contained

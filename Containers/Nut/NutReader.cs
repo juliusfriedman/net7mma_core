@@ -316,7 +316,7 @@ namespace Media.Containers.Nut
         {
             if (false == string.IsNullOrEmpty(m_FileIdString)) return;
 
-            List<byte> bytes = new List<byte>(24);
+            List<byte> bytes = new(24);
 
             while (Remaining > 0 && Position < DefaultMaxDistance)
             {
@@ -424,9 +424,9 @@ namespace Media.Containers.Nut
 
             using (var root = Root) using (var stream = root.DataStream)
             {
-                int bytesRead = 0, end = (int)root.DataSize;
+                int end = (int)root.DataSize;
 
-                m_MajorVersion = (int)DecodeVariableLength(stream, out bytesRead);
+                m_MajorVersion = (int)DecodeVariableLength(stream, out int bytesRead);
 
                 if (m_MajorVersion < MinimumVersion || m_MajorVersion > MaximumVersion) throw new InvalidOperationException("Unsupported Version");
 
@@ -466,7 +466,7 @@ namespace Media.Containers.Nut
                 long count = 0;
 
                 //This is essentially an index, could be byte[]64... but spec is under development...
-                m_HeaderOptions = new List<Tuple<long, long, long, long, long, long, long, Tuple<long, long>>>();
+                m_HeaderOptions = [];
 
                 for (int i = 0; i < MaximumHeaderOptions;)
                 {
@@ -604,9 +604,8 @@ namespace Media.Containers.Nut
 
                 Read(identifier, 1, IdentifierBytesSize);
 
-                int lengthSize = 0;
 
-                long length = DecodeVariableLength(this, out lengthSize);
+                long length = DecodeVariableLength(this, out int lengthSize);
 
                 return new Node(this, identifier, lengthSize, Position, length, length <= Remaining);
             }
@@ -812,7 +811,7 @@ namespace Media.Containers.Nut
         {
             if (m_StreamPackages is not null) return;
 
-            m_StreamPackages = new Dictionary<int, Node>();
+            m_StreamPackages = [];
 
             int bytesRead = 0;
 
@@ -871,7 +870,7 @@ namespace Media.Containers.Nut
 
             ParseStreamPackages();
 
-            List<Track> tracks = new List<Track>();
+            List<Track> tracks = [];
 
             foreach (var streamId in m_StreamPackages.Keys)
             {
@@ -883,9 +882,8 @@ namespace Media.Containers.Nut
 
                 using (var stream = streamPackage.DataStream)
                 {
-                    int bytesRead = 0;
 
-                    long tempStreamId = DecodeVariableLength(stream, out bytesRead);
+                    long tempStreamId = DecodeVariableLength(stream, out int bytesRead);
 
                     if (tempStreamId != streamId) throw new InvalidOperationException("Stream Package Mismatch");
 
@@ -994,7 +992,7 @@ namespace Media.Containers.Nut
 
                     //Duration is off by about 30 seconds? must include rate or some conversion...
 
-                    Track created = new Track(streamPackage, string.Empty, streamId, FileInfo.CreationTimeUtc, FileInfo.LastWriteTimeUtc, sampleCount, height, width, TimeSpan.FromMilliseconds(decode_delay), TimeSpan.FromSeconds(duration), rate, mediaType, codecIndication, channels, bitDepth);
+                    Track created = new(streamPackage, string.Empty, streamId, FileInfo.CreationTimeUtc, FileInfo.LastWriteTimeUtc, sampleCount, height, width, TimeSpan.FromMilliseconds(decode_delay), TimeSpan.FromSeconds(duration), rate, mediaType, codecIndication, channels, bitDepth);
 
                     yield return created;
 

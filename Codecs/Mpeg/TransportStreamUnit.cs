@@ -222,7 +222,7 @@ namespace Media.Containers.Mpeg
             {
                 int offset = 0;
                 AdaptationFieldFlags adaptationFlags = (AdaptationFieldFlags)adaptationField[offset++];
-                return (adaptationFlags.HasFlag(AdaptationFieldFlags.ProgramClockReference)) ? (TimeSpan?)ProgramClockReferenceToTimeSpan(adaptationField, offset) : null;
+                return (adaptationFlags.HasFlag(AdaptationFieldFlags.ProgramClockReference)) ? ProgramClockReferenceToTimeSpan(adaptationField, offset) : null;
             }
 
 
@@ -231,7 +231,7 @@ namespace Media.Containers.Mpeg
                 int offset = 0;
                 AdaptationFieldFlags adaptationFlags = (AdaptationFieldFlags)adaptationField[offset++];
                 if (adaptationFlags.HasFlag(AdaptationFieldFlags.ProgramClockReference)) offset += ProgramClockReferenceSize;
-                return (adaptationFlags.HasFlag(AdaptationFieldFlags.OriginalProgramClockReference)) ? (TimeSpan?)ProgramClockReferenceToTimeSpan(adaptationField, offset) : null;
+                return (adaptationFlags.HasFlag(AdaptationFieldFlags.OriginalProgramClockReference)) ? ProgramClockReferenceToTimeSpan(adaptationField, offset) : null;
             }
 
             public static int SpliceCountdown(byte[] adaptationField)

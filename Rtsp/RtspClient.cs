@@ -188,7 +188,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
     /// <summary>
     /// The media items which are in the play state.
     /// </summary>
-    internal readonly Dictionary<MediaDescription, MediaSessionState> m_Playing = new Dictionary<MediaDescription, MediaSessionState>();//Could just be a list but the dictionary offers faster indexing at the cost of more memory...
+    internal readonly Dictionary<MediaDescription, MediaSessionState> m_Playing = [];//Could just be a list but the dictionary offers faster indexing at the cost of more memory...
 
     //Runtime only, should be moved to common.
 
@@ -302,9 +302,8 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                     }
                     else if (rangeLine.m_Parts.Count > 0)
                     {
-                        string type;
 
-                        if (Media.Sdp.SessionDescription.TryParseRange(rangeLine.m_Parts.First(), out type, out result, out result))
+                        if (Media.Sdp.SessionDescription.TryParseRange(rangeLine.m_Parts.First(), out string type, out result, out result))
                         {
                             MediaDuration = result;
                         }
@@ -439,22 +438,22 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
     /// <summary>
     /// As given by the OPTIONS response or set otherwise.
     /// </summary>
-    public readonly HashSet<string> SupportedFeatures = new HashSet<string>();
+    public readonly HashSet<string> SupportedFeatures = [];
 
     /// <summary>
     /// Values which will be set in the Required tag.
     /// </summary>
-    public readonly HashSet<string> RequiredFeatures = new HashSet<string>();
+    public readonly HashSet<string> RequiredFeatures = [];
 
     /// <summary>
     /// Any additional headers which may be required by the RtspClient.
     /// </summary>
-    public readonly Dictionary<string, string> AdditionalHeaders = new Dictionary<string, string>();
+    public readonly Dictionary<string, string> AdditionalHeaders = [];
 
     /// <summary>
     /// Gets the methods supported by the server recieved in the options request.
     /// </summary>
-    public readonly HashSet<string> SupportedMethods = new HashSet<string>();
+    public readonly HashSet<string> SupportedMethods = [];
 
     //Todo, should be property with protected set.
 
@@ -948,7 +947,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(Client)) return null;
 
-            TimeSpan? startTime = default(TimeSpan?);
+            TimeSpan? startTime = default;
 
             foreach (RtpClient.TransportContext tc in Client.GetTransportContexts()) if (startTime.HasValue is false || tc.m_StartTime > startTime) startTime = tc.m_StartTime;
 
@@ -966,7 +965,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(Client)) return null;
 
-            TimeSpan? endTime = default(TimeSpan?);
+            TimeSpan? endTime = default;
 
             foreach (RtpClient.TransportContext tc in Client.GetTransportContexts()) if (endTime.HasValue is false || tc.m_EndTime > endTime) endTime = tc.m_EndTime;
 
@@ -1129,7 +1128,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                 if (m_CurrentLocation != value)
                 {
 
-                    if (m_InitialLocation is null) m_InitialLocation = value;
+                    m_InitialLocation ??= value;
 
                     //Backup the current location, (needs history list?)
                     m_PreviousLocation = m_CurrentLocation;
@@ -1833,10 +1832,9 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                     //If something was extracted attempt to parse
                     if (false == string.IsNullOrWhiteSpace(noticeIdValue))
                     {
-                        int noticeId;
 
                         //If the noticeId is 2101
-                        if (int.TryParse(noticeIdValue, out noticeId) &&
+                        if (int.TryParse(noticeIdValue, out int noticeId) &&
                             noticeId == 2101)
                         {
                             //End Of Stream notice?
@@ -1844,28 +1842,23 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                             //Get the rtp-info header
                             string rtpInfo = set[RtspHeaders.RtpInfo];
 
-                            string[] rtpInfos;
 
                             //Make a parser class which can be reused?
 
                             //If parsing of the header succeeded
-                            if (RtspHeaders.TryParseRtpInfo(rtpInfo, out rtpInfos))
+                            if (RtspHeaders.TryParseRtpInfo(rtpInfo, out string[] rtpInfos))
                             {
                                 //Notes that more then 1 value here indicates AggregateControl is supported at the server but possibly not the session?
 
                                 //Loop all found sub header values
                                 foreach (string rtpInfoValue in rtpInfos)
                                 {
-                                    Uri uri;
 
-                                    int? rtpTime;
 
-                                    int? seq;
 
-                                    int? ssrc;
 
                                     //If any value which was needed was found.
-                                    if (RtspHeaders.TryParseRtpInfo(rtpInfoValue, out uri, out seq, out rtpTime, out ssrc) && seq.HasValue)
+                                    if (RtspHeaders.TryParseRtpInfo(rtpInfoValue, out Uri uri, out int? seq, out int? rtpTime, out int? ssrc) && seq.HasValue)
                                     {
                                         //Just use the ssrc to lookup the context.
                                         if (ssrc.HasValue)
@@ -2000,28 +1993,23 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
         // Must get stream by location to ensure request is relevent.
         //}
 
-        string[] rtpInfos;
 
         //Make a parser class which can be reused?
 
         //If parsing of the header succeeded
-        if (RtspHeaders.TryParseRtpInfo(rtpInfo, out rtpInfos))
+        if (RtspHeaders.TryParseRtpInfo(rtpInfo, out string[] rtpInfos))
         {
             //Notes that more then 1 value here indicates AggregateControl is supported at the server but possibly not the session?
 
             //Loop all found sub header values
             foreach (string rtpInfoValue in rtpInfos)
             {
-                Uri uri;
 
-                int? rtpTime;
 
-                int? seq;
 
-                int? ssrc;
 
                 //If any value which was needed was found.
-                if (RtspHeaders.TryParseRtpInfo(rtpInfoValue, out uri, out seq, out rtpTime, out ssrc))
+                if (RtspHeaders.TryParseRtpInfo(rtpInfoValue, out Uri uri, out int? seq, out int? rtpTime, out int? ssrc))
                 {
                     //Just use the ssrc to lookup the context.
                     if (ssrc.HasValue)
@@ -2083,9 +2071,8 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
             //Send it
             using (var serverResponse = SendRtspMessage(response, false, false))
             {
-                RtspSession related;
 
-                if (m_Sessions.TryGetValue(m_SessionId, out related))
+                if (m_Sessions.TryGetValue(m_SessionId, out RtspSession related))
                 {
                     related.UpdatePushedMessages(message, serverResponse);
 
@@ -2152,9 +2139,8 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
             //Send it
             using (RtspMessage serverResponse = SendRtspMessage(response, false, false))
             {
-                RtspSession related;
 
-                if (m_Sessions.TryGetValue(m_SessionId, out related))
+                if (m_Sessions.TryGetValue(m_SessionId, out RtspSession related))
                 {
                     related.UpdatePushedMessages(teardown, serverResponse);
 
@@ -2227,11 +2213,10 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
             //Send it
             using (RtspMessage serverResponse = SendRtspMessage(response, false, false))
             {
-                RtspSession related;
 
                 //should use playNotify SessionHeader.
 
-                if (m_Sessions.TryGetValue(m_SessionId, out related))
+                if (m_Sessions.TryGetValue(m_SessionId, out RtspSession related))
                 {
                     related.UpdatePushedMessages(playNotify, serverResponse);
 
@@ -2364,9 +2349,8 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                         //Send it
                         using (var serverResponse = SendRtspMessage(response, false, false))
                         {
-                            RtspSession related;
 
-                            if (string.IsNullOrWhiteSpace(session) is false && m_Sessions.TryGetValue(session, out related))
+                            if (string.IsNullOrWhiteSpace(session) is false && m_Sessions.TryGetValue(session, out RtspSession related))
                             {
                                 related.UpdatePushedMessages(toProcess, serverResponse);
 
@@ -2441,7 +2425,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
             unchecked
             {
                 //Validate the data received
-                RtspMessage interleaved = new RtspMessage(data, offset, length);
+                RtspMessage interleaved = new(data, offset, length);
 
                 //Determine what to do with the interleaved message
                 switch (interleaved.RtspMessageType)
@@ -2702,7 +2686,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
         }
 
         //Not a HashSet to allow duplicates...
-        List<MediaDescription> setupMedia = new List<MediaDescription>();
+        List<MediaDescription> setupMedia = [];
 
         //Get the media descriptions in the session description to setup
         IEnumerable<MediaDescription> toSetup = SessionDescription.MediaDescriptions;
@@ -2883,9 +2867,8 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
                                 //Todo, could integrate at SendMessage level.
 
-                                int retry;
 
-                                if (string.IsNullOrWhiteSpace(retryAfter) is false && int.TryParse(Media.Common.ASCII.ExtractNumber(retryAfter), out retry))
+                                if (string.IsNullOrWhiteSpace(retryAfter) is false && int.TryParse(Media.Common.ASCII.ExtractNumber(retryAfter), out int retry))
                                 {
 
                                     //Warning, long sleep possible, should give the application the change to decide
@@ -3012,9 +2995,8 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
                                 //Todo, could integrate at SendMessage level.
 
-                                int retry;
 
-                                if (string.IsNullOrWhiteSpace(retryAfter) is false && int.TryParse(Media.Common.ASCII.ExtractNumber(retryAfter), out retry))
+                                if (string.IsNullOrWhiteSpace(retryAfter) is false && int.TryParse(Media.Common.ASCII.ExtractNumber(retryAfter), out int retry))
                                 {
                                     System.Threading.Thread.Sleep(System.TimeSpan.FromSeconds(retry));
                                 }
@@ -3619,9 +3601,8 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                 authenticateHeader = authenticateHeader.Substring(staleIndex);
             }
 
-            bool stl;
 
-            if (bool.TryParse(authenticateHeader, out stl))
+            if (bool.TryParse(authenticateHeader, out bool stl))
             {
                 if (stl is false) return response;
             }
@@ -3767,18 +3748,15 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
     public RtspMessage SendRtspMessage(RtspMessage message, bool useClientProtocolVersion = true, bool hasResponse = true)
     {
-        SocketError result;
 
-        int sequenceNumber;
 
-        return SendRtspMessage(message, out result, out sequenceNumber, useClientProtocolVersion, hasResponse, m_MaximumTransactionAttempts);
+        return SendRtspMessage(message, out SocketError result, out int sequenceNumber, useClientProtocolVersion, hasResponse, m_MaximumTransactionAttempts);
     }
 
     public RtspMessage SendRtspMessage(RtspMessage message, out SocketError error, bool useClientProtocolVersion = true, bool hasResponse = true, int attempts = 0)
     {
-        int sequenceNumber;
 
-        return SendRtspMessage(message, out error, out sequenceNumber, useClientProtocolVersion, hasResponse, attempts);
+        return SendRtspMessage(message, out error, out int sequenceNumber, useClientProtocolVersion, hasResponse, attempts);
     }
 
     public RtspMessage SendRtspMessage(RtspMessage message, out SocketError error, out int sequenceNumber, bool useClientProtocolVersion = true, bool hasResponse = true, int attempts = 0)
@@ -4605,9 +4583,8 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
                                 if (CalculateServerDelay)
                                 {
-                                    string timestamp;
 
-                                    RtspHeaders.TryParseTimestamp(m_LastTransmitted[RtspHeaders.Timestamp], out timestamp, out m_LastServerDelay);
+                                    RtspHeaders.TryParseTimestamp(m_LastTransmitted[RtspHeaders.Timestamp], out string timestamp, out m_LastServerDelay);
 
                                     timestamp = null;
                                 }
@@ -4619,9 +4596,8 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                                 if (string.IsNullOrWhiteSpace(m_SessionId) is false)
                                 {
                                     //Update the session related
-                                    RtspSession related;
 
-                                    if (m_Sessions.TryGetValue(m_SessionId, out related))
+                                    if (m_Sessions.TryGetValue(m_SessionId, out RtspSession related))
                                     {
                                         //Todo, could return bool to indicate out of order or otherwise.
                                         related.UpdateMessages(message, m_LastTransmitted);
@@ -4771,7 +4747,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
         try
         {
-            using (RtspMessage describe = new RtspMessage(RtspMessageType.Request)
+            using (RtspMessage describe = new(RtspMessageType.Request)
             {
                 RtspMethod = RtspMethod.DESCRIBE,
                 Location = CurrentLocation,
@@ -4791,17 +4767,16 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
                 describe.SetHeader(RtspHeaders.Accept, Sdp.SessionDescription.MimeType);
 
-                SocketError error;
 
                 Describe:
-                response = SendRtspMessage(describe, out error, true, true, m_MaximumTransactionAttempts) ?? m_LastTransmitted;
+                response = SendRtspMessage(describe, out SocketError error, true, true, m_MaximumTransactionAttempts) ?? m_LastTransmitted;
 
                 if (response is null) return response;
 
                 //Handle no response
                 //If the remote end point is just sending Interleaved Binary Data out of no where it is possible to continue without a SessionDescription
 
-                if (Common.IDisposedExtensions.IsNullOrDisposed(response = response ?? m_LastTransmitted)) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(describe, "Unable to describe media, no response to DESCRIBE request. The request is in the Tag property.");
+                if (Common.IDisposedExtensions.IsNullOrDisposed(response ??= m_LastTransmitted)) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(describe, "Unable to describe media, no response to DESCRIBE request. The request is in the Tag property.");
                 else response.IsPersistent = true;
 
                 if (response.IsComplete is false)
@@ -5080,7 +5055,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
             if (closeConnection) teardown.SetHeader(RtspHeaders.Connection, "Close");
 
-            sessionId = sessionId ?? m_SessionId;
+            sessionId ??= m_SessionId;
 
             if (string.IsNullOrWhiteSpace(sessionId) is false) teardown.SetHeader(RtspHeaders.Session, sessionId);
 
@@ -5305,7 +5280,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
             //Create sockets to reserve the ports we think we will need.
             Socket rtpTemp = null, rtcpTemp = null;
 
-            using (RtspMessage setup = new RtspMessage(RtspMessageType.Request)
+            using (RtspMessage setup = new(RtspMessageType.Request)
             {
                 RtspMethod = RtspMethod.SETUP,
                 Location = location
@@ -5401,25 +5376,25 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                         {
                             setup.SetHeader(RtspHeaders.Transport,
                                 RtspHeaders.TransportHeader(RtpClient.RtpAvpProfileIdentifier + "/TCP", //connection type
-                                localSsrc != 0 ? localSsrc : (int?)null, //ssrc
+                                localSsrc != 0 ? localSsrc : null, //ssrc
                                 null, null, null, null, null, //source and ports
                                 true, false, //unicast, multicast
                                 null, //ttl
                                 true, //interleaved
                                 dataChannel = (byte)(lastContext.DataChannel + 2), //dataChannel
-                                (needsRtcp ? (byte?)(controlChannel = (byte)(lastContext.ControlChannel + 2)) : null), //controlChannel
+                                (needsRtcp ? (controlChannel = (byte)(lastContext.ControlChannel + 2)) : null), //controlChannel
                                 mode)); //mode
                         }
                         else
                         {
                             setup.SetHeader(RtspHeaders.Transport, //name, value =>
                                 RtspHeaders.TransportHeader(RtpClient.RtpAvpProfileIdentifier + "/TCP", //connection type
-                                localSsrc != 0 ? localSsrc : (int?)null, //ssrc
+                                localSsrc != 0 ? localSsrc : null, //ssrc
                                 null, null, null, null, null, //source and ports
                                 true, false, //unicast, multicast
                                 null, //ttl
                                 true, //interleaved
-                                dataChannel, (needsRtcp ? (byte?)controlChannel : null), //dataChannel, controlChannel
+                                dataChannel, (needsRtcp ? controlChannel : null), //dataChannel, controlChannel
                                 mode)); //mode
                         }
                     }
@@ -5488,7 +5463,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                     //More then likely only Ross will complain or his shitty software.
 
                     //Should allow a Rtcp only setup? would be a different profile...
-                    setup.SetHeader(RtspHeaders.Transport, RtspHeaders.TransportHeader(RtpClient.RtpAvpProfileIdentifier + "/UDP", localSsrc != 0 ? localSsrc : (int?)null, null, clientRtpPort, (needsRtcp ? (int?)(clientRtcpPort) : null), null, null, false == multicast, multicast, null, false, 0, 0, RtspMethod.PLAY.ToString()));
+                    setup.SetHeader(RtspHeaders.Transport, RtspHeaders.TransportHeader(RtpClient.RtpAvpProfileIdentifier + "/UDP", localSsrc != 0 ? localSsrc : null, null, clientRtpPort, (needsRtcp ? clientRtcpPort : null), null, null, false == multicast, multicast, null, false, 0, 0, RtspMethod.PLAY.ToString()));
                 }
                 else throw new NotSupportedException("The required Transport is not yet supported.");
 
@@ -5496,13 +5471,12 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
                 bool triedTwoTimes = false;
 
-                int sequenceNumber;
 
                 //Make new connection if required.
 
                 Setup:
                 //Get the response for the setup
-                RtspMessage response = SendRtspMessage(setup, out error, out sequenceNumber, true, true, m_MaximumTransactionAttempts) ?? m_LastTransmitted;
+                RtspMessage response = SendRtspMessage(setup, out error, out int sequenceNumber, true, true, m_MaximumTransactionAttempts) ?? m_LastTransmitted;
 
                 //Should check the cSeq or content type... 
 
@@ -5512,10 +5486,9 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                     case SocketError.Success:
                         {
                             //Get a session ready                    
-                            RtspSession session;
 
                             //Create a RtspSession if there is not already one assoicated with the current sessionId
-                            if (m_Sessions.TryGetValue(SessionId, out session) is false)
+                            if (m_Sessions.TryGetValue(SessionId, out RtspSession session) is false)
                             {
                                 //Message possibly not complete... Session header may be truncated...
 
@@ -5815,7 +5788,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                                 //Todo, destinationIp should still be sourceIp.
 
                                 if (Common.IDisposedExtensions.IsNullOrDisposed(lastContext) is false) created = RtpClient.TransportContext.FromMediaDescription(SessionDescription, (byte)(lastContext.DataChannel + (multiplexing ? 1 : 2)), (byte)(lastContext.ControlChannel + (multiplexing ? 1 : 2)), mediaDescription, needsRtcp, remoteSsrc, remoteSsrc != 0 ? 0 : 2, localIp, sourceIp);
-                                else created = RtpClient.TransportContext.FromMediaDescription(SessionDescription, (byte)dataChannel, (byte)controlChannel, mediaDescription, needsRtcp, remoteSsrc, remoteSsrc != 0 ? 0 : 2, localIp, sourceIp);
+                                else created = RtpClient.TransportContext.FromMediaDescription(SessionDescription, dataChannel, controlChannel, mediaDescription, needsRtcp, remoteSsrc, remoteSsrc != 0 ? 0 : 2, localIp, sourceIp);
 
                                 //Should pass the buffer to Initialize...
 
@@ -5996,11 +5969,9 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
                     //Common.ILoggingExtensions.Log(Logger, ToString() + "@MonitorProtocol: Receiving Data");
 
-                    SocketError error;
 
-                    int cseq;
 
-                    using (var response = SendRtspMessage(null, out error, out cseq, false, true, m_MaximumTransactionAttempts))
+                    using (var response = SendRtspMessage(null, out SocketError error, out int cseq, false, true, m_MaximumTransactionAttempts))
                     {
                         if (error == SocketError.Success && Common.IDisposedExtensions.IsNullOrDisposed(response) is false) Common.ILoggingExtensions.Log(Logger, ToString() + "@MonitorProtocol: (" + error + ") Received =>" + response.ToString());
                     }
@@ -6169,7 +6140,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
         //Check that the Timing description of the session description allows play?           
 
-        using (RtspMessage play = new RtspMessage(RtspMessageType.Request)
+        using (RtspMessage play = new(RtspMessageType.Request)
         {
             RtspMethod = RtspMethod.PLAY,
             Location = location ?? m_CurrentLocation
@@ -6200,10 +6171,9 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
             }
 
             //Store any error
-            SocketError error;
 
             //Send the response
-            RtspMessage response = SendRtspMessage(play, out error, out sequenceNumber, true, true, m_MaximumTransactionAttempts); //?? m_LastTransmitted;
+            RtspMessage response = SendRtspMessage(play, out SocketError error, out sequenceNumber, true, true, m_MaximumTransactionAttempts); //?? m_LastTransmitted;
 
             //response may be null because the server dropped the response due to an invalid header on the request.
 
@@ -6251,28 +6221,23 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                     //Get the rtp-info header
                     string rtpInfo = response[RtspHeaders.RtpInfo];
 
-                    string[] rtpInfos;
 
                     //Make a parser class which can be reused?
 
                     //If parsing of the header succeeded
-                    if (RtspHeaders.TryParseRtpInfo(rtpInfo, out rtpInfos))
+                    if (RtspHeaders.TryParseRtpInfo(rtpInfo, out string[] rtpInfos))
                     {
                         //Notes that more then 1 value here indicates AggregateControl is supported at the server but possibly not the session?
 
                         //Loop all found sub header values
                         foreach (string rtpInfoValue in rtpInfos)
                         {
-                            Uri uri;
 
-                            int? rtpTime;
 
-                            int? seq;
 
-                            int? ssrc;
 
                             //If any value which was needed was found.
-                            if (RtspHeaders.TryParseRtpInfo(rtpInfoValue, out uri, out seq, out rtpTime, out ssrc))
+                            if (RtspHeaders.TryParseRtpInfo(rtpInfoValue, out Uri uri, out int? seq, out int? rtpTime, out int? ssrc))
                             {
                                 //Just use the ssrc to lookup the context.
                                 if (ssrc.HasValue)
@@ -6346,8 +6311,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
     /// <returns>The response</returns>
     public RtspMessage SendPause(MediaDescription mediaDescription = null, bool force = false)
     {
-        int cseq;
-        return SendPause(out cseq, mediaDescription, force);
+        return SendPause(out int cseq, mediaDescription, force);
     }
 
     public RtspMessage SendPause(out int sequenceNumber, MediaDescription mediaDescription = null, bool force = false)
@@ -6384,14 +6348,13 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
         if (SupportedMethods.Contains(RtspMethod.PAUSE.ToString()) is false && force is false) throw new InvalidOperationException("Server does not support PAUSE.");
 
         //if (!Playing) throw new InvalidOperationException("RtspClient is not Playing.");
-        using (RtspMessage pause = new RtspMessage(RtspMessageType.Request)
+        using (RtspMessage pause = new(RtspMessageType.Request)
         {
             RtspMethod = RtspMethod.PAUSE,
             Location = location ?? m_CurrentLocation
         })
         {
-            SocketError error;
-            return SendRtspMessage(pause, out error, out sequenceNumber, true, true, m_MaximumTransactionAttempts);
+            return SendRtspMessage(pause, out SocketError error, out sequenceNumber, true, true, m_MaximumTransactionAttempts);
         }
     }
 
@@ -6405,7 +6368,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
     {
         if (false == SupportedMethods.Contains(RtspMethod.ANNOUNCE.ToString()) && false == force) throw new InvalidOperationException("Server does not support ANNOUNCE.");
         if (Common.IDisposedExtensions.IsNullOrDisposed(sdp)) throw new InvalidOperationException("sdp is null or disposed");
-        using (RtspMessage announce = new RtspMessage(RtspMessageType.Request)
+        using (RtspMessage announce = new(RtspMessageType.Request)
         {
             RtspMethod = RtspMethod.ANNOUNCE,
             Location = location ?? m_CurrentLocation
@@ -6785,7 +6748,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
         if (false.Equals(SupportedMethods.Contains(RtspMethod.GET_PARAMETER.ToString())) && force is false) throw new InvalidOperationException("Server does not support GET_PARAMETER.");
 
         //Need a session id
-        using (RtspMessage get = new RtspMessage(RtspMessageType.Request)
+        using (RtspMessage get = new(RtspMessageType.Request)
         {
             RtspMethod = RtspMethod.GET_PARAMETER,
             Location = CurrentLocation,
@@ -6807,7 +6770,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
         //If the server doesn't support it
         if (false == SupportedMethods.Contains(RtspMethod.SET_PARAMETER.ToString()) && false == force) throw new InvalidOperationException("Server does not support GET_PARAMETER.");
 
-        using (RtspMessage set = new RtspMessage(RtspMessageType.Request)
+        using (RtspMessage set = new(RtspMessageType.Request)
         {
             RtspMethod = RtspMethod.SET_PARAMETER,
             Location = CurrentLocation,

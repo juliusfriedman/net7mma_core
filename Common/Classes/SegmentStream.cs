@@ -137,7 +137,7 @@ namespace Media.Common
 
             //Could avoid LOH allocation by splitting blocks..
             //Would need additional state, seems like a job for a dervied class, BlockSegmentStream...
-            Common.MemorySegment copy = new MemorySegment(segment.m_Length, false); //Don't dispose unless forced
+            Common.MemorySegment copy = new(segment.m_Length, false); //Don't dispose unless forced
 
             //Copy the data
             System.Array.Copy(segment.m_Array, segment.m_Offset, copy.m_Array, 0, segment.m_Length);
@@ -201,7 +201,7 @@ namespace Media.Common
                 return;
             }
 
-            Common.MemorySegment copy = new MemorySegment(toInsert.Count);
+            Common.MemorySegment copy = new(toInsert.Count);
 
             System.Array.Copy(toInsert.m_Array, toInsert.m_Offset, copy.m_Array, 0, toInsert.m_Length);
 
@@ -485,7 +485,7 @@ namespace Media.Common
         public override long Length
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return (long)m_Count; }
+            get { return m_Count; }
         }
 
         public override long Position
@@ -493,7 +493,7 @@ namespace Media.Common
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return (long)m_Position; // + m_Cursor causes a calc for each position but makes it slightly more accurate and makes individual movement faster in some cases.. (Determine how much)
+                return m_Position; // + m_Cursor causes a calc for each position but makes it slightly more accurate and makes individual movement faster in some cases.. (Determine how much)
             }
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             set
@@ -676,10 +676,9 @@ namespace Media.Common
             if (IsDisposed || count <= 0) return;
 
             //Keep a counter for how much we can copy or move.
-            long len;
 
             //If the buffer is null or empty return for now (dead space)...
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer, out len)) return;
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer, out long len)) return;
 
             //If more data was specified than exists use len
             if (count > len) count = (int)len;
@@ -971,7 +970,7 @@ namespace Media.Common
             using (Common.MemorySegment previouslyWorkingSegment = WorkingSegment)
             {
                 //make the new segment (save casts by using copy constructor?_
-                WorkingSegment = new MemorySegment(previouslyWorkingSegment.m_Array, (int)previouslyWorkingSegment.Offset, (int)m_Cursor, previouslyWorkingSegment.ShouldDispose);
+                WorkingSegment = new MemorySegment(previouslyWorkingSegment.m_Array, previouslyWorkingSegment.Offset, (int)m_Cursor, previouslyWorkingSegment.ShouldDispose);
 
                 ////Set the position to count, Decrease for the change in bytes
                 m_Position = m_Count -= WorkingSegment.m_Length - previouslyWorkingSegment.m_Length;
@@ -1131,12 +1130,12 @@ namespace Media.UnitTests
                 //Copy those bytes
                 randomBytes.CopyTo(buffer, 0);
 
-                List<Common.MemorySegment> segments = new List<Common.MemorySegment>();
+                List<Common.MemorySegment> segments = [];
 
                 int offset = 0, toTake = 0;
 
                 //Make a segment stream
-                using (Common.SegmentStream stream = new Common.SegmentStream(segments))
+                using (Common.SegmentStream stream = new(segments))
                 {
                     //make random length segments of all bytes which are contained.
                     for (int remains = TestBytesLength; remains > 0;)
@@ -1148,7 +1147,7 @@ namespace Media.UnitTests
                         if (toTake > remains) toTake = remains;
 
                         //Create the segment
-                        Common.MemorySegment created = new Common.MemorySegment(randomBytes, offset, toTake);
+                        Common.MemorySegment created = new(randomBytes, offset, toTake);
 
                         //Add it to the stream (and list) //Write?
                         stream.AddMemory(created);
@@ -1246,7 +1245,7 @@ namespace Media.UnitTests
                     stream.Position = 0;
 
                     //Test against memory stream (Fix the capacity to help with GC)
-                    using (System.IO.MemoryStream memoryStream = new System.IO.MemoryStream(TestBytesLength))
+                    using (System.IO.MemoryStream memoryStream = new(TestBytesLength))
                     {
                         //Ensure Read returns 0 at end of stream
                         stream.CopyTo(memoryStream);
@@ -1375,7 +1374,7 @@ namespace Media.UnitTests
                         //Console.WriteLine("Previously@: " + stream.Position);
 
                         //Access a random point
-                        int point = (int)Utility.Random.Next(i, (int)(stream.Length - 1));
+                        int point = Utility.Random.Next(i, (int)(stream.Length - 1));
 
                         //Test setting the position
                         stream.Position = point;
@@ -1461,7 +1460,7 @@ namespace Media.UnitTests
         public static void TestWriteAt()
         {
             //Create instance
-            using (Common.SegmentStream stream = new Common.SegmentStream())
+            using (Common.SegmentStream stream = new())
             {
                 //Ensure length
                 if (stream.Length != 0) throw new Exception(nameof(stream.Length));
@@ -1518,7 +1517,7 @@ namespace Media.UnitTests
 
         public static void TestReadMoreThanPossible()
         {
-            using (Common.SegmentStream stream = new Common.SegmentStream(new Common.MemorySegment(new byte[] { 0x00, 0x00 }, 0, 1)))
+            using (Common.SegmentStream stream = new(new Common.MemorySegment(new byte[] { 0x00, 0x00 }, 0, 1)))
             {
                 var buffer = new byte[128];
                 var result = stream.Read(buffer, 0, 4);
@@ -1531,7 +1530,7 @@ namespace Media.UnitTests
                     throw new InvalidOperationException("Cannot read more than what is available");
             }
 
-            using (Common.SegmentStream stream = new Common.SegmentStream())
+            using (Common.SegmentStream stream = new())
             {
                 var buffer = new byte[128];
                 var result = stream.Read(buffer, 0, 4);
@@ -1554,7 +1553,7 @@ namespace Media.UnitTests
                     throw new InvalidOperationException("Should be at end of stream.");
             }
 
-            using (Common.SegmentStream stream = new Common.SegmentStream())
+            using (Common.SegmentStream stream = new())
             {
                 var buffer = new byte[128];
                 var position = 0;

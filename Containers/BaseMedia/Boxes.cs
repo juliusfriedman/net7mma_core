@@ -214,7 +214,7 @@ public class DrefBox : FullBox
         ++EntryCount;
 
         // Create a Data Entry Url Box
-        DataEntryUrlBox dataEntryUrlBox = new DataEntryUrlBox(Master as BaseMediaWriter, dataUrl);
+        DataEntryUrlBox dataEntryUrlBox = new(Master as BaseMediaWriter, dataUrl);
 
         AddChildBox(dataEntryUrlBox);
     }
@@ -1110,7 +1110,7 @@ public class MvexBox : Mp4Box
 
     public void AddTrexBox(uint trackId, uint defaultSampleDescriptionIndex, uint defaultSampleDuration, uint defaultSampleSize, uint defaultSampleFlags)
     {
-        TrexBox trexBox = new TrexBox(Master as BaseMediaWriter, trackId, defaultSampleDescriptionIndex, defaultSampleDuration, defaultSampleSize, defaultSampleFlags);
+        TrexBox trexBox = new(Master as BaseMediaWriter, trackId, defaultSampleDescriptionIndex, defaultSampleDuration, defaultSampleSize, defaultSampleFlags);
         AddChildBox(trexBox);
     }
 }
@@ -1402,7 +1402,7 @@ public class UserMetadataBox : KeyValueBox
 public class MoovBox : Mp4Box
 {
     public MvhdBox MovieHeaderBox { get; }
-    public List<TrakBox> Tracks { get; } = new List<TrakBox>();
+    public List<TrakBox> Tracks { get; } = [];
     public UdtaBox UserDataBox { get; }
 
     public MoovBox(BaseMediaWriter writer, uint timeScale, uint duration, uint preferredRate, ushort preferredVolume, ushort[] matrix, byte[] predefined, uint nextTrackId)
@@ -1438,7 +1438,7 @@ public class Avc1Box : Mp4Box
         : base(writer, Encoding.UTF8.GetBytes("avc1"), 0)
     {
         // Create the AVC Configuration Box (avcC) using the provided data
-        AvcCBox avcCBox = new AvcCBox(writer, avcCData);
+        AvcCBox avcCBox = new(writer, avcCData);
 
         AddChildBox(avcCBox);
     }

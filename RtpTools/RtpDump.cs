@@ -63,7 +63,7 @@ namespace Media.RtpTools.RtpDump
         internal FileFormat m_Format;
 
         //A List detailing the offsets at which RtpToolEntries occurs (maybe used by the writer to allow removal of packets from a stream without erasing them from the source?);
-        internal List<long> m_Offsets = new List<long>();
+        internal List<long> m_Offsets = [];
 
         internal System.IO.BinaryReader m_Reader;
 
@@ -231,7 +231,7 @@ namespace Media.RtpTools.RtpDump
 
             m_StartTime = Media.Ntp.NetworkTimeProtocol.UtcEpoch1970.AddSeconds(BitConverter.Int64BitsToDouble(Common.Binary.Read64(m_FileHeader, 0, Common.Binary.IsLittleEndian)));
 
-            m_Source = new System.Net.IPEndPoint((long)Common.Binary.ReadU32(m_FileHeader, 8, Common.Binary.IsLittleEndian), Common.Binary.ReadU16(m_FileHeader, 12, Common.Binary.IsLittleEndian));
+            m_Source = new System.Net.IPEndPoint(Common.Binary.ReadU32(m_FileHeader, 8, Common.Binary.IsLittleEndian), Common.Binary.ReadU16(m_FileHeader, 12, Common.Binary.IsLittleEndian));
 
             //Check if padding was not set, ReadChars is buggy though, this puts two bytes in the read buffer.
             if (m_Reader.PeekChar() != 0) return;
@@ -531,11 +531,11 @@ namespace Media.RtpTools.RtpDump
 
         public Common.SegmentStream GetSample(Container.Track track, out TimeSpan duration)
         {
-            Rtp.RtpFrame result = new Rtp.RtpFrame(0);
+            Rtp.RtpFrame result = new(0);
 
             while (HasNext)
             {
-                Rtp.RtpPacket next = new Rtp.RtpPacket(ReadNext().Data.ToArray(), 0);
+                Rtp.RtpPacket next = new(ReadNext().Data.ToArray(), 0);
                 if (result.Count > 0 && next.Timestamp != result.Timestamp) break;
                 result.Add(next);
                 if (next.Marker) break;
@@ -672,7 +672,7 @@ namespace Media.RtpTools.RtpDump
                 {
                     //Header already written when modifying a file
                     //Need to read the header and advance the stream to the end, indicate the header was already written so it is not again.
-                    using (DumpReader reader = new DumpReader(stream, m_WroteHeader = true))
+                    using (DumpReader reader = new(stream, m_WroteHeader = true))
                     {
                         //Create the writer forcing ASCII Encoding, leave the stream open if indicated
                         m_Writer = new System.IO.BinaryWriter(stream, Encoding.ASCII, leaveOpen);
@@ -731,12 +731,12 @@ namespace Media.RtpTools.RtpDump
             if (m_Format < FileFormat.Text)
             {
                 //Create the file header now if null
-                if (m_FileIdentifier is null) m_FileIdentifier = RtpDumpExtensions.CreateFileIdentifier(m_Source);
+                m_FileIdentifier ??= RtpDumpExtensions.CreateFileIdentifier(m_Source);
 
                 //Write the file header
                 m_Writer.Write(m_FileIdentifier.Array, m_FileIdentifier.Offset, m_FileIdentifier.Count);
 
-                if (m_FileHeader is null) m_FileHeader = RtpDumpExtensions.CreateFileHeader(m_Start, m_Source);
+                m_FileHeader ??= RtpDumpExtensions.CreateFileHeader(m_Start, m_Source);
 
                 //Write the RD_hdr_t
                 m_Writer.Write(m_FileHeader.Array, m_FileHeader.Offset, m_FileHeader.Count);
@@ -821,10 +821,10 @@ namespace Media.RtpTools.RtpDump
                         entry.Length = (short)(entry.BlobLength = Media.Rtcp.RtcpHeader.Length + +RtpToolEntry.sizeOf_RD_packet_T);
 
                         //Write the data from the blob
-                        using (Rtcp.RtcpPacket rtcp = new Rtcp.RtcpPacket(entry.Blob, entry.Pointer + RtpToolEntry.sizeOf_RD_packet_T)) m_Writer.Write(entry.Blob, 0, entry.BlobLength);
+                        using (Rtcp.RtcpPacket rtcp = new(entry.Blob, entry.Pointer + RtpToolEntry.sizeOf_RD_packet_T)) m_Writer.Write(entry.Blob, 0, entry.BlobLength);
 
                     }
-                    else if (m_Format != FileFormat.Rtcp) using (Rtp.RtpPacket rtp = new Rtp.RtpPacket(entry.Blob, entry.Pointer + RtpToolEntry.sizeOf_RD_packet_T))
+                    else if (m_Format != FileFormat.Rtcp) using (Rtp.RtpPacket rtp = new(entry.Blob, entry.Pointer + RtpToolEntry.sizeOf_RD_packet_T))
                         {
 
                             //Indicate only the header is kept
@@ -841,12 +841,12 @@ namespace Media.RtpTools.RtpDump
                 }
                 else if (m_Format == FileFormat.Payload)
                 {
-                    if (entry.IsRtcp) using (Rtcp.RtcpPacket rtcp = new Rtcp.RtcpPacket(entry.Blob, entry.Pointer + RtpToolEntry.sizeOf_RD_packet_T))
+                    if (entry.IsRtcp) using (Rtcp.RtcpPacket rtcp = new(entry.Blob, entry.Pointer + RtpToolEntry.sizeOf_RD_packet_T))
                         {
                             entry.Length = (short)(entry.BlobLength = rtcp.Payload.Count() + +RtpToolEntry.sizeOf_RD_packet_T);
                             m_Writer.Write(rtcp.Payload.ToArray());
                         }
-                    else using (Rtp.RtpPacket rtp = new Rtp.RtpPacket(entry.Blob, entry.Pointer + RtpToolEntry.sizeOf_RD_packet_T))
+                    else using (Rtp.RtpPacket rtp = new(entry.Blob, entry.Pointer + RtpToolEntry.sizeOf_RD_packet_T))
                         {
                             entry.Length = (short)(entry.BlobLength = rtp.PayloadData.Count() + RtpToolEntry.sizeOf_RD_packet_T);
                             m_Writer.Write(entry.Blob, 0, entry.BlobLength);

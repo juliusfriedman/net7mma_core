@@ -59,7 +59,7 @@ namespace Media.Rtsp.Server.MediaTypes
         /// Packets...
         /// </summary>
         /// <remarks>In or Out is a semantic not distinguished here</remarks>
-        protected readonly ConcurrentLinkedQueueSlim<Common.IPacket> Packets = new ConcurrentLinkedQueueSlim<Common.IPacket>();
+        protected readonly ConcurrentLinkedQueueSlim<Common.IPacket> Packets = new();
 
         //public double MaxSendRate { get; protected set; }
 
@@ -163,9 +163,8 @@ namespace Media.Rtsp.Server.MediaTypes
                     }
 
                     //Dequeue a frame or die
-                    Common.IPacket packet;
 
-                    if (!Packets.TryDequeue(out packet))
+                    if (!Packets.TryDequeue(out Common.IPacket packet))
                         continue;
 
                     SendPacket(packet);

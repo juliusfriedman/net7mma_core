@@ -75,7 +75,7 @@ namespace Media.Common.Collections.Generic
     {
         #region Static
 
-        static TValue DefaultValue = default(TValue);
+        static TValue DefaultValue = default;
 
         #endregion
 
@@ -137,10 +137,9 @@ namespace Media.Common.Collections.Generic
         [CLSCompliant(false)]
         public void Add(ref TKey key, ref TValue value)
         {
-            IList<TValue> Predicates;
 
             //Attempt to get the value
-            bool hadValue = TryGetValueList(ref key, out Predicates);
+            bool hadValue = TryGetValueList(ref key, out IList<TValue> Predicates);
 
             //Skip CoreAdd because the value list is local
             if (hadValue)
@@ -166,9 +165,8 @@ namespace Media.Common.Collections.Generic
         /// <returns></returns>
         public bool Remove(TKey key)
         {
-            IEnumerable<TValue> removed;
 
-            return Remove(key, out removed);
+            return Remove(key, out IEnumerable<TValue> removed);
         }
 
         /// <summary>
@@ -191,9 +189,8 @@ namespace Media.Common.Collections.Generic
         [CLSCompliant(false)]
         public bool Remove(ref TKey key, out IEnumerable<TValue> values)
         {
-            IList<TValue> list;
 
-            bool result = Dictionary.TryRemove(key, out list);
+            bool result = Dictionary.TryRemove(key, out IList<TValue> list);
 
             values = list;
 

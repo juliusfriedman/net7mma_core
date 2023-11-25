@@ -19,11 +19,11 @@
         //needs to be in an abstract AudioCodec : Media.Codec.Codec
         public static readonly int DefaultSampleRate = 8000;
 
-        public static Audio.AudioFormat DefaultAudioFormat = new AudioFormat(DefaultSampleRate, true, CodecDefaultByteOrder, CodecDefaultDataLayout,
+        public static Audio.AudioFormat DefaultAudioFormat = new(DefaultSampleRate, true, CodecDefaultByteOrder, CodecDefaultDataLayout,
             new Media.Codec.MediaComponent[]
             {
-                new Codec.MediaComponent((byte)'l', CodecDefaultBitsPerComponent),
-                new Codec.MediaComponent((byte)'r', CodecDefaultBitsPerComponent)
+                new((byte)'l', CodecDefaultBitsPerComponent),
+                new((byte)'r', CodecDefaultBitsPerComponent)
             });
 
         static MulawCodec()

@@ -162,7 +162,7 @@ namespace Media.Common.Structures
 
         public static IStruct GetDefault(out IStruct @this)
         {
-            return @this = default(IStruct);
+            return @this = default;
         }
 
         public static bool Get(ref IStruct @this)
@@ -179,27 +179,27 @@ namespace Media.Common.Structures
         /// <summary>
         /// The implemenation assoicated with <see cref="object.ToString"/>
         /// </summary>
-        public static readonly ToString<IStruct> ToIStructString = new ToString<IStruct>(ToString);
+        public static readonly ToString<IStruct> ToIStructString = new(ToString);
 
         /// <summary>
         /// The implemenation assoicated with <see cref="object.Equals"/>
         /// </summary>
-        public static readonly Equals<IStruct> EqualsIStruct = new Equals<IStruct>(Equals);
+        public static readonly Equals<IStruct> EqualsIStruct = new(Equals);
 
         /// <summary>
         /// The implemenation assoicated with <see cref="object.GetHashCode"/>
         /// </summary>
-        public static readonly GetHashCode<IStruct> GetHashCodeIStruct = new GetHashCode<IStruct>(GetHashCode);
+        public static readonly GetHashCode<IStruct> GetHashCodeIStruct = new(GetHashCode);
 
         /// <summary>
         /// The implemenation assoicated with <see cref="object.Get"/>
         /// </summary>
-        public static readonly Get<IStruct> GetIStruct = new Get<IStruct>(Get);
+        public static readonly Get<IStruct> GetIStruct = new(Get);
 
         /// <summary>
         /// The implemenation assoicated with <see cref="object.Getter"/>
         /// </summary>
-        public static readonly Getter<IStruct> GetDefaultIStruct = new Getter<IStruct>(GetDefault);
+        public static readonly Getter<IStruct> GetDefaultIStruct = new(GetDefault);
 
         //public static ToString<IStruct> CreateString(ref IStruct structure)
         //{
@@ -219,7 +219,7 @@ namespace Media.Common.Structures
         /// <summary>
         /// <see cref="default"/> of <see cref="Struct"/>
         /// </summary>
-        public static readonly Struct DefaultStruct = default(Struct);
+        public static readonly Struct DefaultStruct = default;
 
         /// <summary>
         /// <see cref="DefaultStruct"/> <see cref="Object.ToString"/>
@@ -249,7 +249,7 @@ namespace Media.Common.Structures
         public bool Equals(Struct that)
         {
             //Weird that @that cannot be used because `that` is already used.
-            IStruct @this = this, _that = that as IStruct;
+            IStruct @this = this, _that = that;
 
             return IStructExtensions.EqualsIStruct(ref @this, ref _that);
         }
@@ -346,7 +346,7 @@ namespace Media.Common.Structures
             }
             catch
             {
-                t = default(T);
+                t = default;
 
                 return false;
             }
@@ -360,7 +360,7 @@ namespace Media.Common.Structures
         {
             try
             {
-                t = this as object;
+                t = this;
 
                 return true;
             }

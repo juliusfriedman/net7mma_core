@@ -20,7 +20,7 @@ namespace Media.Containers.Mpeg
 
         //
 
-        private Dictionary<ushort, int> m_continuityCounter = new Dictionary<ushort, int>();
+        private Dictionary<ushort, int> m_continuityCounter = [];
 
         private double m_systemTimeClock; // In seconds (to avoid integer precision issues)
 
@@ -135,7 +135,7 @@ namespace Media.Containers.Mpeg
 
         private List<byte[]> Packetize(byte[] payload, bool isStuffingAllowed)
         {
-            List<byte[]> result = new List<byte[]>();
+            List<byte[]> result = [];
             int maxPayloadBytesPerPacket = PacketLength - HeaderLength;
             int packetCount = (int)Math.Ceiling((double)payload.Length / maxPayloadBytesPerPacket);
             for (int index = 0; index < packetCount; index++)

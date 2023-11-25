@@ -4,7 +4,7 @@
     public sealed class YUV : ImageTransformation
     {
 
-        static ImageTransform TransformToRGB = new ImageTransform(TransformYUV420ToRGB);
+        static ImageTransform TransformToRGB = new(TransformYUV420ToRGB);
 
         //Needs a way to verify the source is actuall YUV420 and dest is actually RGB
         public static void TransformYUV420ToRGB(Image source, Image dest)
@@ -29,11 +29,11 @@
             bool oddWidth = Common.Binary.IsOdd(m_Dest.Width);
 
             //Take pointers to each plane
-            using (Common.MemorySegment y = new Common.MemorySegment(m_Source.Data.Array, m_Source.Data.Offset, m_Source.PlaneLength(0)))
+            using (Common.MemorySegment y = new(m_Source.Data.Array, m_Source.Data.Offset, m_Source.PlaneLength(0)))
             {
-                using (Common.MemorySegment u = new Common.MemorySegment(m_Source.Data.Array, y.Offset + y.Count, m_Source.PlaneLength(1)))
+                using (Common.MemorySegment u = new(m_Source.Data.Array, y.Offset + y.Count, m_Source.PlaneLength(1)))
                 {
-                    using (Common.MemorySegment v = new Common.MemorySegment(m_Source.Data.Array, u.Offset + u.Count, m_Source.PlaneLength(2)))
+                    using (Common.MemorySegment v = new(m_Source.Data.Array, u.Offset + u.Count, m_Source.PlaneLength(2)))
                     {
                         //Loop for the height
                         for (int i = 0, ie = (m_Dest.Height >> 1); i < ie; i++)
