@@ -2789,6 +2789,9 @@ namespace Media.UnitTests
 
                                     var compositeSource = new Media.Rtsp.Server.MediaTypes.RtpVideoSink("Composite", compositeSession);
 
+                                    //Use a smaller clock rate to improve the frame rate.
+                                    compositeSource.ClockRate = 5;
+
                                     compositeSource.Start();
 
                                     if (!server.TryAddMedia(compositeSource))
@@ -2843,6 +2846,8 @@ namespace Media.UnitTests
                                         keyFrame.Packetize(Convert.FromBase64String(parameters[1]));
                                         keyFrame.SynchronizationSourceIdentifier = compositeContext.SynchronizationSourceIdentifier;
 
+                                        //Force a time jump to keep the artifacts minimal.
+                                        compositeContext.RtpTimestamp += compositeSource.ClockRate * 1000;
                                         compositeSource.Frames.Enqueue(keyFrame);
 
                                         if (currentStream.RtpClient.FrameChangedEventsEnabled)
