@@ -55,7 +55,7 @@ namespace Media.Codecs.Image.Jpeg
 
         public const byte Nul = 0x0;
 
-        public const byte TEM = 0x01;        
+        public const byte TEM = 0x01;
 
         public const byte StartOfBaselineFrame = 0xc0;
 
@@ -71,7 +71,7 @@ namespace Media.Codecs.Image.Jpeg
 
         public const byte StartOfDifferentialLosslessHuffmanFrame = 0xc7;
 
-        public const byte Extension = 0xc8;        
+        public const byte Extension = 0xc8;
 
         public const byte StartOfExtendedSequentialArithmeticFrame = 0xc9;
 
@@ -146,11 +146,11 @@ namespace Media.Codecs.Image.Jpeg
         public static byte[] CreateHuffmanTableMarker(byte[] codeLens, byte[] symbols, int tableNo, int tableClass)
         {
             int symbolsLength = symbols.Length;
-            
+
             byte[] result = new byte[5 + codeLens.Length + symbolsLength];
-            
+
             result[0] = Media.Codecs.Image.Jpeg.Markers.Prefix;
-            
+
             result[1] = Media.Codecs.Image.Jpeg.Markers.HuffmanTable;
 
             //Length
@@ -159,8 +159,8 @@ namespace Media.Codecs.Image.Jpeg
             result[4] = (byte)((tableClass << 4) | tableNo); //Id
 
             //Data
-            codeLens.CopyTo(result, 5); 
-            
+            codeLens.CopyTo(result, 5);
+
             symbols.CopyTo(result, 5 + symbolsLength + 1);
 
             return result;

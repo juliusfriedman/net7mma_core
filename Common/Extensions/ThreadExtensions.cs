@@ -57,7 +57,7 @@ namespace Media.Common.Extensions.Thread
                 (thread.ThreadState & (System.Threading.ThreadState.Stopped | System.Threading.ThreadState.Unstarted)) == System.Threading.ThreadState.Running;
         }
 
-        static readonly System.PlatformNotSupportedException ThreadAbortNotSupported = new ("Thread.Abort is not supported. Ensure your thread has stopped.");
+        static readonly System.PlatformNotSupportedException ThreadAbortNotSupported = new("Thread.Abort is not supported. Ensure your thread has stopped.");
 
         /// <summary>
         /// Calls <see cref="Interrupt"/> on the given thread and indicates if the interrupt was received back.

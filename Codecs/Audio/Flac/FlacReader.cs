@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Media.Common;
+using Media.Container;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Media.Common;
-using Media.Container;
 
 //FLAC is a codec not a container.
 //https://github.com/filoe/cscore/blob/master/CSCore/Codecs/FLAC/FlacFrameHeader.cs
@@ -72,7 +72,7 @@ namespace Media.Codecs.Flac
         /// <summary>
         /// Used to determine how many bytes are allocated to read a <see cref=nameof(node)/>
         /// </summary>
-        const int IdentifierSize = 4, 
+        const int IdentifierSize = 4,
             MinimumReadSize = IdentifierSize;
 
         #endregion
@@ -90,7 +90,7 @@ namespace Media.Codecs.Flac
             SeekTable = 3,
             VorbisComment = 4,
             CueSheet = 5,
-            Picture = 6,            
+            Picture = 6,
             //Reserved = 7, //-126
             Invalid = 127
         }
@@ -397,7 +397,7 @@ namespace Media.Codecs.Flac
             //samplerate
             int sampleRate = identifier[2] & 0x0F;
             if (sampleRate >= 1 && sampleRate <= 11)
-                sampleRate = SampleRateTable[sampleRate];           
+                sampleRate = SampleRateTable[sampleRate];
             else
             {
                 throw new InvalidOperationException("Invalid SampleRate value: " + sampleRate);
@@ -442,7 +442,8 @@ namespace Media.Codecs.Flac
         /// </summary>
         /// <param name=nameof(node)></param>
         /// <returns></returns>
-        public static int GetBitsPerSample(Node node) {
+        public static int GetBitsPerSample(Node node)
+        {
             if (node is null) throw new ArgumentNullException(nameof(node));
             return GetBitsPerSample(node.Identifier);
         }
@@ -480,9 +481,9 @@ namespace Media.Codecs.Flac
 
         int? m_MinBlockSize = 0, m_MaxBlockSize = 0,
              m_MinFrameSize = 0, m_MaxFrameSize = 0,
-             m_SampleRate = 0, m_Channels = 0, 
+             m_SampleRate = 0, m_Channels = 0,
              m_BitsPerSample = 0;
-        
+
         ulong? m_TotalSamples = 0;
 
         string m_Md5 = string.Empty, m_Title = string.Empty;
@@ -518,7 +519,7 @@ namespace Media.Codecs.Flac
                 return (int)m_MinFrameSize.GetValueOrDefault();
             }
         }
-        
+
         public int MaxFrameSize
         {
             get
@@ -584,7 +585,7 @@ namespace Media.Codecs.Flac
         #endregion
 
         #region Methods
-        
+
         /// <summary>
         /// Reads the "fLaC" stream marker as defined by <see cref="fLaCBytes"/> and stores the position of the occurance in <see cref="m_FlacPosition"/>.
         /// Throws <see cref="InvalidOperationException"/> when not enough bytes are present OR the "fLaC" marker cannot be found.
@@ -595,11 +596,11 @@ namespace Media.Codecs.Flac
             while (Position + IdentifierSize < Length)
             {
                 Loop:
-                    for (int i = 0; i < fLaCBytes.Length; ++i)
-                        if (ReadByte() != fLaCBytes[i]) goto Loop;
+                for (int i = 0; i < fLaCBytes.Length; ++i)
+                    if (ReadByte() != fLaCBytes[i]) goto Loop;
                 m_FlacPosition = Position - fLaCBytes.Length;
                 return;
-                
+
             }
             throw new InvalidOperationException("Cannot find fLaC marker.");
         }
@@ -628,8 +629,8 @@ namespace Media.Codecs.Flac
 
                 //If contained the found or the unmasked found then return the page
                 yield return block;
-                
-            Continue:
+
+                Continue:
                 count -= block.TotalSize;
 
                 if (count <= 0) yield break;
@@ -638,7 +639,7 @@ namespace Media.Codecs.Flac
             }
 
             Position = position;
-        }      
+        }
 
         /// <summary>
         /// Reads the next block from the underlying.
@@ -701,7 +702,7 @@ namespace Media.Codecs.Flac
                             //BlockingStrategy = BlockingStrategy.VariableBlockSize;
                             //SampleNumber = (long)samplenumber;
                             throw new Exception("Invalid UTF8 Samplenumber coding.");
-                            
+
                         }
                     }
                     else //fixed blocksize
@@ -779,16 +780,16 @@ namespace Media.Codecs.Flac
                 using (BitReader br = new BitReader(bi.BaseStream, Binary.BitOrder.MostSignificant, IdentifierSize * 2, true))
                 {
                     m_MinBlockSize = Common.Binary.ReadU16(node.Data, 0, BitConverter.IsLittleEndian); //br.Read16();
-                    
+
                     m_MaxBlockSize = Common.Binary.ReadU16(node.Data, 2, BitConverter.IsLittleEndian);
-                    
+
                     m_MinFrameSize = (int)Common.Binary.ReadU24(node.Data, 4, BitConverter.IsLittleEndian);
-                    
+
                     m_MaxFrameSize = (int)Common.Binary.ReadU24(node.Data, 7, BitConverter.IsLittleEndian);
 
                     m_SampleRate = (int)Common.Binary.ReadUInt64MSB(node.Data.Array, 10, 20, 0); //e.g. Common.Binary.ReadBitsMSB(node.Data, Common.Binary.BytesToBits(10), 20)
 
-                    m_Channels = 1 + (int)Common.Binary.ReadUInt64MSB(node.Data.Array, 12, 3, 4); 
+                    m_Channels = 1 + (int)Common.Binary.ReadUInt64MSB(node.Data.Array, 12, 3, 4);
 
                     m_BitsPerSample = 1 + (int)Common.Binary.ReadUInt64MSB(node.Data.Array, 12, 5, 7);
 
@@ -894,14 +895,14 @@ namespace Media.Codecs.Flac
             VerifyBlockType(node, BlockType.SeekTable);
             ///	NOTE
             /// The number of seek points is implied by the metadata header 'length' field, i.e.equal to length / 18.
-            List <Tuple<long, long, short>> seekPoints = new List<Tuple<long, long, short>>((int)(node is null ? 0 : node.DataSize / 18));
-            if (node is not null) for (int i = 0, e = (int)node.DataSize; i < e; i+=18)
-            {
-                //Add the decoded seekpoint
-                seekPoints.Add(new Tuple<long, long, short>(Common.Binary.Read64(node.Data, i, BitConverter.IsLittleEndian),
-                    Common.Binary.Read64(node.Data, i + 8, BitConverter.IsLittleEndian), 
-                    Common.Binary.Read16(node.Data, i + 10, BitConverter.IsLittleEndian)));
-            }
+            List<Tuple<long, long, short>> seekPoints = new List<Tuple<long, long, short>>((int)(node is null ? 0 : node.DataSize / 18));
+            if (node is not null) for (int i = 0, e = (int)node.DataSize; i < e; i += 18)
+                {
+                    //Add the decoded seekpoint
+                    seekPoints.Add(new Tuple<long, long, short>(Common.Binary.Read64(node.Data, i, BitConverter.IsLittleEndian),
+                        Common.Binary.Read64(node.Data, i + 8, BitConverter.IsLittleEndian),
+                        Common.Binary.Read16(node.Data, i + 10, BitConverter.IsLittleEndian)));
+                }
             return seekPoints;
         }
 
@@ -913,7 +914,7 @@ namespace Media.Codecs.Flac
             //return i;
 
             uint result = 0;
-            using(Common.BitReader br = new BitReader(this, Binary.BitOrder.MostSignificant, 32, true))
+            using (Common.BitReader br = new BitReader(this, Binary.BitOrder.MostSignificant, 32, true))
             {
                 uint unaryindicator = (uint)(br.Read24() >> 24);
 
@@ -989,7 +990,7 @@ namespace Media.Codecs.Flac
             m_Tracks = new List<Track>();
 
             //Loop for K StreamInfo blocks and the single VorbisComment.
-            foreach(var block in ReadBlocks(0, Length, BlockType.StreamInfo, BlockType.VorbisComment))
+            foreach (var block in ReadBlocks(0, Length, BlockType.StreamInfo, BlockType.VorbisComment))
             {
 
                 List<KeyValuePair<string, string>> vorbisInfo;
@@ -1023,7 +1024,7 @@ namespace Media.Codecs.Flac
 
                             continue;
                         }
-                }                
+                }
             }
 
             m_Tracks.Add(lastTrack);

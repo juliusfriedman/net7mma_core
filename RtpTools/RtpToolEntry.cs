@@ -36,11 +36,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
+using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Media.Common;
 
 namespace Media.RtpTools
 {
@@ -235,7 +235,7 @@ namespace Media.RtpTools
             set
             {
                 if (IsDisposed) return;
-                
+
                 Common.Binary.Write16(Blob, Pointer + 2, ReverseValues, (ushort)value);
 
             }
@@ -265,13 +265,13 @@ namespace Media.RtpTools
         #region Constructor
 
         internal RtpToolEntry(DateTime timeBase, System.Net.IPEndPoint source, FileFormat format, byte[] memory = null, int? offset = null, long? fileOffset = null, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             Timebase = timeBase;
             Source = source;
             Format = format;
             Blob = memory;
-            FileOffset = fileOffset ?? 0;            
+            FileOffset = fileOffset ?? 0;
             BlobLength = memory.Length;
             if (offset.HasValue) Offset = offset.Value;
         }
@@ -350,7 +350,7 @@ namespace Media.RtpTools
 
         #endregion
 
-      
+
     }
-    
+
 }

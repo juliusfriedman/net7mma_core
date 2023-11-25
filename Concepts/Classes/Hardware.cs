@@ -171,7 +171,7 @@ namespace Media.Concepts.Hardware
 
             //System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ManagedDelegate = managedDelegate);
 
-            InstructionPointer = (ManagedDelegate = managedDelegate).Method.MethodHandle.GetFunctionPointer(); 
+            InstructionPointer = (ManagedDelegate = managedDelegate).Method.MethodHandle.GetFunctionPointer();
         }
 
         /// <summary>
@@ -282,7 +282,7 @@ namespace Media.Concepts.Hardware
             if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(instructions)) throw new System.InvalidOperationException("instructions IsNullOrEmpty.");
 
             Instructions = instructions;
-            
+
             //Could VirtualProtect to allow execution directly from managed array with CallIndirect
         }
 
@@ -338,7 +338,7 @@ namespace Media.Concepts.Hardware
             {
                 Instructions = x64codeBytes;
             }
-        }        
+        }
 
         //Invoke
         //[System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -484,8 +484,8 @@ namespace Media.Concepts.Hardware
         static System.Type PlatformMethodReplacementType = typeof(PlatformMethodReplacement);
 
         static System.Reflection.MethodInfo PreviousMethodInfo = PlatformMethodReplacementType.GetMethod(PreviousMethodSymbol, System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            //Media.Common.Extensions.ExpressionExtensions.SymbolExtensions.GetMethodInfo(() => ((PlatformMethodReplacement)null).PreviousMethod());
-        
+        //Media.Common.Extensions.ExpressionExtensions.SymbolExtensions.GetMethodInfo(() => ((PlatformMethodReplacement)null).PreviousMethod());
+
         #endregion
 
         internal System.Reflection.MethodInfo PreviouslyDefinedMethod
@@ -550,7 +550,7 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// Indicates if the original method will be restored upon calling <see cref="VirtualFree"/>
         /// </summary>
-        internal bool Restore;        
+        internal bool Restore;
 
         #endregion
 

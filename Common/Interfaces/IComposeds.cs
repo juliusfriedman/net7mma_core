@@ -42,7 +42,7 @@ namespace Media.Common.Interfaces
     /// Represents a <see cref="Common.Interfaces.Interface">superposition</see> which is `similar` to another instance.
     /// </summary>
     public interface ISimilar : Common.Interfaces.Interface { }
-    
+
     /// <summary>
     /// The <see cref="internal"/> <see cref="interface"/> which extends <see cref="ISimilar"/>
     /// </summary>

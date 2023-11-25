@@ -173,7 +173,7 @@ namespace Media.Ntp
                 //0.001 Centisecond = 10 Microsecond
                 //1 Tick = 0.1 Microsecond
                 //0.1 * 100 Nanos Per Tick = 100
-                                                                                            //System.TimeSpan.TicksPerSecond is fine here also...
+                //System.TimeSpan.TicksPerSecond is fine here also...
                 long ticks = seconds * System.TimeSpan.TicksPerSecond + ((long)(fractions * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TenMicrosecondsPerPicosecond) >> Common.Binary.BitsPerInteger);
 
                 //Adding a tick here can make the diff 0
@@ -266,7 +266,7 @@ namespace Media.UnitTests
 
             //reverse should equal 12992241732673339392 (test) = 0xb44d_b705_2000_0000
 
-            if (reverse != test) throw new System.Exception("DateTimeToNptTimestamp:" + reverse + ", Error: " + (test - reverse)); 
+            if (reverse != test) throw new System.Exception("DateTimeToNptTimestamp:" + reverse + ", Error: " + (test - reverse));
 
             reverse = Media.Ntp.NetworkTimeProtocol.DateTimeToNptTimestamp32(ref result);
 

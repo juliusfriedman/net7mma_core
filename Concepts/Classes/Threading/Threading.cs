@@ -76,7 +76,7 @@ namespace Media.Concepts.Classes.Threading
         public System.Threading.ThreadPriority OverlappedThreadPriority;
 
         //---- @ 0
-        
+
         [System.Runtime.InteropServices.FieldOffset(0)]
         public ThreadPriority StartPriority;
 
@@ -90,7 +90,7 @@ namespace Media.Concepts.Classes.Threading
         public ThreadPriority AbortPriority;
 
         //---- @ 4
-        
+
         [System.Runtime.InteropServices.FieldOffset(4)]
         public System.Threading.ThreadPriority OverlappedThreadPriority2;
 
@@ -227,7 +227,7 @@ namespace Media.Concepts.Classes.Threading
 
     //}
 
-        //need slimmere
+    //need slimmere
 
     public class AllocationFreeManualResetEventSlim : System.Threading.ManualResetEventSlim
     {
@@ -241,7 +241,7 @@ namespace Media.Concepts.Classes.Threading
         public bool WaitTicks(ref long ticks, System.Threading.CancellationToken cancellationToken)
         {
             int reg;
-            while(ticks > 0)
+            while (ticks > 0)
             {
                 reg = (int)ticks;//mov
                 ticks -= reg;//sub
@@ -355,7 +355,7 @@ namespace Media.Concepts.Classes.Threading
     /// The name is not quite correct as that `name` has already been utilized <see href="http://stackoverflow.com/questions/38379278/how-can-i-improve-this-wrapper-for-thread/38444258#38444258"/>
     /// </remarks>
     public class Fiber : Media.Common.SuppressedFinalizerDisposable, Media.Common.IUpdateable, Media.Common.IThreadReference
-    {        
+    {
         public const Fiber Nil = null;
 
         public const System.Threading.Thread NilThread = null;
@@ -375,7 +375,7 @@ namespace Media.Concepts.Classes.Threading
         }
 
         public Fiber(System.Func<System.Exception, bool> exceptionHandler, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             ExceptionHandler = exceptionHandler;
         }
@@ -407,7 +407,7 @@ namespace Media.Concepts.Classes.Threading
 
         //-- The fibers or actions
 
-        public readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim <System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan>> Itinerarius =
+        public readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan>> Itinerarius =
             new Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan>>();
 
         public bool Add(System.Action action)
@@ -433,74 +433,74 @@ namespace Media.Concepts.Classes.Threading
         /// Normalize the itinerary
         /// </summary>
         void UniversalEntryPoint()
-        {            
-            goto Started;
-        Started: Started = System.DateTimeOffset.UtcNow; goto Aft;
-        Aft:
-            System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan> Item;
-        Begin:
-        try
         {
+            goto Started;
+            Started: Started = System.DateTimeOffset.UtcNow; goto Aft;
+            Aft:
+            System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan> Item;
+            Begin:
             try
             {
-                while (Common.IDisposedExtensions.IsNullOrDisposed(this) is false &&
-                    Itinerarius.Count > 0 && 
-                    UpdateTokenSource.IsCancellationRequested is false)
+                try
                 {
-                    if (Itinerarius.TryDequeue(out Item))
+                    while (Common.IDisposedExtensions.IsNullOrDisposed(this) is false &&
+                        Itinerarius.Count > 0 &&
+                        UpdateTokenSource.IsCancellationRequested is false)
                     {
-                        UnderlyingThread.Priority = System.Threading.ThreadPriority.Lowest;
+                        if (Itinerarius.TryDequeue(out Item))
+                        {
+                            UnderlyingThread.Priority = System.Threading.ThreadPriority.Lowest;
 
-                        //Todo, execution time will require Timer or Clock.
+                            //Todo, execution time will require Timer or Clock.
 
-                        try { Item.Item1.Invoke(); }
-                        finally { UnderlyingThread.Priority = System.Threading.ThreadPriority.Highest; }
+                            try { Item.Item1.Invoke(); }
+                            finally { UnderlyingThread.Priority = System.Threading.ThreadPriority.Highest; }
+                        }
                     }
+
+                    //Depleted
+                    UnderlyingThreadsPriorityInformation.SetIdle(UnderlyingThread);
+                }
+                catch (System.Exception)
+                {
+                    UnderlyingThread.Priority = System.Threading.ThreadPriority.Normal;
+
+                    if (ExceptionHandler is not null)
+                    {
+                        UnderlyingCompressedStack = System.Threading.CompressedStack.Capture();
+
+                        using var enumerator = Exceptions.GetExceptions();
+                        while (enumerator.MoveNext() && UpdateTokenSource.IsCancellationRequested is false)
+                        {
+                            UnderlyingThread.Priority = System.Threading.ThreadPriority.BelowNormal;
+
+                            throw enumerator.Current;
+                        }
+                    }
+
+                    goto Begin;
+                }
+            }
+            catch (System.Exception ex)
+            {
+                UnderlyingThread.Priority = System.Threading.ThreadPriority.BelowNormal;
+
+                if (Exceptions.Handle(ex) is false)
+                {
+                    UnderlyingThread.Priority = System.Threading.ThreadPriority.Normal;
+
+                    throw;
                 }
 
-                //Depleted
-                UnderlyingThreadsPriorityInformation.SetIdle(UnderlyingThread);
+                UnderlyingThread.Priority = System.Threading.ThreadPriority.AboveNormal;
+
+                UnderlyingCompressedStack = null;
             }
-            catch (System.Exception)
-            {
-                UnderlyingThread.Priority = System.Threading.ThreadPriority.Normal;
+            //finally
+            //{
+            //    unsafe { System.Runtime.InteropServices.Marshal.DestroyStructure(Unsafe.AddressOf(ref Item), StructureType); }
+            //}
 
-                if (ExceptionHandler is not null)
-                {
-                    UnderlyingCompressedStack = System.Threading.CompressedStack.Capture();
-
-                    using var enumerator = Exceptions.GetExceptions();
-                    while (enumerator.MoveNext() && UpdateTokenSource.IsCancellationRequested is false)
-                    {
-                        UnderlyingThread.Priority = System.Threading.ThreadPriority.BelowNormal;
-
-                        throw enumerator.Current;
-                    }
-                }
-
-                goto Begin;
-            }
-        }
-        catch(System.Exception ex)
-        {
-            UnderlyingThread.Priority = System.Threading.ThreadPriority.BelowNormal; 
-
-            if (Exceptions.Handle(ex) is false)
-            {
-                UnderlyingThread.Priority = System.Threading.ThreadPriority.Normal; 
-
-                throw;
-            }
-
-            UnderlyingThread.Priority = System.Threading.ThreadPriority.AboveNormal;
-
-            UnderlyingCompressedStack = null;
-        }
-        //finally
-        //{
-        //    unsafe { System.Runtime.InteropServices.Marshal.DestroyStructure(Unsafe.AddressOf(ref Item), StructureType); }
-        //}
-            
             //Wait for more work.
             if (object.ReferenceEquals(System.Threading.Thread.CurrentThread, UnderlyingThread))
             {
@@ -519,11 +519,11 @@ namespace Media.Concepts.Classes.Threading
         async void AsyncEntryPoint()
         {
             goto Started;
-                        Started: 
-            Started = System.DateTimeOffset.UtcNow; 
-                        goto Aft;
-                Aft:
-        Begin:
+            Started:
+            Started = System.DateTimeOffset.UtcNow;
+            goto Aft;
+            Aft:
+            Begin:
 
             System.Tuple<System.Action, ThreadPriorityInformation, System.TimeSpan> Item;
             try
@@ -570,7 +570,7 @@ namespace Media.Concepts.Classes.Threading
                 if (ExceptionHandler is not null &&
                     AggregateExceptions.Data.Count > 0) throw AggregateExceptions;
             }
-            
+
             if (object.ReferenceEquals(System.Threading.Thread.CurrentThread, UnderlyingThread))
             {
                 System.Threading.Thread.Sleep(System.Threading.Timeout.InfiniteTimeSpan);
@@ -744,7 +744,7 @@ namespace Media.Concepts.Classes.Threading
 
                     // lock holder and invoke if it is not removed
                     System.Threading.Monitor.Enter(Holder);
-                    
+
                     if (false == Holder.IsDeleted) Holder.Action.DynamicInvoke(args);
                     else if (false == Holder.IsDeletedFromList)
                     {

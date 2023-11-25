@@ -42,7 +42,6 @@ using Media.Common.Extensions.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 #endregion
 
@@ -90,8 +89,8 @@ namespace Media.Concepts.Experimental
                 try
                 {
                     T current = base.Current;
-                    if(current is not null) try { OnCurrentRead(); }
-                    catch (Exception _) { ex = _; }
+                    if (current is not null) try { OnCurrentRead(); }
+                        catch (Exception _) { ex = _; }
                     return base.Current;
                 }
                 finally { if (ex is not null) throw ex; }
@@ -1547,12 +1546,12 @@ namespace Media.Concepts.Experimental
     #endregion
 
     //Blitable
-    
+
     //Number
 
     //Physics
 
     //Units
 
-    #endregion   
+    #endregion
 }

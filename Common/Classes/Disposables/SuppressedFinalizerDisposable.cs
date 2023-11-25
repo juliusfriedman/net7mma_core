@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Common
 {
@@ -18,15 +14,15 @@ namespace Media.Common
         /// <summary>
         /// Should never run unless immediately finalized.
         /// </summary>
-//        ~SuppressedFinalizerDisposable()
-//        {            
+        //        ~SuppressedFinalizerDisposable()
+        //        {            
 
-//            Dispose(ShouldDispose);
+        //            Dispose(ShouldDispose);
 
-//#if DEBUG
-//            System.Diagnostics.Debug.WriteLine(ToString() + "@Finalize Completed");
-//#endif
-//        }
+        //#if DEBUG
+        //            System.Diagnostics.Debug.WriteLine(ToString() + "@Finalize Completed");
+        //#endif
+        //        }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public SuppressedFinalizerDisposable(bool shouldDispose)

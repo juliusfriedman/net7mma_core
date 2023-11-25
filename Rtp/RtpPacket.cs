@@ -38,10 +38,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
+using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Media.Common;
 
 #endregion
 
@@ -98,7 +98,7 @@ namespace Media.Rtp
             get
             {
                 if (IsDisposed || Payload.Count is 0) return 0;
-                
+
                 return Binary.Clamp(Header.ContributingSourceCount * 4, 0, 60);
             }
         }
@@ -137,7 +137,7 @@ namespace Media.Rtp
             {
                 if (IsDisposed || Payload.Count is 0)
                     return 0;
-                
+
                 return ContributingSourceListOctets + ExtensionOctets;
             }
         }
@@ -246,7 +246,7 @@ namespace Media.Rtp
             get { return PayloadDataSegment; }
         }
 
-        internal protected Common.MemorySegment PaddingDataSegment 
+        internal protected Common.MemorySegment PaddingDataSegment
         {
             get
             {
@@ -342,7 +342,7 @@ namespace Media.Rtp
         public RtpPacket(int version, bool padding, bool extension, bool marker, int payloadType, int csc, int ssrc, int seq, int timestamp, byte[] payload = null)
             : this(new RtpHeader(version, padding, extension, marker, payloadType, csc, ssrc, seq, timestamp), payload)
         {
-            
+
         }
 
         /// <summary>
@@ -410,7 +410,7 @@ namespace Media.Rtp
                 Payload = new MemorySegment(m_OwnedOctets, RtpHeader.Length, count - RtpHeader.Length);
             }
             else
-            {                
+            {
                 //m_OwnedOctets = Media.Common.MemorySegment.EmptyBytes; //IsReadOnly should be false
                 //Payload = new MemoryReference(m_OwnedOctets, 0, 0, m_OwnsHeader);
                 Payload = MemorySegment.Empty;
@@ -426,7 +426,7 @@ namespace Media.Rtp
         /// <param name="size"></param>
         /// <param name="shouldDispose"></param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public RtpPacket(int size, bool shouldDispose = true) 
+        public RtpPacket(int size, bool shouldDispose = true)
             : base(shouldDispose)
         {
             size = Common.Binary.Max(0, size);
@@ -439,7 +439,7 @@ namespace Media.Rtp
 
             Payload = new MemorySegment(m_OwnedOctets, RtpHeader.Length, size - Header.Size);
         }
-            
+
         #endregion
 
         #region Properties
@@ -538,7 +538,7 @@ namespace Media.Rtp
         /// <summary>
         /// <see cref="RtpHeader.Timestamp"/>
         /// </summary>
-        public int Timestamp 
+        public int Timestamp
         {
             get { return Header.Timestamp; }
             internal protected set
@@ -645,7 +645,8 @@ namespace Media.Rtp
                 SynchronizationSourceIdentifier = Header.SynchronizationSourceIdentifier,
                 PayloadType = Header.PayloadType,
                 ContributingSourceCount = includeSourceList ? Header.ContributingSourceCount : 0
-            }.Concat(binarySequence).ToArray(), 0, shouldDispose) { Transferred = Transferred };
+            }.Concat(binarySequence).ToArray(), 0, shouldDispose)
+            { Transferred = Transferred };
         }
 
         /// <summary>
@@ -656,7 +657,7 @@ namespace Media.Rtp
         public RtpPacket Clone()
         {
             return new RtpPacket(new RtpHeader(Header), new Common.MemorySegment(Payload)) { Transferred = Transferred };
-        } 
+        }
 
         /// <summary>
         /// Generates a sequence of bytes containing the RtpHeader and any data contained in Payload.
@@ -757,7 +758,7 @@ namespace Media.Rtp
                 octetsRemaining = RtpExtension.MinimumSize - (payloadCount - offset);
 
                 //If the extension header is not yet read
-                if (octetsRemaining > 0) 
+                if (octetsRemaining > 0)
                 {
                     //Allocte the memory for the extension header
                     if (m_OwnedOctets is null) m_OwnedOctets = new byte[octetsRemaining];
@@ -865,7 +866,7 @@ namespace Media.Rtp
             //RtpPacket is complete
 
             return recieved;
-        }      
+        }
 
         #endregion
 
@@ -1059,11 +1060,11 @@ namespace Media.UnitTests
                             int RandomId = Utility.Random.Next(), RandomSequenceNumber = Utility.Random.Next(ushort.MinValue, ushort.MaxValue), RandomTimestamp = Utility.Random.Next();
 
                             //Create a RtpPacket instance using the specified options
-                            using (Media.Rtp.RtpPacket p = new Rtp.RtpPacket(VersionCounter, 
-                                bitValue, !bitValue, bitValue, 
-                                PayloadCounter, 
-                                ContributingSourceCounter, 
-                                RandomId, 
+                            using (Media.Rtp.RtpPacket p = new Rtp.RtpPacket(VersionCounter,
+                                bitValue, !bitValue, bitValue,
+                                PayloadCounter,
+                                ContributingSourceCounter,
+                                RandomId,
                                 RandomSequenceNumber,
                                 RandomTimestamp))
                             {

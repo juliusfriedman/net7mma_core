@@ -47,7 +47,7 @@ namespace Media.Common
         /// </summary>
         public static readonly System.Text.Encoding ASCIIEncoding = new System.Text.ASCIIEncoding();
 
-        public const byte Null = 0x00, 
+        public const byte Null = 0x00,
             Bell = 0x07, // `\a` => 07 Decimal`
             Backspace = 0x08, //`\b` => 08 Decimal`
             HorizontalTab = 0x09, // `\t` => 09 Decimal`
@@ -55,9 +55,9 @@ namespace Media.Common
             VerticalTab = 0x0B, // `\v` => 11 Decimal
             FormFeed = 0x0C, // NewPage `\f` => 12 Decimal
             NewLine = 0x0D, // `\r` => 13 Decimal
-            //ShiftOut 14
-            //ShiftIn 15
-            //DataLinkEscape 16
+                            //ShiftOut 14
+                            //ShiftIn 15
+                            //DataLinkEscape 16
             Escape = 0x1B, // `\e` => 27 Decimal
             Space = 0x20,// ` ` => 32 Decimal
             /*....*/
@@ -85,7 +85,7 @@ namespace Media.Common
         /// </summary>
         /// <param name="c">the char</param>
         /// <returns>True if the character is within the alloted range, otherwise false.</returns>
-        public static bool IsHexDigit(char c) { return IsHexDigit (ref c); }
+        public static bool IsHexDigit(char c) { return IsHexDigit(ref c); }
 
         /// <summary>
         /// Determines if the given <see cref="char"/> is inclusively within the range of `0-9, A-F and a-f` .

@@ -56,7 +56,7 @@ namespace Media.Containers.Mpeg
 
         public ProgramStreamReader(System.IO.FileStream source, System.IO.FileAccess access = System.IO.FileAccess.Read) : base(source, access) { }
 
-        public ProgramStreamReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, bufferSize) { } 
+        public ProgramStreamReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, bufferSize) { }
 
         //Might need the data not the identifier
         public static string ToTextualConvention(byte[] identifier)
@@ -81,7 +81,7 @@ namespace Media.Containers.Mpeg
             {
                 //If no names were specified or they were and the identifier marker was contained return the node
                 if (names is null || names.Length is 0 || names.Contains(node.Identifier[3])) yield return node;
-                
+
                 //Decrease by TotalSize of the node
                 count -= node.TotalSize;
 
@@ -109,7 +109,7 @@ namespace Media.Containers.Mpeg
             Position = position;
 
             return result;
-        }      
+        }
 
         /// <summary>
         /// 
@@ -242,7 +242,7 @@ namespace Media.Containers.Mpeg
                 //Should just be read from position....
                 Container.Node result = FindNode(Mpeg.StreamTypes.PackHeader, 0, Length);
 
-                if(CanSeek) Position = position;
+                if (CanSeek) Position = position;
 
                 return result;
             }
@@ -307,7 +307,7 @@ namespace Media.Containers.Mpeg
 
             //m_PackHeaderVersion could be ser here..
 
-             //Determine which version of the Pack Header this is
+            //Determine which version of the Pack Header this is
             switch (node.Identifier[4] >> 6)
             {
                 case 0: //MPEG 1
@@ -399,7 +399,7 @@ namespace Media.Containers.Mpeg
             //For DVD-Video this value will always be 1.
 
             byte video_boud = (byte)(temp & 0xE0);
-            
+
             //1-bit boolean. If CSPS_flag is TRUE (1) this specifies which restraint is applicable to the packet rate, otherwise the flag has no meaning. 
             //For DVD-Video this flag must be FALSE (0).
 

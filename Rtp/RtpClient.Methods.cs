@@ -74,11 +74,11 @@ namespace Media.Rtp
 
                     //If the identity will overlap the Payload type CANNOT be the same
 
-                    
 
-                    
 
-                    
+
+
+
 
                     //if chekcking local identifier
                     if (checkLocalIdentity && c.SynchronizationSourceIdentifier == context.SynchronizationSourceIdentifier)
@@ -227,7 +227,7 @@ namespace Media.Rtp
 
             foreach (TransportContext tc in TransportContexts)
             {
-                if (Common.IDisposedExtensions.IsNullOrDisposed(tc) is false && 
+                if (Common.IDisposedExtensions.IsNullOrDisposed(tc) is false &&
                     tc.IsRtcpEnabled && SendReports(tc))
                 {
                     sentAny = true;
@@ -375,7 +375,7 @@ namespace Media.Rtp
             //If the bandwidth is not exceeded also send a SourceDescription
             if (AverageRtcpBandwidthExceeded is false)
             {
-                return SendRtcpPackets(System.Linq.Enumerable.Concat(Media.Common.Extensions.Linq.LinqExtensions.Yield<Rtcp.RtcpPacket>(context.ReceiversReport), 
+                return SendRtcpPackets(System.Linq.Enumerable.Concat(Media.Common.Extensions.Linq.LinqExtensions.Yield<Rtcp.RtcpPacket>(context.ReceiversReport),
                     Media.Common.Extensions.Linq.LinqExtensions.Yield((context.SourceDescription = TransportContext.CreateSourceDescription(context)))));
             }
 
@@ -535,7 +535,7 @@ namespace Media.Rtp
                     else
                     {
                         //Just send them in their own array.
-                        sent += SendData(System.Linq.Enumerable.ToArray(RFC3550.ToCompoundBytes(packets)), 
+                        sent += SendData(System.Linq.Enumerable.ToArray(RFC3550.ToCompoundBytes(packets)),
                             context.ControlChannel, context.RtcpSocket, context.RemoteRtcp, out error);
 
                         buffers = null;
@@ -574,7 +574,7 @@ namespace Media.Rtp
                     if (packet.IsContiguous() is false)
                     {
                         //Just send all packets in their own array by projecting the data (causes an allocation)
-                        sent += SendData(System.Linq.Enumerable.ToArray(RFC3550.ToCompoundBytes(packets)), 
+                        sent += SendData(System.Linq.Enumerable.ToArray(RFC3550.ToCompoundBytes(packets)),
                             context.ControlChannel, context.RtcpSocket, context.RemoteRtcp, out error);
 
                         //Stop here.
@@ -599,9 +599,9 @@ namespace Media.Rtp
 
                         Common.Binary.Write16(framing, 2, Common.Binary.IsLittleEndian, (short)length);
 
-                        while (sent < InterleavedOverhead && 
-                            (false.Equals(error == System.Net.Sockets.SocketError.ConnectionAborted) && 
-                            false.Equals(error == System.Net.Sockets.SocketError.ConnectionReset) && 
+                        while (sent < InterleavedOverhead &&
+                            (false.Equals(error == System.Net.Sockets.SocketError.ConnectionAborted) &&
+                            false.Equals(error == System.Net.Sockets.SocketError.ConnectionReset) &&
                             false.Equals(error == System.Net.Sockets.SocketError.NotConnected)))
                         {
                             //Send all the framing.
@@ -621,13 +621,13 @@ namespace Media.Rtp
                             packetLength = packet.Length;
 
                             //While there is data to send
-                            while (sent < packetLength && 
-                                false.Equals(error == System.Net.Sockets.SocketError.ConnectionAborted) && 
+                            while (sent < packetLength &&
+                                false.Equals(error == System.Net.Sockets.SocketError.ConnectionAborted) &&
                                 false.Equals(error == System.Net.Sockets.SocketError.ConnectionReset))
                             {
                                 //Send it.
-                                sent += context.RtcpSocket.Send(packet.Header.First16Bits.m_Memory.Array, 
-                                    packet.Header.First16Bits.m_Memory.Offset + sent, packetLength - sent, 
+                                sent += context.RtcpSocket.Send(packet.Header.First16Bits.m_Memory.Array,
+                                    packet.Header.First16Bits.m_Memory.Offset + sent, packetLength - sent,
                                     System.Net.Sockets.SocketFlags.None, out error);
                             }
 
@@ -1045,15 +1045,15 @@ namespace Media.Rtp
                 {
 
                     //If the transportContext is changed to automatically update the timestamp by frequency then use transportContext.RtpTimestamp
-                    sent += SendData(System.Linq.Enumerable.ToArray(packet.Prepare(null, ssrc, null, null)), 
-                        transportContext.DataChannel, transportContext.RtpSocket, transportContext.RemoteRtp, out error, 
+                    sent += SendData(System.Linq.Enumerable.ToArray(packet.Prepare(null, ssrc, null, null)),
+                        transportContext.DataChannel, transportContext.RtpSocket, transportContext.RemoteRtp, out error,
                         (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(transportContext.m_SendInterval) >> 2);
                 }
                 else
                 {
                     //Send the data in place.
                     sent += SendData(packet.Header.First16Bits.m_Memory.Array, packet.Header.First16Bits.m_Memory.Offset, packet.Length,
-                        transportContext.DataChannel, transportContext.RtpSocket, transportContext.RemoteRtp, out error, 
+                        transportContext.DataChannel, transportContext.RtpSocket, transportContext.RemoteRtp, out error,
                         (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(transportContext.m_SendInterval) >> 2);
                 }
             }
@@ -1301,7 +1301,7 @@ namespace Media.Rtp
 
                     //use a rtcp header to extract the information in the packet
                     using Rtcp.RtcpHeader rtcpHeader = new Rtcp.RtcpHeader(buffer, offset + sessionRequired);
-                    
+
                     //Get the length in 'words' (by adding one)
                     //A length of 0 means 1 word
                     //A length of 65535 means only the header (no ssrc [or payload])
@@ -1343,7 +1343,7 @@ namespace Media.Rtp
                         if (Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextByPayloadType(commonHeaderBits.RtpPayloadType)) is false && context.InDiscovery is false)
                         {
                             using Rtp.RtpHeader rtpHeader = new RtpHeader(buffer, offset + sessionRequired);
-                            
+
                             expectRtp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextBySourceId(rtpHeader.SynchronizationSourceIdentifier))) ? false : true;
                         }
                         else incompatible = false;
@@ -1448,7 +1448,7 @@ namespace Media.Rtp
                     else
                     {
                         //Build the data
-                        System.Collections.Generic.IEnumerable<byte> framingData;                        
+                        System.Collections.Generic.IEnumerable<byte> framingData;
 
                         //The length is always present
                         framingData = System.Linq.Enumerable.Concat(Common.Binary.GetBytes((short)length, Common.Binary.IsLittleEndian), data);
@@ -1624,7 +1624,7 @@ namespace Media.Rtp
             if (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer))
             {
                 if (Common.IDisposedExtensions.IsNullOrDisposed(m_Buffer)) return 0;
-                
+
                 buffer = m_Buffer.Array;
             }
 
@@ -1669,7 +1669,7 @@ namespace Media.Rtp
                 offset >= m_Buffer.Offset &&
                 Common.IDisposedExtensions.IsNullOrDisposed(this) is false)
             {
-            ContinueParsing:
+                ContinueParsing:
                 //Assume not rtp or rtcp and that the data is compatible with the session
                 hasFrameHeader = jumbo = expectRtp = expectRtcp = incompatible = false;
 
@@ -1693,7 +1693,7 @@ namespace Media.Rtp
                         remainingInBuffer -= frameLength;
 
 #if DEBUG
-                        Media.Common.ILoggingExtensions.Log(Logger, InternalId + "@ProcessFrameData - raisedEvent for frameLength: " + frameLength.ToString() +" remainingInBuffer=" + remainingInBuffer);
+                        Media.Common.ILoggingExtensions.Log(Logger, InternalId + "@ProcessFrameData - raisedEvent for frameLength: " + frameLength.ToString() + " remainingInBuffer=" + remainingInBuffer);
 #endif
 
                         //Iterate again
@@ -1869,7 +1869,7 @@ namespace Media.Rtp
                                         else incompatible = false;
                                     }
                                 }
-                            EndUsingHeader:
+                                EndUsingHeader:
                                 ;
                             }
 
@@ -1923,8 +1923,8 @@ namespace Media.Rtp
                     relevent = null;
                 }
 
-            //At this point there may be either less sessionRequired or not enough for a complete frame.
-            CheckRemainingData:
+                //At this point there may be either less sessionRequired or not enough for a complete frame.
+                CheckRemainingData:
 
                 //See how many more bytes are required from the wire
                 //If the frameLength is less than 0 AND there are less then or equal to sessionRequired remaining in the buffer
@@ -1965,20 +1965,20 @@ namespace Media.Rtp
                             case System.Net.Sockets.SocketError.TooManyOpenSockets:
                             case System.Net.Sockets.SocketError.TryAgain:
                             case System.Net.Sockets.SocketError.TimedOut:
-                                    Media.Common.ILoggingExtensions.Log(Logger, InternalId + "ProcessFrameData - (" + error + ") remainingOnSocket " + remainingOnSocket + " for Channel " + frameChannel.Value + " remainingInBuffer=" + remainingInBuffer);
+                                Media.Common.ILoggingExtensions.Log(Logger, InternalId + "ProcessFrameData - (" + error + ") remainingOnSocket " + remainingOnSocket + " for Channel " + frameChannel.Value + " remainingInBuffer=" + remainingInBuffer);
 
-                                    if (registerY > 0) break;
+                                if (registerY > 0) break;
 
-                                    continue;
+                                continue;
                             case System.Net.Sockets.SocketError.Success:
-                                    break;
+                                break;
                             case System.Net.Sockets.SocketError.Shutdown:
                             //If a socket error occured remove the context so no parsing occurs
                             default:
-                                    //OnTruncatedData
-                                    OnOutOfBandData(buffer, offset - remainingInBuffer, remainingInBuffer);
+                                //OnTruncatedData
+                                OnOutOfBandData(buffer, offset - remainingInBuffer, remainingInBuffer);
 
-                                    return recievedTotal;
+                                return recievedTotal;
                         }
 
                         //Decrease what is remaining from the wire by what was received
@@ -1995,7 +1995,7 @@ namespace Media.Rtp
                     }
 
                     //Move back to where the frame started
-                    offset -= remainingInBuffer;                    
+                    offset -= remainingInBuffer;
 
                     //Go to the top of the loop to verify the data again.
                     if (jumbo is false) goto ContinueParsing;
@@ -2092,7 +2092,7 @@ namespace Media.Rtp
 
             //Return the number of bytes recieved
             return recievedTotal;
-        }        
+        }
 
 
         /// <summary>
@@ -2121,7 +2121,7 @@ namespace Media.Rtp
                 //RTCP packet types in the ranges 1-191 and 224-254 SHOULD only be used when other values have been exhausted.
 
                 using Media.RFC3550.CommonHeaderBits header = new Media.RFC3550.CommonHeaderBits(memory);
-                
+
                 //Could ensure version here to make reception more unified.
 
                 //Just use the payload type to avoid confusion, payload types for Rtcp and Rtp cannot and should not overlap
@@ -2136,7 +2136,7 @@ namespace Media.Rtp
 
             //Cache start, count and index
             int offset = memory.Offset, count = memory.Count, index = 0,
-                //Calulcate remaining, take whatever is less
+            //Calulcate remaining, take whatever is less
             mRemaining = remaining;
 
             //If rtcp should be parsed
@@ -2239,7 +2239,7 @@ namespace Media.Rtp
 
             unchecked
             {
-            Begin:
+                Begin:
                 try
                 {
                     //While the main thread is active.
@@ -2267,7 +2267,7 @@ namespace Media.Rtp
                         {
                             m_EventReady.Reset();
 
-                            while(IsActive && m_EventData.IsEmpty)
+                            while (IsActive && m_EventData.IsEmpty)
                                 m_EventReady.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond);
                         }
                         else if (IsActive is false) break;
@@ -2332,7 +2332,7 @@ namespace Media.Rtp
             unchecked
             {
 
-            Begin:
+                Begin:
 
                 bool critical = false;
 
@@ -2454,11 +2454,11 @@ namespace Media.Rtp
                             if (rtpEnabled && (shouldStop = IsUndisposed is false || m_StopRequested) is false
                                 //&& (readSockets.Contains(tc.RtpSocket) || errorSockets.Contains(tc.RtpSocket))
                                 //Check if the socket can read data first or that data needs to be received
-                                && 
+                                &&
                                 (tc.LastRtpPacketReceived.Equals(System.TimeSpan.MinValue) | tc.LastRtpPacketReceived >= tc.m_ReceiveInterval) ||
                                  tc.RtpSocket.Poll(usec, System.Net.Sockets.SelectMode.SelectRead))
                             {
-                            //RtpTry:
+                                //RtpTry:
                                 //Receive RtpData
                                 receivedRtp += ReceiveData(tc.RtpSocket, ref tc.RemoteRtp, out lastError, rtpEnabled, duplexing, tc.ContextMemory);
 
@@ -2502,7 +2502,7 @@ namespace Media.Rtp
                                     }
                                 }
                             }
-                            
+
                             //if Rtcp is enabled
                             if (rtcpEnabled && (shouldStop = IsUndisposed is false || m_StopRequested) is false)
                             {
@@ -2745,10 +2745,10 @@ namespace Media.Rtp
                                     lastOperation = System.DateTime.UtcNow;
                                 }
 
-                            Done:
+                                Done:
                                 //Indicate to remove another packet
                                 ++remove;
-                            
+
                                 //Might want to force packet to not dispose until it's sent...
                                 if (shouldDispose) Common.BaseDisposable.SetShouldDispose(packet, true, false);
 
@@ -2799,7 +2799,7 @@ namespace Media.Rtp
             Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@SendRecieve - Exit");
         }
 
-#endregion
+        #endregion
 
         public bool TrySetLogger(Media.Common.ILogging logger)
         {

@@ -73,7 +73,7 @@ namespace Media.Rtsp.Server
         internal string m_Name;
         internal Uri m_Source;
         internal NetworkCredential m_SourceCred;
-        internal HashSet<string> m_Aliases = new ();
+        internal HashSet<string> m_Aliases = new();
         //internal bool m_Child = false;
         public virtual Sdp.SessionDescription SessionDescription { get; internal protected set; }
 
@@ -208,7 +208,7 @@ namespace Media.Rtsp.Server
         #region Constructor        
 
         public SourceMedia(string name, Uri source, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             //The stream name cannot be null or consist only of whitespace
             if (string.IsNullOrWhiteSpace(name))
@@ -278,8 +278,8 @@ namespace Media.Rtsp.Server
         {
             if (IsDisabled) return;
 
-            State = StreamState.Started; 
-            
+            State = StreamState.Started;
+
             m_StartedTimeUtc = DateTime.UtcNow;
         }
 
@@ -296,7 +296,7 @@ namespace Media.Rtsp.Server
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void AddAlias(string name)
         {
-            if (m_Aliases.Any(a=> a.Equals(name, StringComparison.OrdinalIgnoreCase))) return;
+            if (m_Aliases.Any(a => a.Equals(name, StringComparison.OrdinalIgnoreCase))) return;
 
             m_Aliases.Add(name);
         }

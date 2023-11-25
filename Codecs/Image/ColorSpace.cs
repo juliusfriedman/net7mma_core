@@ -65,7 +65,7 @@
 ////    //    /// The minimum number of planes any ColorSpace can have.
 ////    //    /// </summary>
 ////    //    public const int MinimumPlanes = 1;
-        
+
 ////    //    /// <summary>
 ////    //    /// The maximum number of planes any ColorSpace can have.
 ////    //    /// </summary>

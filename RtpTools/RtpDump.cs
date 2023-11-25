@@ -49,7 +49,7 @@ namespace Media.RtpTools.RtpDump
     /// Reads files made with a compatible implementation of `<see href="http://www.cs.columbia.edu/irt/software/rtptools/">rtpdump</see>`, <see cref="FileFormat"/> for list of Formats supported.
     /// </summary>
     public sealed class DumpReader : Common.BaseDisposable, IEnumerable<RtpToolEntry>, Container.IMediaContainer
-    {       
+    {
 
         #region Fields
 
@@ -83,7 +83,7 @@ namespace Media.RtpTools.RtpDump
         {
             get
             {
-                return IsDisposed ?FileFormat.Unknown : m_Format;
+                return IsDisposed ? FileFormat.Unknown : m_Format;
             }
         }
 
@@ -113,7 +113,7 @@ namespace Media.RtpTools.RtpDump
         /// <param name="leaveOpen">Indicates if the stream should be left open after reading</param>
         /// <param name="DumpFormat">The optional format to force the reader to read the dump in (Useful for <see cref="DumpFormat.Header"/>)</param>
         public DumpReader(System.IO.Stream stream, bool leaveOpen = false, FileFormat? format = null, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             if (stream is null) throw new ArgumentNullException("stream");
             m_Reader = new System.IO.BinaryReader(stream, System.Text.Encoding.ASCII, leaveOpen); // new System.IO.BinaryReader(stream, System.Text.Encoding.ASCII, leaveOpen);
@@ -144,7 +144,7 @@ namespace Media.RtpTools.RtpDump
             if (m_FileIdentifier is null && RtpDumpExtensions.HasFileHeader(m_Format))
             {
                 //Identify the Binary file
-                ReadBinaryFileIdentifier(); 
+                ReadBinaryFileIdentifier();
 
                 //If the format is non text
                 if (m_Format < FileFormat.Text)
@@ -209,13 +209,13 @@ namespace Media.RtpTools.RtpDump
             //if (Array.LastIndexOf<byte>(m_FileHeader, 0x2f, 22, 22) == -1) goto Invalid;
 
             //Binary type header, maybe header only
-            if(m_Format == FileFormat.Unknown) m_Format = FileFormat.Binary;
+            if (m_Format == FileFormat.Unknown) m_Format = FileFormat.Binary;
 
             //No problems
             return;
 
-        Invalid:
-                Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Binary header is invalid.");
+            Invalid:
+            Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Binary header is invalid.");
 
         }
 
@@ -254,7 +254,7 @@ namespace Media.RtpTools.RtpDump
 
             //Read the file header if no other data has been read yet and the format possibly has header (Determines Binary or Text FileFormat)
             if (m_Reader.BaseStream.Position is 0) ReadFileHeader();
-                
+
             //If no format can be determined then raise a DumpReader type exception with the following message.
             if (m_Format == FileFormat.Unknown) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Unable to determine format!");
 
@@ -268,7 +268,7 @@ namespace Media.RtpTools.RtpDump
             {
                 //Which is the position in the stream
                 m_Offsets.Add(position);
-                    
+
                 //Indicate something was added.
                 ++offsetsCount;
             }
@@ -289,7 +289,7 @@ namespace Media.RtpTools.RtpDump
                 entry = new RtpToolEntry(m_StartTime, m_Source, foundFormat, new byte[RtpToolEntry.sizeOf_RD_packet_T], null, position);
 
                 //Read that many bytes from the stream into the enty.
-                m_Reader.Read(entry.Blob, 0, RtpToolEntry.sizeOf_RD_packet_T);                   
+                m_Reader.Read(entry.Blob, 0, RtpToolEntry.sizeOf_RD_packet_T);
 
                 //Determine how many more bytes follow.
                 int itemLength = entry.Length - RtpToolEntry.sizeOf_RD_packet_T;
@@ -308,17 +308,17 @@ namespace Media.RtpTools.RtpDump
                 entry = RtpSend.ParseText(m_Reader, m_Source, ref foundFormat, out unexpectedData);
             }
 
-                //The format of the item does not match the reader(which would only happen if given an unknown format)
-                if (foundFormat != m_Format)
+            //The format of the item does not match the reader(which would only happen if given an unknown format)
+            if (foundFormat != m_Format)
+            {
+                //If the the format of the entry found was binary
+                if (entry.Format < FileFormat.Text)
                 {
-                    //If the the format of the entry found was binary
-                    if (entry.Format < FileFormat.Text)
+                    //The unexpected data consists of the supposed fileheader.
+                    if (m_FileIdentifier is null)
                     {
-                        //The unexpected data consists of the supposed fileheader.
-                        if (m_FileIdentifier is null)
-                        {
-                            //Assign it
-                            m_FileIdentifier = new (unexpectedData);
+                        //Assign it
+                        m_FileIdentifier = new(unexpectedData);
 
                         //Read the following Binary File Header
                         ReadBinaryFileHeader();
@@ -329,13 +329,13 @@ namespace Media.RtpTools.RtpDump
                         //Remove the offset which was not related to an entry.
                         m_Offsets.RemoveAt(offsetsCount - 1);
 
-                            //Read the entry.
-                            return ReadToolEntry();
-                        }
-                        else Media.Common.TaggedExceptionExtensions.RaiseTaggedException(unexpectedData, "Encountered a Binary file header when already parsed the header. The Tag property contains the data unexpected.");
+                        //Read the entry.
+                        return ReadToolEntry();
                     }
-                    else if (unexpectedData is not null) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(entry, "Unexpected data found while parsing a Text format. See the Tag property of the InnerException", new Common.TaggedException<Common.MemorySegment>(unexpectedData));
-                }                    
+                    else Media.Common.TaggedExceptionExtensions.RaiseTaggedException(unexpectedData, "Encountered a Binary file header when already parsed the header. The Tag property contains the data unexpected.");
+                }
+                else if (unexpectedData is not null) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(entry, "Unexpected data found while parsing a Text format. See the Tag property of the InnerException", new Common.TaggedException<Common.MemorySegment>(unexpectedData));
+            }
 
             //Call determine format so item has the correct format (Header [or Payload])
             if (foundFormat == FileFormat.Unknown)
@@ -355,10 +355,10 @@ namespace Media.RtpTools.RtpDump
             while (Position < Length && (current = ReadToolEntry()) is not null)
             {
 #if DEBUG
-                 System.Diagnostics.Debug.WriteLine("Found DumpItem @ " + m_Offsets.Last());
+                System.Diagnostics.Debug.WriteLine("Found DumpItem @ " + m_Offsets.Last());
 #endif
 
-                 current.Dispose();
+                current.Dispose();
             }
 
             //Should be at the end of the stream here
@@ -396,7 +396,7 @@ namespace Media.RtpTools.RtpDump
             {
                 while (HasNext && count > 0)
                 {
-                    using (RtpToolEntry entry = ReadToolEntry()) 
+                    using (RtpToolEntry entry = ReadToolEntry())
                     {
                         --count;
                     }
@@ -645,12 +645,12 @@ namespace Media.RtpTools.RtpDump
         /// <param name="modify">Optionally indicates if the file should be modified or created, by default it will not overwrite files if they exist.</param>
         /// <param name="leaveOpen">Indicates if the stream should be left open after calling Close or Dipose</param>
         public DumpWriter(System.IO.Stream stream, FileFormat format, System.Net.IPEndPoint defaultSource, DateTime? startTime = null, bool modify = false, bool leaveOpen = false, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             if (stream is null) throw new ArgumentNullException("stream");
-            
+
             if (defaultSource is null) throw new ArgumentNullException("source");
-            
+
             m_Format = format;
 
             m_Source = defaultSource;
@@ -658,7 +658,7 @@ namespace Media.RtpTools.RtpDump
             m_Start = startTime ?? DateTime.UtcNow;
 
             if (false == modify) // New file
-            {               
+            {
                 //Create the writer
                 m_Writer = new System.IO.BinaryWriter(stream, Encoding.ASCII, leaveOpen);
             }
@@ -700,7 +700,7 @@ namespace Media.RtpTools.RtpDump
                 catch (Exception ex)//Only catch exceptions which are unexpected and raise a generic DumpWriter exception
                 {
                     Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "An unexpected exception occured while reading the existing information present in the stream. See InnerException for more details.", ex);
-                }                
+                }
             }
         }
 
@@ -713,7 +713,7 @@ namespace Media.RtpTools.RtpDump
         /// <param name="source">The IPEndPoint from which RtpPackets were recieved</param>
         /// <param name="utcStart">The optional time the file started recording</param>
         /// <param name="overWrite">Indicates the file should be overwritten</param>
-        public DumpWriter(string filePath, FileFormat format, System.Net.IPEndPoint source, DateTime? utcStart = null, bool overWrite = false, bool modify = false, bool shouldDispose = true) : this(new System.IO.FileStream(filePath, !modify ? overWrite ? System.IO.FileMode.Create : System.IO.FileMode.CreateNew : System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.Write, System.IO.FileShare.ReadWrite | System.IO.FileShare.Delete), format, source, utcStart, modify, shouldDispose) { }       
+        public DumpWriter(string filePath, FileFormat format, System.Net.IPEndPoint source, DateTime? utcStart = null, bool overWrite = false, bool modify = false, bool shouldDispose = true) : this(new System.IO.FileStream(filePath, !modify ? overWrite ? System.IO.FileMode.Create : System.IO.FileMode.CreateNew : System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.Write, System.IO.FileShare.ReadWrite | System.IO.FileShare.Delete), format, source, utcStart, modify, shouldDispose) { }
 
         #endregion
 
@@ -731,10 +731,10 @@ namespace Media.RtpTools.RtpDump
             if (m_Format < FileFormat.Text)
             {
                 //Create the file header now if null
-               if(m_FileIdentifier is null) m_FileIdentifier = RtpDumpExtensions.CreateFileIdentifier(m_Source);
+                if (m_FileIdentifier is null) m_FileIdentifier = RtpDumpExtensions.CreateFileIdentifier(m_Source);
 
                 //Write the file header
-               m_Writer.Write(m_FileIdentifier.Array, m_FileIdentifier.Offset, m_FileIdentifier.Count);
+                m_Writer.Write(m_FileIdentifier.Array, m_FileIdentifier.Offset, m_FileIdentifier.Count);
 
                 if (m_FileHeader is null) m_FileHeader = RtpDumpExtensions.CreateFileHeader(m_Start, m_Source);
 
@@ -759,7 +759,7 @@ namespace Media.RtpTools.RtpDump
             if (timeOffset < TimeSpan.Zero) throw new ArgumentOutOfRangeException("timeOffset cannot be less than the start of the file which is defined in the header. ");
 
             //Use the tool entry so it is disposed immediately
-            using (var entry = new RtpToolEntry(m_Start, source ?? m_Source, packet)) 
+            using (var entry = new RtpToolEntry(m_Start, source ?? m_Source, packet))
             {
                 //If given a specific timeoffset use it
                 if (timeOffset.HasValue) entry.Offset = (int)timeOffset.Value.TotalMilliseconds;
@@ -822,7 +822,7 @@ namespace Media.RtpTools.RtpDump
 
                         //Write the data from the blob
                         using (Rtcp.RtcpPacket rtcp = new Rtcp.RtcpPacket(entry.Blob, entry.Pointer + RtpToolEntry.sizeOf_RD_packet_T)) m_Writer.Write(entry.Blob, 0, entry.BlobLength);
-                            
+
                     }
                     else if (m_Format != FileFormat.Rtcp) using (Rtp.RtpPacket rtp = new Rtp.RtpPacket(entry.Blob, entry.Pointer + RtpToolEntry.sizeOf_RD_packet_T))
                         {
@@ -893,7 +893,7 @@ namespace Media.RtpTools.RtpDump
     public class Program
     {
 
-        public RtpDump.DumpWriter Writer { get; set;  }
+        public RtpDump.DumpWriter Writer { get; set; }
 
         //public static void Main(string[] args)
         //{
@@ -905,7 +905,7 @@ namespace Media.RtpTools.RtpDump
     /// Provides useful methods for working with RtpDump formatted data.
     /// </summary>
     public static class RtpDumpExtensions
-    {        
+    {
         internal const string HashBang = "#!";
 
         internal const char Hash = '#';
@@ -1024,7 +1024,7 @@ namespace Media.RtpTools.RtpDump
         {
             //All files must indicate a source address and port
             if (source is null) throw new ArgumentNullException("source");
-            
+
             //Strings in .Net are encoded in Unicode encoding unless otherwise specified, e.g. in the MicroFramework UTF-8
             byte[] result = new byte[RtpToolEntry.sizeOf_RD_hdr_t];
 

@@ -52,7 +52,7 @@ namespace Media.Common.Extensions.IPEndPoint
 
         public static System.Uri ToUri(this System.Net.IPEndPoint endPoint, string scheme = null)
         {
-            if (endPoint is null) throw new System.ArgumentNullException();                
+            if (endPoint is null) throw new System.ArgumentNullException();
 
             return new System.Uri(string.IsNullOrWhiteSpace(scheme) ? endPoint.ToString() : string.Join(SchemeSeperator, scheme, endPoint.ToString()));
         }
@@ -82,7 +82,7 @@ namespace Media.Common.Extensions.IPEndPoint
             catch
             {
                 result = null;
-                
+
                 return false;
             }
         }

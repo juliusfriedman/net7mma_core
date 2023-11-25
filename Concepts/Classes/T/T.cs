@@ -94,7 +94,7 @@ namespace Media.Concepts.Classes.T
             Reference = (nint)(&typedRefeence);
         }
 
-        internal  TypeReference(string type)
+        internal TypeReference(string type)
         {
             System.TypedReference typedRefeence = __makeref(type);
 
@@ -149,7 +149,7 @@ namespace Media.Concepts.Classes.T
 
             unsafe
             {
-                value = __refvalue( *(System.TypedReference*)(Reference.Reference),string);
+                value = __refvalue(*(System.TypedReference*)(Reference.Reference), string);
 
                 return true;
             }
@@ -175,7 +175,7 @@ namespace Media.Concepts.Classes.T
 
             unsafe
             {
-                value = __refvalue( *(System.TypedReference*)(Reference.Reference), System.Type);
+                value = __refvalue(*(System.TypedReference*)(Reference.Reference), System.Type);
 
                 return true;
             }
@@ -295,7 +295,7 @@ namespace Media.Concepts.Classes.T
         /// <summary>
         /// Only accesible from this type or reflection.
         /// </summary>
-        readonly System.Collections.Generic.Dictionary<System.Type, System.Tuple<System.Reflection.ConstructorInfo[], System.Reflection.ParameterInfo[][]>> m_SupportedTypes = 
+        readonly System.Collections.Generic.Dictionary<System.Type, System.Tuple<System.Reflection.ConstructorInfo[], System.Reflection.ParameterInfo[][]>> m_SupportedTypes =
             new System.Collections.Generic.Dictionary<System.Type, System.Tuple<System.Reflection.ConstructorInfo[], System.Reflection.ParameterInfo[][]>>();
 
         /// <summary>

@@ -120,7 +120,7 @@ namespace Media.Containers.Mpeg
         public TransportStreamReader(System.IO.FileStream source, System.IO.FileAccess access = System.IO.FileAccess.Read) : base(source, access) { }
 
         //uses a temp file for now :(
-        public TransportStreamReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { } 
+        public TransportStreamReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { }
 
         /// <summary>
         /// Used in variations of the Mpeg Transport Stream format which require additional data such as ATSC or M2TS.
@@ -212,20 +212,20 @@ namespace Media.Containers.Mpeg
                 {
                     //size is already IdentiferSize
                     int size = IdentiferSize;
-                    
+
                     //Might need a few checks for Subtitle Format Streams because of P, p, g byte.
                     while (UnitOverhead < MaximumUnitOverhead)
                     {
                         //Increase UnitOverhead by 4 bytes (DefaultIdentifierSize)
                         UnitOverhead += IdentiferSize;
-                        
+
                         //Thew newSize is size + IdentiferSize
                         int newSize = (size + IdentiferSize);
                         Array.Resize(ref identifier, newSize);
-                        
+
                         //Read the next bytes starting at the newly allocated space
                         Read(identifier, size, IdentiferSize);
-                        
+
                         //Check for sync
                         if (identifier[UnitOverhead] == TransportStreamUnit.SyncByte) goto FoundSync;
 
@@ -233,7 +233,7 @@ namespace Media.Containers.Mpeg
                         size = newSize;
                     };
                 }
-                
+
                 //Canot find sync
                 throw new InvalidOperationException("Cannot Find Marker");
             }
@@ -265,7 +265,7 @@ namespace Media.Containers.Mpeg
                 yield return next;
 
                 //Get the type of packet this is
-                TransportStreamUnit.PacketIdentifier pid = GetPacketIdentifier(this, next.Identifier);                
+                TransportStreamUnit.PacketIdentifier pid = GetPacketIdentifier(this, next.Identifier);
 
                 //Need to parse the packet to ensure that GetTracks can always be updated.
                 switch (pid)
@@ -440,7 +440,7 @@ namespace Media.Containers.Mpeg
             {
 
                 byte esType = node.Data[offset++];
-                
+
                 //Could store two bytes and have methods to extract with masks.
 
                 TransportStreamUnit.PacketIdentifier esPid = (TransportStreamUnit.PacketIdentifier)(Common.Binary.ReadU16(node.Data, offset, Common.Binary.IsLittleEndian) & TransportStreamUnit.PacketIdentifierMask);

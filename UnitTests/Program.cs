@@ -62,7 +62,7 @@ namespace Media.UnitTests
         /// <summary>
         /// The UnitTests which will be run to test the implemenation logic
         /// </summary>
-        static Action[] LogicTests = new Action[] { 
+        static Action[] LogicTests = new Action[] {
             TestInvocations,
             //Experimental Classes (Should not be used in real code)
             TestStopWatch,
@@ -75,11 +75,11 @@ namespace Media.UnitTests
             //Common
             TestRuntimeExtensions,
             TestOperatingSystemExtensions,
-            TestEncodingExtensions, 
-            TestUtility, 
-            TestBinary, 
+            TestEncodingExtensions,
+            TestUtility,
+            TestBinary,
             TestCommonClasses,
-            TestExpressionExtensions,            
+            TestExpressionExtensions,
             TestMachine,
             //Cryptography
             TestCryptography,
@@ -105,8 +105,8 @@ namespace Media.UnitTests
             TestRtspMessage, 
             //RtpClient
             TestRtpClient,
-            Media.UnitTests.RtpClientUnitTests.TestProcessFrameData.BackToBackRtspMessages, 
-            Media.UnitTests.RtpClientUnitTests.TestProcessFrameData.Issue17245_Case1_Iteration, 
+            Media.UnitTests.RtpClientUnitTests.TestProcessFrameData.BackToBackRtspMessages,
+            Media.UnitTests.RtpClientUnitTests.TestProcessFrameData.Issue17245_Case1_Iteration,
             Media.UnitTests.RtpClientUnitTests.TestProcessFrameData.Issue17245_Case2_Iteration,
             Media.UnitTests.RtpClientUnitTests.TestInterleavedFraming,
             Media.UnitTests.RtpClientUnitTests.TestIndependentFraming,           
@@ -175,7 +175,7 @@ namespace Media.UnitTests
 
             if (Common.Extensions.RuntimeExtensions.IsiOS) System.Console.WriteLine("IsiOS");
 
-            if (Common.Extensions.RuntimeExtensions.IsWatchKit) System.Console.WriteLine("IsWatchKit");           
+            if (Common.Extensions.RuntimeExtensions.IsWatchKit) System.Console.WriteLine("IsWatchKit");
         }
 
         public static void TestOperatingSystemExtensions()
@@ -201,7 +201,7 @@ namespace Media.UnitTests
             //Each octet reflects it's offset in hexidecimal
             // 0 - 9 in hex is the same as decimal
             byte[] haystack = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15 },
-                //Something to look for in the above
+                   //Something to look for in the above
                    needle = new byte[] { 0x14, 0x15 };
 
             //For all 20 bytes look for them in the ensure haystack starting at the beginning
@@ -267,7 +267,7 @@ namespace Media.UnitTests
             System.Console.WriteLine("Tested1");
 
             System.Threading.Thread.Sleep(3);
-            
+
             int local;
 
             System.Console.WriteLine("Delegate1=>" + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(i, out local) ? "0" : local.ToString()));
@@ -381,7 +381,7 @@ namespace Media.UnitTests
                     System.Threading.Thread.Yield();
 
                     System.Console.WriteLine(".Resize1");
-                    
+
                     //When the local is used the call semantic is totally different as the version is maintained through the local.
                     if (useLocal)
                     {
@@ -430,7 +430,7 @@ namespace Media.UnitTests
             //Can only be called once, should be called to free the thread assigned to calling the logic assoicated with BeginInvoke and the callback.
             call.EndInvoke(callInvocation);
 
-            System.Console.WriteLine(".EndInvoke " + callInvocation.IsCompleted + "," + times);            
+            System.Console.WriteLine(".EndInvoke " + callInvocation.IsCompleted + "," + times);
 
             List<IAsyncResult> calls = new List<IAsyncResult>();
 
@@ -448,7 +448,7 @@ namespace Media.UnitTests
 
                 _TestLogicForBeginInvoke(ref data);
 
-                System.Console.WriteLine(".NotDone2=>" + times + ", " + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(data, out register) ? "0" : register.ToString()));                
+                System.Console.WriteLine(".NotDone2=>" + times + ", " + (Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(data, out register) ? "0" : register.ToString()));
             }
 
             foreach (IAsyncResult storedCallInvocation in calls)
@@ -464,7 +464,7 @@ namespace Media.UnitTests
 
         public static void RtspClientTests()
         {
-            foreach (var TestObject in new[] 
+            foreach (var TestObject in new[]
             {
                 //Local VLC...
                 new
@@ -830,7 +830,7 @@ namespace Media.UnitTests
 
                 double protocolVersion = 1.0;
 
-            TestStart:
+                TestStart:
                 try
                 {
                     TestRtspClient(TestObject.Uri, TestObject.Creds, proto, null, protocolVersion);
@@ -942,7 +942,7 @@ namespace Media.UnitTests
                                 cl.Log("Sent: " + httpMessage);
                                 cl.Log("Received: " + httpResponse.ToString());
                             }
-                           
+
                             //Set the version of the message and protocol
                             httpClient.ProtocolVersion = httpMessage.Version = 1.1;
 
@@ -1034,7 +1034,7 @@ namespace Media.UnitTests
 
                     sender.RtcpPacketSent += (s, p, t) => TryPrintClientPacket(s, false, p);
                     sender.RtcpPacketReceieved += (s, p, t) => TryPrintClientPacket(s, true, p);
-                    sender.RtpPacketSent += (s, p, t) => TryPrintClientPacket(s, false, p);                                        
+                    sender.RtpPacketSent += (s, p, t) => TryPrintClientPacket(s, false, p);
 
                     //Using a receiver
                     using (var receiver = new Media.Rtp.RtpClient())
@@ -1215,7 +1215,7 @@ namespace Media.UnitTests
                 }//Disposes the sender
                 consoleWriter.WriteLine(System.Threading.Thread.CurrentThread.ManagedThreadId + "Exit");
             }
-        }        
+        }
 
         static void TestRtpDumpReader(string path, Media.RtpTools.FileFormat? knownFormat = null)
         {
@@ -1283,7 +1283,7 @@ namespace Media.UnitTests
 
                         //If so then there is only another RD_packet_t structure here describing a rtpPacket?
 
-                    PrintRtpOrVatPacketInformation:
+                        PrintRtpOrVatPacketInformation:
                         //Create a RtpHeaer from the Pointer
                         using (Media.Rtp.RtpHeader header = new Media.Rtp.RtpHeader(data, offset))
                         {
@@ -1688,7 +1688,7 @@ namespace Media.UnitTests
 
                                 Console.ForegroundColor = ConsoleColor.DarkGray;
                             }
-                        };                        
+                        };
 
                         //Define an event to handle Rtsp Response events
                         //Note that this event is also used to handle `pushed` responses which the server sent to the RtspClient without a request.
@@ -1813,7 +1813,7 @@ namespace Media.UnitTests
                         //client.UserAgent = "LibVLC/2.1.5 (LIVE555 Streaming Media v2014.05.27)";
 
                         //client.DisableKeepAliveRequest = true;
-                Start:
+                        Start:
 
                         //Allow the client to switch protocols if data is not received.
                         client.AllowAlternateTransport = true;
@@ -2041,7 +2041,7 @@ namespace Media.UnitTests
                                     case ConsoleKey.Z:
                                         {
 
-                                            foreach(var kvp in client.m_Playing)
+                                            foreach (var kvp in client.m_Playing)
                                             {
                                                 Console.WriteLine("@" + kvp.Key.ToString() + "@");
 
@@ -2304,7 +2304,7 @@ namespace Media.UnitTests
 
                     //Traffic
                     var sources = new List<Rtsp.Server.MediaTypes.RtspSource>();
-                    for(int i = 1; i <= 9; ++i)
+                    for (int i = 1; i <= 9; ++i)
                     {
                         var source = new Media.Rtsp.Server.MediaTypes.RtspSource($"R2_05{i}", $"rtsp://8.15.251.101:1935/rtplive/R2_05{i}", Rtsp.RtspClient.ClientProtocolType.Tcp, 0, null, null, null, true);
                         source.RtpClient.ThreadEvents = true;
@@ -2351,7 +2351,7 @@ namespace Media.UnitTests
                     //Make some RtpAudioSink (working 100%)
                     Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmaStream = new Rtsp.Server.MediaTypes.RtpAudioSink("pcma", null, 8, 1, 8000);
                     pcmaStream.Codec = new ALawCodec();
-                    
+
                     //Could share codes where initialization is the same.
                     Media.Rtsp.Server.MediaTypes.RtpAudioSink pcmuStream = new Rtsp.Server.MediaTypes.RtpAudioSink("pcmu", null, 0, 1, 8000);
                     pcmuStream.Codec = new MulawCodec();
@@ -2425,7 +2425,7 @@ namespace Media.UnitTests
                         //Put some audio in the audio stream
                         byte[] audio;
 
-                    Start:
+                        Start:
 
                         using (var bmpScreenshot = new System.Drawing.Bitmap(mirror.Width, mirror.Height, System.Drawing.Imaging.PixelFormat.Format32bppArgb))
                         {
@@ -2510,7 +2510,7 @@ namespace Media.UnitTests
                                 }
                             }
                         }
-                    }));                    
+                    }));
 
                     //Start the server
                     await server.StartAsync();
@@ -2537,7 +2537,7 @@ namespace Media.UnitTests
                     Console.WriteLine("Press 'C' to See how many clients are connected.");
                     //if (sampleStream is not null) Console.WriteLine("Press 'F' to See statistics for " + sampleStream.Name);
 
-                    System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;                    
+                    System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Lowest;
 
                     while (true)
                     {
@@ -2658,8 +2658,8 @@ namespace Media.UnitTests
 
                                         string name;
 
-                                    //If the server is running Read a line to get the stream name.
-                                    if (input)
+                                        //If the server is running Read a line to get the stream name.
+                                        if (input)
                                         {
                                             Console.WriteLine("Input RtspServer stream Name or Id");
 
@@ -2867,7 +2867,7 @@ namespace Media.UnitTests
                             case ConsoleKey.A:
                                 {
                                     //If we didn't already add the audio track
-                                    if(tinyStream.SessionDescription.MediaDescriptions.Count() == 1)
+                                    if (tinyStream.SessionDescription.MediaDescriptions.Count() == 1)
                                     {
                                         tinyStream.SessionDescription.Add(pcmuStream.SessionDescription.MediaDescriptions.First());
                                         tinyStream.RtpClient.TransportContexts.Add(pcmuStream.RtpClient.TransportContexts.First());
@@ -2898,7 +2898,7 @@ namespace Media.UnitTests
                         }
                     }
 
-                End:
+                    End:
                     System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Normal;
 
                     server.DisableHttpTransport();
@@ -3109,7 +3109,7 @@ namespace Media.UnitTests
                 {
                     //Create the managed packet from that binary data
                     using (Media.Rtp.RtpPacket aManagedPacket = new Media.Rtp.RtpPacket(packet, 0))
-                    {                        
+                    {
                         //Create a RtpFrame from the managed packet
                         using (Media.Rtp.RtpFrame managedFrame = new Media.Rtp.RtpFrame(aManagedPacket))
                         {
@@ -3216,9 +3216,9 @@ namespace Media.UnitTests
 
                 //Create a RFC6184Frame
                 using (Media.Rtsp.Server.MediaTypes.RFC6184Media.RFC6184Frame profileFrame = new Media.Rtsp.Server.MediaTypes.RFC6184Media.RFC6184Frame(97))
-                {                    
+                {
 
-                    
+
 
                     //Take each packet in the examples
                     foreach (byte[] packet in packetBytes)
@@ -3257,26 +3257,26 @@ namespace Media.UnitTests
 
                         //If there was a fmtp line then iterate the parts contained.
                         foreach (string p in fmtp.FormatSpecificParameters)
+                        {
+                            //Determine where in the string the desired token in.
+                            string token = Common.Extensions.String.StringExtensions.Substring(p, "sprop-parameter-sets=");
+
+                            //If present extract it.
+                            if (false == string.IsNullOrWhiteSpace(token))
                             {
-                                //Determine where in the string the desired token in.
-                                string token = Common.Extensions.String.StringExtensions.Substring(p, "sprop-parameter-sets=");
+                                //Get the strings which corresponds to the data without the datum split by ','
+                                string[] data = token.Split(',');
 
-                                //If present extract it.
-                                if (false == string.IsNullOrWhiteSpace(token))
-                                {
-                                    //Get the strings which corresponds to the data without the datum split by ','
-                                    string[] data = token.Split(',');
+                                //If there is any data then assign it
 
-                                    //If there is any data then assign it
+                                if (data.Length > 0) sps = System.Convert.FromBase64String(data[0]);
 
-                                    if (data.Length > 0) sps = System.Convert.FromBase64String(data[0]);
+                                if (data.Length > 1) pps = System.Convert.FromBase64String(data[1]);
 
-                                    if (data.Length > 1) pps = System.Convert.FromBase64String(data[1]);
-                                    
-                                    //Done
-                                    break;
-                                }
+                                //Done
+                                break;
                             }
+                        }
 
                         //Prepend the SPS if it was found
                         if (sps is not null)
@@ -3309,7 +3309,7 @@ namespace Media.UnitTests
                         //Don't do this again for subsequent frames in the stream...
                         //m_InitializedStream = true;
                     }
-                    
+
                     //Write the data in the frame to the FileStream
                     profileFrame.Buffer.CopyTo(fs);
                 }
@@ -3349,7 +3349,7 @@ a=rtpmap:99 h263-1998/90000");
 
             if (connectionLine is null) throw new Exception("Cannot find Connection Line");
 
-             //Test parsing a sdp which has a weird connection line.
+            //Test parsing a sdp which has a weird connection line.
             sd = new Media.Sdp.SessionDescription(@"v=0
 o=- 1109162014219182 0 IN IP4 0.0.0.0
 s=HIK Media Server V3.0.0
@@ -4456,13 +4456,13 @@ a=appversion:1.0");
         static void TestNtp()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.NetworkTimeProtocolUnitTests), TypeOfVoid);
-        }        
+        }
 
         /// <summary>
         /// 
         /// </summary>
         static void TestRtpRtcp()
-        {           
+        {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RtpHeaderUnitTests), TypeOfVoid);
 
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.RtpExtensionUnitTests), TypeOfVoid);
@@ -4517,7 +4517,7 @@ a=appversion:1.0");
             //Perform the tests
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.SipMessgeUnitTests), TypeOfVoid);
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -4579,7 +4579,7 @@ a=appversion:1.0");
 
         #region Methods (To Support Unit Tests)
 
-        static Type TypeOfVoid = typeof(void);        
+        static Type TypeOfVoid = typeof(void);
 
         static void CreateInstanceAndInvokeAllMethodsWithReturnType(Type instanceType, Type returnType, bool writeNames = true)
         {
@@ -4590,7 +4590,7 @@ a=appversion:1.0");
 
             //Get the methods of the class
             foreach (var method in instanceType.GetMethods())
-                //System.Reflection.IntrospectionExtensions.GetTypeInfo(instanceType).DeclaredMethods) // gives also the anonymous methods!!!
+            //System.Reflection.IntrospectionExtensions.GetTypeInfo(instanceType).DeclaredMethods) // gives also the anonymous methods!!!
             {
                 //Ensure for the void type
                 if (method.ReturnType != returnType) continue;
@@ -4614,7 +4614,7 @@ a=appversion:1.0");
             Console.BackgroundColor = ConsoleColor.Black;
         }
 
-        static void writeInfo(string message, ConsoleColor? backgroundColor = null, ConsoleColor? foregroundColor= null)
+        static void writeInfo(string message, ConsoleColor? backgroundColor = null, ConsoleColor? foregroundColor = null)
         {
 
             ConsoleColor? previousBackgroundColor = null, previousForegroundColor = null;
@@ -4759,7 +4759,7 @@ a=appversion:1.0");
 
         internal static void TryPrintClientPacket(object sender, bool incomingFlag, Media.Common.IPacket packet, Common.IDisposed context = null, bool writePayload = false)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(context) && Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;            
+            if (Common.IDisposedExtensions.IsNullOrDisposed(context) && Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
             //Notes, racing to handle the event, should clone the packet if you really need to handle it at this level.
 
@@ -4789,7 +4789,7 @@ a=appversion:1.0");
                     else matched = (Media.Rtp.RtpClient.TransportContext)context;
 
                     if (matched is null)
-                    {                        
+                    {
 
                         if (Media.Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
@@ -4883,7 +4883,7 @@ a=appversion:1.0");
                     {
                         //Could dump the packet contents here.
                         Console.WriteLine(Media.RtpTools.RtpSend.ToTextualConvention(Media.RtpTools.FileFormat.Ascii, rtcpPacket));
-                    }                    
+                    }
 
                 }
             }

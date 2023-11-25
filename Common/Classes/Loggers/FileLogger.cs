@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Common.Loggers
 {
@@ -23,7 +19,7 @@ namespace Media.Common.Loggers
         #region Constructor
 
         public FileLogger(System.IO.FileInfo fileInfo, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             m_FileInfo = fileInfo;
         }

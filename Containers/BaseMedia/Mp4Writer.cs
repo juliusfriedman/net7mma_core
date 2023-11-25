@@ -1,8 +1,8 @@
-﻿using System.Text;
-using System;
-using Media.Container;
-using System.IO;
+﻿using Media.Container;
 using Media.Containers.BaseMedia;
+using System;
+using System.IO;
+using System.Text;
 
 namespace Media.Containers.BaseMedia
 {
@@ -268,7 +268,7 @@ namespace Media.UnitTests
 
             // Write the moov box (movie)
             MoovBox moovBox = new MoovBox(writer, 1000, 5000, 1, 1, null, null, 1);
-            
+
             // Create an instance of MdhdBox
             byte version = 0;  // Use 0 for version 0, or 1 for version 1
             uint creationTime = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -288,7 +288,7 @@ namespace Media.UnitTests
             MdiaBox mdiaBox = new MdiaBox(writer, mdhdBox, hdlrBox, minfBox);
 
             // Create an instance of TrakBox and link it with MdiaBox
-            TrakBox trakBox = new TrakBox(writer, mdiaBox);            
+            TrakBox trakBox = new TrakBox(writer, mdiaBox);
 
             // Create an instance of AudioSampleEntryBox
             var audioSampleEntryBox = new Mp4aBox(writer);

@@ -115,7 +115,7 @@ namespace Media.Codecs.Image
             });
         }
 
-        public static ImageFormat BGR(int bitsPerComponent, Common.Binary.ByteOrder byteOrder = Common.Binary.ByteOrder.Little, Codec.DataLayout  dataLayout = Codec.DataLayout.Packed)
+        public static ImageFormat BGR(int bitsPerComponent, Common.Binary.ByteOrder byteOrder = Common.Binary.ByteOrder.Little, Codec.DataLayout dataLayout = Codec.DataLayout.Packed)
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[]
             {
@@ -143,7 +143,7 @@ namespace Media.Codecs.Image
                 new Codec.MediaComponent(premultipliedAlpha ? PreMultipliedAlphaChannelId : AlphaChannelId, bitsPerComponent),
                 new Codec.MediaComponent(BlueChannelId, bitsPerComponent),
                 new Codec.MediaComponent(GreenChannelId, bitsPerComponent),
-                new Codec.MediaComponent(RedChannelId, bitsPerComponent)                
+                new Codec.MediaComponent(RedChannelId, bitsPerComponent)
             });
         }
 
@@ -209,7 +209,7 @@ namespace Media.Codecs.Image
                 new Codec.MediaComponent(AlphaChannelId, bitsPerComponent),
                 new Codec.MediaComponent(ChromaMinorChannelId, bitsPerComponent),
                 new Codec.MediaComponent(ChromaMajorChannelId, bitsPerComponent),
-                new Codec.MediaComponent(premultipliedAlpha ? PreMultipliedAlphaChannelId : LumaChannelId, bitsPerComponent)                
+                new Codec.MediaComponent(premultipliedAlpha ? PreMultipliedAlphaChannelId : LumaChannelId, bitsPerComponent)
             });
         }
 
@@ -311,7 +311,7 @@ namespace Media.Codecs.Image
         #region Constructors
 
         public ImageFormat(Common.Binary.ByteOrder byteOrder, Codec.DataLayout dataLayout, int components, int bitsPerComponent, byte[] componentIds)
-            : base(Codec.MediaType.Image,byteOrder, dataLayout, components, bitsPerComponent, componentIds)
+            : base(Codec.MediaType.Image, byteOrder, dataLayout, components, bitsPerComponent, componentIds)
         {
             //No sub sampling
             Heights = Widths = new int[components];
@@ -355,7 +355,7 @@ namespace Media.Codecs.Image
 
             //This needs to be able to reflect 4:4:4 or less
             //This is how this needs to look.
-            
+
             //Sub Sampling | int | Example
             //           4 |   0 | 8 >> 0 = 8
             //           2 |   1 | 8 >> 1 = 4
@@ -409,7 +409,7 @@ namespace Media.Codecs.Image
             }
         }
 
-        public string FormatString => Encoding.ASCII.GetString(Components.Select(c => c.Id).ToArray()); 
+        public string FormatString => Encoding.ASCII.GetString(Components.Select(c => c.Id).ToArray());
 
         #endregion
     }
@@ -465,7 +465,7 @@ namespace Media.Codecs.Image
     //    /// Amount to shift the luma width right to find the chroma width.
     //    /// </summary>
     //    public readonly int Log2ChromaWidth;
-        
+
     //    /// <summary>
     //    /// Amount to shift the luma height right to find the chroma height.
     //    /// </summary>

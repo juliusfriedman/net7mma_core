@@ -111,11 +111,11 @@ namespace Media.Common.Interfaces
                         }
                         else if (left > right)
                         {
-                            OnEvolution(); 
+                            OnEvolution();
                         }
                         else
                         {
-                            OnDisposition(); 
+                            OnDisposition();
                         }
 
                         break;

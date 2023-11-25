@@ -16,7 +16,7 @@ namespace Media.Rtsp.Server
 
         IDictionary<IMedia, RtpTools.RtpDump.Program> Attached =
             new System.Collections.Concurrent.ConcurrentDictionary<IMedia, RtpTools.RtpDump.Program>();
-        
+
         RtspStreamArchiver(bool shouldDispose = true)
             : base(shouldDispose)
         {
@@ -135,7 +135,7 @@ namespace Media.Rtsp.Server
             {
                 Id = id;
             }
-            
+
 
             public readonly List<RtpSource> Playback = [];
 

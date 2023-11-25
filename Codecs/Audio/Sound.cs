@@ -47,7 +47,7 @@ public class Sound : AudioBuffer
     }
 
 
-    public Sound(AudioFormat audioFormat, int numberOfSamples = 1, bool shouldDispose = true) 
+    public Sound(AudioFormat audioFormat, int numberOfSamples = 1, bool shouldDispose = true)
         : base(audioFormat, numberOfSamples, shouldDispose)
     {
     }
@@ -72,7 +72,7 @@ public class Sound : AudioBuffer
         Media.Common.Binary.Write32(fileHeader, 4, Media.Common.Binary.IsBigEndian, fileSize - 8);
 
         stream.Write(fileHeader);
-        
+
         using var waveFormat = WaveFormat;
         stream.Write(waveFormat.Array, waveFormat.Offset, waveFormat.Count);
 
@@ -87,4 +87,3 @@ public class Sound : AudioBuffer
         stream.Write(Data.Array, Data.Offset, Data.Count);
     }
 }
-    

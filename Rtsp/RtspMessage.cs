@@ -35,8 +35,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Media.Rtsp
@@ -514,7 +514,7 @@ namespace Media.Rtsp
                 //Use the unsigned representation
                 if (m_CSeq != value) SetHeader(RtspHeaders.CSeq, ((uint)(m_CSeq = value)).ToString());
             }
-        }        
+        }
 
         #endregion
 
@@ -601,10 +601,10 @@ namespace Media.Rtsp
         ///    length is not given explicitly.
         /// </reference>        
         public RtspMessage(byte[] data, int offset, int length, Encoding contentEncoding = null, bool shouldDispose = true)
-            :base(data, offset, length, contentEncoding, shouldDispose, RtspMessage.MessageIdentifier)
+            : base(data, offset, length, contentEncoding, shouldDispose, RtspMessage.MessageIdentifier)
         {
 
-            
+
         }
 
         /// <summary>
@@ -613,7 +613,7 @@ namespace Media.Rtsp
         /// <param name="other">The other RtspMessage</param>
         public RtspMessage(RtspMessage other) : base(other)
         {
-            
+
         }
 
         #endregion
@@ -885,7 +885,7 @@ namespace Media.Rtsp
             }
 
             return true;
-        }        
+        }
 
         protected override void OnHeaderAdded(string headerName, string headerValue)
         {
@@ -951,8 +951,8 @@ namespace Media.Rtsp
                 other.m_CSeq == m_CSeq
                 &&
                 string.Compare(other.m_Body, m_Body, false) is 0;
-                //&&               
-                //other.Length == Length;
+            //&&               
+            //other.Length == Length;
         }
 
         #endregion
@@ -1024,7 +1024,7 @@ namespace Media.UnitTests
                             throw new Exception("Request Serialization Testing Failed With Wildcard Location!");
                         }
                     }
-                    
+
                     //Test again with a body
                     request.Body = TestBody;
 
@@ -1070,7 +1070,7 @@ namespace Media.UnitTests
 
             foreach (Media.Rtsp.RtspStatusCode statusCode in Enum.GetValues(typeof(Media.Rtsp.RtspStatusCode)))
             {
-                using(Media.Rtsp.RtspMessage response = new Media.Rtsp.RtspMessage(Media.Rtsp.RtspMessageType.Response)
+                using (Media.Rtsp.RtspMessage response = new Media.Rtsp.RtspMessage(Media.Rtsp.RtspMessageType.Response)
                 {
                     Version = 7,
                     CSeq = 7,
@@ -1165,9 +1165,9 @@ namespace Media.UnitTests
                     if (serialized.RtspStatusCode != response.RtspStatusCode ||
                     serialized.CSeq != response.CSeq ||
                     serialized.Version != response.Version ||
-                        //There must only be one header
+                    //There must only be one header
                     serialized.HeaderCount != 2 ||
-                        //The TestHeaderName must not be present because it was not given a value
+                    //The TestHeaderName must not be present because it was not given a value
                     false == serialized.ContainsHeader(TestHeaderName) ||
                         //Both must be complete
                         false == serialized.IsComplete || false == response.IsComplete)
@@ -1175,7 +1175,7 @@ namespace Media.UnitTests
                         throw new Exception("Response Header Serialization Testing Failed!");
                     }
                 }
-                
+
                 //Set the value now
                 response.AppendOrSetHeader(TestHeaderName, TestHeaderValue);
 
@@ -1186,10 +1186,10 @@ namespace Media.UnitTests
                     if (serialized.RtspStatusCode != response.RtspStatusCode ||
                     serialized.CSeq != response.CSeq &&
                     serialized.Version != response.Version ||
-                        //There must only be one header
+                    //There must only be one header
                     serialized.HeaderCount != 2 ||
                     false == serialized.ContainsHeader(TestHeaderName) ||
-                        //The TestHeaderValue must be exactly the same
+                    //The TestHeaderValue must be exactly the same
                     string.Compare(serialized[TestHeaderName], TestHeaderValue, false) != 0 ||
                         //Both must be complete
                         false == serialized.IsComplete || false == response.IsComplete)
@@ -1211,7 +1211,7 @@ namespace Media.UnitTests
                         serialized.CSeq != response.CSeq ||
                         serialized.Version != response.Version ||
                         string.Compare(serialized.Body, response.Body) != 0 ||
-                            //Both must be complete
+                        //Both must be complete
                         false == serialized.IsComplete || false == response.IsComplete)
                         {
                             throw new Exception("Response Serialization Testing Failed With Body!");
@@ -1252,7 +1252,7 @@ namespace Media.UnitTests
 
                 //Because the message is a response it may not have a CSeq
                 //Look closely.... 'Csec'
-                if (serialized.RtspMessageType != Media.Rtsp.RtspMessageType.Response && 
+                if (serialized.RtspMessageType != Media.Rtsp.RtspMessageType.Response &&
                     (serialized.CSeq >= 0 || false == serialized.IsComplete)) throw new Exception("TestInvalidMessageDeserializationFromString Failed!");
 
                 //Todo test making a hex string... 
@@ -1436,7 +1436,7 @@ namespace Media.UnitTests
                     output.Length <= response.Length ||
                      string.Compare(response.Body, TestBody) != 0) throw new Exception("Invalid response output length");
             }
-           
+
         }
 
         //Should be in RtspHeaders..
@@ -1471,7 +1471,7 @@ namespace Media.UnitTests
             if (rtpClientPort != 10000) throw new Exception("rtpClientPort");
 
             if (rtcpClientPort != 10001) throw new Exception("rtcpClientPort");
-            
+
             if (string.Compare(mode, "\"PLAY\"") != 0) throw new Exception("mode");
 
             testVector = @"Transport: RTP/AVP;multicast;destination=232.248.50.1;source=10.0.57.24;port=18888-18889;ttl=255";
@@ -1515,16 +1515,16 @@ namespace Media.UnitTests
 
                 //Include the session header
                 message.SetHeader(Media.Rtsp.RtspHeaders.Session, "A9B8C7D6");
-                
+
                 //This header should be included (it contains an invalid header directly after the end line data)
                 message.SetHeader(Media.Rtsp.RtspHeaders.UserAgent, "Testing $UserAgent $009\r\n$\0:\0");
-                
+
                 //This header should be included
                 message.SetHeader("Ignore", "$UserAgent $009\r\n$\0\0\aRTSP/1.0");
-                
+
                 //This header should be ignored
                 message.SetHeader("$", string.Empty);
-                
+
                 //Set the date header
                 message.SetHeader(Media.Rtsp.RtspHeaders.Date, DateTime.Now.ToUniversalTime().ToString("r"));
 
@@ -1578,7 +1578,7 @@ namespace Media.UnitTests
                         }
 
                         //Verify the message
-                        if (toComplete.IsComplete != message.IsComplete || 
+                        if (toComplete.IsComplete != message.IsComplete ||
                             toComplete.RtspStatusCode != message.RtspStatusCode ||
                             toComplete.CSeq != message.CSeq ||
                             toComplete.Version != message.Version ||
@@ -1596,12 +1596,12 @@ namespace Media.UnitTests
         public void TestCompleteFromWithBody()
         {
             using (Media.Rtsp.RtspMessage message = new Media.Rtsp.RtspMessage(Media.Rtsp.RtspMessageType.Response, 1.0, Media.Rtsp.RtspMessage.DefaultEncoding)
-                        {
-                            RtspStatusCode = Media.Rtsp.RtspStatusCode.OK,
-                            CSeq = Media.Utility.Random.Next(byte.MinValue, int.MaxValue),
-                            UserAgent = "$UserAgent $007\r\n$\0\0\aRTSP/1.0",
-                            Body = "$00Q\r\n$\0:\0"
-                        })
+            {
+                RtspStatusCode = Media.Rtsp.RtspStatusCode.OK,
+                CSeq = Media.Utility.Random.Next(byte.MinValue, int.MaxValue),
+                UserAgent = "$UserAgent $007\r\n$\0\0\aRTSP/1.0",
+                Body = "$00Q\r\n$\0:\0"
+            })
             {
                 //Shoudn't matter
                 message.RtspStatusCode = Media.Rtsp.RtspStatusCode.OK;
@@ -1677,7 +1677,7 @@ namespace Media.UnitTests
                         }
 
                         //Verify the message
-                        if (toComplete.IsComplete != message.IsComplete || 
+                        if (toComplete.IsComplete != message.IsComplete ||
                             toComplete.RtspStatusCode != message.RtspStatusCode ||
                             toComplete.CSeq != message.CSeq ||
                             toComplete.Version != message.Version ||
@@ -1814,11 +1814,11 @@ namespace Media.UnitTests
             })
             {
 
-#region Notes
+                #region Notes
                 //Set the Content-Length to 0 which will cause the current implementations parsing logic to not parse the body because the header indicates there is no data in the body.
                 //This is valid behavior IMHO but could be changed to allow parsing of invalid messages.
                 //message.SetHeader(Media.Rtsp.RtspHeaders.ContentLength, (0).ToString());
-#endregion
+                #endregion
 
                 //Set the Content-Encoding
                 message.SetHeader(Media.Rtsp.RtspHeaders.ContentEncoding, message.ContentEncoding.WebName);

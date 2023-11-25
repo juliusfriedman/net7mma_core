@@ -36,7 +36,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace Media.Sdp
@@ -65,7 +64,7 @@ namespace Media.Sdp
             //X= should maybe be allowed and continued to be parsed as a line, if more data occurs on the same line and the token is repeated it can be considered a continuation and ignored
             if (sdpLine.Length <= 2) return null;
             else if (sdpLine[1] != SessionDescription.EqualsSign) return null;
-            
+
             char type = sdpLine[0];
 
             //Invalid Line, other types? (check grammar)
@@ -164,7 +163,7 @@ namespace Media.Sdp
         /// Gets the Type of the line.
         /// </summary>
         public char Type { get { return m_Type; } }
-        
+
         /// <summary>
         /// Gets the Parts of the line.
         /// </summary>
@@ -196,7 +195,7 @@ namespace Media.Sdp
 
                     total += m_Encoding.GetByteCount(part);
                 }
-                                                                //Each part gets a type, =, all parts are joined with 'm_Seperator' and lines are ended with `\r\n\`.
+                //Each part gets a type, =, all parts are joined with 'm_Seperator' and lines are ended with `\r\n\`.
                 //return total + m_Encoding.GetByteCount(new char[] { m_Type, SessionDescription.EqualsSign, SessionDescription.NewLine, SessionDescription.LineFeed });                
 
                 //Sorta efficiently as the array creation is implicit, should make static arry
@@ -205,7 +204,7 @@ namespace Media.Sdp
                 //return total + CalucateRequiredLength(m_Encoding, m_Type); ;
 
             }
-        }        
+        }
 
         //UnderModification
 
@@ -311,7 +310,7 @@ namespace Media.Sdp
 
             m_Seperator = seperator ?? other.m_Seperator;
 
-            if(reference) m_Parts = other.m_Parts;
+            if (reference) m_Parts = other.m_Parts;
             else m_Parts = new List<string>(other.m_Parts);
         }
 
@@ -323,7 +322,7 @@ namespace Media.Sdp
         public SessionDescriptionLine(char type, int partCount = 0)
         {
             m_Parts = new List<string>(partCount);
-            
+
             EnsureParts(partCount);
 
             m_Type = type;
@@ -339,7 +338,7 @@ namespace Media.Sdp
         {
             //Does not allow null or empty seperator
             if (string.IsNullOrEmpty(seperator)) seperator = SessionDescription.SpaceString;
-            
+
             //Assign value
             m_Seperator = seperator;
         }
@@ -360,8 +359,8 @@ namespace Media.Sdp
             if (string.IsNullOrWhiteSpace(line)) throw new InvalidOperationException("line cannot be null or consist only of whitespace");
 
             //m_AssumedPart &&
-            if (line.Length < 2 
-                || 
+            if (line.Length < 2
+                ||
                 line[1] != SessionDescription.EqualsSign) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Invalid SessionDescriptionLine: \"" + line + "\"");
 
             if (false == string.IsNullOrEmpty(seperator)) m_Seperator = seperator;
@@ -370,7 +369,7 @@ namespace Media.Sdp
             m_Type = char.ToLower(line[0]);
 
             //Split the parts (creates new string array)
-            
+
             //a=<flag>|<name>|:<value> where value = {...,...,...;x;y;z}
 
             //Could also add Space to the ToArray to ensure spaces are removed if all derived types agree spaces seperate their tokens.
@@ -378,7 +377,7 @@ namespace Media.Sdp
             if (partCount > 0)
             {
                 m_Parts = new List<string>(line.Substring(2).Split(Common.Extensions.Object.ObjectExtensions.ToArray<string>(m_Seperator), partCount, StringSplitOptions.RemoveEmptyEntries));
-                
+
                 //Should have option to throw less parts than expected or truncate extra parts?
                 EnsureParts(partCount);
             }
@@ -390,8 +389,8 @@ namespace Media.Sdp
         public SessionDescriptionLine(string[] sdpLines, ref int index)
             : this(sdpLines[index++]) { }
 
-        public SessionDescriptionLine(string[] sdpLines, ref int index, string seperator, char expected, int partCount = 0)            
-            :this(sdpLines[index++], seperator, partCount)
+        public SessionDescriptionLine(string[] sdpLines, ref int index, string seperator, char expected, int partCount = 0)
+            : this(sdpLines[index++], seperator, partCount)
         {
             if (m_Type != expected) throw new InvalidOperationException("Expected: " + expected + ", Found: " + m_Type);
         }
@@ -498,10 +497,10 @@ namespace Media.Sdp
             //Widens char to string
 
             //Include the type if desired.
-            if(type) yield return m_Type.ToString();
+            if (type) yield return m_Type.ToString();
 
             //Inlcude the equals size is desired
-            if(equals) yield return SessionDescription.EqualsSign.ToString();
+            if (equals) yield return SessionDescription.EqualsSign.ToString();
 
             //Track the amount of parts output.
             int count = 0;

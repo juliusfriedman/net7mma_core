@@ -38,7 +38,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.RtpTools
 {
@@ -105,7 +104,7 @@ namespace Media.RtpTools
         internal static string[] Tokens = new[]
         {
        /*0*/"=", // assignment of a value occuring
-            "RTP",            
+            "RTP",
             "v",//=<version>
             "p",//=<padding>
             "x",//=<extension>
@@ -159,16 +158,16 @@ namespace Media.RtpTools
         public const string Format = "{0} {1}",
 
         /// <summary>
-            /// Used only for FileFormat.Short
-            /// 0 = timeoffset, 1 is sequence number (where - indicates a marker bit), 2 is the Port
-            /// </summary>
+        /// Used only for FileFormat.Short
+        /// 0 = timeoffset, 1 is sequence number (where - indicates a marker bit), 2 is the Port
+        /// </summary>
         ShortFormat = "{0} {1} {2}",
 
         /// <summary>
-            /// The format '('String','Int','Int')' e.g. (IDVI,1,8000).
-            /// Provided by a <see cref="PayloadDescription"/> usually obtained from
-            /// <see cref="PayloadDescriptions"/> or <see cref="PayloadDescription.IsDynamic"/> or <see cref="PayloadDescription.IsUnknown"/>
-            /// </summary>
+        /// The format '('String','Int','Int')' e.g. (IDVI,1,8000).
+        /// Provided by a <see cref="PayloadDescription"/> usually obtained from
+        /// <see cref="PayloadDescriptions"/> or <see cref="PayloadDescription.IsDynamic"/> or <see cref="PayloadDescription.IsUnknown"/>
+        /// </summary>
         RtpPacketFormat = "RTP len={0} from={1}\nv={2}\np={3}\nx={4}\ncc={5}\nm={6}\npt={7}\n#{8}\nseq={9}\nssrc=0x{10:X2}\nts={11}\n",
 
         PayloadDescriptionFormat = "({0},{1})",
@@ -320,7 +319,7 @@ namespace Media.RtpTools
             {4, new PayloadDescription() {EncodingName = "G723", Clockrate = 8000, Channel = 1, PayloadType = 4 } },
             {5, new PayloadDescription() {EncodingName = "DVI4", Clockrate = 8000, Channel = 1, PayloadType = 5 } },
             {6, new PayloadDescription() {EncodingName = "DVI4 ", Clockrate = 16000, Channel = 1, PayloadType = 6 } },
-            {7, new PayloadDescription() {EncodingName = "LPC", Clockrate = 8000, Channel = 1, PayloadType = 7 } }, 
+            {7, new PayloadDescription() {EncodingName = "LPC", Clockrate = 8000, Channel = 1, PayloadType = 7 } },
             {8, new PayloadDescription() {EncodingName = "PCMA", Clockrate = 8000, Channel = 1, PayloadType = 8 } },
             {9, new PayloadDescription() {EncodingName = "G722", Clockrate = 8000, Channel = 1, PayloadType = 9 } },
             {10, new PayloadDescription() {EncodingName = "L16", Clockrate = 44100, Channel = 2, PayloadType = 10 } },
@@ -335,7 +334,7 @@ namespace Media.RtpTools
             {19, new PayloadDescription() {EncodingName = "ComfortNoise", Clockrate = 8000, Channel = 0, PayloadType = 19 } },
             {20, RtpSend.PayloadDescription.Reverved},
             {21, RtpSend.PayloadDescription.Reverved},
-            {22, RtpSend.PayloadDescription.Reverved},            
+            {22, RtpSend.PayloadDescription.Reverved},
             {23, new PayloadDescription() {EncodingName = "SCR", Clockrate = 90000, Channel = 0, PayloadType = 23 } },
             {24, new PayloadDescription() {EncodingName = "MPEG", Clockrate = 90000, Channel = 0, PayloadType = 24 } },
             {25, new PayloadDescription() {EncodingName = "CelB", Clockrate = 90000, Channel = 0, PayloadType = 25 } },
@@ -366,10 +365,10 @@ namespace Media.RtpTools
         {
             if (packet is null || packet.Payload.Count is 0 || format < FileFormat.Text || format == FileFormat.Short) return string.Empty;
 
-            if(format == FileFormat.Unknown) return UnknownSpecifier;
-            
+            if (format == FileFormat.Unknown) return UnknownSpecifier;
+
             //Determine the format to use as well as the `Conventional Abbreviation`
-            switch (packet.PayloadType) 
+            switch (packet.PayloadType)
             {
                 case Rtcp.SourceDescriptionReport.PayloadType:
                     //Use a SourceDescriptionReport to enumerate the SourceDescriptionChunk's and SourceDescriptionItem's contained in the packet.
@@ -392,16 +391,16 @@ namespace Media.RtpTools
                             packet.BlockCount,
                             packet.Header.LengthInWordsMinusOne,
                             (ToTextualConvention(sr) + (char)Common.ASCII.Space + string.Format(RtcpSendersInformationFormat,
-                            //0
+                                //0
                                 (DateTime.UtcNow - sr.NtpDateTime).TotalSeconds.ToString("0.000000"), //ts=
-                            //1
+                                                                                                      //1
                                 sr.NtpTimestamp, //ntp=
-                            //2
+                                                 //2
                                 sr.SendersOctetCount, //osent=
-                            //3
+                                                      //3
                                 sr.SendersPacketCount))); //psent=
                     }
-                case Rtcp.ReceiversReport.PayloadType:                    
+                case Rtcp.ReceiversReport.PayloadType:
                     using (var rr = new Rtcp.ReceiversReport(packet, false))
                     {
                         return string.Format(RtcpExpressionFormat,
@@ -409,11 +408,11 @@ namespace Media.RtpTools
                             packet.SynchronizationSourceIdentifier,
                             packet.Padding ? 1.ToString() : 0.ToString(),
                             packet.BlockCount,
-                            packet.Header.LengthInWordsMinusOne, 
+                            packet.Header.LengthInWordsMinusOne,
                             ToTextualConvention(rr));
                     }
-                case Rtcp.GoodbyeReport.PayloadType:                    
-                    using (var bye = new Rtcp.GoodbyeReport(packet, false)) 
+                case Rtcp.GoodbyeReport.PayloadType:
+                    using (var bye = new Rtcp.GoodbyeReport(packet, false))
                     {
                         return string.Format(RtcpExpressionFormat,
                             "BYE",
@@ -434,21 +433,21 @@ namespace Media.RtpTools
         /// </summary>
         /// <param name="reportBlocks">The blocks to describe</param>
         /// <returns>The string which describes the given blocks.</returns>
-        internal static string ToTextualConvention(IEnumerable<Rtcp.IReportBlock> reportBlocks) 
+        internal static string ToTextualConvention(IEnumerable<Rtcp.IReportBlock> reportBlocks)
         {
             string blockString = string.Empty;
 
-            if (reportBlocks is null || !reportBlocks.Any()) return blockString;            
+            if (reportBlocks is null || !reportBlocks.Any()) return blockString;
 
             //Build the block string for each block in the report
             foreach (Rtcp.ReportBlock reportBlock in reportBlocks)
-                blockString += (char)Common.ASCII.Space + string.Format(RtcpReportBlockFormat, 
-                    reportBlock.SendersSynchronizationSourceIdentifier, 
-                    reportBlock.FractionsLost, 
-                    reportBlock.CumulativePacketsLost, 
-                    reportBlock.ExtendedHighestSequenceNumberReceived, 
-                    reportBlock.InterarrivalJitterEstimate, 
-                    reportBlock.LastSendersReportTimestamp, 
+                blockString += (char)Common.ASCII.Space + string.Format(RtcpReportBlockFormat,
+                    reportBlock.SendersSynchronizationSourceIdentifier,
+                    reportBlock.FractionsLost,
+                    reportBlock.CumulativePacketsLost,
+                    reportBlock.ExtendedHighestSequenceNumberReceived,
+                    reportBlock.InterarrivalJitterEstimate,
+                    reportBlock.LastSendersReportTimestamp,
                     reportBlock.DelaySinceLastSendersReport);
 
             return blockString;
@@ -500,7 +499,7 @@ namespace Media.RtpTools
             return blockStringBuilder.ToString();
         }
 
-        internal static string ToTextualConvention(Rtcp.GoodbyeReport bye) 
+        internal static string ToTextualConvention(Rtcp.GoodbyeReport bye)
         {
             string blockString = string.Empty;
 
@@ -560,9 +559,9 @@ namespace Media.RtpTools
                 time.TotalSeconds.ToString("0.000000"),
                 //1
                 string.Format(RtpSend.RtcpPacketFormat,
-                //0
+                    //0
                     totalLength,
-                //1
+                    //1
                     source.Address.ToString() + ':' + source.Port.ToString())));
 
             //hex dump
@@ -602,14 +601,14 @@ namespace Media.RtpTools
             StringBuilder builder = new StringBuilder(64);
 
             //All Rtp are described with this format
-            builder.Append(string.Format(RtpSend.Format, 
+            builder.Append(string.Format(RtpSend.Format,
                 //0
                 time.TotalSeconds.ToString("0.000000"),
                 //1
                 string.Format(RtpSend.RtpPacketFormat,
                     //0
                     packet.Length, //Packet size in bytes including header
-                    //1
+                                   //1
                     source.Address.ToString() + ':' + source.Port.ToString(),
                     //2
                     packet.Version.ToString(),
@@ -630,7 +629,7 @@ namespace Media.RtpTools
                     //10
                     packet.SynchronizationSourceIdentifier,
                     //11
-                    packet.Timestamp                )));
+                    packet.Timestamp)));
 
             //Write the textual representation of the items in the sourceList
             if (packet.ContributingSourceCount > 0)
@@ -685,7 +684,7 @@ namespace Media.RtpTools
                         builder.Append(string.Format(RtpSend.NonQuotedFormat, "ext_len", rtpExtension.LengthInWords));
                         builder.Append((char)Common.ASCII.LineFeed);
 
-                        builder.Append(string.Format(RtpSend.HexFormat, "ext_data",  Convert.ToHexString(rtpExtension.Data.ToArray()), (char)Common.ASCII.LineFeed));
+                        builder.Append(string.Format(RtpSend.HexFormat, "ext_data", Convert.ToHexString(rtpExtension.Data.ToArray()), (char)Common.ASCII.LineFeed));
                     }
                 }
             }
@@ -700,8 +699,8 @@ namespace Media.RtpTools
 
             //Return the result
             return builder.ToString();
-        }       
-       
+        }
+
         //Move to RtpSendExtensions?
 
         /// <summary>
@@ -884,7 +883,7 @@ namespace Media.RtpTools
                         }
 
                         //Increment for a token parsed within the entry so far
-                        ++tokensParsed; 
+                        ++tokensParsed;
 
                         //Not increased for each token?
 
@@ -1150,7 +1149,7 @@ namespace Media.RtpTools
             //    Format = FileFormat.Text
             //};
         }
-        
+
         public class Program
         {
             public static void Main(string[] args)
@@ -1161,7 +1160,7 @@ namespace Media.RtpTools
 
     }
 
-    public static class RtpSendExtensions 
+    public static class RtpSendExtensions
     {
 
         public static string PayloadDescription(this Rtp.RtpPacket packet)
@@ -1170,7 +1169,7 @@ namespace Media.RtpTools
             if (packet is null) throw new ArgumentNullException("packet");
 
             //Get the PayloadType from the header.
-            byte payloadType =(byte)packet.PayloadType;
+            byte payloadType = (byte)packet.PayloadType;
 
             //Check for dynamic first
             if (RtpSend.PayloadDescription.IsDynamic(payloadType)) return RtpSend.PayloadDescription.Dynamic.EncodingName;

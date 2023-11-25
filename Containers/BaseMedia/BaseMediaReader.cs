@@ -33,12 +33,12 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * 
  * v//
  */
+using Media.Container;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Media.Container;
 
 namespace Media.Containers.BaseMedia
 {
@@ -93,7 +93,7 @@ namespace Media.Containers.BaseMedia
             "minf",
             "dinf",
             "stbl",
-            "edts",            
+            "edts",
             "stsd",
             //"tkhd", //Track Header
             "tref", //Track Reference Container
@@ -133,15 +133,15 @@ namespace Media.Containers.BaseMedia
 
         const int BytesPerUUID = 16;
 
-        public static byte[] IsoUUIDTemplate = new byte[] { 
+        public static byte[] IsoUUIDTemplate = new byte[] {
                                                             0x00, 0x00, 0x00, 0x00, /*XXXX*/
-                                                            0x00, 0x11, 0x00, 0x10, 
+                                                            0x00, 0x11, 0x00, 0x10,
                                                             0x80, 0x00, 0x00, 0xAA,
                                                             0x00, 0x39, 0x9B, 0x71
                                                            };
 
         const int TemplateSize = 12;
-        
+
 
         const int MinimumSize = IdentifierSize + LengthSize, IdentifierSize = 4, LengthSize = IdentifierSize;
 
@@ -192,7 +192,7 @@ namespace Media.Containers.BaseMedia
             }
 
             //Return the result of parsing a Guid from the uuid bytes. The UUID should be in big endian format...
-                                                        //BitOrder == LeastSignificant
+            //BitOrder == LeastSignificant
             return Common.Binary.ReadGuid(uuidBytes, 0, Common.Binary.IsLittleEndian);  //new Guid(uuidBytes);
         }
 
@@ -265,7 +265,7 @@ namespace Media.Containers.BaseMedia
         {
             //4.2 Object Structure 
             bytesRead = 0;
-            
+
             ulong length = 0;
 
             //Allocate 8 bytes
@@ -285,7 +285,7 @@ namespace Media.Containers.BaseMedia
                     length = (uint)Common.Binary.Read32(lengthBytes, 0, Common.Binary.IsLittleEndian);
 
                     //Repeat while 0 or 1 was found
-                } while (length <= 1);                
+                } while (length <= 1);
 
                 //By 'my' logic when a '1' was read which indicated the length is unknown or first 32 bits are full, we don't need to read 8 more just 4 since that is what would be different...
                 //This logic / optomization is not inline with the standard and may be changed later.                
@@ -315,10 +315,10 @@ namespace Media.Containers.BaseMedia
 
             //Keep the identifier bytes
             byte[] identifier = new byte[IdentifierSize];
-            
+
             //Read the box identifier
             int identifierSize = Read(identifier, 0, IdentifierSize);
-            
+
             //If this is a user defined type, then it must be read to access the length and to property get the data offset.
             //The reason why this is not nested in the check for the extended length is that the identifier should always be kept seperate from the data of the node.
             if (IsUserDefinedIdentifier(this, identifier))
@@ -382,7 +382,7 @@ namespace Media.Containers.BaseMedia
                 //This implies that the DataSize can be trusted since the length has been altered by ReadNext() to account for this.                
 
                 ulong dataSize = (ulong)(next.DataSize);
-                
+
                 //Keep track of how much was skipped
                 ulong skipped = 0, toSkip = 0;
 
@@ -391,7 +391,7 @@ namespace Media.Containers.BaseMedia
                 {
                     //Todo use unsafe conversion
                     toSkip = Common.Binary.Clamp(dataSize, (ulong)0, (ulong)long.MaxValue);
-                    
+
                     //Todo unsigned overloads.
                     Skip((long)toSkip);
 
@@ -525,7 +525,7 @@ namespace Media.Containers.BaseMedia
                             created = Common.Binary.ReadU32(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
 
                             modified = Common.Binary.ReadU32(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
-                            
+
                             m_TimeScale = Common.Binary.ReadU32(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
 
                             duration = Common.Binary.ReadU32(mediaHeader.Data, ref offset, Common.Binary.IsLittleEndian);
@@ -607,7 +607,7 @@ namespace Media.Containers.BaseMedia
 
                 bool enabled = false, inMovie, inPreview;
 
-                byte[] codecIndication = Media.Common.MemorySegment.EmptyBytes;                
+                byte[] codecIndication = Media.Common.MemorySegment.EmptyBytes;
 
                 float volume = m_Volume.Value;
 
@@ -682,7 +682,7 @@ namespace Media.Containers.BaseMedia
 
                                     stream.Read(rawData, 0, (int)length);
 
-                                    List<Tuple<int, int, float>> edits = new List<Tuple<int, int, float>>();                                    
+                                    List<Tuple<int, int, float>> edits = new List<Tuple<int, int, float>>();
 
                                     //Skip Flags and Version
                                     offset = LengthSize;
@@ -717,7 +717,7 @@ namespace Media.Containers.BaseMedia
                                     stream.Read(rawData, 0, (int)length);
 
                                     version = rawData[offset++];
-                                    
+
                                     flags = Common.Binary.Read24(rawData, offset, Common.Binary.IsLittleEndian);
 
                                     offset += 3;
@@ -777,7 +777,7 @@ namespace Media.Containers.BaseMedia
 
                                     //Width
                                     width = Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian) / ushort.MaxValue;
-                                    
+
                                     //Height
                                     height = Common.Binary.Read32(rawData, ref offset, Common.Binary.IsLittleEndian) / ushort.MaxValue;
 
@@ -1113,7 +1113,7 @@ namespace Media.Containers.BaseMedia
                     }
                 }
 
-                TimeSpan calculatedDuration = TimeSpan.FromSeconds(trackDuration / (double)trackTimeScale);                
+                TimeSpan calculatedDuration = TimeSpan.FromSeconds(trackDuration / (double)trackTimeScale);
 
                 ulong sampleCount = (ulong)stSizes.Count;
 

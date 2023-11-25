@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Concepts.Classes
 {
@@ -60,7 +56,7 @@ namespace Media.Concepts.Classes
 
                 try { if (Clock.Producer.Count > 10) Clock.Producer.Clear(); }
                 catch { }
-            } 
+            }
         }
 
         public override void Dispose()
@@ -209,22 +205,22 @@ namespace Media.UnitTests
             using (Media.Concepts.Classes.ClockedBus cb = new Concepts.Classes.ClockedBus(times))
             {
                 while (false == System.Console.KeyAvailable) for (int i = 2, e = 21; i < e; ++i)
-                {
-                    if (System.Console.KeyAvailable) goto Done;
+                    {
+                        if (System.Console.KeyAvailable) goto Done;
 
-                    cb.Clock.m_Clock.NanoSleep(i * i * 10);
+                        cb.Clock.m_Clock.NanoSleep(i * i * 10);
 
-                    if (System.Console.KeyAvailable) goto Done;
+                        if (System.Console.KeyAvailable) goto Done;
 
-                    if (i <= 10) cb.SetFrequency(times * i);
-                    else cb.SetFrequency((e - i) * times);
+                        if (i <= 10) cb.SetFrequency(times * i);
+                        else cb.SetFrequency((e - i) * times);
 
-                    if (System.Console.KeyAvailable) goto Done;
+                        if (System.Console.KeyAvailable) goto Done;
 
-                    cb.Clock.m_Clock.NanoSleep(i * i * 100);
+                        cb.Clock.m_Clock.NanoSleep(i * i * 100);
 
-                    if (System.Console.KeyAvailable) goto Done;
-                }
+                        if (System.Console.KeyAvailable) goto Done;
+                    }
             }
 
             Done:
@@ -244,23 +240,23 @@ namespace Media.UnitTests
             {
                 while (false == System.Console.KeyAvailable) for (int i = 0, e = System.Console.WindowWidth; i < e; ++i)
                         for (int j = 0, z = System.Console.WindowHeight; j < z; ++j)
-                    {
-                        if (System.Console.KeyAvailable) goto Done;
+                        {
+                            if (System.Console.KeyAvailable) goto Done;
 
-                        System.Console.SetCursorPosition(i, j);
+                            System.Console.SetCursorPosition(i, j);
 
-                        cb.Clock.m_Clock.NanoSleep(i * i * 10);
+                            cb.Clock.m_Clock.NanoSleep(i * i * 10);
 
-                        if (System.Console.KeyAvailable) goto Done;
+                            if (System.Console.KeyAvailable) goto Done;
 
-                        if (i <= 10) cb.SetFrequency(times * i);
-                        else cb.SetFrequency((e - i) * times);
+                            if (i <= 10) cb.SetFrequency(times * i);
+                            else cb.SetFrequency((e - i) * times);
 
-                        if (System.Console.KeyAvailable) goto Done;
-                    }
+                            if (System.Console.KeyAvailable) goto Done;
+                        }
             }
 
-        Done:
+            Done:
 
             while (System.Console.KeyAvailable) System.Console.ReadKey(true);
 
@@ -302,7 +298,7 @@ namespace Media.UnitTests
             while (System.Console.KeyAvailable) System.Console.ReadKey(true);
 
             System.Console.WriteLine("Done");
-            
+
         }
 
         public void TestForSevenHundredMegaHertz()

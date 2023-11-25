@@ -161,7 +161,7 @@ namespace Media.Codec
             Size = bitsPerComponent * components;
 
             //Creates each component
-            for (int i = 0; i < components; ++i) Components[i] = new MediaComponent( componentIds is not null ? componentIds[i] : (byte)i, bitsPerComponent);
+            for (int i = 0; i < components; ++i) Components[i] = new MediaComponent(componentIds is not null ? componentIds[i] : (byte)i, bitsPerComponent);
         }
 
         public MediaFormat(MediaType mediaType, Common.Binary.ByteOrder byteOrder, DataLayout dataLayout, int components, int[] componentSizes, byte[] componentIds, bool shouldDispose = true)
@@ -230,9 +230,9 @@ namespace Media.Codec
         }
 
         public MediaFormat(MediaFormat other, Common.Binary.ByteOrder byteOrder, DataLayout dataLayout, params MediaComponent[] additionalComponents)
-            :this(other.MediaType, byteOrder, dataLayout, System.Linq.Enumerable.Concat(other.Components, additionalComponents ?? System.Linq.Enumerable.Empty<MediaComponent>()))
+            : this(other.MediaType, byteOrder, dataLayout, System.Linq.Enumerable.Concat(other.Components, additionalComponents ?? System.Linq.Enumerable.Empty<MediaComponent>()))
         {
-            
+
         }
 
         public MediaFormat(MediaFormat other)

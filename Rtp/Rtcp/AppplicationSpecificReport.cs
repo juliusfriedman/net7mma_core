@@ -38,11 +38,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
+using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Media.Common;
 
 #endregion
 namespace Media.Rtcp
@@ -80,11 +80,11 @@ namespace Media.Rtcp
         /// <param name="name">The name of the ApplicationSpecificReport</param>
         /// <param name="applicationDependentData">Optional Application specific data.</param>
         public ApplicationSpecificReport(int version, int padding, int ssrc, int subType, byte[] name, byte[] applicationDependentData, bool shouldDispose = true)
-            : base(version, PayloadType, padding, ssrc, 
+            : base(version, PayloadType, padding, ssrc,
             subType, //BlockCount
             0, //BlockSize
             Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(applicationDependentData) ? NameSize : NameSize + applicationDependentData.Length + 1,//Extension size in bytes
-            shouldDispose) 
+            shouldDispose)
         {
             //Copy the given name
             if (false == Media.Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(name)) Array.Copy(name, 0, Payload.Array, Payload.Offset, NameSize);
@@ -134,7 +134,7 @@ namespace Media.Rtcp
         }
 
         public ApplicationSpecificReport(RtcpPacket reference, bool shouldDispose = true)
-            :base(reference.Header, reference.Payload, shouldDispose)
+            : base(reference.Header, reference.Payload, shouldDispose)
         {
             if (Header.PayloadType != PayloadType) throw new ArgumentException("Header.PayloadType is not equal to the expected type of 204.", "reference");
         }

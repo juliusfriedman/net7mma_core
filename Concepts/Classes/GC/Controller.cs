@@ -82,7 +82,7 @@ namespace Media.Concepts.Classes.GC
 
             System.DateTime lastControlation;
 
-        Start:
+            Start:
 
             System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.BelowNormal;
 
@@ -147,7 +147,7 @@ namespace Media.Concepts.Classes.GC
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void Suspend()
         {
-           if (IsAlive) ControlationThread.Suspend();
+            if (IsAlive) ControlationThread.Suspend();
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

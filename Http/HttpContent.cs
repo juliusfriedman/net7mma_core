@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Http
 {
@@ -23,7 +21,7 @@ namespace Media.Http
         public HttpContent(bool shouldDispose = true) : this(string.Empty, shouldDispose) { }
 
         public HttpContent(string name, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             if (name is null) throw new ArgumentNullException("name");
 
@@ -36,7 +34,7 @@ namespace Media.Http
         public readonly Common.MemorySegment Data;
 
         public BinaryContent(byte[] data, string name = null) : this(new Common.MemorySegment(data), name) { }
-        
+
         public BinaryContent(Common.MemorySegment data, string name = null) : base(name)
         {
             if (data is null || data.Count is 0) throw new ArgumentException("data cannot be null or empty");
@@ -95,7 +93,7 @@ namespace Media.Http
 
             MultipartContent result = new MultipartContent(boundary, message.ContentEncoding);
 
-        Receive:
+            Receive:
             int received = client.HttpSocket.Receive(client.Buffer.Array);
 
             if (received > 0)

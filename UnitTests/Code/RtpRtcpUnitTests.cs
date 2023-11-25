@@ -638,7 +638,7 @@ namespace Media.UnitTests
                 else Console.WriteLine(sr.SynchronizationSourceIdentifier);//0xa3368436
 
                 if ((ulong)sr.NtpTimestamp != 15323127630501249024) throw new Exception("Invalid NtpTimestamp!");
-                
+
                 //Ensure setting the value through a setter is correct
                 sr.NtpTimestamp = sr.NtpTimestamp;
                 if ((ulong)sr.NtpTimestamp != 15323127630501249024) throw new Exception("Invalid NtpTimestamp!");
@@ -745,7 +745,7 @@ namespace Media.UnitTests
             //Or manually for some reason
             rtcpPacket = new Media.Rtcp.RtcpPacket(example, 0); // The same as foundPackets[0]
 
-            if(rtcpPacket.Length != 32) throw new Exception("Incorrect Length");
+            if (rtcpPacket.Length != 32) throw new Exception("Incorrect Length");
 
             using (Media.Rtcp.ReceiversReport rr = new Media.Rtcp.ReceiversReport(rtcpPacket, false))
             {
@@ -877,7 +877,7 @@ namespace Media.UnitTests
             if (false == rtcpPacket.IsComplete || rtcpPacket.Length != 20 || rtcpPacket.Header.LengthInWordsMinusOne != 4) throw new Exception("Invalid Length");
 
             sd = new Rtcp.SourceDescriptionReport(2);
-            
+
             itemData = System.Text.Encoding.UTF8.GetBytes("jfriedman@OPERATIONS-PC");//23 bytes, + 2 bytes header = 25 + csrc octets == 29.
 
             var sdesChunk = new Media.Rtcp.SourceDescriptionReport.SourceDescriptionChunk((int)0x1AB7C080, new Media.Rtcp.SourceDescriptionReport.SourceDescriptionItem(Media.Rtcp.SourceDescriptionReport.SourceDescriptionItem.SourceDescriptionItemType.CName, itemData.Length, itemData, 0));

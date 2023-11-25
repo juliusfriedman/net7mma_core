@@ -37,8 +37,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //http://tools.ietf.org/html/rfc6184
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Media.Rtsp.Server.MediaTypes
 {
@@ -137,7 +137,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     byte[] tsOffsetBytes = new byte[2];
 
                     Common.Binary.Write16(tsOffsetBytes, 0, Common.Binary.IsLittleEndian, tsOffset);
-                    
+
                     return Media.Common.Extensions.Linq.LinqExtensions.Yield(dond).Concat(tsOffsetBytes).Concat(lengthBytes).Concat(n);
                 });
 
@@ -434,7 +434,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                     //Position at the start of the extension? (I would think this would be after the flags...)
                     //It appears that the ExtensionFlags indicates the nal type?
-                    offset -= extensionOctets + Rtp.RtpExtension.MinimumSize;                 
+                    offset -= extensionOctets + Rtp.RtpExtension.MinimumSize;
 
                     //Add the extension data to the count..
                     count += extensionOctets + Rtp.RtpExtension.MinimumSize;
@@ -596,7 +596,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                                 //if (Depacketized.ContainsKey(packetKey)) return;
 
                                                 count -= 4;
-                                                
+
                                                 tmp_nal_size -= 4;
 
 
@@ -635,7 +635,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         }
                     case Media.Codecs.Video.H264.NalUnitType.FragmentationUnitA: //FU - A
                     case Media.Codecs.Video.H264.NalUnitType.FragmentationUnitB: //FU - B (May require re-ordering)
-                        {                            
+                        {
                             /*
                              Informative note: When an FU-A occurs in interleaved mode, it
                              always follows an FU-B, which sets its DON.
@@ -669,7 +669,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                                 //Move to data (Just read the FU Header)
                                 ++offset;
-                                
+
                                 //Adjust count
                                 count -= 2;
 
@@ -871,7 +871,7 @@ namespace Media.Rtsp.Server.MediaTypes
             //{
             //    base.RemoveAt(index, disposeBuffer);
             //}
-            
+
             //internal protected override void DisposeBuffer()
             //{
             //    //The nals are definetely still contained when the buffer is disposed...
@@ -889,7 +889,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             //    if (ShouldDispose) m_ContainedNalTypes.Clear();
             //}
-            
+
 
             //To go to an Image...
             //Look for a SliceHeader in the Buffer

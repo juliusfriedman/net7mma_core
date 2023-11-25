@@ -43,7 +43,6 @@ using Media.Rtcp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 #endregion
 
@@ -151,7 +150,7 @@ namespace Media
         {
             if (packets is null) throw new ArgumentNullException("packets");
             else if (packets.Count() < 2) goto PreparePackets; //Only a single packet can just be prepared.
-            
+
             RtcpPacket first = packets.First();
 
             if (first.Padding) throw new InvalidOperationException("Only the last packet in a compound RtcpPacket may have padding");
@@ -191,7 +190,7 @@ namespace Media
             int paddingAmount = totalLength & 3; // totalLength % 4;
 
             //Add the padding to the last packet
-            if(paddingAmount > 0)
+            if (paddingAmount > 0)
             {
                 //Get the last packet
                 RtcpPacket last = packets.Last();
@@ -223,7 +222,7 @@ namespace Media
                             }
                         default: //1 - 254
                             {
-                                
+
                                 //Calulcate how much padding would be present in total
                                 int totalPadding = existingPaddingAmount + paddingAmount;
 
@@ -287,9 +286,9 @@ namespace Media
 
             //Could use GetAllocate or InternalToBytes to reduce allocations
 
-        PreparePackets:
+            PreparePackets:
             //Return the projection of the sequence containing the compound data
-             return packets.SelectMany(p => p.Prepare());
+            return packets.SelectMany(p => p.Prepare());
         }
 
         //Needs an interface defined in Media.Cryptography
@@ -328,7 +327,7 @@ namespace Media
             bool hasSourceDescription = false, hasCName = false;
 
             //Get all packets contained in the buffer.
-            foreach (RtcpPacket currentPacket in RtcpPacket.GetPackets(array, offset, count, version, null, ssrc, shouldDispose)) 
+            foreach (RtcpPacket currentPacket in RtcpPacket.GetPackets(array, offset, count, version, null, ssrc, shouldDispose))
             {
 
                 //Determine who the packet is from and what type it is.
@@ -337,7 +336,7 @@ namespace Media
                 //The first packet in a compound packet needs to be validated
                 if (parsedPackets is 0 && !IsValidRtcpHeader(currentPacket.Header, currentPacket.Version)) yield break;
                 else if (currentPacket.Version != version || skipUnknownTypes && RtcpPacket.GetImplementationForPayloadType((byte)currentPacket.PayloadType) is null) yield break;
-                
+
                 //Count the packets parsed
                 ++parsedPackets;
 
@@ -537,7 +536,7 @@ namespace Media
         //    u_int32 jitter;         /* estimated jitter */
         //   /* ... */       
         //} source;
-         
+
 
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -637,7 +636,7 @@ namespace Media
 
             //The RtpPacket is in state
             return true;
-        }        
+        }
 
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -891,7 +890,7 @@ namespace Media
 
                 set { m_Memory[0] = value; }
             }
-            
+
             internal byte Last8Bits
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1146,7 +1145,7 @@ namespace Media
             /// <param name="shouldDispose">indicates if memory will disposed when <see cref="Dispose"/> is called</param>
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public CommonHeaderBits(CommonHeaderBits other, bool reference = false, bool shouldDispose = true)
-                :base(shouldDispose)
+                : base(shouldDispose)
             {
                 if (reference)
                 {
@@ -1246,7 +1245,7 @@ namespace Media
             public CommonHeaderBits(int version, bool padding, bool extension, bool marker, int payloadTypeBits, byte otherBits, bool shouldDispose = true)
                 : this(CommonHeaderBits.PackOctet(version, padding, extension, otherBits), CommonHeaderBits.PackOctet(marker, payloadTypeBits), shouldDispose)
             {
-               
+
             }
 
             #endregion
@@ -1281,7 +1280,7 @@ namespace Media
             #endregion
 
             #region Overrides
-            
+
             protected override void Dispose(bool disposing)
             {
                 if (disposing is false || ShouldDispose is false) return;
@@ -1356,7 +1355,7 @@ namespace Media
         /// <see href="http://tools.ietf.org/html/rfc3550">Page 15, paragraph `CSRC list`</see>
         /// </summary>
         public sealed class SourceList : SuppressedFinalizerDisposable, IEnumerator<uint>, IEnumerable<uint>, IReportBlock
-            /*, IReadOnlyCollection<uint> */ //Only needed if modifications to a SourceList are allowed at run time.
+        /*, IReadOnlyCollection<uint> */ //Only needed if modifications to a SourceList are allowed at run time.
         {
             #region Constants / Statics
 
@@ -1418,7 +1417,7 @@ namespace Media
                 foreach (var ssrc in sources.Skip(start))
                 {
                     binary = binary.Concat(Binary.GetBytes(ssrc, Common.Binary.IsLittleEndian)).ToArray();
-                    
+
                     //Increment for the added value and determine if the maximum is reached.
                     if (++m_SourceCount >= SourceList.MaxItems) break;
                 }
@@ -1473,7 +1472,7 @@ namespace Media
             /// <param name="sourceCount">The count of sources expected in the SourceList</param>
             /// <param name="data">The data contained in the SourceList.</param>
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            public SourceList(int sourceCount, bool shouldDispose = true) 
+            public SourceList(int sourceCount, bool shouldDispose = true)
                 : base(shouldDispose)
             {
                 if (0 == (m_SourceCount = Common.Binary.Min(SourceList.MaxItems, sourceCount))) return;
@@ -1495,7 +1494,7 @@ namespace Media
                 m_SourceCount = goodbyeReport.Header.BlockCount;
 
                 //Make a new reference to the payload at the correct offset and size
-                m_Binary = m_SourceCount == 1 ? goodbyeReport.Header.GetSendersSynchronizationSourceIdentifierSegment() : new Common.MemorySegment(goodbyeReport.Payload.Array, 
+                m_Binary = m_SourceCount == 1 ? goodbyeReport.Header.GetSendersSynchronizationSourceIdentifierSegment() : new Common.MemorySegment(goodbyeReport.Payload.Array,
                     goodbyeReport.Payload.Offset,
                     //Take whatever is higher, 0 or the amount given by ReportBlockOctets - the extension and the padding.
                     Common.Binary.Max(0, goodbyeReport.ReportBlockOctets - (goodbyeReport.ReasonForLeavingLength + goodbyeReport.PaddingOctets)));
@@ -1514,7 +1513,7 @@ namespace Media
             }
 
             public SourceList(SourceList other, bool selfReference = false, bool shouldDispose = true) //bool selfReference..
-                : base(shouldDispose) 
+                : base(shouldDispose)
             {
                 m_Binary = selfReference ? other.m_Binary : new MemorySegment(other.m_Binary);
 
@@ -1751,7 +1750,7 @@ namespace Media
             /// <param name="offset">The offset in the vector</param>
             /// <returns>True if the copy succeeded otherwise false.</returns>
             public bool TryCopyTo(byte[] other, int offset)
-            {                
+            {
                 try
                 {
                     CheckDisposed();
@@ -1895,7 +1894,7 @@ namespace Media
         //{ StaticProfiles, DynamicProfiles }
 
         // Register, Unregister, Reassign
-      
+
         #endregion
     }
 }

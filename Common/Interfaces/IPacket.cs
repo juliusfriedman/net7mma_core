@@ -39,8 +39,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Media.Common
 {
@@ -80,7 +78,7 @@ namespace Media.Common
         /// </summary>
         long Length { get; }
 
-        
+
         //https://net7mma.codeplex.com/workitem/17336
         //Todo, select name and implement logically.
         //{ TotalLength, ExpectedLength, RawLength }
@@ -104,7 +102,7 @@ namespace Media.Common
         /// <param name="bufferList">The list of buffers</param>
         /// <returns>True if the operation succeeds, otherwise false.</returns>
         bool TryGetBuffers(out IList<ArraySegment<byte>> bufferList);
-        
+
         #region Notes 
 
         //unsafe could return byte* but the buffers are potentially seperated. (header and payload etc)
@@ -136,7 +134,7 @@ namespace Media.Common
     /// <summary>
     /// Defines commony used extension methods for IPacket instances.
     /// </summary>
-    public static class IPacketExtensions 
+    public static class IPacketExtensions
     {
         /// <summary>
         /// Determines the amount of time taken to send the packet based on the time the packet was <see cref="IPacket.Created">created</see>
@@ -145,7 +143,7 @@ namespace Media.Common
         /// <returns>Null if the packet was not yet sent, otherwise the amount of time</returns>
         public static TimeSpan? GetConverganceTime(this IPacket packet)
         {
-            if (false == packet.Transferred.HasValue) return null; 
+            if (false == packet.Transferred.HasValue) return null;
             return packet.Transferred.Value - packet.Created;
         }
     }

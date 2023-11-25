@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Rtsp.Server.MediaTypes
 {
@@ -17,7 +14,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             public RFC5391Frame(Rtp.RtpFrame existing) : base(existing) { }
 
-            public RFC5391Frame(RFC5391Frame f) : this((Rtp.RtpFrame)f) {  }
+            public RFC5391Frame(RFC5391Frame f) : this((Rtp.RtpFrame)f) { }
 
             //public System.IO.MemoryStream Buffer { get; set; }
 
@@ -49,7 +46,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
 
             //Sollaud                     Standards Track                     [Page 2]
- 
+
             //RFC 5391             RTP Payload Format for G.711.1        November 2008
 
 
@@ -105,7 +102,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
 
             //Sollaud                     Standards Track                     [Page 3]
- 
+
             //RFC 5391             RTP Payload Format for G.711.1        November 2008
 
 
@@ -161,7 +158,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
 
             //Sollaud                     Standards Track                     [Page 4]
- 
+
             //RFC 5391             RTP Payload Format for G.711.1        November 2008
 
 
@@ -217,7 +214,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
 
             //Sollaud                     Standards Track                     [Page 5]
- 
+
             //RFC 5391             RTP Payload Format for G.711.1        November 2008
 
 
@@ -309,7 +306,7 @@ namespace Media.Rtsp.Server.MediaTypes
             SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=rtpmap:" + SessionDescription.MediaDescriptions.First().MediaFormat + " PCMA/" + ClockRate));
             RtpClient.TryAddContext(new Rtp.RtpClient.TransportContext(0, 1, SourceId, SessionDescription.MediaDescriptions.First(), false, SourceId));
         }
-        
+
         #endregion
     }
 }

@@ -35,9 +35,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 namespace Media.Rtp
 {
-	/// <summary>
+    /// <summary>
     /// The constants of a <see cref="RtpClient"/> instance.
-	/// </summary>
+    /// </summary>
     public partial class RtpClient
     {
         #region Constants / Statics
@@ -50,7 +50,7 @@ namespace Media.Rtp
         /// <summary>
         /// The default amount which is used a multiplier to set the SendBufferSize
         /// </summary>
-        const int DefaultSendBufferSizeMultiplier = 1000; 
+        const int DefaultSendBufferSizeMultiplier = 1000;
 
         internal static void ConfigureRtpThread(System.Threading.Thread thread)//,Common.ILogging = null
         {

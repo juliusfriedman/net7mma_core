@@ -96,7 +96,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
             throw new Exception("FourCC strings with offset must be 4 characters long " + FourCC);
         }
 
-        int result = ((int)FourCC[offset  + 3]) << 24
+        int result = ((int)FourCC[offset + 3]) << 24
                     | ((int)FourCC[offset + 2]) << 16
                     | ((int)FourCC[offset + 1]) << 8
                     | ((int)FourCC[offset + 0]);
@@ -139,8 +139,8 @@ public class RiffReader : MediaFileStream, IMediaContainer
     public static readonly HashSet<FourCharacterCode> ParentChunks = new HashSet<FourCharacterCode>()
     {
         FourCharacterCode.RIFF,
-        FourCharacterCode.RIFX, 
-        FourCharacterCode.RF64, 
+        FourCharacterCode.RIFX,
+        FourCharacterCode.RF64,
         FourCharacterCode.ON2,
         FourCharacterCode.odml,
         FourCharacterCode.LIST,
@@ -208,7 +208,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
 
     public RiffReader(System.IO.FileStream source, System.IO.FileAccess access = System.IO.FileAccess.Read) : base(source, access) { }
 
-    public RiffReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { }        
+    public RiffReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { }
 
     public IEnumerable<Node> ReadChunks(long offset = 0, params FourCharacterCode[] names)
     {
@@ -287,7 +287,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
     public Node ReadNext()
     {
         if (Remaining <= MinimumSize) throw new System.IO.EndOfStreamException();
-        
+
         byte[] identifier = new byte[IdentifierSize];
 
         byte[] lengthBytes = new byte[LengthSize];
@@ -314,7 +314,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
         }
 
         //Determine if an identifier follows
-        if(RiffReader.HasSubType(fourCC))
+        if (RiffReader.HasSubType(fourCC))
         {
             //Resize the identifier to make room for the sub type
             Array.Resize(ref identifier, MinimumSize);
@@ -329,7 +329,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
             identifierSize += IdentifierSize;
 
             //Store the SubType if needed.
-            if(false == m_SubType.HasValue) m_SubType = GetSubType(identifier);
+            if (false == m_SubType.HasValue) m_SubType = GetSubType(identifier);
         }
 
         //If this is a 64 bit entry
@@ -345,7 +345,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
         }
 
         //return a new node,                                             Calculate length as padded size (to word boundary)
-        return new Node(this, new Common.MemorySegment(identifier), identifierSize, LengthSize, Position, (long)(0 != (length & 1) ? ++length : length), 
+        return new Node(this, new Common.MemorySegment(identifier), identifierSize, LengthSize, Position, (long)(0 != (length & 1) ? ++length : length),
             read >= MinimumSize && length <= (ulong)Remaining); //determine Complete
     }
 
@@ -357,12 +357,12 @@ public class RiffReader : MediaFileStream, IMediaContainer
             Node next = ReadNext();
 
             if (next is null) yield break;
-                           
+
             yield return next;
 
             if (m_Needs64BitInfo.Value && //If the file needs information from the ds64 node
-                //The value must not have been read before and not found to be 0
-                m_DataSize is 0 && 
+                                          //The value must not have been read before and not found to be 0
+                m_DataSize is 0 &&
                 //There must be at least 28 bytes in a junk / ds64 chunk
                 next.DataSize >= 28 &&
                 //This is the ds64 chunk
@@ -398,17 +398,17 @@ public class RiffReader : MediaFileStream, IMediaContainer
             //Otherwise skip the data of the chunk
             else Skip(next.DataSize);
         }
-    }        
+    }
 
     public override Node Root
     {
         get
         {
             long position = Position;
-            
+
             Node root = ReadChunks(0, FourCharacterCode.RIFF, FourCharacterCode.RIFX, FourCharacterCode.RF64, FourCharacterCode.ON2, FourCharacterCode.odml).FirstOrDefault();
-            
-            Position = position;                
+
+            Position = position;
 
             return root;
         }
@@ -470,7 +470,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
                             System.Globalization.DateTimeStyles.AssumeUniversal, out createdDateTime))
                     {
                         //: parse using invariant (en-US)
-                        if(false == DateTime.TryParseExact(parts[1], "MMM", System.Globalization.CultureInfo.InvariantCulture,
+                        if (false == DateTime.TryParseExact(parts[1], "MMM", System.Globalization.CultureInfo.InvariantCulture,
                             System.Globalization.DateTimeStyles.AssumeUniversal, out createdDateTime))
                         {
                             //The month portion of the result contains the data, the rest is blank
@@ -550,7 +550,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
         get
         {
             if (SubType != FourCharacterCode.WAVE) return Common.Binary.Zero;
-            if(false == m_BitsPerSample.HasValue) ParseFmt();
+            if (false == m_BitsPerSample.HasValue) ParseFmt();
             return m_BitsPerSample.Value;
         }
     }
@@ -843,7 +843,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
             m_MaxBytesPerSec = Common.Binary.Read32(headerChunk.Data, ref offset, Media.Common.Binary.IsBigEndian);
 
             m_PaddingGranularity = Common.Binary.Read32(headerChunk.Data, ref offset, Media.Common.Binary.IsBigEndian);
-            
+
             m_Flags = Common.Binary.Read32(headerChunk.Data, ref offset, Media.Common.Binary.IsBigEndian);
 
             m_TotalFrames = Common.Binary.Read32(headerChunk.Data, ref offset, Media.Common.Binary.IsBigEndian);
@@ -859,7 +859,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
             m_Height = Common.Binary.Read32(headerChunk.Data, ref offset, Media.Common.Binary.IsBigEndian);
 
             m_Reserved = Common.Binary.Read32(headerChunk.Data, ref offset, Media.Common.Binary.IsBigEndian);
-        }            
+        }
     }
 
     /// <summary>
@@ -886,19 +886,19 @@ public class RiffReader : MediaFileStream, IMediaContainer
             foreach (Track track in m_Tracks) yield return track;
             yield break;
         }
-        
+
         long position = Position;
 
         var tracks = new List<Track>();
 
         int trackId = 0;
 
-        if(SubType == FourCharacterCode.WAVE)
+        if (SubType == FourCharacterCode.WAVE)
         {
             if (false == m_SampleRate.HasValue) ParseFmt();
-            Track track = new Track(ReadChunk(FourCharacterCode.data), string.Empty, (int)(Length / BlockAlign), FileInfo.CreationTimeUtc, FileInfo.LastWriteTimeUtc, 
-                BlockAlign, 0, 0, TimeSpan.Zero, TimeSpan.FromSeconds(Length / (SampleRate * Channels * BitsPerSample / Common.Binary.BitsPerByte)), 
-                m_SampleRate.Value, Sdp.MediaType.audio, Common.Binary.GetBytes(m_Format.Value, Common.Binary.IsBigEndian), (byte)m_NumChannels.Value, (byte)m_BitsPerSample.Value, 
+            Track track = new Track(ReadChunk(FourCharacterCode.data), string.Empty, (int)(Length / BlockAlign), FileInfo.CreationTimeUtc, FileInfo.LastWriteTimeUtc,
+                BlockAlign, 0, 0, TimeSpan.Zero, TimeSpan.FromSeconds(Length / (SampleRate * Channels * BitsPerSample / Common.Binary.BitsPerByte)),
+                m_SampleRate.Value, Sdp.MediaType.audio, Common.Binary.GetBytes(m_Format.Value, Common.Binary.IsBigEndian), (byte)m_NumChannels.Value, (byte)m_BitsPerSample.Value,
                 true);
             tracks.Add(track);
             yield return track;
@@ -1074,7 +1074,7 @@ public class RiffReader : MediaFileStream, IMediaContainer
                 }
             }
         }
-        
+
         m_Tracks = tracks;
 
         Position = position;

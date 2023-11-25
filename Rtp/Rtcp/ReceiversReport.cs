@@ -38,20 +38,18 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using Media.Common;
+using System;
+using System.Linq;
 
 #endregion
 namespace Media.Rtcp
 {
     #region ReceiversReport
 
-        /// <summary>
-        /// Provides a managed implemenation of the ReceiversReport defined in http://tools.ietf.org/html/rfc3550#section-6.4.2
-        /// </summary>
+    /// <summary>
+    /// Provides a managed implemenation of the ReceiversReport defined in http://tools.ietf.org/html/rfc3550#section-6.4.2
+    /// </summary>
     public class ReceiversReport : RtcpReport
     {
         #region Constants and Statics
@@ -104,7 +102,7 @@ namespace Media.Rtcp
 
     }
 
-        #endregion
+    #endregion
 }
 
 
@@ -120,7 +118,7 @@ namespace Media.UnitTests
         /// O( )
         /// </summary>
         public static void TestAConstructor_And_Reserialization()
-        {            
+        {
             //Permute every possible value in the 5 bit BlockCount
             for (byte ReportBlockCounter = byte.MinValue; ReportBlockCounter <= Media.Common.Binary.FiveBitMaxValue; ++ReportBlockCounter)
             {

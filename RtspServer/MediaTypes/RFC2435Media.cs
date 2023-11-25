@@ -847,18 +847,18 @@ namespace Media.Rtsp.Server.MediaTypes
             //JpegHuffmanTable StdDCLuminance
 
             static byte[] lum_dc_codelens = { 0, 1, 5, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0 },
-                //Progressive
+                        //Progressive
                         lum_dc_codelens_p = { 0, 2, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
             static byte[] lum_dc_symbols = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 },
-                //Progressive
+                        //Progressive
                         lum_dc_symbols_p = { 0, 2, 3, 0, 1, 4, 5, 6, 7 }; //lum_dc_symbols_p = { 0, 0, 2, 1, 3, 4, 5, 6, 7}; Work for TestProg but not TestImgP
 
             //JpegHuffmanTable StdACLuminance
 
             static byte[] lum_ac_codelens = { 0, 2, 1, 3, 3, 2, 4, 3, 5, 5, 4, 4, 0, 0, 1, 0x7d };
 
-            static byte[] lum_ac_symbols = 
+            static byte[] lum_ac_symbols =
             {
                 0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12,
                 0x21, 0x31, 0x41, 0x06, 0x13, 0x51, 0x61, 0x07,
@@ -887,18 +887,18 @@ namespace Media.Rtsp.Server.MediaTypes
 
             //JpegHuffmanTable StdDCChrominance
             static byte[] chm_dc_codelens = { 0, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 },
-                //Progressive
+                        //Progressive
                         chm_dc_codelens_p = { 0, 3, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
             static byte[] chm_dc_symbols = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 },
-                //Progressive
+                        //Progressive
                         chm_dc_symbols_p = { 0, 1, 2, 3, 0, 4, 5 };
 
             //JpegHuffmanTable StdACChrominance
 
             static byte[] chm_ac_codelens = { 0, 2, 1, 2, 4, 4, 3, 4, 7, 5, 4, 4, 0, 1, 2, 0x77 };
 
-            static byte[] chm_ac_symbols = 
+            static byte[] chm_ac_symbols =
             {
                 0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21,
                 0x31, 0x06, 0x12, 0x41, 0x51, 0x07, 0x61, 0x71,
@@ -1824,7 +1824,7 @@ namespace Media.Rtsp.Server.MediaTypes
                  */
 
                 byte TypeSpecific, Type, Quality,
-                    //A byte which is bit mapped, each bit indicates 16 bit coeffecients for the table .
+                //A byte which is bit mapped, each bit indicates 16 bit coeffecients for the table .
                 PrecisionTable = 0;
 
                 uint FragmentOffset, Width, Height;
@@ -2601,7 +2601,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                 if (false == RtpClient.FrameChangedEventsEnabled) RtpClient.OnRtpPacketReceieved(packet, transportContext);
 
                                 //Put the packet back to ensure the timestamp and other values are correct.
-                                if(Loop) frame.Add(packet);
+                                if (Loop) frame.Add(packet);
 
                                 //Update the jitter and timestamp
                                 transportContext.UpdateJitterAndTimestamp(packet);

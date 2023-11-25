@@ -1,8 +1,7 @@
 ﻿
-using System.Globalization;
 using System;
 using System.Diagnostics;
-using Media.Codec;
+using System.Globalization;
 
 namespace UnitTests.Code;
 
@@ -76,7 +75,7 @@ public class TestCard
 
         // Set all values to 127
         Array.Fill<byte>(yuv_frame, 127);
-        
+
         stopwatch = new Stopwatch();
         stopwatch.Start();
 

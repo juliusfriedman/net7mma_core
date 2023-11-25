@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Codecs.Video.H264
 {
     public static class NalUnitType
     {
         //Mpeg start codes
-        public static byte[] StartCodePrefix = new byte[] { 0x00, 0x00, 0x01 };
+        public static byte[] StartCodePrefix = [0x00, 0x00, 0x01];
 
         public const byte Unknown = 0;
 

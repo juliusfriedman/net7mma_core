@@ -54,7 +54,7 @@ namespace Media.Concepts.Classes
     /// Provides various functionality which can only be achieved with the used of unsafe code.
     /// </summary>
     public static unsafe class Unsafe
-    {        
+    {
         #region AddressOf
 
         /// <summary>
@@ -394,7 +394,7 @@ namespace Media.Concepts.Classes
 
             // Call to internal function differs between builds
 #if DEBUG
-	        int offset = nint.Size == 8  ? 0x2D : 0x22;
+            int offset = nint.Size == 8 ? 0x2D : 0x22;
 #else
             int offset = nint.Size == 8 ? 0x1A : 0xE;
 #endif
@@ -414,24 +414,24 @@ namespace Media.Concepts.Classes
             return absoluteAddress;
         }
 
-  //      public static void HijackNew(System.Reflection.MethodBase method)
-  //      {
-  //          var defaultAllocAddress = (long)GetAllocMethodAddress();
+        //      public static void HijackNew(System.Reflection.MethodBase method)
+        //      {
+        //          var defaultAllocAddress = (long)GetAllocMethodAddress();
 
-  //          var myAllocAddress = (long)MethodHelper.GetMethodAddress(method);
+        //          var myAllocAddress = (long)MethodHelper.GetMethodAddress(method);
 
-  //          int offset = (int)(myAllocAddress - defaultAllocAddress - 4 - 1); // 4 bytes for relative address and one byte for opcode
-  //          byte[] instruction = {
-  //      0xE9, // Long jump instruction
-		//(byte)(offset & 0xFF),
-  //      (byte)((offset >> 8) & 0xFF),
-  //      (byte)((offset >> 16) & 0xFF),
-  //      (byte)((offset >> 24) & 0xFF)
-  //  };
+        //          int offset = (int)(myAllocAddress - defaultAllocAddress - 4 - 1); // 4 bytes for relative address and one byte for opcode
+        //          byte[] instruction = {
+        //      0xE9, // Long jump instruction
+        //(byte)(offset & 0xFF),
+        //      (byte)((offset >> 8) & 0xFF),
+        //      (byte)((offset >> 16) & 0xFF),
+        //      (byte)((offset >> 24) & 0xFF)
+        //  };
 
-  //          //UnlockPage((IntPtr)defaultAllocAddress);
-  //          System.Runtime.InteropServices.Marshal.Copy(instruction, 0, (nint)defaultAllocAddress, instruction.Length);
-  //      }
+        //          //UnlockPage((IntPtr)defaultAllocAddress);
+        //          System.Runtime.InteropServices.Marshal.Copy(instruction, 0, (nint)defaultAllocAddress, instruction.Length);
+        //      }
 
         #endregion
 

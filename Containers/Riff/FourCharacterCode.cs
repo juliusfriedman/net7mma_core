@@ -1,9 +1,4 @@
-﻿using Media.Container;
-using System.Collections.Generic;
-using System.Linq;
-using System;
-
-namespace Media.Containers.Riff;
+﻿namespace Media.Containers.Riff;
 
 #region FourCharacterCode
 

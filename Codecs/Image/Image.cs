@@ -15,13 +15,13 @@ namespace Media.Codecs.Image
         #region Statics
 
         public static Image FromStream(Stream stream)
-        {            
+        {
             BitmapInfoHeader header = new BitmapInfoHeader();
             if (14 != stream.Read(header.Array, 0, 14))
                 throw new InvalidOperationException("Need 14 Bytes for the Bitmap Header");
 
             if (header[0] != 0x42 && header[1] != 0x4D)
-                    throw new InvalidOperationException("Need BM File Header.");
+                throw new InvalidOperationException("Need BM File Header.");
 
             var fileSize = Binary.ReadU32(header, 2, Binary.IsBigEndian);
 
@@ -36,7 +36,7 @@ namespace Media.Codecs.Image
 
             var components = new MediaComponent[componentCount];
 
-            for(var c = 0 ; c < componentCount; c++)
+            for (var c = 0; c < componentCount; c++)
                 components[c] = new MediaComponent((byte)c, componentSize);
 
             var image = new Image(new ImageFormat(Binary.SystemByteOrder, DataLayout.Packed, components), header.Width, header.Height);
@@ -54,7 +54,7 @@ namespace Media.Codecs.Image
             int totalSize = 0;
 
             //Iterate each component in the ColorSpace
-            for (int i = 0, ie = format.Components.Length; i <ie ; ++i)
+            for (int i = 0, ie = format.Components.Length; i < ie; ++i)
             {
                 //Increment the total size in bytes by calculating the size in bytes of that plane using the ColorSpace information
                 totalSize += (width >> format.Widths[i]) * (height >> format.Heights[i]);
@@ -71,7 +71,7 @@ namespace Media.Codecs.Image
         public readonly int Width;
 
         public readonly int Height;
-        
+
         #endregion
 
         #region Constructor
@@ -119,7 +119,7 @@ namespace Media.Codecs.Image
 
                 int componentIndex = 0;
 
-                foreach(var componentData in value)
+                foreach (var componentData in value)
                     SetComponentData(x, y, componentIndex++, componentData);
             }
         }
@@ -176,7 +176,7 @@ namespace Media.Codecs.Image
             stream.Write(fileHeader, 0, fileHeader.Length);
             stream.Write(header.Array, header.Offset, header.Count);
             stream.Write(Data.Array, Data.Offset, Data.Count);
-        }       
+        }
 
         public int PlaneWidth(int plane)
         {
@@ -236,7 +236,7 @@ namespace Media.Codecs.Image
             {
                 case Media.Codec.DataLayout.Planar:
                     //for(int c = 0; c < componentIndex; ++c)
-                        //offset += PlaneLength(c);
+                    //offset += PlaneLength(c);
 
                     int widthSampling = ImageFormat.Widths[componentIndex];
                     int heightSampling = ImageFormat.Heights[componentIndex];
@@ -273,7 +273,7 @@ namespace Media.Codecs.Image
 
             return offset;
         }
-        
+
         //Gets all component samples for the given coordinate into a SegmentStream (not really useful besides saving on some allocation)
 
         public SegmentStream GetSampleData(int x, int y)
@@ -379,7 +379,7 @@ namespace Media.UnitTests
 
         public static void Test_GetComponentData_SetComponentData()
         {
-            foreach(var dataLayout in Enum.GetValues<DataLayout>())
+            foreach (var dataLayout in Enum.GetValues<DataLayout>())
             {
                 if (dataLayout == DataLayout.Unknown) continue;
 
@@ -640,7 +640,7 @@ namespace Media.UnitTests
                     {
                         //int planeOffset = 0;
                         //for (int i = 0; i < componentIndex; ++i)
-                            //planeOffset += image.PlaneLength(i);
+                        //planeOffset += image.PlaneLength(i);
 
                         int widthSampling = imageFormat.Widths[componentIndex];
                         int heightSampling = imageFormat.Heights[componentIndex];
@@ -1026,7 +1026,7 @@ namespace Media.UnitTests
                 new Codec.MediaComponent((byte)'g', 10),
                 new Codec.MediaComponent((byte)'a', 2),
                 new Codec.MediaComponent((byte)'b', 10),
-                
+
             });
 
             //Create the source image
@@ -1097,6 +1097,6 @@ namespace Media.UnitTests
 
                 if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new InvalidOperationException("Did not set Component data (Vector)");
             }
-        }        
+        }
     }
 }

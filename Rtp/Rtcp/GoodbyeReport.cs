@@ -38,11 +38,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
+using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Media.Common;
 
 #endregion
 
@@ -116,7 +115,7 @@ namespace Media.Rtcp
                 Payload.Array[Payload.Offset + offset++] = (byte)extensionSize;
 
                 //Copy it to the payload after the length
-                extensionData.CopyTo(Payload.Array, Payload.Offset + offset);                
+                extensionData.CopyTo(Payload.Array, Payload.Offset + offset);
             }
 
             //Finally ensure the LengthInWords is set accordingly.
@@ -135,7 +134,7 @@ namespace Media.Rtcp
         internal GoodbyeReport(int version, int padding, int ssrc, int blockCount, int extensionSize, int bytesInSourceList, byte[] extensionData) // ref
             : this(version, padding, ssrc, ref blockCount, ref extensionSize, ref bytesInSourceList, extensionData)
         {
-            
+
         }
 
         /// <summary>
@@ -163,7 +162,7 @@ namespace Media.Rtcp
         }
 
         public GoodbyeReport(int version, int ssrc, byte[] reasonForLeaving) : this(version, ssrc, null, reasonForLeaving) { } //Todo chain?
-            
+
         /// <summary>
         /// Constructs a new GoodbyeReport from the given values.
         /// </summary>
@@ -334,7 +333,7 @@ namespace Media.Rtcp
             if (reportBlocksRemaining is 0) throw new InvalidOperationException("A RtcpReport can only hold 31 ReportBlocks");
 
             //Add the bytes to the payload and set the LengthInWordsMinusOne and increase the BlockCount
-            
+
             //This is not valid when there is a ReasonForLeaving, the data needs to be placed before such reason and padding
             AddBytesToPayload(sourceList.GetBinaryEnumerable(offset, BlockCount += Binary.Min(reportBlocksRemaining, count)));
         }
@@ -359,7 +358,7 @@ namespace Media.Rtcp
 
             //The next entries are in the payload.
             using (RFC3550.SourceList sl = GetSourceList())
-            {                    
+            {
                 foreach (uint ssrc in sl)
                 {
                     //Give a ReportBlock of 4 bytes to represent the source list entry
@@ -398,9 +397,9 @@ namespace Media.UnitTests
                     for (byte ReasonLength = byte.MinValue; ReasonLength <= Media.Common.Binary.FiveBitMaxValue; ++ReasonLength)
                     {
                         //Create the RandomId and ReasonForLeaving
-                        
+
                         int RandomId = RFC3550.Random32(Utility.Random.Next());
-                        
+
                         IEnumerable<byte> ReasonForLeaving = Array.ConvertAll(Enumerable.Range(1, (int)ReasonLength).ToArray(), Convert.ToByte);
 
                         //Create a GoodbyeReport instance using the specified options.
@@ -437,7 +436,7 @@ namespace Media.UnitTests
 
                                     System.Diagnostics.Debug.Assert(expectedSourceListSize == sourceList.Size, "Unexpected SourceList Size");
 
-                                    System.Diagnostics.Debug.Assert(expectedBlockCount == sourceList.Count, "Unexpected SourceList Count");                                    
+                                    System.Diagnostics.Debug.Assert(expectedBlockCount == sourceList.Count, "Unexpected SourceList Count");
 
                                     System.Diagnostics.Debug.Assert(RandomId == sourceList.CurrentSource, "Unexpected Source in SourceList");
 

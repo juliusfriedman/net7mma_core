@@ -14,7 +14,7 @@ namespace Media.Sip
         public const string UserAgent = "User-Agent";
         public const string Expires = "Expires";
         public const string MaxForwards = "Max-Forwards";
-     
+
         public const string CallID = "Call-ID";
     }
 }

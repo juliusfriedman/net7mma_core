@@ -998,9 +998,9 @@ namespace Media.Rtsp
                         }
                     }
 
-                #endregion
+                    #endregion
 
-                Timestamp:
+                    Timestamp:
                     #region Timestamp
                     //If requests should be timestamped
                     if (TimestampRequests) Timestamp(message);
@@ -1014,11 +1014,11 @@ namespace Media.Rtsp
                     offset = m_Buffer.Offset;
 
                     length = buffer.Length;
-                #endregion
+                    #endregion
 
-                //-- MessageTransfer can be reused.
+                    //-- MessageTransfer can be reused.
 
-                Connect:
+                    Connect:
                     #region Connect
                     //Wait for any existing requests to finish first
                     wasBlocked = InUse;
@@ -1144,11 +1144,11 @@ namespace Media.Rtsp
 
                     }
 
-                #endregion
+                    #endregion
 
-                #endregion
+                    #endregion
 
-                NothingToSend:
+                    NothingToSend:
                     #region NothingToSend
                     //Check for no response.
                     if (hasResponse is false || Common.IDisposedExtensions.IsNullOrDisposed(this)) return null;
@@ -1292,18 +1292,18 @@ namespace Media.Rtsp
                             }
                     }
 
-                #endregion
+                    #endregion
 
-                #endregion
+                    #endregion
 
-                //Wait for the response while the amount of data received was less than RtspMessage.MaximumLength
-                Wait:
+                    //Wait for the response while the amount of data received was less than RtspMessage.MaximumLength
+                    Wait:
                     #region Waiting for response, Backoff or Retransmit
                     DateTime lastAttempt = DateTime.UtcNow;
 
                     //Wait while
                     while (Common.IDisposedExtensions.IsNullOrDisposed(this) is false &&//The client connected and is not disposed AND
-                                                                                             //There is no last transmitted message assigned AND it has not already been disposed
+                                                                                        //There is no last transmitted message assigned AND it has not already been disposed
                         Common.IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) &&
                         //AND the client is still allowed to wait
                         ++attempt <= m_MaximumTransactionAttempts &&
@@ -1386,9 +1386,9 @@ namespace Media.Rtsp
                         }
                     }
 
-                #endregion
+                    #endregion
 
-                HandleResponse:
+                    HandleResponse:
                     #region HandleResponse
 
                     //Update counters for any data received.
@@ -2074,7 +2074,7 @@ namespace Media.Rtsp
 
         public void UpdateMessages(RtspMessage request, RtspMessage response)
         {
-            if (Common.IDisposedExtensions.IsNullOrDisposed(request) is false && 
+            if (Common.IDisposedExtensions.IsNullOrDisposed(request) is false &&
                 Common.IDisposedExtensions.IsNullOrDisposed(LastRequest) is false)
             {
                 LastRequest.IsPersistent = false;
@@ -2571,14 +2571,14 @@ namespace Media.Rtsp
             {
                 //It is no longer persistent
                 using (LastRequest) LastRequest.IsPersistent = false;
-                
+
                 //It is no longer scoped.
                 LastRequest = null;
             }
 
             //If there is a LastResponse
-            if(LastResponse is not null)
-            { 
+            if (LastResponse is not null)
+            {
                 //It is no longer persistent
                 using (LastResponse) LastResponse.IsPersistent = false;
 

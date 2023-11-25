@@ -49,7 +49,7 @@ namespace Media.Common
         /// 
         /// </summary>
         System.Threading.CancellationTokenSource UpdateTokenSource { get; } //= new System.Threading.CancellationTokenSource();
-        
+
         //System.Threading.CancellationToken LastToken { get; }
 
         //System.Threading.CancellationToken BeginUpdate(); //out Token ^
@@ -90,7 +90,7 @@ namespace Media.Common
             if (reset = System.Threading.WaitHandle.SignalAndWait(updateable.UpdateTokenSource.Token.WaitHandle, updateable.ManualResetEvent.WaitHandle))
             {
                 updateable.ManualResetEvent.Reset();
-                
+
                 reset = true;
             }
 

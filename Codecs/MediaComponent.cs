@@ -64,7 +64,7 @@ public class MediaComponent : Common.SuppressedFinalizerDisposable
     {
         //Validate the size in bits
         if (size < 1) throw new System.ArgumentException("size", "Must be greater than 0.");
-        
+
         //Assign the size in bits
         Size = size;
 

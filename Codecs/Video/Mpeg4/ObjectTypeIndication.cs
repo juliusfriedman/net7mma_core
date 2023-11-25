@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-//Todo Seperate Audio and Video stuff
+﻿//Todo Seperate Audio and Video stuff
 
 namespace Media.Codecs.Video.Mpeg4
 {

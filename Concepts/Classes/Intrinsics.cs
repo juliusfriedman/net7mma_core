@@ -57,7 +57,7 @@ namespace Media.Concepts.Hardware
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
         internal static void Fallback_Void()
         {
-            
+
         }
 
         /// <summary>
@@ -288,7 +288,7 @@ namespace Media.Concepts.Hardware
                 else fallback = System.Delegate.CreateDelegate(entryPoint.ReturnType, this, existingFallback);
             }
 
-            if(Common.IDisposedExtensions.IsNullOrDisposed(entryPoint)) throw new System.InvalidOperationException("entryPoint, IsNullOrDisposed.");
+            if (Common.IDisposedExtensions.IsNullOrDisposed(entryPoint)) throw new System.InvalidOperationException("entryPoint, IsNullOrDisposed.");
 
             EntryPoint = entryPoint;
 
@@ -322,13 +322,13 @@ namespace Media.Concepts.Hardware
         /// <param name="entryPoint"></param>
         /// <param name="fallback"></param>
         public ManagedIntrinsic(bool shouldDispose, PlatformMethodReplacement entryPoint, System.Delegate fallback)
-            : this(shouldDispose, 
+            : this(shouldDispose,
             new UnmanagedAction(fallback, shouldDispose), //For now just give the fallback, until this changes IsHardwareAccelerated will be false
-                //new UnmanagedAction(System.Delegate.CreateDelegate(typeof(System.Action), entryPoint.PreviouslyDefinedMethod), shouldDispose),
-            fallback, 
+                                                          //new UnmanagedAction(System.Delegate.CreateDelegate(typeof(System.Action), entryPoint.PreviouslyDefinedMethod), shouldDispose),
+            fallback,
             DefaultBindingFlags)
         {
-            
+
         }
 
         #endregion
@@ -388,7 +388,7 @@ namespace Media.Concepts.Hardware
             }
         }
 
-        static byte[] x86CodeBytes = new byte[] 
+        static byte[] x86CodeBytes = new byte[]
             {
                 0x0F, 0x31, // rdtsc
                 0xC3, // ret
@@ -397,8 +397,8 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// Pipeline aware
         /// </summary>
-        static byte[] x86Rdtscp = new byte[] 
-            { 
+        static byte[] x86Rdtscp = new byte[]
+            {
                 0x0F, 0x01, 0xF9, //rdtscp
                 0xC3 //ret
             };
@@ -406,8 +406,8 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// Serialized with Cpuid
         /// </summary>
-        static byte[] x86RdtscCpuid = new byte[] 
-            { 
+        static byte[] x86RdtscCpuid = new byte[]
+            {
                0x53, //push ebx
                0x31, 0xC0, //xor eax,eax
                0x0F, 0xA2, //cpuid
@@ -422,7 +422,7 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// Raw call
         /// </summary>
-        static byte[] x64CodeBytes = 
+        static byte[] x64CodeBytes =
             {
                 0x0F, 0x31, // rdtsc
                 0x48, 0xC1, 0xE2, 0x20, // shl rdx,20h 
@@ -433,8 +433,8 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// Pipeline aware
         /// </summary>
-        static byte[] x64Rdtscp = new byte[] 
-            { 
+        static byte[] x64Rdtscp = new byte[]
+            {
                 0x0F, 0x01, 0xF9, //rdtscp
                 0x48, 0xC1, 0xE2, 0x20, // shl rdx, 20h
                 0x48, 0x09, 0xD0, //or rax,rdx
@@ -444,8 +444,8 @@ namespace Media.Concepts.Hardware
         /// <summary>
         /// Serialized with Cpuid
         /// </summary>
-        static byte[] x64RdtscCpuid = new byte[] 
-            { 
+        static byte[] x64RdtscCpuid = new byte[]
+            {
                 0x53, //push rbx
                 0x31, 0xC0, //xor eax,eax
                 0x0F, 0xA2, //cpuid
@@ -464,14 +464,14 @@ namespace Media.Concepts.Hardware
             : base(shouldDispose,
             //Patch Replacement to the code given, Todo, should have a way to mark that this is already done.
             //Done previously by having State kept on Intrinsic in a Dictionary using the Metadatoken.
-            new PlatformMethodReplacement(Common.Extensions.ExpressionExtensions.SymbolExtensions.GetMethodInfo(() => Replacement()), 
+            new PlatformMethodReplacement(Common.Extensions.ExpressionExtensions.SymbolExtensions.GetMethodInfo(() => Replacement()),
                 //Use either the x64 of x86 code
                 machine ? Common.Machine.IsX64() ? x64Rdtscp : x86Rdtscp : nint.Size == Common.Binary.BytesPerLong ? x64RdtscCpuid : x86Rdtscp,
                 true, //Restore should be determined based on state and otherwise
                 shouldDispose),
-            (System.Func<ulong>)DiagnosticStopWatchGetTimestamp) 
+            (System.Func<ulong>)DiagnosticStopWatchGetTimestamp)
         {
-           
+
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -602,7 +602,7 @@ namespace Media.Concepts.Hardware
 
                     if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(entryPoint.Instructions, out codeSize)) return;
 
-                    if (false == (0 == (UnixEntryPoint.Munmap(entryPoint.InstructionPointer, (ulong)codeSize ))))
+                    if (false == (0 == (UnixEntryPoint.Munmap(entryPoint.InstructionPointer, (ulong)codeSize))))
                     {
                         int lastErrno = UnixEntryPoint.GetLastError();
 #if DEBUG
@@ -652,7 +652,7 @@ namespace Media.Concepts.Hardware
         /// </summary>
         /// <param name="shouldDipose">true if the instance should be disposed of when <see cref="Dispose"/> is called.</param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal PlatformIntrinsic(bool shouldDispose) 
+        internal PlatformIntrinsic(bool shouldDispose)
             : base(shouldDispose)
         {
             MetadataToken = GetType().MetadataToken;
@@ -668,7 +668,7 @@ namespace Media.Concepts.Hardware
         internal PlatformIntrinsic(bool shouldDispose, PlatformMethod entryPoint)
             : base(shouldDispose)
         {
-            if(Common.IDisposedExtensions.IsNullOrDisposed(entryPoint)) throw new System.InvalidOperationException("entryPoint, IsNullOrDisposed.");
+            if (Common.IDisposedExtensions.IsNullOrDisposed(entryPoint)) throw new System.InvalidOperationException("entryPoint, IsNullOrDisposed.");
 
             MetadataToken = GetType().MetadataToken;
 
@@ -953,15 +953,15 @@ namespace Media.Concepts.Hardware
 
         internal static System.Reflection.MethodInfo mmap = Syscall.GetMethod("mmap");
 
-        internal static System.Reflection.MethodInfo munmap = Syscall.GetMethod("munmap"); 
+        internal static System.Reflection.MethodInfo munmap = Syscall.GetMethod("munmap");
 
-        internal static System.Reflection.MethodInfo mprotect = Syscall.GetMethod("mprotect"); 
+        internal static System.Reflection.MethodInfo mprotect = Syscall.GetMethod("mprotect");
 
         //internal static System.Reflection.MethodInfo sysconf = Syscall.GetMethod("sysconf"); //public static extern long sysconf (SysconfName name, Errno defaultError);
 
         internal static System.Reflection.MethodInfo sysconf = Syscall.GetMethod("sysconf");
 
-        internal static System.Reflection.MethodInfo getLastError = Syscall.GetMethod("GetLastError"); 
+        internal static System.Reflection.MethodInfo getLastError = Syscall.GetMethod("GetLastError");
 
         //public static long sysconf (SysconfName name)
 
@@ -1069,7 +1069,7 @@ namespace Media.Concepts.Hardware
         [System.Security.SuppressUnmanagedCodeSecurity]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected internal override void VirtualAllocate()
-        {            
+        {
             int codeSize;
 
             if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(Instructions, out codeSize)) return;
@@ -1230,7 +1230,7 @@ namespace Media.Concepts.Hardware
         {
             //http://www.microbe.cz/docs/CPUID.pdf
 
-             #region Constructor
+            #region Constructor
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public ReadCpuType(bool machine = true)
@@ -2200,7 +2200,7 @@ namespace Media.Concepts.Hardware
                 //Maybe padded with null octets at the beginning...
                 return CpuId.ProcessorBrandString = builder.ToString();
             }
-           
+
             /// <summary>
             /// Gets the number of threads per core.
             /// </summary>
@@ -2248,10 +2248,10 @@ namespace Media.Concepts.Hardware
 
                 //Read the number of cores
                 cores = (int)Common.Binary.ReadBits(registers.Array, 32, 16, false);
-                
+
                 //return the amount of cores
                 return cores is 0 ? 1 : cores;
-            }            
+            }
 
             /// <summary>
             /// Gets the number of cores
@@ -2272,7 +2272,7 @@ namespace Media.Concepts.Hardware
                             // The value may not be the same as the number of logical processors that are present in the hardware of a physical package.
 
                             //Access the memory of the registers previously retrieved
-                            return (int)Common.Binary.ReadBits(CpuId.RetrieveInformation(1).Array, 16, 8, false);                            
+                            return (int)Common.Binary.ReadBits(CpuId.RetrieveInformation(1).Array, 16, 8, false);
                         }
                     case VendorStrings.GenuineIntel:
                         {
@@ -2287,7 +2287,7 @@ namespace Media.Concepts.Hardware
 
                                 //Handle as AMD
                                 goto case VendorStrings.AuthenticAMD;
-                            } 
+                            }
 
                             //subLeaf => 0 = Core, 1 = Thread, 2 = Package
                             return (int)Common.Binary.ReadBits(CpuId.RetrieveInformation(11, 1).Array, 32, 16, false);
@@ -2791,7 +2791,7 @@ namespace Media.Concepts.Hardware
                         if (attribute.Function != currentFunction) information = CpuId.RetrieveInformation(currentFunction = attribute.Function).Array;
 
                         //If the feature is not supported
-                        if (0 == Common.Binary.ReadBits(information,  Common.Binary.BitsPerInteger * attribute.Register + attribute.Bit, 1, false))
+                        if (0 == Common.Binary.ReadBits(information, Common.Binary.BitsPerInteger * attribute.Register + attribute.Bit, 1, false))
                         {
                             //reduce supported count and if 0 remove feature because no supported attribute could be matched
                             if (--supported is 0)
@@ -2844,11 +2844,11 @@ namespace Media.Concepts.Hardware
             /// <remarks>Data is given for level and subLeaf by writing values in the correct offsets.</remarks>
             [System.Security.SuppressUnmanagedCodeSecurity]
             [System.Runtime.InteropServices.UnmanagedFunctionPointer(System.Runtime.InteropServices.CallingConvention.Cdecl)]
-            internal delegate void CpuIdExDelegate(byte[] buffer);          
+            internal delegate void CpuIdExDelegate(byte[] buffer);
 
             #region Fields
 
-            CpuIdExDelegate CpuIdEx;           
+            CpuIdExDelegate CpuIdEx;
 
             //edi = buffer
             byte[] x86CodeBytes = new byte[] { 
@@ -2874,7 +2874,7 @@ namespace Media.Concepts.Hardware
 
 
             // rcx is buffer
-            byte[] x64CodeBytes = {                                         
+            byte[] x64CodeBytes = {
                 0x53,                   // push   rbx (ebx is the lower half of rbx)            
                                         //Save buffer address to r9
                 0x49, 0x89, 0xC9,       // mov    r9,rcx
@@ -2952,7 +2952,7 @@ namespace Media.Concepts.Hardware
 
                             break;
                         }
-                   
+
                 }
 
             }
@@ -3065,7 +3065,7 @@ namespace Media.Concepts.Hardware
 
             internal TimestampDelegate ReadTimestampDelegate;
 
-            byte[] x86CodeBytes = new byte[] 
+            byte[] x86CodeBytes = new byte[]
             {
                 0x0F, 0x31, // rdtsc
                 0xC3, // ret
@@ -3074,8 +3074,8 @@ namespace Media.Concepts.Hardware
             /// <summary>
             /// Pipeline aware
             /// </summary>
-            byte[] x86Rdtscp = new byte[] 
-            { 
+            byte[] x86Rdtscp = new byte[]
+            {
                 0x0F, 0x01, 0xF9, //rdtscp
                 0xC3 //ret
             };
@@ -3083,8 +3083,8 @@ namespace Media.Concepts.Hardware
             /// <summary>
             /// Serialized with Cpuid
             /// </summary>
-            byte[] x86RdtscCpuid = new byte[] 
-            { 
+            byte[] x86RdtscCpuid = new byte[]
+            {
                0x53, //push ebx
                0x31, 0xC0, //xor eax,eax
                0x0F, 0xA2, //cpuid
@@ -3101,7 +3101,7 @@ namespace Media.Concepts.Hardware
             /// <summary>
             /// Raw call
             /// </summary>
-            byte[] x64CodeBytes = 
+            byte[] x64CodeBytes =
             {
                 0x0F, 0x31, // rdtsc
                 //0x48, 0xC1, 0xE2, 0x20, // shl rdx,20h 
@@ -3112,8 +3112,8 @@ namespace Media.Concepts.Hardware
             /// <summary>
             /// Pipeline aware
             /// </summary>
-            byte[] x64Rdtscp = new byte[] 
-            { 
+            byte[] x64Rdtscp = new byte[]
+            {
                 0x0F, 0x01, 0xF9, //rdtscp
                 //0x48, 0xC1, 0xE2, 0x20, // shl rdx, 20h
                 //0x48, 0x09, 0xD0, //or rax,rdx
@@ -3123,8 +3123,8 @@ namespace Media.Concepts.Hardware
             /// <summary>
             /// Serialized with Cpuid
             /// </summary>
-            byte[] x64RdtscCpuid = new byte[] 
-            { 
+            byte[] x64RdtscCpuid = new byte[]
+            {
                 0x53, //push rbx
                 0x31, 0xC0, //xor eax,eax
                 0x0F, 0xA2, //cpuid
@@ -3174,7 +3174,7 @@ namespace Media.Concepts.Hardware
                     //Create the pointer for the delegate
                     EntryPoint.InstructionPointer = System.Runtime.InteropServices.Marshal.GetFunctionPointerForDelegate(ReadTimestampDelegate);
                 }
-            }            
+            }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public long ReadTimestampCounter()
@@ -3339,7 +3339,7 @@ namespace Media.Concepts.Hardware
             static ulong Fallback(ref byte s)
             {
                 //s = 0;
-                
+
                 return Hardware.Intrinsics.Rtdsc.GetTimestampUnsigned();
             }
 
@@ -3427,7 +3427,7 @@ namespace Media.Concepts.Hardware
                             //Allocate the memory and allow execution
                             EntryPoint.VirtualAllocate();
 
-                            EntryPoint.VirtualProtect();                            
+                            EntryPoint.VirtualProtect();
 
                             if (State == IntrinsicState.Unknown)
                             {
@@ -3716,14 +3716,14 @@ namespace Media.Concepts.Hardware
 
             #region Fields
 
-            byte[] x86CodeBytes = 
+            byte[] x86CodeBytes =
             {
                 0x0F, 0xC7, 0xF8, // rdseed eax
                 0x0F, 0x92, 0x01, // setb BYTE PTR [ecx]
                 0xC3 // ret
             };
 
-            byte[] x64CodeBytes = new byte[] 
+            byte[] x64CodeBytes = new byte[]
             {
                 0x48, 0x0F, 0xC7, 0xF8, // rexw rdseed rax
                 0x0F, 0x92, 0x01, // setb BYTE PTR [rcx]

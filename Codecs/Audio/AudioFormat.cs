@@ -147,7 +147,7 @@ namespace Media.Codecs.Audio
         /// <summary>
         /// Gets the amount of channels.
         /// </summary>
-        public int Channels => Components.Length;        
+        public int Channels => Components.Length;
 
         /// <summary>
         /// Gets the number of bits per sample.

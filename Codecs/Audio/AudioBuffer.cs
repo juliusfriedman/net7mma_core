@@ -2,10 +2,7 @@
 using Media.Common;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Codecs.Audio
 {
@@ -86,7 +83,7 @@ namespace Media.Codecs.Audio
         /// <summary>
         /// The number of different speakers for which data can be found in the sample.
         /// </summary>
-        public int Channels { get { return MediaFormat.Components.Length ; } }
+        public int Channels { get { return MediaFormat.Components.Length; } }
 
         /// <summary>
         /// Indicates if the sample contains data for only 1 speaker.
@@ -282,7 +279,7 @@ namespace Media.UnitTests
                         audioTransformer.Transform();
                     }
                 }
-            }            
+            }
         }
 
     }

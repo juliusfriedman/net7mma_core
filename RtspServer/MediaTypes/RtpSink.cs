@@ -128,8 +128,8 @@ namespace Media.Rtsp.Server.MediaTypes
         public void EnquePacket(Common.IPacket packet)
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(RtpClient) ||
-                Common.IDisposedExtensions.IsNullOrDisposed(packet)) return; 
-            
+                Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
+
             Packets.Enqueue(packet);
         }
 

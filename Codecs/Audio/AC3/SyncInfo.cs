@@ -1,5 +1,5 @@
-﻿
-using System;
+﻿using System;
+
 namespace Media.Codecs.Audio.Ac3
 {
     public class SyncInfo
@@ -133,9 +133,9 @@ namespace Media.Codecs.Audio.Ac3
             {
                 throw new ArgumentException("Invalid frame size code");
             }
-            
+
             int sampleRateIndex = 2 - sampleRateCode;
-                                                                    //*2
+            //*2
             return frameSizeCodeTable[frameSizeCode, sampleRateIndex] << 1;
         }
     }

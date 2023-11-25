@@ -76,13 +76,13 @@ namespace Media.Codecs.Image
         /// <param name="quality"></param>
         /// <param name="shouldDispose"></param>
         public ImageTransformation(Image source, Image dest, Codec.TransformationQuality quality = Codec.TransformationQuality.Unspecified, bool shouldDispose = true)
-            :this(quality, shouldDispose)
+            : this(quality, shouldDispose)
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(source)) throw new System.ArgumentNullException("source");
             m_Source = source;
 
             if (Common.IDisposedExtensions.IsNullOrDisposed(dest)) throw new System.ArgumentNullException("dest");
-            m_Dest = dest;  
+            m_Dest = dest;
         }
 
         #endregion
@@ -112,7 +112,7 @@ namespace Media.Codecs.Image
         #endregion
 
         #region Methods
-        
+
         public override void Dispose()
         {
             m_Source = null;

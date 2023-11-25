@@ -46,7 +46,7 @@ namespace Media.Codecs.Video
         public VideoCodec(string name, Common.Binary.ByteOrder defaultByteOrder = Common.Binary.ByteOrder.Unknown, int defaultComponentCount = 0, int defaultBitsPerComponent = 0)
             : base(name, Codec.MediaType.Video, defaultByteOrder, defaultComponentCount, defaultBitsPerComponent)
         {
-            
+
         }
     }
 }

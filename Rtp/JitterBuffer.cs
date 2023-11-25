@@ -76,7 +76,7 @@
             return sdp;
         }
 
-        public System.TimeSpan GetDuration (int payloadType)
+        public System.TimeSpan GetDuration(int payloadType)
         {
             System.Collections.Generic.IEnumerable<RtpFrame> frames;
             if (TryGetFrames(payloadType, out frames))
@@ -169,7 +169,7 @@
                         }
                     }
                 }
-                
+
                 //Must add a new frame to frames.
                 addedTo = new RtpFrame(packet);
 

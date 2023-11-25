@@ -81,7 +81,7 @@ namespace Media.Common.Extensions.Math
         {
             //store any remainder
             long r = 0;
-            
+
             //until a approaches 0
             while (a != 0)
             {

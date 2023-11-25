@@ -49,8 +49,8 @@ namespace Media.Concepts.Classes.B
     /// <summary>
     /// An interface which represents an api to which there is `mens rea` in addition to <see cref="IBias"/>
     /// </summary>
-    public interface 
-        
+    public interface
+
         IDecision : IBias
     {
         /// <summary>

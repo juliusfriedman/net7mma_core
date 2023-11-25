@@ -183,7 +183,7 @@
 
             outlen = 0;
             rhigh = 0;
-            for (j = 0; j < inputLength; )
+            for (j = 0; j < inputLength;)
             {
                 if (state.Packed)
                 {
@@ -279,7 +279,7 @@
 
                     //Avoid lookup, ihigh is 0 or even gets 2, odd gets 1
                     wd2 = Common.Binary.IsEven(ref ihigh) ? 2 : 1;
-                    
+
                     wd1 = (band1.nb * 127) >> 7;
                     wd1 += wh[wd2];
 
@@ -372,7 +372,7 @@
 
             g722_bytes = 0;
             xhigh = 0;
-            for (j = 0; j < inputBufferCount; )
+            for (j = 0; j < inputBufferCount;)
             {
                 if (state.ItuTestMode)
                 {

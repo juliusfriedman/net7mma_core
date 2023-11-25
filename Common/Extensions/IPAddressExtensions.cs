@@ -43,7 +43,7 @@ namespace Media.Common.Extensions.IPAddress
         private static void CheckIPVersion(System.Net.IPAddress ipAddress, System.Net.IPAddress mask, out byte[] addressBytes, out byte[] maskBytes)
         {
             if (ipAddress is null) throw new System.ArgumentNullException("ipAddress");
-        
+
             if (mask is null) throw new System.ArgumentNullException("mask");
 
             addressBytes = ipAddress.GetAddressBytes();
@@ -99,7 +99,7 @@ namespace Media.Common.Extensions.IPAddress
         /// </summary>
         /// <returns></returns>
         public static bool IsOnIntranet(this System.Net.IPAddress ipAddress) //Nat
-        {            
+        {
             bool onIntranet = System.Net.IPAddress.IsLoopback(ipAddress);
 
             if (false == onIntranet)
@@ -197,8 +197,8 @@ namespace Media.Common.Extensions.IPAddress
 
         public static bool IsIPv4MappedToIPv6(this System.Net.IPAddress addr)
         {
-            byte[] allocated; 
-            
+            byte[] allocated;
+
             return IsIPv4MappedToIPv6(addr, out allocated);
         }
 
@@ -221,7 +221,7 @@ namespace Media.Common.Extensions.IPAddress
 
             //First 32 bits must be 0 when mapped.
             if (Common.Binary.ReadInteger(addrBytes, 0, 4, Media.Common.Binary.IsLittleEndian) != 0) return false;
-            
+
             //0xff when mapped
             return Common.Binary.ReadU16(addrBytes, 10, Media.Common.Binary.IsLittleEndian) == ushort.MaxValue;
         }
@@ -230,7 +230,7 @@ namespace Media.Common.Extensions.IPAddress
 
         //Could check for method on type at runtime and if present store the location and call with the instance via reflection...
 
-        public static System.Net.IPAddress MapToIPv4(this System.Net.IPAddress addr) 
+        public static System.Net.IPAddress MapToIPv4(this System.Net.IPAddress addr)
         {
             if (addr.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6) throw new System.ArgumentException("Must pass an IPv6 address to MapToIPv4");
 

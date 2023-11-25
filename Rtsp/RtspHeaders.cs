@@ -38,10 +38,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 #endregion
 
 namespace Media.Rtsp
@@ -126,7 +124,7 @@ namespace Media.Rtsp
         {
             foreach (string part in value.Split((char)Common.ASCII.SemiColon))
             {
-                if(Media.Sdp.SessionDescription.TryParseRange(value, out type, out start, out end)) return true;
+                if (Media.Sdp.SessionDescription.TryParseRange(value, out type, out start, out end)) return true;
             }
 
             type = string.Empty;
@@ -171,12 +169,12 @@ namespace Media.Rtsp
         //Could just make a function to extract the tokens and values and then parse them as needed.
 
         //Values should be nullable...?
-        public static bool TryParseTransportHeader(string value, out int ssrc, 
-            out System.Net.IPAddress source, 
-            out int serverRtpPort, out int serverRtcpPort, 
-            out int clientRtpPort, out int clientRtcpPort, 
-            out bool interleaved, out byte dataChannel, out byte controlChannel, 
-            out string mode, 
+        public static bool TryParseTransportHeader(string value, out int ssrc,
+            out System.Net.IPAddress source,
+            out int serverRtpPort, out int serverRtcpPort,
+            out int clientRtpPort, out int clientRtcpPort,
+            out bool interleaved, out byte dataChannel, out byte controlChannel,
+            out string mode,
             out bool unicast, out bool multicast, out System.Net.IPAddress destination, out int ttl)
         {
             if (string.IsNullOrWhiteSpace(value)) throw new InvalidOperationException("value cannot be null or whitespace.");
@@ -188,7 +186,7 @@ namespace Media.Rtsp
             //it should always be the first value...
 
             ssrc = 0;
-            
+
             //I think ttl should have a default of 0 in this case, but it probably doesn't matter in most cases.
             ttl = sbyte.MaxValue;
 
@@ -213,17 +211,17 @@ namespace Media.Rtsp
                         case "unicast":
                             {
                                 if (multicast) throw new InvalidOperationException("Cannot be unicast and multicast");
-                                
+
                                 unicast = true;
-                                
+
                                 continue;
                             }
                         case "multicast":
                             {
                                 if (unicast) throw new InvalidOperationException("Cannot be unicast and multicast");
-                                
+
                                 multicast = true;
-                                
+
                                 continue;
                             }
                         case "mode":
@@ -249,7 +247,7 @@ namespace Media.Rtsp
                                     //var hostEntry = System.Net.Dns.GetHostEntry(sourcePart);
 
                                     //Should either return the hostEntry or require an address family.
-                                    
+
                                     //hostEntry.AddressList.FirstOrDefault(e=>e.AddressFamily == connectionAddressType...)
 
                                     //Could work around by always providing the v6 address if possible...
@@ -297,7 +295,7 @@ namespace Media.Rtsp
                                 }
 
                                 //Could just clamp.
-                                if (ttl < byte.MinValue || ttl > byte.MaxValue) 
+                                if (ttl < byte.MinValue || ttl > byte.MaxValue)
                                     Media.Common.TaggedExceptionExtensions.RaiseTaggedException(ttl, "See Tag. Invalid ttl datum as given.");
 
                                 continue;
@@ -329,7 +327,7 @@ namespace Media.Rtsp
                                 }
 
                                 continue;
-          
+
                             }
                         case "client_port":
                             {
@@ -407,12 +405,12 @@ namespace Media.Rtsp
         }
 
         public static string TransportHeader(string connectionType, int? ssrc, //todo, reorder and add destination and port
-            System.Net.IPAddress source, 
-            int? clientRtpPort, int? clientRtcpPort, 
-            int? serverRtpPort, int? serverRtcpPort, 
-            bool? unicast, bool? multicast, 
-            int? ttl, 
-            bool? interleaved, byte? dataChannel, byte? controlChannel, 
+            System.Net.IPAddress source,
+            int? clientRtpPort, int? clientRtcpPort,
+            int? serverRtpPort, int? serverRtcpPort,
+            bool? unicast, bool? multicast,
+            int? ttl,
+            bool? interleaved, byte? dataChannel, byte? controlChannel,
             string mode = null) //string[] others?
         {
             if (string.IsNullOrWhiteSpace(connectionType)) throw new ArgumentNullException(nameof(connectionType));
@@ -481,7 +479,7 @@ namespace Media.Rtsp
                 if (serverRtpPort.HasValue)
                 {
                     builder.Append(SemiColon);
-                    
+
                     //todo, put in static grammar
                     builder.Append("server_port=");
                     builder.Append(serverRtpPort.Value);
@@ -514,7 +512,7 @@ namespace Media.Rtsp
                         builder.Append(controlChannel);
                     }
                 }
-                
+
                 //
 
                 if (ttl.HasValue)
@@ -565,7 +563,7 @@ namespace Media.Rtsp
                 return builder.ToString();
             }
             finally { builder = null; }
-        }        
+        }
 
         /// <summary>
         /// Parses a RFC2326 Rtp-Info header, if two sub headers are present only the values from the last header are returned.
@@ -722,7 +720,7 @@ namespace Media.Rtsp
 
                 result.Append(ssrc.Value.ToString("X"));
             }
-            
+
             return result.ToString();
         }
 

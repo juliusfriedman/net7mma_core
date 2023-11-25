@@ -37,7 +37,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Media.Sdp
 {
@@ -137,11 +136,11 @@ namespace Media.Sdp
 
 
             //Assuming given a value NOT a line text to parse...
-            
+
             //Todo, should just add 2 parts, ':' and value...
 
-            public SessionAttributeLine(string seperator = null,  int partCount = 2, 
-                string attributeName = Common.Extensions.String.StringExtensions.UnknownString,                 
+            public SessionAttributeLine(string seperator = null, int partCount = 2,
+                string attributeName = Common.Extensions.String.StringExtensions.UnknownString,
                 string attributeValue = null)
                 : base(AttributeType, seperator, partCount)
             {
@@ -181,7 +180,7 @@ namespace Media.Sdp
 
             //Should have params values overload with optional seperator(s)
 
-            public SessionAttributeLine(string[] sdpLines, ref int index, string seperator = null, int partCount = 1) 
+            public SessionAttributeLine(string[] sdpLines, ref int index, string seperator = null, int partCount = 1)
                 : base(sdpLines, ref index, seperator, AttributeType, partCount)
             {
 
@@ -595,7 +594,7 @@ namespace Media.Sdp
 
                     //Make space if requried
                     Array.Resize(ref m_ConnectionParts, 2);
-                        
+
                     //Set the value
                     m_ConnectionParts[1] = value.ToString();
                 }
@@ -704,10 +703,10 @@ namespace Media.Sdp
             public SessionConnectionLine(string[] sdpLines, ref int index)
                 : base(sdpLines, ref index, SessionDescription.SpaceString, ConnectionType)
             {
-                
+
             }
 
-            public SessionConnectionLine(string line) 
+            public SessionConnectionLine(string line)
                 : base(line, SessionDescription.SpaceString, 3)
             {
                 if (m_Type.Equals(ConnectionType) is false) throw new InvalidOperationException("Not a SessionConnectionLine line");
@@ -768,7 +767,7 @@ namespace Media.Sdp
             }
 
             public SessionVersionLine(string[] sdpLines, ref int index)
-                :  base(sdpLines, ref index, SessionDescription.SpaceString, VersionType, 1) 
+                : base(sdpLines, ref index, SessionDescription.SpaceString, VersionType, 1)
             {
             }
 
@@ -899,7 +898,7 @@ namespace Media.Sdp
                 : base(OriginType, SessionDescription.SpaceString, 6)
             {
                 if (string.IsNullOrWhiteSpace(owner)) goto EnsureParts;
-                
+
                 //Check for missing o=? (Adds overhead)
                 if (false.Equals(owner[0].Equals(OriginType)))
                 {
@@ -910,7 +909,7 @@ namespace Media.Sdp
                 }
                 else m_Parts.AddRange(owner.Substring(2).Replace(SessionDescription.NewLineString, string.Empty).Split(SessionDescription.Space));
 
-            EnsureParts:
+                EnsureParts:
                 EnsureParts(6);
             }
 
@@ -969,7 +968,7 @@ namespace Media.Sdp
             public SessionNameLine(string[] sdpLines, ref int index)
                 : base(sdpLines, ref index, SessionDescription.SpaceString, NameType, 1) //this()
             {
-               
+
             }
 
         }
@@ -985,7 +984,7 @@ namespace Media.Sdp
             public string SessionName
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return GetPart(0);}
+                get { return GetPart(0); }
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 set { SetPart(0, value); }
             }
@@ -1011,7 +1010,7 @@ namespace Media.Sdp
             public SessionInformationLine(string[] sdpLines, ref int index)
                 : base(sdpLines, ref index, SessionDescription.SpaceString, InformationType) //this()
             {
-              
+
             }
 
         }
@@ -1053,7 +1052,7 @@ namespace Media.Sdp
             public SessionPhoneNumberLine(string[] sdpLines, ref int index)
                 : base(sdpLines, ref index, SessionDescription.SpaceString, PhoneType) //this()
             {
-               
+
             }
         }
 
@@ -1071,7 +1070,7 @@ namespace Media.Sdp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 set { SetPart(0, value); }
             }
-            
+
             #region Constructor
 
             public SessionEmailLine()
@@ -1175,7 +1174,7 @@ namespace Media.Sdp
             public SessionUriLine(string[] sdpLines, ref int index)
                 : base(sdpLines, ref index, SessionDescription.SpaceString, UriType)
             {
-                
+
             }
         }
 
@@ -1254,7 +1253,7 @@ namespace Media.Sdp
 
                 //Offsets are the value following the adjustmentIndex
                 if (Common.Binary.IsEven(ref adjustmentIndex)) ++adjustmentIndex;
-                
+
                 //Ensure valid index
                 if (adjustmentIndex >= m_Parts.Count) return TimeSpan.Zero;
 
@@ -1304,7 +1303,7 @@ namespace Media.Sdp
                 {
                     string sdpLine = sdpLines[index++].Trim();
 
-                    if (string.IsNullOrWhiteSpace(sdpLine) 
+                    if (string.IsNullOrWhiteSpace(sdpLine)
                         ||
                         sdpLine[0] != TimeZoneType) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Invalid SessionTimeZoneLine");
 
@@ -1395,9 +1394,9 @@ namespace Media.Sdp
             /// </summary>
             public MediaType MediaType
             {
-                                                                                      
+
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                                                                                                        //Unbounded split
+                //Unbounded split
                 get { return (MediaType)Enum.Parse(typeof(MediaType), MediaToken.Split(SessionDescription.Space).First(), true); }
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 set { SetPart(0, value.ToString()); }
@@ -1430,7 +1429,7 @@ namespace Media.Sdp
                     SetPart(1, value.ToString());
                 }
             }
-            
+
             //Could be extension method or static method of the Attribute class, this logic could then be reused in other places such as the ConnectionLine.
 
             /// <summary>
@@ -1620,7 +1619,7 @@ namespace Media.Sdp
             public SessionMediaDescriptionLine(string[] sdpLines, ref int index)
                 : base(sdpLines, ref index, SessionDescription.SpaceString, MediaDescriptionType, 4)
             {
-                
+
             }
 
             //internal...
@@ -1658,7 +1657,7 @@ namespace Media.Sdp
         public class SessionTimeDescriptionLine : SessionDescriptionLine
         {
             internal const char TimeType = 't';
-            
+
             //internal protected for setters or this can be changed on accident.
             public static SessionTimeDescriptionLine Permanent = new SessionTimeDescriptionLine(0, 0);
 
@@ -1673,7 +1672,7 @@ namespace Media.Sdp
             }
 
             public SessionTimeDescriptionLine(long startTime, long stopTime)
-                :this()
+                : this()
             {
                 StartTime = startTime;
 
@@ -1699,7 +1698,7 @@ namespace Media.Sdp
             public SessionTimeDescriptionLine(string[] sdpLines, ref int index)
                 : base(sdpLines, ref index, SessionDescription.SpaceString, TimeType, 2)
             {
-                
+
             }
 
             //internal...
@@ -1961,7 +1960,7 @@ namespace Media.Sdp
                 {
                     string sdpLine = sdpLines[index++].Trim();
 
-                    if (string.IsNullOrWhiteSpace(sdpLine) 
+                    if (string.IsNullOrWhiteSpace(sdpLine)
                         ||
                         sdpLine[0] != RepeatType) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Invalid SessionRepeatTimeLine");
 
@@ -1984,14 +1983,14 @@ namespace Media.Sdp
                 try
                 {
                     if (string.IsNullOrWhiteSpace(text)) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Invalid SessionRepeatTimeLine");
-                        
+
                     //sdpFormat
-                    if(text[0] == RepeatType)
+                    if (text[0] == RepeatType)
                     {
 
                         text = SessionDescription.TrimLineValue(text.Substring(2));
                     }
-                    
+
                     m_Parts.AddRange(text.Split(SessionDescription.Space));
                 }
                 catch
@@ -2168,7 +2167,7 @@ namespace Media.Sdp
             public PayloadTypeInformationLine(string[] sdpLines, ref int index, string seperator = null, int partCount = 1)
                : base(sdpLines, ref index, seperator ?? SessionDescription.SpaceString, partCount)
             {
-               
+
             }
 
             //Could put information parts in Parts... see todo.
@@ -2526,7 +2525,7 @@ namespace Media.Sdp
 
             public FormatTypeLine(string formatToken, string formatSpecificParameters)
                 : this(formatToken)
-            {                
+            {
                 FormatSpecificParameterToken = formatSpecificParameters;
 
                 //Add(formatSpecificParameters);
@@ -2544,7 +2543,7 @@ namespace Media.Sdp
                 if (m_Parts.Count is 0
                     ||
                     false.Equals(AttributeName.StartsWith(AttributeFields.FormatType, StringComparison.OrdinalIgnoreCase))) throw new InvalidOperationException("Not a FormatTypeLine line");
-                    //false == GetPart(0).StartsWith(AttributeFields.FormatType, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("Not a FormatTypeLine line");
+                //false == GetPart(0).StartsWith(AttributeFields.FormatType, StringComparison.OrdinalIgnoreCase)) throw new InvalidOperationException("Not a FormatTypeLine line");
             }
 
             #endregion

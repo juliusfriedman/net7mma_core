@@ -57,7 +57,7 @@ namespace Media.Codecs.Image
             const uint RgbMask = 0x00ffffff;
 
             private static volatile int[] lookupTable;
-            
+
             private static int[] LookupTable
             {
                 get
@@ -95,7 +95,7 @@ namespace Media.Codecs.Image
                 return GetYuv((uint)rgb);
             }
 
-            const double R0 = .299, G0 = .587, B = .114, 
+            const double R0 = .299, G0 = .587, B = .114,
                          R1 = -.169, G1 = .331, H = .5,
                          R2 = .419, G2 = .081;
 
@@ -174,11 +174,11 @@ namespace Media.Codecs.Image
         }
 
         //public static void FlipHorizontal(byte[] source, int srcOffset, byte[] destination, int destOffset, ..)
-        
+
 
         //Should follow the same api as below...
 
-        const int E = 8, S = 16, H = 100, T = 298, t = 208, N = 409, f = 516;               
+        const int E = 8, S = 16, H = 100, T = 298, t = 208, N = 409, f = 516;
 
         internal static unsafe void YUV2RGBManaged(byte[] YUVData, byte[] RGBData, int width, int height)
         {

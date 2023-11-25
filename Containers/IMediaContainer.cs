@@ -39,9 +39,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #region Using Statements
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 #endregion
 
 namespace Media.Container
@@ -66,7 +63,7 @@ namespace Media.Container
         /// The Uri which describes the location of the data contained in this IMediaContainer
         /// </summary>
         Uri Location { get; }
-        
+
         /// <summary>
         /// The first element in parsing, usually described the file type and version
         /// </summary>

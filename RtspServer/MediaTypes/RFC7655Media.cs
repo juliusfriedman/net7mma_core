@@ -1,6 +1,5 @@
 ﻿using Media.Codecs.Audio.Alaw;
 using Media.Codecs.Audio.Mulaw;
-using Media.Common;
 using Media.Rtp;
 using System;
 using System.Linq;
@@ -47,7 +46,7 @@ public class RFC7655Media : RtpAudioSink
     /// <param name="payloadType"></param>
     /// <param name="channels"></param>
     /// <param name="compandingLaw"></param>
-    public RFC7655Media(string name, Uri source, int payloadType, int channels, CompandingLaw compandingLaw) 
+    public RFC7655Media(string name, Uri source, int payloadType, int channels, CompandingLaw compandingLaw)
         : base(name, source, payloadType, channels, RfcClockRate)
     {
         switch (compandingLaw)
@@ -107,7 +106,7 @@ public class RFC7655Media : RtpAudioSink
 
         if (Codec is ALawCodec)
         {
-            for(int i = offset, o = 0; i < length; i += 2)
+            for (int i = offset, o = 0; i < length; i += 2)
             {
                 newPacket.Payload[o++] = ALawEncoder.LinearToALawSample(Common.Binary.Read16(data, i, System.BitConverter.IsLittleEndian));
             }

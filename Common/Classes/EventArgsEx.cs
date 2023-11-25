@@ -28,13 +28,13 @@ namespace Media.Common
 
         public bool IgnoreSender(object o) { return Ignore.Add(o); }
 
-        public bool IgnoresSender(object o){ return Ignore.Contains(o);}
+        public bool IgnoresSender(object o) { return Ignore.Contains(o); }
 
         public bool ListenForSender(object o) { return Ignore.Remove(o); }
 
         public static void SetHandled(object sender, EventArgsEx args, bool value = true)
         {
-            if(args is not null && false == args.IgnoresSender(sender)) args.Handled = value;
+            if (args is not null && false == args.IgnoresSender(sender)) args.Handled = value;
         }
 
         public static void SetContinue(object sender, EventArgsEx args, bool value = true)
@@ -49,7 +49,7 @@ namespace Media.Common
     }
 
     #endregion
-    
+
     #region IEvent
 
     /// <summary>
@@ -77,7 +77,7 @@ namespace Media.Common
         /////// Signature &lt;0 : Will throw an exception (-0)
         /////// Signature &gt;0 : May throw an exception
         /// </remarks>
-        long Signature { get; }        
+        long Signature { get; }
     }
 
     public static class IEventExtensions
@@ -121,7 +121,7 @@ namespace Media.Common
             if (o is System.Delegate) Source = o as System.Delegate;
 
             Enabled = enabled;
-        }        
+        }
 
         public Delegate Source { get; protected set; }
 
@@ -164,7 +164,7 @@ namespace Media.Common
             : base(t, enabled)
         {
 
-        }       
+        }
     }
 
     internal struct EventReferenceInformation<T> : IEvent, IDisposed
@@ -230,10 +230,10 @@ namespace Media.Common
         {
             get
             {
-                return Common.IDisposedExtensions.IsNullOrDisposed(this) is false ? 
-                    IEventExtensions.HasSource(this) ? 
-                        Event : Consumed as Delegate 
-                            : null; 
+                return Common.IDisposedExtensions.IsNullOrDisposed(this) is false ?
+                    IEventExtensions.HasSource(this) ?
+                        Event : Consumed as Delegate
+                            : null;
             }
         }
 
@@ -261,7 +261,7 @@ namespace Media.Common
 
             ShouldDispose = false;
         }
-    }   
+    }
 
     internal static class EventReferenceInformationExtensions
     {
@@ -294,6 +294,6 @@ namespace Media.Common
         }
     }
 
-#endregion
+    #endregion
 
 }

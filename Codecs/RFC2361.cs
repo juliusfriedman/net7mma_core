@@ -63,7 +63,7 @@
         public static System.Guid ToGuid(ref int fourCC)
         {
             byte[] source = TemplateGuid.ToByteArray();
-            
+
             Common.Binary.Write32(source, 0, Media.Common.Binary.IsLittleEndian, fourCC);
 
             return new System.Guid(source);

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Media.Codecs.Video.Mpeg4
+﻿namespace Media.Codecs.Video.Mpeg4
 {
     /// <summary>
     /// Contains common values used by the Motion Picture Experts Group for MPEG4

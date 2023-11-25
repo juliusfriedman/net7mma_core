@@ -732,7 +732,7 @@ public class SttsBox : FullBox
 {
     public int EntryCount
     {
-        get => Binary.Read32(Data, OffsetToData, Binary.IsLittleEndian); 
+        get => Binary.Read32(Data, OffsetToData, Binary.IsLittleEndian);
         set => Binary.Write32(Data.Array, OffsetToData, Binary.IsLittleEndian, value);
     }
 
@@ -867,14 +867,14 @@ public class TfraBox : FullBox
         get
         {
             var offset = OffsetToData + 10;
-            while(offset < DataSize)
+            while (offset < DataSize)
             {
                 //This allocated for the data already
                 var tfra = new TrackFragmentRandomAccessEntryBox(Master as BaseMediaWriter, Version);
 
                 //Reassign rather than copy
                 tfra.Data = new MemorySegment(Data.Array, offset, tfra.Length);
-                
+
                 yield return tfra;
 
                 offset += tfra.Length;
@@ -1548,10 +1548,10 @@ public class VisualSampleEntryBox : SampleEntryBox
         set
         {
             //if (value.Count() != 3)
-                //throw new ArgumentException("PreDefined2 must contain 3 elements.");
+            //throw new ArgumentException("PreDefined2 must contain 3 elements.");
 
             int i = 0;
-            foreach(var val in value)
+            foreach (var val in value)
             {
                 Binary.Write32(Data.Array, OffsetToData + 10 + i++ * 4, Binary.IsLittleEndian, val);
             }

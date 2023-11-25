@@ -88,7 +88,7 @@
         /// Gets the <see cref="Common.MemorySegment"/> in which the <see cref="Buffer"/> is stored.
         /// </summary>
         public Common.MemorySegment Cache { get { return m_ByteCache; } }
-        
+
         /// <summary>
         /// Gets or Sets the index in the bits
         /// </summary>
@@ -197,7 +197,8 @@
             //Todo, should determine if the Position NEEDS to be moved here or if that is natural
             //when remaining is > than bitCount the bytes are already in the buffer and we can ignore seeking.
             //if (m_Remaining >= bitCount) return;
-            /*m_Remaining -= Common.Binary.BitsPerByte * (int)*/m_BaseStream.Seek(bytes, System.IO.SeekOrigin.Current);           
+            /*m_Remaining -= Common.Binary.BitsPerByte * (int)*/
+            m_BaseStream.Seek(bytes, System.IO.SeekOrigin.Current);
         }
 
         /// <summary>
@@ -269,7 +270,7 @@
                 if (bytesRead is 0) break;
 
                 //Adjust for the bytesRead
-                bytesToRead -= bytesRead;               
+                bytesToRead -= bytesRead;
             }
 
             //Compute how many bits are in the buffer.
@@ -290,7 +291,7 @@
             {
                 int count = m_ByteCache.Count - m_ByteIndex;
                 System.Buffer.BlockCopy(m_ByteCache.Array, m_ByteIndex, m_ByteCache.Array, m_ByteCache.Offset, count);
-                if(clear) System.Array.Clear(m_ByteCache.Array, m_ByteCache.Offset + m_ByteIndex, count);
+                if (clear) System.Array.Clear(m_ByteCache.Array, m_ByteCache.Offset + m_ByteIndex, count);
                 //Indicate to Reset the ByteIndex
                 return true;
             }
@@ -307,7 +308,7 @@
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool PeekBit(bool reverse = false)
         {
-            switch (reverse) 
+            switch (reverse)
             {
                 default://.net core 3.1 requires this or the build error is that this method doesn't return on all code paths....
                 case false: return Common.Binary.GetBitReverse(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex);
@@ -700,7 +701,7 @@
             base.Dispose();
 
             m_ByteCache.Dispose();
-            
+
             if (m_LeaveOpen) return;
 
             m_BaseStream.Dispose();

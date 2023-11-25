@@ -38,11 +38,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
+using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Media.Common;
 
 #endregion
 
@@ -158,7 +157,7 @@ namespace Media.Rtp
         /// <param name="data">The optional extension data itself not including the Flags or LengthInWords fields.</param>
         /// <param name="offset">The optional offset into data to being copying.</param>
         public RtpExtension(int sizeInBytes, short flags = 0, byte[] data = null, int offset = 0, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             //Allocate memory for the binary
             m_MemorySegment = new Common.MemorySegment(new byte[MinimumSize + sizeInBytes], 0, MinimumSize + sizeInBytes);
@@ -226,7 +225,7 @@ namespace Media.Rtp
 
         IEnumerator<byte> IEnumerable<byte>.GetEnumerator()
         {
-            return GetEnumerableImplementation().GetEnumerator();   
+            return GetEnumerableImplementation().GetEnumerator();
         }
 
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()

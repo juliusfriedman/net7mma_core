@@ -69,7 +69,7 @@ namespace Media.Common.Extensions.Process
                 Thread.ProcessorAffinity = (nint)affinityFlags;
 
                 //If there was an ideal processor indicate such.
-                if(idealProcessor >= 0) Thread.IdealProcessor = idealProcessor;
+                if (idealProcessor >= 0) Thread.IdealProcessor = idealProcessor;
             }
         }
 

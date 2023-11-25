@@ -37,12 +37,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #endregion
 
 #region Using Statements
+using Media.Container;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Media.Container;
 #endregion
 
 namespace Media.Containers.Real
@@ -55,9 +53,11 @@ namespace Media.Containers.Real
 
         public enum ChunkType
         {
-            /*.*/RA/*0xFD*/, //RealAudio (1.0) Version = 3, (2.0) Version = 4
-            // RealMedia file header (only one per file, must be the first chunk)
-            /*.*/RMF,
+            /*.*/
+            RA/*0xFD*/, //RealAudio (1.0) Version = 3, (2.0) Version = 4
+                        // RealMedia file header (only one per file, must be the first chunk)
+            /*.*/
+            RMF,
             //File properties (only one per file)
             PROP,
             //Stream properties (one for each stream)
@@ -147,7 +147,7 @@ namespace Media.Containers.Real
 
         public override Node TableOfContents
         {
-            get { using(var root = Root) return ReadChunks(root.DataOffset + root.DataSize, Length - root.DataOffset + root.DataSize, ChunkType.INDX).FirstOrDefault(); }
+            get { using (var root = Root) return ReadChunks(root.DataOffset + root.DataSize, Length - root.DataOffset + root.DataSize, ChunkType.INDX).FirstOrDefault(); }
         }
 
         public Node ReadNext()
@@ -181,7 +181,7 @@ namespace Media.Containers.Real
                                 {
 
                                     //.ra4 sig
-                                    
+
                                     //Next dWord
                                     length = 8;
 

@@ -351,20 +351,20 @@ namespace Media.Common.Collections.Generic
 
         public ConcurrentThesaurus(IDictionary<TKey, IList<TValue>> values, IEqualityComparer<TKey> equalityComparer)
         {
-            Dictionary = new (values, equalityComparer);
+            Dictionary = new(values, equalityComparer);
         }
 
         public ConcurrentThesaurus(int capacity, IEqualityComparer<TKey> equalityComparer)
         {
-            Dictionary = new (Environment.ProcessorCount, capacity, equalityComparer);
+            Dictionary = new(Environment.ProcessorCount, capacity, equalityComparer);
         }
 
         public ConcurrentThesaurus(IEqualityComparer<TKey> equalityComparer)
         {
-            Dictionary = new (equalityComparer);
+            Dictionary = new(equalityComparer);
         }
 
-        public ConcurrentThesaurus(IDictionary<TKey, IList<TValue>> values) : this(values, EqualityComparer<TKey>.Default) { }        
+        public ConcurrentThesaurus(IDictionary<TKey, IList<TValue>> values) : this(values, EqualityComparer<TKey>.Default) { }
 
         public ConcurrentThesaurus(int capacity) : this(capacity, EqualityComparer<TKey>.Default) { }
 

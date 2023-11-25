@@ -59,7 +59,7 @@ namespace Media.Http
                 Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableLinger(socket));
 
                 //Retransmit for 0 sec
-                if(Common.Extensions.OperatingSystemExtensions.IsWindows)
+                if (Common.Extensions.OperatingSystemExtensions.IsWindows)
                     Media.Common.Extensions.Exception.ExceptionExtensions.ResumeOnError(() => Media.Common.Extensions.Socket.SocketExtensions.DisableTcpRetransmissions(socket));
 
                 //If both send and receieve buffer size are 0 then there is no coalescing when nagle's algorithm is disabled
@@ -276,7 +276,7 @@ namespace Media.Http
             get { return m_UserAgent; }
             set
             {
-                if (string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException("UserAgent cannot consist of only null or whitespace."); 
+                if (string.IsNullOrWhiteSpace(value)) throw new ArgumentNullException("UserAgent cannot consist of only null or whitespace.");
                 m_UserAgent = value;
             }
         }
@@ -514,7 +514,7 @@ namespace Media.Http
         /// <param name="existing">An existing Socket</param>
         /// <param name="leaveOpen"><see cref="LeaveOpen"/></param>
         public HttpClient(Uri location, int bufferSize = DefaultBufferSize, Socket existing = null, bool leaveOpen = false, int responseTimeoutInterval = (int)Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             if (location is null) throw new ArgumentNullException("location");
 
@@ -555,7 +555,7 @@ namespace Media.Http
 
             //Set the protocol version to use in requests.
             ProtocolVersion = DefaultProtocolVersion;
-            
+
             ConfigureSocket = ConfigureHttpSocket;
 
             m_ResponseTimeoutInterval = responseTimeoutInterval;
@@ -689,7 +689,7 @@ namespace Media.Http
             if (m_HttpSocket is not null)
             {
                 //If LeaveOpen was false and the socket is not shared.
-                if (false == LeaveOpen )
+                if (false == LeaveOpen)
                 {
                     //Dispose the socket
                     m_HttpSocket.Dispose();
@@ -834,9 +834,9 @@ namespace Media.Http
                     }
                     #endregion
 
-                    
 
-                Connect:
+
+                    Connect:
                     #region Connect
                     //Wait for any existing requests to finish first
                     wasBlocked = InUse;
@@ -862,8 +862,8 @@ namespace Media.Http
                     #region Prepare To Send
 
                     //Determine if the message should be sent in chunks
-                    bool sendChunked = SendChunked && false == string.IsNullOrWhiteSpace(message.Body) 
-                        || 
+                    bool sendChunked = SendChunked && false == string.IsNullOrWhiteSpace(message.Body)
+                        ||
                         message.Version > 1.0 && string.Compare(message[HttpHeaders.TransferEncoding], "chunked", true) is 0;
 
                     //Protocol version < 1.1 does not support Transfer-Encoding.
@@ -880,9 +880,9 @@ namespace Media.Http
                     }
 
                     //May not have to make a distinct case for multipart... the data would already be in the body...
-                    bool multiPart = string.Compare(message[HttpHeaders.ContentType], "multipart/form-data", true) is 0;                 
+                    bool multiPart = string.Compare(message[HttpHeaders.ContentType], "multipart/form-data", true) is 0;
 
-                    
+
 
                     //Maybe should not require a Strict option?
                     //Checks for ContentLength and TransferEncoding and removes the ContentLength
@@ -903,7 +903,7 @@ namespace Media.Http
                         // A client that sends an HTTP/1.1 request MUST send a Host header.
                         if (1.1 >= message.Version && false == message.ContainsHeader(HttpHeaders.Host)) //Should remove host header if present?
                         {
-                            if(null != message.Location)
+                            if (null != message.Location)
                                 message.SetHeader(HttpHeaders.Host, message.Location.Host);
                             else
                                 message.SetHeader(HttpHeaders.Host, CurrentLocation.Host);
@@ -928,7 +928,7 @@ namespace Media.Http
                         }
 
                         #endregion
-                                               
+
                         #region Invalid Protocol Headers
 
                         //Check for chunked when protocol is less than or equal to 1.0 and remove.
@@ -952,7 +952,7 @@ namespace Media.Http
 
                     #endregion
 
-                Send:
+                    Send:
                     #region Send
                     //If the message was Transferred previously
                     if (message.Transferred.HasValue)
@@ -1028,7 +1028,7 @@ namespace Media.Http
                             m_SentBytes += sent;
 
                             sent = length = 0;
-                            
+
                             //Release the reference to the array
                             buffer = null;
                         }
@@ -1043,15 +1043,15 @@ namespace Media.Http
 
                     #endregion
 
-                NothingToSend:
+                    NothingToSend:
                     #region NothingToSend
                     //Check for no response.
                     if (false == hasResponse) return null;
 
                     #endregion
 
-                //Receive some data (only referenced by the check for disconnection)
-                Receive:
+                    //Receive some data (only referenced by the check for disconnection)
+                    Receive:
                     #region Receive
                     //If we can receive 
                     //if (m_RtspSocket is not null && m_RtspSocket.Poll(pollTime, SelectMode.SelectRead))
@@ -1106,14 +1106,14 @@ namespace Media.Http
 
                     #endregion
 
-                //Wait for the response while the amount of data received was less than RtspMessage.MaximumLength
-                Wait:
+                    //Wait for the response while the amount of data received was less than RtspMessage.MaximumLength
+                    Wait:
                     #region Waiting for response, Backoff or Retransmit
                     DateTime lastAttempt = DateTime.UtcNow;
 
                     //Wait while
                     while (IsDisposed is false &&//The client connected and is not disposed AND
-                        //There is no last transmitted message assigned AND it has not already been disposed
+                                                 //There is no last transmitted message assigned AND it has not already been disposed
                         (m_LastTransmitted is null || m_LastTransmitted.IsDisposed)
                         //AND the client is still allowed to wait
                         && ++attempt <= m_ResponseTimeoutInterval)
@@ -1170,7 +1170,7 @@ namespace Media.Http
 
                     #endregion
 
-                HandleResponse:
+                    HandleResponse:
                     #region HandleResponse
 
                     //Update counters for any data received.
@@ -1271,9 +1271,9 @@ namespace Media.Http
                         //Could have a remaining property which is set in parse body
 
                         //Http 1.0 without content-length header or with content-length and not yet completed.
-                        if (received > 0 && m_LastTransmitted is not null && 
-                            ((m_LastTransmitted.ContentLength == -1 && m_LastTransmitted.Version >= 1.0) 
-                            || 
+                        if (received > 0 && m_LastTransmitted is not null &&
+                            ((m_LastTransmitted.ContentLength == -1 && m_LastTransmitted.Version >= 1.0)
+                            ||
                             false == m_LastTransmitted.IsComplete))
                         {
                             //Clear received counter
@@ -1309,7 +1309,7 @@ namespace Media.Http
                 }
                 finally
                 {
-                    
+
                     //Determine if the host will close the connection
                     if (m_LastTransmitted is not null && m_LastTransmitted[HttpHeaders.Connection] == "close")
                     {
@@ -1336,7 +1336,7 @@ namespace Media.Http
         public HttpMessage SendChunkedHttpMessage(HttpMessage message)
         {
             //Ensure 1.1
-            if(message.Version < 1.1) message.Version = 1.1;
+            if (message.Version < 1.1) message.Version = 1.1;
 
             //Determine if message had an existing encoding
             string transferEncoding = message.GetHeader(HttpHeaders.TransferEncoding);
@@ -1499,40 +1499,40 @@ namespace Media.Http
 
             //Boundary is always '--' + boundary
 
-        //User-Agent: curl/7.21.2 (x86_64-apple-darwin)
-        //Host: localhost:8080
-        //Accept: */*
-        //Content-Length: 1143
-        //Expect: 100-continue
-        //Content-Type: multipart/form-data; boundary=----------------------------83ff53821b7c
+            //User-Agent: curl/7.21.2 (x86_64-apple-darwin)
+            //Host: localhost:8080
+            //Accept: */*
+            //Content-Length: 1143
+            //Expect: 100-continue
+            //Content-Type: multipart/form-data; boundary=----------------------------83ff53821b7c
 
 
             //Should already be sent by this point, all headers
 
             //Time to send a boundary specified by the Content-Type, possibly a Disposition and then another Content-Type for the streams data
 
-        //------------------------------83ff53821b7c
-        //Content-Disposition: form-data; name="img"; filename="a.png"
-        //Content-Type: application/octet-stream
+            //------------------------------83ff53821b7c
+            //Content-Disposition: form-data; name="img"; filename="a.png"
+            //Content-Type: application/octet-stream
 
-        //?PNG
+            //?PNG
 
-        //IHD?wS??iCCPICC Profilex?T?kA?6n??Zk?x?"IY?hE?6?bk
-        //Y?<ߡ)??????9Nyx?+=?Y"|@5-?M?S?%?@?H8??qR>?׋??inf???O?????b??N?????~N??>?!?
-        //??V?J?p?8?da?sZHO?Ln?}&???wVQ?y?g????E??0
-        // ??
-        //   IDAc????????-IEND?B`?
+            //IHD?wS??iCCPICC Profilex?T?kA?6n??Zk?x?"IY?hE?6?bk
+            //Y?<ߡ)??????9Nyx?+=?Y"|@5-?M?S?%?@?H8??qR>?׋??inf???O?????b??N?????~N??>?!?
+            //??V?J?p?8?da?sZHO?Ln?}&???wVQ?y?g????E??0
+            // ??
+            //   IDAc????????-IEND?B`?
 
             //Stream data sent, output another boundary and possibly a Disposition and then another Content-Type for the streams data
             //This would be a second call
-        
-        //------------------------------83ff53821b7c
-        //Content-Disposition: form-data; name="foo"
-        //bar
+
+            //------------------------------83ff53821b7c
+            //Content-Disposition: form-data; name="foo"
+            //bar
 
             //Third call
 
-        //------------------------------83ff53821b7c--
+            //------------------------------83ff53821b7c--
 
             //Stream data sent, output another boundary and return total sent.
 
@@ -1778,7 +1778,7 @@ namespace Media.Http
 
                                 goto default;
                             }
-                           
+
 
                             //If playing and interleaved stream AND the last transmitted message is NOT null and is NOT Complete then attempt to complete it
                             if (false == IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted))
@@ -1855,7 +1855,7 @@ namespace Media.Http
                         }
                 }
             }
-        }      
+        }
 
         private void ProcessServerSentRequest(HttpMessage m_LastTransmitted)
         {

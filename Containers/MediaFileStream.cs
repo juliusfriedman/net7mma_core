@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 namespace Media.Container
 {
     /// <summary>
@@ -74,15 +74,15 @@ namespace Media.Container
 
             sharedFinalizer = () =>
             {
-                if (false == final) return; 
-                
+                if (false == final) return;
+
                 if (fs is not null)
                 {
-                    fs.Dispose(); 
-                    
+                    fs.Dispose();
+
                     fs = null;
                 }
-                
+
                 if (args is not null) args = null;
 
                 if (sharedFinalizer is not null) sharedFinalizer = null;
@@ -103,16 +103,16 @@ namespace Media.Container
 
                     MediaFileStream created = (MediaFileStream)derivedType.GetConstructor(ConstructorTypes).Invoke(args);
 
-                    using(var rootNode = created.Root)
+                    using (var rootNode = created.Root)
                         if (rootNode is not null && rootNode.IsComplete)
-                    {
-                        args = null;
+                        {
+                            args = null;
 
-                        //Ensure the finalizer can now run.
-                        final = true;
+                            //Ensure the finalizer can now run.
+                            final = true;
 
-                        return created;
-                    }
+                            return created;
+                        }
 
                     //The created MediaFileStream is useless for this type of file.
                     created.Dispose();
@@ -251,7 +251,7 @@ namespace Media.Container
             ////    m_Length = e.Total;
 
             ////};
-            
+
             //Wait for the end of the transaction or the root to be valid
             //Buffering && Root is null
             while (result.IsTransactionDone is false && Root is null) result.AsyncWaitHandle.WaitOne(0);
@@ -278,7 +278,7 @@ namespace Media.Container
             //Start position would be useful here for resuming or chunking downloading
 
             //E.g. for a large file make N readers with offset positions, of N * size, download each part and then write to the result stream when its required
-            
+
             //Static copy to path func
             AfterClose = () =>
             {
@@ -343,7 +343,7 @@ namespace Media.Container
 
         public void RemoveCachingPolicy(NodeAction n)
         {
-            if(m_NodeCachingPolicy is not null) m_NodeCachingPolicy -= n;
+            if (m_NodeCachingPolicy is not null) m_NodeCachingPolicy -= n;
         }
 
         public delegate bool NodeAction(Node n);
@@ -405,12 +405,12 @@ namespace Media.Container
         public override void Close()
         {
             if (IsDisposed) return;
-            
+
             m_Position = m_Length = -1;
-            
+
             base.Close();
-            
-            if(AfterClose is not null) AfterClose();
+
+            if (AfterClose is not null) AfterClose();
 
             FileInfo = null;
         }
@@ -485,7 +485,7 @@ namespace Media.Container
         }
 
         public virtual void RefreshFileInfo(bool updateLength = true)
-        {            
+        {
             //If the FileInfo is not null
             if (FileInfo is not null)
             {
@@ -503,10 +503,11 @@ namespace Media.Container
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
         public virtual byte[] ReadBytes(long count)
         {
-            if (count <= 0) return Media.Common.MemorySegment.EmptyBytes; 
-            byte[] result = new byte[count]; 
-            long i = 0; 
-            /*do*/while ((count -= i += Read(result, (int)i, (int)count)) > 0) ; 
+            if (count <= 0) return Media.Common.MemorySegment.EmptyBytes;
+            byte[] result = new byte[count];
+            long i = 0;
+            /*do*/
+            while ((count -= i += Read(result, (int)i, (int)count)) > 0) ;
             return result;
         }
 
@@ -538,7 +539,7 @@ namespace Media.Container
             {
                 if (position != stream.Seek(position, System.IO.SeekOrigin.Begin)) throw new InvalidOperationException("Unable to obtain the given position");
 
-                int read = 0; while ((count -= read += stream.Read(buffer, read, count)) > 0) ;                
+                int read = 0; while ((count -= read += stream.Read(buffer, read, count)) > 0) ;
 
                 RefreshFileInfo(refreshFileInfo);
 
@@ -646,7 +647,7 @@ namespace Media.Container
     //    public IdentifierTransaction(System.IO.Stream s, byte[] dest, int off, int len)
     //        : base(s, dest, off, len)
     //    {
-            
+
     //    }
     //}
 

@@ -85,6 +85,6 @@ namespace Media.Common.Extensions.DateTime
         public static System.DateTime AddNanoseconds(this System.DateTime self, int nanoSeconds)
         {
             return self.AddTicks((int)System.Math.Round(nanoSeconds / (double)Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerTick));
-        }  
+        }
     }
 }

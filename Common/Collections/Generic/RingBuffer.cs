@@ -125,7 +125,7 @@ namespace Media.Common.Collections.Generic
             {
                 // avoid an arithmetic overflow
                 if (_position == int.MaxValue) _position = _position % Capacity;
-                   
+
                 // add a new item to the current relative position within the
                 // buffer and increase the position
                 _buffer[_position++ % Capacity] = item;

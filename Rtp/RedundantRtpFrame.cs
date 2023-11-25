@@ -18,9 +18,9 @@
 
             if (Common.IDisposedExtensions.IsNullOrDisposed(packet)) yield break;
 
-            int headerOctets = packet.HeaderOctets, 
+            int headerOctets = packet.HeaderOctets,
                 offset = packet.Payload.Offset + headerOctets, startOffset = offset,
-                remaining = packet.Payload.Count - (headerOctets + packet.PaddingOctets), 
+                remaining = packet.Payload.Count - (headerOctets + packet.PaddingOctets),
                 endHeaders = remaining, headersContained = 0;
 
             //If there are not enough bytes for the profile header break.
@@ -75,41 +75,41 @@
             bool marker = packet.Marker;
 
             //Start at the offset in bits of the end of header.
-            if(headersContained > 0) for (int headOffset = startOffset, i = 0, bitOffset = Common.Binary.BytesToBits(ref headOffset); i < headersContained; ++i)
-            {
-                //Read the payloadType out of the header
-                tempPayloadType = (int)Common.Binary.ReadBitsMSB(packet.Payload.Array, Common.Binary.BytesToBits(ref headOffset) + 1, 7);
+            if (headersContained > 0) for (int headOffset = startOffset, i = 0, bitOffset = Common.Binary.BytesToBits(ref headOffset); i < headersContained; ++i)
+                {
+                    //Read the payloadType out of the header
+                    tempPayloadType = (int)Common.Binary.ReadBitsMSB(packet.Payload.Array, Common.Binary.BytesToBits(ref headOffset) + 1, 7);
 
-                //Read the timestamp offset  from the header
-                tempTimestamp = (int)Common.Binary.ReadBitsMSB(packet.Payload.Array, ref bitOffset, 10);
+                    //Read the timestamp offset  from the header
+                    tempTimestamp = (int)Common.Binary.ReadBitsMSB(packet.Payload.Array, ref bitOffset, 10);
 
-                //Read the blockLength from the header
-                tempBlockLen = (int)Common.Binary.ReadBitsMSB(packet.Payload.Array, ref bitOffset, 14);
+                    //Read the blockLength from the header
+                    tempBlockLen = (int)Common.Binary.ReadBitsMSB(packet.Payload.Array, ref bitOffset, 14);
 
-                //If there are less bytes in the payload than remain in the block stop 
-                //if (remaining < tempBlockLen) break;
+                    //If there are less bytes in the payload than remain in the block stop 
+                    //if (remaining < tempBlockLen) break;
 
-                //Get the payload
-                Common.MemorySegment payload = new Common.MemorySegment(packet.Payload.Array, Common.Binary.BitsToBytes(ref bitOffset), tempBlockLen, shouldDispose);
+                    //Get the payload
+                    Common.MemorySegment payload = new Common.MemorySegment(packet.Payload.Array, Common.Binary.BitsToBytes(ref bitOffset), tempBlockLen, shouldDispose);
 
-                //Create the header
-                Rtp.RtpHeader header = new RtpHeader(packet.Version, false, false, marker, tempPayloadType, 0, packet.SynchronizationSourceIdentifier, 
-                    packet.SequenceNumber, 
-                    packet.Timestamp + tempTimestamp, 
-                    shouldDispose);
+                    //Create the header
+                    Rtp.RtpHeader header = new RtpHeader(packet.Version, false, false, marker, tempPayloadType, 0, packet.SynchronizationSourceIdentifier,
+                        packet.SequenceNumber,
+                        packet.Timestamp + tempTimestamp,
+                        shouldDispose);
 
-                //Create the packet
-                RtpPacket result = new RtpPacket(header, payload, shouldDispose);
+                    //Create the packet
+                    RtpPacket result = new RtpPacket(header, payload, shouldDispose);
 
-                //Return the packet
-                yield return result;
+                    //Return the packet
+                    yield return result;
 
-                //Move the offset
-                bitOffset += Common.Binary.BytesToBits(ref tempBlockLen);
-                
-                //Remove the blockLength from the count
-                remaining -= tempBlockLen;
-            }
+                    //Move the offset
+                    bitOffset += Common.Binary.BytesToBits(ref tempBlockLen);
+
+                    //Remove the blockLength from the count
+                    remaining -= tempBlockLen;
+                }
 
             //If there is anymore data it's values are defined in the header of the given packet.
 
@@ -196,7 +196,7 @@
             }
 
             //Write the last header (1 byte with (F)irst bit set and PayloadType
-            
+
             //Get the packet
             packet = packets[packetIndex];
 
@@ -254,7 +254,7 @@
                 //}
 
                 //For now just call Depacketize with the subordinate
-                    //Whoever reads the data in those depacketized packets would use the GetPackets( overload ) which keeps this efficent.
+                //Whoever reads the data in those depacketized packets would use the GetPackets( overload ) which keeps this efficent.
                 base.Depacketize(subordinate);
             }
         }

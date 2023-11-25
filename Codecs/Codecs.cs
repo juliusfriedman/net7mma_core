@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Codec
 {
@@ -24,7 +21,7 @@ namespace Media.Codec
 
         public static Media.Codec.Interfaces.ICodec GetCodec(string name)
         {
-            return m_RegisteredCodecs.FirstOrDefault(c=> string.Compare(c.Name, name, true) is 0);
+            return m_RegisteredCodecs.FirstOrDefault(c => string.Compare(c.Name, name, true) is 0);
         }
 
         public static bool TryRegisterCodec(Media.Codec.Interfaces.ICodec codec)

@@ -35,17 +35,13 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net;
 
 namespace Media.Rtsp.Server
 {
     /// <summary>
     /// A Source Stream which is a facade` to another.
     /// </summary>
-    public class ChildMedia: SourceMedia
+    public class ChildMedia : SourceMedia
     {
         internal SourceMedia m_Parent;
 

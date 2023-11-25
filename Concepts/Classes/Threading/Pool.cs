@@ -79,7 +79,7 @@ namespace Media.Concepts.Classes.Threading
             internal T[] Lessee;
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            public Lease(Pool<T> lessor, int id, int emure, T[] lessee)                
+            public Lease(Pool<T> lessor, int id, int emure, T[] lessee)
             {
                 Lessor = lessor;
 
@@ -137,7 +137,7 @@ namespace Media.Concepts.Classes.Threading
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get { return Emurality >= 0; }
             }
-        }   
+        }
 
         #endregion
 
@@ -161,10 +161,10 @@ namespace Media.Concepts.Classes.Threading
             if (size < 0) pool.m_Pool = (T[][])System.Array.CreateInstance(ElementType, new int[] { -size, 0 }, new int[] { size, 0 });
             else pool.m_Pool = new T[size][];
 
-            if(pool.m_DisableNull) for (int i = size - 1; i >= 0; --i)
-            {
-                pool.m_Pool[i] = EmptyArray;
-            }
+            if (pool.m_DisableNull) for (int i = size - 1; i >= 0; --i)
+                {
+                    pool.m_Pool[i] = EmptyArray;
+                }
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -247,7 +247,7 @@ namespace Media.Concepts.Classes.Threading
         {
             get
             {
-                if(Slots is 0) return -(Whole * m_Leases.Count);
+                if (Slots is 0) return -(Whole * m_Leases.Count);
                 else if (m_Leases.Count is 0) return -(Whole * Slots);
                 return (m_Leases.Count / Slots) / Whole;
             }
@@ -314,7 +314,7 @@ namespace Media.Concepts.Classes.Threading
 
         public T[] Get(System.Threading.Thread access, int size)
         {
-            return Get ((access ?? System.Threading.Thread.CurrentThread).ManagedThreadId, size);
+            return Get((access ?? System.Threading.Thread.CurrentThread).ManagedThreadId, size);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -364,12 +364,12 @@ namespace Media.Concepts.Classes.Threading
 
         public void EnsureCapacity(int id, int size)
         {
-            Get (id, size);
+            Get(id, size);
         }
 
         public void EnsureCapacity(System.Threading.Thread access, int size)
         {
-            Get (access, size);
+            Get(access, size);
         }
 
         System.Comparison<T[]> Sorter;
@@ -391,7 +391,7 @@ namespace Media.Concepts.Classes.Threading
 
             EnsureCapacity(index);
 
-            m_Pool [index] = data;
+            m_Pool[index] = data;
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -410,13 +410,13 @@ namespace Media.Concepts.Classes.Threading
                 return result;
             }
 
-        Null:
+            Null:
             return null;
         }
 
         public T[] FindOrCreate(int size, System.Threading.Thread access)
         {
-            return Find (size) ?? Get (access, size);
+            return Find(size) ?? Get(access, size);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -438,7 +438,7 @@ namespace Media.Concepts.Classes.Threading
             //}
 
             //Ensure the capacity of pool with respect to the thread
-            EnsureCapacity (id);
+            EnsureCapacity(id);
 
             Lease lease = new Lease(this, id, /*emure * */size, Get(id, size));
 
@@ -478,7 +478,7 @@ namespace Media.Concepts.Classes.Threading
 
         #endregion
     }
-    
+
     //Todo
     ///// <summary>
     ///// Extends Pool to have only a multidimensional array

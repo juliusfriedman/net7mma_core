@@ -71,7 +71,7 @@ namespace Media.Common
         {
             MemorySegment result = new MemorySegment(count, shouldDispose);
 
-            if(source is not null) System.Array.Copy(source, offset, result.m_Array, 0, count);
+            if (source is not null) System.Array.Copy(source, offset, result.m_Array, 0, count);
 
             return result;
         }
@@ -101,7 +101,7 @@ namespace Media.Common
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return (int)m_Length; }
-            
+
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             internal protected set { m_Length = value; }
         }
@@ -113,7 +113,7 @@ namespace Media.Common
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return m_Length; }
-            
+
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             internal protected set { m_Length = value; }
         }
@@ -152,7 +152,7 @@ namespace Media.Common
             get { return m_Array; }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            internal protected set { m_Array = value; } 
+            internal protected set { m_Array = value; }
         }
 
         #endregion
@@ -162,19 +162,19 @@ namespace Media.Common
         /// <summary>
         /// Should never run unless immediately finalized.
         /// </summary>
-//        ~MemorySegment()
-//        {
-//            m_Array = null; 
-            
-//            m_Length = 0;
+        //        ~MemorySegment()
+        //        {
+        //            m_Array = null; 
 
-//            Dispose(ShouldDispose = true);
+        //            m_Length = 0;
 
-//#if DEBUG
-//            System.Diagnostics.Debug.WriteLine(ToString() + "@Finalize Completed");
-//#endif
-//        }
-        
+        //            Dispose(ShouldDispose = true);
+
+        //#if DEBUG
+        //            System.Diagnostics.Debug.WriteLine(ToString() + "@Finalize Completed");
+        //#endif
+        //        }
+
         #region Chained
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -182,7 +182,7 @@ namespace Media.Common
             : base(shouldDispose)
         {
             if (reference is null) throw new ArgumentNullException("reference");
-            
+
             m_Array = reference;
 
             m_Length = m_Array.LongLength;
@@ -216,7 +216,7 @@ namespace Media.Common
         /// <param name="size"></param>
         /// <param name="shouldDispose"></param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public MemorySegment(long size, bool shouldDispose = true) 
+        public MemorySegment(long size, bool shouldDispose = true)
             : base(shouldDispose)
         {
             if (size < 0) throw new ArgumentException(nameof(size));
@@ -628,7 +628,7 @@ namespace Media.Common
                     //Continue
                     continue;
                 }
-                
+
                 //Reset the count, the match needs to be found in order.
                 needed = count;
 

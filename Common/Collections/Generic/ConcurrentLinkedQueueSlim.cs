@@ -38,7 +38,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
-using Media.Common.Extensions.Generic.Dictionary;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,7 +69,7 @@ namespace Media.Common.Collections.Generic
             public T Value;
 
             public Node Next;
-                     
+
             //Create and have no value, Deleted, Has Value
             //Flags, Allocated, Deleted, Stored, Native
 
@@ -108,11 +107,11 @@ namespace Media.Common.Collections.Generic
 
         //    System.Type TypeOfLinkedListNodeT = typeof(LinkedListNode<T>);
 
-            
+
 
         //    //or the ctor
         //    System.Collections.Generic.IEnumerable<System.Reflection.ConstructorInfo> ctors = System.Reflection.IntrospectionExtensions.GetTypeInfo(TypeOfLinkedListNodeT).DeclaredConstructors;
-            
+
         //    Constructor = ctors.LastOrDefault();
         //    //ctors[0].Invoke(new object[] { list, value });
 
@@ -211,7 +210,7 @@ namespace Media.Common.Collections.Generic
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return System.Threading.Interlocked.Read(ref m_Count); }
         }
-        
+
         /// <summary>
         /// Indicates if no elements are contained.
         /// </summary>
@@ -229,7 +228,7 @@ namespace Media.Common.Collections.Generic
         /// Constructs a LinkedQueue
         /// </summary>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        
+
         public ConcurrentLinkedQueueSlim()
         {
 
@@ -345,9 +344,9 @@ namespace Media.Common.Collections.Generic
             //else Last = Last.Next = new Node(ref t);
 
             switch (System.Threading.Interlocked.Read(ref m_Count))
-                {
-                    case Common.Binary.LongZero: Last = First = new Node(ref t); break;
-                    default: Last = Last.Next = new Node(ref t); break;
+            {
+                case Common.Binary.LongZero: Last = First = new Node(ref t); break;
+                default: Last = Last.Next = new Node(ref t); break;
                     //default: Last = System.Threading.Interlocked.Exchange<Node>(ref Last.Next, new Node(ref t)) ?? Last.Next; break;
             }
 
@@ -595,12 +594,12 @@ namespace Media.UnitTests
                         System.Console.WriteLine("Enumerate Count: " + LinkedQueue.Count);
 
                         long peek = 0;
-                        
-                        if(LinkedQueue.TryPeek(ref peek)) System.Console.WriteLine("Enumerate TryPeek: " + peek);
+
+                        if (LinkedQueue.TryPeek(ref peek)) System.Console.WriteLine("Enumerate TryPeek: " + peek);
 
                         if (false == LinkedQueue.IsEmpty)
                         {
-                            if(LinkedQueue.Last is not null)
+                            if (LinkedQueue.Last is not null)
                                 System.Console.WriteLine("Enumerate Last: " + LinkedQueue.Last.Value);
 
                             if (LinkedQueue.First is not null)
@@ -652,7 +651,8 @@ namespace Media.UnitTests
 
             System.Threading.Thread[] enumerateThreads = new System.Threading.Thread[ThreadCount];
 
-            Func<System.Threading.Thread> createEnumerateThread = () => {
+            Func<System.Threading.Thread> createEnumerateThread = () =>
+            {
 
                 if (enumerateCount >= ThreadCount) enumerateCount = 0;
 
@@ -675,7 +675,7 @@ namespace Media.UnitTests
                             System.Console.WriteLine(System.Threading.Thread.CurrentThread.Name + "=> Last = " + System.Threading.Thread.VolatileRead(ref LinkedQueue.Last.Value));
                         }
                     }
-                    catch(Exception)
+                    catch (Exception)
                     {
                         System.Console.WriteLine(System.Threading.Thread.CurrentThread.Name + " => Exception");
                     }
@@ -783,7 +783,7 @@ namespace Media.UnitTests
             }
 
             System.Linq.ParallelEnumerable.ForAll(enqueueThreads.AsParallel(), t => t.Start());
-            
+
             System.Linq.ParallelEnumerable.ForAll(dequeueThreads.AsParallel(), t => t.Start());
 
             while (stackLevelCountOut is 0 && statLevelCountIn is 0) sharedResetEvent.WaitOne(0);
@@ -841,7 +841,7 @@ namespace Media.UnitTests
             {
                 try
                 {
-                                                                                    //Multiply ThreadCount by 100
+                    //Multiply ThreadCount by 100
                     if (true == LinkedQueue.IsEmpty && false == (LastInputOutput == ThreadCount * (((10 >> 3) << 7) - 28))) throw new System.Exception("IsEmpty");
                 }
                 catch

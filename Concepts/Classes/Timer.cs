@@ -87,7 +87,7 @@ namespace Media.Concepts.Classes
         //
 
         readonly internal Clock m_Clock = new Clock();
-        
+
         readonly internal Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<long> Producer;
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -104,11 +104,11 @@ namespace Media.Concepts.Classes
 
                 long sample = 0;
 
-            AfterSample:
+                AfterSample:
 
                 try
                 {
-                Top:
+                    Top:
                     System.Threading.Thread.CurrentThread.Priority = System.Threading.ThreadPriority.Highest;
 
                     /*do */
@@ -154,9 +154,9 @@ namespace Media.Concepts.Classes
             Event.Start();
 
             //to ensure the slice offset is different, e.g. more bias
-        //m_Clock.NanoSleep(0);
+            //m_Clock.NanoSleep(0);
 
-        Approximate:
+            Approximate:
 
             ulong approximate = Common.Binary.Clamp((ulong)(m_Clock.AverageOperationsPerTick / (Frequency.Ticks + 1)), (ulong)1, ulong.MaxValue), x = 0;
 
@@ -168,7 +168,7 @@ namespace Media.Concepts.Classes
 
                 unchecked
                 {
-                Start:
+                    Start:
 
                     if (IsDisposed) return;
 
@@ -248,8 +248,8 @@ namespace Media.Concepts.Classes
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public Timer(System.TimeSpan frequency, bool shouldDispose = true) 
-            :base(shouldDispose)
+        public Timer(System.TimeSpan frequency, bool shouldDispose = true)
+            : base(shouldDispose)
         {
             m_Frequency = frequency;
 
@@ -291,7 +291,7 @@ namespace Media.Concepts.Classes
                     m_Counter.Join(System.Threading.Timeout.InfiniteTimeSpan);  //++m_Ops;
                 }
             }
-            
+
             System.Threading.Thread.CurrentThread.Priority = previous;
         }
 
@@ -318,8 +318,8 @@ namespace Media.Concepts.Classes
             if (IsDisposed || disposing is false || ShouldDispose is false) return;
 
             base.Dispose(disposing);
-            
-            Stop(); 
+
+            Stop();
 
             Tick = null;
         }
@@ -334,7 +334,7 @@ namespace Media.UnitTests
         public void TestForOneTick()
         {
             //Create a Timer that will elapse every `OneMicrosecond`
-             using (Media.Concepts.Classes.Timer t = new Media.Concepts.Classes.Timer(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick))
+            using (Media.Concepts.Classes.Timer t = new Media.Concepts.Classes.Timer(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick))
             {
                 int count = 0;
 
@@ -362,7 +362,7 @@ namespace Media.UnitTests
                 System.Console.WriteLine("Started: " + t.m_Started.ToString("MM/dd/yyyy hh:mm:ss.ffffff tt"));
 
                 //Sleep the frequency
-                 System.TimeSpan s = new System.TimeSpan(((long)t.m_Ticks + testSw.ElapsedTicks));
+                System.TimeSpan s = new System.TimeSpan(((long)t.m_Ticks + testSw.ElapsedTicks));
 
                 while (s < t.Frequency)
                 {

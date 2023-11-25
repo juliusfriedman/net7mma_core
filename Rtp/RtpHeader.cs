@@ -38,11 +38,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
+using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Media.Common;
 
 #endregion
 
@@ -451,7 +450,7 @@ namespace Media.Rtp
         /// <param name="shouldDispose">indicates if <see cref="SegmentToLast6Bytes"/> will disposed when <see cref="Dispose"/> is called</param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public RtpHeader(int version, bool padding, bool extension, bool marker, int payloadTypeBits, int contributingSourceCount, int ssrc, int sequenceNumber, int timestamp, bool shouldDispose = true)
-            :this(version, padding, extension, shouldDispose)
+            : this(version, padding, extension, shouldDispose)
         {
             //Set the marker bit
             Marker = marker;
@@ -507,7 +506,7 @@ namespace Media.Rtp
             if (IsDisposed) return 0;
 
             int copied = 0;
-            
+
             copied += First16Bits.CopyTo(dest, offset);
 
             offset += copied;

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Text;
 namespace Media.Http
 {
@@ -59,7 +58,7 @@ namespace Media.Http
         public const string RequestStatus = " Request-Status";
         public const string Session = "Session";
         public const string Server = "Server";
-        
+
         //https://www.ietf.org/rfc/rfc2616.txt @ 14.39 TE
         public const string TE = "TE"; //Extension Transfer Encodings..
 
@@ -106,7 +105,7 @@ namespace Media.Http
 
             public const string MinFresh = min_fresh;
 
-            internal const string min_stale = "min-stale";            
+            internal const string min_stale = "min-stale";
 
             public const string MinStale = min_stale;
 
@@ -216,7 +215,7 @@ namespace Media.Http
                         //If there is a Quality of Protection
                         if (qopPart is not null)
                         {
-                            if (qopPart .Equals(Http.HeaderFields.Authorization.Attributes.qop, StringComparison.OrdinalIgnoreCase))
+                            if (qopPart.Equals(Http.HeaderFields.Authorization.Attributes.qop, StringComparison.OrdinalIgnoreCase))
                             {
                                 HA2 = Cryptography.MD5.GetHash(encoding.GetBytes(string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", methodString, uriPart)));
                                 //The MD5 hash of the combined HA1 result, server nonce (nonce), request counter (nc), client nonce (cnonce), quality of protection code (qop) and HA2 result is calculated. The result is the "response" value provided by the client.
@@ -299,24 +298,24 @@ namespace Media.Http
             //Digest realm="testrealm@host.com",\r\n  \t qop="auth,auth-int",   nonce="dcd98b7102dd2f0e8b11d0f600bfb0c093", opaque="5ccc069c403ebaf9f0171e9517f40e41"
             string[] majors = SplitSpace(input);
 
-            if(count > 0) foreach (string part in majors)
-            {
-                if (string.IsNullOrWhiteSpace(part)) continue;
+            if (count > 0) foreach (string part in majors)
+                {
+                    if (string.IsNullOrWhiteSpace(part)) continue;
 
-                string[] parts = SplitEqual(part);
+                    string[] parts = SplitEqual(part);
 
-                if (parts.Length > 1)
-                    result.Add(parts[0], parts[1]);
-                else
-                    result.Add(parts[0], string.Empty);
+                    if (parts.Length > 1)
+                        result.Add(parts[0], parts[1]);
+                    else
+                        result.Add(parts[0], string.Empty);
 
-                if (--count <= 0) break;
-            }
+                    if (--count <= 0) break;
+                }
 
             return result;
         }
     }
 
-    
+
 
 }

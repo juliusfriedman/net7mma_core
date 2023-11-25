@@ -138,7 +138,7 @@ namespace Media.Concepts.Classes
 
                             //    //return taken.Add(new System.TimeSpan((long)Media.Common.Extensions.Math.MathExtensions.Clamp(Units, overage, maxCount)));
                             //}
-                            
+
                             //return taken.Add(new System.TimeSpan(Units));
                         }
                 }
@@ -204,123 +204,123 @@ namespace Media.UnitTests
 
             //Create a Timer that will elapse every `OneMicrosecond`
             for (int i = 0; i < 250; ++i) using (Media.Concepts.Classes.Stopwatch sw = new Media.Concepts.Classes.Stopwatch())
-            {
-                var started = System.DateTime.UtcNow;
-
-                System.Console.WriteLine("Started: " + started.ToString("MM/dd/yyyy hh:mm:ss.ffffff tt"));
-
-                //Define some amount of time
-                System.TimeSpan sleepTime = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond;
-
-                System.Diagnostics.Stopwatch testSw = new System.Diagnostics.Stopwatch();
-
-                //Start
-                testSw.Start();
-
-                //Start
-                sw.Start();
-
-                //while (sw.Elapsed.Ticks < sleepTime.Ticks - (Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick + Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick).Ticks)
-                //{
-                //    //sw.Timer.m_Clock.NanoSleep(0); //System.Threading.Thread.SpinWait(0);
-
-                //    System.Console.WriteLine(sw.ElapsedNanoseconds);
-
-                //}
-
-                while (double.IsNaN(sw.ElapsedNanoseconds))
                 {
-                    sw.Timer.m_Clock.NanoSleep(0);
-                    //sw.Timer.m_Counter.Join(0);
+                    var started = System.DateTime.UtcNow;
+
+                    System.Console.WriteLine("Started: " + started.ToString("MM/dd/yyyy hh:mm:ss.ffffff tt"));
+
+                    //Define some amount of time
+                    System.TimeSpan sleepTime = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond;
+
+                    System.Diagnostics.Stopwatch testSw = new System.Diagnostics.Stopwatch();
+
+                    //Start
+                    testSw.Start();
+
+                    //Start
+                    sw.Start();
+
+                    //while (sw.Elapsed.Ticks < sleepTime.Ticks - (Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick + Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick).Ticks)
+                    //{
+                    //    //sw.Timer.m_Clock.NanoSleep(0); //System.Threading.Thread.SpinWait(0);
+
+                    //    System.Console.WriteLine(sw.ElapsedNanoseconds);
+
+                    //}
+
+                    while (double.IsNaN(sw.ElapsedNanoseconds))
+                    {
+                        sw.Timer.m_Clock.NanoSleep(0);
+                        //sw.Timer.m_Counter.Join(0);
+                    }
+
+                    //while (sw.ElapsedNanoseconds is 0.0 && sw.Elapsed == System.TimeSpan.Zero)
+                    //{
+                    //    sw.Timer.m_Clock.NanoSleep(0);
+
+                    //    System.Console.WriteLine(sw.ElapsedNanoseconds);
+                    //}
+
+                    //Sleep the desired amount
+                    //System.Threading.Thread.Sleep(sleepTime);
+
+                    //Stop
+                    testSw.Stop();
+
+                    //Stop
+                    sw.Stop();
+
+                    System.Console.WriteLine(sw.ElapsedNanoseconds);
+
+                    System.Console.WriteLine(sw.Units);
+
+                    var finished = System.DateTime.UtcNow;
+
+                    var taken = finished - started;
+
+                    var cc = System.Console.ForegroundColor;
+
+                    System.Console.WriteLine("Finished: " + finished.ToString("MM/dd/yyyy hh:mm:ss.ffffff tt"));
+
+                    System.Console.WriteLine("Sleep Time: " + sleepTime.ToString());
+
+                    System.Console.WriteLine("Real Taken Total: " + taken.ToString());
+
+                    if (taken > sleepTime)
+                    {
+                        System.Console.ForegroundColor = System.ConsoleColor.Red;
+                        System.Console.WriteLine("Missed by: " + (taken - sleepTime));
+                    }
+                    else
+                    {
+                        System.Console.ForegroundColor = System.ConsoleColor.Green;
+                        System.Console.WriteLine("Still have: " + (sleepTime - taken));
+                    }
+
+                    System.Console.ForegroundColor = cc;
+
+                    System.Console.WriteLine("Real Taken msec Total: " + taken.TotalMilliseconds.ToString());
+
+                    System.Console.WriteLine("Real Taken sec Total: " + taken.TotalSeconds.ToString());
+
+                    System.Console.WriteLine("Real Taken μs Total: " + Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(taken).ToString());
+
+                    System.Console.WriteLine("Managed Taken Total: " + sw.Elapsed.ToString());
+
+                    System.Console.WriteLine("Diagnostic Taken Total: " + testSw.Elapsed.ToString());
+
+                    System.Console.WriteLine("Diagnostic Elapsed Seconds  Total: " + ((testSw.ElapsedTicks / (double)System.Diagnostics.Stopwatch.Frequency)));
+
+                    //Write the rough amount of time taken in  micro seconds
+                    System.Console.WriteLine("Managed Time Estimated Taken: " + sw.ElapsedMicroseconds + "μs");
+
+                    //Write the rough amount of time taken in  micro seconds
+                    System.Console.WriteLine("Diagnostic Time Estimated Taken: " + Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(testSw.Elapsed) + "μs");
+
+                    System.Console.WriteLine("Managed Time Estimated Taken: " + sw.ElapsedMilliseconds);
+
+                    System.Console.WriteLine("Diagnostic Time Estimated Taken: " + testSw.ElapsedMilliseconds);
+
+                    System.Console.WriteLine("Managed Time Estimated Taken: " + sw.ElapsedSeconds);
+
+                    System.Console.WriteLine("Diagnostic Time Estimated Taken: " + testSw.Elapsed.TotalSeconds);
+
+                    if (sw.Elapsed < testSw.Elapsed)
+                    {
+                        System.Console.WriteLine("Faster than Diagnostic StopWatch");
+                        l.Add(new System.Tuple<bool, System.TimeSpan, System.TimeSpan>(true, sw.Elapsed, testSw.Elapsed));
+                    }
+                    else if (sw.Elapsed > testSw.Elapsed)
+                    {
+                        System.Console.WriteLine("Slower than Diagnostic StopWatch");
+                        l.Add(new System.Tuple<bool, System.TimeSpan, System.TimeSpan>(false, sw.Elapsed, testSw.Elapsed));
+                    }
+                    else
+                    {
+                        System.Console.WriteLine("Equal to Diagnostic StopWatch");
+                        l.Add(new System.Tuple<bool, System.TimeSpan, System.TimeSpan>(true, sw.Elapsed, testSw.Elapsed));
+                    }
                 }
-
-                //while (sw.ElapsedNanoseconds is 0.0 && sw.Elapsed == System.TimeSpan.Zero)
-                //{
-                //    sw.Timer.m_Clock.NanoSleep(0);
-
-                //    System.Console.WriteLine(sw.ElapsedNanoseconds);
-                //}
-
-                //Sleep the desired amount
-                //System.Threading.Thread.Sleep(sleepTime);
-
-                //Stop
-                testSw.Stop();
-
-                //Stop
-                sw.Stop();
-
-                System.Console.WriteLine(sw.ElapsedNanoseconds);
-
-                System.Console.WriteLine(sw.Units);
-
-                var finished = System.DateTime.UtcNow;
-
-                var taken = finished - started;
-
-                var cc = System.Console.ForegroundColor;
-
-                System.Console.WriteLine("Finished: " + finished.ToString("MM/dd/yyyy hh:mm:ss.ffffff tt"));
-
-                System.Console.WriteLine("Sleep Time: " + sleepTime.ToString());
-
-                System.Console.WriteLine("Real Taken Total: " + taken.ToString());
-
-                if (taken > sleepTime) 
-                {
-                    System.Console.ForegroundColor = System.ConsoleColor.Red;
-                    System.Console.WriteLine("Missed by: " + (taken - sleepTime));
-                }
-                else
-                {
-                    System.Console.ForegroundColor = System.ConsoleColor.Green;
-                    System.Console.WriteLine("Still have: " + (sleepTime - taken));
-                }
-
-                System.Console.ForegroundColor = cc;
-
-                System.Console.WriteLine("Real Taken msec Total: " + taken.TotalMilliseconds.ToString());
-
-                System.Console.WriteLine("Real Taken sec Total: " + taken.TotalSeconds.ToString());
-
-                System.Console.WriteLine("Real Taken μs Total: " + Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(taken).ToString());
-
-                System.Console.WriteLine("Managed Taken Total: " + sw.Elapsed.ToString());
-
-                System.Console.WriteLine("Diagnostic Taken Total: " + testSw.Elapsed.ToString());
-
-                System.Console.WriteLine("Diagnostic Elapsed Seconds  Total: " + ((testSw.ElapsedTicks / (double)System.Diagnostics.Stopwatch.Frequency)));
-
-                //Write the rough amount of time taken in  micro seconds
-                System.Console.WriteLine("Managed Time Estimated Taken: " + sw.ElapsedMicroseconds + "μs");
-
-                //Write the rough amount of time taken in  micro seconds
-                System.Console.WriteLine("Diagnostic Time Estimated Taken: " + Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(testSw.Elapsed) + "μs");
-
-                System.Console.WriteLine("Managed Time Estimated Taken: " + sw.ElapsedMilliseconds);
-
-                System.Console.WriteLine("Diagnostic Time Estimated Taken: " + testSw.ElapsedMilliseconds);
-
-                System.Console.WriteLine("Managed Time Estimated Taken: " + sw.ElapsedSeconds);
-
-                System.Console.WriteLine("Diagnostic Time Estimated Taken: " + testSw.Elapsed.TotalSeconds);
-
-                if (sw.Elapsed < testSw.Elapsed)
-                {
-                    System.Console.WriteLine("Faster than Diagnostic StopWatch");
-                    l.Add(new System.Tuple<bool, System.TimeSpan, System.TimeSpan>(true, sw.Elapsed, testSw.Elapsed));
-                }
-                else if (sw.Elapsed > testSw.Elapsed)
-                {
-                    System.Console.WriteLine("Slower than Diagnostic StopWatch");
-                    l.Add(new System.Tuple<bool, System.TimeSpan, System.TimeSpan>(false, sw.Elapsed, testSw.Elapsed));
-                }
-                else
-                {
-                    System.Console.WriteLine("Equal to Diagnostic StopWatch");
-                    l.Add(new System.Tuple<bool, System.TimeSpan, System.TimeSpan>(true, sw.Elapsed, testSw.Elapsed));
-                }
-            }
 
             int w = 0, f = 0;
 

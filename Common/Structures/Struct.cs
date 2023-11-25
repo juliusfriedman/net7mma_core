@@ -203,7 +203,7 @@ namespace Media.Common.Structures
 
         //public static ToString<IStruct> CreateString(ref IStruct structure)
         //{
-            //return new ToString<IStruct>(ref structure);
+        //return new ToString<IStruct>(ref structure);
         //}
     }
 
@@ -220,7 +220,7 @@ namespace Media.Common.Structures
         /// <see cref="default"/> of <see cref="Struct"/>
         /// </summary>
         public static readonly Struct DefaultStruct = default(Struct);
-        
+
         /// <summary>
         /// <see cref="DefaultStruct"/> <see cref="Object.ToString"/>
         /// </summary>

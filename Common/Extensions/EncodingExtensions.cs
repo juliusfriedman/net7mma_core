@@ -252,7 +252,7 @@ namespace Media.Common.Extensions.Encoding
             bool sawDelimit = false;
 
             //Make the builder
-            builder = new System.Text.StringBuilder();            
+            builder = new System.Text.StringBuilder();
 
             //Use the BinaryReader on the stream to ensure ReadChar reads in the correct size
             //This prevents manual conversion from byte to char and uses the encoding's code page.
@@ -300,7 +300,7 @@ namespace Media.Common.Extensions.Encoding
                 }
             }
 
-        Done:
+            Done:
 
             if (builder is null)
             {
@@ -379,12 +379,12 @@ namespace Media.Common.Extensions.Encoding
         /// <returns>The encoded data.</returns>
         public static char[] GetChars(this System.Text.Encoding encoding, params byte[] toEncode)
         {
-            if(toEncode is null) throw new ArgumentNullException("toEncode");
+            if (toEncode is null) throw new ArgumentNullException("toEncode");
 
             //int firstDimension = toEncode.Rank -1;
 
             //get the length
-            int toEncodeLength = toEncode.GetUpperBound(0); 
+            int toEncodeLength = toEncode.GetUpperBound(0);
 
             //If 0 then return the empty char array
             if (toEncodeLength is 0) return EmptyChar;

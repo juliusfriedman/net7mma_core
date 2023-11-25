@@ -38,11 +38,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
+using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using Media.Common;
 
 #endregion
 namespace Media.Rtcp
@@ -67,18 +66,18 @@ namespace Media.Rtcp
         /// <param name="payloadType">The optional <see cref="RtcpPacket.PayloadType"/> of all packets</param>
         /// <param name="ssrc">The optional <see cref="RtcpPacket.SynchronizationSourceIdentifier"/> of all packets</param>
         /// <returns>A pointer to each packet found</returns>
-        public static IEnumerable<RtcpPacket> GetPackets(byte[] array, int offset, int count, 
+        public static IEnumerable<RtcpPacket> GetPackets(byte[] array, int offset, int count,
             int version = 2, //Todo, should possibly be Enumerable
             int? payloadType = null, //Todo, should be Enumerable
             int? ssrc = null, //Todo, should be Enumerable
             bool shouldDispose = true)
         {
             //array.GetLowerBound(0) for VB, UpperBound(0) is then the index of the last element
-            int lowerBound = 0, upperBound = array.Length; 
+            int lowerBound = 0, upperBound = array.Length;
 
             if (offset < lowerBound || offset > upperBound) throw new ArgumentOutOfRangeException("index", "Must refer to an accessible position in the given array");
 
-            if (count <= lowerBound) yield break;            
+            if (count <= lowerBound) yield break;
 
             if (count > upperBound) throw new ArgumentOutOfRangeException("count", "Must refer to an accessible position in the given array");
 
@@ -92,7 +91,7 @@ namespace Media.Rtcp
             {
                 //Get the header of the packet to verify if it is wanted or not
                 using var header = new RtcpHeader(new Common.MemorySegment(array, offset, remains, shouldDispose), shouldDispose);
-                
+
                 //Determine how long the header was
                 int headerSize = header.Size;
 
@@ -205,7 +204,7 @@ namespace Media.Rtcp
                         return;
                     }
             }
-        }        
+        }
 
         /// <summary>
         /// Creates a RtcpPacket instance from an existing RtcpHeader and payload.
@@ -224,7 +223,7 @@ namespace Media.Rtcp
 
             Header = header;
 
-            Payload = payload;            
+            Payload = payload;
         }
 
         /// <summary>
@@ -254,7 +253,7 @@ namespace Media.Rtcp
                 case ushort.MinValue:// 0 + 1 = 1 * 4 = 4, header only.???
                     {
                         Payload = new MemorySegment(0, shouldDispose);
-                        
+
                         m_OwnedOctets = Payload.Array;
 
                         return;
@@ -282,8 +281,8 @@ namespace Media.Rtcp
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public RtcpPacket(byte[] buffer, int offset, bool shouldDispose = true) 
-            :this (buffer, offset, buffer.Length - offset, shouldDispose)
+        public RtcpPacket(byte[] buffer, int offset, bool shouldDispose = true)
+            : this(buffer, offset, buffer.Length - offset, shouldDispose)
         {
 
 
@@ -301,10 +300,10 @@ namespace Media.Rtcp
         /// <param name="lengthInWords">Sets <see cref="RtcpHeader.LengthInWordsMinusOne"/></param>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public RtcpPacket(int version, int payloadType, int padding, int ssrc, int blockCount, int lengthInWords, int blockSize, int extensionSize, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             //If the padding is greater than allow throw an overflow exception
-            if (padding < 0 || padding > byte.MaxValue) throw Binary.CreateOverflowException("padding", padding, byte.MinValue.ToString(), byte.MaxValue.ToString());            
+            if (padding < 0 || padding > byte.MaxValue) throw Binary.CreateOverflowException("padding", padding, byte.MinValue.ToString(), byte.MaxValue.ToString());
 
             extensionSize = Binary.MachineWordsToBytes(Binary.BytesToMachineWords(extensionSize));
 
@@ -348,14 +347,14 @@ namespace Media.Rtcp
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public RtcpPacket(int version, int payloadType, int padding, int ssrc, int lengthInWords, int blockCount, bool shouldDispose = true)
-            :this(version, payloadType, padding, ssrc, blockCount, lengthInWords, 0, 0, shouldDispose)
+            : this(version, payloadType, padding, ssrc, blockCount, lengthInWords, 0, 0, shouldDispose)
         {
-            
+
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public RtcpPacket(int version, int payloadType, int padding, int blockCount, int ssrc, int lengthInWords, byte[] payload, int index, int count, bool shouldDispose = true)
-            :this(version, payloadType, padding, ssrc, blockCount, lengthInWords, shouldDispose)
+            : this(version, payloadType, padding, ssrc, blockCount, lengthInWords, shouldDispose)
         {
             if (count is 0) return;
 
@@ -559,7 +558,7 @@ namespace Media.Rtcp
         /// If more then 255 octets of padding would be present as a result of this call then no padding is added.
         /// </summary>
         /// <param name="paddingAmount">The amount of padding create</param>
-        internal protected virtual void SetPadding(int paddingAmount) 
+        internal protected virtual void SetPadding(int paddingAmount)
         {
             throw new NotImplementedException();
 
@@ -588,7 +587,7 @@ namespace Media.Rtcp
 
             if (newBytes <= 0) return;
 
-           if (m_OwnedOctets is null)
+            if (m_OwnedOctets is null)
             {
                 m_OwnedOctets = octets.Skip(offset).Take(newBytes).ToArray();
 
@@ -624,7 +623,7 @@ namespace Media.Rtcp
             }
 
             //Set the length in words minus one in the header
-            if(setLength) SetLengthInWordsMinusOne();
+            if (setLength) SetLengthInWordsMinusOne();
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
@@ -679,20 +678,20 @@ namespace Media.Rtcp
         /// <summary>
         /// Gets the data in the <see cref="Payload"/> of the RtcpPacket inluding any <see cref="ExtensionData"/> bot not any <see cref="PaddingOctets"/> if the packet <see cref="IsComplete"/>.
         /// </summary>
-         public IEnumerable<byte> RtcpData
-         {
-             get
-             {
-                 if (IsDisposed || Payload.Count is 0) return Media.Common.MemorySegment.Empty;
+        public IEnumerable<byte> RtcpData
+        {
+            get
+            {
+                if (IsDisposed || Payload.Count is 0) return Media.Common.MemorySegment.Empty;
 
-                 //return Payload.Take(Payload.Count - PaddingOctets);
+                //return Payload.Take(Payload.Count - PaddingOctets);
 
-                 return new Common.MemorySegment(Payload.Array, Payload.Offset, Payload.Count - PaddingOctets);
-             }
-         }
+                return new Common.MemorySegment(Payload.Array, Payload.Offset, Payload.Count - PaddingOctets);
+            }
+        }
 
         /// <summary>
-         /// The amount of data as specified by RFC3550 if <see cref="Padding"/> is true, otherwise an Empty Sequnce
+        /// The amount of data as specified by RFC3550 if <see cref="Padding"/> is true, otherwise an Empty Sequnce
         /// </summary>
         public IEnumerable<byte> PaddingData
         {
@@ -732,7 +731,7 @@ namespace Media.Rtcp
 
                 //Return the result of creating the new instance with the given binary
                 return new RtcpPacket(new RtcpHeader(Header.Version, Header.PayloadType, padding ? Header.Padding : false, reportBlocks ? Header.BlockCount : 0, Header.SendersSynchronizationSourceIdentifier, shouldDispose),
-                    binarySequence, 
+                    binarySequence,
                     shouldDispose)
                 {
                     Transferred = Transferred
@@ -749,7 +748,7 @@ namespace Media.Rtcp
         public RtcpPacket Clone()
         {
             return new RtcpPacket(new RtcpHeader(Header), new Common.MemorySegment(Payload)) { Transferred = Transferred };
-        } 
+        }
 
         /// <summary>
         /// Provides a sample implementation of what would be required to complete a RtpPacket that has the IsComplete property False.
@@ -789,7 +788,7 @@ namespace Media.Rtcp
                     octetsRemaining -= rec;
                     recieved += rec;
                 }
-                
+
                 //Re-allocate the segment around the received data. //length + received
                 Payload = new Common.MemorySegment(m_OwnedOctets, 0, m_OwnedOctets.Length);
 
@@ -814,7 +813,7 @@ namespace Media.Rtcp
         long Common.IPacket.Length { get { return (long)Length; } }
 
         #endregion
-        
+
         #region Expansion
 
         static Type RtcpPacketType = typeof(RtcpPacket);
@@ -887,16 +886,16 @@ namespace Media.Rtcp
             foreach (System.Reflection.Assembly assembly in (domain ?? AppDomain.CurrentDomain).GetAssemblies())
             {
                 try { Types = assembly.GetTypes(); }
-                catch { if(breakOnError) Common.Extensions.Debug.DebugExtensions.BreakIfAttached(); continue; }
+                catch { if (breakOnError) Common.Extensions.Debug.DebugExtensions.BreakIfAttached(); continue; }
 
                 //Iterate each derived type which is a SubClassOf RtcpPacket.
                 foreach (System.Type derivedType in Types.Where(t => t.IsSubclassOf(RtcpPacketType)))
                 {
                     //If the derivedType is an abstraction then add to the AbstractionBag and continue
-                    if(derivedType.IsAbstract)
+                    if (derivedType.IsAbstract)
                     {
-                        Abstractions.Add(derivedType);            
-                
+                        Abstractions.Add(derivedType);
+
                         continue;
                     }
 
@@ -928,7 +927,7 @@ namespace Media.Rtcp
                         }
                     }
 
-                Continue:                    
+                    Continue:
                     continue;
                 }
             }
@@ -1025,7 +1024,7 @@ namespace Media.Rtcp
         {
             return b is null ? a is null : b.Equals(a);
         }
-        
+
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(RtcpPacket a, RtcpPacket b) { return (a == b) is false; }
 

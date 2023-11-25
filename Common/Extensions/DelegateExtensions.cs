@@ -65,7 +65,7 @@ namespace Media.Common.Extensions.Delegate
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void CreateDelegate(ref System.Delegate self, System.Type type = null)
         {
-            if(self is not null) foreach(var inv in self.GetInvocationList())
+            if (self is not null) foreach (var inv in self.GetInvocationList())
                     self = System.Delegate.Combine(self, System.Delegate.CreateDelegate(type ?? inv.Method.ReturnType, inv.Target, inv.Method));
         }
 
@@ -123,7 +123,7 @@ namespace Media.Common.Extensions.Delegate
     //http://www.codeproject.com/Articles/1104555/The-Function-Decorator-Pattern-Reanimation-of-Func @ ActionExtensions
     public static class FuncExtensions
     {
-        public static System.Func<TArg, TResult> GetOrCache<TArg, TResult, TCache>(this System.Func<TArg, TResult> func, TCache cache) 
+        public static System.Func<TArg, TResult> GetOrCache<TArg, TResult, TCache>(this System.Func<TArg, TResult> func, TCache cache)
             where TCache : class, System.Collections.Generic.IDictionary<TArg, TResult>
         {
             return (arg) =>
@@ -142,7 +142,7 @@ namespace Media.Common.Extensions.Delegate
                 return value;
             };
         }
-  
+
         public static System.Func<TArg, TResult> WaitExecute<TArg, TResult>(this System.Func<TArg, TResult> func, System.TimeSpan amount)
         {
             return (arg) =>

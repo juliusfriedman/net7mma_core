@@ -114,7 +114,7 @@ namespace Media.Concepts.Classes.C
         #endregion
 
         //Media.Common.Structures.Getter Getter;
-        
+
         //Media.Common.Structures.Setter Setter;
 
         #region Setters

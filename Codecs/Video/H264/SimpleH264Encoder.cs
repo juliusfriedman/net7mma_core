@@ -401,11 +401,11 @@ public class SimpleH264Encoder : IDisposable
         }
     }
 
-    ﻿/* * CJOCh264encoder.cpp
-    *
-    *  Created on: Aug 17, 2014
-    *      Author: Jordi Cenzano (www.jordicenzano.name)
-    */
+    /* * CJOCh264encoder.cpp
+   *
+   *  Created on: Aug 17, 2014
+   *      Author: Jordi Cenzano (www.jordicenzano.name)
+   */
 
     /*
     * CJOCh264encoder.h

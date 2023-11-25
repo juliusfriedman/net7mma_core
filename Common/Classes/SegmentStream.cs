@@ -38,9 +38,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 using System;
-using System.Linq;
 using System.Collections.Generic;
-using Media.Common.Interfaces;
+using System.Linq;
 #endregion
 
 namespace Media.Common
@@ -433,7 +432,7 @@ namespace Media.Common
 
                 //Synchronize count.
                 long diff = tempStream.m_Count - m_Count;
-                
+
                 if (diff < 0) throw new Exception("Concurrency, Should not call Free and WriteAt the same time.");
                 else if (diff > 0) m_Count += diff;
                 //System.Threading.Interlocked.CompareExchange(ref m_Count, tempStream.m_Count, m_Count);
@@ -693,7 +692,7 @@ namespace Media.Common
 
                 //Copy len from the buffer at the offset to the working segment's array at the offset + the cursor
                 Array.Copy(buffer, offset, WorkingSegment.m_Array, WorkingSegment.m_Offset + m_Cursor, len);
-                
+
                 //Move the cursor
                 m_Cursor += len;
 
@@ -705,7 +704,7 @@ namespace Media.Common
 
                 //Adjust count for len copied.
                 //If there is nothing left to do return.
-                if(0 == (count -= (int)len)) return;
+                if (0 == (count -= (int)len)) return;
 
                 //If at the end of the current segment and not at the end of the stream
                 if (m_Cursor >= WorkingSegment.m_Length && m_Position < m_Count)
@@ -1140,7 +1139,7 @@ namespace Media.UnitTests
                 using (Common.SegmentStream stream = new Common.SegmentStream(segments))
                 {
                     //make random length segments of all bytes which are contained.
-                    for (int remains = TestBytesLength; remains > 0; )
+                    for (int remains = TestBytesLength; remains > 0;)
                     {
                         //Take a random amount
                         toTake = remains > 1 ? Media.Utility.Random.Next(1, remains) : 1;
@@ -1445,7 +1444,7 @@ namespace Media.UnitTests
 
                     //Todo, test writing into segments at boundaries.
                     //Todo, test SetLength
-                    
+
                     //Close the stream
                     stream.Close();
 
@@ -1465,13 +1464,13 @@ namespace Media.UnitTests
             using (Common.SegmentStream stream = new Common.SegmentStream())
             {
                 //Ensure length
-                if(stream.Length != 0) throw new Exception(nameof(stream.Length));
+                if (stream.Length != 0) throw new Exception(nameof(stream.Length));
 
                 //Ensure state
                 if (stream.Remains != 0) throw new Exception(nameof(stream.Remains));
 
                 //Make data
-                byte[] test = new byte[] { 1, 2, 3, 4};
+                byte[] test = new byte[] { 1, 2, 3, 4 };
 
                 //Write data
                 stream.WriteAt(0, test, 0, test.Length);
@@ -1551,7 +1550,7 @@ namespace Media.UnitTests
                 result = stream.Read(buffer, 0, 4);
                 if (result > 1)
                     throw new InvalidOperationException("Cannot read more than what is available");
-                if(stream.Position != stream.Length)
+                if (stream.Position != stream.Length)
                     throw new InvalidOperationException("Should be at end of stream.");
             }
 

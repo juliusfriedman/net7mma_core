@@ -42,8 +42,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #endregion
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Media.UnitTests
 {
@@ -213,7 +213,7 @@ namespace Media.UnitTests
                     Console.WriteLine("'" + System.Text.Encoding.ASCII.GetString(buffer) + "'");
 
 
-                GetMessage:
+                    GetMessage:
 
                     try
                     {
@@ -539,7 +539,7 @@ namespace Media.UnitTests
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     Console.WriteLine("\tInterleaved (@" + offset + ", count=" + count + ") =>" + System.Text.Encoding.ASCII.GetString(data, offset, count));
 
-                GetMessage:
+                    GetMessage:
                     Media.Rtsp.RtspMessage interleaved = new Media.Rtsp.RtspMessage(data, offset, count);
 
                     if (interleaved.RtspMessageType == Media.Rtsp.RtspMessageType.Invalid && lastInterleaved is not null)
@@ -745,7 +745,7 @@ namespace Media.UnitTests
                 test.TransportContexts.Add(new Rtp.RtpClient.TransportContext(0, 1, 0)
                 {
                     MinimumPacketSize = 2,
-                    MediaDescription = new Sdp.MediaDescription( Sdp.MediaType.application, "TCP/RTP/AVP", 97, 0)
+                    MediaDescription = new Sdp.MediaDescription(Sdp.MediaType.application, "TCP/RTP/AVP", 97, 0)
                 });
 
                 Media.Rtsp.RtspMessage lastInterleaved = null;
@@ -758,7 +758,7 @@ namespace Media.UnitTests
                     Console.ForegroundColor = ConsoleColor.Cyan;
                     Console.WriteLine("\tInterleaved (@" + offset + ", count=" + count + ") =>" + System.Text.Encoding.ASCII.GetString(data, offset, count));
 
-                GetMessage:
+                    GetMessage:
                     Media.Rtsp.RtspMessage interleaved = new Media.Rtsp.RtspMessage(data, offset, count);
 
                     if (interleaved.RtspMessageType == Media.Rtsp.RtspMessageType.Invalid && lastInterleaved is not null)
@@ -1031,7 +1031,7 @@ a=sendonly";
             using (var sdp = new Media.Sdp.SessionDescription(testVector))
             {
                 //Verify the parsing
-                if(false.Equals(sdp.Lines.Count().Equals(8))) throw new System.Exception("Did not parse all lines");
+                if (false.Equals(sdp.Lines.Count().Equals(8))) throw new System.Exception("Did not parse all lines");
 
                 //Verify that a RtpClient can be created, since no ports are specified the default for rtp and rtcp are used.
                 //Initialize fails on the attempt to hole punch and ports are set to 0.
@@ -1055,7 +1055,7 @@ a=sendonly";
                     if (false.Equals(Common.Extensions.Socket.SocketExtensions.GetFirstMulticastIPAddress(localEndPoint.AddressFamily).Equals(localEndPoint.Address))) throw new System.Exception("Unexpected RtpSocket.LocalEndPoint.IPAddress");
 
                     //Verify their address
-                    System.Net.IPEndPoint remoteEndPoint = firstContext.RtpSocket.Connected ? firstContext.RtpSocket.RemoteEndPoint as System.Net.IPEndPoint : firstContext.RemoteRtp as System.Net.IPEndPoint; 
+                    System.Net.IPEndPoint remoteEndPoint = firstContext.RtpSocket.Connected ? firstContext.RtpSocket.RemoteEndPoint as System.Net.IPEndPoint : firstContext.RemoteRtp as System.Net.IPEndPoint;
 
                     if (true.Equals(remoteEndPoint is null)) throw new System.Exception("Unexpected RemoteRtp or RtpSocket.RemoteEndPoint");
 

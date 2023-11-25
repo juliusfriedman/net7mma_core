@@ -104,10 +104,10 @@ namespace Media.Sip
         /// </summary>
         /// <param name="packet">The array segment which contains the packet in whole at the offset of the segment. The Count of the segment may not contain more bytes than a RFC2326 message may contain.</param>
         public SipMessage(byte[] data, int offset, int length, Encoding contentEncoding = null, bool shouldDispose = true)
-            :base(data, offset, length, contentEncoding, shouldDispose, SipMessage.MessageIdentifier)
+            : base(data, offset, length, contentEncoding, shouldDispose, SipMessage.MessageIdentifier)
         {
 
-            
+
         }
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Media.Sip
         /// <param name="other">The other RtspMessage</param>
         public SipMessage(SipMessage other) : base(other)
         {
-            
+
         }
 
         #endregion

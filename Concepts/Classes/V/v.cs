@@ -251,7 +251,8 @@ namespace Media.Concepts.Classes.v
         /// </summary>
         /// <param name="t">t</param>
         /// <param name="v">v</param>
-        static void Invalid (T t, out bool v){
+        static void Invalid(T t, out bool v)
+        {
             v = t is null;
         }
 
@@ -260,7 +261,7 @@ namespace Media.Concepts.Classes.v
         /// </summary>
         static Invalidator<T> Invalidate = new Invalidator<T>()
         {
-            Void = System.Delegate.CreateDelegate(typeof(Invalidator<T>), Common.Extensions.ExpressionExtensions.SymbolExtensions.GetMethodInfo(()=>Invalidator<T>.Invalid(default(T), out Nil)))
+            Void = System.Delegate.CreateDelegate(typeof(Invalidator<T>), Common.Extensions.ExpressionExtensions.SymbolExtensions.GetMethodInfo(() => Invalidator<T>.Invalid(default(T), out Nil)))
         };
     }
 }

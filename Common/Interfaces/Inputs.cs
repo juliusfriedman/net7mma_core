@@ -156,7 +156,7 @@ namespace Media.Common.Interfaces
 
         internal protected Keyword()
         {
-            
+
         }
 
         InterStruct IBridge.Bridge
@@ -165,7 +165,7 @@ namespace Media.Common.Interfaces
         }
 
         //KeywordStructure : =>
-    }    
+    }
 
     /// <summary>
     /// 
@@ -618,7 +618,7 @@ namespace Media.Common.Interfaces
         /// Is this instance output.
         /// </summary>
         bool IsOutput { get; }
-        
+
         /// <summary>
         /// Does this instance have input
         /// </summary>

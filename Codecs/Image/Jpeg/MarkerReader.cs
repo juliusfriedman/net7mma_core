@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Codecs.Image.Jpeg
 {
 
     //Would be helpful to have a Stream with a buffer for skipping
-    
+
     //Should allow marker reading on it's own outside of the RFC2435 class to decouple logic.
     public class MarkerReader : IDisposable
     {
@@ -68,7 +66,7 @@ namespace Media.Codecs.Image.Jpeg
                     //Correct Length
                     CodeSize -= 2; //Not including their own length
 
-                AtMarker:
+                    AtMarker:
 
                     current = new Marker()
                     {
@@ -127,7 +125,7 @@ namespace Media.Codecs.Image.Jpeg
 
         public IEnumerable<byte> Prepare() //bool includePrefix, includeCode, includeLength, includeData...
         {
-            if(PrefixLength > 0) foreach(byte b in Enumerable.Repeat<byte>(Jpeg.Markers.Prefix, PrefixLength)) yield return b;
+            if (PrefixLength > 0) foreach (byte b in Enumerable.Repeat<byte>(Jpeg.Markers.Prefix, PrefixLength)) yield return b;
 
             yield return Code;
 

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Media.Concepts.Classes.Sockets
+﻿namespace Media.Concepts.Classes.Sockets
 {
     /// <summary>
     /// Contains methods for setting SocketFlags via stored values.
@@ -71,7 +65,7 @@ namespace Media.Concepts.Classes.Sockets
         public int Receive(System.Net.Sockets.Socket socket, byte[] data, ref int offset, ref int count, ref System.Net.Sockets.SocketFlags flags, out System.Net.Sockets.SocketError error)
         {
             return socket.Receive(data, offset, count, flags, out error);
-        }        
+        }
 
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -97,7 +91,7 @@ namespace Media.Concepts.Classes.Sockets
 
             do
             {
-                local= Receive(socket, data, ref offset, ref count, ref flags, out error);
+                local = Receive(socket, data, ref offset, ref count, ref flags, out error);
 
                 total += local;
 

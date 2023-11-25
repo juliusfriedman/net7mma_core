@@ -1,9 +1,7 @@
-﻿using System;
+﻿using Media.Container;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Media.Container;
 
 namespace Media.Containers.Gxf
 {
@@ -97,7 +95,7 @@ namespace Media.Containers.Gxf
         public Node ReadElement(Identifier identifier, long offset, long count)
         {
             long position = Position;
-            Node result =  ReadElements(offset, count, identifier).FirstOrDefault();
+            Node result = ReadElements(offset, count, identifier).FirstOrDefault();
             Position = position;
             return result;
         }
@@ -136,7 +134,7 @@ namespace Media.Containers.Gxf
 
             if (length >> 24 > 0 || length < MinimumSize) length = 0;
 
-            if (Common.Binary.ReadU32(identifier, IdentifierParts, Common.Binary.IsLittleEndian) > VersionMajor 
+            if (Common.Binary.ReadU32(identifier, IdentifierParts, Common.Binary.IsLittleEndian) > VersionMajor
                 ||
                 identifier[IdentifierParts + 1] != (byte)Identifier.PacketStartA && identifier[IdentifierParts + 2] != (byte)Identifier.PacketStartB) throw new InvalidOperationException("Invalid Packet Header");
 
@@ -210,6 +208,6 @@ namespace Media.Containers.Gxf
         {
             get { return Root; }
         }
-       
+
     }
 }

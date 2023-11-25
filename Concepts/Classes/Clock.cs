@@ -230,8 +230,8 @@ namespace Media.Concepts.Classes
 
             nanos = Common.Binary.Clamp(nanos, 0, (long)Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMicrosecond);
 
-            NanoSleep(ref nanos, aopt); 
-            
+            NanoSleep(ref nanos, aopt);
+
             System.Threading.Thread.EndCriticalRegion();
         }
 

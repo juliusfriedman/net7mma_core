@@ -92,7 +92,7 @@ namespace Media.Concepts.Math
 
         void DivideBy15Fast(ref uint x)
         {
-            uint s,t;
+            uint s, t;
 
             s = x >> 4;
 
@@ -106,7 +106,7 @@ namespace Media.Concepts.Math
         void DivideBy15Fast(ref ushort x)
         {
             ++x;
-            
+
             x += (ushort)(x << 4);
 
             x += (ushort)(x >> 8);
@@ -875,7 +875,7 @@ namespace Media.Concepts.Math
             ulong unsigned = Concepts.Classes.Unsafe.UInt64ToInt64Bits(ref x);
             return Log2Floor(ref unsigned);
         }
-        
+
         /// <summary>Gets the next higher power of 2, e.g. 4=>8, 13=>16.</summary>
         /// <remarks>For negative values of x, NextPowerOf2((uint)x) is 0.</remarks>
         [System.CLSCompliant(false)]

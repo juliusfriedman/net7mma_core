@@ -58,10 +58,10 @@ namespace Media.Concepts.Classes
         {
             Unknown,
             Centaur,
-            Advanced,            
+            Advanced,
             Intel,
             MicroDevices,
-            Motorola,    
+            Motorola,
             VIA,
             Cyrix = VIA,
             Transmeta,

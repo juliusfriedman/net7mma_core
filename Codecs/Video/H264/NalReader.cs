@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Media.Codecs.Video.H264
+﻿namespace Media.Codecs.Video.H264
 {
     //Should be used to decouple reading of nal units from the RFC6184 class.
 

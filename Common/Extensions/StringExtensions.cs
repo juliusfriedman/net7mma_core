@@ -130,7 +130,7 @@ namespace Media.Common.Extensions.String
             try
             {
                 count = count < 0 ? value.Length : count;
-                
+
                 //Start with the value and the same capacity as there may be no capitols..
                 sb = new System.Text.StringBuilder(value, offset, count, count);
 

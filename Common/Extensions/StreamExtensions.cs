@@ -62,10 +62,10 @@ namespace Media.Common.Extensions.Stream
         /// </summary>
         internal sealed class DownloadAdapter : LifetimeDisposable, ITransactionResult
         {
-            public System.Uri Location { get; internal set; } 
+            public System.Uri Location { get; internal set; }
 
-            public System.IDisposable Request { get; internal set; } 
-            
+            public System.IDisposable Request { get; internal set; }
+
             public System.IDisposable Response { get; internal set; }
 
             public System.IO.Stream ResponseOutputStream { get; internal set; }
@@ -90,8 +90,8 @@ namespace Media.Common.Extensions.Stream
 
                 if (ResponseOutputStream is not null)
                 {
-                    ResponseOutputStream.Dispose(); 
-                    
+                    ResponseOutputStream.Dispose();
+
                     ResponseOutputStream = null;
                 }
 
@@ -112,7 +112,7 @@ namespace Media.Common.Extensions.Stream
                 //Response = response;
 
                 //Result = response.GetResponseStream();
-                
+
                 //ds.Disposing += HandleDisposing;
 
                 SemaphoreSlim.Wait();
@@ -120,7 +120,7 @@ namespace Media.Common.Extensions.Stream
 
             public void Cancel()
             {
-                Expire();  
+                Expire();
 
                 if (ResponseOutputStream is not null && ResponseOutputStream.CanRead)
                 {
@@ -222,17 +222,18 @@ namespace Media.Common.Extensions.Stream
                 public DisposableHttpWebRequest(System.Net.HttpWebRequest request, System.Net.WebProxy proxy, System.Net.NetworkCredential credentials, System.Collections.Specialized.NameValueCollection headers, System.Net.CookieCollection cookies)
                     : this(request)
                 {
-                    if(proxy is not null) Request.Proxy = proxy;
+                    if (proxy is not null) Request.Proxy = proxy;
 
                     if (headers is not null) Request.Headers.Add(headers);
 
-                    if (cookies is not null)Request.CookieContainer.Add(cookies);
+                    if (cookies is not null) Request.CookieContainer.Add(cookies);
 
                     if (credentials is not null) Request.Credentials = credentials;
                 }
 
-                public DisposableHttpWebRequest(System.Uri location, System.Net.WebProxy proxy, System.Net.NetworkCredential credentials, System.Collections.Specialized.NameValueCollection headers, System.Net.CookieCollection cookies) : 
-                    this((System.Net.HttpWebRequest)System.Net.HttpWebRequest.Create(location), proxy, credentials, headers, cookies) { }
+                public DisposableHttpWebRequest(System.Uri location, System.Net.WebProxy proxy, System.Net.NetworkCredential credentials, System.Collections.Specialized.NameValueCollection headers, System.Net.CookieCollection cookies) :
+                    this((System.Net.HttpWebRequest)System.Net.HttpWebRequest.Create(location), proxy, credentials, headers, cookies)
+                { }
 
                 internal protected override void Dispose(bool disposing)
                 {
@@ -279,7 +280,7 @@ namespace Media.Common.Extensions.Stream
                     //ds.Disposing += HandleDisposing;                
                 }
 
-                public WebClientEx(System.Uri location) 
+                public WebClientEx(System.Uri location)
                     : this()
                 {
                     try
@@ -336,7 +337,7 @@ namespace Media.Common.Extensions.Stream
             }
 
             #endregion
-            
+
             //Credential
             public static DownloadAdapter HttpWebRequestDownload(System.Uri location, System.Net.WebProxy proxy = null, System.Net.NetworkCredential credentials = null, System.Collections.Specialized.NameValueCollection headers = null, System.Net.CookieCollection cookies = null)
             {
@@ -369,7 +370,7 @@ namespace Media.Common.Extensions.Stream
                     {
                         d.Request = webClient;
                         d.ResponseOutputStream = webClient.ResponseStream;
-                        
+
                         if (webClient.ResponseHeaders is not null)
                         {
                             string contentLength = webClient.ResponseHeaders["Content-Length"];
@@ -395,7 +396,7 @@ namespace Media.Common.Extensions.Stream
             }
 
             void ITransactionResult.CancelTransaction()
-            {                
+            {
                 Cancel();
             }
 
@@ -471,7 +472,7 @@ namespace Media.Common.Extensions.Stream
             {
                 System.ArgumentNullException.ThrowIfNull(adapter);
 
-                this.adapter = adapter; 
+                this.adapter = adapter;
             }
 
             private System.IO.Stream ResponseStream
@@ -537,8 +538,8 @@ namespace Media.Common.Extensions.Stream
             }
             catch (System.Exception ex)
             {
-                Media.Common.TaggedExceptionExtensions.TryRaiseTaggedException(result, ex.Message, ex); 
-                
+                Media.Common.TaggedExceptionExtensions.TryRaiseTaggedException(result, ex.Message, ex);
+
                 return false;
             }
         }
@@ -676,7 +677,7 @@ namespace Media.Common.Extensions.Stream
                 var evt = tb is not null ? tb.TransactionCompleted : null;
 
                 if (evt is null) return;
-                
+
                 evt(sender, tb);
 
                 evt = null;
@@ -765,7 +766,7 @@ namespace Media.Common.Extensions.Stream
             {
                 get { return CancelTokenSource.IsCancellationRequested || CancelToken.IsCancellationRequested; }
             }
-          
+
             public virtual bool IsCompleted
             {
                 get { return IsTransactionCanceled || IsTransactionDone || AsyncTransactionResult is not null && AsyncTransactionResult.IsCompleted; }
@@ -862,7 +863,7 @@ namespace Media.Common.Extensions.Stream
             public virtual void CancelTransaction()
             {
                 Cancel();
-            }           
+            }
 
             #endregion
 
@@ -875,7 +876,7 @@ namespace Media.Common.Extensions.Stream
             public event EventHandlerEx<ITransactionResult> TransactionCompleted;
 
             public event EventHandlerEx<ITransactionResult> TransactionCancelled;
-            
+
             #endregion
         }
 
@@ -965,7 +966,7 @@ namespace Media.Common.Extensions.Stream
             }
 
             public StreamCopyTransaction(System.IO.Stream source, bool disposeSource, System.IO.Stream dest, bool disposeDest, int bufferSize, System.Action<long, byte[], int, int> writeFunction)
-                :this(source, dest, bufferSize, writeFunction)
+                : this(source, dest, bufferSize, writeFunction)
             {
                 DisposeSource = disposeSource;
 
@@ -981,7 +982,7 @@ namespace Media.Common.Extensions.Stream
             void CopyLogic(System.IAsyncResult iar)
             {
 
-                if(IsCompleted) return;
+                if (IsCompleted) return;
 
                 try
                 {
@@ -1025,7 +1026,7 @@ namespace Media.Common.Extensions.Stream
                     Expire();
                 }
 
-            Dispose:
+                Dispose:
                 Dispose(ShouldDispose = true);
             }
 

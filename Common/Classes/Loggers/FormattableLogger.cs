@@ -81,7 +81,7 @@ namespace Media.Common.Classes.Loggers
         /// <returns>The formatted string</returns>
         public string FormatException(string exception)
         {
-            return Format(ExceptionFormat, exception); 
+            return Format(ExceptionFormat, exception);
         }
     }
 }

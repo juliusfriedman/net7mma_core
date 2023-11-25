@@ -35,8 +35,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Media.Sdp
@@ -102,7 +102,7 @@ namespace Media.Sdp
 
         public bool HasMultiplePorts
         {
-            get { return MediaDescriptionLine.HasMultiplePorts; }            
+            get { return MediaDescriptionLine.HasMultiplePorts; }
         }
 
         public int NumberOfPorts
@@ -158,7 +158,7 @@ namespace Media.Sdp
                 return MediaDescriptionLine.Length + m_Lines.Sum(l => l.Length);
             }
         }
-                       
+
         #endregion
 
         #region Constructor
@@ -192,18 +192,18 @@ namespace Media.Sdp
             MediaFormat = mediaFormat;
         }
 
-        public MediaDescription(string[] sdpLines, int index, bool shouldDispose = true) 
+        public MediaDescription(string[] sdpLines, int index, bool shouldDispose = true)
             : this(sdpLines, ref index, shouldDispose) { }
 
         [CLSCompliant(false)]
         public MediaDescription(string[] sdpLines, ref int index, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             //Create a MediaDescriptionLine.
             MediaDescriptionLine = new Sdp.Lines.SessionMediaDescriptionLine(sdpLines, ref index);
 
             //Parse remaining optional entries
-            for (int e = sdpLines.Length; index < e; )
+            for (int e = sdpLines.Length; index < e;)
             {
                 string line = sdpLines[index];
 
@@ -363,7 +363,7 @@ namespace Media.Sdp
             //    If multiple addresses are specified in the "c=" field and multiple
             //    ports are specified in the "m=" field, a one-to-one mapping from
             //    port to the corresponding address is implied.  For example:
-                
+
             //      c=IN IP4 224.2.1.1/127/2
             //      m=video 49170/2 RTP/AVP 31
             //    */
@@ -393,7 +393,7 @@ namespace Media.Sdp
             //Note if Unassigned MediaFormat is used that this might have to be a 'char' to be exactly what was given
             buffer.Append(MediaDescriptionLine.ToString());
 
-        //LinesOnly:
+            //LinesOnly:
             foreach (SessionDescriptionLine l in m_Lines.Where(l => l.m_Type != Sdp.Lines.SessionBandwidthLine.BandwidthType && l.m_Type != Sdp.Lines.SessionAttributeLine.AttributeType))
                 buffer.Append(l.ToString());
 
@@ -409,7 +409,7 @@ namespace Media.Sdp
         #endregion
 
         #region Named Lines
-        
+
         //Could all be extension methods.
 
         public IEnumerable<SessionDescriptionLine> AttributeLines
@@ -447,7 +447,7 @@ namespace Media.Sdp
         //    }
         //}
 
-       
+
         public SessionDescriptionLine FmtpLine
         {
             get
@@ -608,7 +608,7 @@ namespace Media.Sdp
             if (Common.IDisposedExtensions.IsNullOrDisposed(mediaDescription) || Common.IDisposedExtensions.IsNullOrDisposed(sessionDescription)) return false;
 
             //Get index of mediaDesription
-            
+
             //Check TimeDescription @ index.
 
             TimeDescription td = GetTimeDescription(mediaDescription, sessionDescription);
@@ -646,7 +646,7 @@ namespace Media.Sdp
             {
                 td = null;
             }
-            
+
             return true;
         }
     }

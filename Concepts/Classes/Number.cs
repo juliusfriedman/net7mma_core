@@ -82,7 +82,7 @@ namespace Media.Concepts.Classes
     [System.CLSCompliant(true)]
     public interface IHardware
     {
-        
+
     }
 
     #region IProcessor
@@ -151,7 +151,7 @@ namespace Media.Concepts.Classes
         public static Common.Binary.ByteOrder SystemEndian = Common.Binary.SystemByteOrder;
 
         public readonly IHardware Hardware;
-        
+
         /// <summary>
         /// Allows one to swap the values on the stack if needed or otherwise prepare them for computation
         /// </summary>
@@ -673,7 +673,7 @@ namespace Media.Concepts.Classes
 
         const int Base = 2;
 
-       
+
 
         //DefaultRadix is probably a better name.
         public readonly static Radix DecimalBase = new Radix(Base);
@@ -721,7 +721,7 @@ namespace Media.Concepts.Classes
         #region Statics
 
         public bool IsNull(Bitable a) { return Processor.IsNull(ref a); }
-        
+
         [System.CLSCompliant(false)]
         public bool IsNull(ref Bitable a) { return Processor.IsNull(ref a); }
 
@@ -878,10 +878,10 @@ namespace Media.Concepts.Classes
         Size = 1,//This field must be equal or greater than the total size, in bytes, of the members of the class or structure.
         Pack = 0, //A value of 0 indicates that the packing alignment is set to the default for the current platform.
         CharSet = System.Runtime.InteropServices.CharSet.Auto)]
-    public struct Bits : 
-        System.Collections.IEnumerable, 
+    public struct Bits :
+        System.Collections.IEnumerable,
         //ICoreUnit
-        System.Collections.Generic.IEnumerable<bool>, 
+        System.Collections.Generic.IEnumerable<bool>,
         System.Collections.Generic.IEnumerable<Byte> //IList
     {
         /// <summary>
@@ -1023,7 +1023,7 @@ namespace Media.Concepts.Classes
         {
             return new Bits((byte)(b.m_Bits << amount));
         }
-        
+
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static Bits operator +(Bits b, int amount)
         {
@@ -1166,13 +1166,13 @@ namespace Media.Concepts.Classes
         }
     }
 
-    #endregion      
-   
+    #endregion
+
     #region Bitable
 
     public class Bitable :
-        System.Collections.Generic.IEnumerable<Bits>, 
-        System.Collections.Generic.IEnumerable<byte>, 
+        System.Collections.Generic.IEnumerable<Bits>,
+        System.Collections.Generic.IEnumerable<byte>,
         System.Collections.Generic.IEnumerable<bool> //IList ?
     {
         #region Statics
@@ -1452,9 +1452,9 @@ namespace Media.Concepts.Classes
         public int IndexOfAny(Bits[] b, bool ignoreEndian = true)
         {
             int index = -1;
-            
+
             foreach (Bits x in b) if (false.Equals((index = IndexOf(x, ignoreEndian)).Equals(-1))) break;
-                
+
             return index;
         }
 
@@ -1483,7 +1483,7 @@ namespace Media.Concepts.Classes
             }
 
             return -1;
-        }        
+        }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         internal /* virtual */ bool ToBool(int index = 0)
@@ -2457,7 +2457,7 @@ namespace Media.Concepts.Classes
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return Number.IsNullOrZero(this);              
+                return Number.IsNullOrZero(this);
             }
         }
 
@@ -2472,14 +2472,14 @@ namespace Media.Concepts.Classes
                 switch (TypeCode)
                 {
                     case System.TypeCode.Decimal:
-                            return this >= DecimalNegativeZero || this >= DecimalNegativeZeroAlt;
+                        return this >= DecimalNegativeZero || this >= DecimalNegativeZeroAlt;
                     default: return IsAbsoluteZero ? false : this >= NegativeZero;
                 }
 
                 //-0...
 
                 //return Common.Binary.IsNegative(Real.ToDouble());
-                
+
                 //return Real < System.Numerics.Complex.Zero;
             }
         }

@@ -38,11 +38,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Media.Rtsp.Server.MediaTypes
 {
@@ -151,7 +147,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 return header;
             }
-            
+
 
             /// <summary>
             /// /// <summary>
@@ -177,11 +173,11 @@ namespace Media.Rtsp.Server.MediaTypes
             /// <param name="addPadding"></param>
             /// <param name="includeAuHeaders"></param>
             /// <param name="includeAuxData"></param>
-            public void Depacketize(Media.Rtp.RtpPacket packet, out int parsedAccessUnits, out int remainsInAu, bool headersPresent = true, int profileId = 0, int channelConfiguration = 0, 
-                int frequencyIndex = 0, int sizeLength = 0, int indexLength = 0, int indexDeltaLength = 0, int CTSDeltaLength = 0, 
+            public void Depacketize(Media.Rtp.RtpPacket packet, out int parsedAccessUnits, out int remainsInAu, bool headersPresent = true, int profileId = 0, int channelConfiguration = 0,
+                int frequencyIndex = 0, int sizeLength = 0, int indexLength = 0, int indexDeltaLength = 0, int CTSDeltaLength = 0,
                 int DTSDeltaLength = 0, int auxDataSizeLength = 0, bool randomAccessIndication = false, int streamStateIndication = 0,
-                int constantAuSize = 0, IEnumerable<byte> frameHeader = null, 
-                bool addPadding = false, bool includeAuHeaders = false, bool includeAuxData = false) 
+                int constantAuSize = 0, IEnumerable<byte> frameHeader = null,
+                bool addPadding = false, bool includeAuHeaders = false, bool includeAuxData = false)
             {
                 remainsInAu = parsedAccessUnits = 0;
 
@@ -660,7 +656,7 @@ namespace Media.Rtsp.Server.MediaTypes
             {
                 parsedAccessUnits = remainsInInterleavedAu = 0;
 
-                foreach(Rtp.RtpPacket packet in Packets) Depacketize(packet, out parsedAccessUnits, out remainsInInterleavedAu, headersPresent, profileId, channelConfiguration, frequencyIndex, sizeLength, indexDeltaLength, indexDeltaLength, CTSDeltaLength, DTSDeltaLength, auxDataSizeLength, randomAccessIndication, streamStateIndication, defaultAuSize, frameHeader, addPadding, includeAuHeaders, includeAuxData);
+                foreach (Rtp.RtpPacket packet in Packets) Depacketize(packet, out parsedAccessUnits, out remainsInInterleavedAu, headersPresent, profileId, channelConfiguration, frequencyIndex, sizeLength, indexDeltaLength, indexDeltaLength, CTSDeltaLength, DTSDeltaLength, auxDataSizeLength, randomAccessIndication, streamStateIndication, defaultAuSize, frameHeader, addPadding, includeAuHeaders, includeAuxData);
             }
 
             public override void Depacketize(bool allowIncomplete)
@@ -711,7 +707,7 @@ namespace Media.Rtsp.Server.MediaTypes
             //Add the control line
             SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=control:trackID=1"));
             SessionDescription.MediaDescriptions.First().Add(new Sdp.SessionDescriptionLine("a=rtpmap:96 mpeg4-generic/" + ClockRate));
-            
+
             //Should be a field set in constructor.
             /*
               streamType:

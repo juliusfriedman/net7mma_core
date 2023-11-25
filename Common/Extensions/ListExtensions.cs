@@ -37,14 +37,14 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #endregion
 
 namespace Media.Common.Extensions.List
-{    
+{
     public static class ListExtensions
     {
 
         public static void AddRange<T>(this System.Collections.Generic.List<T> list, System.Collections.Generic.IEnumerable<T> source, int start, int length)
         {
             if (list is null) throw new System.ArgumentNullException("list");
-            
+
             if (source is null) throw new System.ArgumentNullException("source");
 
             int count = System.Linq.Enumerable.Count(source);

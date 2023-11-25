@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Media.Rtsp.Server
 {
@@ -18,7 +14,7 @@ namespace Media.Rtsp.Server
 
         public ArchivedRtpMedia(string name, Uri source)
             : base(name, source)
-        {            
+        {
             //Create Session Description from file in archiver.
 
             //SessionDescription =

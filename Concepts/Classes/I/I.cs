@@ -266,7 +266,7 @@ namespace Media.Concepts.Classes.I
 
     #region ContrivedReference<U, T>
 
-    public abstract class ContrivedReference<U, T> : 
+    public abstract class ContrivedReference<U, T> :
         Reference<T>, //base
         IReference<U>, //this
         Media.Common.Interfaces.IComposed<T>

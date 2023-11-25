@@ -680,7 +680,7 @@ namespace Media.Concepts.Classes
             }
         }
     }
-    
+
     /// <summary>
     /// Class which is usefl for measuring and converting frequency
     /// </summary>

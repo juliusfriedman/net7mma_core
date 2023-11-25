@@ -82,8 +82,8 @@ namespace Media.Common
     /// Represents an interface which is used to convey reference to an instance of <see cref="ILogging"/>
     /// </summary>
     public interface ILoggingReference : Common.Interfaces.Interface //
-        //IReference<ILogging>
-        //Media.Common.Interfaces.ITryGet<ILogging>, Media.Common.Interfaces.ITrySet<ILogging>
+                                                                     //IReference<ILogging>
+                                                                     //Media.Common.Interfaces.ITryGet<ILogging>, Media.Common.Interfaces.ITrySet<ILogging>
     {
         /// <summary>
         /// Try to modify the reference to the instance of <see cref="ILogging"/>

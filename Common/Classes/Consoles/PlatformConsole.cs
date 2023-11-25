@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Media.Common.Classes.Consoles
+﻿namespace Media.Common.Classes.Consoles
 {
     /// <summary>
     /// The <see cref="Class"/> associated with the console.

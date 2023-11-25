@@ -392,7 +392,7 @@ namespace Media.Common
         /// </summary>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool HasFiniteBitPattern() { return BitPatternSize > 0; }        
+        public static bool HasFiniteBitPattern() { return BitPatternSize > 0; }
 
         /// <summary>
         /// Indicates if the Machine can execute ARM instructions
@@ -409,7 +409,7 @@ namespace Media.Common
         /// Indicates if the Machine can execute x86 instructions
         /// </summary>
         /// <returns></returns>
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]        
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool IsX86()
         {
             return 1 == (((uint)1) << Media.Common.Binary.BitsPerInteger);
@@ -440,7 +440,7 @@ namespace Media.Common
 
             //false == CodeType == System.Reflection.PortableExecutableKinds.PE32Plus ?
 
-            return IsX64() ? Common.Binary.BytesPerLong :  IsX86() ? Common.Binary.BytesPerInteger : nint.Size;
+            return IsX64() ? Common.Binary.BytesPerLong : IsX86() ? Common.Binary.BytesPerInteger : nint.Size;
         }
 
         /// <summary>
@@ -487,7 +487,7 @@ namespace Media.Common
                 return (int)(((size + ptrSize - 1) & ~(ptrSize - 1)) - size);
             }
         }
-         
+
         //Detection
 
         /// <summary>
@@ -766,7 +766,7 @@ namespace Media.Common
                             throw new System.InvalidOperationException("Please create an issue for your architecture to be supported.");
                         }
                     case System.Reflection.ProcessorArchitecture.MSIL://Neutral with respect to processor and bits-per-word.
-                         //Should follow the X86 style
+                                                                      //Should follow the X86 style
                     case System.Reflection.ProcessorArchitecture.X86://A 32-bit Intel processor, either native or in the Windows on Windows environment on a 64-bit platform (WOW64).
                         {
                             if (false == Machine.IsX86()) throw new System.InvalidOperationException("Did not detect an x86 Machine");
@@ -889,7 +889,7 @@ namespace Media.UnitTests
         {
             System.Console.WriteLine("Detected Native Pointer Size: " + Media.Common.Machine.NativePointeSize);
         }
-    
+
         //public void TestSignExtendedShift()
         //{
         //    //throw new System.NotImplementedException();

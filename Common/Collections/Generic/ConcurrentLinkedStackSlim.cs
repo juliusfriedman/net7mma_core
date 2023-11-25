@@ -38,7 +38,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 
-using Media.Common.Extensions.Generic.Dictionary;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,7 +69,7 @@ namespace Media.Common.Collections.Generic
             public T Value;
 
             public Node Next;
-                     
+
             //Create and have no value, Deleted, Has Value
             //Flags, Allocated, Deleted, Stored, Native
 
@@ -125,7 +124,7 @@ namespace Media.Common.Collections.Generic
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get { return System.Threading.Interlocked.Read(ref m_Count); }
         }
-        
+
         /// <summary>
         /// Indicates if no elements are contained.
         /// </summary>
@@ -164,7 +163,7 @@ namespace Media.Common.Collections.Generic
         {
             switch (System.Threading.Interlocked.Read(ref m_Count))
             {
-                case Common.Binary.LongZero:  
+                case Common.Binary.LongZero:
                     //Store
                     t = default(T);
 
@@ -182,7 +181,7 @@ namespace Media.Common.Collections.Generic
 
                     //Decrement (1) @ Count
                     System.Threading.Interlocked.Decrement(ref m_Count);
-                    
+
                     //Return
                     return true;
             }
@@ -200,7 +199,7 @@ namespace Media.Common.Collections.Generic
             //    return false;
             //}
 
-            
+
 
             ////Return true
             //return true;
@@ -685,7 +684,7 @@ namespace Media.UnitTests
                 sharedResetEvent.WaitOne(ThreadCount);
             }
 
-            if (statLevelCountIn != stackLevelCountOut) throw new System.Exception("count:" + statLevelCountIn +"," + stackLevelCountOut);
+            if (statLevelCountIn != stackLevelCountOut) throw new System.Exception("count:" + statLevelCountIn + "," + stackLevelCountOut);
 
             if (false == LinkedStack.IsEmpty) throw new System.Exception("IsEmpty," + LinkedStack.Count);
 

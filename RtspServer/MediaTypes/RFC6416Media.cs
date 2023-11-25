@@ -38,11 +38,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 using System;
 using System.Linq;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Media.Rtsp.Server.MediaTypes
 {
@@ -95,7 +90,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     {
                         //Set the end bit if no more data remains
                         if (offset + mtu > nalLength) marker = true;
-                    
+
                         //Add the packet
                         Add(new Rtp.RtpPacket(2, false, false, marker, PayloadType, 0, SynchronizationSourceIdentifier, HighestSequenceNumber + 1, 0, nal));
 
@@ -155,7 +150,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 //Depacketized.Add(addIndex++, StartCodePrefixSegment);
 
                 //Depacketized.Add(addIndex++, new Common.MemorySegment(new byte[] { Media.Codecs.Video.Mpeg4.StartCodes.VisualObjectSequence }));
-                
+
                 //What a waste, 4 bytes + to describe 1
                 Depacketized.Add(addIndex++, new Common.MemorySegment(new byte[] { profileLevelId }));
 

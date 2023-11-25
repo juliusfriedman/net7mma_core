@@ -34,11 +34,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * 
  * v//
  */
+using Media.Container;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Media.Container;
 
 namespace Media.Containers.Asf
 {
@@ -167,7 +167,7 @@ namespace Media.Containers.Asf
 
         public AsfReader(System.IO.FileStream source, System.IO.FileAccess access = System.IO.FileAccess.Read) : base(source, access) { }
 
-        public AsfReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { } 
+        public AsfReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { }
 
         public IEnumerable<Node> ReadObjects(long offset = 0, params Guid[] names)
         {
@@ -251,7 +251,7 @@ namespace Media.Containers.Asf
             {
                 //Resize the identifer to encompass the reserved data
                 Array.Resize(ref identifier, IdentifierSize + HeaderObjectReservedDataSize);
-                
+
                 //Take the reserved data out of the count of bytes in the node
                 length -= Read(identifier, IdentifierSize, HeaderObjectReservedDataSize);
             }
@@ -266,13 +266,13 @@ namespace Media.Containers.Asf
                 Node next = ReadNext();
 
                 if (next is null) yield break;
-                
+
                 yield return next;
-                
+
                 //Only skip nodes which don't have children.
-                if(next.IdentifierSize == IdentifierSize) Skip(next.DataSize);
+                if (next.IdentifierSize == IdentifierSize) Skip(next.DataSize);
             }
-        }      
+        }
 
         /// <summary>
         /// Returns the <see cref="Node"/> identified by <see cref="Identifier.HeaderObject"/>.
@@ -430,7 +430,7 @@ namespace Media.Containers.Asf
                 //Created 64
                 m_Created = BaseDate.AddTicks((long)Common.Binary.ReadU64(fileProperties.Data, offset, Media.Common.Binary.IsBigEndian));
                 offset += 8;
-                
+
                 //NumberOfPackets 64
                 m_NumberOfPackets = (long)Common.Binary.ReadU64(fileProperties.Data, offset, Media.Common.Binary.IsBigEndian);
                 offset += 8;
@@ -454,7 +454,7 @@ namespace Media.Containers.Asf
                 //Flags 32
                 m_Flags = (long)Common.Binary.ReadU32(fileProperties.Data, offset, Media.Common.Binary.IsBigEndian);
                 offset += 4;
-                
+
                 //MinimumPacketSize 32
                 m_MinimumPacketSize = (long)Common.Binary.ReadU32(fileProperties.Data, offset, Media.Common.Binary.IsBigEndian);
                 offset += 4;
@@ -466,7 +466,7 @@ namespace Media.Containers.Asf
                 //MaximumBitRate 32
                 m_MaximumBitRate = (long)Common.Binary.ReadU32(fileProperties.Data, offset, Media.Common.Binary.IsBigEndian);
                 offset += 4;
-                
+
                 //Any more data it belongs to some kind of extension...
                 //if(offset < fileProperties.DataSize)
             }
@@ -525,7 +525,7 @@ namespace Media.Containers.Asf
         {
             using (var contentDescription = ReadObject(Identifier.ContentDescriptionObject, Root.DataOffset))
             {
-                if(contentDescription is not null && contentDescription.DataSize > 2)
+                if (contentDescription is not null && contentDescription.DataSize > 2)
                 {
                     int offset = 2, len = Common.Binary.Read16(contentDescription.Data, offset, Media.Common.Binary.IsBigEndian), remaining = (int)contentDescription.DataSize;
                     remaining -= 2;
@@ -562,7 +562,7 @@ namespace Media.Containers.Asf
                         offset += 2;
                         remaining -= 2;
                     }
-                    else len = 0; 
+                    else len = 0;
 
                     if (remaining > 0 && len > 0)
                     {
@@ -579,7 +579,7 @@ namespace Media.Containers.Asf
                         offset += 2;
                         remaining -= 2;
                     }
-                    else len = 0; 
+                    else len = 0;
 
                     if (len > 0)
                     {
@@ -748,7 +748,7 @@ namespace Media.Containers.Asf
                             //16 number_channels
                             channels = (byte)Common.Binary.ReadU16(asfObject.Data, offset, Media.Common.Binary.IsBigEndian);
                             offset += 2;
-                            
+
                             //32 samples_per_second
                             rate = Common.Binary.ReadU32(asfObject.Data, offset, Media.Common.Binary.IsBigEndian);
 
@@ -856,13 +856,13 @@ namespace Media.Containers.Asf
 
                 //Parse Index....
 
-                Track created = new Track(asfObject, trackName, trackId, Created, Modified, (int)sampleCount, (int)height, (int)width, TimeSpan.FromMilliseconds(startTime / (double)timeScale), TimeSpan.FromMilliseconds(duration), 
+                Track created = new Track(asfObject, trackName, trackId, Created, Modified, (int)sampleCount, (int)height, (int)width, TimeSpan.FromMilliseconds(startTime / (double)timeScale), TimeSpan.FromMilliseconds(duration),
                     //Frames Per Seconds
                     // duration is in milliseconds, converted to seconds, scaled
                     mediaType == Sdp.MediaType.video ?
                     duration * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond / Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerSecond * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.MicrosecondsPerMillisecond
-                    : 
-                    rate, 
+                    :
+                    rate,
                     ///
                     mediaType, codecIndication, channels, bitDepth);
 

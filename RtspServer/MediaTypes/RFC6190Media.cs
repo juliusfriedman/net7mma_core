@@ -36,13 +36,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 //http://tools.ietf.org/html/rfc6184
 
-using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace Media.Rtsp.Server.MediaTypes
 {
@@ -69,7 +63,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             protected internal override void ProcessPacket(Rtp.RtpPacket packet, bool ignoreForbiddenZeroBit = true, bool fullStartCodes = false)
             {
-                
+
                 //Determine if the forbidden bit is set and the type of nal from the first byte
                 byte firstByte = packet.Payload[packet.HeaderOctets];
 

@@ -92,8 +92,8 @@ namespace Media.Rtsp.Server
         /// <summary>
         /// Stops the media
         /// </summary>
-        void Stop();   
-        
+        void Stop();
+
         //UserTag, IMedia<T>     
     }
 }

@@ -36,8 +36,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Net;
 
 namespace Media.Rtsp.Server.MediaTypes
@@ -79,7 +77,7 @@ namespace Media.Rtsp.Server.MediaTypes
         public override Rtp.RtpClient RtpClient
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return  IsDisposed ? null : Common.IDisposedExtensions.IsNullOrDisposed(RtspClient) ? null : RtspClient.Client; }
+            get { return IsDisposed ? null : Common.IDisposedExtensions.IsNullOrDisposed(RtspClient) ? null : RtspClient.Client; }
         }
 
         public override NetworkCredential SourceCredential
@@ -207,7 +205,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 RtspClient = new RtspClient(m_Source, rtpProtocolType, bufferSize);
 
                 RtspClient.OnConnect += RtspClient_OnConnect;
-                
+
                 RtspClient.OnDisconnect += RtspClient_OnDisconnect;
 
                 RtspClient.OnPlay += RtspClient_OnPlay;
@@ -224,7 +222,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 if (false.Equals(authType == AuthenticationSchemes.None)) RtspClient.AuthenticationScheme = SourceAuthenticationScheme = authType;
             }
-            
+
             //If only certain media should be setup 
             if (specificMedia is not null) SpecificMediaTypes = specificMedia;
 
@@ -241,7 +239,7 @@ namespace Media.Rtsp.Server.MediaTypes
         /// </summary>
         public override void Start()
         {
-            if (IsDisposed || State >= StreamState.StopRequested) return;            
+            if (IsDisposed || State >= StreamState.StopRequested) return;
 
             //May have to re-create client.
 
@@ -249,7 +247,7 @@ namespace Media.Rtsp.Server.MediaTypes
             {
                 RtspClient.Connect();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Common.ILoggingExtensions.LogException(RtspClient.Logger, ex);
 
@@ -298,11 +296,11 @@ namespace Media.Rtsp.Server.MediaTypes
             State = StreamState.StartRequested;
 
             try
-            {                
+            {
                 //Start playing
                 RtspClient.StartPlaying(MediaStartTime, MediaEndTime, SpecificMediaTypes);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 //StoPlaying and Disconnect when an exception occurs.
                 RtspClient.Disconnect(true);

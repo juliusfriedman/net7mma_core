@@ -35,7 +35,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Media.Containers.Mpeg
 {
@@ -54,7 +53,7 @@ namespace Media.Containers.Mpeg
         public static string ToTextualConvention(byte[] identifer, int offset = 0)
         {
             int streamId = GetStreamId(identifer);
-            return string.Join("-", "StreamId",  streamId, '(', Media.Containers.Mpeg.StreamTypes.ToTextualConvention((byte)streamId), ')');
+            return string.Join("-", "StreamId", streamId, '(', Media.Containers.Mpeg.StreamTypes.ToTextualConvention((byte)streamId), ')');
         }
 
         public PacketizedElementaryStreamReader(string filename, System.IO.FileAccess access = System.IO.FileAccess.Read) : base(filename, access) { }
@@ -63,7 +62,7 @@ namespace Media.Containers.Mpeg
 
         public PacketizedElementaryStreamReader(System.IO.FileStream source, System.IO.FileAccess access = System.IO.FileAccess.Read) : base(source, access) { }
 
-        public PacketizedElementaryStreamReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { } 
+        public PacketizedElementaryStreamReader(Uri uri, System.IO.Stream source, int bufferSize = 8192) : base(uri, source, null, bufferSize, true) { }
 
         //Methods for reading the PES OptionalHeader and StuffingLength...
 
@@ -234,6 +233,6 @@ namespace Media.Containers.Mpeg
         public override Common.SegmentStream GetSample(Container.Track track, out TimeSpan duration)
         {
             throw new NotImplementedException();
-        }       
+        }
     }
 }

@@ -28,7 +28,7 @@
         }
 
         public PacketBase(bool shouldDispose, System.TimeSpan lifetime)
-            :base(shouldDispose, lifetime)
+            : base(shouldDispose, lifetime)
         {
 
         }
@@ -49,7 +49,7 @@
             Length = size;
         }
 
-        public PacketBase(byte[] data, int offset, int length, bool isComplete, bool shouldDispose) 
+        public PacketBase(byte[] data, int offset, int length, bool isComplete, bool shouldDispose)
             : this(length, shouldDispose)
         {
             IsComplete = isComplete;
@@ -459,7 +459,7 @@
 
             return true;
         }
-        
+
         long IPacket.Length
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

@@ -54,7 +54,7 @@ namespace Media.Container
 
         public static Node CreateNodeFrom(Node n)
         {
-            return new Node(n); 
+            return new Node(n);
         }
 
         public static Node CreateNodeWithDataReference(Node n)
@@ -269,7 +269,7 @@ namespace Media.Container
         /// <param name="size"></param>
         /// <param name="complete"></param>
         public Node(IMediaContainer master, byte[] identifier, int lengthSize, long offset, long size, bool complete, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             if (master is null) throw new ArgumentNullException("master");
             if (identifier is null) throw new ArgumentNullException("identifier");
@@ -284,17 +284,17 @@ namespace Media.Container
         }
 
         public Node(IMediaContainer master, Common.MemorySegment identifierPointer, int identifierSize, int lengthSize, long offset, long size, bool complete, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             Master = master;
             DataOffset = offset;
 
             IdentifierPointer = identifierPointer;
             Identifier = IdentifierPointer.Array;
-            
+
             IdentifierSize = identifierSize;
             LengthSize = lengthSize;
-            
+
             DataSize = size;
             IsComplete = complete; //Should calulcate here?
         }
@@ -304,7 +304,7 @@ namespace Media.Container
         /// </summary>
         /// <param name="n"></param>
         Node(Node n, bool shouldDispose = true)
-            :base(shouldDispose)
+            : base(shouldDispose)
         {
             if (n is null) throw new ArgumentNullException();
             Master = n.Master;
@@ -326,7 +326,7 @@ namespace Media.Container
         Node(Node n, bool selfReference, int offset = 0, bool shouldDispose = true)
             : this(n, shouldDispose)
         {
-            if(n is not null && n.DataSize > 0 && n.DataAssigned)
+            if (n is not null && n.DataSize > 0 && n.DataAssigned)
             {
                 if (selfReference) m_Data = n.m_Data;
                 else
