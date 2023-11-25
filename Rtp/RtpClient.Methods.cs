@@ -34,6 +34,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * v//
  */
 using Media.Common.Extensions.Socket;
+using System.Linq;
 
 namespace Media.Rtp
 {
@@ -1645,7 +1646,7 @@ namespace Media.Rtp
             //TODO handle receiving when no $ and Channel is presenent... e.g. RFC4571
             //Would only be 2 then...
 
-            int sessionRequired = InterleavedOverhead;
+            int sessionRequired = TransportContexts.Min(tc => tc.MinimumPacketSize);
 
             //Todo, we allow a buffer to be given so we must also check if its changed to null...
 
