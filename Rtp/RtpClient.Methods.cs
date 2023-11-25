@@ -34,7 +34,6 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * v//
  */
 using Media.Common.Extensions.Socket;
-using System.Xml.Linq;
 
 namespace Media.Rtp
 {
@@ -1272,7 +1271,7 @@ namespace Media.Rtp
                 #region Verify Packet Headers
 
                 //Use CommonHeaderBits on the data after the Interleaved Frame Header
-                using RFC3550.CommonHeaderBits common = new RFC3550.CommonHeaderBits(buffer, offset + sessionRequired);
+                using RFC3550.CommonHeaderBits commonHeaderBits = new RFC3550.CommonHeaderBits(buffer, offset + sessionRequired);
 
                 //Try to mark the packetas compatible and find a context
                 bool incompatible = false, expectRtcp = false, expectRtp = false;
@@ -1293,12 +1292,12 @@ namespace Media.Rtp
                     }
 
                     //use a rtcp header to extract the information in the packet
-                    using Rtcp.RtcpHeader header = new Rtcp.RtcpHeader(buffer, offset + sessionRequired);
+                    using Rtcp.RtcpHeader rtcpHeader = new Rtcp.RtcpHeader(buffer, offset + sessionRequired);
                     
                     //Get the length in 'words' (by adding one)
                     //A length of 0 means 1 word
                     //A length of 65535 means only the header (no ssrc [or payload])
-                    ushort lengthInWordsPlusOne = (ushort)(header.LengthInWordsMinusOne + 1);
+                    ushort lengthInWordsPlusOne = (ushort)(rtcpHeader.LengthInWordsMinusOne + 1);
 
                     //Store any rtcp length so we can verify its not 0 and then additionally ensure its value is not larger then the frameLength
                     //Convert to bytes
@@ -1312,11 +1311,11 @@ namespace Media.Rtp
 
                     if (incompatible is false && //It was not already ruled incomaptible
                         lengthInWordsPlusOne > 0 && //If there is supposed to be SSRC in the packet
-                        header.Size > Rtcp.RtcpHeader.Length)
+                        rtcpHeader.Size > Rtcp.RtcpHeader.Length)
                     {
                         //Determine if Rtcp is expected
                         //Perform another lookup and check compatibility
-                        expectRtcp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextBySourceId(header.SendersSynchronizationSourceIdentifier))) ? false : true;
+                        expectRtcp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextBySourceId(rtcpHeader.SendersSynchronizationSourceIdentifier))) ? false : true;
                     }
 
                     //May be mixing channels...
@@ -1333,14 +1332,14 @@ namespace Media.Rtp
                         }
 
                         //the context by payload type is null is not discovering the identity check the SSRC.
-                        if (Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextByPayloadType(common.RtpPayloadType)) is false /*&& relevent.InDiscovery is false*/)
+                        if (Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextByPayloadType(commonHeaderBits.RtpPayloadType)) is false /*&& relevent.InDiscovery is false*/)
                         {
-                            using Rtp.RtpHeader header = new RtpHeader(buffer, offset + sessionRequired);
+                            using Rtp.RtpHeader rtpHeader = new RtpHeader(buffer, offset + sessionRequired);
                             
                             //The context was obtained by the frameChannel
                             //Use the SSRC to determine where it should be handled.
                             //If there is no context the packet is incompatible
-                            expectRtp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextBySourceId(header.SynchronizationSourceIdentifier))) ? false : true;
+                            expectRtp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextBySourceId(rtpHeader.SynchronizationSourceIdentifier))) ? false : true;
 
                             //(Could also check SequenceNumber to prevent duplicate packets from being processed.)
 

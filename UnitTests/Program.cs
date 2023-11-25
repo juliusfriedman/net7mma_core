@@ -108,7 +108,8 @@ namespace Media.UnitTests
             Media.UnitTests.RtpClientUnitTests.TestProcessFrameData.BackToBackRtspMessages, 
             Media.UnitTests.RtpClientUnitTests.TestProcessFrameData.Issue17245_Case1_Iteration, 
             Media.UnitTests.RtpClientUnitTests.TestProcessFrameData.Issue17245_Case2_Iteration,
-            Media.UnitTests.RtpClientUnitTests.TestInterleavedFraming,           
+            Media.UnitTests.RtpClientUnitTests.TestInterleavedFraming,
+            Media.UnitTests.RtpClientUnitTests.TestIndependentFraming,           
             //RtspClient
             //Tools 
             TestRtpTools, 
