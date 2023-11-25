@@ -101,12 +101,12 @@ namespace Media.Rtp
         /// <param name="readFrameByte">Indicates if the frameByte should be read (RFC2326)</param>
         /// <param name="frameByte">Indicates the frameByte to read</param>
         /// <returns> -1 If the buffer does not contain a RFC2326 / RFC4751 frame at the offset given</returns>
-        internal static int TryReadFrameHeader(byte[] buffer, int offset, out byte channel, byte? frameByte = BigEndianFrameControl, bool readChannel = true)
+        internal static int TryReadFrameHeader(byte[] buffer, int offset, out byte? channel, byte? frameByte = BigEndianFrameControl, bool readChannel = true, int sessionRequired = InterleavedOverhead)
         {
             //Must be assigned
             channel = default;
 
-            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer)) return -1;
+            if (Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(buffer, out int bufferLength) || bufferLength - offset < sessionRequired) return -1;
 
             //https://www.ietf.org/rfc/rfc2326.txt
 

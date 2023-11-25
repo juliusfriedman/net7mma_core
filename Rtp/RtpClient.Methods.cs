@@ -1186,7 +1186,7 @@ namespace Media.Rtp
         /// <param name="buffer">The optional buffer to use.</param>
         /// <returns>The amount of bytes the frame data SHOULD have</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        int ReadApplicationLayerFraming(ref int received, ref int sessionRequired, ref int offset, out byte frameChannel, out RtpClient.TransportContext context, out bool raisedEvent, byte[] buffer = null)
+        int ReadApplicationLayerFraming(ref int received, ref int sessionRequired, ref int offset, out byte? frameChannel, out RtpClient.TransportContext context, out bool raisedEvent, byte[] buffer = null)
         {
             //There is no relevant TransportContext assoicated yet.
             context = null;
@@ -1255,13 +1255,13 @@ namespace Media.Rtp
             //TODO if RFC4571 is specified do check here to avoid reading channel.
 
             //The amount of data needed for the frame comes from TryReadFrameHeader
-            int frameLength = TryReadFrameHeader(buffer, bufferOffset, out frameChannel, BigEndianFrameControl, true);
+            int frameLength = TryReadFrameHeader(buffer, bufferOffset, out frameChannel, BigEndianFrameControl, sessionRequired >= InterleavedOverhead, sessionRequired);
 
             //Assign a context if there is a frame of any size
-            if (frameLength >= 0)
+            if (frameChannel.HasValue && frameLength >= 0)
             {
                 //Assign the context
-                context = GetContextByChannels(frameChannel);
+                context = GetContextByChannels(frameChannel.Value);
 
                 //Increase the result by the size of the header
                 frameLength += sessionRequired;
@@ -1546,7 +1546,7 @@ namespace Media.Rtp
             TransportContext relevent = null;
 
             //The channel of the data
-            byte frameChannel = Common.Binary.Zero;
+            byte? frameChannel = default;
 
             //Get the length of the given buffer (Should actually use m_Buffer.Count when using our own buffer)
             int bufferLength = buffer.Length,
@@ -1794,9 +1794,9 @@ namespace Media.Rtp
                         if (jumbo)
                         {
                             //If rtp or rtcp is expected check data
-                            if (expectRtp || expectRtcp || frameChannel < TransportContexts.Count)
+                            if (expectRtp || expectRtcp || frameChannel.HasValue && frameChannel.Value < TransportContexts.Count)
                             {
-                                Media.Common.ILoggingExtensions.Log(Logger, InternalId + "ProcessFrameData - Large Packet of " + frameLength + " for Channel " + frameChannel + " remainingInBuffer=" + remainingInBuffer);
+                                Media.Common.ILoggingExtensions.Log(Logger, InternalId + "ProcessFrameData - Large Packet of " + frameLength + " for Channel " + frameChannel.Value + " remainingInBuffer=" + remainingInBuffer);
 
                                 //Could allow for the buffer to be replaced here for the remainder of this call only.
 
@@ -1879,7 +1879,7 @@ namespace Media.Rtp
                             case System.Net.Sockets.SocketError.TooManyOpenSockets:
                             case System.Net.Sockets.SocketError.TryAgain:
                             case System.Net.Sockets.SocketError.TimedOut:
-                                    Media.Common.ILoggingExtensions.Log(Logger, InternalId + "ProcessFrameData - (" + error + ") remainingOnSocket " + remainingOnSocket + " for Channel " + frameChannel + " remainingInBuffer=" + remainingInBuffer);
+                                    Media.Common.ILoggingExtensions.Log(Logger, InternalId + "ProcessFrameData - (" + error + ") remainingOnSocket " + remainingOnSocket + " for Channel " + frameChannel.Value + " remainingInBuffer=" + remainingInBuffer);
 
                                     if (registerY > 0) break;
 
