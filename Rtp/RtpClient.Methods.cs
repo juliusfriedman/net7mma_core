@@ -712,10 +712,7 @@ namespace Media.Rtp
 
             //If forced or the last reports were sent in less time than alloted by the m_SendInterval
             //Indicate if reports were sent in this interval
-            return force || context.LastRtcpReportSent == System.TimeSpan.MinValue || context.LastRtcpReportSent >= context.m_SendInterval ?
-                 SendRtcpPackets(PrepareReports(context, true, true), context, out error) > 0
-                 :
-                 false;
+            return (force || context.LastRtcpReportSent == System.TimeSpan.MinValue || context.LastRtcpReportSent >= context.m_SendInterval) && SendRtcpPackets(PrepareReports(context, true, true), context, out error) > 0;
         }
 
         /// <summary>
@@ -1314,7 +1311,7 @@ namespace Media.Rtp
                     {
                         //Determine if Rtcp is expected
                         //Perform another lookup and check compatibility
-                        expectRtcp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextBySourceId(rtcpHeader.SendersSynchronizationSourceIdentifier))) ? false : true;
+                        expectRtcp = !(incompatible = Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextBySourceId(rtcpHeader.SendersSynchronizationSourceIdentifier)));
                     }
 
                     //May be mixing channels...
@@ -1335,7 +1332,7 @@ namespace Media.Rtp
                         {
                             using Rtp.RtpHeader rtpHeader = new(buffer, offset + sessionRequired);
 
-                            expectRtp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextBySourceId(rtpHeader.SynchronizationSourceIdentifier))) ? false : true;
+                            expectRtp = !(incompatible = Common.IDisposedExtensions.IsNullOrDisposed(context = GetContextBySourceId(rtpHeader.SynchronizationSourceIdentifier)));
                         }
                         else incompatible = false;
                     }
@@ -1820,7 +1817,7 @@ namespace Media.Rtp
                                             {
                                                 //Determine if Rtcp is expected
                                                 //Perform another lookup and check compatibility
-                                                expectRtcp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(GetContextBySourceId(header.SendersSynchronizationSourceIdentifier))) ? false : true;
+                                                expectRtcp = !(incompatible = Common.IDisposedExtensions.IsNullOrDisposed(GetContextBySourceId(header.SendersSynchronizationSourceIdentifier)));
                                             }
                                         }
                                     }
@@ -1845,7 +1842,7 @@ namespace Media.Rtp
                                                 //The context was obtained by the frameChannel
                                                 //Use the SSRC to determine where it should be handled.
                                                 //If there is no context the packet is incompatible
-                                                expectRtp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(GetContextBySourceId(header.SynchronizationSourceIdentifier))) ? false : true;
+                                                expectRtp = !(incompatible = Common.IDisposedExtensions.IsNullOrDisposed(GetContextBySourceId(header.SynchronizationSourceIdentifier)));
 
                                                 //(Could also check SequenceNumber to prevent duplicate packets from being processed.)
 

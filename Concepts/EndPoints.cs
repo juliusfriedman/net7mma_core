@@ -95,11 +95,9 @@ namespace Concepts.Classes.Sockets
         {
             if (false.Equals(base.Equals(obj))) return false;
 
-            InternetEndPoint iNetComparand = obj as InternetEndPoint;
 
-            return iNetComparand is null
-                ? false
-                : ProtocolType == iNetComparand.ProtocolType &&
+            return obj is InternetEndPoint iNetComparand
+&& ProtocolType == iNetComparand.ProtocolType &&
                     ProtocolFamily == iNetComparand.ProtocolFamily;
         }
 
@@ -165,7 +163,7 @@ namespace Concepts.Classes.Sockets
             System.Net.Sockets.ProtocolType protocolType, System.Net.Sockets.ProtocolFamily protocolFamily)
             : base(protocolType, protocolFamily)
         {
-            if (port < System.Net.IPEndPoint.MinPort || port > System.Net.IPEndPoint.MaxPort)
+            if (port is < System.Net.IPEndPoint.MinPort or > System.Net.IPEndPoint.MaxPort)
             {
                 throw new System.ArgumentOutOfRangeException("port");
             }
@@ -218,11 +216,9 @@ namespace Concepts.Classes.Sockets
         {
             if (false.Equals(base.Equals(comparand))) return false;
 
-            InternetEndPoint iNetComparand = comparand as InternetEndPoint;
 
-            return iNetComparand is null
-                ? false
-                : m_Family == iNetComparand.m_Family &&
+            return comparand is InternetEndPoint iNetComparand
+&& m_Family == iNetComparand.m_Family &&
                     m_Port == iNetComparand.m_Port;
         }
 
@@ -268,11 +264,9 @@ namespace Concepts.Classes.Sockets
         {
             if (false.Equals(base.Equals(comparand))) return false;
 
-            DnsEndPoint dnsComparand = comparand as DnsEndPoint;
 
-            return dnsComparand is null
-                ? false
-                : m_Family == dnsComparand.m_Family &&
+            return comparand is DnsEndPoint dnsComparand
+&& m_Family == dnsComparand.m_Family &&
                     m_Port == dnsComparand.m_Port &&
                     m_Host == dnsComparand.m_Host;
         }

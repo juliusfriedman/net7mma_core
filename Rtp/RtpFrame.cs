@@ -412,7 +412,7 @@ namespace Media.Rtp
         public bool HasDepacketized
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Depacketized is null ? false : Depacketized.Count > 0; }
+            get { return Depacketized is not null && Depacketized.Count > 0; }
         }
 
         /// <summary>
@@ -430,7 +430,7 @@ namespace Media.Rtp
         public bool Transferred
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return IsEmpty ? false : Packets.All(p => p.Transferred.HasValue); }
+            get { return !IsEmpty && Packets.All(p => p.Transferred.HasValue); }
         }
 
         //Possible make an Action<bool> / Delegate 'IsCompleteCheck' which represents the functionality to use here and remove virtual.
@@ -1508,7 +1508,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            return object.ReferenceEquals(this, obj) ? true : obj is RtpFrame f && Equals(f);
+            return object.ReferenceEquals(this, obj) || obj is RtpFrame f && Equals(f);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

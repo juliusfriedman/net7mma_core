@@ -54,6 +54,6 @@
 
         public const byte SystemLast = byte.MaxValue;
 
-        public static bool IsSystemStartCode(byte b) { return b >= SystemFirst && b <= SystemLast; }
+        public static bool IsSystemStartCode(byte b) { return b is >= SystemFirst and <= SystemLast; }
     }
 }

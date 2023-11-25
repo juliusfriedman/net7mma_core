@@ -1186,7 +1186,7 @@ namespace Media.Sdp
         public override bool Equals(object obj)
         {
             //System.Object
-            return object.ReferenceEquals(this, obj) ? true : obj is SessionDescription sd && Equals(sd);
+            return object.ReferenceEquals(this, obj) || obj is SessionDescription sd && Equals(sd);
         }
 
         /// <summary>

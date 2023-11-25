@@ -1914,11 +1914,9 @@ namespace Media.Concepts.Hardware
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public static bool IsSupported(PlatformIntrinsic intrinsic)
             {
-                return Common.IDisposedExtensions.IsNullOrDisposed(intrinsic) || CpuId.GetMaximumFeatureLevel() == -1
-                    ? false
-                    : false == System.Enum.TryParse<CpuId.CpuIdFeature>(intrinsic.GetType().Name, true, out CpuIdFeature feature)
-                    ? false
-                    : CpuId.Supports(feature);
+                return !Common.IDisposedExtensions.IsNullOrDisposed(intrinsic) && CpuId.GetMaximumFeatureLevel() != -1
+&& false != System.Enum.TryParse<CpuId.CpuIdFeature>(intrinsic.GetType().Name, true, out CpuIdFeature feature)
+&& CpuId.Supports(feature);
             }
 
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -2092,15 +2090,11 @@ namespace Media.Concepts.Hardware
             /// <returns></returns>
             public static bool IsKnownVirtualMachine()
             {
-                switch (GetVendorString())
+                return GetVendorString() switch
                 {
-                    default: return false;
-                    case VendorStrings.Microsoft_Hv:
-                    case VendorStrings.KVMKVMKVM:
-                    case VendorStrings.VMwareVMware:
-                    case VendorStrings.XenVMMXenVMM:
-                        return true;
-                }
+                    VendorStrings.Microsoft_Hv or VendorStrings.KVMKVMKVM or VendorStrings.VMwareVMware or VendorStrings.XenVMMXenVMM => true,
+                    _ => false,
+                };
             }
 
             /// <summary>

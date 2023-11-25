@@ -420,7 +420,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            return object.ReferenceEquals(this, obj) ? true : obj is MemorySegment other && Equals(other);
+            return object.ReferenceEquals(this, obj) || obj is MemorySegment other && Equals(other);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

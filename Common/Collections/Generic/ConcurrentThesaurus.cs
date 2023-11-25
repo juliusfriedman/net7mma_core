@@ -251,7 +251,7 @@ namespace Media.Common.Collections.Generic
             else predicates.Add(value);//Othewise add the value to the predicates which is a reference to the key
 
             //Add the value if not already in the dictionary
-            return false == inDictionary ? Dictionary.TryAdd(key, predicates) : true;
+            return false != inDictionary || Dictionary.TryAdd(key, predicates);
         }
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()

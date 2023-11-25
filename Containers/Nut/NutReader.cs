@@ -412,7 +412,7 @@ namespace Media.Containers.Nut
 
                 m_MajorVersion = (int)DecodeVariableLength(stream, out int bytesRead);
 
-                if (m_MajorVersion < MinimumVersion || m_MajorVersion > MaximumVersion) throw new InvalidOperationException("Unsupported Version");
+                if (m_MajorVersion is < MinimumVersion or > MaximumVersion) throw new InvalidOperationException("Unsupported Version");
 
                 //2.4 reads minor version
                 if (m_MajorVersion > StableVersion) m_MinorVersion = (int)DecodeVariableLength(stream, out bytesRead);
@@ -483,9 +483,8 @@ namespace Media.Containers.Nut
                         tmp_match = DecodeVariableLength(stream, out bytesRead);
 
                         //Sanity
-                        if ((tmp_match <= short.MinValue || tmp_match > short.MaxValue)
-                            &&
-                            tmp_match != 1 - (1 << 62)) throw new InvalidOperationException("absolute delta match time must be less than or equal to short.MaxValue");
+                        if (tmp_match is (<= short.MinValue or > short.MaxValue) and
+                            not (1 - (1 << 62))) throw new InvalidOperationException("absolute delta match time must be less than or equal to short.MaxValue");
                     }
 
                     if (tmp_fields > 7) tmp_head_idx = DecodeVariableLength(stream, out bytesRead);
@@ -545,7 +544,7 @@ namespace Media.Containers.Nut
                     position += bytesRead;
 
                     //FROM FFMPEG Should ensure every value is > 0 && < 256
-                    if (headerLength < 0 || headerLength > MaximumHeaderOptions) throw new InvalidOperationException("headerLength Must be > 0 && < 256, found: " + headerLength);
+                    if (headerLength is < 0 or > MaximumHeaderOptions) throw new InvalidOperationException("headerLength Must be > 0 && < 256, found: " + headerLength);
 
                     //Get the header data
                     byte[] headerData = new byte[headerLength];

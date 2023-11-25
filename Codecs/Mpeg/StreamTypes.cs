@@ -70,9 +70,9 @@ namespace Media.Containers.Mpeg
 
         public const byte PrivateStream2 = 0xBF;
 
-        public static bool IsMpeg1or2AudioStream(byte code) { return code >= 0xC0 && code <= 0xDF; }
+        public static bool IsMpeg1or2AudioStream(byte code) { return code is >= 0xC0 and <= 0xDF; }
 
-        public static bool IsMpeg1or2VideoStream(byte code) { return code >= 0xE0 && code <= 0xEF; }
+        public static bool IsMpeg1or2VideoStream(byte code) { return code is >= 0xE0 and <= 0xEF; }
 
         public const byte ECMStream = 0xF0;
 
@@ -94,9 +94,9 @@ namespace Media.Containers.Mpeg
 
         public const byte AncillaryStream = 0xF9;
 
-        public static bool IsReserverd(byte b) { return b >= 0xFA && b <= 0xFE; }
+        public static bool IsReserverd(byte b) { return b is >= 0xFA and <= 0xFE; }
 
-        public static bool IsUserPrivate(byte b) { return b >= 0x20 && b <= 0x3F; }
+        public static bool IsUserPrivate(byte b) { return b is >= 0x20 and <= 0x3F; }
 
         public const byte ProgramStreamDirectory = byte.MaxValue;
 

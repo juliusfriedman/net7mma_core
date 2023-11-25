@@ -480,7 +480,7 @@
                             {
                                 byte ch = buffer[i];
 
-                                if ((ch == (byte)'\n') || (ch == (byte)'\r'))
+                                if (ch is ((byte)'\n') or ((byte)'\r'))
                                 {
                                     break;
                                 }

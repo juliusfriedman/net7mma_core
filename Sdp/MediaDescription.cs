@@ -339,7 +339,7 @@ namespace Media.Sdp
                 ? md.Equals(this)
                 : obj is Sdp.Lines.SessionMediaDescriptionLine sdml
                 ? Equals(sdml)
-                : obj is SessionDescriptionLine sdl ? m_Lines.Contains(sdl) : false;
+                : obj is SessionDescriptionLine sdl && m_Lines.Contains(sdl);
         }
 
         public override string ToString()
@@ -394,7 +394,7 @@ namespace Media.Sdp
             buffer.Append(MediaDescriptionLine.ToString());
 
             //LinesOnly:
-            foreach (SessionDescriptionLine l in m_Lines.Where(l => l.m_Type != Sdp.Lines.SessionBandwidthLine.BandwidthType && l.m_Type != Sdp.Lines.SessionAttributeLine.AttributeType))
+            foreach (SessionDescriptionLine l in m_Lines.Where(l => l.m_Type is not Sdp.Lines.SessionBandwidthLine.BandwidthType and not Sdp.Lines.SessionAttributeLine.AttributeType))
                 buffer.Append(l.ToString());
 
             foreach (SessionDescriptionLine l in m_Lines.Where(l => l.m_Type == Sdp.Lines.SessionBandwidthLine.BandwidthType))

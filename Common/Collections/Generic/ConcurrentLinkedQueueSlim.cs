@@ -343,12 +343,11 @@ namespace Media.Common.Collections.Generic
             //if (/*Count is Common.Binary.LongZero ||*/ First is null)) 
             //else Last = Last.Next = new Node(ref t);
 
-            switch (System.Threading.Interlocked.Read(ref m_Count))
+            Last = System.Threading.Interlocked.Read(ref m_Count) switch
             {
-                case Common.Binary.LongZero: Last = First = new Node(ref t); break;
-                default: Last = Last.Next = new Node(ref t); break;
-                    //default: Last = System.Threading.Interlocked.Exchange<Node>(ref Last.Next, new Node(ref t)) ?? Last.Next; break;
-            }
+                Common.Binary.LongZero => First = new Node(ref t),
+                _ => Last.Next = new Node(ref t),
+            };
 
             //Increment (1) @ Count
             System.Threading.Interlocked.Increment(ref m_Count);

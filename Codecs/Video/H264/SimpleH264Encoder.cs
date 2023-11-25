@@ -301,7 +301,7 @@ public class SimpleH264Encoder : IDisposable
 
         public void addbits(uint lval, int nNumbits)
         {
-            if ((nNumbits <= 0) || (nNumbits > 64))
+            if (nNumbits is <= 0 or > 64)
             {
                 throw new System.Exception("Error: numbits must be between 1 ... 64");
             }

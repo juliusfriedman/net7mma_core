@@ -327,7 +327,7 @@ namespace Media.Codecs.Flac
         public static bool IsReservedBlock(BlockType blockType)
         {
             byte byteLockType = (byte)blockType;
-            return byteLockType >= 7 && byteLockType <= 126;
+            return byteLockType is >= 7 and <= 126;
         }
 
         public static bool IsInvalid(BlockType blockType) { return blockType == BlockType.Invalid; }
@@ -363,11 +363,11 @@ namespace Media.Codecs.Flac
             }
             blocksize = val == 1
                 ? 192
-                : val >= 2 && val <= 5
+                : val is >= 2 and <= 5
                 ? 576 << (val - 2)
-                : val == 6 || val == 7
+                : val is 6 or 7
                 ? val
-                : val >= 8 && val <= 15 ? 256 << (val - 8) : throw new InvalidOperationException("Invalid Blocksize value: " + val);
+                : val is >= 8 and <= 15 ? 256 << (val - 8) : throw new InvalidOperationException("Invalid Blocksize value: " + val);
 
             return blocksize;
 
@@ -385,7 +385,7 @@ namespace Media.Codecs.Flac
 
             //samplerate
             int sampleRate = identifier[2] & 0x0F;
-            sampleRate = sampleRate >= 1 && sampleRate <= 11
+            sampleRate = sampleRate is >= 1 and <= 11
                 ? SampleRateTable[sampleRate]
                 : throw new InvalidOperationException("Invalid SampleRate value: " + sampleRate);
             return sampleRate;
@@ -437,7 +437,7 @@ namespace Media.Codecs.Flac
             #region bitspersample
 
             int bitsPerSample = (identififer[3] & 0x0E) >> 1;
-            bitsPerSample = bitsPerSample == 3 || bitsPerSample >= 7 || bitsPerSample < 0
+            bitsPerSample = bitsPerSample is 3 or >= 7 or < 0
                 ? throw new InvalidOperationException("Invalid BitsPerSampleIndex")
                 : BitPerSampleTable[bitsPerSample];
             return bitsPerSample;

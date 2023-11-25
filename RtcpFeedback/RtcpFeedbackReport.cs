@@ -31,7 +31,7 @@ namespace Media.Rtcp.Feedback
             : base(reference.Header, reference.Payload, shouldDispose)
         {
             //Validate PayloadType
-            if (Header.PayloadType < 205 || Header.PayloadType > 206) throw new ArgumentException("Header.PayloadType is not equal to the expected type.", "reference");
+            if (Header.PayloadType is < 205 or > 206) throw new ArgumentException("Header.PayloadType is not equal to the expected type.", "reference");
 
             //Validate Format
             switch (Format)

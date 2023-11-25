@@ -652,7 +652,7 @@ namespace Media.Concepts.Classes
             {
                 return a is null
                     ? b is null
-                    : b is null ? false : a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalMeters : a.Units == b.TotalMeters;
+                    : b is not null && (a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalMeters : a.Units == b.TotalMeters);
             }
 
             public static bool operator !=(Distance a, IDistance b)
@@ -861,7 +861,7 @@ namespace Media.Concepts.Classes
             {
                 return a is null
                     ? b is null
-                    : b is null ? false : a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits;
+                    : b is not null && (a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits);
             }
 
             public static bool operator !=(Frequency a, Frequency b)
@@ -871,7 +871,7 @@ namespace Media.Concepts.Classes
 
             public override bool Equals(object obj)
             {
-                return obj is Frequency ? true : base.Equals(obj);
+                return obj is Frequency || base.Equals(obj);
             }
 
             public override int GetHashCode()
@@ -1016,7 +1016,7 @@ namespace Media.Concepts.Classes
             {
                 return a is null
                     ? b is null
-                    : b is null ? false : a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits;
+                    : b is not null && (a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits);
             }
 
             public static bool operator !=(Temperature a, ITemperature b)
@@ -1026,7 +1026,7 @@ namespace Media.Concepts.Classes
 
             public override bool Equals(object obj)
             {
-                return obj is ITemperature ? true : base.Equals(obj);
+                return obj is ITemperature || base.Equals(obj);
             }
 
             public override int GetHashCode()
@@ -1185,7 +1185,7 @@ namespace Media.Concepts.Classes
             {
                 return a is null
                     ? b is null
-                    : b is null ? false : a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits;
+                    : b is not null && (a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits);
             }
 
             public static bool operator !=(Mass a, IMass b)
@@ -1195,7 +1195,7 @@ namespace Media.Concepts.Classes
 
             public override bool Equals(object obj)
             {
-                return obj is IMass ? true : base.Equals(obj);
+                return obj is IMass || base.Equals(obj);
             }
 
             public override int GetHashCode()
@@ -1415,7 +1415,7 @@ namespace Media.Concepts.Classes
             {
                 return a is null
                     ? b is null
-                    : b is null ? false : a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits;
+                    : b is not null && (a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits);
             }
 
             public static bool operator !=(Energy a, IEnergy b)
@@ -1635,7 +1635,7 @@ namespace Media.Concepts.Classes
             {
                 return a is null
                     ? b is null
-                    : b is null ? false : a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits;
+                    : b is not null && (a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits);
             }
 
             public static bool operator !=(Velocity a, IVelocity b)
@@ -1785,7 +1785,7 @@ namespace Media.Concepts.Classes
             {
                 return a is null
                     ? b is null
-                    : b is null ? false : a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits;
+                    : b is not null && (a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits);
             }
 
             public static bool operator !=(Force a, IForce b)
@@ -1944,7 +1944,7 @@ namespace Media.Concepts.Classes
             {
                 return a is null
                     ? b is null
-                    : b is null ? false : a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits;
+                    : b is not null && (a.Constant.Equals(b.Constant) is false ? a.Units * b.Constant == b.TotalUnits : a.Units == b.TotalUnits);
             }
 
             public static bool operator !=(Wavelength a, IWavelength b)

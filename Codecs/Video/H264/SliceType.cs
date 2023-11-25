@@ -34,15 +34,11 @@ namespace Media.Codecs.Video.H264
         [CLSCompliant(false)]
         public static bool IsIntra(ref byte sliceType)
         {
-            switch (sliceType)
+            return sliceType switch
             {
-                case SliceType.I:
-                case SliceType.SI:
-                case SliceType.IAlt:
-                case SliceType.SIAlt:
-                    return true;
-                default: return false;
-            }
+                SliceType.I or SliceType.SI or SliceType.IAlt or SliceType.SIAlt => true,
+                _ => false,
+            };
         }
 
         [CLSCompliant(true)]

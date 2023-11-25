@@ -918,7 +918,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            return ReferenceEquals(this, obj) ? true : obj is RtpPacket p && Equals(p);
+            return ReferenceEquals(this, obj) || obj is RtpPacket p && Equals(p);
         }
 
         //Packet equals...

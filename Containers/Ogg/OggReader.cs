@@ -149,15 +149,13 @@ namespace Media.Containers.Ogg
                 result = (CapturePattern)Common.Binary.ReadU64(page.Data, 0, Media.Common.Binary.IsBigEndian);
 
                 //Determine if this is a known capture pattern.
-                switch (result)
+                return result switch
                 {
-                    case CapturePattern.fishead:
-                    case CapturePattern.fisbone:
-                    case CapturePattern.index: return result.ToString();
+                    CapturePattern.fishead or CapturePattern.fisbone or CapturePattern.index => result.ToString(),
                     //Todo should be Oggs to be sure and default should break.
                     //Was already Oggs, just return that
-                    default: return CapturePattern.Oggs.ToString();
-                }
+                    _ => CapturePattern.Oggs.ToString(),
+                };
             }
 
             return base.ToTextualConvention(page);

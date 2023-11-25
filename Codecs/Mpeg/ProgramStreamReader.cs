@@ -423,7 +423,7 @@ namespace Media.Containers.Mpeg
                 byte streamId = node.Data[offset++];
 
                 //Use constants from StreamType and see if a switch could be better.
-                if (streamId < 0xBC && streamId != 0xB8 && streamId != 0xB9) throw new InvalidOperationException("All Entries in the System Header must apply to a stream with an id >= 0xBC");
+                if (streamId is < 0xBC and not 0xB8 and not 0xB9) throw new InvalidOperationException("All Entries in the System Header must apply to a stream with an id >= 0xBC");
 
                 /*
                  1-bit boolean. False (0) indicates the multiplier is 128, TRUE (1) indicates the multiplier is 1024. 

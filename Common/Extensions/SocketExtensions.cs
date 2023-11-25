@@ -99,7 +99,7 @@ namespace Media.Common.Extensions.Socket
         public static int FindOpenPort(System.Net.Sockets.ProtocolType type, int start = 30000, bool even = true, System.Net.IPAddress localIp = null)
         {
             //As IP would imply either or Only Tcp or Udp please.
-            if (type != System.Net.Sockets.ProtocolType.Udp && type != System.Net.Sockets.ProtocolType.Tcp) return -1;
+            if (type is not System.Net.Sockets.ProtocolType.Udp and not System.Net.Sockets.ProtocolType.Tcp) return -1;
 
             //Start at the given port number
             int port = start;
@@ -117,16 +117,12 @@ namespace Media.Common.Extensions.Socket
             try
             {
                 //Determine if Udp or Tcp listeners are being checked.
-                switch (type)
+                listeners = type switch
                 {
-                    case System.Net.Sockets.ProtocolType.Udp:
-                        listeners = ipGlobalProperties.GetActiveUdpListeners();
-                        break;
-                    case System.Net.Sockets.ProtocolType.Tcp:
-                        listeners = ipGlobalProperties.GetActiveTcpListeners();
-                        break;
-                    default: throw new System.NotSupportedException("The given ProtocolType is not supported");
-                }
+                    System.Net.Sockets.ProtocolType.Udp => ipGlobalProperties.GetActiveUdpListeners(),
+                    System.Net.Sockets.ProtocolType.Tcp => ipGlobalProperties.GetActiveTcpListeners(),
+                    _ => throw new System.NotSupportedException("The given ProtocolType is not supported"),
+                };
             }
             catch (System.NotImplementedException)
             {
@@ -212,10 +208,8 @@ namespace Media.Common.Extensions.Socket
                     catch (System.Exception ex)
                     {
                         //Check for the expected error.
-                        if (ex is System.Net.Sockets.SocketException)
+                        if (ex is System.Net.Sockets.SocketException se)
                         {
-                            System.Net.Sockets.SocketException se = (System.Net.Sockets.SocketException)ex;
-
                             if (se.SocketErrorCode == System.Net.Sockets.SocketError.AddressAlreadyInUse)
                             {
                                 //Try next port
@@ -845,9 +839,8 @@ namespace Media.Common.Extensions.Socket
             //Todo, static local allocation
             byte[] value = socket.GetSocketOption(System.Net.Sockets.SocketOptionLevel.Tcp, System.Net.Sockets.SocketOptionName.Expedited, len);
 
-            return Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(value, out len) || len < Common.Binary.BytesPerInteger
-                ? false
-                : Common.Binary.ReadU32(value, Common.Binary.BytesPerInteger, Media.Common.Binary.IsLittleEndian) > 0;
+            return !Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(value, out len) && len >= Common.Binary.BytesPerInteger
+&& Common.Binary.ReadU32(value, Common.Binary.BytesPerInteger, Media.Common.Binary.IsLittleEndian) > 0;
         }
 
         #endregion
@@ -1114,12 +1107,12 @@ namespace Media.Common.Extensions.Socket
 
             if (nif is null) return -1;
 
-            switch (socket.AddressFamily)
+            return socket.AddressFamily switch
             {
-                case System.Net.Sockets.AddressFamily.InterNetwork: return nif.GetIPProperties().GetIPv4Properties().Mtu;
-                case System.Net.Sockets.AddressFamily.InterNetworkV6: return nif.GetIPProperties().GetIPv6Properties().Mtu;
-                default: return -1;
-            }
+                System.Net.Sockets.AddressFamily.InterNetwork => nif.GetIPProperties().GetIPv4Properties().Mtu,
+                System.Net.Sockets.AddressFamily.InterNetworkV6 => nif.GetIPProperties().GetIPv6Properties().Mtu,
+                _ => -1,
+            };
         }
 
         public static bool TryGetMaximumTransmittableUnit(System.Net.Sockets.Socket socket, out int mtu)

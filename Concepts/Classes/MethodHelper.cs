@@ -227,9 +227,7 @@ namespace Media.Concepts.Classes
 
         private static Type GetMethodReturnType(MethodBase method)
         {
-            MethodInfo methodInfo = method as MethodInfo;
-
-            if (methodInfo is null)
+            if (method is not MethodInfo methodInfo)
             {
                 // Constructor info.
                 throw new ArgumentException("Unsupported MethodBase : " + method.GetType().Name, "method");

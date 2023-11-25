@@ -2264,11 +2264,10 @@ namespace Media.Rtsp//.Server
             //addressString += + ((IPEndPoint)RemoteEndPoint).Port;
 
             //Check for the existing connectionLine
-            Sdp.Lines.SessionConnectionLine connectionLine = sdp.ConnectionLine as Sdp.Lines.SessionConnectionLine;
 
             //Add the new line if needed
 
-            if (connectionLine is null) sdp.ConnectionLine = connectionLine = new Sdp.Lines.SessionConnectionLine()
+            if (sdp.ConnectionLine is not Sdp.Lines.SessionConnectionLine connectionLine) sdp.ConnectionLine = connectionLine = new Sdp.Lines.SessionConnectionLine()
             {
                 ConnectionAddress = addressString,
                 ConnectionAddressType = m_RtspSocket.AddressFamily == AddressFamily.InterNetworkV6 ? Media.Sdp.Lines.SessionConnectionLine.IP6 : Media.Sdp.Lines.SessionConnectionLine.IP4,

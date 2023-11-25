@@ -216,7 +216,7 @@ namespace Media.RtpTools
         internal struct PayloadDescription
         {
 
-            internal static bool IsDynamic(byte payloadType) { return payloadType >= 96 && payloadType <= 127; }
+            internal static bool IsDynamic(byte payloadType) { return payloadType is >= 96 and <= 127; }
 
             //IsReserved?
 
@@ -771,7 +771,7 @@ namespace Media.RtpTools
                     format = FileFormat.Unknown;
                     return null;
                 }
-                else if (peek == RtpDump.RtpDumpExtensions.Hash || peek == (char)Common.ASCII.Space)
+                else if (peek is RtpDump.RtpDumpExtensions.Hash or ((char)Common.ASCII.Space))
                 {
                     //Comment lines start with # (Hash). Strings are enclosed in quotation marks.
                     parsingCommentOrWhitespace = true;
@@ -1174,7 +1174,7 @@ namespace Media.RtpTools
             if (RtpSend.PayloadDescription.IsDynamic(payloadType)) return RtpSend.PayloadDescription.Dynamic.EncodingName;
 
             //Check for conflict avoidance
-            if (payloadType >= 72 && payloadType <= 76) return RtpSend.PayloadDescription.ConflictAvoidance.EncodingName;
+            if (payloadType is >= 72 and <= 76) return RtpSend.PayloadDescription.ConflictAvoidance.EncodingName;
 
             //Check for conflict avoidance
             if (payloadType >= 35 && payloadType <= 71 || payloadType >= 77 && payloadType < RtpSend.PayloadDescription.Dynamic.PayloadType) return RtpSend.PayloadDescription.Unassigned.EncodingName;

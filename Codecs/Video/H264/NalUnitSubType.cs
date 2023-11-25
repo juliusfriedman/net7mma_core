@@ -11,7 +11,7 @@ namespace Media.Codecs.Video.H264
         public const byte AggregationPacket = 0x02;
 
         [CLSCompliant(false)]
-        public static bool IsReserved(ref byte subType) { return subType == NalUnitSubType.Reserved || subType >= 3 && subType <= Common.Binary.FiveBitMaxValue; }
+        public static bool IsReserved(ref byte subType) { return subType is NalUnitSubType.Reserved or >= 3 and <= Common.Binary.FiveBitMaxValue; }
 
         [CLSCompliant(true)]
         public static bool IsReserved(byte subType) { return IsReserved(ref subType); }

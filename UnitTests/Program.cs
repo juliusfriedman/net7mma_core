@@ -2651,10 +2651,7 @@ namespace Media.UnitTests
                                     Console.WriteLine("Performing Load Test");
                                     System.Threading.ThreadPool.QueueUserWorkItem((_) =>
                                     {
-
-                                        Media.Rtsp.RtspServer localServer = _ as Media.Rtsp.RtspServer;
-
-                                        bool input = localServer is null ? true : localServer.IsRunning;
+                                        bool input = _ is not Media.Rtsp.RtspServer localServer || localServer.IsRunning;
 
                                         string name;
 
@@ -3240,7 +3237,7 @@ namespace Media.UnitTests
 
                     //If there is not a sps or pps in band and this is the first frame given to a decoder then it needs to contain a SPS and PPS
                     //This is typically retrieved from the SessionDescription or CodecPrivateData but only the very first time.
-                    if (/*false == m_InitializedStream && */ false == profileFrame.ContainedUnitTypes.Any(nalType => nalType == Media.Codecs.Video.H264.NalUnitType.SequenceParameterSet || nalType == Media.Codecs.Video.H264.NalUnitType.PictureParameterSet) /*false == profileFrame.ContainsSequenceParameterSet || false == profileFrame.ContainsPictureParameterSet*/)
+                    if (/*false == m_InitializedStream && */ false == profileFrame.ContainedUnitTypes.Any(nalType => nalType is Media.Codecs.Video.H264.NalUnitType.SequenceParameterSet or Media.Codecs.Video.H264.NalUnitType.PictureParameterSet) /*false == profileFrame.ContainsSequenceParameterSet || false == profileFrame.ContainsPictureParameterSet*/)
                     {
                         //From the MediaDescription.FmtpLine from the SessionDescription which describes the media.
                         Media.Sdp.Lines.FormatTypeLine fmtp = new(Media.Sdp.SessionDescriptionLine.Parse("a=fmtp:97 packetization-mode=1;profile-level-id=42C01E;sprop-parameter-sets=Z0LAHtkDxWhAAAADAEAAAAwDxYuS,aMuMsg=="));

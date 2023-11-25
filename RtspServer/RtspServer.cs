@@ -2968,8 +2968,8 @@ namespace Media.Rtsp
                 //Send the response to the client
                 ProcessSendRtspMessage(resp, session, sendResponse);
 
-                if (resp.RtspStatusCode > RtspStatusCode.Unknown &&
-                    resp.RtspStatusCode <= RtspStatusCode.OK)
+                if (resp.RtspStatusCode is > RtspStatusCode.Unknown and
+                    <= RtspStatusCode.OK)
                 {
                     //Take the range into account given.
                     session.ProcessPacketBuffer(found);

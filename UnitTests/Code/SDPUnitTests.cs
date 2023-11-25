@@ -1508,7 +1508,7 @@ a=rtcp-fb:96 nack";
 
             var line = mediaDescription.Lines.Skip(3).FirstOrDefault();
 
-            if (!(line is Media.Sdp.Lines.SessionAttributeLine)) throw new Exception("line is not SessionAttributeLine");
+            if (line is not Media.Sdp.Lines.SessionAttributeLine) throw new Exception("line is not SessionAttributeLine");
 
             if (line.ToString() != "a=mpeg4-iod: \"data:application/mpeg4-iod;base64,AoE8AA8BHgEBAQOBDAABQG5kYXRhOmFwcGxpY2F0aW9uL21wZWc0LW9kLWF1O2Jhc2U2NCxBVGdCR3dVZkF4Y0F5U1FBWlFRTklCRUFGM0FBQVBvQUFBRERVQVlCQkE9PQEbAp8DFQBlBQQNQBUAB9AAAD6AAAA+gAYBAwQNAQUAAMgAAAAAAAAAAAYJAQAAAAAAAAAAA2EAAkA+ZGF0YTphcHBsaWNhdGlvbi9tcGVnNC1iaWZzLWF1O2Jhc2U2NCx3QkFTZ1RBcUJYSmhCSWhRUlFVL0FBPT0EEgINAAAUAAAAAAAAAAAFAwAAQAYJAQAAAAAAAAAA\"\r\n") throw new Exception("InitialObjectDescriptor");
 

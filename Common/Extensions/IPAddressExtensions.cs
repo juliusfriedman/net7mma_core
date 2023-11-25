@@ -165,7 +165,7 @@ namespace Media.Common.Extensions.IPAddress
                         byte highIP = (byte)(ipAddress.Address & byte.MaxValue); // ipAddress.GetAddressBytes()[0];
 #pragma warning restore CS0618 // Type or member is obsolete
 
-                        return highIP >= 224 && highIP <= 239;
+                        return highIP is >= 224 and <= 239;
 #endif
                     }
                 case System.Net.Sockets.AddressFamily.InterNetworkV6:

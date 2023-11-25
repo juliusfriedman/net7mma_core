@@ -1042,11 +1042,9 @@ namespace Media.Rtsp.Server.MediaTypes
     {
         public static bool Contains(this Media.Rtsp.Server.MediaTypes.RFC6184Media.RFC6184Frame frame, params byte[] nalTypes)
         {
-            return Common.IDisposedExtensions.IsNullOrDisposed(frame)
-                ? false
-                : Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(nalTypes)
-                ? false
-                : frame.m_ContainedNalTypes.Any(n => nalTypes.Contains(n));
+            return !Common.IDisposedExtensions.IsNullOrDisposed(frame)
+&& !Common.Extensions.Array.ArrayExtensions.IsNullOrEmpty(nalTypes)
+&& frame.m_ContainedNalTypes.Any(n => nalTypes.Contains(n));
         }
 
         public static bool IsKeyFrame(this Media.Rtsp.Server.MediaTypes.RFC6184Media.RFC6184Frame frame)

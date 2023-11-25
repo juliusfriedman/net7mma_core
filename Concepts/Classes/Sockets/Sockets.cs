@@ -71,17 +71,12 @@
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public int IsFatalError(ref System.Net.Sockets.SocketError error, System.Net.Sockets.Socket socket)
         {
-            switch (error)
+            return error switch
             {
-                case System.Net.Sockets.SocketError.ConnectionAborted:
-                case System.Net.Sockets.SocketError.ConnectionReset:
-                case System.Net.Sockets.SocketError.Shutdown:
-                    return 1;
-                case System.Net.Sockets.SocketError.Success:
-                    return 0;
-                case System.Net.Sockets.SocketError.SocketError:
-                default: return (int)error;
-            }
+                System.Net.Sockets.SocketError.ConnectionAborted or System.Net.Sockets.SocketError.ConnectionReset or System.Net.Sockets.SocketError.Shutdown => 1,
+                System.Net.Sockets.SocketError.Success => 0,
+                _ => (int)error,
+            };
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

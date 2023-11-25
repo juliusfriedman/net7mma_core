@@ -734,96 +734,96 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override Number Addition(ref Number a, ref Number b)
         {
-            switch (a.TypeCode)
+            return a.TypeCode switch
             {
-                case System.TypeCode.SByte: return new Number((a.ToSByte() + b.ToSByte()));
-                case System.TypeCode.Byte: return new Number((a.ToByte() + b.ToByte()));
-                case System.TypeCode.Int16: return new Number((a.ToInt16() + b.ToInt16()));
-                case System.TypeCode.UInt16: return new Number((a.ToUInt16() + b.ToUInt16()));
-                case System.TypeCode.Int32: return new Number((a.ToInt32() + b.ToInt32()));
-                case System.TypeCode.UInt32: return new Number((a.ToUInt32() + b.ToUInt32()));
-                case System.TypeCode.Int64: return new Number((a.ToInt64() + b.ToInt64()));
-                case System.TypeCode.UInt64: return new Number((a.ToUInt64() + b.ToUInt64()));
-                case System.TypeCode.Decimal: return new Number((a.ToDecimal() + b.ToDecimal()));
-                case System.TypeCode.Double: return new Number((a.ToDouble() + b.ToDouble()));
-                default: return (Number)Bitable.DoubleZero;
-            }
+                System.TypeCode.SByte => new Number((a.ToSByte() + b.ToSByte())),
+                System.TypeCode.Byte => new Number((a.ToByte() + b.ToByte())),
+                System.TypeCode.Int16 => new Number((a.ToInt16() + b.ToInt16())),
+                System.TypeCode.UInt16 => new Number((a.ToUInt16() + b.ToUInt16())),
+                System.TypeCode.Int32 => new Number((a.ToInt32() + b.ToInt32())),
+                System.TypeCode.UInt32 => new Number((a.ToUInt32() + b.ToUInt32())),
+                System.TypeCode.Int64 => new Number((a.ToInt64() + b.ToInt64())),
+                System.TypeCode.UInt64 => new Number((a.ToUInt64() + b.ToUInt64())),
+                System.TypeCode.Decimal => new Number((a.ToDecimal() + b.ToDecimal())),
+                System.TypeCode.Double => new Number((a.ToDouble() + b.ToDouble())),
+                _ => (Number)Bitable.DoubleZero,
+            };
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override Number Subtraction(ref Number a, ref Number b)
         {
-            switch (a.TypeCode)
+            return a.TypeCode switch
             {
-                case System.TypeCode.SByte: return new Number((a.ToSByte() - b.ToSByte()));
-                case System.TypeCode.Byte: return new Number((a.ToByte() - b.ToByte()));
-                case System.TypeCode.Int16: return new Number((a.ToInt16() - b.ToInt16()));
-                case System.TypeCode.UInt16: return new Number((a.ToUInt16() - b.ToUInt16()));
-                case System.TypeCode.Int32: return new Number((a.ToInt32() - b.ToInt32()));
-                case System.TypeCode.UInt32: return new Number((a.ToUInt32() - b.ToUInt32()));
-                case System.TypeCode.Int64: return new Number((a.ToInt64() - b.ToInt64()));
-                case System.TypeCode.UInt64: return new Number((a.ToUInt64() - b.ToUInt64()));
-                case System.TypeCode.Decimal: return new Number((a.ToDecimal() - b.ToDecimal()));
-                case System.TypeCode.Double: return new Number((a.ToDouble() - b.ToDouble()));
-                default: return (Number)Bitable.DoubleZero;
-            }
+                System.TypeCode.SByte => new Number((a.ToSByte() - b.ToSByte())),
+                System.TypeCode.Byte => new Number((a.ToByte() - b.ToByte())),
+                System.TypeCode.Int16 => new Number((a.ToInt16() - b.ToInt16())),
+                System.TypeCode.UInt16 => new Number((a.ToUInt16() - b.ToUInt16())),
+                System.TypeCode.Int32 => new Number((a.ToInt32() - b.ToInt32())),
+                System.TypeCode.UInt32 => new Number((a.ToUInt32() - b.ToUInt32())),
+                System.TypeCode.Int64 => new Number((a.ToInt64() - b.ToInt64())),
+                System.TypeCode.UInt64 => new Number((a.ToUInt64() - b.ToUInt64())),
+                System.TypeCode.Decimal => new Number((a.ToDecimal() - b.ToDecimal())),
+                System.TypeCode.Double => new Number((a.ToDouble() - b.ToDouble())),
+                _ => (Number)Bitable.DoubleZero,
+            };
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override Number Multiplication(ref Number a, ref Number b)
         {
-            switch (a.TypeCode)
+            return a.TypeCode switch
             {
-                case System.TypeCode.SByte: return new Number((a.ToSByte() * b.ToSByte()));
-                case System.TypeCode.Byte: return new Number((a.ToByte() * b.ToByte()));
-                case System.TypeCode.Int16: return new Number((a.ToInt16() * b.ToInt16()));
-                case System.TypeCode.UInt16: return new Number((a.ToUInt16() * b.ToUInt16()));
-                case System.TypeCode.Int32: return new Number((a.ToInt32() * b.ToInt32()));
-                case System.TypeCode.UInt32: return new Number((a.ToUInt32() * b.ToUInt32()));
-                case System.TypeCode.Int64: return new Number((a.ToInt64() * b.ToInt64()));
-                case System.TypeCode.UInt64: return new Number((a.ToUInt64() * b.ToUInt64()));
-                case System.TypeCode.Decimal: return new Number((a.ToDecimal() * b.ToDecimal()));
-                case System.TypeCode.Double: return new Number((a.ToDouble() * b.ToDouble()));
-                default: return (Number)Bitable.DoubleZero;
-            }
+                System.TypeCode.SByte => new Number((a.ToSByte() * b.ToSByte())),
+                System.TypeCode.Byte => new Number((a.ToByte() * b.ToByte())),
+                System.TypeCode.Int16 => new Number((a.ToInt16() * b.ToInt16())),
+                System.TypeCode.UInt16 => new Number((a.ToUInt16() * b.ToUInt16())),
+                System.TypeCode.Int32 => new Number((a.ToInt32() * b.ToInt32())),
+                System.TypeCode.UInt32 => new Number((a.ToUInt32() * b.ToUInt32())),
+                System.TypeCode.Int64 => new Number((a.ToInt64() * b.ToInt64())),
+                System.TypeCode.UInt64 => new Number((a.ToUInt64() * b.ToUInt64())),
+                System.TypeCode.Decimal => new Number((a.ToDecimal() * b.ToDecimal())),
+                System.TypeCode.Double => new Number((a.ToDouble() * b.ToDouble())),
+                _ => (Number)Bitable.DoubleZero,
+            };
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override Number Division(ref Number a, ref Number b)
         {
-            switch (a.TypeCode)
+            return a.TypeCode switch
             {
-                case System.TypeCode.SByte: return new Number((a.ToSByte() / b.ToSByte()));
-                case System.TypeCode.Byte: return new Number((a.ToByte() / b.ToByte()));
-                case System.TypeCode.Int16: return new Number((a.ToInt16() / b.ToInt16()));
-                case System.TypeCode.UInt16: return new Number((a.ToUInt16() / b.ToUInt16()));
-                case System.TypeCode.Int32: return new Number((a.ToInt32() / b.ToInt32()));
-                case System.TypeCode.UInt32: return new Number((a.ToUInt32() / b.ToUInt32()));
-                case System.TypeCode.Int64: return new Number((a.ToInt64() / b.ToInt64()));
-                case System.TypeCode.UInt64: return new Number((a.ToUInt64() / b.ToUInt64()));
-                case System.TypeCode.Decimal: return new Number((a.ToDecimal() / b.ToDecimal()));
-                case System.TypeCode.Double: return new Number((a.ToDouble() / b.ToDouble()));
-                default: return (Number)Bitable.DoubleZero;
-            }
+                System.TypeCode.SByte => new Number((a.ToSByte() / b.ToSByte())),
+                System.TypeCode.Byte => new Number((a.ToByte() / b.ToByte())),
+                System.TypeCode.Int16 => new Number((a.ToInt16() / b.ToInt16())),
+                System.TypeCode.UInt16 => new Number((a.ToUInt16() / b.ToUInt16())),
+                System.TypeCode.Int32 => new Number((a.ToInt32() / b.ToInt32())),
+                System.TypeCode.UInt32 => new Number((a.ToUInt32() / b.ToUInt32())),
+                System.TypeCode.Int64 => new Number((a.ToInt64() / b.ToInt64())),
+                System.TypeCode.UInt64 => new Number((a.ToUInt64() / b.ToUInt64())),
+                System.TypeCode.Decimal => new Number((a.ToDecimal() / b.ToDecimal())),
+                System.TypeCode.Double => new Number((a.ToDouble() / b.ToDouble())),
+                _ => (Number)Bitable.DoubleZero,
+            };
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override Number Modulus(ref Number a, ref Number b)
         {
-            switch (a.TypeCode)
+            return a.TypeCode switch
             {
-                case System.TypeCode.SByte: return new Number((a.ToSByte() % b.ToSByte()));
-                case System.TypeCode.Byte: return new Number((a.ToSByte() % b.ToByte()));
-                case System.TypeCode.Int16: return new Number((a.ToSByte() % b.ToInt16()));
-                case System.TypeCode.UInt16: return new Number((a.ToSByte() % b.ToUInt16()));
-                case System.TypeCode.Int32: return new Number((a.ToSByte() % b.ToInt32()));
-                case System.TypeCode.UInt32: return new Number((a.ToSByte() % b.ToUInt32()));
-                case System.TypeCode.Int64: return new Number((a.ToSByte() % b.ToInt64()));
-                case System.TypeCode.UInt64: return new Number((a.ToByte() % b.ToUInt64()));
-                case System.TypeCode.Decimal: return new Number((a.ToSByte() % b.ToDecimal()));
-                case System.TypeCode.Double: return new Number((a.ToSByte() % b.ToDouble()));
-                default: return (Number)Bitable.DoubleZero;
-            }
+                System.TypeCode.SByte => new Number((a.ToSByte() % b.ToSByte())),
+                System.TypeCode.Byte => new Number((a.ToSByte() % b.ToByte())),
+                System.TypeCode.Int16 => new Number((a.ToSByte() % b.ToInt16())),
+                System.TypeCode.UInt16 => new Number((a.ToSByte() % b.ToUInt16())),
+                System.TypeCode.Int32 => new Number((a.ToSByte() % b.ToInt32())),
+                System.TypeCode.UInt32 => new Number((a.ToSByte() % b.ToUInt32())),
+                System.TypeCode.Int64 => new Number((a.ToSByte() % b.ToInt64())),
+                System.TypeCode.UInt64 => new Number((a.ToByte() % b.ToUInt64())),
+                System.TypeCode.Decimal => new Number((a.ToSByte() % b.ToDecimal())),
+                System.TypeCode.Double => new Number((a.ToSByte() % b.ToDouble())),
+                _ => (Number)Bitable.DoubleZero,
+            };
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1526,14 +1526,13 @@ namespace Media.Concepts.Classes
             int size = Count - index;
             if (size < SizeOfDouble)
             {
-                switch (size)
+                return size switch
                 {
-                    case Common.Binary.BytesPerByte: return ToByte();
-                    case Common.Binary.BytesPerChar: return ToInt16(index);
-                    case Common.Binary.Three: //Reserved for 24Bit
-                    default:
-                    case Common.Binary.BytesPerInteger: return ToInt32(index);
-                }
+                    Common.Binary.BytesPerByte => ToByte(),
+                    Common.Binary.BytesPerChar => ToInt16(index),
+                    //Reserved for 24Bit
+                    _ => (double)ToInt32(index),
+                };
             }
             else return BitConverter.ToDouble(Memory, index); //Doesn't handle - 0...
         }
@@ -1823,7 +1822,7 @@ namespace Media.Concepts.Classes
 
             public bool MoveNext()
             {
-                return m_Diposed ? false : ++Index < Bitable.Count;
+                return !m_Diposed && ++Index < Bitable.Count;
             }
 
             public void Reset()
@@ -2122,17 +2121,17 @@ namespace Media.Concepts.Classes
                     Number newN = new(n);
 
                     //Check if char is digit
-                    if (c >= '0' && c <= '9')
+                    if (c is >= '0' and <= '9')
                     {
                         newN += c - '0';
                     }
                     else //Check if char is hex
                     {
-                        if (c >= 'A' && c <= 'F')
+                        if (c is >= 'A' and <= 'F')
                         {
                             newN += (c - 'A') + 10;
                         }
-                        else if (c >= 'a' && c <= 'f')
+                        else if (c is >= 'a' and <= 'f')
                         {
                             newN += (c - 'a') + 10;
                         }
@@ -2461,12 +2460,11 @@ namespace Media.Concepts.Classes
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                switch (TypeCode)
+                return TypeCode switch
                 {
-                    case System.TypeCode.Decimal:
-                        return this >= DecimalNegativeZero || this >= DecimalNegativeZeroAlt;
-                    default: return IsAbsoluteZero ? false : this >= NegativeZero;
-                }
+                    System.TypeCode.Decimal => this >= DecimalNegativeZero || this >= DecimalNegativeZeroAlt,
+                    _ => !IsAbsoluteZero && this >= NegativeZero,
+                };
 
                 //-0...
 

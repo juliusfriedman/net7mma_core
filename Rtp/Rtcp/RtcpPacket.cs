@@ -303,7 +303,7 @@ namespace Media.Rtcp
             : base(shouldDispose)
         {
             //If the padding is greater than allow throw an overflow exception
-            if (padding < 0 || padding > byte.MaxValue) throw Binary.CreateOverflowException("padding", padding, byte.MinValue.ToString(), byte.MaxValue.ToString());
+            if (padding is < 0 or > byte.MaxValue) throw Binary.CreateOverflowException("padding", padding, byte.MinValue.ToString(), byte.MaxValue.ToString());
 
             extensionSize = Binary.MachineWordsToBytes(Binary.BytesToMachineWords(extensionSize));
 
@@ -433,7 +433,7 @@ namespace Media.Rtcp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-            get { return IsDisposed || Header.IsDisposed ? false : Length >= ((ushort)((Header.LengthInWordsMinusOne + 1) * Binary.BytesPerInteger)) - Header.Size; }    //((ushort)((Header.LengthInWordsMinusOne + 1) * Binary.BytesPerInteger)) - RtcpHeader.Length; }
+            get { return !IsDisposed && !Header.IsDisposed && Length >= ((ushort)((Header.LengthInWordsMinusOne + 1) * Binary.BytesPerInteger)) - Header.Size; }    //((ushort)((Header.LengthInWordsMinusOne + 1) * Binary.BytesPerInteger)) - RtcpHeader.Length; }
         }
 
         /// <summary>
@@ -730,7 +730,7 @@ namespace Media.Rtcp
                 else if (padding) binarySequence = binarySequence.Concat(Payload.Array.Skip(Payload.Count - PaddingOctets)); //Add only the padding
 
                 //Return the result of creating the new instance with the given binary
-                return new RtcpPacket(new RtcpHeader(Header.Version, Header.PayloadType, padding ? Header.Padding : false, reportBlocks ? Header.BlockCount : 0, Header.SendersSynchronizationSourceIdentifier, shouldDispose),
+                return new RtcpPacket(new RtcpHeader(Header.Version, Header.PayloadType, padding && Header.Padding, reportBlocks ? Header.BlockCount : 0, Header.SendersSynchronizationSourceIdentifier, shouldDispose),
                     binarySequence,
                     shouldDispose)
                 {
@@ -943,8 +943,7 @@ namespace Media.Rtcp
                 implementation is not null &&
                 implementation.IsAbstract is false &&
                 implementation.IsSubclassOf(RtcpPacketType)
-                    ? Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryAdd(ImplementationMap, payloadType, implementation, out _)
-                    : false;
+&& Media.Common.Extensions.Generic.Dictionary.DictionaryExtensions.TryAdd(ImplementationMap, payloadType, implementation, out _);
         }
 
         internal static bool TryUnMapImplementation(byte payloadType, out Type implementation)
@@ -1001,7 +1000,7 @@ namespace Media.Rtcp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            return object.ReferenceEquals(this, obj) ? true : obj is RtcpPacket p && Equals(p);
+            return object.ReferenceEquals(this, obj) || obj is RtcpPacket p && Equals(p);
         }
 
         //Packet equals...
@@ -1109,7 +1108,7 @@ namespace Media.UnitTests
                                         System.Diagnostics.Debug.Assert(p.BlockCount == ReportBlockCounter, "Unexpected BlockCount");
 
                                         //Check the SynchronizationSourceIdentifier
-                                        System.Diagnostics.Debug.Assert(p.SynchronizationSourceIdentifier is 0 || p.SynchronizationSourceIdentifier == 7, "Unexpected SynchronizationSourceIdentifier");
+                                        System.Diagnostics.Debug.Assert(p.SynchronizationSourceIdentifier is 0 or 7, "Unexpected SynchronizationSourceIdentifier");
 
                                         //Check the LengthInWordsMinusOne, should not be 0 when padding is used...
                                         System.Diagnostics.Debug.Assert(p.Header.LengthInWordsMinusOne == ushort.MaxValue, "Unexpected LengthInWordsMinusOne");

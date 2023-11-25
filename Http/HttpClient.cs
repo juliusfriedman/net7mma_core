@@ -294,7 +294,7 @@ namespace Media.Http
             set
             {
                 if (value == m_AuthenticationScheme) return;
-                m_AuthenticationScheme = value != AuthenticationSchemes.Basic && value != AuthenticationSchemes.Digest && value != AuthenticationSchemes.None
+                m_AuthenticationScheme = value is not AuthenticationSchemes.Basic and not AuthenticationSchemes.Digest and not AuthenticationSchemes.None
                     ? throw new System.InvalidOperationException("Only None, Basic and Digest are supported")
                     : value;
             }
@@ -376,10 +376,8 @@ namespace Media.Http
 
                     m_RemoteHttp = m_HttpSocket.RemoteEndPoint;
 
-                    if (m_RemoteHttp is IPEndPoint)
+                    if (m_RemoteHttp is IPEndPoint remote)
                     {
-                        IPEndPoint remote = (IPEndPoint)m_RemoteHttp;
-
                         m_RemoteIP = remote.Address;
                     }
                 }
@@ -469,7 +467,7 @@ namespace Media.Http
                         m_HttpPort = m_CurrentLocation.Port;
 
                         //Validate ports, should throw? should also use default for for scheme...
-                        if (m_HttpPort <= ushort.MinValue || m_HttpPort > ushort.MaxValue) m_HttpPort = HttpMessage.TransportDefaultPort;
+                        if (m_HttpPort is <= ushort.MinValue or > ushort.MaxValue) m_HttpPort = HttpMessage.TransportDefaultPort;
 
                         //Make a IPEndPoint 
                         m_RemoteHttp = new IPEndPoint(m_RemoteIP, m_HttpPort);
@@ -1090,7 +1088,7 @@ namespace Media.Http
                     else //Nothing was received
                     {
                         //Check for fatal exceptions
-                        if (error != SocketError.ConnectionAborted && error != SocketError.ConnectionReset && error != SocketError.Interrupted)
+                        if (error is not SocketError.ConnectionAborted and not SocketError.ConnectionReset and not SocketError.Interrupted)
                         {
                             if (++attempt <= m_ResponseTimeoutInterval) goto Wait;
                         }

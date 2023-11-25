@@ -14,65 +14,41 @@ namespace Media.Codecs.Audio.Ac3
 
         public static byte GetSampleRateCode(int sampleRate)
         {
-            switch (sampleRate)
+            return sampleRate switch
             {
-                case 48000:
-                    return 0;
-                case 44100:
-                    return 1;
-                case 32000:
-                    return 2;
-                default:
-                    throw new ArgumentException("Invalid sample rate");
-            }
+                48000 => 0,
+                44100 => 1,
+                32000 => 2,
+                _ => throw new ArgumentException("Invalid sample rate"),
+            };
         }
 
         /// <returns>Bitrate in kbit/s</returns>
         public static int GetBitRate(byte frameSizeCode)
         {
-            switch (frameSizeCode / 2)
+            return (frameSizeCode / 2) switch
             {
-                case 0:
-                    return 32;
-                case 1:
-                    return 40;
-                case 2:
-                    return 48;
-                case 3:
-                    return 56;
-                case 4:
-                    return 64;
-                case 5:
-                    return 80;
-                case 6:
-                    return 96;
-                case 7:
-                    return 112;
-                case 8:
-                    return 128;
-                case 9:
-                    return 160;
-                case 10:
-                    return 192;
-                case 11:
-                    return 224;
-                case 12:
-                    return 256;
-                case 13:
-                    return 320;
-                case 14:
-                    return 384;
-                case 15:
-                    return 448;
-                case 16:
-                    return 512;
-                case 17:
-                    return 576;
-                case 18:
-                    return 640;
-                default:
-                    throw new ArgumentException("Invalid frame size code");
-            }
+                0 => 32,
+                1 => 40,
+                2 => 48,
+                3 => 56,
+                4 => 64,
+                5 => 80,
+                6 => 96,
+                7 => 112,
+                8 => 128,
+                9 => 160,
+                10 => 192,
+                11 => 224,
+                12 => 256,
+                13 => 320,
+                14 => 384,
+                15 => 448,
+                16 => 512,
+                17 => 576,
+                18 => 640,
+                _ => throw new ArgumentException("Invalid frame size code"),
+            };
         }
 
         private static readonly int[,] frameSizeCodeTable = new int[,]

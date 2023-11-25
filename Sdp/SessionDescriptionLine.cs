@@ -422,7 +422,7 @@ namespace Media.Sdp
         public override bool Equals(object obj)
         {
             //System.Object
-            return object.ReferenceEquals(this, obj) ? true : obj is SessionDescriptionLine l && Equals(l);
+            return object.ReferenceEquals(this, obj) || obj is SessionDescriptionLine l && Equals(l);
         }
 
         //ToString should be implemented by GetEnumerator and String.Join(string.Empty, GetEnumerator)

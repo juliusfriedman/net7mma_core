@@ -76,19 +76,11 @@ namespace Media.Codecs.Video.H264
         [CLSCompliant(false)]
         public static bool IsReserved(ref byte nalType)
         {
-            switch (nalType)
+            return nalType switch
             {
-                case Reserved:
-                //nalType >= 16 && nalType <= 18
-                case 16:
-                case 17:
-                case 18:
-                //nalType >= 22 && nalType <= 23
-                case 22:
-                case 23:
-                    return true;
-                default: return false;
-            }
+                Reserved or 16 or 17 or 18 or 22 or 23 => true,
+                _ => false,
+            };
 
             //return nalType == Reserved || nalType >= 16 && nalType <= 18 || nalType >= 22 && nalType <= 23;
         }
@@ -103,16 +95,11 @@ namespace Media.Codecs.Video.H264
         [CLSCompliant(false)]
         public static bool IsAccessUnit(ref byte nalType)
         {
-            switch (nalType)
+            return nalType switch
             {
-                case CodedSlice:
-                case DataPartitionA:
-                case DataPartitionB:
-                case DataPartitionC:
-                case InstantaneousDecoderRefresh:
-                    return true;
-                default: return false;
-            }
+                CodedSlice or DataPartitionA or DataPartitionB or DataPartitionC or InstantaneousDecoderRefresh => true,
+                _ => false,
+            };
         }
 
         [CLSCompliant(true)]
@@ -123,14 +110,11 @@ namespace Media.Codecs.Video.H264
         [CLSCompliant(false)]
         public static bool IsSlice(ref byte nalType)
         {
-            switch (nalType)
+            return nalType switch
             {
-                case CodedSlice:
-                case DataPartitionA:
-                case InstantaneousDecoderRefresh:
-                    return true;
-                default: return false;
-            }
+                CodedSlice or DataPartitionA or InstantaneousDecoderRefresh => true,
+                _ => false,
+            };
         }
 
         [CLSCompliant(true)]

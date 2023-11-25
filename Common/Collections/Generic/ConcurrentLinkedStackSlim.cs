@@ -247,11 +247,11 @@ namespace Media.Common.Collections.Generic
             //    Next = First
             //};
 
-            switch (System.Threading.Interlocked.Read(ref m_Count))
+            First = System.Threading.Interlocked.Read(ref m_Count) switch
             {
-                case Common.Binary.LongZero: First = Last = new Node(ref t); break;
-                default: First = new Node(ref t, First); break;
-            }
+                Common.Binary.LongZero => Last = new Node(ref t),
+                _ => new Node(ref t, First),
+            };
 
 
             //Increment (1) @ Count

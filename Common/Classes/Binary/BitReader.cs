@@ -308,12 +308,12 @@
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool PeekBit(bool reverse = false)
         {
-            switch (reverse)
+            return reverse switch
             {
-                default://.net core 3.1 requires this or the build error is that this method doesn't return on all code paths....
-                case false: return Common.Binary.GetBitReverse(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex);
-                case true: return Common.Binary.GetBit(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex);
-            }
+                true => Common.Binary.GetBit(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex),
+                //.net core 3.1 requires this or the build error is that this method doesn't return on all code paths....
+                _ => Common.Binary.GetBitReverse(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex),
+            };
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -321,14 +321,12 @@
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            switch (m_BitOrder)
+            return m_BitOrder switch
             {
-                case Binary.BitOrder.LeastSignificant:
-                    return (byte)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte));
-                case Binary.BitOrder.MostSignificant:
-                    return (byte)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte));
-                default: throw new System.NotSupportedException("Please create an issue for your use case");
-            }
+                Binary.BitOrder.LeastSignificant => (byte)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte)),
+                Binary.BitOrder.MostSignificant => (byte)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerByte)),
+                _ => throw new System.NotSupportedException("Please create an issue for your use case"),
+            };
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -336,14 +334,12 @@
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            switch (m_BitOrder)
+            return m_BitOrder switch
             {
-                case Binary.BitOrder.LeastSignificant:
-                    return (short)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort));
-                case Binary.BitOrder.MostSignificant:
-                    return (short)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort));
-                default: throw new System.NotSupportedException("Please create an issue for your use case");
-            }
+                Binary.BitOrder.LeastSignificant => (short)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort)),
+                Binary.BitOrder.MostSignificant => (short)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerShort)),
+                _ => throw new System.NotSupportedException("Please create an issue for your use case"),
+            };
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -351,14 +347,12 @@
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            switch (m_BitOrder)
+            return m_BitOrder switch
             {
-                case Binary.BitOrder.LeastSignificant:
-                    return (int)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize));
-                case Binary.BitOrder.MostSignificant:
-                    return (int)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize));
-                default: throw new System.NotSupportedException("Please create an issue for your use case");
-            }
+                Binary.BitOrder.LeastSignificant => (int)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize)),
+                Binary.BitOrder.MostSignificant => (int)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.TripleBitSize)),
+                _ => throw new System.NotSupportedException("Please create an issue for your use case"),
+            };
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -366,14 +360,12 @@
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            switch (m_BitOrder)
+            return m_BitOrder switch
             {
-                case Binary.BitOrder.LeastSignificant:
-                    return (int)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger));
-                case Binary.BitOrder.MostSignificant:
-                    return (int)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger));
-                default: throw new System.NotSupportedException("Please create an issue for your use case");
-            }
+                Binary.BitOrder.LeastSignificant => (int)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger)),
+                Binary.BitOrder.MostSignificant => (int)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerInteger)),
+                _ => throw new System.NotSupportedException("Please create an issue for your use case"),
+            };
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -381,14 +373,12 @@
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            switch (m_BitOrder)
+            return m_BitOrder switch
             {
-                case Binary.BitOrder.LeastSignificant:
-                    return (long)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong));
-                case Binary.BitOrder.MostSignificant:
-                    return (long)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong));
-                default: throw new System.NotSupportedException("Please create an issue for your use case");
-            }
+                Binary.BitOrder.LeastSignificant => (long)(reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong)),
+                Binary.BitOrder.MostSignificant => (long)(reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.BitsPerLong)),
+                _ => throw new System.NotSupportedException("Please create an issue for your use case"),
+            };
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -397,14 +387,12 @@
         {
             int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
 
-            switch (m_BitOrder)
+            return m_BitOrder switch
             {
-                case Binary.BitOrder.LeastSignificant:
-                    return (reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, count) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, count));
-                case Binary.BitOrder.MostSignificant:
-                    return (reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, count) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, count));
-                default: throw new System.NotSupportedException("Please create an issue for your use case");
-            }
+                Binary.BitOrder.LeastSignificant => (reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, count) : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, count)),
+                Binary.BitOrder.MostSignificant => (reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, count) : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, count)),
+                _ => throw new System.NotSupportedException("Please create an issue for your use case"),
+            };
         }
 
 

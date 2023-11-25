@@ -614,16 +614,13 @@ namespace Media.Http
             {
                 //rfc2616.html#rfc.section.4.4
 
-                if (StatusCode >= 100 && StatusCode <= 199) return false;
+                if (StatusCode is >= 100 and <= 199) return false;
 
-                switch (HttpStatusCode)
+                return HttpStatusCode switch
                 {
-                    case HttpStatusCode.NoContent:
-                    case HttpStatusCode.NotModified:
-                    case HttpStatusCode.Found:
-                        return false;
-                    default: return true;
-                }
+                    HttpStatusCode.NoContent or HttpStatusCode.NotModified or HttpStatusCode.Found => false,
+                    _ => true,
+                };
             }
         }
 
@@ -1800,7 +1797,7 @@ namespace Media.Http
 
         protected internal virtual bool ParseBody(bool force = false)
         {
-            return IsDisposed && IsPersistent is false ? false : ParseBody(out int remains, force);
+            return (!IsDisposed || IsPersistent is true) && ParseBody(out int remains, force);
         }
 
         /// <summary>
@@ -2043,12 +2040,12 @@ namespace Media.Http
 
         public virtual bool ContainsHeader(string name)
         {
-            return IsDisposed && IsPersistent is false ? false : ContainsHeader(name, out _);
+            return (!IsDisposed || IsPersistent is true) && ContainsHeader(name, out _);
         }
 
         public virtual bool ContainsEntityHeader(string name)
         {
-            return IsDisposed && IsPersistent is false ? false : ContainsEntityHeader(name, out _);
+            return (!IsDisposed || IsPersistent is true) && ContainsEntityHeader(name, out _);
         }
 
         /// <summary>
@@ -2273,7 +2270,7 @@ namespace Media.Http
 
             //switch
 
-            if (MessageType == HttpMessageType.Request || MessageType == HttpMessageType.Invalid)
+            if (MessageType is HttpMessageType.Request or HttpMessageType.Invalid)
             {
                 //foreach (byte b in headerEncoding.GetBytes(MethodString)) yield return b;
 
@@ -2562,9 +2559,8 @@ namespace Media.Http
             //Fast path doesn't show true equality.
             //other.Created != Created
 
-            return other is null
-                ? false
-                : other.MessageType == MessageType
+            return other is not null
+&& other.MessageType == MessageType
                 &&
                 other.Version.Equals(Version)
                 &&
@@ -2581,7 +2577,7 @@ namespace Media.Http
 
         public override bool Equals(object obj)
         {
-            return ReferenceEquals(this, obj) ? true : obj is HttpMessage m && Equals(m);
+            return ReferenceEquals(this, obj) || obj is HttpMessage m && Equals(m);
         }
 
         #endregion

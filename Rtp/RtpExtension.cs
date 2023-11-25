@@ -134,7 +134,7 @@ namespace Media.Rtp
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return IsDisposed ? false : m_MemorySegment.Count >= Size;
+                return !IsDisposed && m_MemorySegment.Count >= Size;
             }
         }
 

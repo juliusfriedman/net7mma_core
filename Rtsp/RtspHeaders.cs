@@ -295,7 +295,7 @@ namespace Media.Rtsp
                                 }
 
                                 //Could just clamp.
-                                if (ttl < byte.MinValue || ttl > byte.MaxValue)
+                                if (ttl is < byte.MinValue or > byte.MaxValue)
                                     Media.Common.TaggedExceptionExtensions.RaiseTaggedException(ttl, "See Tag. Invalid ttl datum as given.");
 
                                 continue;

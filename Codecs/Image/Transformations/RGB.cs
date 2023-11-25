@@ -132,7 +132,7 @@ namespace Media.Codecs.Image.Transformations
             int offChr = 0, offLuma = 0, offSrc = 0, strideSrc = src.Width * src.ImageFormat.Length, strideDst = dst.Width, dstComponentOffset = dst.MediaFormat.Length;
 
             //Could probably handle packed or semi planar YUV by making a small offset change
-            if (dst.ImageFormat.DataLayout == Codec.DataLayout.Packed || dst.ImageFormat.DataLayout == Codec.DataLayout.SemiPlanar)
+            if (dst.ImageFormat.DataLayout is Codec.DataLayout.Packed or Codec.DataLayout.SemiPlanar)
             {
                 strideDst = dst.MediaFormat.Length;
 

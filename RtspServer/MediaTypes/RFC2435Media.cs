@@ -114,7 +114,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     byte Q = packet.Payload.Array[offset + 5];
 
                     //DRI Present
-                    if (Type > 63 && Type < 128) result += DataRestartIntervalHeaderSize;
+                    if (Type is > 63 and < 128) result += DataRestartIntervalHeaderSize;
 
                     //When FragmentOffset is 0 there is no QTables present.
                     if (false == (Common.Binary.ReadU24(packet.Payload.Array, offset, Common.Binary.IsLittleEndian) is 0)) return result;
@@ -228,7 +228,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 offset += 2;
 
                 //Skip DataRestartInterval data
-                if (Type > 63 && Type < 128) offset += 4;
+                if (Type is > 63 and < 128) offset += 4;
 
                 //Must be zero is not 0, this means there is an alignment issue and we should NOT attempt to read the rest of the Quantization table header.
                 if (end - offset < 4 || (packet.Payload.Array[offset++]) != 0)
@@ -1209,7 +1209,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 jpegStream.Seek(0, System.IO.SeekOrigin.Begin);
 
                 //Check for the Start of Information Marker
-                if (jpegStream.ReadByte() != Media.Codecs.Image.Jpeg.Markers.Prefix && jpegStream.ReadByte() != Media.Codecs.Image.Jpeg.Markers.StartOfInformation)
+                if (jpegStream.ReadByte() is not Media.Codecs.Image.Jpeg.Markers.Prefix and not Media.Codecs.Image.Jpeg.Markers.StartOfInformation)
                     throw new NotSupportedException("Data does not start with Start Of Information Marker");
 
                 //Check for the End of Information Marker, //If present do not include it.
@@ -1283,10 +1283,10 @@ namespace Media.Rtsp.Server.MediaTypes
                         if (FunctionCode == -1) break;
 
                         //Ensure not padded
-                        if (FunctionCode == Media.Codecs.Image.Jpeg.Markers.Prefix
-                            ||
+                        if (FunctionCode is Media.Codecs.Image.Jpeg.Markers.Prefix
+                            or
                             // ff00 is the escaped form of 0xff, will never be encountered the way data is read after the SOF
-                            FunctionCode is 0) continue;
+                            0) continue;
 
                         //Last Tag
                         if (FunctionCode == Media.Codecs.Image.Jpeg.Markers.EndOfInformation) break;
@@ -2019,7 +2019,7 @@ namespace Media.Rtsp.Server.MediaTypes
                    session setup protocol (which is beyond the scope of this document).
                  */
                 //Restart Interval 64 - 127
-                if (Type > 63 && Type < 128) //Might not need to check Type < 128 but done because of the above statement
+                if (Type is > 63 and < 128) //Might not need to check Type < 128 but done because of the above statement
                 {
 
                     //ProfileHeaderInformation.DataRestartIntervalHeaderSize
@@ -2583,16 +2583,12 @@ namespace Media.Rtsp.Server.MediaTypes
                                 packet.Timestamp = transportContext.RtpTimestamp;
 
                                 //Assign next sequence number
-                                switch (transportContext.RecieveSequenceNumber)
+                                packet.SequenceNumber = transportContext.RecieveSequenceNumber switch
                                 {
-                                    case ushort.MaxValue:
-                                        packet.SequenceNumber = transportContext.RecieveSequenceNumber = 0;
-                                        break;
+                                    ushort.MaxValue => transportContext.RecieveSequenceNumber = 0,
                                     //Increment the sequence number on the transportChannel and assign the result to the packet
-                                    default:
-                                        packet.SequenceNumber = ++transportContext.RecieveSequenceNumber;
-                                        break;
-                                }
+                                    _ => ++transportContext.RecieveSequenceNumber,
+                                };
 
                                 //Fire an event so the server sends a packet to all clients connected to this source
                                 if (false == RtpClient.FrameChangedEventsEnabled) RtpClient.OnRtpPacketReceieved(packet, transportContext);

@@ -656,10 +656,8 @@ namespace Media.UnitTests
                 foreach (Media.Rtcp.IReportBlock rb in sr)
                 {
                     if ((uint)rb.BlockIdentifier != 2738258998) throw new Exception("Invalid Source SSRC");
-                    else if (rb is Media.Rtcp.ReportBlock)
+                    else if (rb is Media.Rtcp.ReportBlock asReportBlock)
                     {
-                        Media.Rtcp.ReportBlock asReportBlock = (Media.Rtcp.ReportBlock)rb;
-
                         Console.WriteLine(asReportBlock.SendersSynchronizationSourceIdentifier);//0
                         Console.WriteLine(asReportBlock.FractionsLost);//0
                         Console.WriteLine(asReportBlock.CumulativePacketsLost);//0

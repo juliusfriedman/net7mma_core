@@ -144,9 +144,8 @@ namespace Media.Rtcp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool IsValid(int? version = 0, int? payloadType = 0, bool? padding = false)
         {
-            return version.HasValue && version != Version
-                ? false
-                : payloadType.HasValue && payloadType != PayloadType ? false : !padding.HasValue || Padding == padding;
+            return (!version.HasValue || version == Version)
+&& (!payloadType.HasValue || payloadType == PayloadType) && (!padding.HasValue || Padding == padding);
         }
 
         /// <summary>
@@ -219,7 +218,7 @@ namespace Media.Rtcp
                 /*CheckDisposed();*/
 
                 //Write the value
-                if (value < RtcpHeader.MinimumLengthInWords || value > RtcpHeader.MaximumLengthInWords) throw Binary.CreateOverflowException("LengthInWordsMinusOne", value, RtcpHeader.MinimumLengthInWords.ToString(), RtcpHeader.MaximumLengthInWords.ToString());
+                if (value is < RtcpHeader.MinimumLengthInWords or > RtcpHeader.MaximumLengthInWords) throw Binary.CreateOverflowException("LengthInWordsMinusOne", value, RtcpHeader.MinimumLengthInWords.ToString(), RtcpHeader.MaximumLengthInWords.ToString());
 
                 Binary.Write16(SegmentToLast6Bytes.Array, SegmentToLast6Bytes.Offset, Common.Binary.IsLittleEndian, (ushort)value);
             }
@@ -239,13 +238,13 @@ namespace Media.Rtcp
 
                 /*CheckDisposed();*/
 
-                switch (LengthInWordsMinusOne)
+                return LengthInWordsMinusOne switch
                 {
                     //case RtcpHeader.MinimumLengthInWords:
-                    case RtcpHeader.MaximumLengthInWords: // -
-                        return 0;
-                    default: return (int)Binary.ReadU32(SegmentToLast6Bytes.Array, SegmentToLast6Bytes.Offset + 2, Common.Binary.IsLittleEndian);
-                }
+                    // -
+                    RtcpHeader.MaximumLengthInWords => 0,
+                    _ => (int)Binary.ReadU32(SegmentToLast6Bytes.Array, SegmentToLast6Bytes.Offset + 2, Common.Binary.IsLittleEndian),
+                };
 
                 //return (int)Binary.ReadU32(PointerToLast6Bytes.Array, PointerToLast6Bytes.Offset + 2, Common.Binary.IsLittleEndian);
             }
@@ -282,13 +281,11 @@ namespace Media.Rtcp
 
                 //return PointerToLast6Bytes.Count + First16Bits.m_Memory.Count;
 
-                switch (LengthInWordsMinusOne)
+                return LengthInWordsMinusOne switch
                 {
-                    case RtcpHeader.MinimumLengthInWords:
-                    case RtcpHeader.MaximumLengthInWords:
-                        return RtcpHeader.Length;
-                    default: return Binary.BytesPerLong; //return RFC3550.CommonHeaderBits.Size + PointerToLast6Bytes.Count;
-                }
+                    RtcpHeader.MinimumLengthInWords or RtcpHeader.MaximumLengthInWords => RtcpHeader.Length,
+                    _ => Binary.BytesPerLong,//return RFC3550.CommonHeaderBits.Size + PointerToLast6Bytes.Count;
+                };
             }
         }
 
@@ -506,13 +503,13 @@ namespace Media.Rtcp
         /// <returns>The sequence created</returns>
         internal IEnumerable<byte> GetSendersSynchronizationSourceIdentifierSequence()
         {
-            switch (LengthInWordsMinusOne)
+            return LengthInWordsMinusOne switch
             {
                 //case RtcpHeader.MinimumLengthInWords: // 0, => 65535
-                case RtcpHeader.MaximumLengthInWords: // 65535 => 0
-                    return Common.MemorySegment.EmptyBytes;
-                default: return SegmentToLast6Bytes.Skip(RFC3550.CommonHeaderBits.Size);
-            }
+                // 65535 => 0
+                RtcpHeader.MaximumLengthInWords => Common.MemorySegment.EmptyBytes,
+                _ => SegmentToLast6Bytes.Skip(RFC3550.CommonHeaderBits.Size),
+            };
         }
 
         /// <summary>
@@ -525,15 +522,12 @@ namespace Media.Rtcp
 
         internal IEnumerable<byte> GetEnumerableImplementation()
         {
-            switch (LengthInWordsMinusOne)
+            return LengthInWordsMinusOne switch
             {
                 //Value 0 means there is 65535 words.... this should return any values present... (as default does)
-                case RtcpHeader.MinimumLengthInWords:
-                case RtcpHeader.MaximumLengthInWords:
-                    return Enumerable.Concat<byte>(First16Bits, SegmentToLast6Bytes.Take(RFC3550.CommonHeaderBits.Size));
-                default:
-                    return Enumerable.Concat<byte>(First16Bits, SegmentToLast6Bytes);
-            }
+                RtcpHeader.MinimumLengthInWords or RtcpHeader.MaximumLengthInWords => Enumerable.Concat<byte>(First16Bits, SegmentToLast6Bytes.Take(RFC3550.CommonHeaderBits.Size)),
+                _ => Enumerable.Concat<byte>(First16Bits, SegmentToLast6Bytes),
+            };
         }
 
         #endregion
@@ -594,7 +588,7 @@ namespace Media.Rtcp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            return object.ReferenceEquals(this, obj) ? true : obj is RtcpHeader h && Equals(h);
+            return object.ReferenceEquals(this, obj) || obj is RtcpHeader h && Equals(h);
         }
 
         #endregion
@@ -643,7 +637,7 @@ namespace Media.UnitTests
                             for (byte ReportBlockCounter = byte.MinValue; ReportBlockCounter <= Media.Common.Binary.FiveBitMaxValue; ++ReportBlockCounter)
                             {
                                 //Permute every necessary value in the 16 bit LengthInWordsMinusOne 65535, 0 -> 8
-                                for (ushort lengthIn32BitWords = ushort.MaxValue; lengthIn32BitWords == ushort.MaxValue || lengthIn32BitWords <= Media.Common.Binary.BitsPerByte; ++lengthIn32BitWords)
+                                for (ushort lengthIn32BitWords = ushort.MaxValue; lengthIn32BitWords is ushort.MaxValue or <= Media.Common.Binary.BitsPerByte; ++lengthIn32BitWords)
                                 {
                                     //Always specify a value for the ssrc, if the length is 65535 this means there is no ssrc...
                                     using (Rtcp.RtcpHeader test = new(VersionCounter, PayloadCounter, bitValue, ReportBlockCounter, 7, lengthIn32BitWords))

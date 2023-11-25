@@ -631,7 +631,7 @@ namespace Media.Common.Extensions.Stream
 
             private static void HandleCompleted(object sender, ITransactionResult e)
             {
-                if (e is not null && e is TransactionBase)
+                if (e is not null and TransactionBase)
                 {
                     TransactionBase tb = e as TransactionBase;
 
@@ -650,7 +650,7 @@ namespace Media.Common.Extensions.Stream
 
             private static void HandleWrite(object sender, ITransactionResult e)
             {
-                if (e is not null && e is TransactionBase)
+                if (e is not null and TransactionBase)
                 {
                     TransactionBase tb = ((TransactionBase)e);
 
@@ -662,7 +662,7 @@ namespace Media.Common.Extensions.Stream
 
             private static void HandleCancelled(object sender, ITransactionResult e)
             {
-                if (e is not null && e is TransactionBase)
+                if (e is not null and TransactionBase)
                 {
                     TransactionBase tb = ((TransactionBase)e);//e as TransactionBase;
 

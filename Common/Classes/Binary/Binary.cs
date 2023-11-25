@@ -644,27 +644,11 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool IsPalindrome(ref byte b)
         {
-            switch (b)
+            return b switch
             {
-                case 0:
-                case 24:
-                case 36:
-                case 60:
-                case 66:
-                case 90:
-                case 102:
-                case 126:
-                case 129:
-                case 153:
-                case 165:
-                case 189:
-                case 195:
-                case 219:
-                case 231:
-                case 255:
-                    return true;
-                default: return false;
-            }
+                0 or 24 or 36 or 60 or 66 or 90 or 102 or 126 or 129 or 153 or 165 or 189 or 195 or 219 or 231 or 255 => true,
+                _ => false,
+            };
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -1020,14 +1004,14 @@ namespace Media.Common
         public static bool GetBit(ref byte source, int index)
         {
 
-            if (index < Binary.Nihil || index > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
+            if (index is < Binary.Nihil or > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
 
-            switch (source)
+            return source switch
             {
-                case byte.MinValue: return false;
-                case byte.MaxValue: return true;
-                default: return unchecked((source & (Binary.Ūnus << index)) != Binary.Nihil);
-            }
+                byte.MinValue => false,
+                byte.MaxValue => true,
+                _ => unchecked((source & (Binary.Ūnus << index)) != Binary.Nihil),
+            };
         }
 
         public static bool GetBit(byte source, int index) { return GetBit(ref source, index); }
@@ -1045,14 +1029,14 @@ namespace Media.Common
         public static bool GetBitReverse(ref byte source, int index)
         {
 
-            if (index < Binary.Nihil || index > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
+            if (index is < Binary.Nihil or > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
 
-            switch (source)
+            return source switch
             {
-                case byte.MinValue: return false;
-                case byte.MaxValue: return true;
-                default: return unchecked((source & (Binary.SedecimBitSize >> index)) != Binary.Nihil);
-            }
+                byte.MinValue => false,
+                byte.MaxValue => true,
+                _ => unchecked((source & (Binary.SedecimBitSize >> index)) != Binary.Nihil),
+            };
         }
 
         /// <summary>
@@ -1068,7 +1052,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool ExchangeBit(ref byte source, int index, bool newValue)
         {
-            if (index < Binary.Nihil || index > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
+            if (index is < Binary.Nihil or > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
 
             //Read the bit
             bool oldValue = GetBit(ref source, index);
@@ -1089,7 +1073,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool ExchangeBitReverse(ref byte source, int index, bool newValue)
         {
-            if (index < Binary.Nihil || index > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
+            if (index is < Binary.Nihil or > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
 
             //Read the bit in reverse
             bool oldValue = GetBitReverse(ref source, index);
@@ -1120,7 +1104,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void SetBitReverse(ref byte source, int index)
         {
-            if (index < Binary.Nihil || index > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
+            if (index is < Binary.Nihil or > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
 
             //Set the bit
             source = (byte)(source | (Binary.SedecimBitSize >> index));
@@ -1135,7 +1119,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void SetBit(ref byte source, int index)
         {
-            if (index < Binary.Nihil || index > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
+            if (index is < Binary.Nihil or > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
 
             source |= (byte)(Binary.Ūnus << index);
         }
@@ -1151,7 +1135,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void ClearBit(ref byte source, int index)
         {
-            if (index < Binary.Nihil || index > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
+            if (index is < Binary.Nihil or > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
 
             source &= (byte)(~(Binary.Ūnus << index));
         }
@@ -1167,7 +1151,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void ClearBitReverse(ref byte source, int index)
         {
-            if (index < Binary.Nihil || index > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
+            if (index is < Binary.Nihil or > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
 
             source &= (byte)(~(Binary.SedecimBitSize >> index));
         }
@@ -1187,7 +1171,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void ToggleBit(ref byte source, int index)
         {
-            if (index < Binary.Nihil || index > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
+            if (index is < Binary.Nihil or > Binary.BitsPerByte) throw new ArgumentOutOfRangeException("index", "Must be a value 0 - 8");
 
             source ^= (byte)index;
         }
@@ -1324,23 +1308,23 @@ namespace Media.Common
 
         public static long ReadBits(byte[] bytes, int bitOffset, int bitCount, Binary.BitOrder order)
         {
-            switch (order)
+            return order switch
             {
-                case BitOrder.LeastSignificant: return (long)ReadBitsLSB(bytes, bitOffset, bitCount);
-                case BitOrder.MostSignificant: return (long)ReadBitsMSB(bytes, bitOffset, bitCount);
-                default: throw new NotImplementedException("A definite BitOrder must be supplied.");
-            }
+                BitOrder.LeastSignificant => (long)ReadBitsLSB(bytes, bitOffset, bitCount),
+                BitOrder.MostSignificant => (long)ReadBitsMSB(bytes, bitOffset, bitCount),
+                _ => throw new NotImplementedException("A definite BitOrder must be supplied."),
+            };
         }
 
         [CLSCompliant(false)]
         public static long ReadBits(byte[] bytes, ref int bitOffset, int bitCount, Binary.BitOrder order)
         {
-            switch (order)
+            return order switch
             {
-                case BitOrder.LeastSignificant: return (long)ReadBitsLSB(bytes, ref bitOffset, bitCount);
-                case BitOrder.MostSignificant: return (long)ReadBitsMSB(bytes, ref bitOffset, bitCount);
-                default: throw new NotImplementedException("A definite BitOrder must be supplied.");
-            }
+                BitOrder.LeastSignificant => (long)ReadBitsLSB(bytes, ref bitOffset, bitCount),
+                BitOrder.MostSignificant => (long)ReadBitsMSB(bytes, ref bitOffset, bitCount),
+                _ => throw new NotImplementedException("A definite BitOrder must be supplied."),
+            };
         }
 
         public static long ReadBitsMSB(byte bits, int bitOffset, int bitCount)
@@ -2672,14 +2656,11 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static uint ReverseUnsignedInt(ref uint source)
         {
-            switch (source)
+            return source switch
             {
-                case uint.MinValue:
-                case uint.MaxValue:
-                    return source;
-                default:
-                    return ((source & 0x000000FFU) << 24) | ((source & 0x0000FF00U) << 8) | ((source & 0x00FF0000U) >> 8) | ((source & 0xFF000000U) >> 24);
-            }
+                uint.MinValue or uint.MaxValue => source,
+                _ => ((source & 0x000000FFU) << 24) | ((source & 0x0000FF00U) << 8) | ((source & 0x00FF0000U) >> 8) | ((source & 0xFF000000U) >> 24),
+            };
         }
 
         [CLSCompliant(false)]
@@ -2689,15 +2670,12 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ulong ReverseUnsignedLong(ref ulong source)
         {
-            switch (source)
+            return source switch
             {
-                case ulong.MaxValue:
-                case ulong.MinValue:
-                    return source;
-                default:
-                    return (source & 0x00000000000000FFUL) << 56 | (source & 0x000000000000FF00UL) << 40 | (source & 0x0000000000FF0000UL) << 24 | (source & 0x00000000FF000000UL) << 8 |
-                   (source & 0x000000FF00000000UL) >> 8 | (source & 0x0000FF0000000000UL) >> 24 | (source & 0x00FF000000000000UL) >> 40 | (source & 0xFF00000000000000UL) >> 56;
-            }
+                ulong.MaxValue or ulong.MinValue => source,
+                _ => (source & 0x00000000000000FFUL) << 56 | (source & 0x000000000000FF00UL) << 40 | (source & 0x0000000000FF0000UL) << 24 | (source & 0x00000000FF000000UL) << 8 |
+                                   (source & 0x000000FF00000000UL) >> 8 | (source & 0x0000FF0000000000UL) >> 24 | (source & 0x00FF000000000000UL) >> 40 | (source & 0xFF00000000000000UL) >> 56,
+            };
         }
 
         /// <summary>
@@ -2767,25 +2745,21 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static ulong RollU64(ulong source, int amount)
         {
-            switch (source)
+            return source switch
             {
-                case 0:
-                case ulong.MaxValue:
-                    return source;
-                default: return source >> amount | source << amount;
-            }
+                0 or ulong.MaxValue => source,
+                _ => source >> amount | source << amount,
+            };
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static long Roll64(long source, int amount)
         {
-            switch (source)
+            return source switch
             {
-                case 0:
-                case long.MaxValue:
-                    return source;
-                default: return source >> amount | source << amount;
-            }
+                0 or long.MaxValue => source,
+                _ => source >> amount | source << amount,
+            };
         }
 
         #endregion

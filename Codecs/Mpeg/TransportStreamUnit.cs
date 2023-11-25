@@ -329,37 +329,37 @@ namespace Media.Containers.Mpeg
         public static bool IsReserved(TableIdentifier identifier)
         {
             byte tid = (byte)identifier;
-            return tid >= 0x06 && tid <= 0x37
-                || tid >= 0x38 && tid <= 0x39 //ISO/IEC 13818-6 reserved
-                || tid >= 0x43 && tid <= 0x45
-                || tid >= 0x47 && tid <= 0x49
-                || tid >= 0x4B && tid <= 0x4D
-                || tid >= 0x7B && tid <= 0x7D
-                || tid == byte.MaxValue;
+            return tid is >= 0x06 and <= 0x37
+                or >= 0x38 and <= 0x39 //ISO/IEC 13818-6 reserved
+                or >= 0x43 and <= 0x45
+                or >= 0x47 and <= 0x49
+                or >= 0x4B and <= 0x4D
+                or >= 0x7B and <= 0x7D
+                or byte.MaxValue;
         }
 
         public static bool IsUserDefined(TableIdentifier identifier)
         {
             byte tid = (byte)identifier;
-            return tid >= 0x80 && tid <= 0xFE;
+            return tid is >= 0x80 and <= 0xFE;
         }
 
         public static bool IsReserved(PacketIdentifier identifier)
         {
             ushort sid = (ushort)identifier;
-            return sid >= 0x04 && sid <= 0x0F || sid >= 0x0017 && sid <= 0x001B;
+            return sid is >= 0x04 and <= 0x0F or >= 0x0017 and <= 0x001B;
         }
 
         public static bool IsUserDefined(PacketIdentifier identifier)
         {
             ushort sid = (ushort)identifier; //Encompass ASTCMetaData?
-            return sid >= 0x20 && sid <= 0x1FFA || sid >= 0x1FFC && sid <= 0x1FFE;
+            return sid is >= 0x20 and <= 0x1FFA or >= 0x1FFC and <= 0x1FFE;
         }
 
         public static bool IsDVBMetaData(PacketIdentifier identifier)
         {
             ushort sid = (ushort)identifier;
-            return sid >= 16 && sid <= Common.Binary.FiveBitMaxValue;
+            return sid is >= 16 and <= Common.Binary.FiveBitMaxValue;
         }
 
         public static bool HasTransportErrorIndicator(byte[] header, int offset = 0) { return (header[offset + 1] & ErrorMask) > 0; }

@@ -777,10 +777,8 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
                 m_RemoteRtsp = m_RtspSocket.RemoteEndPoint;
 
-                if (m_RemoteRtsp is IPEndPoint)
+                if (m_RemoteRtsp is IPEndPoint remote)
                 {
-                    IPEndPoint remote = (IPEndPoint)m_RemoteRtsp;
-
                     m_RemoteIP = remote.Address;
                 }
 
@@ -1174,7 +1172,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                     m_RtspPort = m_CurrentLocation.Port;
 
                     //Validate ports, should throw? should also use default port for scheme
-                    if (m_RtspPort <= ushort.MinValue || m_RtspPort > ushort.MaxValue) m_RtspPort = RtspMessage.ReliableTransportDefaultPort;
+                    if (m_RtspPort is <= ushort.MinValue or > ushort.MaxValue) m_RtspPort = RtspMessage.ReliableTransportDefaultPort;
 
                     //Determine protocol
                     m_RtspProtocol = m_CurrentLocation.Scheme == RtspMessage.ReliableTransportScheme
@@ -1416,7 +1414,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
         if (rtpProtocolType.HasValue)
         {
             //Determine if this means anything for Rtp Transport and set the field
-            m_RtpProtocol = rtpProtocolType.Value == ClientProtocolType.Tcp || rtpProtocolType.Value == ClientProtocolType.Http
+            m_RtpProtocol = rtpProtocolType.Value is ClientProtocolType.Tcp or ClientProtocolType.Http
                 ? ProtocolType.Tcp
                 : rtpProtocolType.Value == ClientProtocolType.Udp
                     ? ProtocolType.Udp
@@ -5441,7 +5439,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                         {
                             //Should probably check for open port again...
 
-                            rtcpTemp = Media.Common.Extensions.Socket.SocketExtensions.ReservePort(SocketType.Dgram, ProtocolType.Udp, ((IPEndPoint)m_RtspSocket.LocalEndPoint).Address, (clientRtcpPort = (openPort == ushort.MaxValue || openPort is 0 ? openPort : openPort + 1)));
+                            rtcpTemp = Media.Common.Extensions.Socket.SocketExtensions.ReservePort(SocketType.Dgram, ProtocolType.Udp, ((IPEndPoint)m_RtspSocket.LocalEndPoint).Address, (clientRtcpPort = (openPort is ushort.MaxValue or 0 ? openPort : openPort + 1)));
                         }
                     }
 

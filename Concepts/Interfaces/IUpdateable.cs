@@ -71,9 +71,8 @@ namespace Media.Common
         /// <returns>True or False</returns>
         public static bool UnderModification(this IUpdateable updateable)
         {
-            return Common.IDisposedExtensions.IsNullOrDisposed(updateable)
-                ? false
-                : updateable.ManualResetEvent.IsSet is false && updateable.UpdateTokenSource.IsCancellationRequested is false;
+            return !Common.IDisposedExtensions.IsNullOrDisposed(updateable)
+&& updateable.ManualResetEvent.IsSet is false && updateable.UpdateTokenSource.IsCancellationRequested is false;
         }
 
         public static bool UnderModification(this IUpdateable updateable, System.Threading.CancellationToken token)

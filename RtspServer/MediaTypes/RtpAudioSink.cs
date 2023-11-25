@@ -114,16 +114,12 @@ public class RtpAudioSink : RtpSink
                             packet.Timestamp = transportContext.RtpTimestamp;
 
                             //Assign next sequence number
-                            switch (transportContext.RecieveSequenceNumber)
+                            packet.SequenceNumber = transportContext.RecieveSequenceNumber switch
                             {
-                                case ushort.MaxValue:
-                                    packet.SequenceNumber = transportContext.RecieveSequenceNumber = 0;
-                                    break;
+                                ushort.MaxValue => transportContext.RecieveSequenceNumber = 0,
                                 //Increment the sequence number on the transportChannel and assign the result to the packet
-                                default:
-                                    packet.SequenceNumber = ++transportContext.RecieveSequenceNumber;
-                                    break;
-                            }
+                                _ => ++transportContext.RecieveSequenceNumber,
+                            };
 
                             //Fire an event so the server sends a packet to all clients connected to this source
                             if (false == RtpClient.FrameChangedEventsEnabled) RtpClient.OnRtpPacketReceieved(packet, transportContext);
@@ -300,17 +296,12 @@ public class RtpAudioSink : RtpSink
         Array.Copy(data, offset, newPacket.Payload.Array, newPacket.Payload.Offset, length);
 
         //Assign next sequence number
-        switch (transportContext.SendSequenceNumber)
+        newPacket.SequenceNumber = transportContext.SendSequenceNumber switch
         {
-            case ushort.MaxValue:
-                newPacket.SequenceNumber = transportContext.SendSequenceNumber = 0;
-                break;
+            ushort.MaxValue => transportContext.SendSequenceNumber = 0,
             //Increment the sequence number on the transportChannel and assign the result to the packet
-            default:
-                newPacket.SequenceNumber = ++transportContext.SendSequenceNumber;
-                break;
-        }
-
+            _ => ++transportContext.SendSequenceNumber,
+        };
         newFrame.Add(newPacket);
 
         //Return the value indicating if the frame was queued.

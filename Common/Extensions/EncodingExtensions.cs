@@ -524,7 +524,7 @@ namespace Media.UnitTests
 
                         //Ensure the strings are equal (The extra byte is spacing)
                         int difference = string.Compare(encoding.GetString(encoding.GetBytes(testString)), actual);
-                        if (difference != 0 && difference > 1)
+                        if (difference is not 0 and > 1)
                         {
                             throw new System.Exception("string data is incorrect.");
                         }

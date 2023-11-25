@@ -42,14 +42,14 @@ namespace Media.Codecs.Image.Jpeg
                     if (FunctionCode == -1) break;
 
                     //Ensure not padded
-                    if (FunctionCode == Media.Codecs.Image.Jpeg.Markers.Prefix
-                        ||
-                        FunctionCode is 0) continue;
+                    if (FunctionCode is Media.Codecs.Image.Jpeg.Markers.Prefix
+                        or
+                        0) continue;
 
                     //Last Tag
-                    if (FunctionCode == Media.Codecs.Image.Jpeg.Markers.StartOfInformation
-                        ||
-                        FunctionCode == Media.Codecs.Image.Jpeg.Markers.EndOfInformation) goto AtMarker;
+                    if (FunctionCode is Media.Codecs.Image.Jpeg.Markers.StartOfInformation
+                        or
+                        Media.Codecs.Image.Jpeg.Markers.EndOfInformation) goto AtMarker;
 
                     //Read the Marker Length
 
@@ -127,7 +127,7 @@ namespace Media.Codecs.Image.Jpeg
 
             yield return Code;
 
-            if (Code == Markers.StartOfInformation || Code == Markers.EndOfInformation) yield break;
+            if (Code is Markers.StartOfInformation or Markers.EndOfInformation) yield break;
 
             foreach (byte b in Common.Binary.GetBytes((short)Length, Media.Common.Binary.IsBigEndian)) yield return b;
 

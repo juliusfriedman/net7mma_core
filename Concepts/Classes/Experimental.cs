@@ -420,7 +420,7 @@ namespace Media.Concepts.Experimental
         /// <returns></returns>
         public virtual bool MoveNext()
         {
-            return m_Disposed ? false : ++Index <= VirtualCount;
+            return !m_Disposed && ++Index <= VirtualCount;
         }
 
         /// <summary>
@@ -436,7 +436,7 @@ namespace Media.Concepts.Experimental
 
         bool System.Collections.IEnumerator.MoveNext()
         {
-            return m_Disposed ? false : MoveNext();
+            return !m_Disposed && MoveNext();
         }
 
         void System.Collections.IEnumerator.Reset()
@@ -815,7 +815,7 @@ namespace Media.Concepts.Experimental
 
         public override bool MoveNext()
         {
-            return base.MoveNext() ? CoreGetEnumerator() != -1 : false;
+            return base.MoveNext() && CoreGetEnumerator() != -1;
         }
 
         private int CoreGetEnumerator(long direction = 1)
@@ -1326,15 +1326,12 @@ namespace Media.Concepts.Experimental
 
         public override long Seek(long offset, System.IO.SeekOrigin origin)
         {
-            switch (origin)
+            return origin switch
             {
-                case System.IO.SeekOrigin.End:
-                case System.IO.SeekOrigin.Begin:
-                    return (long)SeekAbsolute(offset, System.IO.SeekOrigin.Begin);
-                case System.IO.SeekOrigin.Current:
-                    return m_CurrentStream.Seek(offset, origin);
-                default: return m_CurrentStream.Position;
-            }
+                System.IO.SeekOrigin.End or System.IO.SeekOrigin.Begin => (long)SeekAbsolute(offset, System.IO.SeekOrigin.Begin),
+                System.IO.SeekOrigin.Current => m_CurrentStream.Seek(offset, origin),
+                _ => m_CurrentStream.Position,
+            };
         }
 
         public void MoveToEnd()

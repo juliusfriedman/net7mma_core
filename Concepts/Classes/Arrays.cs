@@ -1365,7 +1365,7 @@ namespace Media.Concepts.Classes
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            return obj is not Array<T> array ? false : GetHashCode() == array.GetHashCode();
+            return obj is Array<T> array && GetHashCode() == array.GetHashCode();
         }
 
         #endregion

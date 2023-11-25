@@ -1299,7 +1299,7 @@ namespace Media
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             public override bool Equals(object obj)
             {
-                return object.ReferenceEquals(this, obj) ? true : obj is CommonHeaderBits b && Equals(b);
+                return object.ReferenceEquals(this, obj) || obj is CommonHeaderBits b && Equals(b);
             }
 
             #endregion

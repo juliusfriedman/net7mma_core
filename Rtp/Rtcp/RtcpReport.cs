@@ -145,7 +145,7 @@ namespace Media.Rtcp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-            get { return IsDisposed ? false : Payload.Count - ReportBlockOctets - PaddingOctets > 0; }
+            get { return !IsDisposed && Payload.Count - ReportBlockOctets - PaddingOctets > 0; }
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace Media.Rtcp
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
 
-            get { return IsDisposed ? false : Header.BlockCount > 0; }
+            get { return !IsDisposed && Header.BlockCount > 0; }
         }
 
         /// <summary>

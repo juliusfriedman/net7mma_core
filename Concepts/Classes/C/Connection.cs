@@ -87,7 +87,7 @@ namespace Media.Concepts.Classes.C
         /// <returns></returns>
         private static bool Refresh(Connection connection)
         {
-            return ConnectionExtensions.IsConnecting(connection) ? false : ConnectionExtensions.IsConnected(connection);
+            return !ConnectionExtensions.IsConnecting(connection) && ConnectionExtensions.IsConnected(connection);
         }
 
         #endregion
@@ -203,12 +203,12 @@ namespace Media.Concepts.Classes.C
     {
         public static bool IsConnecting(IConnecton connection)
         {
-            return Common.IDisposedExtensions.IsNullOrDisposed(connection) ? false : connection.IsConnecting;
+            return !Common.IDisposedExtensions.IsNullOrDisposed(connection) && connection.IsConnecting;
         }
 
         public static bool IsConnected(IConnecton connection)
         {
-            return Common.IDisposedExtensions.IsNullOrDisposed(connection) ? false : connection.IsConnected;
+            return !Common.IDisposedExtensions.IsNullOrDisposed(connection) && connection.IsConnected;
         }
     }
 }

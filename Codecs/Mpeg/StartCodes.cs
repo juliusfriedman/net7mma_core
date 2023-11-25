@@ -14,14 +14,11 @@ namespace Media.Containers.Mpeg
 
         public static bool IsReserved(byte b)
         {
-            switch (b)
+            return b switch
             {
-                case 0xB0:
-                case 0xB1:
-                case 0xB6:
-                    return true;
-                default: return false;
-            }
+                0xB0 or 0xB1 or 0xB6 => true,
+                _ => false,
+            };
         }
 
         /// <summary>
@@ -35,12 +32,12 @@ namespace Media.Containers.Mpeg
         public const byte Picture = 0x00;
 
         //Probably Key Frames.
-        public static bool IsVideoObjectStartCode(byte b) { return b >= Picture && b <= Common.Binary.FiveBitMaxValue; }
+        public static bool IsVideoObjectStartCode(byte b) { return b is >= Picture and <= Common.Binary.FiveBitMaxValue; }
 
         //0x20 probably a key frame.
-        public static bool IsVisalObjectLayerStartCode(byte code) { return code >= 0x20 && code <= 0x2f; }
+        public static bool IsVisalObjectLayerStartCode(byte code) { return code is >= 0x20 and <= 0x2f; }
 
-        public static bool IsSliceStartCode(byte code) { return code >= 0x01 && code <= 0xAF; }
+        public static bool IsSliceStartCode(byte code) { return code is >= 0x01 and <= 0xAF; }
 
         //MPEG 4 Specific Name (Reversed in MPEG 1 and 2)
         //Probably key frame

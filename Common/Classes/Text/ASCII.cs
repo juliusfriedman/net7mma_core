@@ -212,22 +212,22 @@ namespace Media.Common
 
         public static byte ToLower(byte ch)
         {
-            return ch >= (byte)'A' && ch <= (byte)'Z' ? (byte)(ch - ((byte)'A' - (byte)'a')) : ch;
+            return ch is >= ((byte)'A') and <= ((byte)'Z') ? (byte)(ch - ((byte)'A' - (byte)'a')) : ch;
         }
 
         public static byte ToUpper(byte ch)
         {
-            return ch >= (byte)'a' && ch <= (byte)'z' ? (byte)(ch - ((byte)'a' - (byte)'A')) : ch;
+            return ch is >= ((byte)'a') and <= ((byte)'z') ? (byte)(ch - ((byte)'a' - (byte)'A')) : ch;
         }
 
         public static bool IsLowerAlpha(byte ch)
         {
-            return ch >= (byte)'a' && ch <= (byte)'z';
+            return ch is >= ((byte)'a') and <= ((byte)'z');
         }
 
         public static bool IsUpperAlpha(byte ch)
         {
-            return ch >= (byte)'A' && ch <= (byte)'Z';
+            return ch is >= ((byte)'A') and <= ((byte)'Z');
         }
 
         public static bool IsAlpha(byte ch)
@@ -242,28 +242,21 @@ namespace Media.Common
 
         public static bool IsNumeric(byte ch)
         {
-            return ch >= (byte)'0' && ch <= (byte)'9';
+            return ch is >= ((byte)'0') and <= ((byte)'9');
         }
 
         public static bool IsWhiteSpace(byte ch)
         {
-            switch (ch)
+            return ch switch
             {
-                case (byte)' ':
-                    return true;
-                case (byte)'\n':
-                    return true;
-                case (byte)'\r':
-                    return true;
-                case (byte)'\v':
-                    return true;
-                case (byte)'\f':
-                    return true;
-                case (byte)'\t':
-                    return true;
-                default:
-                    return false;
-            }
+                (byte)' ' => true,
+                (byte)'\n' => true,
+                (byte)'\r' => true,
+                (byte)'\v' => true,
+                (byte)'\f' => true,
+                (byte)'\t' => true,
+                _ => false,
+            };
         }
 
         #endregion

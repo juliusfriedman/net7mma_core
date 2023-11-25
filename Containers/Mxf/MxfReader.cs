@@ -798,7 +798,7 @@ namespace Media.Containers.Mxf
                         status = (PartitionStatus)footer.Identifier[14];
 
                         //Don't parse an incomplete footer
-                        if (status == PartitionStatus.OpenAndIncomplete || status == PartitionStatus.ClosedAndIncomplete) return;
+                        if (status is PartitionStatus.OpenAndIncomplete or PartitionStatus.ClosedAndIncomplete) return;
 
                         offset = 0;
 

@@ -598,7 +598,7 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override bool Equals(object obj)
         {
-            return object.ReferenceEquals(this, obj) ? true : obj is RtpHeader h && Equals(h);
+            return object.ReferenceEquals(this, obj) || obj is RtpHeader h && Equals(h);
         }
 
         #endregion

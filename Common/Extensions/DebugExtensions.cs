@@ -42,6 +42,6 @@ namespace Media.Common.Extensions.Debug
     {
         public static void BreakIfAttached() { if (System.Diagnostics.Debugger.IsAttached) System.Diagnostics.Debugger.Break(); }
 
-        public static bool Attach() { return System.Diagnostics.Debugger.IsAttached ? true : System.Diagnostics.Debugger.Launch(); }
+        public static bool Attach() { return System.Diagnostics.Debugger.IsAttached || System.Diagnostics.Debugger.Launch(); }
     }
 }

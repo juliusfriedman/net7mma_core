@@ -1016,7 +1016,7 @@ namespace Media.Rtp
 
                     return IsRtpEnabled
                         ? RtpSocket is not null && LocalRtp is not null
-                        : IsRtcpEnabled ? RtcpSocket is not null && LocalRtcp is not null : false;
+                        : IsRtcpEnabled && RtcpSocket is not null && LocalRtcp is not null;
                 }
             }
 
@@ -1053,7 +1053,7 @@ namespace Media.Rtp
 
                     long totalRtcp = TotalRtcpBytesSent + TotalRtcpBytesReceieved;
 
-                    return totalRtcp is Common.Binary.LongZero ? false : totalRtcp >= totalReceived / maximumRtcpBandwidthPercentage;
+                    return totalRtcp is not Common.Binary.LongZero && totalRtcp >= totalReceived / maximumRtcpBandwidthPercentage;
                 }
             }
 
@@ -1322,7 +1322,7 @@ namespace Media.Rtp
             public bool LocalMultiplexing
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return (IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled is false || LocalRtp is null) ? false : LocalRtp.Equals(LocalRtcp); }
+                get { return !IDisposedExtensions.IsNullOrDisposed(this) && IsRtcpEnabled is true && LocalRtp is not null && LocalRtp.Equals(LocalRtcp); }
             }
 
             /// <summary>
@@ -1331,7 +1331,7 @@ namespace Media.Rtp
             public bool RemoteMultiplexing
             {
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-                get { return (IDisposedExtensions.IsNullOrDisposed(this) || IsRtcpEnabled is false || RemoteRtp is null) ? false : RemoteRtp.Equals(RemoteRtcp); }
+                get { return !IDisposedExtensions.IsNullOrDisposed(this) && IsRtcpEnabled is true && RemoteRtp is not null && RemoteRtp.Equals(RemoteRtcp); }
             }
 
             /// <summary>
@@ -1342,9 +1342,8 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    return IDisposedExtensions.IsNullOrDisposed(this)
-                        ? false
-                        : (IsRtpEnabled && IsRtcpEnabled) && (LocalMultiplexing || RemoteMultiplexing);
+                    return !IDisposedExtensions.IsNullOrDisposed(this)
+&& (IsRtpEnabled && IsRtcpEnabled) && (LocalMultiplexing || RemoteMultiplexing);
                 }
             }
 
@@ -4197,7 +4196,7 @@ namespace Media.Rtp
                     return false;
 
                 long totalRtcp = TotalRtcpBytesSent + TotalRtcpBytesReceieved;
-                return totalRtcp is Common.Binary.LongZero ? false : totalRtcp >= totalReceived / averageMaximumRtcpBandwidthPercentage;
+                return totalRtcp is not Common.Binary.LongZero && totalRtcp >= totalReceived / averageMaximumRtcpBandwidthPercentage;
             }
         }
 
