@@ -93,7 +93,7 @@ namespace Media.Rtp
     /// Provides an implementation of the <see href="http://tools.ietf.org/html/rfc3550"> Real Time Protocol </see>.
     /// An instance typically allows one <see cref="System.Net.Sockets.Socket"/> to communicate (via the RTP protocol) to another <see cref="System.Net.Sockets.Socket"/> via <see cref="RtpClient.TransportContext"/>'s in which some <see cref="Media.Sdp.SessionDescription"/> has been created.
     /// </summary>
-    public partial class RtpClient : Common.BaseDisposable, Media.Common.IThreadReference
+    public partial class RtpClient : Common.SuppressedFinalizerDisposable, Media.Common.IThreadReference
     {
         #region Nested Types
 

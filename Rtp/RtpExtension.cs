@@ -57,7 +57,7 @@ namespace Media.Rtp
     /// Provides a managed implementation around the RtpExtension information which would be present in a RtpPacket only if the Extension bit is set.
     /// Marked IDisposable for derived implementations and to indicate when the implementation is no longer required.
     /// </summary>
-    public class RtpExtension : BaseDisposable, IEnumerable<byte>
+    public class RtpExtension : SuppressedFinalizerDisposable, IEnumerable<byte>
     {
         #region Constants And Statics
 

@@ -47,7 +47,6 @@ using Media.Common;
 
 namespace Media.Rtp
 {
-
     #region RtpPacket
 
     /// <summary>
