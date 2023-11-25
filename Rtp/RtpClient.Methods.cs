@@ -1255,7 +1255,8 @@ namespace Media.Rtp
             //TODO if RFC4571 is specified do check here to avoid reading channel.
 
             //The amount of data needed for the frame comes from TryReadFrameHeader
-            int frameLength = TryReadFrameHeader(buffer, bufferOffset, out frameChannel, BigEndianFrameControl, sessionRequired >= InterleavedOverhead, sessionRequired);
+            bool isInterleaved = sessionRequired >= InterleavedOverhead;
+            int frameLength = TryReadFrameHeader(buffer, bufferOffset, out frameChannel, isInterleaved ? BigEndianFrameControl : null, isInterleaved, sessionRequired);
 
             //Assign a context if there is a frame of any size
             if (frameChannel.HasValue && frameLength >= 0)
