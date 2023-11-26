@@ -2439,12 +2439,13 @@ namespace Media.Rtp
                             int usec = (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(tc.m_ReceiveInterval) >> 4;
 
                             //If receiving Rtp and the socket is able to read
-                            if (rtpEnabled && (shouldStop = IsUndisposed is false || m_StopRequested) is false
-                                //&& (readSockets.Contains(tc.RtpSocket) || errorSockets.Contains(tc.RtpSocket))
+                            if (rtpEnabled &&
+                                (shouldStop = IsUndisposed is false || m_StopRequested) is false
                                 //Check if the socket can read data first or that data needs to be received
                                 &&
-                                (tc.LastRtpPacketReceived.Equals(System.TimeSpan.MinValue) | tc.LastRtpPacketReceived >= tc.m_ReceiveInterval) ||
-                                 tc.RtpSocket.Poll(usec, System.Net.Sockets.SelectMode.SelectRead))
+                                (tc.LastRtpPacketReceived == System.TimeSpan.MinValue ||
+                                 tc.LastRtpPacketReceived >= tc.m_ReceiveInterval) ||
+                                tc.RtpSocket.Poll(usec, System.Net.Sockets.SelectMode.SelectRead))
                             {
                                 //RtpTry:
                                 //Receive RtpData
