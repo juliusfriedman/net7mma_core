@@ -1817,13 +1817,13 @@ namespace Media.Rtp
                                             {
                                                 //Determine if Rtcp is expected
                                                 //Perform another lookup and check compatibility
-                                                expectRtcp = !(incompatible = Common.IDisposedExtensions.IsNullOrDisposed(GetContextBySourceId(header.SendersSynchronizationSourceIdentifier)));
+                                                expectRtcp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(GetContextBySourceId(header.SendersSynchronizationSourceIdentifier))) is false;
                                             }
                                         }
                                     }
 
                                     //May be mixing channels...
-                                    if (expectRtcp is false && relevent.InDiscovery is false)
+                                    if (expectRtcp is false/* && relevent.InDiscovery is false*/)
                                     {
                                         //Rtp
                                         if (remainingInBuffer <= sessionRequired + Rtp.RtpHeader.Length)
@@ -1842,7 +1842,7 @@ namespace Media.Rtp
                                                 //The context was obtained by the frameChannel
                                                 //Use the SSRC to determine where it should be handled.
                                                 //If there is no context the packet is incompatible
-                                                expectRtp = !(incompatible = Common.IDisposedExtensions.IsNullOrDisposed(GetContextBySourceId(header.SynchronizationSourceIdentifier)));
+                                                expectRtp = (incompatible = Common.IDisposedExtensions.IsNullOrDisposed(GetContextBySourceId(header.SynchronizationSourceIdentifier))) is false;
 
                                                 //(Could also check SequenceNumber to prevent duplicate packets from being processed.)
 

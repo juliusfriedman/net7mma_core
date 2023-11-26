@@ -373,7 +373,7 @@ namespace Media.Common
         bool IDisposed.IsDisposed
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return (!IsUndisposed || IsFinalized is true) && IsDisposed; }
+            get { return (IsUndisposed is false || IsFinalized) && IsDisposed; }
         }
 
         /// <summary>
