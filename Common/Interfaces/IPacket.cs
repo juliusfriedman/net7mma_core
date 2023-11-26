@@ -1,6 +1,6 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
  Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
 
@@ -79,7 +79,7 @@ namespace Media.Common
         long Length { get; }
 
 
-        //https://net7mma.codeplex.com/workitem/17336
+        //https://github.com/juliusfriedman/net7mma_coreworkitem/17336
         //Todo, select name and implement logically.
         //{ TotalLength, ExpectedLength, RawLength }
 

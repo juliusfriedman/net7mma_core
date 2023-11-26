@@ -1,6 +1,6 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
  History:
  11 Feb 2015    Julius Friedman juliusfriedman@gmail.com  Created.
