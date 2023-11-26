@@ -657,8 +657,6 @@ namespace Media
         {
             //Should be performed in the Conference level, these values here will only 
             //should allow a backoff to occur in reporting and possibly eventually to be turned off.
-            fraction = 0;
-
             uint extended_max = RtpSeqCycles + RtpMaxSeq;
 
             int expected = (int)(extended_max - RtpBaseSeq + 1);
