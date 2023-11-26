@@ -335,12 +335,9 @@ namespace Media.Rtsp
 
                                 int clientPortsLength = clientPorts.Length;
 
-                                if (clientPortsLength > 0)
-                                {
-                                    clientRtpPort = int.Parse(clientPorts[0], System.Globalization.CultureInfo.InvariantCulture);
-                                    if (clientPortsLength > 1) clientRtcpPort = int.Parse(clientPorts[1], System.Globalization.CultureInfo.InvariantCulture);
-                                    else clientRtcpPort = clientRtpPort; //multiplexing
-                                }
+                                clientRtpPort = int.Parse(clientPorts[0], System.Globalization.CultureInfo.InvariantCulture);
+                                if (clientPortsLength > 1) clientRtcpPort = int.Parse(clientPorts[1], System.Globalization.CultureInfo.InvariantCulture);
+                                else clientRtcpPort = clientRtpPort; //multiplexing
 
                                 continue;
                             }
@@ -350,12 +347,9 @@ namespace Media.Rtsp
 
                                 int serverPortsLength = serverPorts.Length;
 
-                                if (serverPortsLength > 0)
-                                {
-                                    serverRtpPort = int.Parse(serverPorts[0], System.Globalization.CultureInfo.InvariantCulture);
-                                    if (serverPortsLength > 1) serverRtcpPort = int.Parse(serverPorts[1], System.Globalization.CultureInfo.InvariantCulture);
-                                    else serverRtcpPort = serverRtpPort; //multiplexing
-                                }
+                                serverRtpPort = int.Parse(serverPorts[0], System.Globalization.CultureInfo.InvariantCulture);
+                                if (serverPortsLength > 1) serverRtcpPort = int.Parse(serverPorts[1], System.Globalization.CultureInfo.InvariantCulture);
+                                else serverRtcpPort = serverRtpPort; //multiplexing
 
                                 continue;
                             }
@@ -779,19 +773,16 @@ namespace Media.Rtsp
 
                     int partsLength = parts.Length;
 
-                    if (partsLength > 0)
-                    {
-                        timestamp = parts[0];
+                    timestamp = parts[0];
 
-                        //If there was something after the space
-                        if (partsLength > 1)
+                    //If there was something after the space
+                    if (partsLength > 1)
+                    {
+                        //attempt to calulcate it from the given value
+                        if (double.TryParse(parts[1].Trim(), out double delaySeconds))
                         {
-                            //attempt to calulcate it from the given value
-                            if (double.TryParse(parts[1].Trim(), out double delaySeconds))
-                            {
-                                //Set the value of the servers delay
-                                delay = TimeSpan.FromSeconds(delaySeconds);
-                            }
+                            //Set the value of the servers delay
+                            delay = TimeSpan.FromSeconds(delaySeconds);
                         }
                     }
                 }

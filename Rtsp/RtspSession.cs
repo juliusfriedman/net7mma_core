@@ -2131,40 +2131,37 @@ namespace Media.Rtsp
                 int headerPartsLength = sessionHeaderParts.Length;
 
                 //Check if a valid value was given
-                if (headerPartsLength > 0)
+                //Trim it of whitespace
+                string value = System.Linq.Enumerable.LastOrDefault(sessionHeaderParts, (p => false == string.IsNullOrWhiteSpace(p)));
+
+                //If we dont have an exiting id then this is valid if the header was completely recieved only.
+                if (false == string.IsNullOrWhiteSpace(value) &&
+                    true == string.IsNullOrWhiteSpace(SessionId) ||
+                    value[0] != SessionId[0])
                 {
-                    //Trim it of whitespace
-                    string value = System.Linq.Enumerable.LastOrDefault(sessionHeaderParts, (p => false == string.IsNullOrWhiteSpace(p)));
+                    //Get the SessionId if present
+                    SessionId = sessionHeaderParts[0].Trim();
 
-                    //If we dont have an exiting id then this is valid if the header was completely recieved only.
-                    if (false == string.IsNullOrWhiteSpace(value) &&
-                        true == string.IsNullOrWhiteSpace(SessionId) ||
-                        value[0] != SessionId[0])
+                    //Check for a timeout
+                    if (sessionHeaderParts.Length > 1)
                     {
-                        //Get the SessionId if present
-                        SessionId = sessionHeaderParts[0].Trim();
+                        string timeoutPart = sessionHeaderParts[1];
 
-                        //Check for a timeout
-                        if (sessionHeaderParts.Length > 1)
+                        if (false == string.IsNullOrWhiteSpace(timeoutPart))
                         {
-                            string timeoutPart = sessionHeaderParts[1];
+                            int timeoutStart = 1 + timeoutPart.IndexOf(Media.Sdp.SessionDescription.EqualsSign);
 
-                            if (false == string.IsNullOrWhiteSpace(timeoutPart))
+                            if (timeoutStart >= 0 && int.TryParse(timeoutPart.AsSpan(timeoutStart), out timeoutStart))
                             {
-                                int timeoutStart = 1 + timeoutPart.IndexOf(Media.Sdp.SessionDescription.EqualsSign);
-
-                                if (timeoutStart >= 0 && int.TryParse(timeoutPart.AsSpan(timeoutStart), out timeoutStart))
+                                if (timeoutStart > 0)
                                 {
-                                    if (timeoutStart > 0)
-                                    {
-                                        Timeout = System.TimeSpan.FromSeconds(timeoutStart);
-                                    }
+                                    Timeout = System.TimeSpan.FromSeconds(timeoutStart);
                                 }
                             }
                         }
-
-                        value = null;
                     }
+
+                    value = null;
                 }
 
                 sessionHeaderParts = null;
