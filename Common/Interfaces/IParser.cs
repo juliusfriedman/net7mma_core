@@ -121,7 +121,7 @@ namespace Media.Common.Interfaces
                     }
                 default:
                     {
-                        if (State.Equals(Complete))
+                        if (State is Complete)
                         {
                             OnRealization();
                         }
@@ -158,7 +158,7 @@ namespace Media.Common.Interfaces
 
         bool ICompletable.IsComplete
         {
-            get { return State.Equals(Complete); }
+            get { return State is Complete; }
         }
     }
 }

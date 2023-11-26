@@ -426,7 +426,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool Equals(MemorySegment other)
         {
-            return Common.IDisposedExtensions.IsNullOrDisposed(other) is false && Common.IDisposedExtensions.IsNullOrDisposed(this) is false && other.GetHashCode().Equals(GetHashCode());
+            return Common.IDisposedExtensions.IsNullOrDisposed(other) is false && Common.IDisposedExtensions.IsNullOrDisposed(this) is false && other.GetHashCode() == GetHashCode();
         }
 
         #region Operators

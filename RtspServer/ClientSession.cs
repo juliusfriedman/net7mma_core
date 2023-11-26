@@ -77,14 +77,18 @@ namespace Media.Rtsp//.Server
 
                 //After
 
-                if (da.Equals(Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan)) return Common.Binary.Zero;
-                else if (a.Transferred.Value.Ticks <= da.Ticks) return Common.Binary.NegativeOne;
+                if (da.Equals(Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan))
+                    return Common.Binary.Zero;
+
+                if (a.Transferred.Value.Ticks <= da.Ticks)
+                    return Common.Binary.NegativeOne;
 
                 //-- fast path the transfer check, if less than between b.LastRtpPacketSent
 
                 TimeSpan dy = (DateTime.UtcNow - a.Transferred.Value).Duration();
 
-                if (dy <= b.LastRtpPacketSent) return Common.Binary.One;
+                if (dy <= b.LastRtpPacketSent)
+                    return Common.Binary.One;
 
                 //--
 
@@ -93,8 +97,8 @@ namespace Media.Rtsp//.Server
                 //Has the time since the last transfer occured elapsed in a quantity which is greater than or equal to the sendr interval?
                 return dt >= b.m_SendInterval ?
                     //does that time in 100z of a nanos minus that of the senders jitter differ from the rtp (receive) jitter in such a way that it is greater or equal?
-                    dt.Ticks - b.SenderJitter >= b.RtpJitter ?
-                      Common.Binary.NegativeOne : Common.Binary.Zero
+                    dt.Ticks - b.SenderJitter >= b.RtpJitter
+                      ? Common.Binary.NegativeOne : Common.Binary.Zero
                       //if not return {0}, <0>, -|0|
                       : -Common.Binary.Zero;
             }

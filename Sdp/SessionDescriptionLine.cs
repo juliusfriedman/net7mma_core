@@ -414,7 +414,7 @@ namespace Media.Sdp
                &&
                other.m_Seperator.Equals(m_Seperator)
                &&
-               other.Length.Equals(Length)
+               other.Length == Length
                && //Calling ToString without taking account case
                ToString().Equals(other.ToString(), StringComparison.OrdinalIgnoreCase);
         }

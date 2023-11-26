@@ -1446,7 +1446,7 @@ namespace Media.Concepts.Classes
         {
             int index = -1;
 
-            foreach (Bits x in b) if (false.Equals((index = IndexOf(x, ignoreEndian)).Equals(-1))) break;
+            foreach (Bits x in b) if (false.Equals((index = IndexOf(x, ignoreEndian)) is -1)) break;
 
             return index;
         }

@@ -170,7 +170,7 @@ namespace Media
                 index = Array.IndexOf(array, needle[0], startIndex, sourceLength - needleLen + 1);
 #endif
                 // if we did not find even the first element of the needls, then the search is failed
-                if (index.Equals(-1))
+                if (index is -1)
                     return -1;
 
                 int i, p;

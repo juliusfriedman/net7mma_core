@@ -755,13 +755,13 @@ namespace Media.Rtp
             //No packets contained yet
             if (count is 0)
             {
-                if (m_Ssrc.Equals(-1)) m_Ssrc = ssrc;
+                if (m_Ssrc is -1) m_Ssrc = ssrc;
                 else if (false.Equals(ssrc.Equals(m_Ssrc))) throw new ArgumentException("packet.SynchronizationSourceIdentifier must match frame SynchronizationSourceIdentifier", "packet");
 
-                if (m_Timestamp.Equals(-1)) m_Timestamp = ts;
+                if (m_Timestamp is -1) m_Timestamp = ts;
                 else if (false.Equals(ts.Equals(m_Timestamp))) throw new ArgumentException("packet.Timestamp must match frame Timestamp", "packet");
 
-                if (m_PayloadType.Equals(-1)) m_PayloadType = pt;
+                if (m_PayloadType is -1) m_PayloadType = pt;
                 else if (AllowsMultiplePayloadTypes is false && false.Equals(pt.Equals(PayloadType))) throw new ArgumentException("packet.PayloadType must match frame PayloadType", "packet");
 
                 m_LowestSequenceNumber = m_HighestSequenceNumber = seq;
@@ -789,20 +789,24 @@ namespace Media.Rtp
             //If the identity is not the same
             if (false.Equals(ssrc.Equals(m_Ssrc)))
             {
-                if (m_Ssrc.Equals(Common.Binary.NegativeOne))
+                if (m_Ssrc is Common.Binary.NegativeOne)
                 {
                     m_Ssrc = ssrc;
 
                     goto Timestamp;
                 }
                 //If the packet has a source list
-                else if (false.Equals(packet.ContributingSourceCount is 0))
+                else if (packet.ContributingSourceCount is not 0)
                 {
-                    using (RFC3550.SourceList sl = packet.GetSourceList())
+                    RFC3550.SourceList sl = packet.GetSourceList();
+                    if (sl is not null)
                     {
-                        if (sl.Contains(ref m_Ssrc))
+                        using (sl)
                         {
-                            goto Timestamp;
+                            if (sl.Contains(ref m_Ssrc))
+                            {
+                                goto Timestamp;
+                            }
                         }
                     }
                 }
@@ -1502,7 +1506,7 @@ namespace Media.Rtp
                  &&
                  other.MarkerCount.Equals(MarkerCount)
                  &&
-                 other.GetHashCode().Equals(GetHashCode());
+                 other.GetHashCode() == GetHashCode();
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

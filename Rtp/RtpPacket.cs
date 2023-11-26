@@ -908,11 +908,11 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool Equals(RtpPacket other)
         {
-            return other.Length.Equals(Length)
+            return other.Length == Length
                  &&
                  other.Payload.Equals(Payload) //SequenceEqual...
                  &&
-                 other.GetHashCode().Equals(GetHashCode());
+                 other.GetHashCode() == GetHashCode();
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

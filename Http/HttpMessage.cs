@@ -2560,9 +2560,10 @@ namespace Media.Http
             //other.Created != Created
 
             return other is not null
-&& other.MessageType == MessageType
                 &&
-                other.Version.Equals(Version)
+                other.MessageType == MessageType
+                &&
+                other.Version == Version
                 &&
                 other.MethodString.Equals(MethodString)
                 //&&

@@ -241,7 +241,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
                 LastStatusChangeUtc = DateTime.UtcNow;
 
-                if (MediaStartedUtc.Equals(DateTime.MinValue) && value == MediaStatus.Playing)
+                if (MediaStartedUtc == DateTime.MinValue && value is MediaStatus.Playing)
                 {
                     MediaStartedUtc = LastStatusChangeUtc;
                 }
@@ -5418,7 +5418,8 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                         //Should allow this to be given or set as a property MinimumUdpPort, MaximumUdpPort                        
                         int openPort = Media.Common.Extensions.Socket.SocketExtensions.ProbeForOpenPort(ProtocolType.Udp, lastPortUsed + 1, true);
 
-                        if (Common.Binary.NegativeOne.Equals(openPort)) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Could not find open Udp Port");
+                        if (openPort is Common.Binary.NegativeOne)
+                            Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Could not find open Udp Port");
                         //else if (MaximumUdp.HasValue && openPort > MaximumUdp)
                         //{
                         //    Media.Common.Extensions.Exceptions.ExceptionExtensions.CreateAndRaiseException(this, "Found Udp Port > MaximumUdp. Found: " + openPort);

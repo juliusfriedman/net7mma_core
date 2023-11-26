@@ -891,7 +891,7 @@ namespace Media.Rtp
                 get
                 {
                     return TotalRtpPacketsReceieved >= 0 &&
-                        false.Equals(m_LastRtpIn.Equals(DateTime.MinValue)) &&
+                        m_LastRtpIn != DateTime.MinValue &&
                         false.Equals(m_ReceiveInterval.Equals(Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan)) &&
                         LastRtpPacketReceived < m_ReceiveInterval;
                 }
@@ -903,7 +903,7 @@ namespace Media.Rtp
                 get
                 {
                     return IsActive && TotalRtpPacketsSent >= 0 &&
-                        false.Equals(m_LastRtpOut.Equals(DateTime.MinValue)) &&
+                        m_LastRtpOut != DateTime.MinValue &&
                         false.Equals(m_SendInterval.Equals(Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan)) &&
                         LastRtpPacketSent < m_SendInterval;
                 }
@@ -915,7 +915,7 @@ namespace Media.Rtp
                 get
                 {
                     return TotalRtcpPacketsReceieved >= 0 &&
-                        false.Equals(m_LastRtcpIn.Equals(DateTime.MinValue)) &&
+                        m_LastRtcpIn != DateTime.MinValue &&
                         false.Equals(m_ReceiveInterval.Equals(Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan)) &&
                         LastRtcpReportReceived < m_ReceiveInterval;
                 }
@@ -1065,10 +1065,10 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    return IDisposedExtensions.IsNullOrDisposed(this) || m_FirstPacketSent.Equals(DateTime.MinValue) ?
-                        Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan
-                        :
-                        DateTime.UtcNow - m_FirstPacketSent;
+                    return IDisposedExtensions.IsNullOrDisposed(this) ||
+                           m_FirstPacketSent == DateTime.MinValue
+                           ? Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan
+                           : DateTime.UtcNow - m_FirstPacketSent;
                 }
             }
 
@@ -1080,10 +1080,10 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    return IDisposedExtensions.IsNullOrDisposed(this) || m_FirstPacketReceived.Equals(DateTime.MinValue) ?
-                        Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan
-                        :
-                        DateTime.UtcNow - m_FirstPacketReceived;
+                    return IDisposedExtensions.IsNullOrDisposed(this) ||
+                           m_FirstPacketReceived == DateTime.MinValue
+                           ? Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan
+                           : DateTime.UtcNow - m_FirstPacketReceived;
                 }
             }
 
@@ -1185,7 +1185,9 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    return m_LastRtcpOut.Equals(DateTime.MinValue) ? TimeSpan.MinValue : DateTime.UtcNow - m_LastRtcpOut;
+                    return m_LastRtcpOut == DateTime.MinValue
+                        ? TimeSpan.MinValue
+                        : DateTime.UtcNow - m_LastRtcpOut;
                 }
             }
 
@@ -1197,7 +1199,9 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    return m_LastRtcpIn.Equals(DateTime.MinValue) ? TimeSpan.MinValue : DateTime.UtcNow - m_LastRtcpIn;
+                    return m_LastRtcpIn == DateTime.MinValue
+                        ? TimeSpan.MinValue
+                        : DateTime.UtcNow - m_LastRtcpIn;
                 }
             }
 
@@ -1209,7 +1213,9 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    return m_LastRtpIn.Equals(DateTime.MinValue) ? TimeSpan.MinValue : DateTime.UtcNow - m_LastRtpIn;
+                    return m_LastRtpIn == DateTime.MinValue
+                        ? TimeSpan.MinValue
+                        : DateTime.UtcNow - m_LastRtpIn;
                 }
             }
 
@@ -1221,7 +1227,9 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    return m_LastRtpOut.Equals(DateTime.MinValue) ? TimeSpan.MinValue : DateTime.UtcNow - m_LastRtpOut;
+                    return m_LastRtpOut == DateTime.MinValue
+                        ? TimeSpan.MinValue
+                        : DateTime.UtcNow - m_LastRtpOut;
                 }
             }
 
@@ -1233,7 +1241,9 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    return m_Initialized.Equals(DateTime.MinValue) ? TimeSpan.MinValue : DateTime.UtcNow - m_Initialized;
+                    return m_Initialized == DateTime.MinValue
+                        ? TimeSpan.MinValue
+                        : DateTime.UtcNow - m_Initialized;
                 }
             }
 
