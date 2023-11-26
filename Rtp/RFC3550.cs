@@ -329,13 +329,16 @@ namespace Media
             //Get all packets contained in the buffer.
             foreach (RtcpPacket currentPacket in RtcpPacket.GetPackets(array, offset, count, version, null, ssrc, shouldDispose))
             {
-
                 //Determine who the packet is from and what type it is.
                 int firstPayloadType = currentPacket.PayloadType;
 
                 //The first packet in a compound packet needs to be validated
-                if (parsedPackets is 0 && !IsValidRtcpHeader(currentPacket.Header, currentPacket.Version)) yield break;
-                else if (currentPacket.Version != version || skipUnknownTypes && RtcpPacket.GetImplementationForPayloadType((byte)currentPacket.PayloadType) is null) yield break;
+                if (parsedPackets is 0 && IsValidRtcpHeader(currentPacket.Header, currentPacket.Version) is false)
+                    yield break;
+
+                if (currentPacket.Version != version || (skipUnknownTypes &&
+                    RtcpPacket.GetImplementationForPayloadType((byte)currentPacket.PayloadType) is null))
+                    yield break;
 
                 //Count the packets parsed
                 ++parsedPackets;
