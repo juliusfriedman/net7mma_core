@@ -1754,10 +1754,10 @@ namespace Media.Rtp
                                 //If this is a valid context there must be at least a RtpHeader's worth of data in the buffer. 
                                 //If this was a RtcpPacket with only 4 bytes it wouldn't have a ssrc and wouldn't be valid to be sent.
                                 if (incompatible is false &&
-                                    frameChannel.Equals(relevent.DataChannel) &&
+                                    frameChannel.HasValue && frameChannel.Value.Equals(relevent.DataChannel) &&
                                     remainingInBuffer < Rtp.RtpHeader.Length + sessionRequired
                                     ||
-                                    (frameChannel.Equals(relevent.ControlChannel) &&
+                                    (frameChannel.HasValue && frameChannel.Value.Equals(relevent.ControlChannel) &&
                                     remainingInBuffer < Rtcp.RtcpHeader.Length + sessionRequired))
                                 {
                                     //Remove the context
@@ -1780,7 +1780,7 @@ namespace Media.Rtp
                                 if (incompatible is false)
                                 {
                                     //Determine if the packet is Rtcp by looking at the found channel and the relvent control channel
-                                    if (frameChannel.Equals(relevent.ControlChannel) && relevent.InDiscovery is false)
+                                    if (frameChannel.HasValue && frameChannel.Equals(relevent.ControlChannel) && relevent.InDiscovery is false)
                                     {
                                         //Rtcp
 
