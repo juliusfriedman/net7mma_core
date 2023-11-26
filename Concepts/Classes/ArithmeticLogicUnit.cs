@@ -1,4 +1,4 @@
-﻿//http://www.codeproject.com/script/Articles/ViewDownloads.aspx?aid=141650
+﻿//https://www.codeproject.com/script/Articles/ViewDownloads.aspx?aid=141650
 
 namespace Media.Concepts.Classes
 {

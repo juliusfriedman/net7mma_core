@@ -894,7 +894,7 @@ namespace Media.Http
 
                         #region Host Headers
 
-                        //http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html
+                        //https://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html
                         // A client that sends an HTTP/1.1 request MUST send a Host header.
                         if (1.1 >= message.Version && false == message.ContainsHeader(HttpHeaders.Host)) //Should remove host header if present?
                         {
@@ -1488,7 +1488,7 @@ namespace Media.Http
 
             //extract boundary from contentType
 
-            //http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.2
+            //https://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.2
 
             //Boundary is always '--' + boundary
 
@@ -1552,7 +1552,7 @@ namespace Media.Http
             //If not forced and already TriedCredentials then return the response given.
             if (false == force && TriedCredentials && response is null) return response;
 
-            //http://tools.ietf.org/html/rfc2617
+            //https://tools.ietf.org/html/rfc2617
             //3.2.1 The WWW-Authenticate Response Header
             //Example
             //WWW-Authenticate: Basic realm="nmrs_m7VKmomQ2YM3:", Digest realm="GeoVision", nonce="b923b84614fc11c78c712fb0e88bc525"\r\n

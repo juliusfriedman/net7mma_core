@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -48,7 +48,7 @@ namespace Media.Rtcp
     #region ReceiversReport
 
     /// <summary>
-    /// Provides a managed implemenation of the ReceiversReport defined in http://tools.ietf.org/html/rfc3550#section-6.4.2
+    /// Provides a managed implemenation of the ReceiversReport defined in https://tools.ietf.org/html/rfc3550#section-6.4.2
     /// </summary>
     public class ReceiversReport : RtcpReport
     {

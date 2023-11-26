@@ -1,7 +1,7 @@
 ﻿/*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -242,7 +242,7 @@ namespace Media.Sdp
         #endregion
 
         #region Others
-        /* http://www.iana.org/assignments/sdp-parameters/sdp-parameters.xhtml#sdp-parameters-1
+        /* https://www.iana.org/assignments/sdp-parameters/sdp-parameters.xhtml#sdp-parameters-1
                 att-field (both session and media level)	record	[RFC-ietf-siprec-protocol-18]
                 att-field (both session and media level)	recordpref	[RFC-ietf-siprec-protocol-18]
                 att-field (both session and media level)	rtcp-rgrp	[RFC-ietf-avtcore-rtp-multi-stream-optimisation-12]

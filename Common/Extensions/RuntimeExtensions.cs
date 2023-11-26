@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -103,17 +103,17 @@ namespace Media.Common.Extensions
             get { return WatchKitType is not null; }
         }
 
-        //IsRyuJit - http://stackoverflow.com/questions/22422021/how-do-i-verify-that-ryujit-is-jitting-my-app
+        //IsRyuJit - https://stackoverflow.com/questions/22422021/how-do-i-verify-that-ryujit-is-jitting-my-app
 
         // Check whether optimized SIMD intrinsics will be generated
         //if (VectorMath.IsHardwareAccelerated)
         //{
         //}
 
-        //http://stackoverflow.com/questions/8413922/programmatically-determining-mono-runtime-version
+        //https://stackoverflow.com/questions/8413922/programmatically-determining-mono-runtime-version
 
         //System.Reflection.Assembly.GetExecutingAssembly().ImageRuntimeVersion
-        //NetVersion http://www.codeproject.com/Tips/135964/Get-NET-Framework-version
+        //NetVersion https://www.codeproject.com/Tips/135964/Get-NET-Framework-version
 
         ////https://github.com/dotnet/cli/blob/ac4c6702d5d345dc9c397f80290f105fedebe98b/scripts/Microsoft.DotNet.Cli.Build.Framework/CurrentPlatform.cs
     }

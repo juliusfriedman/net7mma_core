@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -53,7 +53,7 @@ using System.Threading;
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -90,7 +90,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 namespace Media.Rtp
 {
     /// <summary>
-    /// Provides an implementation of the <see href="http://tools.ietf.org/html/rfc3550"> Real Time Protocol </see>.
+    /// Provides an implementation of the <see href="https://tools.ietf.org/html/rfc3550"> Real Time Protocol </see>.
     /// An instance typically allows one <see cref="System.Net.Sockets.Socket"/> to communicate (via the RTP protocol) to another <see cref="System.Net.Sockets.Socket"/> via <see cref="RtpClient.TransportContext"/>'s in which some <see cref="Media.Sdp.SessionDescription"/> has been created.
     /// </summary>
     public partial class RtpClient : Common.SuppressedFinalizerDisposable, Media.Common.IThreadReference
@@ -140,7 +140,7 @@ namespace Media.Rtp
                 //IP Options for InterNetwork
                 if (socket.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    //http://en.wikipedia.org/wiki/Type_of_service
+                    //https://en.wikipedia.org/wiki/Type_of_service
                     //CS5,EF	40,46	5 :Critical - mainly used for voice RTP
                     //40 || 46 is used for RTP Audio per Wikipedia
                     //48 is Internetwork Control
@@ -1753,7 +1753,7 @@ namespace Media.Rtp
             {
 
                 /*NOTE : 
-                 * http://www.ietf.org/rfc/rfc3551.txt
+                 * https://www.ietf.org/rfc/rfc3551.txt
                  * 
                   Static payload type 13 was assigned to the Comfort Noise (CN) payload format defined in RFC 3389.  
                   Payload type 19 was marked reserved because it had been temporarily allocated to an earlier version of Comfort Noise
@@ -3104,7 +3104,7 @@ namespace Media.Rtp
 
                 //The counters for the bytes will now be be updated (without the 12 octets of the header)
                 //increment the counters (Only use the Payload.Count per the RFC) (new Erratta Submitted)
-                //http://www.rfc-editor.org/errata_search.php?rfc=3550
+                //https://www.rfc-editor.org/errata_search.php?rfc=3550
                 transportContext.RtpBytesRecieved += packet.Payload.Count;
 
                 //Please note due to the 'consensus' achieved for this standard (RFC 1889 / RFC3550 / RFC3551)
@@ -3299,7 +3299,7 @@ namespace Media.Rtp
                 //This allows detection of middle boxes, make a seperate sample, default implementation should be 'compliant'...
 
                 //increment the counters (Only use the Payload.Count per the RFC) (new Erratta Submitted)
-                //http://www.rfc-editor.org/errata_search.php?rfc=3550
+                //https://www.rfc-editor.org/errata_search.php?rfc=3550
                 transportContext.RtpBytesSent += packet.Payload.Count;
 
 

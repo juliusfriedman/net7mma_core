@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -116,7 +116,7 @@ namespace Media.Common
         //It may be easier to just stub a method for sending (and recieving) rather than trying to act differently depending on the RunTime but the RunTimes are different to a degree.
 
         //Microsoft -
-        //BufferOffsetSize is used in 4.6 http://referencesource.microsoft.com/#System/net/System/Net/Sockets/Socket.cs
+        //BufferOffsetSize is used in 4.6 https://referencesource.microsoft.com/#System/net/System/Net/Sockets/Socket.cs
         //DoMultipleSend, BeginMultipleSend, EndMultipleSend
         //MultipleConnect
         //This could call those methods with the MemorySegment especially if MemorySegment was able to used as a BufferOffsetSize structure.

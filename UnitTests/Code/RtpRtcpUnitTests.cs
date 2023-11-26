@@ -871,7 +871,7 @@ namespace Media.UnitTests
             //asPacket now has 1 block (1 chunk of 15 bytes)
             //asPacket is 19 octets long, 11 octets in the payload and 8 octets in the header
             //asPacket would have a LengthInWordsMinusOne of 3 because 19 / 4 = 4 - 1 = 3
-            //But null octets are added (Per RFC3550 @ Page 45 [Paragraph 2] / http://tools.ietf.org/html/rfc3550#appendix-A.4)
+            //But null octets are added (Per RFC3550 @ Page 45 [Paragraph 2] / https://tools.ietf.org/html/rfc3550#appendix-A.4)
             //19 + 1 = 20, 20 / 4 = 5 - 1 = 4.
             if (false == rtcpPacket.IsComplete || rtcpPacket.Length != 20 || rtcpPacket.Header.LengthInWordsMinusOne != 4) throw new Exception("Invalid Length");
 

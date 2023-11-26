@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -187,7 +187,7 @@ namespace Media.Codecs.Image
             //like this (where Cb = u , Cr = y)
             //Y0 Cb Y1 Cr Y2 Cb Y3 
 
-            /*http://msdn.microsoft.com/en-us/library/ms893078.aspx
+            /*https://learn.microsoft.com/en-us/previous-versions/windows/embedded/ms893078(v=msdn.10)?redirectedfrom=MSDN
              * 
              * C = Y - 16
              D = U - 128
@@ -197,7 +197,7 @@ namespace Media.Codecs.Image
              B = clip(( 298 * C + 516 * D           + 128) >> 8)
 
              * here are a whole bunch more formats for doing this...
-             * http://stackoverflow.com/questions/3943779/converting-to-yuv-ycbcr-colour-space-many-versions
+             * https://stackoverflow.com/questions/3943779/converting-to-yuv-ycbcr-colour-space-many-versions
              */
 
 

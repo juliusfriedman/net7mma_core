@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -367,7 +367,7 @@ namespace Media.Common
         /// Defines a known ByteOrder
         /// </summary>
         /// <notes>
-        /// Adopted from the example at <see href="http://en.wikipedia.org/wiki/Endianness">Wikipedia - Endianness</see>
+        /// Adopted from the example at <see href="https://en.wikipedia.org/wiki/Endianness">Wikipedia - Endianness</see>
         /// </notes>
         public enum ByteOrder
         {
@@ -383,7 +383,7 @@ namespace Media.Common
         }
 
         /// <summary>
-        /// Defines a known BitOrder <see href="http://en.wikipedia.org/wiki/Bit_numbering">Wikipedia - Bit numbering</see>
+        /// Defines a known BitOrder <see href="https://en.wikipedia.org/wiki/Bit_numbering">Wikipedia - Bit numbering</see>
         /// </summary>
         public enum BitOrder
         {
@@ -847,7 +847,7 @@ namespace Media.Common
 
                 //Some bytes cannot be reversed and should skipped. (mod 3, mod 2)
                 //There are at least 16 values out of 256 which are palindromes. (All are products of 3) 
-                //http://stackoverflow.com/questions/845772/how-to-check-if-the-binary-representation-of-an-integer-is-a-palindrome
+                //https://stackoverflow.com/questions/845772/how-to-check-if-the-binary-representation-of-an-integer-is-a-palindrome
 
                 /*
               Value | Quotient of division 3
@@ -1165,7 +1165,7 @@ namespace Media.Common
         /// <param name="source">The octet to set the bit in</param>
         /// <param name="index">The index of the bit to set</param>
         /// <remarks>
-        /// http://stackoverflow.com/questions/2605913/invert-1-bit-in-c-sharp
+        /// https://stackoverflow.com/questions/2605913/invert-1-bit-in-c-sharp
         /// </remarks>
         [CLSCompliant(false)]
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

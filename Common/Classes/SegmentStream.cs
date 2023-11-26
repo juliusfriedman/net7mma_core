@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -996,7 +996,7 @@ namespace Media.Common
 
         //The only way to avoid the allocation in the base class with CopyTo is to handly the copying here....
         //If you use CopyTo the CLR will use it's own buffer to middle man the reading and writing to the destination.
-        //http://referencesource.microsoft.com/#mscorlib/system/io/stream.cs
+        //https://referencesource.microsoft.com/#mscorlib/system/io/stream.cs
         //Alternatively a CopyToStream could be made or also a function which hid the base member via new.
 
         /// <summary>

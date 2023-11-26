@@ -1,7 +1,7 @@
 ﻿/*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -577,7 +577,7 @@ namespace Media.Rtsp
         /// </summary>
         /// <param name="packet">The array segment which contains the packet in whole at the offset of the segment. The Count of the segment may not contain more bytes than a RFC2326 message may contain.</param>
         /// <reference>
-        /// RFC2326 - http://tools.ietf.org/html/rfc2326 - [Page 19]
+        /// RFC2326 - https://tools.ietf.org/html/rfc2326 - [Page 19]
         /// 4.4 Message Length
         ///When a message body is included with a message, the length of that
         ///body is determined by one of the following (in order of precedence):

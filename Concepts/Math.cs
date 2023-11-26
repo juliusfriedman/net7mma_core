@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -43,8 +43,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 //https://github.com/qwertie/LoycCore/blob/master/Loyc.Essentials/Math/MathEx.cs
 
 //Some from here
-//http://stackoverflow.com/questions/5558492/divide-by-10-using-bit-shifts
-//http://stackoverflow.com/questions/6357038/is-multiplication-and-division-using-shift-operators-in-c-actually-faster
+//https://stackoverflow.com/questions/5558492/divide-by-10-using-bit-shifts
+//https://stackoverflow.com/questions/6357038/is-multiplication-and-division-using-shift-operators-in-c-actually-faster
 
 //Other parts from here
 //http://www.hackersdelight.org/divcMore.pdf
@@ -427,7 +427,7 @@ namespace Media.Concepts.Math
                 remainder = ShiftLeftEx(ref aH, ref aL, skip);
 
                 // The core division algorithm is based on the assembly code in 
-                // http://www.codeproject.com/KB/recipes/MulDiv64.aspx
+                // https://www.codeproject.com/KB/recipes/MulDiv64.aspx
                 // Unoptimized, it required an iteration for every bit of the input 
                 // (a). The way it works is slightly subtle. The dividend 'a' 
                 // slowly becomes the output as the loop progresses. The original 

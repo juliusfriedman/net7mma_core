@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -50,7 +50,7 @@ namespace Media.Rtcp
 
     /// <summary>
     /// A managed implemenation of the Rtcp abstraction found in RFC3550.
-    /// <see cref="http://tools.ietf.org/html/rfc3550"> RFC3550 </see> for more information
+    /// <see cref="https://tools.ietf.org/html/rfc3550"> RFC3550 </see> for more information
     /// </summary>
     public class RtcpPacket : SuppressedFinalizerDisposable, IPacket, ICloneable
     {

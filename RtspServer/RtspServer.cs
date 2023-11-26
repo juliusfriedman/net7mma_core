@@ -1,7 +1,7 @@
 ﻿/*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -52,7 +52,7 @@ namespace Media.Rtsp
 {
     /// <summary>
     /// Implementation of Rtsp / RFC2326 server 
-    /// http://tools.ietf.org/html/rfc2326
+    /// https://tools.ietf.org/html/rfc2326
     /// Suppports Reliable(Rtsp / Tcp or Rtsp / Http) and Unreliable(Rtsp / Udp) connections
     /// </summary>
     public class RtspServer : Common.BaseDisposable, Common.ISocketReference, Common.IThreadReference
@@ -2626,7 +2626,7 @@ namespace Media.Rtsp
             //If the last request did not have an authorization header
             else if (noAuthHeader)
             {
-                /* -- http://tools.ietf.org/html/rfc2617
+                /* -- https://tools.ietf.org/html/rfc2617
                  
     qop
      Indicates what "quality of protection" the client has applied to
@@ -3250,7 +3250,7 @@ namespace Media.Rtsp
                 }
                 else if (authType.Contains(RtspHeaderFields.Authorization.Digest, StringComparison.OrdinalIgnoreCase))
                 {
-                    //http://tools.ietf.org/html/rfc2617
+                    //https://tools.ietf.org/html/rfc2617
                     //Digest RFC2617
                     /* Example header -
                      * 
@@ -3360,7 +3360,7 @@ namespace Media.Rtsp
                         string.IsNullOrWhiteSpace(uri) ||
                         string.IsNullOrWhiteSpace(response)) return false;
 
-                    //http://en.wikipedia.org/wiki/Digest_access_authentication
+                    //https://en.wikipedia.org/wiki/Digest_access_authentication
                     //The MD5 hash of the combined username, authentication realm and password is calculated. The result is referred to as HA1.
                     byte[] HA1 = Cryptography.MD5.GetHash(request.ContentEncoding.GetBytes(string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}:{2}", requiredCredential.UserName, realm.Replace("realm=", string.Empty), requiredCredential.Password)));
 
@@ -3368,8 +3368,8 @@ namespace Media.Rtsp
                     byte[] HA2 = Cryptography.MD5.GetHash(request.ContentEncoding.GetBytes(string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", request.RtspMethod, uri.Replace("uri=", string.Empty))));
 
                     //No QOP No NC
-                    //See http://en.wikipedia.org/wiki/Digest_access_authentication
-                    //http://tools.ietf.org/html/rfc2617
+                    //See https://en.wikipedia.org/wiki/Digest_access_authentication
+                    //https://tools.ietf.org/html/rfc2617
 
                     //The MD5 hash of the combined HA1 result, server nonce (nonce), request counter (nc), client nonce (cnonce), quality of protection code (qop) and HA2 result is calculated. The result is the "response" value provided by the client.
                     byte[] ResponseHash = Cryptography.MD5.GetHash(request.ContentEncoding.GetBytes(string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}:{2}:{3}:{4}:{5}",

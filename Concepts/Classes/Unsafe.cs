@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -129,7 +129,7 @@ namespace Media.Concepts.Classes
 
         #region BytesPer
 
-        //http://stackoverflow.com/questions/4764573/why-is-typedreference-behind-the-scenes-its-so-fast-and-safe-almost-magical
+        //https://stackoverflow.com/questions/4764573/why-is-typedreference-behind-the-scenes-its-so-fast-and-safe-almost-magical
 
         internal static class ArrayOfTwoElements<T>
         {
@@ -245,7 +245,7 @@ namespace Media.Concepts.Classes
         //    }
         //}
 
-        //http://stackoverflow.com/questions/621493/c-sharp-unsafe-value-type-array-to-byte-array-conversions/3577227#3577227
+        //https://stackoverflow.com/questions/621493/c-sharp-unsafe-value-type-array-to-byte-array-conversions/3577227#3577227
 
         [System.CLSCompliant(false)]
         public static unsafe T[] Create<T>(void* source, int length)
@@ -437,7 +437,7 @@ namespace Media.Concepts.Classes
 
         #region MakeTypedReference
 
-        //http://stackoverflow.com/questions/26998758/why-is-typedreference-maketypedreference-so-constrained
+        //https://stackoverflow.com/questions/26998758/why-is-typedreference-maketypedreference-so-constrained
 
         //private static readonly System.Reflection.MethodInfo InternalMakeTypedReferenceMethod = typeof(System.TypedReference).GetMethod("InternalMakeTypedReference", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Instance);
         //Needs DelegatExtensions
@@ -467,7 +467,7 @@ namespace Media.Concepts.Classes
 
         #region Structures
 
-        //Adapted from 'Mash`s' response on StackOverflow @ http://stackoverflow.com/questions/621493/c-sharp-unsafe-value-type-array-to-byte-array-conversions/3577227#3577227
+        //Adapted from 'Mash`s' response on StackOverflow @ https://stackoverflow.com/questions/621493/c-sharp-unsafe-value-type-array-to-byte-array-conversions/3577227#3577227
         //Also SharpUtils UnsafeTools VariadicUnion
 
         /// <summary>

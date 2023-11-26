@@ -1,7 +1,7 @@
 ﻿/*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -34,7 +34,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * v//
  */
 
-//http://tools.ietf.org/html/rfc6184
+//https://tools.ietf.org/html/rfc6184
 
 using System;
 using System.Collections.Generic;
@@ -55,7 +55,7 @@ namespace Media.Rtsp.Server.MediaTypes
         //https://bitbucket.org/jerky/rtp-streaming-server
 
         //C# MP4 and H.264 ES Writer
-        //http://iknowu.duckdns.org/files/public/MP4Maker/MP4Maker.htm
+        //https://github.com/TalAloni/MP4Maker
 
         /// <summary>
         /// Implements Packetization and Depacketization of packets defined in <see href="https://tools.ietf.org/html/rfc6184">RFC6184</see>.
@@ -897,11 +897,11 @@ namespace Media.Rtsp.Server.MediaTypes
 
         //Should be created dynamically
 
-        //http://www.cardinalpeak.com/blog/the-h-264-sequence-parameter-set/
+        //https://www.cardinalpeak.com/blog/the-h-264-sequence-parameter-set
 
         //TODO, Use a better starting point e.g. https://github.com/jordicenzano/h264simpleCoder/blob/master/src/CJOCh264encoder.h or the OpenH264 stuff @ https://github.com/cisco/openh264
 
-        //http://stackoverflow.com/questions/6394874/fetching-the-dimensions-of-a-h264video-stream
+        //https://stackoverflow.com/questions/6394874/fetching-the-dimensions-of-a-h264video-stream
 
         //The sps should be changed to reflect the correct amount of macro blocks for the width and height specified as well as color depth.
 

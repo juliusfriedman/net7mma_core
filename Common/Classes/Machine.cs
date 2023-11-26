@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -47,7 +47,7 @@ namespace Media.Common
     /// Provides functionality which can be though of based on machine concepts of the current architecture.
     /// </summary>
     /// <note><see href="http://blogs.msdn.com/b/vcblog/archive/2012/10/26/10362875.aspx">Hello ARM</see></note>
-    /// <note><see href="https://msdn.microsoft.com/en-us/magazine/jj553518.aspx">.NET Development for ARM Processors</see></note>
+    /// <note><see href="https://learn.microsoft.com/en-us/archive/msdn-magazine/2012/august/clr-net-development-for-arm-processors">.NET Development for ARM Processors</see></note>
     public static class Machine //IMachineInterface
     {
         #region Nested Types
@@ -56,7 +56,7 @@ namespace Media.Common
         /// Defines a known ByteOrder
         /// </summary>
         /// <notes>
-        /// Adopted from the example at <see href="http://en.wikipedia.org/wiki/Endianness">Wikipedia - Endianness</see>
+        /// Adopted from the example at <see href="https://en.wikipedia.org/wiki/Endianness">Wikipedia - Endianness</see>
         /// </notes>
         public enum ByteOrder
         {
@@ -72,7 +72,7 @@ namespace Media.Common
         }
 
         /// <summary>
-        /// Defines a known BitOrder <see href="http://en.wikipedia.org/wiki/Bit_numbering">Wikipedia - Bit numbering</see>
+        /// Defines a known BitOrder <see href="https://en.wikipedia.org/wiki/Bit_numbering">Wikipedia - Bit numbering</see>
         /// </summary>
         public enum BitOrder
         {
@@ -84,7 +84,7 @@ namespace Media.Common
         }
 
         /// <summary>
-        /// Defines a known <see href="http://en.wikipedia.org/wiki/Signed_number_representations">Signed number representation</see>
+        /// Defines a known <see href="https://en.wikipedia.org/wiki/Signed_number_representations">Signed number representation</see>
         /// </summary>
         public enum BinaryRepresentation
         {
@@ -730,7 +730,7 @@ namespace Media.Common
             //e.g. (3 & -1) == 3, where as Media.Common.Binary.BitwiseAnd(-3, 1) == 1
         }
 
-        //http://en.wikipedia.org/wiki/Signed_number_representations
+        //https://en.wikipedia.org/wiki/Signed_number_representations
         //Excess, Base, Biased
 
         #endregion
@@ -792,10 +792,10 @@ namespace Media.Common
                 System.Diagnostics.Trace.WriteLineIf(nint.Size != m_NativePointeSize, string.Format("Did not detect the NativePointerSize correctly, Found:{0}, Expected:{1}", m_NativePointeSize, nint.Size));
 
                 //Environment check?
-                //http://superuser.com/questions/305901/possible-values-of-processor-architecture
+                //https://superuser.com/questions/305901/possible-values-of-processor-architecture
 
                 //Interop
-                //http://stackoverflow.com/questions/767613/identifying-the-cpu-architecture-type-using-c-sharp/25284569#25284569
+                //https://stackoverflow.com/questions/767613/identifying-the-cpu-architecture-type-using-c-sharp/25284569#25284569
 
                 //Could detect prefer 32 bit code
                 //http://apichange.codeplex.com/SourceControl/changeset/view/76c98b8c7311#ApiChange.Api/src/Introspection/CorFlagsReader.cs

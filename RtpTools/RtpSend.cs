@@ -1,7 +1,7 @@
 ﻿/*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -269,7 +269,7 @@ namespace Media.RtpTools
             };
 
             /// <summary>
-            /// Also possibly the <see href="http://en.wikipedia.org/wiki/FourCC">FourceCC</see>
+            /// Also possibly the <see href="https://en.wikipedia.org/wiki/FourCC">FourceCC</see>
             /// </summary>
             public string EncodingName { get; internal set; }
 
@@ -1139,7 +1139,6 @@ namespace Media.RtpTools
 
             //Create the resulting entry with the data contained in memory read from the reader by the writer
 
-            //http://net7mma.codeplex.com/workitem/17176
             //Fix to provide correct format here
             //kind of difficult because text formats are similar, would use tokens present to determine format.
 

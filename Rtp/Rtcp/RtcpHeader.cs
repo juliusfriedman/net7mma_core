@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -50,7 +50,7 @@ namespace Media.Rtcp
 
     #region Reference
 
-    /* Copied from http://tools.ietf.org/html/rfc3550#section-6.4
+    /* Copied from https://tools.ietf.org/html/rfc3550#section-6.4
          
            Schulzrinne, et al.         Standards Track                    [Page 35]
            FFC 3550                          RTP                          July 2003
@@ -68,7 +68,7 @@ namespace Media.Rtcp
 
     /// <summary>
     /// Provides a managed abstraction around the first 4 octets of any RtcpPacket.
-    /// Futher information can be found at http://tools.ietf.org/html/rfc3550#section-6.4.1
+    /// Futher information can be found at https://tools.ietf.org/html/rfc3550#section-6.4.1
     /// Note in certain situations the <see cref="CommonHeaderBits.RtcpBlockCount"/> is used for application specific purposes.
     /// </summary>
     public class RtcpHeader : SuppressedFinalizerDisposable, IEnumerable<byte>
@@ -191,7 +191,7 @@ namespace Media.Rtcp
         /// </summary>
         public int LengthInWordsMinusOne
         {
-            /* Copied from http://tools.ietf.org/html/rfc3550#section-6.4.1
+            /* Copied from https://tools.ietf.org/html/rfc3550#section-6.4.1
              
         length: 16 bits
             

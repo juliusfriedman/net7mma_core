@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -845,7 +845,7 @@ namespace Media.UnitTests
 
     //Tested over 1000000 times on my cpu with no issues.
     //=>12 Threads = 24200 is for my core i7 3960X @ 3.3 GHz (15 MB SmartCache)
-    //http://ark.intel.com/products/63696/Intel-Core-i7-3960X-Processor-Extreme-Edition-15M-Cache-up-to-3_90-GHz
+    //https://ark.intel.com/products/63696/Intel-Core-i7-3960X-Processor-Extreme-Edition-15M-Cache-up-to-3_90-GHz
 
     //Todo, Test Circular
 }

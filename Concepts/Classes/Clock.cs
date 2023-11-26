@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -384,7 +384,7 @@ namespace Media.UnitTests
                 #region Notes on results
 
                 //Even with a RTOS
-                //http://en.wikipedia.org/wiki/Real-time_operating_system
+                //https://en.wikipedia.org/wiki/Real-time_operating_system
 
                 //Out of the above runs you should see close to the same values as produced by the initial clock and somewhat different that that of the static clock
                 //If you run this test multiple times you will see seemingly random results.

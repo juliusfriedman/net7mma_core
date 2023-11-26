@@ -1,7 +1,7 @@
 ﻿/*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -228,7 +228,7 @@ namespace Media.Sdp
 
             //Types registered with IANA
             private const string RecieveBandwidthToken = "RR", SendBandwdithToken = "RS", ApplicationSpecificBandwidthToken = "AS", ConferenceTotalBandwidthToken = "CT",
-                IndependentApplicationSpecificBandwidthToken = "TIAS"; //http://tools.ietf.org/html/rfc3890
+                IndependentApplicationSpecificBandwidthToken = "TIAS"; //https://tools.ietf.org/html/rfc3890
 
             //const string BandwidthFormat = "b={0}:{1}";
 
@@ -408,7 +408,7 @@ namespace Media.Sdp
 
             //Should be moved when defined
 
-            //IANA http://www.iana.org/assignments/sdp-parameters/sdp-parameters.xhtml
+            //IANA https://www.iana.org/assignments/sdp-parameters/sdp-parameters.xhtml
 
             //Proto
 

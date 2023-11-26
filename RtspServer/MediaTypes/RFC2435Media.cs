@@ -1,7 +1,7 @@
 ﻿/*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -52,8 +52,8 @@ namespace Media.Rtsp.Server.MediaTypes
         /// Implements RFC2435
         /// Encodes from a System.Drawing.Image to a RFC2435 Jpeg.
         /// Decodes a RFC2435 Jpeg to a System.Drawing.Image.
-        ///  <see cref="http://tools.ietf.org/rfc/rfc2435.txt">RFC 2435</see>        
-        ///  <see cref="http://en.wikipedia.org/wiki/JPEG"/>
+        ///  <see cref="https://tools.ietf.org/rfc/rfc2435.txt">RFC 2435</see>        
+        ///  <see cref="https://en.wikipedia.org/wiki/JPEG"/>
         /// </summary>
         public class RFC2435Frame : Rtp.RtpFrame
         {
@@ -333,12 +333,12 @@ namespace Media.Rtsp.Server.MediaTypes
                 */
 
                     //Type specific
-                    //http://tools.ietf.org/search/rfc2435#section-3.1.1
+                    //https://tools.ietf.org/search/rfc2435#section-3.1.1
                     (byte)typeSpecific,
                 ];
 
                 //Three byte fragment offset
-                //http://tools.ietf.org/search/rfc2435#section-3.1.2
+                //https://tools.ietf.org/search/rfc2435#section-3.1.2
 
                 //Common.Binary.WriteNetwork24()
                 //Common.Binary.GetBytes(fragmentOffset, Common.Binary.IsLittleEndian)
@@ -349,22 +349,22 @@ namespace Media.Rtsp.Server.MediaTypes
 
 
                 //(Jpeg)Type
-                //http://tools.ietf.org/search/rfc2435#section-3.1.3
+                //https://tools.ietf.org/search/rfc2435#section-3.1.3
                 RtpJpegHeader.Add((byte)jpegType);
 
-                //http://tools.ietf.org/search/rfc2435#section-3.1.4 (Q)
+                //https://tools.ietf.org/search/rfc2435#section-3.1.4 (Q)
                 RtpJpegHeader.Add((byte)quality);
 
-                //http://tools.ietf.org/search/rfc2435#section-3.1.5 (Width)
+                //https://tools.ietf.org/search/rfc2435#section-3.1.5 (Width)
                 RtpJpegHeader.Add((byte)(((width + 7) & ~7) >> 3));
 
-                //http://tools.ietf.org/search/rfc2435#section-3.1.6 (Height)
+                //https://tools.ietf.org/search/rfc2435#section-3.1.6 (Height)
                 RtpJpegHeader.Add((byte)(((height + 7) & ~7) >> 3));
 
                 //If this is the first packet
                 if (fragmentOffset is 0)
                 {
-                    //http://tools.ietf.org/search/rfc2435#section-3.1.7 (Restart Marker header)
+                    //https://tools.ietf.org/search/rfc2435#section-3.1.7 (Restart Marker header)
                     if (jpegType >= 63 && dri is not null)
                     {
                         //Create a Rtp Restart Marker, Set first and last
@@ -399,7 +399,7 @@ namespace Media.Rtsp.Server.MediaTypes
             }
 
             /// <summary>
-            /// http://en.wikipedia.org/wiki/JPEG_File_Interchange_Format
+            /// https://en.wikipedia.org/wiki/JPEG_File_Interchange_Format
             /// </summary>
             /// <param name="jpegType"></param>
             /// <param name="width"></param>
@@ -928,7 +928,7 @@ namespace Media.Rtsp.Server.MediaTypes
             /// <param name="offset"></param>
             /// <param name="length"></param>
             /// <returns></returns>
-            /// <remarks>Ported from <see href="http://www.hackerfactor.com/src/jpegquality.c">Hacker Factory</see></remarks>
+            /// <remarks>Ported from <see href="https://www.hackerfactor.com/src/jpegquality.c">Hacker Factory</see></remarks>
             public static int DetermineAverageQuality(byte precisionTable, IList<byte> tables, int offset, int length)
             {
                 /* Quantization tables have 1 DC value and 63 AC values */
@@ -1158,7 +1158,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             //Todo, use MarkerReader from JPEG
             /// <summary>
-            /// Creates a <see cref="http://tools.ietf.org/search/rfc2435">RFC2435 Rtp Frame</see> using the given parameters.
+            /// Creates a <see cref="https://tools.ietf.org/search/rfc2435">RFC2435 Rtp Frame</see> using the given parameters.
             /// </summary>
             /// <param name="jpegStream">The stream which contains JPEG formatted data and starts with a StartOfInformation Marker</param>
             /// <param name="qualityFactor">The value to utilize in the RFC2435 Q field, a value >= 100 causes the Quantization Tables to be sent in band.</param>
@@ -1185,12 +1185,12 @@ namespace Media.Rtsp.Server.MediaTypes
                 //Set the id of all subsequent packets.
                 SynchronizationSourceIdentifier = ssrc ?? -1;
 
-                byte RtpJpegTypeSpecific = 0,  //Type-specific - http://tools.ietf.org/search/rfc2435#section-3.1.1
-                    RtpJpegType = 0, //Type - http://tools.ietf.org/search/rfc2435#section-3.1.3
-                    Quality = (byte)(qualityFactor ?? 50); //Q - http://tools.ietf.org/search/rfc2435#section-3.1.4
+                byte RtpJpegTypeSpecific = 0,  //Type-specific - https://tools.ietf.org/search/rfc2435#section-3.1.1
+                    RtpJpegType = 0, //Type - https://tools.ietf.org/search/rfc2435#section-3.1.3
+                    Quality = (byte)(qualityFactor ?? 50); //Q - https://tools.ietf.org/search/rfc2435#section-3.1.4
 
-                ushort Width = 0,  //http://tools.ietf.org/search/rfc2435#section-3.1.5
-                    Height = 0; //http://tools.ietf.org/search/rfc2435#section-3.1.6
+                ushort Width = 0,  //https://tools.ietf.org/search/rfc2435#section-3.1.5
+                    Height = 0; //https://tools.ietf.org/search/rfc2435#section-3.1.6
 
                 //The byte which corresponds to the Precision field in the RtpJpeg profile header.
                 byte RtpJpegPrecisionTable = 0;
@@ -1399,7 +1399,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                                     //Check for SubSampling to set the RtpJpegType from the Luma component
 
-                                    //http://tools.ietf.org/search/rfc2435#section-4.1
+                                    //https://tools.ietf.org/search/rfc2435#section-4.1
                                     //Type numbers 2-5 are reserved and SHOULD NOT be used.
 
                                     //if (data[7] != 0x21) RtpJpegType |= 1;
@@ -1408,13 +1408,13 @@ namespace Media.Rtsp.Server.MediaTypes
                                     int Nf = data[offset++];
 
                                     //Hi: Horizontal sampling factor – Specifies the relationship between the component horizontal dimension
-                                    //and maximum image dimension X (see http://www.w3.org/Graphics/JPEG/itu-t81.pdf A.1.1); also specifies the number of horizontal data units of component
+                                    //and maximum image dimension X (see https://www.w3.org/Graphics/JPEG/itu-t81.pdf A.1.1); also specifies the number of horizontal data units of component
                                     //Ci in each MCU, when more than one component is encoded in a scan                                                        
 
                                     //Each component takes 3 bytes Ci, {Hi, Vi,} Tqi
 
                                     //Vi: Vertical sampling factor – Specifies the relationship between the component vertical dimension and
-                                    //maximum image dimension Y (see http://www.w3.org/Graphics/JPEG/itu-t81.pdf A.1.1); also specifies the number of vertical data units of component Ci in
+                                    //maximum image dimension Y (see https://www.w3.org/Graphics/JPEG/itu-t81.pdf A.1.1); also specifies the number of vertical data units of component Ci in
                                     //each MCU, when more than one component is encoded in a scan                                                                 
 
                                     //Experimental Support for Any amount of samples.
@@ -1477,7 +1477,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                 {
                                     #region RFC2435 - Restart Marker Header
 
-                                    /*  http://tools.ietf.org/search/rfc2435#section-3.1.7
+                                    /*  https://tools.ietf.org/search/rfc2435#section-3.1.7
                              
                                 3.1.7.  Restart Marker header
 
@@ -1517,7 +1517,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                                     #endregion
 
-                                    //http://www.w3.org/Graphics/JPEG/itu-t81.pdf
+                                    //https://www.w3.org/Graphics/JPEG/itu-t81.pdf
                                     //Specifies the length of the parameters in the DRI segment shown in Figure B.9 (see B.1.1.4).
                                     Lr = (ushort)(jpegStream.ReadByte() * 256 + jpegStream.ReadByte());
 
@@ -2058,7 +2058,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 if (FragmentOffset is 0 && Depacketized.Count is 0)
                 {
 
-                    //RFC2435 http://tools.ietf.org/search/rfc2435#section-3.1.8
+                    //RFC2435 https://tools.ietf.org/search/rfc2435#section-3.1.8
                     //3.1.8.  Quantization Table header
                     /*
                      This header MUST be present after the main JPEG header (and after the
@@ -2069,7 +2069,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     if (Quality >= (rfc2035Quality ? 100 : 128)) //RFC2035 uses 0->100 where RFC2435 uses 0 ->127 but values 100 - 127 are not specified in the algorithm provided and should possiblly use the alternate quantization tables
                     {
 
-                        /* http://tools.ietf.org/search/rfc2435#section-3.1.8
+                        /* https://tools.ietf.org/search/rfc2435#section-3.1.8
                          * Quantization Table Header
                          * -------------------------
                          0                   1                   2                   3

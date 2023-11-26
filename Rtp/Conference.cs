@@ -1,7 +1,7 @@
 ﻿/*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -36,10 +36,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 namespace Media.Rtp
 {
     /// <summary>
-    /// http://tools.ietf.org/html/rfc3550#section-6.2.1
+    /// https://tools.ietf.org/html/rfc3550#section-6.2.1
     /// Each RtpClient has it's own source table.
     /// 
-    /// Since tables can potentially be very large. i.e. http://tools.ietf.org/html/rfc2762
+    /// Since tables can potentially be very large. i.e. https://tools.ietf.org/html/rfc2762
     /// The state information could get very large and thus the table may not be able to hold all participants in communication...
     /// 
     /// </summary>
@@ -65,7 +65,7 @@ namespace Media.Rtp
 
         E.g. it will have a source table use the above algorithms and may be abstract or provide only a partial implementation
         
-        Rtcp Scheduling should be implemented in the conference level see => http://tools.ietf.org/html/rfc3550#appendix-A.7
+        Rtcp Scheduling should be implemented in the conference level see => https://tools.ietf.org/html/rfc3550#appendix-A.7
          
         It is up to the conference to handle SDP Announcement for new members and changes in the conference.
         

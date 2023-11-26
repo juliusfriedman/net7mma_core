@@ -1,7 +1,7 @@
 ﻿/*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -45,8 +45,8 @@ namespace Media.Sdp
 
     /// <summary>
     /// Provides facilities for parsing and creating SessionDescription data
-    /// http://en.wikipedia.org/wiki/Session_Description_Protocol
-    /// http://tools.ietf.org/html/rfc4566
+    /// https://en.wikipedia.org/wiki/Session_Description_Protocol
+    /// https://tools.ietf.org/html/rfc4566
     /// </summary>
     /// 
     ///https://msdn.microsoft.com/en-us/library/bb758954(v=office.13).aspx
@@ -1228,7 +1228,7 @@ namespace Media.Sdp
             m_MediaDescriptions.ForEach(md => buffer.Append(md.ToString(this)));
 
             //Strings in .Net are Unicode code points (subsequently the characters only are addressable by their 16 bit code point representation).
-            //http://csharpindepth.com/Articles/General/Strings.aspx
+            //https://csharpindepth.com/Articles/Strings
             return buffer.ToString();
         }
 

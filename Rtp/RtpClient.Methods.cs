@@ -1,7 +1,7 @@
 ﻿/*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -2105,7 +2105,7 @@ namespace Media.Rtp
                 //Double Negitive, Demux based on PayloadType? RFC5761?
 
                 //Distinguishable RTP and RTCP Packets
-                //http://tools.ietf.org/search/rfc5761#section-4
+                //https://tools.ietf.org/search/rfc5761#section-4
 
                 //Observation 1) Rtp packets can only have a PayloadType from 64-95
                 //However Rtcp Packets may also use PayloadTypes 72- 76.. (Reduced size...)

@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -974,7 +974,7 @@ namespace Media.RtpTools.RtpDump
         ///      Since 'rtpplay' nor 'rtpsend' output any files the 'rtpdump' program output files only in a single version with a specific header format,
         ///     and subsequently did not use a header when outputting in non - binary formats because the binary data would be encoded in a textual encoding per the storage of string instances in that operating system.
         ///     It is also worth noting that 'rtptrans' amother other 'rtp tools' may be able to use any of the file formats so long as the format is given correctly to 'rtpdump' which is `outputting` the format.
-        ///     This  implied `output` would then be <see href="http://en.wikipedia.org/wiki/Redirection_(computing)">redirected</see> to the input of the other program on a <see href="http://en.wikipedia.org/wiki/Unix">Unix</see>  like <see href="http://en.wikipedia.org/wiki/Operating_System">Operating System</see>.
+        ///     This  implied `output` would then be <see href="https://en.wikipedia.org/wiki/Redirection_(computing)">redirected</see> to the input of the other program on a <see href="https://en.wikipedia.org/wiki/Unix">Unix</see>  like <see href="https://en.wikipedia.org/wiki/Operating_System">Operating System</see>.
         ///     The Tool Name e.g. 'rtpplay' should never equal 'rtpdump' or 'rtpsend' or any other value because the original tools would probably not read them.
         ///     
         /// ===============================
@@ -989,14 +989,14 @@ namespace Media.RtpTools.RtpDump
         /// ===============================
         /// 'address/port' - 
         ///     Is [hopefully] meant to contain two entities.
-        ///     A single <see href="http://en.wikipedia.org/wiki/IP_Address">IP Address</see>,
+        ///     A single <see href="https://en.wikipedia.org/wiki/IP_Address">IP Address</see>,
         ///     A '/' character,
         ///     A unsigned 16 bit integer which corresponds to the network port [which was `possibly` used to originally receive the data contained in the file but possibly modified or never set].
         ///     The encoding of these values was never specified and thus was interpreted from the `bark.rtp` file and explained above.
         ///
         /// It is worth nothing that there could be more or less than 104 Bits remaining in this header and the only way to know is by looking for...
         /// 
-        /// [0x0a] hexidecimal which is Line Feed in <see href="http://en.wikipedia.org/wiki/ASCII">ASCII Encoding</see>.
+        /// [0x0a] hexidecimal which is Line Feed in <see href="https://en.wikipedia.org/wiki/ASCII">ASCII Encoding</see>.
         /// </remarks>
         internal const string FileHeaderFormat = HashBang + RtpPlay.RtpPlayFormat + " {0}/{1}\n";
 

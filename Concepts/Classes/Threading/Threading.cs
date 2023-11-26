@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -350,7 +350,7 @@ namespace Media.Concepts.Classes.Threading
     /// </summary>
     /// <remarks>
     /// [and execution time. (eventually)]
-    /// The name is not quite correct as that `name` has already been utilized <see href="http://stackoverflow.com/questions/38379278/how-can-i-improve-this-wrapper-for-thread/38444258#38444258"/>
+    /// The name is not quite correct as that `name` has already been utilized <see href="https://stackoverflow.com/questions/38379278/how-can-i-improve-this-wrapper-for-thread/38444258#38444258"/>
     /// </remarks>
     public class Fiber : Media.Common.SuppressedFinalizerDisposable, Media.Common.IUpdateable, Media.Common.IThreadReference
     {
@@ -653,7 +653,7 @@ namespace Media.Concepts.Classes.Threading
     /// Thread safe event invoker
     /// </summary>
     /// <remarks>
-    /// <see href="http://stackoverflow.com/questions/786383/c-sharp-events-and-thread-safety">Stack Overflow</see>
+    /// <see href="https://stackoverflow.com/questions/786383/c-sharp-events-and-thread-safety">Stack Overflow</see>
     /// </remarks>
     public sealed class ThreadSafeEventInvoker
     {

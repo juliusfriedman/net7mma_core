@@ -115,7 +115,7 @@ namespace Media.Codecs.Video.Mpeg4
         public static bool IsUserPrivate(byte b) { return (b is >= 0xC0 and <= 0xE0 or >= 0xE2 and <= 0xFE); }
     }
 
-    /*http://wiki.multimedia.cx/index.php?title=MPEG-4_Audio#Audio_Object_Types
+    /*https://wiki.multimedia.cx/index.php?title=MPEG-4_Audio#Audio_Object_Types
          MPEG-4 Audio
             Company: ISO
             Samples: http://samples.mplayerhq.hu/MPEG-4/

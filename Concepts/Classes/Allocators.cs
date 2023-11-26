@@ -2,7 +2,7 @@
 /*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -106,7 +106,7 @@ namespace Media.Concepts.Classes
     /// 
     /// </summary>
     /// <remarks>
-    /// <see href="http://www.codeproject.com/Articles/32125/Unmanaged-Arrays-in-C-No-Problem">CodeProject</see>
+    /// <see href="https://www.codeproject.com/Articles/32125/Unmanaged-Arrays-in-C-No-Problem">CodeProject</see>
     /// </remarks>
     public class UnmanagedAllocator : IStorageAllocator
     {
@@ -139,7 +139,7 @@ namespace Media.Concepts.Classes
     /// <summary>
     /// Allocates aligned memory for any type
     /// </summary>
-    /// <see href="http://stackoverflow.com/questions/1951290/memory-alignment-of-classes-in-c">StackOverflow</see>
+    /// <see href="https://stackoverflow.com/questions/1951290/memory-alignment-of-classes-in-c">StackOverflow</see>
     /// <typeparam name="T"></typeparam>
     public class AlignedAllocator<T> : IStorageAllocator where T : new()
     {

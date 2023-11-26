@@ -37,7 +37,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * v//
  */
 
-//http://www.codeproject.com/Articles/578116/Complete-Managed-Media-Aggregation-Part-III-Quantu
+//https://www.codeproject.com/Articles/578116/Complete-Managed-Media-Aggregation-Part-III-Quantu
 
 ///All types besides UnitBase could eventually be struct
 namespace Media.Concepts.Classes
@@ -694,7 +694,7 @@ namespace Media.Concepts.Classes
         }
 
 
-        //http://en.wikipedia.org/wiki/Frequency
+        //https://en.wikipedia.org/wiki/Frequency
         /* Frequencies not expressed in hertz:
          * 
          * Even higher frequencies are believed to occur naturally, 
@@ -728,7 +728,7 @@ namespace Media.Concepts.Classes
             public const double THz = 1000000000000D;
 
 
-            //http://en.wikipedia.org/wiki/Visible_spectrum - Audible?
+            //https://en.wikipedia.org/wiki/Visible_spectrum - Audible?
             public static bool IsVisible(Frequency f, double min = 430, double max = 790)
             {
                 double F = f.Terahertz.ToDouble();
@@ -1964,6 +1964,6 @@ namespace Media.Concepts.Classes
         }
     }
 
-    //Current ->     //http://en.wikipedia.org/wiki/Coulomb
+    //Current ->     //https://en.wikipedia.org/wiki/Coulomb
     //Charge
 }

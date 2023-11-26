@@ -6,7 +6,7 @@ namespace Media.Containers.Mpeg
     /// Describes the various MPEG Stream Types. (ISO13818-2 and compatible)
     /// <see href="http://www.mp4ra.org/object.html">MP4REG</see>
     /// </summary>
-    //http://xhelmboyx.tripod.com/formats/mpeg-layout.txt
+    //https://xhelmboyx.tripod.com/formats/mpeg-layout.txt
     public static class StreamTypes
     {
         public const byte Forbidden = 0x00;

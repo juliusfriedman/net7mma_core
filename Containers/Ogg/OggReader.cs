@@ -1,7 +1,7 @@
 ﻿/*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -41,7 +41,7 @@ using System.Linq;
 namespace Media.Containers.Ogg
 {
     /// <summary>
-    /// Provides an implementation of the Ogg Container defined by Xiph.org and <see cref="http://www.ietf.org/rfc/rfc3533.txt">RFC3533</see>.
+    /// Provides an implementation of the Ogg Container defined by Xiph.org and <see cref="https://www.ietf.org/rfc/rfc3533.txt">RFC3533</see>.
     /// The implementation is compatible with ogg, oga, ogv, ogx and ogm files and others including spx and opus.
     /// </summary>
     public class OggReader : MediaFileStream
@@ -454,7 +454,7 @@ namespace Media.Containers.Ogg
                 //4cc, width, height, colorspace, bitsperplane, rate
                 //formatId, channels, sampleRate
 
-                /*http://www.ietf.org/rfc/rfc5334.txt
+                /*https://www.ietf.org/rfc/rfc5334.txt
                                       Codec Identifier             | Codecs Parameter
                        -----------------------------------------------------------
                         char[5]: 'BBCD\0'            | dirac
@@ -628,7 +628,7 @@ namespace Media.Containers.Ogg
                                         //Sampling rate
                                         rate = Common.Binary.Read32(startPage.Data, 12, Media.Common.Binary.IsBigEndian);
 
-                                        /* http://www.xiph.org/vorbis/doc/Vorbis_I_spec.html
+                                        /* https://www.xiph.org/vorbis/doc/Vorbis_I_spec.html
                                             All three fields set to the same value implies a fixed rate, or tightly bounded, nearly fixed-rate bitstream
                                             Only nominal set implies a VBR or ABR stream that averages the nominal bitrate
                                             Maximum and or minimum set implies a VBR bitstream that obeys the bitrate limits
@@ -1027,7 +1027,7 @@ namespace Media.Containers.Ogg
                             //YUV4MPEG2 W352 H288 F30000:1001 Ip A128:117
                             goto default;
                         }
-                    //http://en.wikipedia.org/wiki/JPEG_Network_Graphics
+                    //https://en.wikipedia.org/wiki/JPEG_Network_Graphics
                     case 213: //JNG
                     case 212: //MNG https://wiki.xiph.org/OggMNG#Motivation
                     case 211: //PNG

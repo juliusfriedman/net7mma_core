@@ -1,7 +1,7 @@
 ﻿/*
 This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -44,7 +44,7 @@ namespace Media.Containers.BaseMedia
 {
     /// <summary>
     /// Represents the logic necessary to read ISO Complaint Base Media Format Files.
-    /// <see href="http://en.wikipedia.org/wiki/ISO_base_media_file_format">Wikipedia</see>
+    /// <see href="https://en.wikipedia.org/wiki/ISO_base_media_file_format">Wikipedia</see>
     /// Formats include QuickTime (.qt, .mov, .mp4, .m4v, .m4a), 
     /// Microsoft Smooth Streaming (.ismv, .isma, .ismc), 
     /// JPEG2000 (.jp2, .jpf, .jpx), Motion JPEG2000 (.mj2, .mjp2), 

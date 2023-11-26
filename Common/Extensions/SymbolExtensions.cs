@@ -6,7 +6,7 @@ using System.Reflection;
 #region References
 
 //http://blog.functionalfun.net/2009/10/getting-methodinfo-of-generic-method.html
-//http://snipplr.com/view/29683/converting-methodinfo-into-a-delegate-instance-to-improve-performance/
+//https://snipplr.com/view/29683/converting-methodinfo-into-a-delegate-instance-to-improve-performance
 
 #endregion
 
