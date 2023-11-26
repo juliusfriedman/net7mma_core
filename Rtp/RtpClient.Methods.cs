@@ -353,7 +353,8 @@ namespace Media.Rtp
         protected internal /*virtual*/ int SendReceiversReport(TransportContext context, bool force = false)
         {
             //Determine if the ReceiversReport can be sent.
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || Common.IDisposedExtensions.IsNullOrDisposed(context)  //If the context is disposed
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) ||
+                Common.IDisposedExtensions.IsNullOrDisposed(context)  //If the context is disposed
                 && //AND the call has not been forced AND the context IsRtcpEnabled 
                 (force is false && context.IsRtcpEnabled)
                 // OR there is no RtcpSocket
@@ -1521,7 +1522,12 @@ namespace Media.Rtp
             if (Common.IDisposedExtensions.IsNullOrDisposed(buffer)) buffer = m_Buffer;
 
             //Ensure the socket can poll, should measure against parallel checks with OR
-            if (buffer.Count <= 0 | m_StopRequested | socket is null | remote is null | Common.IDisposedExtensions.IsNullOrDisposed(buffer) | Common.IDisposedExtensions.IsNullOrDisposed(this)) return 0;
+            if (buffer.Count <= 0 ||
+                m_StopRequested ||
+                socket is null ||
+                remote is null ||
+                Common.IDisposedExtensions.IsNullOrDisposed(buffer) ||
+                Common.IDisposedExtensions.IsNullOrDisposed(this)) return 0;
 
             bool tcp = socket.ProtocolType == System.Net.Sockets.ProtocolType.Tcp;
 

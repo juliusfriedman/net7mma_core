@@ -620,7 +620,8 @@ namespace Media.Rtp
                 using (RtpExtension extension = GetExtension())
                 {
                     //If an extension could be obtained include it
-                    if (Common.IDisposedExtensions.IsNullOrDisposed(extension) is false) binarySequence = binarySequence.Concat(extension);
+                    if (Common.IDisposedExtensions.IsNullOrDisposed(extension) is false)
+                        binarySequence = binarySequence.Concat(extension);
                 }
             }
 
