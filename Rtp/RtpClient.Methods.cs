@@ -1780,7 +1780,7 @@ namespace Media.Rtp
                                 if (incompatible is false)
                                 {
                                     //Determine if the packet is Rtcp by looking at the found channel and the relvent control channel
-                                    if (frameChannel.HasValue && frameChannel.Equals(relevent.ControlChannel) && relevent.InDiscovery is false)
+                                    if (frameChannel.HasValue && frameChannel.Value.Equals(relevent.ControlChannel) && relevent.InDiscovery is false)
                                     {
                                         //Rtcp
 
