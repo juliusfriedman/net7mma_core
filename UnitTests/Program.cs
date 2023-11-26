@@ -154,7 +154,7 @@ namespace Media.UnitTests
 
             RunTest(RtspClientTests);
 
-            await RunTestAsync(TestServerAsync).ConfigureAwait(false);
+            await RunTestAsync(TestServerAsync, nameof(TestServerAsync)).ConfigureAwait(false);
         }
 
         #region Unit Tests
@@ -4652,12 +4652,12 @@ a=appversion:1.0");
             {
                 test();
                 return Task.CompletedTask;
-            }, count, waitForGoAhead, test.Method.Name)
+            }, test.Method.Name, count, waitForGoAhead)
             .GetAwaiter()
             .GetResult();
         }
 
-        private static async Task RunTestAsync(Func<Task> test, int count = 1, bool waitForGoAhead = true, string testName = default)
+        private static async Task RunTestAsync(Func<Task> test, string testName = default, int count = 1, bool waitForGoAhead = true)
         {
             System.Console.Clear();
             Console.WriteLine("About to run test: " + testName ?? test.Method.Name);
@@ -4735,7 +4735,7 @@ a=appversion:1.0");
                 {
                     case ConsoleKey.W:
                         {
-                            await RunTestAsync(test, 1, false).ConfigureAwait(false);
+                            await RunTestAsync(test, count: 1, waitForGoAhead: false).ConfigureAwait(false);
                             return;
                         }
                     case ConsoleKey.D:
