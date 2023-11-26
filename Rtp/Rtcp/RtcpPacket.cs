@@ -360,11 +360,14 @@ namespace Media.Rtcp
 
             int lowerBound = payload.GetLowerBound(0), upperBound = payload.GetUpperBound(0);
 
-            if (index < lowerBound || index > upperBound) throw new ArgumentOutOfRangeException("index", "Must refer to an accessible position in the given array");
+            if (index < lowerBound || index > upperBound)
+                throw new ArgumentOutOfRangeException(nameof(index), "Must refer to an accessible position in the given array");
 
-            if (count > upperBound) throw new ArgumentOutOfRangeException("count", "Must refer to an accessible position in the given array");
+            if (count > upperBound)
+                throw new ArgumentOutOfRangeException(nameof(count), "Must refer to an accessible position in the given array");
 
-            if (count + index > upperBound) throw new ArgumentOutOfRangeException("index", "Count must refer to an accessible position in the given array when deleniated by index");
+            if (count + index > upperBound)
+                throw new ArgumentOutOfRangeException(nameof(index), "Count must refer to an accessible position in the given array when deleniated by index");
 
             AddBytesToPayload(payload, index, count);
         }
