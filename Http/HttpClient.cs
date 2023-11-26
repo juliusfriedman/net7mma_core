@@ -306,7 +306,7 @@ namespace Media.Http
         public int BytesSent { get { return m_SentBytes; } }
 
         /// <summary>
-        /// The amount of bytes recieved by the RtspClient
+        /// The amount of bytes received by the RtspClient
         /// </summary>
         public int BytesRecieved { get { return m_ReceivedBytes; } }
 
@@ -1783,13 +1783,13 @@ namespace Media.Http
                                 //Create a memory segment and complete the message as required from the buffer.
                                 using (var memory = new Media.Common.MemorySegment(data, offset, length))
                                 {
-                                    //Use the data recieved to complete the message and not the socket
+                                    //Use the data received to complete the message and not the socket
                                     int justReceived = false == IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) ? m_LastTransmitted.CompleteFrom(null, memory) : 0;
 
                                     //If anything was received
                                     if (justReceived > 0)
                                     {
-                                        //Account for what was just recieved.
+                                        //Account for what was just received.
                                         received += justReceived;
 
                                         //No data was consumed don't raise another event.

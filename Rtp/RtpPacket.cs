@@ -711,7 +711,7 @@ namespace Media.Rtp
                 offset = Payload.Offset,//Cache the offset in parsing 
                 sourceListOctets = ContributingSourceListOctets,//Cache the amount of octets required in the ContributingSourceList.
                 extensionSize = Header.Extension ? RtpExtension.MinimumSize : 0, //Cache the amount of octets required to read the ExtensionHeader
-                recieved = 0;
+                received = 0;
 
             //If the ContributingSourceList is not complete
             if (payloadCount < sourceListOctets)
@@ -737,7 +737,7 @@ namespace Media.Rtp
                     //Decrement how many octets were receieved
                     octetsRemaining -= justReceived;
 
-                    recieved += justReceived;
+                    received += justReceived;
                 }
             }
 
@@ -771,7 +771,7 @@ namespace Media.Rtp
                         //Decrement how many octets were receieved
                         octetsRemaining -= justReceived;
 
-                        recieved += justReceived;
+                        received += justReceived;
                     }
                 }
 
@@ -807,7 +807,7 @@ namespace Media.Rtp
                                 //Decrement how many octets were receieved
                                 octetsRemaining -= justReceived;
 
-                                recieved += justReceived;
+                                received += justReceived;
                             }
                         }
                     }
@@ -840,7 +840,7 @@ namespace Media.Rtp
                         //Move the offset
                         offset += justReceived;
 
-                        recieved += justReceived;
+                        received += justReceived;
 
                         octetsRemaining -= justReceived;
                     }
@@ -854,7 +854,7 @@ namespace Media.Rtp
 
             //RtpPacket is complete
 
-            return recieved;
+            return received;
         }
 
         #endregion

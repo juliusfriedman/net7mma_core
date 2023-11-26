@@ -284,7 +284,7 @@ namespace Media.RtpTools
             public int Clockrate { get; internal set; }
 
             /// <summary>
-            /// Used traditionally to describe the Rtp 1.0 channel field in which the data was expected to be recieved.
+            /// Used traditionally to describe the Rtp 1.0 channel field in which the data was expected to be received.
             /// <see cref="ftp://gaia.cs.umass.edu/pub/hgschulz/rtp/draft-ietf-avt-rtp-04.txt"/>
             /// </summary>
             /*

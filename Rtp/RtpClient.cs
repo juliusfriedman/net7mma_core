@@ -682,12 +682,12 @@ namespace Media.Rtp
                          RtpPacketsSent, RtcpPacketsSent,
                          RtpPacketsReceived, RtcpPacketsReceived;
 
-            //The current, highest received and highest sent Sequence numbers recieved by the RtpClient
+            //The current, highest received and highest sent Sequence numbers received by the RtpClient
             internal ushort m_SequenceNumber, m_LastSentSequenceNumber, RtpMaxSeq;
 
             //Used for Rtp and Rtcp Transport Calculations (Should be moved into State Structure)
             internal uint RtpTransit, SenderTransit,
-                //Count of bytes recieved prior to the reception of a report
+                //Count of bytes received prior to the reception of a report
                 RtpReceivedPrior,
                 //Count of bytes expected prior to the recpetion of a report
                 RtpExpectedPrior,
@@ -701,7 +701,7 @@ namespace Media.Rtp
                 RtpBadSeq,
                 //Jitter value
                 RtpJitter, SenderJitter,
-                //Valid amount of rtp packets recieved 
+                //Valid amount of rtp packets received 
                 ValidRtpPacketsReceived;
 
             internal TimeSpan m_SendInterval = DefaultReportInterval, m_ReceiveInterval = DefaultReportInterval,
@@ -833,7 +833,7 @@ namespace Media.Rtp
             }
 
             /// <summary>
-            /// The smallest packet which may be sent or recieved on the TransportContext.
+            /// The smallest packet which may be sent or received on the TransportContext.
             /// </summary>
             public int MinimumPacketSize
             {
@@ -844,7 +844,7 @@ namespace Media.Rtp
             }
 
             /// <summary>
-            /// The largest packet which may be sent or recieved on the TransportContext.
+            /// The largest packet which may be sent or received on the TransportContext.
             /// </summary>
             public int MaximumPacketSize
             {
@@ -934,7 +934,7 @@ namespace Media.Rtp
             }
 
             /// <summary>
-            /// Indicates if the RemoteParty is known by a unique id other than 0 unless <see cref="MinimumSequentialValidRtpPackets"/> have been recieved
+            /// Indicates if the RemoteParty is known by a unique id other than 0 unless <see cref="MinimumSequentialValidRtpPackets"/> have been received
             /// </summary>
             internal bool InDiscovery
             {
@@ -1318,7 +1318,7 @@ namespace Media.Rtp
             }
 
             /// <summary>
-            /// Determines if the source has recieved at least <see cref="MinimumSequentialValidRtpPackets"/> RtpPackets
+            /// Determines if the source has received at least <see cref="MinimumSequentialValidRtpPackets"/> RtpPackets
             /// </summary>
             public /*virtual*/ bool IsValid
             {
@@ -1470,7 +1470,7 @@ namespace Media.Rtp
             }
 
             /// <summary>
-            /// The total amount of RtcpPackets recieved
+            /// The total amount of RtcpPackets received
             /// </summary>
             public long TotalRtcpPacketsSent
             {
@@ -1524,7 +1524,7 @@ namespace Media.Rtp
             }
 
             /// <summary>            
-            /// Gets the sequence number of the last RtpPacket recieved on this channel
+            /// Gets the sequence number of the last RtpPacket received on this channel
             /// </summary>
             public int RecieveSequenceNumber
             {
@@ -1560,7 +1560,7 @@ namespace Media.Rtp
             }
 
             /// <summary>
-            /// The NtpTimestamp from the last SendersReport recieved or created
+            /// The NtpTimestamp from the last SendersReport received or created
             /// </summary>
             public long NtpTimestamp
             {
@@ -1717,7 +1717,7 @@ namespace Media.Rtp
                     //Update the Sender NtpTimestamp on the Context.
                     SenderNtpTimestamp = (long)Media.Ntp.NetworkTimeProtocol.DateTimeToNptTimestamp(packet.Transferred.Value);
                 }
-                else //Handle as a recieved packet
+                else //Handle as a received packet
                 {
                     RFC3550.CalulcateJitter(ref arrivalDifference, ref RtpJitter, ref RtpTransit);
 
@@ -2443,7 +2443,7 @@ namespace Media.Rtp
         //OnPacketLoss(object sender, PacketLossInformation info)
 
         /// <summary>
-        /// Raised when non rtp protocol data is recieved.
+        /// Raised when non rtp protocol data is received.
         /// </summary>
         public event InterleavedDataHandler OutOfBandData;
 
@@ -2769,7 +2769,7 @@ namespace Media.Rtp
                 //Keep track of the the bytes sent in the context
                 transportContext.RtcpBytesRecieved += packet.Length;
 
-                //Set the time when the first rtcp packet was recieved
+                //Set the time when the first rtcp packet was received
                 if (transportContext.m_FirstPacketReceived == DateTime.MinValue) transportContext.m_FirstPacketReceived = packet.Created;
             }
 
@@ -3011,7 +3011,7 @@ namespace Media.Rtp
                     //If Udp would change ttl and possibly DNS resolver,
                     //Send reports with loss or culumate for next report based on bandwidth and application requirements
                 }
-                else ++transportContext.ValidRtpPacketsReceived; //Increase the amount of valid rtp packets recieved when ValidatePacketAndUpdateSequenceNumber is true
+                else ++transportContext.ValidRtpPacketsReceived; //Increase the amount of valid rtp packets received when ValidatePacketAndUpdateSequenceNumber is true
 
                 #region Identity and version Seperation
 

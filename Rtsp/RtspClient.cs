@@ -449,7 +449,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
     public readonly Dictionary<string, string> AdditionalHeaders = [];
 
     /// <summary>
-    /// Gets the methods supported by the server recieved in the options request.
+    /// Gets the methods supported by the server received in the options request.
     /// </summary>
     public readonly HashSet<string> SupportedMethods = [];
 
@@ -566,7 +566,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
     }
 
     /// <summary>
-    /// Indicates if the client will send a <see cref="KeepAliveRequest"/> during <see cref="StartPlaying"/> if no data is flowing immediately after the PLAY response is recieved.
+    /// Indicates if the client will send a <see cref="KeepAliveRequest"/> during <see cref="StartPlaying"/> if no data is flowing immediately after the PLAY response is received.
     /// </summary>
     public bool SendKeepAliveImmediatelyAfterStartPlaying
     {
@@ -1277,7 +1277,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
     }
 
     /// <summary>
-    /// The amount of bytes recieved by the RtspClient
+    /// The amount of bytes received by the RtspClient
     /// </summary>
     public int BytesRecieved
     {
@@ -2506,13 +2506,13 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                                 //Create a memory segment and complete the message as required from the buffer.
                                 using var memory = new Media.Common.MemorySegment(data, offset, length);
 
-                                //Use the data recieved to complete the message and not the socket
+                                //Use the data received to complete the message and not the socket
                                 int justReceived = IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) is false ? m_LastTransmitted.CompleteFrom(null, memory) : 0;
 
                                 //If anything was received
                                 if (justReceived > 0)
                                 {
-                                    //Account for what was just recieved.
+                                    //Account for what was just received.
                                     received += justReceived;
 
                                     //No data was actually consumed don't raise another event.
@@ -4311,7 +4311,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                 else /* if (Common.IDisposedExtensions.IsNullOrDisposed(message) is false) */
                 {
 
-                    //Handle the message recieved
+                    //Handle the message received
 
                     switch (m_LastTransmitted.RtspMessageType)
                     {
@@ -4530,7 +4530,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                                             //Trim it of whitespace
                                             string value = sessionHeaderParts.LastOrDefault(p => string.IsNullOrWhiteSpace(p) is false);
 
-                                            //If we dont have an exiting id then this is valid if the header was completely recieved only.
+                                            //If we dont have an exiting id then this is valid if the header was completely received only.
                                             if (string.IsNullOrWhiteSpace(value) is false &&
                                                 string.IsNullOrWhiteSpace(m_SessionId) ||
                                                 false.Equals(string.Compare(value, m_SessionId) is Common.Binary.Zero))
@@ -5161,7 +5161,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
     /// <summary>
     /// Sends a SETUP Rtsp Request based on the given parameters. If no response is obtained a second response will be sent.
-    /// If no response is recieved the client WILL attempt to proceed as if SETUP has succeeded and setup any transport resources which would be required.
+    /// If no response is received the client WILL attempt to proceed as if SETUP has succeeded and setup any transport resources which would be required.
     /// If the response indicates the session is not found and there is not already an existing <see cref="SessionId"/> the request will be repeated without a Session header.
     /// </summary>
     /// <param name="location"></param>
@@ -6469,7 +6469,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                     //Get a context
                     var context = Client.GetContextForMediaDescription(mediaDescription);
 
-                    //If there is a context ensure it has not ended and has recieved data within the context receive interval.
+                    //If there is a context ensure it has not ended and has received data within the context receive interval.
                     if (Common.IDisposedExtensions.IsNullOrDisposed(context) ||
                         context.Goodbye is null ||
                         context.IsContinious ||

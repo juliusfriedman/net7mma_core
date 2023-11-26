@@ -184,7 +184,7 @@ namespace Media.Rtsp.Server.MediaTypes
             //If there is a RtpClient call Activate.
             RtpClient?.Activate();
 
-            //Should be done in first packet recieved...
+            //Should be done in first packet received...
             base.IsReady = true;
 
             //Call start which sets state.

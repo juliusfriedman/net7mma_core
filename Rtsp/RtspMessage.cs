@@ -481,7 +481,11 @@ namespace Media.Rtsp
                     //Messages with ContentLength AND no Body are not complete.
                     //Determine if the count of the octets in the body is greater than or equal to the supposed amount
 
-                    return ParseContentLength(hasNullBody) is false && hasNullBody && m_ContentLength > 0 ? m_HeadersParsed : ContentEncoding.GetByteCount(m_Body) >= m_ContentLength;
+                    return ParseContentLength(hasNullBody) is false &&
+                        hasNullBody &&
+                        m_ContentLength > 0
+                            ? m_HeadersParsed
+                            : ContentEncoding.GetByteCount(m_Body) >= m_ContentLength;
 
                     //return hasNullBody && m_ContentLength > 0 ? false : false == hasNullBody && m_ContentLength <= 0 || (ContentEncoding.GetByteCount(m_Body) >= m_ContentLength);
 

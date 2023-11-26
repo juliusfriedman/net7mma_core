@@ -58,7 +58,7 @@ namespace Media.Rtp
 
         //Collection to handle the dispatch of events.
         //Notes that Collections.Concurrent.Queue may be better suited for this in production until the ConcurrentLinkedQueue has been thoroughly engineered and tested.
-        //The context, the item, final, recieved
+        //The context, the item, final, received
         private readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<(RtpClient.TransportContext Context, Common.BaseDisposable Packet, bool Final, bool Received)> m_EventData = new();
 
         //Todo, LinkedQueue and Clock.

@@ -779,7 +779,7 @@ namespace Media.Rtcp
                 }
 
 
-                int recieved = 0;
+                int received = 0;
 
                 //Read from the stream, decrementing from octetsRemaining what was read.
                 while (octetsRemaining > 0)
@@ -787,13 +787,13 @@ namespace Media.Rtcp
                     int rec = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out System.Net.Sockets.SocketError error);
                     offset += rec;
                     octetsRemaining -= rec;
-                    recieved += rec;
+                    received += rec;
                 }
 
                 //Re-allocate the segment around the received data. //length + received
                 Payload = new Common.MemorySegment(m_OwnedOctets, 0, m_OwnedOctets.Length);
 
-                return recieved;
+                return received;
             }
 
             return 0;

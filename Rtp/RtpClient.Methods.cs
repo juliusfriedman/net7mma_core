@@ -1512,7 +1512,7 @@ namespace Media.Rtp
         /// Recieves data on a given socket and endpoint
         /// </summary>
         /// <param name="socket">The socket to receive data on</param>
-        /// <returns>The number of bytes recieved</returns>             
+        /// <returns>The number of bytes received</returns>             
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected internal /*virtual*/ int ReceiveData(System.Net.Sockets.Socket socket, ref System.Net.EndPoint remote, out System.Net.Sockets.SocketError error, bool expectRtp = true, bool expectRtcp = true, Common.MemorySegment buffer = null)
         {
@@ -1577,7 +1577,7 @@ namespace Media.Rtp
                 //}
 
 
-                //Use the data received to parse and complete any recieved packets, should take a parseState
+                //Use the data received to parse and complete any received packets, should take a parseState
                 /*using (var memory = new Common.MemorySegment(buffer.Array, buffer.Offset, received)) */
                 //}
 
@@ -1984,7 +1984,7 @@ namespace Media.Rtp
                         //Increment received
                         recievedTotal += registerY;
 
-                        //Incrment remaining in buffer for what was recieved.
+                        //Incrment remaining in buffer for what was received.
                         remainingInBuffer += registerY;
                     }
 
@@ -2084,7 +2084,7 @@ namespace Media.Rtp
                 OnOutOfBandData(buffer, offset, remainingInBuffer);
             }
 
-            //Return the number of bytes recieved
+            //Return the number of bytes received
             return recievedTotal;
         }
 
@@ -2187,7 +2187,7 @@ namespace Media.Rtp
                 //If the item was already disposed then do nothing
                 if (Common.IDisposedExtensions.IsNullOrDisposed(tuple.Frame)) return;
 
-                //handle for recieved frames
+                //handle for received frames
                 //todo, length may be more valuable than bool, - means in, positive is out
                 if (tuple.Received && tuple.Frame is RtpFrame frame)
                 {
@@ -2315,7 +2315,7 @@ namespace Media.Rtp
 
         /// <summary>
         /// Entry point of the m_WorkerThread. Handles sending out RtpPackets and RtcpPackets in buffer and handling any incoming RtcpPackets.
-        /// Sends a Goodbye and exits if no packets are sent of recieved in a certain amount of time
+        /// Sends a Goodbye and exits if no packets are sent of received in a certain amount of time
         /// </summary>
         //[System.Security.SecurityCritical]
         private void SendReceieve()
@@ -2504,7 +2504,7 @@ namespace Media.Rtp
                                 //Check if reports needs to be received (Sometimes data doesn't flow immediately)
                                 bool needsToReceiveReports = tc.LastRtcpReportReceived.Equals(System.TimeSpan.MinValue) || tc.LastRtcpReportReceived >= tc.m_ReceiveInterval;
 
-                                //The last report was never received or recieved longer ago then required
+                                //The last report was never received or received longer ago then required
                                 if (needsToReceiveReports
                                     //&& (readSockets.Contains(tc.RtcpSocket) || errorSockets.Contains(tc.RtcpSocket))
                                     //And the socket can read

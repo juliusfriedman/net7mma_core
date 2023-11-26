@@ -774,7 +774,7 @@ namespace Media.Sdp
         /// <summary>
         /// Constructs a SessionDescription from the given contents of a Session Description Protocol message
         /// </summary>
-        /// <param name="sdpContents">The Session Description Protocol usually recieved in the Describe request of a RtspClient</param>
+        /// <param name="sdpContents">The Session Description Protocol usually received in the Describe request of a RtspClient</param>
         public SessionDescription(string sdpContents, bool shouldDispose = true)
             : this((sdpContents ?? string.Empty).Split(SessionDescription.CRLFSplit, StringSplitOptions.RemoveEmptyEntries), 0, -1, shouldDispose)
         {

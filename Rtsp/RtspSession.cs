@@ -147,7 +147,7 @@ namespace Media.Rtsp
         public readonly Dictionary<string, string> AdditionalHeaders = [];
 
         /// <summary>
-        /// Gets the methods supported by the server recieved in the options request.
+        /// Gets the methods supported by the server received in the options request.
         /// </summary>
         public readonly HashSet<string> SupportedMethods = [];
 
@@ -260,7 +260,7 @@ namespace Media.Rtsp
         }
 
         /// <summary>
-        /// The amount of bytes recieved by the RtspClient
+        /// The amount of bytes received by the RtspClient
         /// </summary>
         public int BytesRecieved
         {
@@ -417,7 +417,7 @@ namespace Media.Rtsp
         }
 
         /// <summary>
-        /// The last RtspMessage recieved from the remote source
+        /// The last RtspMessage received from the remote source
         /// </summary>
         public RtspMessage LastInboundRequest { get; protected internal set; }
 
@@ -473,7 +473,7 @@ namespace Media.Rtsp
         }
 
         /// <summary>
-        /// Indicates if the client will send a <see cref="KeepAliveRequest"/> during <see cref="StartPlaying"/> if no data is flowing immediately after the PLAY response is recieved.
+        /// Indicates if the client will send a <see cref="KeepAliveRequest"/> during <see cref="StartPlaying"/> if no data is flowing immediately after the PLAY response is received.
         /// </summary>
         public bool SendKeepAliveImmediatelyAfterStartPlaying
         {
@@ -1398,7 +1398,7 @@ namespace Media.Rtsp
                     else /* if (Common.IDisposedExtensions.IsNullOrDisposed(message) is false) */
                     {
 
-                        //Handle the message recieved
+                        //Handle the message received
 
                         switch (m_LastTransmitted.RtspMessageType)
                         {
@@ -1618,7 +1618,7 @@ namespace Media.Rtsp
                                                 //Trim it of whitespace
                                                 string value = sessionHeaderParts.LastOrDefault(p => string.IsNullOrWhiteSpace(p) is false);
 
-                                                //If we dont have an exiting id then this is valid if the header was completely recieved only.
+                                                //If we dont have an exiting id then this is valid if the header was completely received only.
                                                 if (string.IsNullOrWhiteSpace(value) is false &&
                                                     string.IsNullOrWhiteSpace(SessionId) ||
                                                     false.Equals(string.Compare(value, SessionId) is Common.Binary.Zero))
@@ -2134,7 +2134,7 @@ namespace Media.Rtsp
                 //Trim it of whitespace
                 string value = System.Linq.Enumerable.LastOrDefault(sessionHeaderParts, (p => false == string.IsNullOrWhiteSpace(p)));
 
-                //If we dont have an exiting id then this is valid if the header was completely recieved only.
+                //If we dont have an exiting id then this is valid if the header was completely received only.
                 if (false == string.IsNullOrWhiteSpace(value) &&
                     true == string.IsNullOrWhiteSpace(SessionId) ||
                     value[0] != SessionId[0])

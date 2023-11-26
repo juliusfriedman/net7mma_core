@@ -709,7 +709,7 @@ namespace Media.RtpTools.RtpDump
         /// </summary>
         /// <param name="filePath">The path to store the created the dump or the location of an existing rtpdump file</param>
         /// <param name="format">The to write the dump in. An exceptio will be thrown if overwrite is false and format does match the existing file's format</param>
-        /// <param name="source">The IPEndPoint from which RtpPackets were recieved</param>
+        /// <param name="source">The IPEndPoint from which RtpPackets were received</param>
         /// <param name="utcStart">The optional time the file started recording</param>
         /// <param name="overWrite">Indicates the file should be overwritten</param>
         public DumpWriter(string filePath, FileFormat format, System.Net.IPEndPoint source, DateTime? utcStart = null, bool overWrite = false, bool modify = false, bool shouldDispose = true) : this(new System.IO.FileStream(filePath, !modify ? overWrite ? System.IO.FileMode.Create : System.IO.FileMode.CreateNew : System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.Write, System.IO.FileShare.ReadWrite | System.IO.FileShare.Delete), format, source, utcStart, modify, shouldDispose) { }
@@ -752,7 +752,7 @@ namespace Media.RtpTools.RtpDump
         /// If written in <see cref="DumpFormat.Payload"/> the Rtp Packet will only contain the RTP Payload and will not be able to be read back into RtpPackets with this class.        
         /// </summary>
         /// <param name="packet">The time</param>
-        /// <param name="timeOffset">The optional time the packet was recieved relative to the beginning of the file. If the packet has a Created time that will be used otherwise DateTime.UtcNow.</param>
+        /// <param name="timeOffset">The optional time the packet was received relative to the beginning of the file. If the packet has a Created time that will be used otherwise DateTime.UtcNow.</param>
         public void WritePacket(Rtp.RtpPacket packet, TimeSpan? timeOffset = null, System.Net.IPEndPoint source = null)
         {
             if (timeOffset < TimeSpan.Zero) throw new ArgumentOutOfRangeException("timeOffset cannot be less than the start of the file which is defined in the header. ");
@@ -774,7 +774,7 @@ namespace Media.RtpTools.RtpDump
         /// If written in Binary the packet will contain an 8 Byte overhead. If written in Payload or Header the Rtcp Packet is silently ignored.
         /// </summary>
         /// <param name="packet">The packet to write</param>
-        /// <param name="timeOffset">The optional time the packet was recieved relative to the beginning of the file. If the packet has a Created time that will be used otherwise DateTime.UtcNow.</param>
+        /// <param name="timeOffset">The optional time the packet was received relative to the beginning of the file. If the packet has a Created time that will be used otherwise DateTime.UtcNow.</param>
         public void WritePacket(Rtcp.RtcpPacket packet, TimeSpan? timeOffset = null, System.Net.IPEndPoint source = null)
         {
             if (timeOffset < TimeSpan.Zero) throw new ArgumentOutOfRangeException("timeOffset cannot be less than the start of the file which is defined in the header. ");

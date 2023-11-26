@@ -63,7 +63,7 @@ namespace Media.Common.Extensions.Thread
         /// Calls <see cref="Interrupt"/> on the given thread and indicates if the interrupt was received back.
         /// </summary>
         /// <param name="thread">The thread to interrupt</param>
-        /// <returns>True if the <see cref="System.Threading.ThreadInterruptedException"/> was recieved.</returns>
+        /// <returns>True if the <see cref="System.Threading.ThreadInterruptedException"/> was received.</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool InterruptThread(ref System.Threading.Thread thread)
         {

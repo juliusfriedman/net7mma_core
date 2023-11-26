@@ -1646,7 +1646,7 @@ namespace Media.Rtsp//.Server
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
-            //Get an implementation for the packet recieved
+            //Get an implementation for the packet received
             var implementation = Rtcp.RtcpPacket.GetImplementationForPayloadType((byte)packet.PayloadType);
 
             if (implementation is null) Common.ILoggingExtensions.LogException(m_Server.ClientSessionLogger, new Exception("Recieved Unknown PacketType: " + packet.PayloadType + " Packet Ssrc = " + packet.SynchronizationSourceIdentifier));
@@ -1669,7 +1669,7 @@ namespace Media.Rtsp//.Server
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
-            //Get an implementation for the packet recieved
+            //Get an implementation for the packet received
             var implementation = Rtcp.RtcpPacket.GetImplementationForPayloadType((byte)packet.PayloadType);
 
             if (implementation is null) Common.ILoggingExtensions.LogException(m_Server.ClientSessionLogger, new Exception("Sent Unknown PacketType: " + packet.PayloadType + " Packet Ssrc = " + packet.SynchronizationSourceIdentifier));
