@@ -355,7 +355,7 @@ namespace Media.Rtsp
             //Sanity
             if (message is null) return null;
 
-            if (offset > message.Length) throw new ArgumentOutOfRangeException(nameof(offset));
+            if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
 
             if (offset > message.Length) throw new ArgumentOutOfRangeException(nameof(offset));
 
