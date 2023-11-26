@@ -2291,7 +2291,8 @@ namespace Media.Rtp
                     MulticastGroups.Clear();
 
                     //For Udp the RtcpSocket may be the same socket as the RtpSocket if the sender/reciever is duplexing
-                    if (RtcpSocket is not null && RtpSocket.Handle.Equals(RtcpSocket.Handle) is false) RtcpSocket.Close();
+                    if (RtcpSocket is not null && RtcpSocket.Handle.Equals(RtpSocket?.Handle) is false)
+                        RtcpSocket.Close();
 
                     //Close the RtpSocket
                     RtpSocket?.Close();
