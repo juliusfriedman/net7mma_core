@@ -1876,7 +1876,7 @@ namespace Media.Rtp
                             //If rtp or rtcp is expected check data
                             if (expectRtp || expectRtcp || frameChannel.HasValue && frameChannel.Value < TransportContexts.Count)
                             {
-                                Media.Common.ILoggingExtensions.Log(Logger, InternalId + "ProcessFrameData - Large Packet of " + frameLength + " for Channel " + frameChannel.Value + " remainingInBuffer=" + remainingInBuffer);
+                                Media.Common.ILoggingExtensions.Log(Logger, InternalId + "ProcessFrameData - Large Packet of " + frameLength + " for Channel " + frameChannel.GetValueOrDefault() + " remainingInBuffer=" + remainingInBuffer);
 
                                 //Could allow for the buffer to be replaced here for the remainder of this call only.
 
