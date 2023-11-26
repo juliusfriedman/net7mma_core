@@ -1595,7 +1595,7 @@ namespace Media.Rtsp
 
                                     //For any other request besides teardown update the sessionId and timeout
                                     if (message is not null &&
-                                        false.Equals(message.RtspMethod == RtspMethod.TEARDOWN))
+                                        message.RtspMethod is not RtspMethod.TEARDOWN)
                                     {
                                         //Get the header.
                                         string sessionHeader = m_LastTransmitted[RtspHeaders.Session];

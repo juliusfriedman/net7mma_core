@@ -4507,7 +4507,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
                                 //For any other request besides teardown update the sessionId and timeout
                                 if (message is not null &&
-                                    false.Equals(message.RtspMethod == RtspMethod.TEARDOWN))
+                                    message.RtspMethod is not RtspMethod.TEARDOWN)
                                 {
                                     //Get the header.
                                     string sessionHeader = m_LastTransmitted[RtspHeaders.Session];
@@ -4820,7 +4820,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                         }
                     default:
                         {
-                            if (response.RtspMethod == RtspMethod.REDIRECT) goto case RtspStatusCode.Found;
+                            if (response.RtspMethod is RtspMethod.REDIRECT) goto case RtspStatusCode.Found;
                             if (statusCode > RtspStatusCode.OK) goto case RtspStatusCode.InternalServerError;
                             else if (statusCode < RtspStatusCode.OK) goto case RtspStatusCode.OK;
                             break;
