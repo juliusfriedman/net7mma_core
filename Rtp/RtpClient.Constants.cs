@@ -1,7 +1,7 @@
 ﻿/*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -65,7 +65,7 @@ namespace Media.Rtp
         //Might want a seperate method for this... (WakeupRemote)
         //Most routers / firewalls will let traffic back through if the person from behind initiated the traffic.
         //Send some bytes to ensure the reciever is awake and ready... (SIP / RELOAD / ICE / STUN / TURN may have something specific and better)
-        //e.g Port mapping request http://tools.ietf.org/html/rfc6284#section-4.2 
+        //e.g Port mapping request https://tools.ietf.org/html/rfc6284#section-4.2 
         private static readonly byte[] WakeUpBytes = new byte[] { 0x70, 0x70, 0x70, 0x70 };
 
         //Choose better name,,, 
@@ -146,7 +146,7 @@ namespace Media.Rtp
             //In stand alone operation mode the RtpClient should read only the length of the frame and decypher the contents based on the Payload.
 
             //SEE [COMEDIA]ly
-            //http://tools.ietf.org/search/rfc4571#section-3
+            //https://tools.ietf.org/search/rfc4571#section-3
 
             //The ssrc may be useless due to middle boxes which have re-compresssed the data and sent it along with a new identifier....
             //The new identifier would be valid but would imply that the packet came from a different source (which since it was re-sampled it should)...

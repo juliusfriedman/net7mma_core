@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -120,7 +120,7 @@ namespace Media.Common.Extensions.Delegate
         public static readonly System.Action NoOp = () => { };
     }
 
-    //http://www.codeproject.com/Articles/1104555/The-Function-Decorator-Pattern-Reanimation-of-Func @ ActionExtensions
+    //https://www.codeproject.com/Articles/1104555/The-Function-Decorator-Pattern-Reanimation-of-Func @ ActionExtensions
     public static class FuncExtensions
     {
         public static System.Func<TArg, TResult> GetOrCache<TArg, TResult, TCache>(this System.Func<TArg, TResult> func, TCache cache)

@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -426,7 +426,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool Equals(MemorySegment other)
         {
-            return Common.IDisposedExtensions.IsNullOrDisposed(other) is false && Common.IDisposedExtensions.IsNullOrDisposed(this) is false && other.GetHashCode().Equals(GetHashCode());
+            return Common.IDisposedExtensions.IsNullOrDisposed(other) is false && Common.IDisposedExtensions.IsNullOrDisposed(this) is false && other.GetHashCode() == GetHashCode();
         }
 
         #region Operators

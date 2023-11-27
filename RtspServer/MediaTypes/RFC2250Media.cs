@@ -9,7 +9,7 @@ namespace Media.Rtsp.Server.MediaTypes
     {
 
         /// <summary>
-        /// Provides an implementation of <see href="http://tools.ietf.org/html/rfc2250">RFC2250</see> Commonly used with MPEG Encoded Video.
+        /// Provides an implementation of <see href="https://tools.ietf.org/html/rfc2250">RFC2250</see> Commonly used with MPEG Encoded Video.
         /// </summary>
         public class RFC2250Frame : Rtp.RtpFrame
         {
@@ -335,7 +335,7 @@ namespace Media.Rtsp.Server.MediaTypes
         }
 
         /// <summary>
-        /// http://www.codeproject.com/Articles/5834/A-C-MPEG-Image-Compression-Class
+        /// https://www.codeproject.com/Articles/5834/A-C-MPEG-Image-Compression-Class
         /// </summary>
         public class MPEGFunctions
         {

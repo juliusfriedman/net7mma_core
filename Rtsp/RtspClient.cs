@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -52,7 +52,7 @@ namespace Media.Rtsp;
 
 /// <summary>
 /// Implements RFC 2326
-/// http://www.ietf.org/rfc/rfc2326.txt
+/// https://www.ietf.org/rfc/rfc2326.txt
 /// Provides facilities for communication with an RtspServer to establish one or more Rtp Transport Channels.
 /// </summary>
 public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISocketReference
@@ -241,7 +241,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
                 LastStatusChangeUtc = DateTime.UtcNow;
 
-                if (MediaStartedUtc.Equals(DateTime.MinValue) && value == MediaStatus.Playing)
+                if (MediaStartedUtc == DateTime.MinValue && value is MediaStatus.Playing)
                 {
                     MediaStartedUtc = LastStatusChangeUtc;
                 }
@@ -449,7 +449,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
     public readonly Dictionary<string, string> AdditionalHeaders = [];
 
     /// <summary>
-    /// Gets the methods supported by the server recieved in the options request.
+    /// Gets the methods supported by the server received in the options request.
     /// </summary>
     public readonly HashSet<string> SupportedMethods = [];
 
@@ -566,7 +566,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
     }
 
     /// <summary>
-    /// Indicates if the client will send a <see cref="KeepAliveRequest"/> during <see cref="StartPlaying"/> if no data is flowing immediately after the PLAY response is recieved.
+    /// Indicates if the client will send a <see cref="KeepAliveRequest"/> during <see cref="StartPlaying"/> if no data is flowing immediately after the PLAY response is received.
     /// </summary>
     public bool SendKeepAliveImmediatelyAfterStartPlaying
     {
@@ -1277,7 +1277,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
     }
 
     /// <summary>
-    /// The amount of bytes recieved by the RtspClient
+    /// The amount of bytes received by the RtspClient
     /// </summary>
     public int BytesRecieved
     {
@@ -2506,13 +2506,13 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                                 //Create a memory segment and complete the message as required from the buffer.
                                 using var memory = new Media.Common.MemorySegment(data, offset, length);
 
-                                //Use the data recieved to complete the message and not the socket
+                                //Use the data received to complete the message and not the socket
                                 int justReceived = IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) is false ? m_LastTransmitted.CompleteFrom(null, memory) : 0;
 
                                 //If anything was received
                                 if (justReceived > 0)
                                 {
-                                    //Account for what was just recieved.
+                                    //Account for what was just received.
                                     received += justReceived;
 
                                     //No data was actually consumed don't raise another event.
@@ -3559,7 +3559,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
         #region Example header
 
-        //http://tools.ietf.org/html/rfc2617
+        //https://tools.ietf.org/html/rfc2617
         //3.2.1 The WWW-Authenticate Response Header
         //Example
         //WWW-Authenticate: Basic realm="nmrs_m7VKmomQ2YM3:", Digest realm="GeoVision", nonce="b923b84614fc11c78c712fb0e88bc525"\r\n
@@ -4311,7 +4311,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                 else /* if (Common.IDisposedExtensions.IsNullOrDisposed(message) is false) */
                 {
 
-                    //Handle the message recieved
+                    //Handle the message received
 
                     switch (m_LastTransmitted.RtspMessageType)
                     {
@@ -4507,7 +4507,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
                                 //For any other request besides teardown update the sessionId and timeout
                                 if (message is not null &&
-                                    false.Equals(message.RtspMethod == RtspMethod.TEARDOWN))
+                                    message.RtspMethod is not RtspMethod.TEARDOWN)
                                 {
                                     //Get the header.
                                     string sessionHeader = m_LastTransmitted[RtspHeaders.Session];
@@ -4530,7 +4530,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                                             //Trim it of whitespace
                                             string value = sessionHeaderParts.LastOrDefault(p => string.IsNullOrWhiteSpace(p) is false);
 
-                                            //If we dont have an exiting id then this is valid if the header was completely recieved only.
+                                            //If we dont have an exiting id then this is valid if the header was completely received only.
                                             if (string.IsNullOrWhiteSpace(value) is false &&
                                                 string.IsNullOrWhiteSpace(m_SessionId) ||
                                                 false.Equals(string.Compare(value, m_SessionId) is Common.Binary.Zero))
@@ -4820,7 +4820,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                         }
                     default:
                         {
-                            if (response.RtspMethod == RtspMethod.REDIRECT) goto case RtspStatusCode.Found;
+                            if (response.RtspMethod is RtspMethod.REDIRECT) goto case RtspStatusCode.Found;
                             if (statusCode > RtspStatusCode.OK) goto case RtspStatusCode.InternalServerError;
                             else if (statusCode < RtspStatusCode.OK) goto case RtspStatusCode.OK;
                             break;
@@ -5161,7 +5161,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
     /// <summary>
     /// Sends a SETUP Rtsp Request based on the given parameters. If no response is obtained a second response will be sent.
-    /// If no response is recieved the client WILL attempt to proceed as if SETUP has succeeded and setup any transport resources which would be required.
+    /// If no response is received the client WILL attempt to proceed as if SETUP has succeeded and setup any transport resources which would be required.
     /// If the response indicates the session is not found and there is not already an existing <see cref="SessionId"/> the request will be repeated without a Session header.
     /// </summary>
     /// <param name="location"></param>
@@ -5418,7 +5418,8 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                         //Should allow this to be given or set as a property MinimumUdpPort, MaximumUdpPort                        
                         int openPort = Media.Common.Extensions.Socket.SocketExtensions.ProbeForOpenPort(ProtocolType.Udp, lastPortUsed + 1, true);
 
-                        if (Common.Binary.NegativeOne.Equals(openPort)) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Could not find open Udp Port");
+                        if (openPort is Common.Binary.NegativeOne)
+                            Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "Could not find open Udp Port");
                         //else if (MaximumUdp.HasValue && openPort > MaximumUdp)
                         //{
                         //    Media.Common.Extensions.Exceptions.ExceptionExtensions.CreateAndRaiseException(this, "Found Udp Port > MaximumUdp. Found: " + openPort);
@@ -6468,7 +6469,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                     //Get a context
                     var context = Client.GetContextForMediaDescription(mediaDescription);
 
-                    //If there is a context ensure it has not ended and has recieved data within the context receive interval.
+                    //If there is a context ensure it has not ended and has received data within the context receive interval.
                     if (Common.IDisposedExtensions.IsNullOrDisposed(context) ||
                         context.Goodbye is null ||
                         context.IsContinious ||

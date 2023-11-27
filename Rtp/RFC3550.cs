@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -49,7 +49,7 @@ using System.Linq;
 namespace Media
 {
     /// <summary>
-    /// Provides an implementation of various abstractions presented in <see cref="http://tools.ietf.org/html/rfc3550">RFC3550</see>
+    /// Provides an implementation of various abstractions presented in <see cref="https://tools.ietf.org/html/rfc3550">RFC3550</see>
     /// </summary>
     public sealed class RFC3550
     {
@@ -116,7 +116,7 @@ namespace Media
 
         /// <summary>
         /// Calculates a value which can be used in conjunction with the <see cref="RtcpValidMask"/> to validate a RtcpHeader.
-        /// <see cref="http://tools.ietf.org/html/rfc3550#appendix-A">Appendix A</see>
+        /// <see cref="https://tools.ietf.org/html/rfc3550#appendix-A">Appendix A</see>
         /// </summary>
         /// <param name="version">The version of the RtcpPacket to validate</param>
         /// <param name="payloadType">The optional payloadType to use in the calulcation. Defaults to 201</param>
@@ -303,7 +303,7 @@ namespace Media
         /// <returns>The sequence of bytes which represent the compound RtcpPacket preceeded with the given 32 bit value <paramref name="random"/>.</returns>
         public static IEnumerable<byte> ToEncryptedCompoundBytes(int random, System.Security.Cryptography.HashAlgorithm algorithm = null, params RtcpPacket[] packets)
         {
-            throw new NotImplementedException("http://tools.ietf.org/html/rfc3550#section-9.1");
+            throw new NotImplementedException("https://tools.ietf.org/html/rfc3550#section-9.1");
             //algorithm = algorithm ?? System.Security.Cryptography.DES.Create();
             //return Enumerable.Concat(randomBytes, ToCompoundBytes(packets));
         }
@@ -329,13 +329,16 @@ namespace Media
             //Get all packets contained in the buffer.
             foreach (RtcpPacket currentPacket in RtcpPacket.GetPackets(array, offset, count, version, null, ssrc, shouldDispose))
             {
-
                 //Determine who the packet is from and what type it is.
                 int firstPayloadType = currentPacket.PayloadType;
 
                 //The first packet in a compound packet needs to be validated
-                if (parsedPackets is 0 && !IsValidRtcpHeader(currentPacket.Header, currentPacket.Version)) yield break;
-                else if (currentPacket.Version != version || skipUnknownTypes && RtcpPacket.GetImplementationForPayloadType((byte)currentPacket.PayloadType) is null) yield break;
+                if (parsedPackets is 0 && IsValidRtcpHeader(currentPacket.Header, currentPacket.Version) is false)
+                    yield break;
+
+                if (currentPacket.Version != version || (skipUnknownTypes &&
+                    RtcpPacket.GetImplementationForPayloadType((byte)currentPacket.PayloadType) is null))
+                    yield break;
 
                 //Count the packets parsed
                 ++parsedPackets;
@@ -657,8 +660,6 @@ namespace Media
         {
             //Should be performed in the Conference level, these values here will only 
             //should allow a backoff to occur in reporting and possibly eventually to be turned off.
-            fraction = 0;
-
             uint extended_max = RtpSeqCycles + RtpMaxSeq;
 
             int expected = (int)(extended_max - RtpBaseSeq + 1);
@@ -1345,7 +1346,7 @@ namespace Media
         /// 
         /// Note a mixer which is making a new SourceList should account for the fact that only 15 sources per RtpPacket can be indicated in a single RtpPacket,
         /// for more information see
-        /// <see href="http://tools.ietf.org/html/rfc3550">Page 15, paragraph `CSRC list`</see>
+        /// <see href="https://tools.ietf.org/html/rfc3550">Page 15, paragraph `CSRC list`</see>
         /// </summary>
         public sealed class SourceList : SuppressedFinalizerDisposable, IEnumerator<uint>, IEnumerable<uint>, IReportBlock
         /*, IReadOnlyCollection<uint> */ //Only needed if modifications to a SourceList are allowed at run time.

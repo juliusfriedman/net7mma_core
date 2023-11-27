@@ -1,7 +1,7 @@
 ﻿/*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -355,7 +355,7 @@ namespace Media.Rtsp
             //Sanity
             if (message is null) return null;
 
-            if (offset > message.Length) throw new ArgumentOutOfRangeException(nameof(offset));
+            if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
 
             if (offset > message.Length) throw new ArgumentOutOfRangeException(nameof(offset));
 
@@ -481,7 +481,11 @@ namespace Media.Rtsp
                     //Messages with ContentLength AND no Body are not complete.
                     //Determine if the count of the octets in the body is greater than or equal to the supposed amount
 
-                    return ParseContentLength(hasNullBody) is false && hasNullBody && m_ContentLength > 0 ? m_HeadersParsed : ContentEncoding.GetByteCount(m_Body) >= m_ContentLength;
+                    return ParseContentLength(hasNullBody) is false &&
+                        hasNullBody &&
+                        m_ContentLength > 0
+                            ? m_HeadersParsed
+                            : ContentEncoding.GetByteCount(m_Body) >= m_ContentLength;
 
                     //return hasNullBody && m_ContentLength > 0 ? false : false == hasNullBody && m_ContentLength <= 0 || (ContentEncoding.GetByteCount(m_Body) >= m_ContentLength);
 
@@ -573,7 +577,7 @@ namespace Media.Rtsp
         /// </summary>
         /// <param name="packet">The array segment which contains the packet in whole at the offset of the segment. The Count of the segment may not contain more bytes than a RFC2326 message may contain.</param>
         /// <reference>
-        /// RFC2326 - http://tools.ietf.org/html/rfc2326 - [Page 19]
+        /// RFC2326 - https://tools.ietf.org/html/rfc2326 - [Page 19]
         /// 4.4 Message Length
         ///When a message body is included with a message, the length of that
         ///body is determined by one of the following (in order of precedence):

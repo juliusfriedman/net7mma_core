@@ -1,7 +1,7 @@
 ﻿/*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -42,7 +42,7 @@ namespace Media.Containers.Mcf
     /// <summary>
     /// Aims to provide an implementation of the Media Container Format.
     /// (.mcf, .av.mcf, .audio.mcf, .video.mcf)
-    /// <see cref="http://en.wikipedia.org/wiki/Multimedia_Container_Format">MCF Wikipedia Entry</see>
+    /// <see cref="https://en.wikipedia.org/wiki/Multimedia_Container_Format">MCF Wikipedia Entry</see>
     /// <see cref="http://mukoli.free.fr/mcf/">Unfinished Format Specification</see>
     /// </summary>
     /// <notes>Like Matroska but ALL Elements are fixed sized except the Block</notes>

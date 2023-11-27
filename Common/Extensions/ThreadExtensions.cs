@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -63,7 +63,7 @@ namespace Media.Common.Extensions.Thread
         /// Calls <see cref="Interrupt"/> on the given thread and indicates if the interrupt was received back.
         /// </summary>
         /// <param name="thread">The thread to interrupt</param>
-        /// <returns>True if the <see cref="System.Threading.ThreadInterruptedException"/> was recieved.</returns>
+        /// <returns>True if the <see cref="System.Threading.ThreadInterruptedException"/> was received.</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool InterruptThread(ref System.Threading.Thread thread)
         {

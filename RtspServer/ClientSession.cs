@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -77,14 +77,18 @@ namespace Media.Rtsp//.Server
 
                 //After
 
-                if (da.Equals(Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan)) return Common.Binary.Zero;
-                else if (a.Transferred.Value.Ticks <= da.Ticks) return Common.Binary.NegativeOne;
+                if (da.Equals(Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan))
+                    return Common.Binary.Zero;
+
+                if (a.Transferred.Value.Ticks <= da.Ticks)
+                    return Common.Binary.NegativeOne;
 
                 //-- fast path the transfer check, if less than between b.LastRtpPacketSent
 
                 TimeSpan dy = (DateTime.UtcNow - a.Transferred.Value).Duration();
 
-                if (dy <= b.LastRtpPacketSent) return Common.Binary.One;
+                if (dy <= b.LastRtpPacketSent)
+                    return Common.Binary.One;
 
                 //--
 
@@ -93,8 +97,8 @@ namespace Media.Rtsp//.Server
                 //Has the time since the last transfer occured elapsed in a quantity which is greater than or equal to the sendr interval?
                 return dt >= b.m_SendInterval ?
                     //does that time in 100z of a nanos minus that of the senders jitter differ from the rtp (receive) jitter in such a way that it is greater or equal?
-                    dt.Ticks - b.SenderJitter >= b.RtpJitter ?
-                      Common.Binary.NegativeOne : Common.Binary.Zero
+                    dt.Ticks - b.SenderJitter >= b.RtpJitter
+                      ? Common.Binary.NegativeOne : Common.Binary.Zero
                       //if not return {0}, <0>, -|0|
                       : -Common.Binary.Zero;
             }
@@ -975,7 +979,7 @@ namespace Media.Rtsp//.Server
                     //End playing after this time if given and not unspecified
                     endRange = end;
 
-                    //http://stackoverflow.com/questions/4672359/why-does-timespan-fromsecondsdouble-round-to-milliseconds
+                    //https://stackoverflow.com/questions/4672359/why-does-timespan-fromsecondsdouble-round-to-milliseconds
 
                     if (end.Equals(Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan) is false
                         &&
@@ -1642,7 +1646,7 @@ namespace Media.Rtsp//.Server
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
-            //Get an implementation for the packet recieved
+            //Get an implementation for the packet received
             var implementation = Rtcp.RtcpPacket.GetImplementationForPayloadType((byte)packet.PayloadType);
 
             if (implementation is null) Common.ILoggingExtensions.LogException(m_Server.ClientSessionLogger, new Exception("Recieved Unknown PacketType: " + packet.PayloadType + " Packet Ssrc = " + packet.SynchronizationSourceIdentifier));
@@ -1665,7 +1669,7 @@ namespace Media.Rtsp//.Server
         {
             if (Common.IDisposedExtensions.IsNullOrDisposed(packet)) return;
 
-            //Get an implementation for the packet recieved
+            //Get an implementation for the packet received
             var implementation = Rtcp.RtcpPacket.GetImplementationForPayloadType((byte)packet.PayloadType);
 
             if (implementation is null) Common.ILoggingExtensions.LogException(m_Server.ClientSessionLogger, new Exception("Sent Unknown PacketType: " + packet.PayloadType + " Packet Ssrc = " + packet.SynchronizationSourceIdentifier));

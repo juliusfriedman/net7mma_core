@@ -1,7 +1,7 @@
 ﻿/*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -88,7 +88,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
         //Asked by a user here how they would save a rtsp stream to disk....
         //RtpTools, MediaFileWriter, FFMPEG, Media Foundation................................................................
-        //http://stackoverflow.com/questions/37285323/how-to-record-a-rtsp-stream-to-disk-using-net7mma
+        //https://stackoverflow.com/questions/37285323/how-to-record-a-rtsp-stream-to-disk-using-net7mma
 
         //System.Drawing.Image m_lastDecodedFrame;
         //internal virtual void DecodeFrame(Rtp.RtpClient sender, Rtp.RtpFrame frame)
@@ -184,7 +184,7 @@ namespace Media.Rtsp.Server.MediaTypes
             //If there is a RtpClient call Activate.
             RtpClient?.Activate();
 
-            //Should be done in first packet recieved...
+            //Should be done in first packet received...
             base.IsReady = true;
 
             //Call start which sets state.

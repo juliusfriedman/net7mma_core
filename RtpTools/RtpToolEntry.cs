@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -268,9 +268,6 @@ namespace Media.RtpTools
             BlobLength = memory.Length;
             if (offset.HasValue) Offset = offset.Value;
         }
-
-        //http://net7mma.codeplex.com/workitem/17176
-        //Text entries will need another constructor
 
         public RtpToolEntry(DateTime timeBase, System.Net.IPEndPoint source, Common.IPacket packet, int? offset = null, long? fileOffset = null, FileFormat format = FileFormat.Binary, bool shouldDispose = true)
             : this(timeBase, source, format, format >= FileFormat.Binary ? CreatePacketHeader(packet, offset ?? 0).Concat(packet.Prepare()).ToArray() : null, offset, fileOffset, shouldDispose)

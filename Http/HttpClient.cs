@@ -306,7 +306,7 @@ namespace Media.Http
         public int BytesSent { get { return m_SentBytes; } }
 
         /// <summary>
-        /// The amount of bytes recieved by the RtspClient
+        /// The amount of bytes received by the RtspClient
         /// </summary>
         public int BytesRecieved { get { return m_ReceivedBytes; } }
 
@@ -894,7 +894,7 @@ namespace Media.Http
 
                         #region Host Headers
 
-                        //http://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html
+                        //https://www.w3.org/Protocols/rfc2616/rfc2616-sec19.html
                         // A client that sends an HTTP/1.1 request MUST send a Host header.
                         if (1.1 >= message.Version && false == message.ContainsHeader(HttpHeaders.Host)) //Should remove host header if present?
                         {
@@ -1488,7 +1488,7 @@ namespace Media.Http
 
             //extract boundary from contentType
 
-            //http://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.2
+            //https://www.w3.org/TR/html401/interact/forms.html#h-17.13.4.2
 
             //Boundary is always '--' + boundary
 
@@ -1552,7 +1552,7 @@ namespace Media.Http
             //If not forced and already TriedCredentials then return the response given.
             if (false == force && TriedCredentials && response is null) return response;
 
-            //http://tools.ietf.org/html/rfc2617
+            //https://tools.ietf.org/html/rfc2617
             //3.2.1 The WWW-Authenticate Response Header
             //Example
             //WWW-Authenticate: Basic realm="nmrs_m7VKmomQ2YM3:", Digest realm="GeoVision", nonce="b923b84614fc11c78c712fb0e88bc525"\r\n
@@ -1783,13 +1783,13 @@ namespace Media.Http
                                 //Create a memory segment and complete the message as required from the buffer.
                                 using (var memory = new Media.Common.MemorySegment(data, offset, length))
                                 {
-                                    //Use the data recieved to complete the message and not the socket
+                                    //Use the data received to complete the message and not the socket
                                     int justReceived = false == IDisposedExtensions.IsNullOrDisposed(m_LastTransmitted) ? m_LastTransmitted.CompleteFrom(null, memory) : 0;
 
                                     //If anything was received
                                     if (justReceived > 0)
                                     {
-                                        //Account for what was just recieved.
+                                        //Account for what was just received.
                                         received += justReceived;
 
                                         //No data was consumed don't raise another event.

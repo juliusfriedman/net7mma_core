@@ -164,7 +164,7 @@ namespace Media.Http
                 case System.Net.AuthenticationSchemes.None: break;
                 case System.Net.AuthenticationSchemes.Basic:
                     {
-                        //http://en.wikipedia.org/wiki/Basic_access_authentication
+                        //https://en.wikipedia.org/wiki/Basic_access_authentication
                         //Don't use the domain.
 
                         //Don't use `basic` because apparently case is REALLY important at this point...
@@ -176,7 +176,7 @@ namespace Media.Http
                     }
                 case System.Net.AuthenticationSchemes.Digest:
                     {
-                        //http://www.ietf.org/rfc/rfc2617.txt
+                        //https://www.ietf.org/rfc/rfc2617.txt
 
                         //Example 
                         //Authorization: Digest username="admin", realm="GeoVision", nonce="b923b84614fc11c78c712fb0e88bc525", uri="rtsp://203.11.64.27:8554/CH001.sdp", response="d771e4e5956e3d409ce5747927db10af"\r\n
@@ -201,7 +201,7 @@ namespace Media.Http
                             if (string.IsNullOrWhiteSpace(cnOncePart)) cnOncePart = Utility.Random.Next(int.MaxValue).ToString("X");
                         }
 
-                        //http://en.wikipedia.org/wiki/Digest_access_authentication
+                        //https://en.wikipedia.org/wiki/Digest_access_authentication
                         //The MD5 hash of the combined username, authentication realm and password is calculated. The result is referred to as HA1.
                         byte[] HA1 = Cryptography.MD5.GetHash(encoding.GetBytes(string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}:{2}", credential.UserName, realmPart, credential.Password)));
 

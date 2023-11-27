@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -111,7 +111,7 @@ namespace Media.Concepts.Classes.v
         #endregion
     }
 
-    //http://stackoverflow.com/questions/38468498/adding-to-a-message-for-various-errors-on-form/38468636#38468636
+    //https://stackoverflow.com/questions/38468498/adding-to-a-message-for-various-errors-on-form/38468636#38468636
 
     /// <summary>
     /// A function used in <see cref="Prototype"/>

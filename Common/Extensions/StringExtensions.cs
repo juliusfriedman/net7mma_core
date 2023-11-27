@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -115,7 +115,7 @@ namespace Media.Common.Extensions.String
 
         #endregion
 
-        //http://stackoverflow.com/questions/272633/add-spaces-before-capital-letters
+        //https://stackoverflow.com/questions/272633/add-spaces-before-capital-letters
         //Before I ever saw the above I came up with the below... I did modify one thing after
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static string AddSpacesBeforeCapitols(string value, int offset = 0, int count = -1)

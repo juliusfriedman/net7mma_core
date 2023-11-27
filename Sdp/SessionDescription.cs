@@ -1,7 +1,7 @@
 ﻿/*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -45,8 +45,8 @@ namespace Media.Sdp
 
     /// <summary>
     /// Provides facilities for parsing and creating SessionDescription data
-    /// http://en.wikipedia.org/wiki/Session_Description_Protocol
-    /// http://tools.ietf.org/html/rfc4566
+    /// https://en.wikipedia.org/wiki/Session_Description_Protocol
+    /// https://tools.ietf.org/html/rfc4566
     /// </summary>
     /// 
     ///https://msdn.microsoft.com/en-us/library/bb758954(v=office.13).aspx
@@ -140,12 +140,13 @@ namespace Media.Sdp
             int hypenOffset = value.IndexOf(HyphenSign, offset);
 
             //parse the times we find after this point
-            string startTimeString = string.Empty, endTimeString = string.Empty;
+            string endTimeString = string.Empty;
+            string startTimeString;
 
             //Start time only
-            if (hypenOffset.Equals(-1) || hypenOffset >= length - 1)
+            if (hypenOffset is -1 || hypenOffset >= length - 1)
             {
-                startTimeString = (hypenOffset.Equals(-1) ? value.Substring(offset) : value.Substring(offset, length - (offset + 1))).Trim();
+                startTimeString = (hypenOffset is -1 ? value[offset..] : value.Substring(offset, length - (offset + 1))).Trim();
             }
             else
             {
@@ -153,7 +154,7 @@ namespace Media.Sdp
 
                 startTimeString = value.Substring(offset, length - (offset + (length - hypenOffset + 1))).Trim();
 
-                endTimeString = value.Substring(hypenOffset).Trim();
+                endTimeString = value[hypenOffset..].Trim();
             }
 
             //Parse the string to the terms of the value
@@ -170,8 +171,8 @@ namespace Media.Sdp
                             if (string.IsNullOrWhiteSpace(startTimeString) is false && string.Compare(startTimeString, "now", StringComparison.OrdinalIgnoreCase) != 0) start = startTimeString.IndexOf(Colon) >= 0 ? TimeSpan.Parse(startTimeString, System.Globalization.CultureInfo.InvariantCulture) : TimeSpan.FromSeconds(double.Parse(startTimeString, System.Globalization.CultureInfo.InvariantCulture));
 
                             //If both strings were the same don't parse again.
-                            if (string.Compare(startTimeString, endTimeString) is 0) end = start;
-                            else if (string.IsNullOrWhiteSpace(endTimeString) is false) end = startTimeString.IndexOf(Colon) >= 0 ? TimeSpan.Parse(endTimeString, System.Globalization.CultureInfo.InvariantCulture) : TimeSpan.FromSeconds(double.Parse(endTimeString, System.Globalization.CultureInfo.InvariantCulture));
+                            if (string.Compare(startTimeString, string.Empty) is 0) end = start;
+                            else if (string.IsNullOrWhiteSpace(string.Empty) is false) end = startTimeString.IndexOf(Colon) >= 0 ? TimeSpan.Parse(string.Empty, System.Globalization.CultureInfo.InvariantCulture) : TimeSpan.FromSeconds(double.Parse(string.Empty, System.Globalization.CultureInfo.InvariantCulture));
 
                             return true;
                         }
@@ -205,8 +206,8 @@ namespace Media.Sdp
                             }
 
                             //Parse and determine the end time
-                            if (string.Compare(startTimeString, endTimeString) is 0) end = start;
-                            else if (false.Equals(string.IsNullOrWhiteSpace(endTimeString)) && DateTime.TryParseExact(startTimeString, clockFormat, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out date))
+                            if (string.Compare(startTimeString, string.Empty) is 0) end = start;
+                            else if (false.Equals(string.IsNullOrWhiteSpace(string.Empty)) && DateTime.TryParseExact(startTimeString, clockFormat, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out date))
                             {
                                 //Time in the past
                                 end = now > date ? now - date : date - now;
@@ -773,7 +774,7 @@ namespace Media.Sdp
         /// <summary>
         /// Constructs a SessionDescription from the given contents of a Session Description Protocol message
         /// </summary>
-        /// <param name="sdpContents">The Session Description Protocol usually recieved in the Describe request of a RtspClient</param>
+        /// <param name="sdpContents">The Session Description Protocol usually received in the Describe request of a RtspClient</param>
         public SessionDescription(string sdpContents, bool shouldDispose = true)
             : this((sdpContents ?? string.Empty).Split(SessionDescription.CRLFSplit, StringSplitOptions.RemoveEmptyEntries), 0, -1, shouldDispose)
         {
@@ -1227,7 +1228,7 @@ namespace Media.Sdp
             m_MediaDescriptions.ForEach(md => buffer.Append(md.ToString(this)));
 
             //Strings in .Net are Unicode code points (subsequently the characters only are addressable by their 16 bit code point representation).
-            //http://csharpindepth.com/Articles/General/Strings.aspx
+            //https://csharpindepth.com/Articles/Strings
             return buffer.ToString();
         }
 

@@ -1,7 +1,7 @@
 ﻿/*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -58,7 +58,7 @@ namespace Media.Rtp
 
         //Collection to handle the dispatch of events.
         //Notes that Collections.Concurrent.Queue may be better suited for this in production until the ConcurrentLinkedQueue has been thoroughly engineered and tested.
-        //The context, the item, final, recieved
+        //The context, the item, final, received
         private readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<(RtpClient.TransportContext Context, Common.BaseDisposable Packet, bool Final, bool Received)> m_EventData = new();
 
         //Todo, LinkedQueue and Clock.

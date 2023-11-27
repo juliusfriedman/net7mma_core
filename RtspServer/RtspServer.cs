@@ -1,7 +1,7 @@
 ﻿/*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -52,7 +52,7 @@ namespace Media.Rtsp
 {
     /// <summary>
     /// Implementation of Rtsp / RFC2326 server 
-    /// http://tools.ietf.org/html/rfc2326
+    /// https://tools.ietf.org/html/rfc2326
     /// Suppports Reliable(Rtsp / Tcp or Rtsp / Http) and Unreliable(Rtsp / Udp) connections
     /// </summary>
     public class RtspServer : Common.BaseDisposable, Common.ISocketReference, Common.IThreadReference
@@ -190,7 +190,7 @@ namespace Media.Rtsp
                 prototype.SendTimeout = prototype.ReceiveTimeout = (int)Common.Extensions.TimeSpan.TimeSpanExtensions.Max(RtspClient.DefaultConnectionTime, InterframeGap).TotalMilliseconds;
 
                 //Create a buffer using the size of the largest message possible without a Content-Length header.
-                //This helps to ensure that partial messages are not recieved by the server from a client if possible (should eventually allow much smaller)                
+                //This helps to ensure that partial messages are not received by the server from a client if possible (should eventually allow much smaller)                
             }
         }
 
@@ -202,7 +202,7 @@ namespace Media.Rtsp
         /// The port the RtspServer is listening on, defaults to 554
         /// </summary>
         internal int m_ServerPort = DefaultPort;
-        //Counters for bytes sent and recieved
+        //Counters for bytes sent and received
         internal long m_Recieved, m_Sent;
 
         internal IPAddress m_ServerIP;
@@ -444,7 +444,7 @@ namespace Media.Rtsp
 
         /// <summary>
         /// If <see cref="IsRunning"/> is true and the server's socket is Bound.
-        /// The local endpoint for this RtspServer (The endpoint on which requests are recieved)        
+        /// The local endpoint for this RtspServer (The endpoint on which requests are received)        
         /// </summary>
         public IPEndPoint LocalEndPoint
         {
@@ -488,7 +488,7 @@ namespace Media.Rtsp
         }
 
         /// <summary>
-        /// The total amount of bytes the RtspServer recieved from remote RtspRequests
+        /// The total amount of bytes the RtspServer received from remote RtspRequests
         /// </summary>
         public long TotalRtspBytesRecieved
         {
@@ -506,7 +506,7 @@ namespace Media.Rtsp
         }
 
         /// <summary>
-        /// The amount of bytes sent or recieved from all contained streams in the RtspServer (Might want to log the counters seperately so the totals are not lost with the streams or just not provide the property)
+        /// The amount of bytes sent or received from all contained streams in the RtspServer (Might want to log the counters seperately so the totals are not lost with the streams or just not provide the property)
         /// </summary>
         public long TotalStreamedBytes
         {
@@ -1533,7 +1533,7 @@ namespace Media.Rtsp
                         //While running and not completed, wait timeOut
                         while (IsRunning)
                         {
-                            //If the signal was recieved then stop looping
+                            //If the signal was received then stop looping
                             if (m_AcceptSignal.Wait(halfTimeout)) break;
                         }
 
@@ -1729,7 +1729,7 @@ namespace Media.Rtsp
                 //Take note of where we are receiving from
                 EndPoint inBound = session.RemoteEndPoint;
 
-                //Declare how much was recieved
+                //Declare how much was received
                 int received = e.BytesTransferred;
 
                 //If we received any application layer data
@@ -1813,7 +1813,7 @@ namespace Media.Rtsp
                         //Attempt to complete it
                         received = session.LastRequest.CompleteFrom(null, data);
 
-                        //If nothing was recieved then do nothing.
+                        //If nothing was received then do nothing.
                         if (received is 0)
                         {
                             Media.Common.ILoggingExtensions.Log(Logger, "Session:" + session.Id + "Did not use buffer of " + data.Count + " bytes.");
@@ -2626,7 +2626,7 @@ namespace Media.Rtsp
             //If the last request did not have an authorization header
             else if (noAuthHeader)
             {
-                /* -- http://tools.ietf.org/html/rfc2617
+                /* -- https://tools.ietf.org/html/rfc2617
                  
     qop
      Indicates what "quality of protection" the client has applied to
@@ -2911,7 +2911,7 @@ namespace Media.Rtsp
             //Add the state information for the source
             RtpClient.TransportContext sourceContext = found.RtpClient.GetContextForMediaDescription(mediaDescription);
 
-            //If the source has no TransportContext for that format or the source has not recieved a packet yet
+            //If the source has no TransportContext for that format or the source has not received a packet yet
             if (Common.IDisposedExtensions.IsNullOrDisposed(sourceContext) || sourceContext.InDiscovery)
             {
                 //Stream is not yet ready
@@ -3029,7 +3029,7 @@ namespace Media.Rtsp
         /// Ends the client session
         /// </summary>
         /// <param name="request">The Teardown request</param>
-        /// <param name="session">The session which recieved the request</param>
+        /// <param name="session">The session which received the request</param>
         internal void ProcessRtspTeardown(RtspMessage request, ClientSession session, bool sendResponse = true)
         {
             //If there was a location which was not a wildcard attempt to honor it.
@@ -3250,7 +3250,7 @@ namespace Media.Rtsp
                 }
                 else if (authType.Contains(RtspHeaderFields.Authorization.Digest, StringComparison.OrdinalIgnoreCase))
                 {
-                    //http://tools.ietf.org/html/rfc2617
+                    //https://tools.ietf.org/html/rfc2617
                     //Digest RFC2617
                     /* Example header -
                      * 
@@ -3360,7 +3360,7 @@ namespace Media.Rtsp
                         string.IsNullOrWhiteSpace(uri) ||
                         string.IsNullOrWhiteSpace(response)) return false;
 
-                    //http://en.wikipedia.org/wiki/Digest_access_authentication
+                    //https://en.wikipedia.org/wiki/Digest_access_authentication
                     //The MD5 hash of the combined username, authentication realm and password is calculated. The result is referred to as HA1.
                     byte[] HA1 = Cryptography.MD5.GetHash(request.ContentEncoding.GetBytes(string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}:{2}", requiredCredential.UserName, realm.Replace("realm=", string.Empty), requiredCredential.Password)));
 
@@ -3368,8 +3368,8 @@ namespace Media.Rtsp
                     byte[] HA2 = Cryptography.MD5.GetHash(request.ContentEncoding.GetBytes(string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}", request.RtspMethod, uri.Replace("uri=", string.Empty))));
 
                     //No QOP No NC
-                    //See http://en.wikipedia.org/wiki/Digest_access_authentication
-                    //http://tools.ietf.org/html/rfc2617
+                    //See https://en.wikipedia.org/wiki/Digest_access_authentication
+                    //https://tools.ietf.org/html/rfc2617
 
                     //The MD5 hash of the combined HA1 result, server nonce (nonce), request counter (nc), client nonce (cnonce), quality of protection code (qop) and HA2 result is calculated. The result is the "response" value provided by the client.
                     byte[] ResponseHash = Cryptography.MD5.GetHash(request.ContentEncoding.GetBytes(string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0}:{1}:{2}:{3}:{4}:{5}",

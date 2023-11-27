@@ -26,7 +26,7 @@ namespace Media.Codecs.Audio
 
     /// <summary>
     /// Defines the logic commonly assoicated with all types of Audio samples.
-    /// <see href="http://wiki.multimedia.cx/?title=PCM#Frequency_And_Sample_Rate">The Multimedia Wiki</see>
+    /// <see href="https://wiki.multimedia.cx/?title=PCM#Frequency_And_Sample_Rate">The Multimedia Wiki</see>
     /// </summary>
     public class AudioBuffer : Media.Codec.MediaBuffer
     {

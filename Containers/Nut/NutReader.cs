@@ -1,7 +1,7 @@
 ﻿/*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -45,7 +45,7 @@ namespace Media.Containers.Nut
     /// Provides an implementation of the Nut Container defined by (MPlayer, FFmpeg and Libav)
     /// </summary>
     /// <notes><see cref="http://ffmpeg.org/~michael/nut.txt">Specification</see></notes>
-    //http://wiki.multimedia.cx/index.php?title=NUT
+    //https://wiki.multimedia.cx/index.php?title=NUT
     //https://www.ffmpeg.org/doxygen/2.3/nut_8c_source.html
     //http://people.xiph.org/~xiphmont/containers/nut/nut-english.txt
     //https://github.com/lu-zero/nut/wiki/Specification

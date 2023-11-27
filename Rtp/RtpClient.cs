@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -37,6 +37,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #endregion
 
 using Media.Common;
+using Media.Common.Extensions.Socket;
 using Media.Rtcp;
 using System;
 using System.Collections.Generic;
@@ -51,9 +52,9 @@ using System.Threading;
 
 #region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -90,7 +91,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 namespace Media.Rtp
 {
     /// <summary>
-    /// Provides an implementation of the <see href="http://tools.ietf.org/html/rfc3550"> Real Time Protocol </see>.
+    /// Provides an implementation of the <see href="https://tools.ietf.org/html/rfc3550"> Real Time Protocol </see>.
     /// An instance typically allows one <see cref="System.Net.Sockets.Socket"/> to communicate (via the RTP protocol) to another <see cref="System.Net.Sockets.Socket"/> via <see cref="RtpClient.TransportContext"/>'s in which some <see cref="Media.Sdp.SessionDescription"/> has been created.
     /// </summary>
     public partial class RtpClient : Common.SuppressedFinalizerDisposable, Media.Common.IThreadReference
@@ -140,7 +141,7 @@ namespace Media.Rtp
                 //IP Options for InterNetwork
                 if (socket.AddressFamily == AddressFamily.InterNetwork)
                 {
-                    //http://en.wikipedia.org/wiki/Type_of_service
+                    //https://en.wikipedia.org/wiki/Type_of_service
                     //CS5,EF	40,46	5 :Critical - mainly used for voice RTP
                     //40 || 46 is used for RTP Audio per Wikipedia
                     //48 is Internetwork Control
@@ -446,7 +447,7 @@ namespace Media.Rtp
 
                             Common.Extensions.Socket.SocketExtensions.SetMulticastTimeToLive(tc.RtpSocket, ttl);
 
-                            if (rtcpEnabled && false.Equals(tc.RtcpSocket.Handle == tc.RtpSocket.Handle))
+                            if (rtcpEnabled && tc.RtcpSocket.Handle != tc.RtpSocket.Handle)
                             {
                                 Common.Extensions.Socket.SocketExtensions.JoinMulticastGroup(tc.RtcpSocket, remoteIp);
 
@@ -682,12 +683,12 @@ namespace Media.Rtp
                          RtpPacketsSent, RtcpPacketsSent,
                          RtpPacketsReceived, RtcpPacketsReceived;
 
-            //The current, highest received and highest sent Sequence numbers recieved by the RtpClient
+            //The current, highest received and highest sent Sequence numbers received by the RtpClient
             internal ushort m_SequenceNumber, m_LastSentSequenceNumber, RtpMaxSeq;
 
             //Used for Rtp and Rtcp Transport Calculations (Should be moved into State Structure)
             internal uint RtpTransit, SenderTransit,
-                //Count of bytes recieved prior to the reception of a report
+                //Count of bytes received prior to the reception of a report
                 RtpReceivedPrior,
                 //Count of bytes expected prior to the recpetion of a report
                 RtpExpectedPrior,
@@ -701,7 +702,7 @@ namespace Media.Rtp
                 RtpBadSeq,
                 //Jitter value
                 RtpJitter, SenderJitter,
-                //Valid amount of rtp packets recieved 
+                //Valid amount of rtp packets received 
                 ValidRtpPacketsReceived;
 
             internal TimeSpan m_SendInterval = DefaultReportInterval, m_ReceiveInterval = DefaultReportInterval,
@@ -833,7 +834,7 @@ namespace Media.Rtp
             }
 
             /// <summary>
-            /// The smallest packet which may be sent or recieved on the TransportContext.
+            /// The smallest packet which may be sent or received on the TransportContext.
             /// </summary>
             public int MinimumPacketSize
             {
@@ -844,7 +845,7 @@ namespace Media.Rtp
             }
 
             /// <summary>
-            /// The largest packet which may be sent or recieved on the TransportContext.
+            /// The largest packet which may be sent or received on the TransportContext.
             /// </summary>
             public int MaximumPacketSize
             {
@@ -891,7 +892,7 @@ namespace Media.Rtp
                 get
                 {
                     return TotalRtpPacketsReceieved >= 0 &&
-                        false.Equals(m_LastRtpIn.Equals(DateTime.MinValue)) &&
+                        m_LastRtpIn != DateTime.MinValue &&
                         false.Equals(m_ReceiveInterval.Equals(Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan)) &&
                         LastRtpPacketReceived < m_ReceiveInterval;
                 }
@@ -903,7 +904,7 @@ namespace Media.Rtp
                 get
                 {
                     return IsActive && TotalRtpPacketsSent >= 0 &&
-                        false.Equals(m_LastRtpOut.Equals(DateTime.MinValue)) &&
+                        m_LastRtpOut != DateTime.MinValue &&
                         false.Equals(m_SendInterval.Equals(Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan)) &&
                         LastRtpPacketSent < m_SendInterval;
                 }
@@ -915,7 +916,7 @@ namespace Media.Rtp
                 get
                 {
                     return TotalRtcpPacketsReceieved >= 0 &&
-                        false.Equals(m_LastRtcpIn.Equals(DateTime.MinValue)) &&
+                        m_LastRtcpIn != DateTime.MinValue &&
                         false.Equals(m_ReceiveInterval.Equals(Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan)) &&
                         LastRtcpReportReceived < m_ReceiveInterval;
                 }
@@ -934,7 +935,7 @@ namespace Media.Rtp
             }
 
             /// <summary>
-            /// Indicates if the RemoteParty is known by a unique id other than 0 unless <see cref="MinimumSequentialValidRtpPackets"/> have been recieved
+            /// Indicates if the RemoteParty is known by a unique id other than 0 unless <see cref="MinimumSequentialValidRtpPackets"/> have been received
             /// </summary>
             internal bool InDiscovery
             {
@@ -1065,10 +1066,10 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    return IDisposedExtensions.IsNullOrDisposed(this) || m_FirstPacketSent.Equals(DateTime.MinValue) ?
-                        Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan
-                        :
-                        DateTime.UtcNow - m_FirstPacketSent;
+                    return IDisposedExtensions.IsNullOrDisposed(this) ||
+                           m_FirstPacketSent == DateTime.MinValue
+                           ? Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan
+                           : DateTime.UtcNow - m_FirstPacketSent;
                 }
             }
 
@@ -1080,10 +1081,10 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    return IDisposedExtensions.IsNullOrDisposed(this) || m_FirstPacketReceived.Equals(DateTime.MinValue) ?
-                        Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan
-                        :
-                        DateTime.UtcNow - m_FirstPacketReceived;
+                    return IDisposedExtensions.IsNullOrDisposed(this) ||
+                           m_FirstPacketReceived == DateTime.MinValue
+                           ? Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan
+                           : DateTime.UtcNow - m_FirstPacketReceived;
                 }
             }
 
@@ -1185,7 +1186,9 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    return m_LastRtcpOut.Equals(DateTime.MinValue) ? TimeSpan.MinValue : DateTime.UtcNow - m_LastRtcpOut;
+                    return m_LastRtcpOut == DateTime.MinValue
+                        ? TimeSpan.MinValue
+                        : DateTime.UtcNow - m_LastRtcpOut;
                 }
             }
 
@@ -1197,7 +1200,9 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    return m_LastRtcpIn.Equals(DateTime.MinValue) ? TimeSpan.MinValue : DateTime.UtcNow - m_LastRtcpIn;
+                    return m_LastRtcpIn == DateTime.MinValue
+                        ? TimeSpan.MinValue
+                        : DateTime.UtcNow - m_LastRtcpIn;
                 }
             }
 
@@ -1209,7 +1214,9 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    return m_LastRtpIn.Equals(DateTime.MinValue) ? TimeSpan.MinValue : DateTime.UtcNow - m_LastRtpIn;
+                    return m_LastRtpIn == DateTime.MinValue
+                        ? TimeSpan.MinValue
+                        : DateTime.UtcNow - m_LastRtpIn;
                 }
             }
 
@@ -1221,7 +1228,9 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    return m_LastRtpOut.Equals(DateTime.MinValue) ? TimeSpan.MinValue : DateTime.UtcNow - m_LastRtpOut;
+                    return m_LastRtpOut == DateTime.MinValue
+                        ? TimeSpan.MinValue
+                        : DateTime.UtcNow - m_LastRtpOut;
                 }
             }
 
@@ -1233,7 +1242,9 @@ namespace Media.Rtp
                 [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
                 get
                 {
-                    return m_Initialized.Equals(DateTime.MinValue) ? TimeSpan.MinValue : DateTime.UtcNow - m_Initialized;
+                    return m_Initialized == DateTime.MinValue
+                        ? TimeSpan.MinValue
+                        : DateTime.UtcNow - m_Initialized;
                 }
             }
 
@@ -1308,7 +1319,7 @@ namespace Media.Rtp
             }
 
             /// <summary>
-            /// Determines if the source has recieved at least <see cref="MinimumSequentialValidRtpPackets"/> RtpPackets
+            /// Determines if the source has received at least <see cref="MinimumSequentialValidRtpPackets"/> RtpPackets
             /// </summary>
             public /*virtual*/ bool IsValid
             {
@@ -1460,7 +1471,7 @@ namespace Media.Rtp
             }
 
             /// <summary>
-            /// The total amount of RtcpPackets recieved
+            /// The total amount of RtcpPackets received
             /// </summary>
             public long TotalRtcpPacketsSent
             {
@@ -1514,7 +1525,7 @@ namespace Media.Rtp
             }
 
             /// <summary>            
-            /// Gets the sequence number of the last RtpPacket recieved on this channel
+            /// Gets the sequence number of the last RtpPacket received on this channel
             /// </summary>
             public int RecieveSequenceNumber
             {
@@ -1550,7 +1561,7 @@ namespace Media.Rtp
             }
 
             /// <summary>
-            /// The NtpTimestamp from the last SendersReport recieved or created
+            /// The NtpTimestamp from the last SendersReport received or created
             /// </summary>
             public long NtpTimestamp
             {
@@ -1707,7 +1718,7 @@ namespace Media.Rtp
                     //Update the Sender NtpTimestamp on the Context.
                     SenderNtpTimestamp = (long)Media.Ntp.NetworkTimeProtocol.DateTimeToNptTimestamp(packet.Transferred.Value);
                 }
-                else //Handle as a recieved packet
+                else //Handle as a received packet
                 {
                     RFC3550.CalulcateJitter(ref arrivalDifference, ref RtpJitter, ref RtpTransit);
 
@@ -1743,7 +1754,7 @@ namespace Media.Rtp
             {
 
                 /*NOTE : 
-                 * http://www.ietf.org/rfc/rfc3551.txt
+                 * https://www.ietf.org/rfc/rfc3551.txt
                  * 
                   Static payload type 13 was assigned to the Comfort Noise (CN) payload format defined in RFC 3389.  
                   Payload type 19 was marked reserved because it had been temporarily allocated to an earlier version of Comfort Noise
@@ -2291,10 +2302,12 @@ namespace Media.Rtp
                     MulticastGroups.Clear();
 
                     //For Udp the RtcpSocket may be the same socket as the RtpSocket if the sender/reciever is duplexing
-                    if (RtcpSocket is not null && RtpSocket.Handle.Equals(RtcpSocket.Handle) is false) RtcpSocket.Close();
+                    if (RtcpSocket.IsNullOrDisposed() is false && RtcpSocket.Handle.Equals(RtpSocket?.Handle) is false)
+                        RtcpSocket.Close();
 
                     //Close the RtpSocket
-                    RtpSocket?.Close();
+                    if (RtpSocket.IsNullOrDisposed() is false)
+                        RtpSocket?.Close();
 
                     RtpSocket = RtcpSocket = null;
                 }
@@ -2432,7 +2445,7 @@ namespace Media.Rtp
         //OnPacketLoss(object sender, PacketLossInformation info)
 
         /// <summary>
-        /// Raised when non rtp protocol data is recieved.
+        /// Raised when non rtp protocol data is received.
         /// </summary>
         public event InterleavedDataHandler OutOfBandData;
 
@@ -2758,7 +2771,7 @@ namespace Media.Rtp
                 //Keep track of the the bytes sent in the context
                 transportContext.RtcpBytesRecieved += packet.Length;
 
-                //Set the time when the first rtcp packet was recieved
+                //Set the time when the first rtcp packet was received
                 if (transportContext.m_FirstPacketReceived == DateTime.MinValue) transportContext.m_FirstPacketReceived = packet.Created;
             }
 
@@ -3000,7 +3013,7 @@ namespace Media.Rtp
                     //If Udp would change ttl and possibly DNS resolver,
                     //Send reports with loss or culumate for next report based on bandwidth and application requirements
                 }
-                else ++transportContext.ValidRtpPacketsReceived; //Increase the amount of valid rtp packets recieved when ValidatePacketAndUpdateSequenceNumber is true
+                else ++transportContext.ValidRtpPacketsReceived; //Increase the amount of valid rtp packets received when ValidatePacketAndUpdateSequenceNumber is true
 
                 #region Identity and version Seperation
 
@@ -3093,7 +3106,7 @@ namespace Media.Rtp
 
                 //The counters for the bytes will now be be updated (without the 12 octets of the header)
                 //increment the counters (Only use the Payload.Count per the RFC) (new Erratta Submitted)
-                //http://www.rfc-editor.org/errata_search.php?rfc=3550
+                //https://www.rfc-editor.org/errata_search.php?rfc=3550
                 transportContext.RtpBytesRecieved += packet.Payload.Count;
 
                 //Please note due to the 'consensus' achieved for this standard (RFC 1889 / RFC3550 / RFC3551)
@@ -3288,7 +3301,7 @@ namespace Media.Rtp
                 //This allows detection of middle boxes, make a seperate sample, default implementation should be 'compliant'...
 
                 //increment the counters (Only use the Payload.Count per the RFC) (new Erratta Submitted)
-                //http://www.rfc-editor.org/errata_search.php?rfc=3550
+                //https://www.rfc-editor.org/errata_search.php?rfc=3550
                 transportContext.RtpBytesSent += packet.Payload.Count;
 
 

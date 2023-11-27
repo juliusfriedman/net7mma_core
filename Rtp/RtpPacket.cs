@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -51,7 +51,7 @@ namespace Media.Rtp
 
     /// <summary>
     /// A managed implemenation of the Rtp abstraction found in RFC3550.
-    /// <see cref="http://tools.ietf.org/html/rfc3550"> RFC3550 </see> for more information
+    /// <see cref="https://tools.ietf.org/html/rfc3550"> RFC3550 </see> for more information
     /// </summary>
     public class RtpPacket : SuppressedFinalizerDisposable, IPacket, ICloneable
     {
@@ -620,7 +620,8 @@ namespace Media.Rtp
                 using (RtpExtension extension = GetExtension())
                 {
                     //If an extension could be obtained include it
-                    if (Common.IDisposedExtensions.IsNullOrDisposed(extension) is false) binarySequence = binarySequence.Concat(extension);
+                    if (Common.IDisposedExtensions.IsNullOrDisposed(extension) is false)
+                        binarySequence = binarySequence.Concat(extension);
                 }
             }
 
@@ -710,7 +711,7 @@ namespace Media.Rtp
                 offset = Payload.Offset,//Cache the offset in parsing 
                 sourceListOctets = ContributingSourceListOctets,//Cache the amount of octets required in the ContributingSourceList.
                 extensionSize = Header.Extension ? RtpExtension.MinimumSize : 0, //Cache the amount of octets required to read the ExtensionHeader
-                recieved = 0;
+                received = 0;
 
             //If the ContributingSourceList is not complete
             if (payloadCount < sourceListOctets)
@@ -736,7 +737,7 @@ namespace Media.Rtp
                     //Decrement how many octets were receieved
                     octetsRemaining -= justReceived;
 
-                    recieved += justReceived;
+                    received += justReceived;
                 }
             }
 
@@ -770,7 +771,7 @@ namespace Media.Rtp
                         //Decrement how many octets were receieved
                         octetsRemaining -= justReceived;
 
-                        recieved += justReceived;
+                        received += justReceived;
                     }
                 }
 
@@ -806,7 +807,7 @@ namespace Media.Rtp
                                 //Decrement how many octets were receieved
                                 octetsRemaining -= justReceived;
 
-                                recieved += justReceived;
+                                received += justReceived;
                             }
                         }
                     }
@@ -839,7 +840,7 @@ namespace Media.Rtp
                         //Move the offset
                         offset += justReceived;
 
-                        recieved += justReceived;
+                        received += justReceived;
 
                         octetsRemaining -= justReceived;
                     }
@@ -853,7 +854,7 @@ namespace Media.Rtp
 
             //RtpPacket is complete
 
-            return recieved;
+            return received;
         }
 
         #endregion
@@ -908,11 +909,11 @@ namespace Media.Rtp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool Equals(RtpPacket other)
         {
-            return other.Length.Equals(Length)
+            return other.Length == Length
                  &&
                  other.Payload.Equals(Payload) //SequenceEqual...
                  &&
-                 other.GetHashCode().Equals(GetHashCode());
+                 other.GetHashCode() == GetHashCode();
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

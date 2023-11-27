@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -417,7 +417,7 @@ namespace Media.Concepts.Hardware
                0xC3 // ret
             };
 
-        //http://stackoverflow.com/questions/17401914/why-should-i-use-rdtsc-diferently-on-x86-and-x86-x64
+        //https://stackoverflow.com/questions/17401914/why-should-i-use-rdtsc-diferently-on-x86-and-x86-x64
         //In x86-64 mode, RDTSC also clears the higher 32 bits of RAX. To compensate those bits we have to shift hi left by 32 bits.
 
         /// <summary>
@@ -1184,7 +1184,7 @@ namespace Media.Concepts.Hardware
         //C# Example
         //https://searchcode.com/codesearch/view/3147326/#
 
-        //http://stackoverflow.com/questions/29642816/is-there-a-way-to-call-the-rdtsc-assembly-instruction-from-c
+        //https://stackoverflow.com/questions/29642816/is-there-a-way-to-call-the-rdtsc-assembly-instruction-from-c
 
         //https://github.com/sharpdx/SharpDX/blob/master/Source/SharpDX/SharpJit.cs
 
@@ -1353,7 +1353,7 @@ namespace Media.Concepts.Hardware
 
             //https://en.wikipedia.org/wiki/Control_register
 
-            //http://www.microbe.cz/docs/CPUID.pdf
+            //https://www.microbe.cz/docs/CPUID.pdf
 
             //http://infocenter.arm.com/help/index.jsp?topic=/com.arm.doc.ddi0432c/Bhccjgga.html
 
@@ -3042,7 +3042,7 @@ namespace Media.Concepts.Hardware
                0xC3 // ret
             };
 
-            //http://stackoverflow.com/questions/17401914/why-should-i-use-rdtsc-diferently-on-x86-and-x86-x64
+            //https://stackoverflow.com/questions/17401914/why-should-i-use-rdtsc-diferently-on-x86-and-x86-x64
             //In x86-64 mode, RDTSC also clears the higher 32 bits of RAX. To compensate those bits we have to shift hi left by 32 bits.
 
             //These functions return 64 bit values given the definition of the delegate so the return value is already 64 bits.

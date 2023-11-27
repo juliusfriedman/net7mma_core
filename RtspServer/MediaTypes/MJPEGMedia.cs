@@ -46,7 +46,7 @@
         private IWebProxy proxy = null;
         // received frames count
         private int framesReceived;
-        // recieved byte count
+        // received byte count
         private long bytesReceived;
         // use separate HTTP connection group or use default
         private bool useSeparateConnectionGroup = true;

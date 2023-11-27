@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -50,7 +50,7 @@ namespace Media.Rtcp
 
     /// <summary>
     /// A managed implemenation of the Rtcp abstraction found in RFC3550.
-    /// <see cref="http://tools.ietf.org/html/rfc3550"> RFC3550 </see> for more information
+    /// <see cref="https://tools.ietf.org/html/rfc3550"> RFC3550 </see> for more information
     /// </summary>
     public class RtcpPacket : SuppressedFinalizerDisposable, IPacket, ICloneable
     {
@@ -360,11 +360,14 @@ namespace Media.Rtcp
 
             int lowerBound = payload.GetLowerBound(0), upperBound = payload.GetUpperBound(0);
 
-            if (index < lowerBound || index > upperBound) throw new ArgumentOutOfRangeException("index", "Must refer to an accessible position in the given array");
+            if (index < lowerBound || index > upperBound)
+                throw new ArgumentOutOfRangeException(nameof(index), "Must refer to an accessible position in the given array");
 
-            if (count > upperBound) throw new ArgumentOutOfRangeException("count", "Must refer to an accessible position in the given array");
+            if (count > upperBound)
+                throw new ArgumentOutOfRangeException(nameof(count), "Must refer to an accessible position in the given array");
 
-            if (count + index > upperBound) throw new ArgumentOutOfRangeException("index", "Count must refer to an accessible position in the given array when deleniated by index");
+            if (count + index > upperBound)
+                throw new ArgumentOutOfRangeException(nameof(index), "Count must refer to an accessible position in the given array when deleniated by index");
 
             AddBytesToPayload(payload, index, count);
         }
@@ -776,7 +779,7 @@ namespace Media.Rtcp
                 }
 
 
-                int recieved = 0;
+                int received = 0;
 
                 //Read from the stream, decrementing from octetsRemaining what was read.
                 while (octetsRemaining > 0)
@@ -784,13 +787,13 @@ namespace Media.Rtcp
                     int rec = Media.Common.Extensions.Socket.SocketExtensions.AlignedReceive(m_OwnedOctets, offset, octetsRemaining, socket, out System.Net.Sockets.SocketError error);
                     offset += rec;
                     octetsRemaining -= rec;
-                    recieved += rec;
+                    received += rec;
                 }
 
                 //Re-allocate the segment around the received data. //length + received
                 Payload = new Common.MemorySegment(m_OwnedOctets, 0, m_OwnedOctets.Length);
 
-                return recieved;
+                return received;
             }
 
             return 0;
@@ -990,11 +993,11 @@ namespace Media.Rtcp
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool Equals(RtcpPacket other)
         {
-            return other.Length.Equals(Length)
+            return other.Length == Length
                &&
                other.Payload.Equals(Payload) //SequenceEqual...
                &&
-               other.GetHashCode().Equals(GetHashCode());
+               other.GetHashCode() == GetHashCode();
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

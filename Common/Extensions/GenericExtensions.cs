@@ -1,7 +1,7 @@
 ﻿#region References
-//http://stackoverflow.com/questions/6607033/c-sharp-language-generics-open-closed-bound-unbound-constructed
-//http://stackoverflow.com/questions/1735035/generics-open-and-closed-constructed-types
-//http://stackoverflow.com/questions/2173107/what-exactly-is-an-open-generic-type-in-net
+//https://stackoverflow.com/questions/6607033/c-sharp-language-generics-open-closed-bound-unbound-constructed
+//https://stackoverflow.com/questions/1735035/generics-open-and-closed-constructed-types
+//https://stackoverflow.com/questions/2173107/what-exactly-is-an-open-generic-type-in-net
 #endregion
 
 namespace Media.Common.Extensions.Generic

@@ -6,7 +6,7 @@ namespace Media.Common
     /// Provides an implementation of the <see cref="BaseDisposable"/> with a supressed finalizer.
     /// </summary>
     /// <remarks>
-    /// <see href="http://stackoverflow.com/questions/18020861/how-to-get-notified-before-static-variables-are-finalized/18316325#18316325">StackOverflow</see>, <see href="http://stackoverflow.com/questions/8011001/can-anyone-explain-this-finalisation-behaviour">Also</see> some for details
+    /// <see href="https://stackoverflow.com/questions/18020861/how-to-get-notified-before-static-variables-are-finalized/18316325#18316325">StackOverflow</see>, <see href="https://stackoverflow.com/questions/8011001/can-anyone-explain-this-finalisation-behaviour">Also</see> some for details
     /// </remarks>
     public class SuppressedFinalizerDisposable : BaseDisposable
     {

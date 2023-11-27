@@ -1,9 +1,9 @@
 ﻿//extern alias Object;
 #region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -282,7 +282,7 @@ namespace Media.Concepts.Classes.T
     /// </summary>
     /// <remarks>
     /// Based on some of the work here
-    /// http://stackoverflow.com/questions/2969368/is-this-possible-c-sharp-collection-of-type-with-constrains-or-collection-of-g
+    /// https://stackoverflow.com/questions/2969368/is-this-possible-c-sharp-collection-of-type-with-constrains-or-collection-of-g
     /// </remarks>
     public class TypeManager : Media.Common.SuppressedFinalizerDisposable
     {

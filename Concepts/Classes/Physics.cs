@@ -36,7 +36,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 namespace Media.Concepts.Classes
 {
     /// <summary>
-    /// http://physics.nist.gov/cuu/Constants/Table/allascii.txt
+    /// https://physics.nist.gov/cuu/Constants/Table/allascii.txt
     /// </summary>
     public sealed class Physics
     {

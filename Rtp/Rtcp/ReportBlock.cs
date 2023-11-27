@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -107,7 +107,7 @@ namespace Media.Rtcp
 
         /// <summary>
         /// The fractions of <see cref="Rtp.RtpPacket"/>'s from the <see cref="ReportBlock.SendersSynchronizationSourceIdentifier"/> indicated that have been lost since the begining of reception.
-        /// <see cref="http://tools.ietf.org/html/rfc3550#appendix-A.3"> for more information </see>
+        /// <see cref="https://tools.ietf.org/html/rfc3550#appendix-A.3"> for more information </see>
         /// </summary>
         public byte FractionsLost
         {
@@ -121,7 +121,7 @@ namespace Media.Rtcp
 
         /// <summary>
         /// The total number of <see cref="Rtp.RtpPacket"/>'s from the <see cref="ReportBlock.SendersSynchronizationSourceIdentifier"/> indicated that have been lost since the begining of reception.
-        /// <see cref="http://tools.ietf.org/html/rfc3550#appendix-A.3"> for more information </see>
+        /// <see cref="https://tools.ietf.org/html/rfc3550#appendix-A.3"> for more information </see>
         /// </summary>
         public int CumulativePacketsLost
         {
@@ -136,7 +136,7 @@ namespace Media.Rtcp
 
         /// <summary>
         /// The highest <see cref="Rtp.RtpPacket.SeqeuenceNumber"> SequenceNumber</see> received from the <see cref="ReportBlock.SendersSynchronizationSourceIdentifier"/> indicated.
-        /// <see cref="http://tools.ietf.org/html/rfc3550#appendix-A.3"> for more information </see>
+        /// <see cref="https://tools.ietf.org/html/rfc3550#appendix-A.3"> for more information </see>
         /// </summary>
         public int ExtendedHighestSequenceNumberReceived
         {
@@ -164,7 +164,7 @@ namespace Media.Rtcp
         }
 
         /// <summary>
-        /// The Middle 32 bits out of 64 in the NtpTimestamp (as explained in <see cref="http://tools.ietf.org/html/rfc3550#section-4">Section 4</see>)
+        /// The Middle 32 bits out of 64 in the NtpTimestamp (as explained in <see cref="https://tools.ietf.org/html/rfc3550#section-4">Section 4</see>)
         /// </summary>
         public int LastSendersReportTimestamp
         {

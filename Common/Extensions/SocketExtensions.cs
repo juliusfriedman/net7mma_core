@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -1165,16 +1165,16 @@ namespace Media.Common.Extensions.Socket
 
         /// <summary>
         /// Requires a bound and connected <param name="socket">Socket</param>, <see cref="Socket.IsBound"/> and <see cref="Socket.RemoteEndPoint"/>
-        /// Useful when the amount of data to be recieved is known in advance.
+        /// Useful when the amount of data to be received is known in advance.
         /// Recieves the given amount of bytes into the buffer given a offset and an amount;
         /// even if an 0 length reception occurs or an error occurs during the recieve; (other than Timeout)
-        /// but only relatively with respect with amount and only until the amount has been recieved.
+        /// but only relatively with respect with amount and only until the amount has been received.
         /// </summary>
         /// <param name="buffer">The array to receive into</param>
         /// <param name="offset">The location to receive into</param>
         /// <param name="amount">The 0 based amount of bytes to receive, 0 will have no result, other values will be progressively used to determine exactly when an error occurs</param>
         /// <param name="socket">The socket to receive on</param>
-        /// <returns>The amount of bytes recieved which will be equal to the amount paramter unless the data was unable to fit in the given buffer</returns>
+        /// <returns>The amount of bytes received which will be equal to the amount paramter unless the data was unable to fit in the given buffer</returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static int AlignedReceive(byte[] buffer, int offset, int amount, System.Net.Sockets.Socket socket, out System.Net.Sockets.SocketError error) //RecieveAllOrTimeout
         {
@@ -1213,7 +1213,7 @@ namespace Media.Common.Extensions.Socket
                             if (justReceived <= 0)
                             {
                                 //Try again maybe
-                                //Only if the attempts in operations were less than the amount of bytes required to be recieved.
+                                //Only if the attempts in operations were less than the amount of bytes required to be received.
                                 if (++attempt > amount) goto Done;
 
                                 //Continue.

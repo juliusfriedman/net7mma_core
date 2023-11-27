@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -37,7 +37,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #endregion 
 
 //Rtti interop example 
-//http://stackoverflow.com/questions/33802676/how-to-get-a-raw-memory-pointer-to-a-managed-class
+//https://stackoverflow.com/questions/33802676/how-to-get-a-raw-memory-pointer-to-a-managed-class
 
 //netMF older versions will need Emit class.
 
@@ -473,7 +473,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 namespace Media.Concepts.Classes
 {
 
-    //See also http://www.codeproject.com/Articles/9927/Fast-Dynamic-Property-Access-with-C
+    //See also https://www.codeproject.com/Articles/9927/Fast-Dynamic-Property-Access-with-C
 
     internal delegate T ReferenceFunc<T>(ref T t); //IntPtr where
 
@@ -558,7 +558,7 @@ namespace Media.Concepts.Classes
             //Not yet working, would be easier to rewrite a body of a stub method as there is no way to define a GenricMethod on an existing assembly easily or to re-write the method at runtime.
 
             //https://blogs.msdn.microsoft.com/zelmalki/2009/03/29/msil-injection-rewrite-a-non-dynamic-method-at-runtime/
-            //http://stackoverflow.com/questions/7299097/dynamically-replace-the-contents-of-a-c-sharp-method
+            //https://stackoverflow.com/questions/7299097/dynamically-replace-the-contents-of-a-c-sharp-method
 
             //Could also just define a generic type dynamically and save it out to disk...
 

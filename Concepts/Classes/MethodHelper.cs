@@ -4,8 +4,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 //Modified based on the following examples:
-//http://stackoverflow.com/questions/7299097/dynamically-replace-the-contents-of-a-c-sharp-method
-//http://www.codeproject.com/Articles/37549/CLR-Injection-Runtime-Method-Replacer
+//https://stackoverflow.com/questions/7299097/dynamically-replace-the-contents-of-a-c-sharp-method
+//https://www.codeproject.com/Articles/37549/CLR-Injection-Runtime-Method-Replacer
 //https://stackoverflow.com/questions/45972562/c-sharp-how-to-get-runtimemethodhandle-from-dynamicmethod
 namespace Media.Concepts.Classes
 {

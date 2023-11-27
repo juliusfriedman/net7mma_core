@@ -1,7 +1,7 @@
 ﻿/*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -353,7 +353,8 @@ namespace Media.Rtp
         protected internal /*virtual*/ int SendReceiversReport(TransportContext context, bool force = false)
         {
             //Determine if the ReceiversReport can be sent.
-            if (Common.IDisposedExtensions.IsNullOrDisposed(this) || Common.IDisposedExtensions.IsNullOrDisposed(context)  //If the context is disposed
+            if (Common.IDisposedExtensions.IsNullOrDisposed(this) ||
+                Common.IDisposedExtensions.IsNullOrDisposed(context)  //If the context is disposed
                 && //AND the call has not been forced AND the context IsRtcpEnabled 
                 (force is false && context.IsRtcpEnabled)
                 // OR there is no RtcpSocket
@@ -1511,7 +1512,7 @@ namespace Media.Rtp
         /// Recieves data on a given socket and endpoint
         /// </summary>
         /// <param name="socket">The socket to receive data on</param>
-        /// <returns>The number of bytes recieved</returns>             
+        /// <returns>The number of bytes received</returns>             
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         protected internal /*virtual*/ int ReceiveData(System.Net.Sockets.Socket socket, ref System.Net.EndPoint remote, out System.Net.Sockets.SocketError error, bool expectRtp = true, bool expectRtcp = true, Common.MemorySegment buffer = null)
         {
@@ -1521,7 +1522,12 @@ namespace Media.Rtp
             if (Common.IDisposedExtensions.IsNullOrDisposed(buffer)) buffer = m_Buffer;
 
             //Ensure the socket can poll, should measure against parallel checks with OR
-            if (buffer.Count <= 0 | m_StopRequested | socket is null | remote is null | Common.IDisposedExtensions.IsNullOrDisposed(buffer) | Common.IDisposedExtensions.IsNullOrDisposed(this)) return 0;
+            if (buffer.Count <= 0 ||
+                m_StopRequested ||
+                socket is null ||
+                remote is null ||
+                Common.IDisposedExtensions.IsNullOrDisposed(buffer) ||
+                Common.IDisposedExtensions.IsNullOrDisposed(this)) return 0;
 
             bool tcp = socket.ProtocolType == System.Net.Sockets.ProtocolType.Tcp;
 
@@ -1571,7 +1577,7 @@ namespace Media.Rtp
                 //}
 
 
-                //Use the data received to parse and complete any recieved packets, should take a parseState
+                //Use the data received to parse and complete any received packets, should take a parseState
                 /*using (var memory = new Common.MemorySegment(buffer.Array, buffer.Offset, received)) */
                 //}
 
@@ -1870,7 +1876,7 @@ namespace Media.Rtp
                             //If rtp or rtcp is expected check data
                             if (expectRtp || expectRtcp || frameChannel.HasValue && frameChannel.Value < TransportContexts.Count)
                             {
-                                Media.Common.ILoggingExtensions.Log(Logger, InternalId + "ProcessFrameData - Large Packet of " + frameLength + " for Channel " + frameChannel.Value + " remainingInBuffer=" + remainingInBuffer);
+                                Media.Common.ILoggingExtensions.Log(Logger, InternalId + "ProcessFrameData - Large Packet of " + frameLength + " for Channel " + frameChannel.GetValueOrDefault() + " remainingInBuffer=" + remainingInBuffer);
 
                                 //Could allow for the buffer to be replaced here for the remainder of this call only.
 
@@ -1978,7 +1984,7 @@ namespace Media.Rtp
                         //Increment received
                         recievedTotal += registerY;
 
-                        //Incrment remaining in buffer for what was recieved.
+                        //Incrment remaining in buffer for what was received.
                         remainingInBuffer += registerY;
                     }
 
@@ -2078,7 +2084,7 @@ namespace Media.Rtp
                 OnOutOfBandData(buffer, offset, remainingInBuffer);
             }
 
-            //Return the number of bytes recieved
+            //Return the number of bytes received
             return recievedTotal;
         }
 
@@ -2099,7 +2105,7 @@ namespace Media.Rtp
                 //Double Negitive, Demux based on PayloadType? RFC5761?
 
                 //Distinguishable RTP and RTCP Packets
-                //http://tools.ietf.org/search/rfc5761#section-4
+                //https://tools.ietf.org/search/rfc5761#section-4
 
                 //Observation 1) Rtp packets can only have a PayloadType from 64-95
                 //However Rtcp Packets may also use PayloadTypes 72- 76.. (Reduced size...)
@@ -2181,7 +2187,7 @@ namespace Media.Rtp
                 //If the item was already disposed then do nothing
                 if (Common.IDisposedExtensions.IsNullOrDisposed(tuple.Frame)) return;
 
-                //handle for recieved frames
+                //handle for received frames
                 //todo, length may be more valuable than bool, - means in, positive is out
                 if (tuple.Received && tuple.Frame is RtpFrame frame)
                 {
@@ -2309,7 +2315,7 @@ namespace Media.Rtp
 
         /// <summary>
         /// Entry point of the m_WorkerThread. Handles sending out RtpPackets and RtcpPackets in buffer and handling any incoming RtcpPackets.
-        /// Sends a Goodbye and exits if no packets are sent of recieved in a certain amount of time
+        /// Sends a Goodbye and exits if no packets are sent of received in a certain amount of time
         /// </summary>
         //[System.Security.SecurityCritical]
         private void SendReceieve()
@@ -2439,12 +2445,13 @@ namespace Media.Rtp
                             int usec = (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(tc.m_ReceiveInterval) >> 4;
 
                             //If receiving Rtp and the socket is able to read
-                            if (rtpEnabled && (shouldStop = IsUndisposed is false || m_StopRequested) is false
-                                //&& (readSockets.Contains(tc.RtpSocket) || errorSockets.Contains(tc.RtpSocket))
+                            if (rtpEnabled &&
+                                (shouldStop = IsUndisposed is false || m_StopRequested) is false
                                 //Check if the socket can read data first or that data needs to be received
                                 &&
-                                (tc.LastRtpPacketReceived.Equals(System.TimeSpan.MinValue) | tc.LastRtpPacketReceived >= tc.m_ReceiveInterval) ||
-                                 tc.RtpSocket.Poll(usec, System.Net.Sockets.SelectMode.SelectRead))
+                                (tc.LastRtpPacketReceived == System.TimeSpan.MinValue ||
+                                 tc.LastRtpPacketReceived >= tc.m_ReceiveInterval) ||
+                                tc.RtpSocket.Poll(usec, System.Net.Sockets.SelectMode.SelectRead))
                             {
                                 //RtpTry:
                                 //Receive RtpData
@@ -2497,7 +2504,7 @@ namespace Media.Rtp
                                 //Check if reports needs to be received (Sometimes data doesn't flow immediately)
                                 bool needsToReceiveReports = tc.LastRtcpReportReceived.Equals(System.TimeSpan.MinValue) || tc.LastRtcpReportReceived >= tc.m_ReceiveInterval;
 
-                                //The last report was never received or recieved longer ago then required
+                                //The last report was never received or received longer ago then required
                                 if (needsToReceiveReports
                                     //&& (readSockets.Contains(tc.RtcpSocket) || errorSockets.Contains(tc.RtcpSocket))
                                     //And the socket can read

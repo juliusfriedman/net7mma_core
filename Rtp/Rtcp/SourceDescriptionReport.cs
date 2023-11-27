@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -51,7 +51,7 @@ namespace Media.Rtcp
 
     /// <summary>
     /// The SDES packet is a three-level structure composed of a header and zero or more chunks, each of which is composed of items describing the source identified in that chunk.  
-    /// The items are described individually in subsequent sections of RFC3550 http://tools.ietf.org/html/rfc3550#section-6.5
+    /// The items are described individually in subsequent sections of RFC3550 https://tools.ietf.org/html/rfc3550#section-6.5
     /// A SourceDescription is a 3 Tier Structure which contains an RtcpHeader and 0 or more <see cref="SourceDescriptionChunk"/>'s.
     /// The amount of <see cref="SourceDescriptionChunk"/>'s contained is indicated by the <see cref="RtcpPacket.BlockCount"/> property.
     /// </summary>
@@ -106,7 +106,7 @@ namespace Media.Rtcp
         #region SourceDescriptionItem
 
         /// <summary>
-        /// Provides an implementation of the SDES item abstraction observed in http://tools.ietf.org/html/rfc3550#section-6.5.
+        /// Provides an implementation of the SDES item abstraction observed in https://tools.ietf.org/html/rfc3550#section-6.5.
         /// And Item is a contigous allocation of memory with a 8 bit identifier which in certain cases is followed by an 8 bit length field.        
         /// </summary>
         /// <remarks>
@@ -118,7 +118,7 @@ namespace Media.Rtcp
 
             /// <summary>
             /// Defines some of the known types of SourceDescriptionItems.
-            /// <see cref="http://www.iana.org/assignments/rtp-parameters/rtp-parameters.xhtml">For a complete list</see>
+            /// <see cref="https://www.iana.org/assignments/rtp-parameters/rtp-parameters.xhtml">For a complete list</see>
             /// </summary>
             public enum SourceDescriptionItemType : byte
             {
@@ -167,7 +167,7 @@ namespace Media.Rtcp
                 /// </summary>
                 ApplicationSpecificIdentifier = 10
                 //More @ 
-                //http://tools.ietf.org/html/rfc6776
+                //https://tools.ietf.org/html/rfc6776
             }
 
             /// <summary>
@@ -536,7 +536,7 @@ namespace Media.Rtcp
                         int count = ChunkData.Count();
 
                         //Determine how many null octets to add
-                        //http://tools.ietf.org/html/rfc3550#appendix-A.4
+                        //https://tools.ietf.org/html/rfc3550#appendix-A.4
 
                         int nullOctetsRequired = Binary.BytesPerInteger - (count & 0x03);
 
@@ -832,7 +832,7 @@ namespace Media.Rtcp
         #region SourceDescriptionChunk
 
         /// <summary>
-        /// Provides a implementation around the SourceDescriptionChunk abstraction observed in RFC3550 http://tools.ietf.org/html/rfc3550#section-6.5.
+        /// Provides a implementation around the SourceDescriptionChunk abstraction observed in RFC3550 https://tools.ietf.org/html/rfc3550#section-6.5.
         /// </summary>
         /// <remarks>
         /// A SourceDescriptionChunk is a [variable length] 2 Tier Structure which contains an Identifer and a List of <see cref="SourceDescriptionItem"/>.
@@ -1212,7 +1212,7 @@ namespace Media.Rtcp
             //If it's okay to pad the item data for octet alignment
             if (pad)
             {
-                //http://tools.ietf.org/html/rfc3550#appendix-A.4
+                //https://tools.ietf.org/html/rfc3550#appendix-A.4
                 int nullOctetsRequired = Binary.BytesPerInteger - (chunkSize & 0x03);
 
                 //Per RFC3550 @ Page 45 [Paragraph 2]
@@ -1252,8 +1252,10 @@ namespace Media.Rtcp
             //Iterate the contained chunks
             foreach (SourceDescriptionChunk currentChunk in GetChunkIterator())
             {
+                contained = chunk.ChunkData == currentChunk.ChunkData;
+
                 //If the chunk yielded in the iterator matches the chunk identifier a match is present.
-                if (contained = (chunk.ChunkData == currentChunk.ChunkData))
+                if (contained)
                 {
                     break;
                 }

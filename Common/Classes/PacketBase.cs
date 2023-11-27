@@ -423,7 +423,9 @@
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return Completer is null ? StaticCompleteFrom(null, null).Equals(int.MinValue) : Completer(null, null).Equals(int.MinValue);
+                return Completer is null
+                    ? StaticCompleteFrom(null, null) is int.MinValue
+                    : Completer(null, null) is int.MinValue;
             }
         }
 

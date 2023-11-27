@@ -1,8 +1,8 @@
 ﻿#region Copyright
 /*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -51,7 +51,7 @@ namespace Media.Rtp
 
     #region Reference
 
-    /* Copied from http://tools.ietf.org/html/rfc3550#section-5
+    /* Copied from https://tools.ietf.org/html/rfc3550#section-5
          
            Schulzrinne, et al.         Standards Track                    [Page 12]
            FFC 3550                          RTP                          July 2003
@@ -79,7 +79,7 @@ namespace Media.Rtp
 
     /// <summary>
     /// Provides a manged abstraction around the first 12 octets in any RtpPacket.
-    /// Further information can be found at http://tools.ietf.org/html/rfc3550#section-5
+    /// Further information can be found at https://tools.ietf.org/html/rfc3550#section-5
     /// </summary>
     /// <remarks>
     /// Is IDisposeable because the class OWNS a reference to the CommonHeaderBits and a byte[].
@@ -104,8 +104,8 @@ namespace Media.Rtp
                RTP payload cannot be determined.  
                The framing mechanism is not defined here.
              * 
-               http://tools.ietf.org/html/rfc4571 Defined a framining mechanism to which known Errata exists at the time of this implementation.
-             * http://www.rfc-editor.org/errata_search.php?rfc=4571
+               https://tools.ietf.org/html/rfc4571 Defined a framining mechanism to which known Errata exists at the time of this implementation.
+             * https://www.rfc-editor.org/errata_search.php?rfc=4571
              * 
              * RFC4571 Also states @  [Page 1] (Paragraph 1, the final sentence)
              * 
@@ -113,7 +113,7 @@ namespace Media.Rtp
              * 
              * For reference the earlier version of RTP can be found @ ftp://gaia.cs.umass.edu/pub/hgschulz/rtp/draft-ietf-avt-rtp-04.txt
              * 
-             * RFC2336 defined a method similar to that which is used by RFC4571 and can be located @ http://tools.ietf.org/html/rfc2326#section-10.12
+             * RFC2336 defined a method similar to that which is used by RFC4571 and can be located @ https://tools.ietf.org/html/rfc2326#section-10.12
              *
              * Specifically the difference is that multiple packets may not be stored in a single interleaved frame 
              * Also that different packet types e.g. Rtp and Rtcp cannot appear in the same frame.

@@ -1446,7 +1446,7 @@ namespace Media.Concepts.Classes
         {
             int index = -1;
 
-            foreach (Bits x in b) if (false.Equals((index = IndexOf(x, ignoreEndian)).Equals(-1))) break;
+            foreach (Bits x in b) if (false.Equals((index = IndexOf(x, ignoreEndian)) is -1)) break;
 
             return index;
         }
@@ -1537,7 +1537,7 @@ namespace Media.Concepts.Classes
             else return BitConverter.ToDouble(Memory, index); //Doesn't handle - 0...
         }
 
-        //http://msdn2.microsoft.com/en-us/library/system.decimal.getbits.aspx
+        //https://learn.microsoft.com/en-us/dotnet/api/system.decimal.getbits
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public /* virtual */ decimal ToDecimal(int index = 0, int count = Common.Binary.BytesPerInteger)
@@ -1986,8 +1986,8 @@ namespace Media.Concepts.Classes
             //return n.IsNegative ? n : (Number)(-n.ToDouble());
         }
 
-        //http://www.codeproject.com/Articles/9078/Fraction-class-in-C
-        //http://stackoverflow.com/questions/20699596/reciprocal-a-number-and-then-reciprocal-it-again-to-the-original-number
+        //https://www.codeproject.com/Articles/9078/Fraction-class-in-C
+        //https://stackoverflow.com/questions/20699596/reciprocal-a-number-and-then-reciprocal-it-again-to-the-original-number
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static Number Reciprocal(Number n)
         {
@@ -2085,7 +2085,7 @@ namespace Media.Concepts.Classes
 
         #region Parse
 
-        //http://referencesource.microsoft.com/#mscorlib/system/number.cs
+        //https://referencesource.microsoft.com/#mscorlib/system/number.cs
 
         private const uint MaxStep = 0xFFFFFFFF / 16; //268435455.938	
 
@@ -2741,7 +2741,7 @@ namespace Media.Concepts.Classes
     #region Radix
 
     /// <summary>
-    /// http://en.wikipedia.org/wiki/Radix
+    /// https://en.wikipedia.org/wiki/Radix
     /// In mathematical numeral systems, the radix or base is the number of unique digits, including zero, that a positional numeral system uses to represent numbers. 
     /// For example, for the decimal system (the most common system in use today) the radix is ten, because it uses the ten digits from 0 through 9.
     /// </summary>

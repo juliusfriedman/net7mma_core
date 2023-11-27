@@ -26,7 +26,7 @@ namespace Media.Rtsp.Server.MediaTypes
             public void Depacketize()
             {
                 /*
-                 http://tools.ietf.org/html/rfc5577#page-3
+                 https://tools.ietf.org/html/rfc5577#page-3
                   */
 
                 throw new NotImplementedException();

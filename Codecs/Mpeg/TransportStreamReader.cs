@@ -1,7 +1,7 @@
 ﻿/*
-This file came from Managed Media Aggregation, You can always find the latest version @ https://net7mma.codeplex.com/
+This file came from Managed Media Aggregation, You can always find the latest version @ https://github.com/juliusfriedman/net7mma_core
   
- Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. http://www.asti-trans.com)
+ Julius.Friedman@gmail.com / (SR. Software Engineer ASTI Transportation Inc. https://www.asti-trans.com)
 
 Permission is hereby granted, free of charge, 
  * to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -53,7 +53,7 @@ namespace Media.Containers.Mpeg
 
         //http://basemedia.Codeplex.com
 
-        //http://iknowu.duckdns.org/files/public/MP4Maker/MP4Maker.htm
+        //https://github.com/TalAloni/MP4Maker
 
         #endregion
 

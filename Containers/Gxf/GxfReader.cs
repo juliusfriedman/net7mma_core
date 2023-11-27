@@ -8,7 +8,7 @@ namespace Media.Containers.Gxf
     //Namespace SMPTE ?
     // SMPTE 360M-2001: General Exchange Format (GXF)
     //https://tech.ebu.ch/docs/techreview/trev_291-edge.pdf
-    //http://wiki.multimedia.cx/index.php?title=GXF
+    //https://wiki.multimedia.cx/index.php?title=GXF
     public class GxfReader : MediaFileStream, IMediaContainer
     {
         public enum Identifier : byte
