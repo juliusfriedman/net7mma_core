@@ -2307,7 +2307,7 @@ namespace Media.Rtp
 
                     //Close the RtpSocket
                     if (RtpSocket.IsNullOrDisposed() is false)
-                        RtpSocket?.Close();
+                        RtpSocket.Close();
 
                     RtpSocket = RtcpSocket = null;
                 }
