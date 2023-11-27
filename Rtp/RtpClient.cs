@@ -446,7 +446,7 @@ namespace Media.Rtp
 
                             Common.Extensions.Socket.SocketExtensions.SetMulticastTimeToLive(tc.RtpSocket, ttl);
 
-                            if (rtcpEnabled && false.Equals(tc.RtcpSocket.Handle == tc.RtpSocket.Handle))
+                            if (rtcpEnabled && tc.RtcpSocket.Handle != tc.RtpSocket.Handle)
                             {
                                 Common.Extensions.Socket.SocketExtensions.JoinMulticastGroup(tc.RtcpSocket, remoteIp);
 
@@ -2301,11 +2301,12 @@ namespace Media.Rtp
                     MulticastGroups.Clear();
 
                     //For Udp the RtcpSocket may be the same socket as the RtpSocket if the sender/reciever is duplexing
-                    if (RtcpSocket is not null && RtcpSocket.Handle.Equals(RtpSocket?.Handle) is false)
+                    if (RtcpSocket.IsNullOrDisposed() is false && RtcpSocket.Handle.Equals(RtpSocket?.Handle) is false)
                         RtcpSocket.Close();
 
                     //Close the RtpSocket
-                    RtpSocket?.Close();
+                    if (RtpSocket.IsNullOrDisposed() is false)
+                        RtpSocket?.Close();
 
                     RtpSocket = RtcpSocket = null;
                 }
