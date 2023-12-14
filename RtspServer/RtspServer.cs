@@ -255,16 +255,34 @@ namespace Media.Rtsp
         private Thread m_ServerThread;
 
         /// <summary>
-        /// Indicates to the ServerThread a stop has been requested
+        /// Indicates to the ServerThread a stop has been requested.
         /// </summary>
-        private bool m_StopRequested, m_Maintaining;
+        private int m_StopRequested, m_Maintaining;
 
         //Handles the Restarting of streams which needs to be and disconnects clients which are inactive.
-        internal Timer m_Maintainer;
+        internal volatile Timer m_Maintainer;
 
         #endregion
 
         #region Propeties
+
+        /// <summary>
+        /// Is stop requested? Thread-safe as required.
+        /// </summary>
+        private bool IsStopRequested
+        {
+            get => Volatile.Read(ref m_StopRequested) == 1;
+            set => Interlocked.Exchange(ref m_StopRequested, value ? 1 : 0);
+        }
+
+        /// <summary>
+        /// Is maintaining server? Thread-safe as required.
+        /// </summary>
+        private bool IsMaintaining
+        {
+            get => Volatile.Read(ref m_Maintaining) == 1;
+            set => Interlocked.Exchange(ref m_Maintaining, value ? 1 : 0);
+        }
 
         public Media.Rtsp.Server.RtspStreamArchiver Archiver
         {
@@ -427,7 +445,7 @@ namespace Media.Rtsp
             get
             {
                 return IsDisposed is false &&
-                    m_StopRequested is false &&
+                    IsStopRequested is false &&
                     m_Started.HasValue &&
                     m_ServerThread is not null;
             }
@@ -1210,7 +1228,7 @@ namespace Media.Rtsp
             if (IsRunning) return;
 
             //Allowed to run
-            m_Maintaining = m_StopRequested = false;
+            IsMaintaining = IsStopRequested = false;
 
             //Indicate start was called
             Common.ILoggingExtensions.Log(Logger, "Server Started @ " + DateTime.UtcNow);
@@ -1262,7 +1280,7 @@ namespace Media.Rtsp
             //Start it
             m_ServerThread.Start();
 
-            //Timer for maintaince ( one quarter of the ticks)
+            //Timer for maintaince (one quarter of the ticks)
             m_Maintainer = new Timer(MaintainServer,
                 null,
                 TimeSpan.FromTicks(RtspClientInactivityTimeout.Ticks >> 2),
@@ -1290,11 +1308,11 @@ namespace Media.Rtsp
         /// <param name="state">Reserved</param>
         internal virtual void MaintainServer(object state = null)
         {
-            if (m_Maintaining || IsDisposed || m_StopRequested) return;
+            if (IsMaintaining || IsDisposed || IsStopRequested) return;
 
-            if (IsRunning && m_Maintaining is false)
+            if (IsRunning && IsMaintaining is false)
             {
-                m_Maintaining = true;
+                IsMaintaining = true;
 
                 try
                 {
@@ -1315,7 +1333,7 @@ namespace Media.Rtsp
 
                         MediaStreams.AsParallel().ForAll(s => s.TrySetLogger(Logger));
 
-                        m_Maintaining = false;
+                        IsMaintaining = false;
 
                         if (IsRunning && m_Maintainer is not null)
                         {
@@ -1336,7 +1354,7 @@ namespace Media.Rtsp
                 {
                     Common.ILoggingExtensions.LogException(Logger, ex);
 
-                    m_Maintaining = m_Maintainer is not null;
+                    IsMaintaining = m_Maintainer is not null;
                 }
             }
         }
@@ -1353,7 +1371,7 @@ namespace Media.Rtsp
             if (IsRunning is false) return;
 
             //Stop listening for new clients
-            m_StopRequested = true;
+            IsStopRequested = true;
 
             Common.ILoggingExtensions.Log(Logger, "@Stop - StopRequested");
             Common.ILoggingExtensions.Log(Logger, "Connected Clients:" + ActiveConnections);
@@ -1415,7 +1433,7 @@ namespace Media.Rtsp
 
             foreach (Media.Rtsp.Server.IMedia stream in MediaStreams)
             {
-                if (m_StopRequested) return;
+                if (IsStopRequested) return;
 
                 streamTasks.Add(StartStreamAsync(stream));
             }
@@ -1509,9 +1527,10 @@ namespace Media.Rtsp
                 //While running
                 while (IsRunning)
                 {
-                    if (m_StopRequested)
+                    if (IsStopRequested)
                         break;
-                    else if (m_Sessions.Count < m_MaximumSessions)
+
+                    if (m_Sessions.Count < m_MaximumSessions)
                     {
                         //If not already accepting
                         if (lastAccept is null)
@@ -1560,7 +1579,7 @@ namespace Media.Rtsp
             {
                 Common.ILoggingExtensions.LogException(Logger, ex);
 
-                if (m_StopRequested) return;
+                if (IsStopRequested) return;
 
                 goto Begin;
             }
@@ -2245,7 +2264,7 @@ namespace Media.Rtsp
                 //Then it would also be easier to make /audio only passwords etc.
 
                 //When stopping only handle teardown and keep alives
-                if (m_StopRequested &&
+                if (IsStopRequested &&
                     (request.ContainsHeader(RtspHeaders.Connection) is false ||
                     (request.RtspMethod != RtspMethod.TEARDOWN && request.RtspMethod != RtspMethod.GET_PARAMETER && request.RtspMethod != RtspMethod.OPTIONS)))
                 {
