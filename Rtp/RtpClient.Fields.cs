@@ -62,7 +62,7 @@ namespace Media.Rtp
         private readonly Media.Common.Collections.Generic.ConcurrentLinkedQueueSlim<(RtpClient.TransportContext Context, Common.BaseDisposable Packet, bool Final, bool Received)> m_EventData = new();
 
         //Todo, LinkedQueue and Clock.
-        private readonly System.Threading.ManualResetEventSlim m_EventReady = new(false, 100); //should be caluclated based on memory and speed. SpinWait uses 10 as a default.
+        private readonly System.Threading.ManualResetEventSlim m_EventReady = new(false, spinCount: 20); //should be caluclated based on memory and speed. SpinWait uses 10 as a default.
 
         //Outgoing Packets, Not a Queue because you cant re-order a Queue (in place) and you can't take a range from the Queue (in a single operation)
         //Those things aside, ordering is not performed here and only single packets are iterated and would eliminate the need for removing after the operation.
