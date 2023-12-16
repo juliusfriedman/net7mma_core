@@ -155,7 +155,7 @@ namespace Media.Rtsp.Server.MediaTypes
             {
                 try
                 {
-                    if (Packets.Count is 0)
+                    if (Packets.IsEmpty)
                     {
                         System.Threading.Thread.Sleep(0);
 

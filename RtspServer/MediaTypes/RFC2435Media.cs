@@ -2527,7 +2527,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 {
                     try
                     {
-                        if (Frames.Count is 0 && State == StreamState.Started)
+                        if (Frames.IsEmpty && State == StreamState.Started)
                         {
                             if (RtpClient.IsActive) RtpClient.m_WorkerThread.Priority = System.Threading.ThreadPriority.Lowest;
 
