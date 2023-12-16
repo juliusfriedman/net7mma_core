@@ -752,6 +752,7 @@ namespace Media.Rtsp
                     catch (Exception ex)
                     {
                         Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@IsPlaying - " + ex.Message);
+                        Media.Common.ILoggingExtensions.LogException(Logger, ex);
                     }
                 }
 
@@ -1702,6 +1703,7 @@ namespace Media.Rtsp
                 catch (Exception ex)
                 {
                     Common.ILoggingExtensions.Log(Logger, ToString() + "@SendRtspMessage: " + ex.Message);
+                    Common.ILoggingExtensions.LogException(Logger, ex);
                 }
                 finally
                 {
@@ -2399,7 +2401,7 @@ namespace Media.Rtsp
             }
             catch (Exception ex)
             {
-                Common.ILoggingExtensions.Log(Logger, ex.Message);
+                Common.ILoggingExtensions.LogException(Logger, ex);
 
                 throw;
             }
