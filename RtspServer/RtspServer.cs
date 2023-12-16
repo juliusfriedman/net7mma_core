@@ -65,6 +65,12 @@ namespace Media.Rtsp
         //Milliseconds
         internal const int DefaultSendTimeout = 500;
 
+        // Minimum timout to use for RTSP clients.
+        private readonly TimeSpan MinimumRtspClientInactivityTimeout = TimeSpan.FromSeconds(1);
+
+        // Default timout to use for RTSP clients.
+        private readonly TimeSpan DefaultRtspClientInactivityTimeout = TimeSpan.FromSeconds(60);
+
         internal static void ConfigureRtspServerThread(Thread thread)
         {
             thread.TrySetApartmentState(ApartmentState.MTA);
@@ -673,7 +679,9 @@ namespace Media.Rtsp
         public RtspServer(IPEndPoint listenEndPoint, TimeSpan? inactivityTimeout = null, bool shouldDispose = true)
             : base(shouldDispose)
         {
-            RtspClientInactivityTimeout = inactivityTimeout ?? TimeSpan.FromSeconds(60);
+            RtspClientInactivityTimeout = inactivityTimeout.HasValue
+                ? Media.Common.Extensions.TimeSpan.TimeSpanExtensions.Max(inactivityTimeout.Value, MinimumRtspClientInactivityTimeout)
+                : DefaultRtspClientInactivityTimeout;
 
             //Check syntax of Server header to ensure allowed format...
             ServerName = "ASTI Media Server RTSP\\" + Version.ToString(RtspMessage.VersionFormat, System.Globalization.CultureInfo.InvariantCulture);
@@ -1283,7 +1291,7 @@ namespace Media.Rtsp
             //Timer for maintaince (one quarter of the ticks)
             m_Maintainer = new Timer(MaintainServer,
                 null,
-                TimeSpan.FromTicks(RtspClientInactivityTimeout.Ticks >> 2),
+                TimeSpan.FromTicks(Math.Max(RtspClientInactivityTimeout.Ticks >> 4, MinimumRtspClientInactivityTimeout.Ticks)),
                 Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan);
 
             if (m_UdpPort >= 0) EnableUnreliableTransport(m_UdpPort);
