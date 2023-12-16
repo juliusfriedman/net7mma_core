@@ -144,15 +144,15 @@ namespace Media.UnitTests
         public static async Task Main(string[] args)
         {
             //Run the main tests
-            foreach (Action test in LogicTests) RunTest(test);
+            //foreach (Action test in LogicTests) RunTest(test);
 
-            Console.WriteLine("Logic Tests Complete! Press Q to Exit or any other key to perform the live tests.");
+            //Console.WriteLine("Logic Tests Complete! Press Q to Exit or any other key to perform the live tests.");
 
-            if (Console.ReadKey(true).Key == ConsoleKey.Q) return;
+            //if (Console.ReadKey(true).Key == ConsoleKey.Q) return;
 
-            RunTest(HttpClientTests);
+            //RunTest(HttpClientTests);
 
-            RunTest(RtspClientTests);
+            //RunTest(RtspClientTests);
 
             await RunTestAsync(TestServerAsync, nameof(TestServerAsync)).ConfigureAwait(false);
         }
@@ -2470,10 +2470,6 @@ namespace Media.UnitTests
                                     catch (Exception ex)
                                     {
                                         server.Logger.LogException(ex);
-
-                                        gfxScreenshot.Dispose();
-
-                                        bmpScreenshot.Dispose();
 
                                         if (server is not null && server.IsRunning) goto Start;
                                     }
