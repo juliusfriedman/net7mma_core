@@ -2256,7 +2256,7 @@ namespace Media.Rtp
                             m_EventReady.Reset();
 
                             while (IsActive && m_EventData.IsEmpty)
-                                m_EventReady.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond);
+                                m_EventReady.Wait(WaitIntervalBetweenEvents);
                         }
                         else if (IsActive is false) break;
 

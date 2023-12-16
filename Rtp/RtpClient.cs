@@ -3913,6 +3913,19 @@ namespace Media.Rtp
         }
 
         /// <summary>
+        /// How much time to wait between event queue checks.
+        /// High values reduce event handling speed / FPS, but also reduce CPU consumption.
+        /// </summary>
+        public TimeSpan WaitIntervalBetweenEvents
+        {
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized | System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+            get => m_WaitIntervalBetweenEvents;
+
+            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized | System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+            set => m_WaitIntervalBetweenEvents = value;
+        }
+
+        /// <summary>
         /// Gets or sets a value which indicates if events will be threaded or not.
         /// If threading is enabled the call will block until the event thread has started.
         /// </summary>
