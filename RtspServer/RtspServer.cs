@@ -646,16 +646,16 @@ namespace Media.Rtsp
         //Todo
         //Allow for joining of server instances to support multiple end points.
 
-        public RtspServer(AddressFamily addressFamily = AddressFamily.InterNetwork, int listenPort = DefaultPort, bool shouldDispose = true)
-            : this(new IPEndPoint(Media.Common.Extensions.Socket.SocketExtensions.GetFirstUnicastIPAddress(addressFamily), listenPort), shouldDispose) { }
+        public RtspServer(AddressFamily addressFamily, int listenPort, TimeSpan? inactivityTimeout = null, bool shouldDispose = true)
+            : this(new IPEndPoint(Media.Common.Extensions.Socket.SocketExtensions.GetFirstUnicastIPAddress(addressFamily), listenPort), inactivityTimeout, shouldDispose) { }
 
-        public RtspServer(IPAddress listenAddress, int listenPort, bool shouldDispose = true)
-            : this(new IPEndPoint(listenAddress, listenPort), shouldDispose) { }
+        public RtspServer(IPAddress listenAddress, int listenPort, TimeSpan? inactivityTimeout = null, bool shouldDispose = true)
+            : this(new IPEndPoint(listenAddress, listenPort), inactivityTimeout, shouldDispose) { }
 
-        public RtspServer(IPEndPoint listenEndPoint, bool shouldDispose = true)
+        public RtspServer(IPEndPoint listenEndPoint, TimeSpan? inactivityTimeout = null, bool shouldDispose = true)
             : base(shouldDispose)
         {
-            RtspClientInactivityTimeout = TimeSpan.FromSeconds(60);
+            RtspClientInactivityTimeout = inactivityTimeout ?? TimeSpan.FromSeconds(60);
 
             //Check syntax of Server header to ensure allowed format...
             ServerName = "ASTI Media Server RTSP\\" + Version.ToString(RtspMessage.VersionFormat, System.Globalization.CultureInfo.InvariantCulture);
