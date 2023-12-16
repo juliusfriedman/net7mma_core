@@ -963,15 +963,9 @@ namespace Media.Common.Extensions.Socket
 
         #region UnicastPortReuse
 
-        //Notes 4.6 has ReuseUnicastPort
-
-        private const int ReuseUnicastPort = 0x3007; // 12295
-
-        private static readonly System.Net.Sockets.SocketOptionName ReuseUnicastPortOption = (System.Net.Sockets.SocketOptionName)ReuseUnicastPort;
-
         public static void SetUnicastPortReuse(System.Net.Sockets.Socket socket, int value)
         {
-            socket.SetSocketOption(System.Net.Sockets.SocketOptionLevel.Socket, ReuseUnicastPortOption, value);
+            socket.SetSocketOption(System.Net.Sockets.SocketOptionLevel.Socket, System.Net.Sockets.SocketOptionName.ReuseUnicastPort, value);
         }
 
         public static void DisableUnicastPortReuse(System.Net.Sockets.Socket socket)
