@@ -2262,7 +2262,7 @@ namespace Media.Rtp
                             m_EventReady.Reset();
 
                             while (IsActive && m_EventData.IsEmpty)
-                                m_EventReady.Wait(Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond);
+                                m_EventReady.Wait(WaitIntervalBetweenEvents);
                         }
                         else if (IsActive is false) break;
 
@@ -2273,7 +2273,13 @@ namespace Media.Rtp
                         HandleEvent();
                     }
                 }
-                catch (System.Exception ex) { Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@HandleEvents: " + ex.Message); goto Begin; }
+                catch (System.Exception ex)
+                {
+                    Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@HandleEvents: " + ex.Message);
+                    Media.Common.ILoggingExtensions.LogException(Logger, ex);
+
+                    goto Begin;
+                }
             }
         }
 
@@ -2784,6 +2790,7 @@ namespace Media.Rtp
                 catch (System.Exception ex)
                 {
                     Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@SendRecieve: " + ex.Message);
+                    Media.Common.ILoggingExtensions.LogException(Logger, ex);
 
                     if (critical) System.Threading.Thread.EndCriticalRegion();
 

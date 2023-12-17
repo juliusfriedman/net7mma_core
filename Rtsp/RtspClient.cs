@@ -1019,6 +1019,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                 catch (Exception ex)
                 {
                     Media.Common.ILoggingExtensions.Log(Logger, ToString() + "@IsPlaying - " + ex.Message);
+                    Media.Common.ILoggingExtensions.LogException(Logger, ex);
                 }
             }
 
@@ -3083,7 +3084,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
     public void StopPlaying(bool disconnectSocket = true)
     {
         try { Disconnect(disconnectSocket); }
-        catch (Exception ex) { Media.Common.ILoggingExtensions.Log(Logger, ex.Message); }
+        catch (Exception ex) { Media.Common.ILoggingExtensions.LogException(Logger, ex); }
     }
 
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.Synchronized)]
@@ -3318,7 +3319,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
         }
         catch (Exception ex)
         {
-            Common.ILoggingExtensions.Log(Logger, ex.Message);
+            Common.ILoggingExtensions.LogException(Logger, ex);
 
             throw;
         }
@@ -4623,6 +4624,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
             catch (Exception ex)
             {
                 Common.ILoggingExtensions.Log(Logger, ToString() + "@SendRtspMessage: " + ex.Message);
+                Common.ILoggingExtensions.LogException(Logger, ex);
             }
             finally
             {
@@ -5968,7 +5970,11 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                     DisableKeepAliveRequest = keepAlives;
                 }
             }
-            catch (Exception ex) { Common.ILoggingExtensions.Log(Logger, ToString() + "@MonitorProtocol: " + ex.Message); }
+            catch (Exception ex)
+            {
+                Common.ILoggingExtensions.Log(Logger, ToString() + "@MonitorProtocol: " + ex.Message);
+                Common.ILoggingExtensions.LogException(Logger, ex);
+            }
 
             //If not disposed AND IsConnected and if protocol switch is still allowed AND IsPlaying and not already TCP
             if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false &&
@@ -6048,6 +6054,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                     catch (Exception ex)
                     {
                         Common.ILoggingExtensions.Log(Logger, ToString() + "@MonitorProtocol: " + ex.Message);
+                        Common.ILoggingExtensions.LogException(Logger, ex);
                     }
                 }
             }
@@ -6071,8 +6078,19 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
         //If there is still a timer change it based on the last messages round trip time, should be relative to all messages...
         if (Common.IDisposedExtensions.IsNullOrDisposed(this) is false && m_ProtocolMonitor is not null)
-            try { m_ProtocolMonitor.Change(m_ConnectionTime.Add(LastMessageRoundTripTime), Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan); }
-            catch (Exception ex) { Common.ILoggingExtensions.Log(Logger, ToString() + "@MonitorProtocol: " + ex.Message); }
+            try
+            {
+                m_ProtocolMonitor.Change
+                (
+                    m_ConnectionTime.Add(LastMessageRoundTripTime),
+                    Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan
+                );
+            }
+            catch (Exception ex)
+            {
+                Common.ILoggingExtensions.Log(Logger, ToString() + "@MonitorProtocol: " + ex.Message);
+                Common.ILoggingExtensions.LogException(Logger, ex);
+            }
     }
 
     public RtspMessage SendPlay(MediaDescription mediaDescription, TimeSpan? startTime = null, TimeSpan? endTime = null, string rangeType = "npt")
@@ -6515,7 +6533,11 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
             }
 
         }
-        catch (Exception ex) { Common.ILoggingExtensions.Log(Logger, ToString() + "@SendKeepAlive: " + ex.Message); }
+        catch (Exception ex)
+        {
+            Common.ILoggingExtensions.Log(Logger, ToString() + "@SendKeepAlive: " + ex.Message);
+            Common.ILoggingExtensions.LogException(Logger, ex);
+        }
 
         //Raise the stopping event if not playing anymore
         //if (true == wasPlaying && false == IsPlaying) OnStopping();

@@ -41,6 +41,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 #endregion
 
@@ -217,7 +218,7 @@ namespace Media.Common.Collections.Generic
         public bool IsEmpty
         {
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return Count is Common.Binary.LongZero; }
+            get { return Volatile.Read(ref First) is null; }
         }
 
         #endregion
@@ -324,8 +325,7 @@ namespace Media.Common.Collections.Generic
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public void Enqueue(T t)
         {
-            bool added = false;
-
+            bool added;
             do added = TryEnqueue(ref t);
             while (added is false);
         }

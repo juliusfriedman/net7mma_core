@@ -81,7 +81,7 @@ namespace Media.Common
         /// <param name="bd"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static long RetrieveState(BaseDisposable bd) { return bd.State; }
+        internal static int RetrieveState(BaseDisposable bd) { return bd.State; }
 
         /// <summary>
         /// Indicates the <see cref=""/>
@@ -89,7 +89,7 @@ namespace Media.Common
         /// <param name="bd"></param>
         /// <returns></returns>
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        internal static bool IsDestructing(BaseDisposable bd, ref long state) { return (state = RetrieveState(bd)) > Disposed; }
+        internal static bool IsDestructing(BaseDisposable bd, ref int state) { return (state = RetrieveState(bd)) > Disposed; }
 
         /// <summary>
         /// If the sender is of the type <see cref="BaseDisposable"/> then <see cref="SetShouldDispose"/> will be called to dispose the instance immediately.
@@ -133,7 +133,7 @@ namespace Media.Common
         ///  The sign bit of the integer value is the only 'confusing' part about this and it must be understood because the Interlocked methods are CLS Compliant and do not expose unsigned counterparts.
         ///  See the remarks section above for more clarity.
         /// </remarks>
-        private long State; // = Undisposed; (Todo, internal protected and can remove Statics.. or new private protected and...)
+        private int State; // = Undisposed; (Todo, internal protected and can remove Statics.. or new private protected and...)
 
         #endregion
 
@@ -188,9 +188,7 @@ namespace Media.Common
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                //return System.Threading.Thread.VolatileRead(ref State) == Undisposed;
-                //return (System.Threading.Interlocked.Read(ref State) & int.MaxValue).Equals(Undisposed);
-                return System.Threading.Interlocked.Read(ref State).Equals(Undisposed);
+                return System.Threading.Volatile.Read(ref State) == Undisposed;
             }
         }
 
@@ -202,9 +200,7 @@ namespace Media.Common
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                //return System.Threading.Thread.VolatileRead(ref State) == Finalized;
-                //return (System.Threading.Interlocked.Read(ref State) & int.MaxValue).Equals(Finalized);
-                return System.Threading.Interlocked.Read(ref State).Equals(Finalized);
+                return System.Threading.Volatile.Read(ref State) == Finalized;
             }
         }
 

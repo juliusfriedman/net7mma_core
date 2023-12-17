@@ -55,7 +55,7 @@ namespace Media.Common
         internal void Resurrect(ref int managedThreadId)
         {
             //Need to retrieve the state from this instance.
-            long state = 0;
+            int state = 0;
 
             //Not already disposed or destructing?
             if (IsUndisposed is false | BaseDisposable.IsDestructing(this, ref state) is false) return;

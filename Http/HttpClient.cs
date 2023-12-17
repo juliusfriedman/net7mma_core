@@ -1299,6 +1299,7 @@ namespace Media.Http
                 catch (Exception ex)
                 {
                     Common.ILoggingExtensions.Log(Logger, ToString() + "@SendHttpMessage: " + ex.Message);
+                    Common.ILoggingExtensions.LogException(Logger, ex);
                 }
                 finally
                 {
