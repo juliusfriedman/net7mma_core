@@ -143,18 +143,22 @@ namespace Media.UnitTests
         [MTAThread]
         public static async Task Main(string[] args)
         {
-            //Run the main tests
-            //foreach (Action test in LogicTests) RunTest(test);
-
-            //Console.WriteLine("Logic Tests Complete! Press Q to Exit or any other key to perform the live tests.");
-
-            //if (Console.ReadKey(true).Key == ConsoleKey.Q) return;
-
-            //RunTest(HttpClientTests);
-
-            //RunTest(RtspClientTests);
-
             await RunTestAsync(TestServerAsync, nameof(TestServerAsync)).ConfigureAwait(false);
+
+            Console.WriteLine("Server Test Complete! Press Q to Exit or any other key to perform the LogicTests.");
+
+            if (Console.ReadKey(true).Key == ConsoleKey.Q) return;
+
+            //Run the main tests
+            foreach (Action test in LogicTests) RunTest(test);
+
+            Console.WriteLine("Logic Tests Complete! Press Q to Exit or any other key to perform the live tests.");
+
+            if (Console.ReadKey(true).Key == ConsoleKey.Q) return;
+
+            RunTest(HttpClientTests);
+
+            RunTest(RtspClientTests);
         }
 
         #region Unit Tests
