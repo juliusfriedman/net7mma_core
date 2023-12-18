@@ -414,7 +414,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override int GetHashCode()
         {
-            return (IsDisposed ? HashCode.Combine(m_Offset, m_Length) : HashCode.Combine(m_Array.GetHashCode(), m_Offset, m_Length));
+            return IsDisposed ? HashCode.Combine(m_Offset, m_Length) : HashCode.Combine(m_Array.GetHashCode(), m_Offset, m_Length);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
