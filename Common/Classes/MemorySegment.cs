@@ -434,7 +434,7 @@ namespace Media.Common
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(MemorySegment a, MemorySegment b)
         {
-            return b is null ? a is null : a.Equals(b);
+            return b is null ? a is null : b.Equals(a);
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
