@@ -1,11 +1,13 @@
 ﻿using Codecs.Image;
 using Media.Codec;
+using Media.Codecs.Image;
 using Media.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Media.Codecs.Image
 {
@@ -228,10 +230,12 @@ namespace Media.Codecs.Image
             switch (DataLayout)
             {
                 case DataLayout.SemiPlanar:
-                    if (component.Id is ImageFormat.LumaChannelId)
-                        goto case DataLayout.Packed;
-                    offset = (y / 2 * PlaneWidth(componentIndex) + x / 2) * ImageFormat.Components.Length + componentIndex;
-                    break;
+                    if (componentIndex is 0)
+                        goto case DataLayout.Planar;
+                    offset += Width + Height * component.Length;
+                    y >>= 1;
+                    x >>= 1;
+                    goto case DataLayout.Packed;
                 case DataLayout.Planar:
                     // Each component is stored in a separate plane. The offset is calculated based on the plane's width and the pixel's position within the plane.
                     // Calculate the width and height of the plane for the given component
@@ -255,11 +259,11 @@ namespace Media.Codecs.Image
                         int previousPlaneHeight = Height >> ImageFormat.Heights[i];
                         offset += previousPlaneWidth * previousPlaneHeight * ImageFormat.Components[i].Length;
                     }
-                    break;               
+                    break;
                 case DataLayout.Packed:
                     // In packed layout, components are interleaved
                     int componentDataIndex = (y * PlaneWidth(componentIndex) + x) * ImageFormat.Components.Length + componentIndex;
-                    offset = componentDataIndex * component.Length;
+                    offset += componentDataIndex * component.Length;
                     break;
             }
 
@@ -430,9 +434,9 @@ namespace Media.UnitTests
                                 for (int y = 0; y < image.Height; ++y)
                                 {
                                     // Set the modified data back to the image
-                                    image.SetComponentVector(x, y, c, (Vector<byte>)filledVector);
-                                    image.SetComponentVector(x + 1, y, c, (Vector<byte>)filledVector);
-                                    image.SetComponentVector(x + 2, y, c, (Vector<byte>)filledVector);
+                                    image.SetComponentVector(x, y, c, Vector.AsVectorByte(filledVector));
+                                    image.SetComponentVector(x + 1, y, c, Vector.AsVectorByte(filledVector));
+                                    image.SetComponentVector(x + 2, y, c, Vector.AsVectorByte(filledVector));
                                 }
                             }
                         }
@@ -669,11 +673,32 @@ namespace Media.UnitTests
                     {
                         var component = imageFormat[componentIndex];
 
-                        int expectedOffset = component.Id switch
+                        int expectedOffset = 0;
+                        switch (componentIndex)
                         {
-                            Codecs.Image.ImageFormat.LumaChannelId => (y * image.Width + x) * imageFormat.Components.Length + componentIndex,
-                            _ => (y / 2 * image.Width + x / 2) * imageFormat.Components.Length + componentIndex
-                        };
+                            case 0:
+                                // Calculate the width and height of the plane for the given component
+                                int widthSampling = image.ImageFormat.Widths[componentIndex];
+                                int heightSampling = image.ImageFormat.Heights[componentIndex];
+
+                                int planeWidth = image.Width >> widthSampling;
+                                int planeHeight = image.Height >> heightSampling;
+
+                                // Calculate the position within the plane
+                                int planeX = x >> widthSampling;
+                                int planeY = y >> heightSampling;
+
+                                // Calculate the offset within the plane
+                                expectedOffset += (planeY * planeWidth + planeX) * component.Length;
+                                break;
+                            default:
+                                expectedOffset += image.Width + image.Height * component.Length;
+                                var Y = y >> 1;
+                                var X = x >> 1;
+                                int componentDataIndex = (Y * image.PlaneWidth(componentIndex) + X) * image.ImageFormat.Components.Length + componentIndex;
+                                expectedOffset += componentDataIndex * component.Length;
+                                break;
+                        }
 
                         int calculatedOffset = image.CalculateComponentDataOffset(x, y, componentIndex);
 
