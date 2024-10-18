@@ -3,6 +3,9 @@ using System.Text;
 
 namespace Media.Codecs.Image
 {
+    /// <summary>
+    /// Represents an image format with various properties and methods for creating specific formats.
+    /// </summary>
     public class ImageFormat : Codec.MediaFormat
     {
         #region Statics
@@ -400,7 +403,7 @@ namespace Media.Codecs.Image
 
         public bool HasAlphaComponent { get { return AlphaComponent is not null; } }
 
-        public bool IsPremultipliedWithAplha
+        public bool IsPremultipliedWithAlpha
         {
             get
             {

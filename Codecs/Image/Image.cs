@@ -1,4 +1,6 @@
-﻿using Media.Codec;
+﻿using Codecs.Image;
+using Media.Codec;
+using Media.Codecs.Image;
 using Media.Common;
 using System;
 using System.Collections.Generic;
@@ -17,14 +19,16 @@ namespace Media.Codecs.Image
 
         public static Image FromStream(Stream stream)
         {
-            BitmapInfoHeader header = new();
-            if (14 != stream.Read(header.Array, 0, 14))
-                throw new InvalidOperationException("Need 14 Bytes for the Bitmap Header");
+            BitmapHeader bitmapHeader = new();            
+            if (BitmapHeader.Length != stream.Read(bitmapHeader.Array, 0, bitmapHeader.Count))
+                throw new InvalidOperationException($"Need {BitmapHeader.Length} Bytes for the Bitmap Header");
 
-            if (header[0] != 0x42 && header[1] != 0x4D)
+            if (bitmapHeader.FileSignature != BitmapHeader.BMFileSignature)
                 throw new InvalidOperationException("Need BM File Header.");
 
-            var fileSize = Binary.ReadU32(header, 2, Binary.IsBigEndian);
+            var fileSize = bitmapHeader.FileSize;
+
+            BitmapInfoHeader header = new();
 
             if (header.Count != stream.Read(header.Array, 0, header.Count))
                 throw new InvalidOperationException($"Need {BitmapInfoHeader.Length} Bytes for the Bitmap Header");
@@ -157,36 +161,30 @@ namespace Media.Codecs.Image
             SaveBitmap(header, stream);
         }
 
-        public void SaveBitmap(BitmapInfoHeader header, Stream stream)
+        public void SaveBitmap(BitmapInfoHeader bitmapInfoHeader, Stream stream)
         {
-            int fileSize = 14 + header.Count + Data.Array.Length;
+            int headersSize = BitmapHeader.Length + BitmapInfoHeader.Length;
+            int fileSize = headersSize + Data.Array.Length;
 
-            // BMP file header
-            byte[] fileHeader =
-            {
-                0x42, 0x4D,                       // "BM" - BMP file identifier
-                0, 0, 0, 0,                       // FileSize
-                0x00, 0x00,                       // Reserved
-                0x00, 0x00,                       // Reserved
-                0x36, 0x00, 0x00, 0x00            // Offset of the image data (54 bytes)
-            };
-
-            Binary.Write32(fileHeader, 2, Binary.IsBigEndian, fileSize);
+            BitmapHeader bitmapHeader = new BitmapHeader();
+            bitmapHeader.FileSignature = 0x424d;
+            bitmapHeader.FileSize = (uint)fileSize;
+            bitmapHeader.DataOffset = (uint)headersSize;
 
             // Write the BMP file header to the stream
-            stream.Write(fileHeader, 0, fileHeader.Length);
-            stream.Write(header.Array, header.Offset, header.Count);
+            stream.Write(bitmapHeader.Array, bitmapHeader.Offset, bitmapHeader.Count);
+            stream.Write(bitmapInfoHeader.Array, bitmapInfoHeader.Offset, bitmapInfoHeader.Count);
             stream.Write(Data.Array, Data.Offset, Data.Count);
         }
 
         public int PlaneWidth(int plane)
         {
-            return plane >= MediaFormat.Components.Length ? -1 : Width >> ImageFormat.Widths[plane];
+            return plane < 0 || plane >= MediaFormat.Components.Length ? -1 : Width >> ImageFormat.Widths[plane];
         }
 
         public int PlaneHeight(int plane)
         {
-            return plane >= MediaFormat.Components.Length ? -1 : Height >> ImageFormat.Heights[plane];
+            return plane < 0 || plane >= MediaFormat.Components.Length ? -1 : Height >> ImageFormat.Heights[plane];
         }
 
         /// <summary>
@@ -196,7 +194,7 @@ namespace Media.Codecs.Image
         /// <returns></returns>
         public int PlaneSize(int plane)
         {
-            return plane >= MediaFormat.Components.Length ? -1 : (PlaneWidth(plane) + PlaneHeight(plane)) * ImageFormat.Size;
+            return plane < 0 || plane >= MediaFormat.Components.Length ? -1 : (PlaneWidth(plane) + PlaneHeight(plane)) * ImageFormat.Size;
         }
 
         /// <summary>
@@ -206,7 +204,7 @@ namespace Media.Codecs.Image
         /// <returns></returns>
         public int PlaneLength(int plane)
         {
-            return plane >= MediaFormat.Components.Length ? -1 : Common.Binary.BitsToBytes(PlaneSize(plane));
+            return plane < 0 || plane >= MediaFormat.Components.Length ? -1 : Binary.BitsToBytes(PlaneSize(plane));
         }
 
         /// <summary>
@@ -232,39 +230,60 @@ namespace Media.Codecs.Image
             switch (DataLayout)
             {
                 case DataLayout.Planar:
-                    //for(int c = 0; c < componentIndex; ++c)
-                    //offset += PlaneLength(c);
-
+                    //•	Each component is stored in a separate plane. The offset is calculated based on the plane's width and the pixel's position within the plane.
+                    // Calculate the width and height of the plane for the given component
                     int widthSampling = ImageFormat.Widths[componentIndex];
                     int heightSampling = ImageFormat.Heights[componentIndex];
 
                     int planeWidth = Width >> widthSampling;
+                    int planeHeight = Height >> heightSampling;
+
+                    // Calculate the position within the plane
                     int planeX = x >> widthSampling;
                     int planeY = y >> heightSampling;
 
-                    offset += (planeY * planeWidth + planeX) * component.Length;
+                    // Calculate the offset within the plane
+                    offset = (planeY * planeWidth + planeX) * component.Length;
+
+                    // Add the base offset for the component's plane
+                    for (int i = 0; i < componentIndex; i++)
+                    {
+                        int previousPlaneWidth = Width >> ImageFormat.Widths[i];
+                        int previousPlaneHeight = Height >> ImageFormat.Heights[i];
+                        offset += previousPlaneWidth * previousPlaneHeight * ImageFormat.Components[i].Length;
+                    }
                     break;
-
-
                 case DataLayout.SemiPlanar:
-                    int yPlaneWidth = PlaneWidth(componentIndex);
-                    // Non interleaved plane
-                    if (component.Id is ImageFormat.LumaChannelId)
+                    // Calculate the width and height of the luma plane
+                    int yPlaneWidth = Width;
+                    int yPlaneHeight = Height;
+
+                    if (component.Id == ImageFormat.LumaChannelId)
                     {
-                        offset += (y * yPlaneWidth + x) * component.Length;
-                        break;
+                        // Luma component
+                        offset = (y * yPlaneWidth + x) * component.Length;
                     }
-                    else// interleaved plane
+                    else
                     {
-                        int uvOffset = yPlaneWidth * PlaneHeight(componentIndex);
-                        int uvComponentIndex = y / 2 * (yPlaneWidth / 2) + x / 2;
-                        offset += uvOffset + uvComponentIndex * component.Length;
-                        break;
+                        // Chroma components (U and V)
+                        int uvPlaneWidth = yPlaneWidth / 2;
+                        int uvPlaneHeight = yPlaneHeight / 2;
+
+                        // Calculate the position within the UV plane
+                        int uvX = x / 2;
+                        int uvY = y / 2;
+
+                        // Calculate the base offset for the UV plane
+                        int uvBaseOffset = yPlaneWidth * yPlaneHeight * component.Length;
+
+                        // Calculate the offset within the UV plane
+                        offset = uvBaseOffset + (uvY * uvPlaneWidth + uvX) * component.Length;
                     }
+                    break;
                 case DataLayout.Packed:
-                    int componentDataIndex = y * Width + x;
-                    int bytesPerChannel = ImageFormat.Length; // Number of bytes per channel (e.g., 3 for RGB24)
-                    offset += componentDataIndex * bytesPerChannel;
+                    // In packed layout, components are interleaved
+                    int componentDataIndex = (y * PlaneWidth(componentIndex) + x) * ImageFormat.Components.Length + componentIndex;
+                    offset = componentDataIndex * component.Length;
                     break;
             }
 
@@ -295,7 +314,7 @@ namespace Media.Codecs.Image
             if (offset < 0) return MemorySegment.Empty;
             //throw new IndexOutOfRangeException("Coordinates are outside the bounds of the image.");
 
-            return new MemorySegment(Data.Array, offset, component.Length);
+            return new MemorySegment(Data.Array, Binary.Min(Data.Count, offset), Binary.Min(Data.Count - offset, component.Length));
         }
 
         public MemorySegment GetComponentData(int x, int y, byte componentId) => GetComponentData(x, y, ImageFormat.GetComponentById(componentId));
@@ -317,7 +336,7 @@ namespace Media.Codecs.Image
                 return; // or throw an exception
 
             int offset = CalculateComponentDataOffset(x, y, componentIndex);
-            if (offset < 0)
+            if (offset < 0 || offset >= data.Count)
                 return; // or throw an exception
 
             Buffer.BlockCopy(data.Array, data.Offset, Data.Array, Data.Offset + offset, data.Count);
@@ -650,6 +669,14 @@ namespace Media.UnitTests
 
                         int expectedOffset = (planeY * planeWidth + planeX) * imageFormat.Components[componentIndex].Length;
 
+                        // Add the base offset for the component's plane
+                        for (int i = 0; i < componentIndex; i++)
+                        {
+                            int previousPlaneWidth = image.Width >> image.ImageFormat.Widths[i];
+                            int previousPlaneHeight = image.Height >> image.ImageFormat.Heights[i];
+                            expectedOffset += previousPlaneWidth * previousPlaneHeight * image.ImageFormat.Components[i].Length;
+                        }
+
                         int calculatedOffset = image.CalculateComponentDataOffset(x, y, componentIndex);
 
                         if (expectedOffset != calculatedOffset) throw new InvalidOperationException();
@@ -689,9 +716,11 @@ namespace Media.UnitTests
             {
                 for (int x = 0; x < image.Width; x++)
                 {
-                    for (int componentIndex = 0; componentIndex < imageFormat.Length; componentIndex++)
+                    for (int componentIndex = 0; componentIndex < imageFormat.Components.Length; componentIndex++)
                     {
-                        int expectedOffset = (y * image.Width + x) * imageFormat.Length;
+                        var component = image.ImageFormat.Components[componentIndex];
+
+                        int expectedOffset = (y * image.Width + x) * imageFormat.Components.Length + componentIndex;
 
                         int calculatedOffset = image.CalculateComponentDataOffset(x, y, componentIndex);
 
