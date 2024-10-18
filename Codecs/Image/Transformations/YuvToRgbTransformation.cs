@@ -146,9 +146,9 @@ public class VectorizedYuvToRgbTransformation : ImageTransformation
                 Vector<byte> vVector = Source.GetComponentVector(x + 2, y, ImageFormat.ChromaMinorChannelId);
 
                 // Convert YUV to RGB using vectorized calculations
-                Vector<float> yFloat = (Vector<float>)yVector;
-                Vector<float> uFloat = (Vector<float>)uVector - vector128;
-                Vector<float> vFloat = (Vector<float>)vVector - vector128;
+                Vector<float> yFloat = Vector.AsVectorSingle(yVector) - vector128;
+                Vector<float> uFloat = Vector.AsVectorSingle(uVector) - vector128;
+                Vector<float> vFloat = Vector.AsVectorSingle(vVector) - vector128;
 
                 Vector<float> rValue = yFloat + vector1_13983 * vFloat;
                 Vector<float> gValue = yFloat - vector0_39465 * uFloat - vector0_58060 * vFloat;

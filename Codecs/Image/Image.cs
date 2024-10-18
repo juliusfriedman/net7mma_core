@@ -2,13 +2,14 @@
 using Media.Common;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Numerics;
 
 namespace Media.Codecs.Image
 {
-    public class Image : Media.Codec.MediaBuffer
+    public class Image : MediaBuffer
     {
         private const float DefaultDpi = 96.0f;
 
@@ -87,7 +88,7 @@ namespace Media.Codecs.Image
         }
 
         public Image(ImageFormat format, int width, int height, byte[] data)
-            : base(format, new Common.MemorySegment(data))
+            : base(format, new MemorySegment(data))
         {
             Width = width;
 
@@ -101,7 +102,7 @@ namespace Media.Codecs.Image
         //Should be Vector<byte>?
 
         //Assumes component order
-        public IEnumerable<Common.MemorySegment> this[int x, int y]
+        public IEnumerable<MemorySegment> this[int x, int y]
         {
             get
             {
@@ -110,7 +111,7 @@ namespace Media.Codecs.Image
 
                 //Loop each component and return the segment which corresponds to the data at the offset for that component
                 for (int c = 0, ce = ImageFormat.Components.Length; c < ce; ++c)
-                    yield return new Common.MemorySegment(Data.Array, Data.Offset + CalculateComponentDataOffset(x, y, c), ImageFormat[c].Length);
+                    yield return new MemorySegment(Data.Array, Data.Offset + CalculateComponentDataOffset(x, y, c), ImageFormat[c].Length);
             }
             set
             {
@@ -152,7 +153,7 @@ namespace Media.Codecs.Image
             int ypelsPerMeter = (int)Math.Round(1.0f / verticalResolutionMeters);
 
             // Create a new BitmapInfoHeader based on the ImageFormat
-            BitmapInfoHeader header = new(width, height, (short)ImageFormat.Length, (short)ImageFormat.Size, compressionFormat, Data.Array.Length, xpelsPerMeter, ypelsPerMeter, 0, 0);
+            BitmapInfoHeader header = new(width, height, (short)ImageFormat.Length, (short)ImageFormat.Size, compressionFormat, Data.Count, xpelsPerMeter, ypelsPerMeter, 0, 0);
             SaveBitmap(header, stream);
         }
 
@@ -161,7 +162,7 @@ namespace Media.Codecs.Image
             int fileSize = 14 + header.Count + Data.Array.Length;
 
             // BMP file header
-            byte[] fileHeader = new byte[14]
+            byte[] fileHeader =
             {
                 0x42, 0x4D,                       // "BM" - BMP file identifier
                 0, 0, 0, 0,                       // FileSize
@@ -170,7 +171,7 @@ namespace Media.Codecs.Image
                 0x36, 0x00, 0x00, 0x00            // Offset of the image data (54 bytes)
             };
 
-            Common.Binary.Write32(fileHeader, 2, Binary.IsBigEndian, fileSize);
+            Binary.Write32(fileHeader, 2, Binary.IsBigEndian, fileSize);
 
             // Write the BMP file header to the stream
             stream.Write(fileHeader, 0, fileHeader.Length);
@@ -217,16 +218,20 @@ namespace Media.Codecs.Image
         /// <returns></returns>
         public int CalculateComponentDataOffset(int x, int y, int componentIndex)
         {
+            // Validate the input parameters
+            if (x < 0 || x >= Width || y < 0 || y >= Height)
+                return -1;
+
             if (componentIndex < 0 || componentIndex >= ImageFormat.Components.Length)
                 return -1;
 
+            // Calculate the offset based on the data layout
             int offset = 0;
 
             var component = ImageFormat.Components[componentIndex];
-
             switch (DataLayout)
             {
-                case Media.Codec.DataLayout.Planar:
+                case DataLayout.Planar:
                     //for(int c = 0; c < componentIndex; ++c)
                     //offset += PlaneLength(c);
 
@@ -241,10 +246,10 @@ namespace Media.Codecs.Image
                     break;
 
 
-                case Media.Codec.DataLayout.SemiPlanar:
+                case DataLayout.SemiPlanar:
                     int yPlaneWidth = PlaneWidth(componentIndex);
                     // Non interleaved plane
-                    if (componentIndex is 0)
+                    if (component.Id is ImageFormat.LumaChannelId)
                     {
                         offset += (y * yPlaneWidth + x) * component.Length;
                         break;
@@ -256,7 +261,7 @@ namespace Media.Codecs.Image
                         offset += uvOffset + uvComponentIndex * component.Length;
                         break;
                     }
-                case Media.Codec.DataLayout.Packed:
+                case DataLayout.Packed:
                     int componentDataIndex = y * Width + x;
                     int bytesPerChannel = ImageFormat.Length; // Number of bytes per channel (e.g., 3 for RGB24)
                     offset += componentDataIndex * bytesPerChannel;
@@ -332,6 +337,8 @@ namespace Media.Codecs.Image
         }
 
         public void SetComponentData(int x, int y, byte componentId, MemorySegment data) => SetComponentData(x, y, GetComponentIndex(componentId), data);
+
+        public void SetComponentVector(int x, int y, byte componentId, Vector<byte> componentVector) => SetComponentVector(x, y, GetComponentIndex(componentId), componentVector);
 
         public void Fill(byte value) => Array.Fill(Data.Array, value, Data.Offset, Data.Count);
 
