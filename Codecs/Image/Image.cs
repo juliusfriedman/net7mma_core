@@ -1,10 +1,8 @@
 ﻿using Codecs.Image;
 using Media.Codec;
-using Media.Codecs.Image;
 using Media.Common;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -229,8 +227,13 @@ namespace Media.Codecs.Image
             var component = ImageFormat.Components[componentIndex];
             switch (DataLayout)
             {
+                case DataLayout.SemiPlanar:
+                    if (component.Id is ImageFormat.LumaChannelId)
+                        goto case DataLayout.Packed;
+                    offset = (y / 2 * PlaneWidth(componentIndex) + x / 2) * ImageFormat.Components.Length + componentIndex;
+                    break;
                 case DataLayout.Planar:
-                    //•	Each component is stored in a separate plane. The offset is calculated based on the plane's width and the pixel's position within the plane.
+                    // Each component is stored in a separate plane. The offset is calculated based on the plane's width and the pixel's position within the plane.
                     // Calculate the width and height of the plane for the given component
                     int widthSampling = ImageFormat.Widths[componentIndex];
                     int heightSampling = ImageFormat.Heights[componentIndex];
@@ -252,34 +255,7 @@ namespace Media.Codecs.Image
                         int previousPlaneHeight = Height >> ImageFormat.Heights[i];
                         offset += previousPlaneWidth * previousPlaneHeight * ImageFormat.Components[i].Length;
                     }
-                    break;
-                case DataLayout.SemiPlanar:
-                    // Calculate the width and height of the luma plane
-                    int yPlaneWidth = Width;
-                    int yPlaneHeight = Height;
-
-                    if (component.Id == ImageFormat.LumaChannelId)
-                    {
-                        // Luma component
-                        offset = (y * yPlaneWidth + x) * component.Length;
-                    }
-                    else
-                    {
-                        // Chroma components (U and V)
-                        int uvPlaneWidth = yPlaneWidth / 2;
-                        int uvPlaneHeight = yPlaneHeight / 2;
-
-                        // Calculate the position within the UV plane
-                        int uvX = x / 2;
-                        int uvY = y / 2;
-
-                        // Calculate the base offset for the UV plane
-                        int uvBaseOffset = yPlaneWidth * yPlaneHeight * component.Length;
-
-                        // Calculate the offset within the UV plane
-                        offset = uvBaseOffset + (uvY * uvPlaneWidth + uvX) * component.Length;
-                    }
-                    break;
+                    break;               
                 case DataLayout.Packed:
                     // In packed layout, components are interleaved
                     int componentDataIndex = (y * PlaneWidth(componentIndex) + x) * ImageFormat.Components.Length + componentIndex;
@@ -656,10 +632,6 @@ namespace Media.UnitTests
                 {
                     for (int componentIndex = 0; componentIndex < imageFormat.Length; componentIndex++)
                     {
-                        //int planeOffset = 0;
-                        //for (int i = 0; i < componentIndex; ++i)
-                        //planeOffset += image.PlaneLength(i);
-
                         int widthSampling = imageFormat.Widths[componentIndex];
                         int heightSampling = imageFormat.Heights[componentIndex];
 
@@ -669,7 +641,6 @@ namespace Media.UnitTests
 
                         int expectedOffset = (planeY * planeWidth + planeX) * imageFormat.Components[componentIndex].Length;
 
-                        // Add the base offset for the component's plane
                         for (int i = 0; i < componentIndex; i++)
                         {
                             int previousPlaneWidth = image.Width >> image.ImageFormat.Widths[i];
@@ -696,9 +667,14 @@ namespace Media.UnitTests
                 {
                     for (int componentIndex = 0; componentIndex < imageFormat.Length; componentIndex++)
                     {
-                        int expectedOffset = componentIndex is 0
-                            ? y * image.Width + x
-                            : (image.Width * image.Height) + ((y / 2) * (image.Width / 2) + (x / 2)) * imageFormat.Components[componentIndex].Length;
+                        var component = imageFormat[componentIndex];
+
+                        int expectedOffset = component.Id switch
+                        {
+                            Codecs.Image.ImageFormat.LumaChannelId => (y * image.Width + x) * imageFormat.Components.Length + componentIndex,
+                            _ => (y / 2 * image.Width + x / 2) * imageFormat.Components.Length + componentIndex
+                        };
+
                         int calculatedOffset = image.CalculateComponentDataOffset(x, y, componentIndex);
 
                         if (expectedOffset != calculatedOffset) throw new InvalidOperationException();
@@ -791,6 +767,13 @@ namespace Media.UnitTests
 
                     //Compare the two sequences
                     if (false == left.SequenceEqual(right)) throw new System.InvalidOperationException();
+                    
+                    string currentPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                    var outputDirectory = Directory.CreateDirectory(Path.Combine(currentPath, "Media", "BmpTest", "output"));
+                    using (var outputStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"Yuv420P_{Yuv420P.DataLayout}.yuv"), FileMode.OpenOrCreate))
+                    {
+                        outputStream.Write(yuvImage.Data.Array, yuvImage.Data.Offset, yuvImage.Data.Count);
+                    }
                 }
 
                 //Done with the format.
