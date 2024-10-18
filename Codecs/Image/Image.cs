@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using static System.Net.Mime.MediaTypeNames;
+using System.Text;
 
 namespace Media.Codecs.Image
 {
@@ -23,15 +23,30 @@ namespace Media.Codecs.Image
             if (BitmapHeader.Length != stream.Read(bitmapHeader.Array, 0, bitmapHeader.Count))
                 throw new InvalidOperationException($"Need {BitmapHeader.Length} Bytes for the Bitmap Header");
 
-            if (bitmapHeader.FileSignature != BitmapHeader.BMFileSignature)
-                throw new InvalidOperationException("Need BM File Header.");
+            switch (bitmapHeader.FileSignature)
+            {
+                case BitmapHeader.BMFileSignature:
+                case BitmapHeader.BAFileSignature:
+                case BitmapHeader.CIFileSignature:
+                case BitmapHeader.CPFileSignature:
+                case BitmapHeader.ICFileSignature:
+                case BitmapHeader.PTFileSignature:
+                    break;
+                default:
+                    throw new InvalidOperationException("Need BM File Header.");
+            }
 
             var fileSize = bitmapHeader.FileSize;
 
             BitmapInfoHeader header = new();
 
-            if (header.Count != stream.Read(header.Array, 0, header.Count))
+            if (BitmapInfoHeader.Length != stream.Read(header.Array, 0, header.Count))
                 throw new InvalidOperationException($"Need {BitmapInfoHeader.Length} Bytes for the Bitmap Header");
+
+            if (header.Size is not 40 and not 56 and not 124) // 124 - is BITMAPV5INFOHEADER, 56 - is BITMAPV3INFOHEADER, where we ignore the additional values see https://web.archive.org/web/20150127132443/https://forums.adobe.com/message/3272950
+            {
+                throw new Exception("The information header size is incorrect.");
+            }
 
             //Need to build components based on header for now just use RGB or use a single component.
 
@@ -145,8 +160,7 @@ namespace Media.Codecs.Image
             int width = Width;
             int height = Height;
 
-            //Should be a 4CC indicating the image but...
-            var compressionFormat = 0;// Binary.Read32(ImageFormat.Components.Select(c => (byte)char.ToUpper((char)c.Id)).ToArray(), 0, Binary.IsBigEndian);
+            var compressionFormat = (int)BitmapInfoHeader.CompressionMethodType.BitFields;
 
             // Convert pixels to meters: 1 inch = 0.0254 meters
             float horizontalResolutionMeters = width / DefaultDpi * 0.0254f;
@@ -167,13 +181,16 @@ namespace Media.Codecs.Image
             int fileSize = headersSize + Data.Array.Length;
 
             BitmapHeader bitmapHeader = new BitmapHeader();
-            bitmapHeader.FileSignature = 0x424d;
+            bitmapHeader.FileSignature = BitmapHeader.BMFileSignature;
             bitmapHeader.FileSize = (uint)fileSize;
+            bitmapHeader.Reserved = Binary.ReadU32(Encoding.ASCII.GetBytes(ImageFormat.FormatString), 0, false);
             bitmapHeader.DataOffset = (uint)headersSize;
 
             // Write the BMP file header to the stream
             stream.Write(bitmapHeader.Array, bitmapHeader.Offset, bitmapHeader.Count);
+            // Write the DIB header to the stream
             stream.Write(bitmapInfoHeader.Array, bitmapInfoHeader.Offset, bitmapInfoHeader.Count);
+            // Write the image data to the stream
             stream.Write(Data.Array, Data.Offset, Data.Count);
         }
 
@@ -262,8 +279,9 @@ namespace Media.Codecs.Image
                     break;
                 case DataLayout.Packed:
                     // In packed layout, components are interleaved
-                    int componentDataIndex = (y * PlaneWidth(componentIndex) + x) * ImageFormat.Components.Length + componentIndex;
-                    offset += componentDataIndex * component.Length;
+                    //int componentDataIndex = (y * PlaneWidth(componentIndex) + x) * ImageFormat.Components.Length + componentIndex;
+                    //offset += componentDataIndex * component.Length;
+                    offset = x + (PlaneHeight(componentIndex) - (y + 1)) * PlaneWidth(componentIndex);
                     break;
             }
 
@@ -695,8 +713,7 @@ namespace Media.UnitTests
                                 expectedOffset += image.Width + image.Height * component.Length;
                                 var Y = y >> 1;
                                 var X = x >> 1;
-                                int componentDataIndex = (Y * image.PlaneWidth(componentIndex) + X) * image.ImageFormat.Components.Length + componentIndex;
-                                expectedOffset += componentDataIndex * component.Length;
+                                expectedOffset = X + (image.PlaneHeight(componentIndex) - (Y + 1)) * image.PlaneWidth(componentIndex);
                                 break;
                         }
 
@@ -721,7 +738,7 @@ namespace Media.UnitTests
                     {
                         var component = image.ImageFormat.Components[componentIndex];
 
-                        int expectedOffset = (y * image.Width + x) * imageFormat.Components.Length + componentIndex;
+                        int expectedOffset = x + (image.PlaneHeight(componentIndex) - (y + 1)) * image.PlaneWidth(componentIndex);
 
                         int calculatedOffset = image.CalculateComponentDataOffset(x, y, componentIndex);
 

@@ -1,14 +1,35 @@
 ﻿using Media.Common;
+using System.Reflection.PortableExecutable;
 
 public class BitmapInfoHeader : MemorySegment
 {
-    public const int Length = 40;
+    public const int Length = 40;    
+
+    public enum CompressionMethodType : int
+    {
+        RGB = 0,
+        RunLength8 = 1,
+        RunLength4 = 2,
+        BitFields = 3,
+        JPEG = 4,
+        PNG = 5,
+        AlphaBitFields = 6,
+        CMYK = 11,
+        CMYKRunLength8 = 12,
+        CMYKRunLength4 = 13
+    }
 
     public int Size
     {
         get => Binary.Read32(Array, Offset, Binary.IsBigEndian);
         set => Binary.Write32(Array, Offset, Binary.IsBigEndian, value);
     }
+
+    public bool IsKnownSize => Size switch
+    {
+        40 or 56 or 124 => true,
+        _ => false
+    };
 
     public int Width
     {
@@ -39,6 +60,8 @@ public class BitmapInfoHeader : MemorySegment
         get => Binary.Read32(Array, Offset + 16, Binary.IsBigEndian);
         set => Binary.Write32(Array, Offset + 16, Binary.IsBigEndian, value);
     }
+
+    public CompressionMethodType CompressionMethod => (CompressionMethodType)Compression;
 
     public int ImageSize
     {

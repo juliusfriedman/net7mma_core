@@ -8,6 +8,16 @@ public class BitmapHeader : MemorySegment
 
     public const ushort BMFileSignature = 0x424D; // "BM" in ASCII
 
+    public const ushort BAFileSignature = 0x4142; // "BA" in ASCII
+
+    public const ushort CIFileSignature = 0x4943; // "CI" in ASCII
+
+    public const ushort CPFileSignature = 0x5043; // "CP" in ASCII
+
+    public const ushort ICFileSignature = 0x4349; // "IC" in ASCII
+
+    public const ushort PTFileSignature = 0x5450; // "PT" in ASCII
+
     public ushort FileSignature
     {
         get => Binary.ReadU16(Array, Offset, Binary.IsLittleEndian);
