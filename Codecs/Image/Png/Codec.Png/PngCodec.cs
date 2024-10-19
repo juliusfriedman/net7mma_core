@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Text;
 using Media.Codec;
 using Media.Codec.Interfaces;
@@ -28,14 +29,35 @@ namespace Codec.Png
 
         public int Encode(PngImage image, Stream outputStream)
         {
+            var position = outputStream.Position;
             // Implement PNG encoding logic here
-            throw new NotImplementedException();
+            image.Save(outputStream);
+            return (int)(outputStream.Position - position);
         }
 
         public PngImage Decode(Stream inputStream)
         {
             // Implement PNG decoding logic here
-            throw new NotImplementedException();
+            return PngImage.FromStream(inputStream);
+        }
+
+        public static IEnumerable<Chunk> ReadChunks(Stream inputStream)
+        {
+            // Read and validate the PNG signature
+            using MemorySegment bytes = new MemorySegment(new byte[Binary.BytesPerLong]);
+            if (Binary.BytesPerLong != inputStream.Read(bytes.Array, bytes.Offset, bytes.Count))
+                throw new InvalidDataException("Not enough bytes for PNGSignature.");
+            ulong signature = Binary.ReadU64(bytes.Array, bytes.Offset, Binary.IsLittleEndian);
+            if (signature != PngImage.PNGSignature)
+                throw new InvalidDataException("The provided stream is not a valid PNG file.");
+
+            while (inputStream.Position < inputStream.Length)
+            {
+                var chunk = Chunk.ReadChunk(inputStream);
+                if (chunk == null)
+                    yield break;
+                yield return chunk;
+            }
         }
     }
 }

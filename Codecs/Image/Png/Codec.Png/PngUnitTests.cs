@@ -8,19 +8,18 @@ namespace Media.UnitTests;
 
 internal class PngUnitTests
 {
-    public static void TestSaveBitmap()
-    {
-        var format = ImageFormat.RGBA(8);
-        var image = new PngImage(format, 100, 100);
-        using (var stream = new MemoryStream())
-        {
-            image.Save(stream);
-            Console.WriteLine(stream.Length > 0 ? "Pass" : "Fail");
-        }
-    }
-
     public static void TestSave()
     {
+        var format = ImageFormat.RGBA(8);
+        using (var image = new PngImage(format, 100, 100))
+        {
+            using (var stream = new MemoryStream())
+            {
+                image.Save(stream);
+                Console.WriteLine(stream.Length > 0 ? "Pass" : "Fail");
+            }
+        }
+
         var currentPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 
         var outputDirectory = Directory.CreateDirectory(Path.Combine(currentPath!, "Media", "PngTest", "output"));
@@ -94,14 +93,11 @@ internal class PngUnitTests
             {
                 for (int j = 0; j < image.Height; j += 4)
                 {
-                    for (int c = 0; c < image.ImageFormat.Components.Length; ++c)
-                    {
-                        var data = image.GetComponentVector(i, j, c);
+                    var data = image.GetVectorDataAt(i, j);
 
-                        data = Vector<byte>.One * byte.MaxValue;
+                    data = Vector<byte>.One * byte.MaxValue;
 
-                        image.SetComponentVector(i, j, c, data);
-                    }
+                    image.SetVectorDataAt(i, j, data);
                 }
             }
 
@@ -117,14 +113,11 @@ internal class PngUnitTests
             {
                 for (int j = 0; j < image.Height; j += 4)
                 {
-                    for (int c = 0; c < image.ImageFormat.Components.Length; ++c)
-                    {
-                        var data = image.GetComponentVector(i, j, c);
+                    var data = image.GetVectorDataAt(i, j);
 
-                        data = Vector<byte>.One * byte.MaxValue;
+                    data = Vector<byte>.One * byte.MaxValue;
 
-                        image.SetComponentVector(i, j, c, data);
-                    }
+                    image.SetVectorDataAt(i, j, data);
                 }
             }
 
@@ -140,14 +133,11 @@ internal class PngUnitTests
             {
                 for (int j = 0; j < image.Height; j += 16)
                 {
-                    for (int c = 0; c < image.ImageFormat.Length; ++c)
-                    {
-                        var data = image.GetComponentVector(i, j, c);
+                    var data = image.GetVectorDataAt(i, j);
 
-                        data = Vector<byte>.One * byte.MaxValue;
+                    data = Vector<byte>.One * byte.MaxValue;
 
-                        image.SetComponentVector(i, j, c, data);
-                    }
+                    image.SetVectorDataAt(i, j, data);
                 }
             }
 
@@ -197,25 +187,34 @@ internal class PngUnitTests
     {
         string currentPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!;
 
-        using var grayStream = new FileStream(Path.Combine(currentPath, "Media", "PngTest", "lena_gray.png"), FileMode.Open, FileAccess.Read);
-        using var grayImage = PngImage.FromStream(grayStream);
+        string pngTestDir = Path.Combine(currentPath, "Media", "PngTest");
 
-        using var colorStream = new FileStream(Path.Combine(currentPath, "Media", "PngTest", "lena_color.png"), FileMode.Open, FileAccess.Read);
-        using var colorImage = PngImage.FromStream(colorStream);
+        string outputDir = Path.Combine(currentPath, "Media", "PngTest", "output");
 
-        if (colorImage.Width != grayImage.Width) throw new InvalidOperationException();
-        if (colorImage.Height != grayImage.Height) throw new InvalidOperationException();
+        foreach (var filePath in Directory.GetFiles(pngTestDir, "*.png"))
+        {
+            using var pngStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Read);
 
-        var outputGray = new FileStream(Path.Combine(currentPath, "Media", "PngTest", "output", "lena_gray_save.png"), FileMode.OpenOrCreate, FileAccess.Write);
-        grayImage.Save(outputGray);
+            foreach (var chunk in PngCodec.ReadChunks(pngStream))
+            {
+                Console.Write("ChunkType:");
+                Console.WriteLine(chunk.ChunkType);
+                Console.Write("ChunkSize:");
+                Console.WriteLine(chunk.ChunkSize);
+                Console.Write("Data:");
+                Console.WriteLine(BitConverter.ToString(chunk.Data.Array, chunk.Data.Offset, chunk.Data.Count));
+                Console.Write("Chunk:");
+                Console.WriteLine(chunk.Crc);
+            }
 
-        var outputColor = new FileStream(Path.Combine(currentPath, "Media", "PngTest", "output", "lena_color_save.png"), FileMode.OpenOrCreate, FileAccess.Write);
-        colorImage.Save(outputColor);
+            pngStream.Seek(0, SeekOrigin.Begin);
 
-        var newImage = new PngImage(Codecs.Image.ImageFormat.RGBA(8), grayImage.Width, grayImage.Height);
-        grayImage.Data.CopyTo(newImage.Data);
+            using var pngImage = PngImage.FromStream(pngStream);
 
-        var outputNew = new FileStream(Path.Combine(currentPath, "Media", "PngTest", "output", "lena_gray_new_save.png"), FileMode.OpenOrCreate, FileAccess.Write);
-        newImage.Save(outputNew);
+            var saveFileName = Path.Combine(outputDir, Path.GetFileName(filePath));
+
+            using var outputNew = new FileStream(saveFileName, FileMode.OpenOrCreate, FileAccess.Write);
+            pngImage.Save(outputNew);
+        }
     }
 }

@@ -1,6 +1,9 @@
-﻿using System.IO.Compression;
+﻿using System;
+using System.IO.Compression;
+using System.Linq;
 using System.Numerics;
 using System.Text;
+using System.Threading.Tasks.Sources;
 using Media.Codecs.Image;
 using Media.Common;
 
@@ -57,7 +60,7 @@ public class PngImage : Image
     public static PngImage FromStream(Stream stream)
     {
         // Read and validate the PNG signature
-        MemorySegment bytes = new MemorySegment(new byte[Binary.BytesPerLong]);
+        using MemorySegment bytes = new MemorySegment(new byte[Binary.BytesPerLong]);
         if (Binary.BytesPerLong != stream.Read(bytes.Array, bytes.Offset, bytes.Count))
             throw new InvalidDataException("Not enough bytes for PNGSignature.");
         ulong signature = Binary.ReadU64(bytes.Array, bytes.Offset, Binary.IsLittleEndian);
@@ -69,17 +72,15 @@ public class PngImage : Image
         ImageFormat? imageFormat = default;
         MemorySegment? dataSegment = default;
         byte colorType = default;
+        ChunkHeader chunkHeader;
         while (stream.Position < stream.Length)
         {
-            if (Binary.BytesPerInteger != stream.Read(bytes.Array, bytes.Offset, Binary.BytesPerInteger))
+            chunkHeader = new ChunkHeader(bytes.Array, bytes.Offset);
+
+            if (ChunkHeader.ChunkHeaderLength != stream.Read(bytes.Array, bytes.Offset, ChunkHeader.ChunkHeaderLength))
                 throw new InvalidDataException("Not enough bytes for chunk length.");
 
-            int chunkLength = Binary.Read32(bytes.Array, bytes.Offset, Binary.IsLittleEndian);
-
-            if (Binary.BytesPerInteger != stream.Read(bytes.Array, bytes.Offset, Binary.BytesPerInteger))
-                throw new InvalidDataException("Not enough bytes for chunk type.");
-
-            string chunkType = Encoding.ASCII.GetString(bytes.Array, bytes.Offset, Binary.BytesPerInteger);
+            string chunkType = chunkHeader.Name;
 
             if (chunkType == "IHDR")
             {
@@ -111,19 +112,24 @@ public class PngImage : Image
 
                 // Create the image format based on the IHDR data
                 imageFormat = CreateImageFormat(bitDepth, colorType);
+
+                stream.Seek(Binary.BytesPerInteger, SeekOrigin.Current); // Skip the CRC
+
             }
             else if (chunkType == "IDAT")
             {
                 // Read the image data
-                dataSegment = new MemorySegment(chunkLength);
+                dataSegment = new MemorySegment(chunkHeader.Length);
 
-                if(chunkLength != stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count))
-                    throw new InvalidDataException("Not enough bytes for IDAT.");                
+                if(chunkHeader.Length != stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count))
+                    throw new InvalidDataException("Not enough bytes for IDAT.");
+
+                stream.Seek(Binary.BytesPerInteger, SeekOrigin.Current); // Skip the CRC
             }
             else
             {
                 // Skip the chunk data and CRC
-                stream.Seek(chunkLength, SeekOrigin.Current);
+                stream.Seek(chunkHeader.Length + Binary.BytesPerInteger, SeekOrigin.Current);
             }
         }
 
@@ -143,64 +149,52 @@ public class PngImage : Image
         //Should implement like MarkerReader and MarkerWriter in Codec.Jpeg
 
         // Write the IHDR chunk
-        WriteChunk(stream, "IHDR", WriteIHDRChunk);
+        WriteIHDRChunk(stream);
 
         // Write the IDAT chunk
-        WriteChunk(stream, "IDAT", WriteIDATChunk);
+        WriteIDATChunk(stream);
 
         // Write the IEND chunk
-        WriteChunk(stream, "IEND", WriteIENDChunk);
+        WriteIENDChunk(stream);
     }
 
     private void WriteIHDRChunk(Stream stream)
     {
-        stream.Write(Binary.GetBytes(Width, Binary.IsLittleEndian));
-        stream.Write(Binary.GetBytes(Height, Binary.IsLittleEndian));
-        stream.WriteByte((byte)ImageFormat.Size);
-        stream.WriteByte(ColorType);
-        stream.WriteByte(0); // Compression method
-        stream.WriteByte(0); // Filter method
-        stream.WriteByte(0); // Interlace method
+        using var ihdr = new Chunk("IHDR", 13);
+        var offset = ihdr.Data.Offset;
+        Binary.Write32(ihdr.Data.Array, offset, Binary.IsLittleEndian, Width);
+        offset += Binary.BytesPerInteger;
+        Binary.Write32(ihdr.Data.Array, offset, Binary.IsLittleEndian, Height);
+        offset += Binary.BytesPerInteger;
+        Binary.Write8(ihdr.Data.Array, offset++, Binary.IsBigEndian, (byte)ImageFormat.Size);
+        Binary.Write8(ihdr.Data.Array, offset++, Binary.IsBigEndian, ColorType);
+        Binary.Write8(ihdr.Data.Array, offset++, Binary.IsBigEndian, 0);
+        Binary.Write8(ihdr.Data.Array, offset++, Binary.IsBigEndian, 0);
+        Binary.Write8(ihdr.Data.Array, offset++, Binary.IsBigEndian, 0);
+        stream.Write(ihdr.Array, ihdr.Offset, ihdr.Count);
     }
 
-    private void WriteChunk(Stream writer, string chunkType, Action<Stream> writeChunkData)
+    private void WriteIDATChunk(Stream stream, CompressionLevel compressionLevel = CompressionLevel.Optimal)
     {
-        using (MemoryStream ms = new MemoryStream())
+        Chunk idat;
+        using (MemoryStream ms = new MemoryStream(Data.Count))
         {
-            // Write the chunk data to the MemoryStream
-            writeChunkData(ms);
-            byte[] chunkData = ms.ToArray();
-
-            // Write the length of the chunk data (big-endian)
-            writer.Write(BitConverter.GetBytes(chunkData.Length).Reverse().ToArray());
-
-            // Write the chunk type
-            writer.Write(Encoding.ASCII.GetBytes(chunkType));
-
-            // Write the chunk data
-            writer.Write(chunkData);
-
-            // Calculate and write the CRC
-            writer.Write(CalculateCrc(Encoding.ASCII.GetBytes(chunkType).Concat(chunkData)));
-        }
-    }
-
-    private void WriteIDATChunk(Stream stream)
-    {
-        using (MemoryStream ms = new MemoryStream())
-        {
-            using (DeflateStream deflateStream = new DeflateStream(ms, CompressionLevel.Optimal, true))
+            using (DeflateStream deflateStream = new DeflateStream(ms, compressionLevel, true))
             {
                 deflateStream.Write(Data.Array, Data.Offset, Data.Count);
             }
             ms.Seek(0, SeekOrigin.Begin);
-            ms.CopyTo(stream);
+            ms.TryGetBuffer(out var buffer);
+            idat = new Chunk("IDAT", buffer.Count);
+            buffer.CopyTo(idat.Data.Array, idat.Data.Offset);            
         }
+        stream.Write(idat.Array, idat.Offset, idat.Count);
     }
 
     private void WriteIENDChunk(Stream stream)
     {
-        // IEND chunk has no data
+        var iend = new Chunk("IEND", 0);
+        stream.Write(iend.Array, iend.Offset, iend.Count);
     }
 
     public MemorySegment GetPixelDataAt(int x, int y)
