@@ -160,7 +160,7 @@ namespace Media.Codecs.Image
             int width = Width;
             int height = Height;
 
-            var compressionFormat = (int)BitmapInfoHeader.CompressionMethodType.BitFields;
+            var compressionFormat = (int)BitmapInfoHeader.CompressionMethodType.RGB;
 
             // Convert pixels to meters: 1 inch = 0.0254 meters
             float horizontalResolutionMeters = width / DefaultDpi * 0.0254f;
@@ -171,7 +171,7 @@ namespace Media.Codecs.Image
             int ypelsPerMeter = (int)Math.Round(1.0f / verticalResolutionMeters);
 
             // Create a new BitmapInfoHeader based on the ImageFormat
-            BitmapInfoHeader header = new(width, height, (short)ImageFormat.Length, (short)ImageFormat.Size, compressionFormat, Data.Count, xpelsPerMeter, ypelsPerMeter, 0, 0);
+            BitmapInfoHeader header = new(width, height, (short)ImageFormat.Components.Length, (short)ImageFormat.Size, compressionFormat, Data.Count, xpelsPerMeter, ypelsPerMeter, 0, 0);
             SaveBitmap(header, stream);
         }
 
@@ -517,7 +517,7 @@ namespace Media.UnitTests
                     {
                         for (int j = 0; j < image.Height; j += 2)
                         {
-                            for (int c = 0; c < image.ImageFormat.Length; ++c)
+                            for (int c = 0; c < image.ImageFormat.Components.Length; ++c)
                             {
                                 var data = image.GetComponentData(i, j, image.ImageFormat[c]);
 
@@ -552,7 +552,7 @@ namespace Media.UnitTests
                     {
                         for (int j = 0; j < image.Height; j += 2)
                         {
-                            for (int c = 0; c < image.ImageFormat.Length; ++c)
+                            for (int c = 0; c < image.ImageFormat.Components.Length; ++c)
                             {
                                 var data = image.GetComponentVector(i, j, c);
 
@@ -570,13 +570,36 @@ namespace Media.UnitTests
                 }
             }
 
+            using (var image = new Codecs.Image.Image(ImageFormat.Binary(8), 696, 564))
+            {
+                for (int i = 0; i < image.Width; i += 4)
+                {
+                    for (int j = 0; j < image.Height; j += 4)
+                    {
+                        for (int c = 0; c < image.ImageFormat.Components.Length; ++c)
+                        {
+                            var data = image.GetComponentVector(i, j, c);
+
+                            data = Vector<byte>.One * byte.MaxValue;
+
+                            image.SetComponentVector(i, j, c, data);
+                        }
+                    }
+                }
+
+                using (var outputBmpStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, "Binary_packed_line2.bmp"), FileMode.OpenOrCreate))
+                {
+                    image.SaveBitmap(outputBmpStream);
+                }
+            }
+
             using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 696, 564))
             {
                 for (int i = 0; i < image.Width; i += 4)
                 {
                     for (int j = 0; j < image.Height; j += 4)
                     {
-                        for (int c = 0; c < image.ImageFormat.Length; ++c)
+                        for (int c = 0; c < image.ImageFormat.Components.Length; ++c)
                         {
                             var data = image.GetComponentVector(i, j, c);
 
@@ -757,7 +780,7 @@ namespace Media.UnitTests
             //Create the source image
             using (Media.Codecs.Image.Image rgbImage = new(Media.Codecs.Image.ImageFormat.RGB(8), testWidth, testHeight))
             {
-                if (rgbImage.ImageFormat.HasAlphaComponent) throw new System.Exception("HasAlphaComponent should be false");
+                if (rgbImage.ImageFormat.HasAlphaComponent) throw new System.Exception("HasAlphaComponent should be false");             
 
                 //Create the ImageFormat based on YUV packed but in Planar format with a full height luma plane and half hight chroma planes
                 var Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
@@ -809,9 +832,27 @@ namespace Media.UnitTests
 
                     //Compare the two sequences
                     if (false == left.SequenceEqual(right)) throw new System.InvalidOperationException();
-                    
-                    string currentPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
+                    //Draw some lines
+                    for (int i = 0; i < yuvImage.Width; i += 16)
+                    {
+                        for (int j = 0; j < yuvImage.Height; j += 16)
+                        {
+                            for (int c = 0; c < yuvImage.ImageFormat.Length; ++c)
+                            {
+                                var data = yuvImage.GetComponentVector(i, j, c);
+
+                                data = Vector<byte>.One * byte.MaxValue;
+
+                                yuvImage.SetComponentVector(i, j, c, data);
+                            }
+                        }
+                    }
+
+                    var currentPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
                     var outputDirectory = Directory.CreateDirectory(Path.Combine(currentPath, "Media", "BmpTest", "output"));
+
                     using (var outputStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"Yuv420P_{Yuv420P.DataLayout}.yuv"), FileMode.OpenOrCreate))
                     {
                         outputStream.Write(yuvImage.Data.Array, yuvImage.Data.Offset, yuvImage.Data.Count);
