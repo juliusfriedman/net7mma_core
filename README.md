@@ -16,19 +16,14 @@ it to clients (you can also use it's frame types to handle
 depacketization of media) [which will eventually be seperated into their
 own classes so you don't need the server to packetize or depacketize].
 
-You can use the Image project to create Images (save to Bitmap only right
-now).
+You can use the Image projects to create Images (Support for Bitmap or Portable Network Graphics formats only for now).
 
-You can use the Audio project to create Audio (See examples for saving
-to a Riff / Wave file).
+You can use the Audio project to create Audio (See examples for saving to a Riff / Wave file).
 
-Various transforms are supported for the Image and Audio buffers,
-[using vectorization where possible].
+Various transforms are supported for the Image and Audio buffers, [using vectorization where possible].
 
-You can read various types of media files using the various Container
-projects.
+You can read various types of media files using the various Container projects.
 
-A lot of the classes are still in development mode so please let me
-know if you see a feature missing or a gap in the API.
+A lot of the classes are still in development mode so please let me know if you see a feature missing or a gap in the API.
 
 Contributions welcome!
