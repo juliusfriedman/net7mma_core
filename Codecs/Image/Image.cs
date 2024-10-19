@@ -8,63 +8,13 @@ using System.IO;
 using System.Linq;
 using System.Numerics;
 using System.Text;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Media.Codecs.Image
 {
     public class Image : MediaBuffer
     {
-        private const float DefaultDpi = 96.0f;
-
         #region Statics
-
-        public static Image FromStream(Stream stream)
-        {
-            BitmapHeader bitmapHeader = new();            
-            if (BitmapHeader.Length != stream.Read(bitmapHeader.Array, 0, bitmapHeader.Count))
-                throw new InvalidOperationException($"Need {BitmapHeader.Length} Bytes for the Bitmap Header");
-
-            switch (bitmapHeader.FileSignature)
-            {
-                case BitmapHeader.BMFileSignature:
-                case BitmapHeader.BAFileSignature:
-                case BitmapHeader.CIFileSignature:
-                case BitmapHeader.CPFileSignature:
-                case BitmapHeader.ICFileSignature:
-                case BitmapHeader.PTFileSignature:
-                    break;
-                default:
-                    throw new InvalidOperationException("Need BM File Header.");
-            }
-
-            var fileSize = bitmapHeader.FileSize;
-
-            BitmapInfoHeader header = new();
-
-            if (BitmapInfoHeader.Length != stream.Read(header.Array, 0, header.Count))
-                throw new InvalidOperationException($"Need {BitmapInfoHeader.Length} Bytes for the Bitmap Header");
-
-            if (header.Size is not 40 and not 56 and not 124) // 124 - is BITMAPV5INFOHEADER, 56 - is BITMAPV3INFOHEADER, where we ignore the additional values see https://web.archive.org/web/20150127132443/https://forums.adobe.com/message/3272950
-            {
-                throw new Exception("The information header size is incorrect.");
-            }
-
-            //Need to build components based on header for now just use RGB or use a single component.
-
-            var componentCount = header.Planes;
-
-            var componentSize = header.BitCount;
-
-            var components = new MediaComponent[componentCount];
-
-            for (var c = 0; c < componentCount; c++)
-                components[c] = new MediaComponent((byte)c, componentSize);
-
-            var image = new Image(new ImageFormat(Binary.SystemByteOrder, DataLayout.Packed, components), header.Width, header.Height);
-
-            stream.Read(image.Data.Array);
-
-            return image;
-        }
 
         //static Image Crop(Image source)
 
@@ -130,7 +80,12 @@ namespace Media.Codecs.Image
 
         #region Constructor
 
-        //Needs a subsampling...
+        public Image(ImageFormat imageFormat, int width, int height, ImageCodec codec)
+                        : base(imageFormat, CalculateSize(imageFormat, width, height), codec)
+        {
+            Width = width;
+            Height = height;
+        }
 
         public Image(ImageFormat format, int width, int height)
             : base(format, CalculateSize(format, width, height))
@@ -142,6 +97,14 @@ namespace Media.Codecs.Image
 
         public Image(ImageFormat format, int width, int height, byte[] data)
             : base(format, new MemorySegment(data))
+        {
+            Width = width;
+
+            Height = height;
+        }
+
+        public Image(ImageFormat format, int width, int height, MemorySegment data)
+            : base(format, data)
         {
             Width = width;
 
@@ -164,7 +127,7 @@ namespace Media.Codecs.Image
 
                 //Loop each component and return the segment which corresponds to the data at the offset for that component
                 for (int c = 0, ce = ImageFormat.Components.Length; c < ce; ++c)
-                    yield return new MemorySegment(Data.Array, Data.Offset + CalculateComponentDataOffset(x, y, c), ImageFormat[c].Length);
+                    yield return Data.Slice(CalculateComponentDataOffset(x, y, c), ImageFormat[c].Length);
             }
             set
             {
@@ -182,51 +145,11 @@ namespace Media.Codecs.Image
 
         public int Planes { get { return MediaFormat.Components.Length; } }
 
+        public ImageCodec ImageCodec => (ImageCodec)Codec;
+
         #endregion
 
         #region Methods
-
-        public void SaveBitmap(Stream stream)
-        {
-            if (stream is null)
-                throw new ArgumentNullException(nameof(stream));
-
-            int width = Width;
-            int height = Height;
-
-            var compressionFormat = (int)BitmapInfoHeader.CompressionMethodType.RGB;
-
-            // Convert pixels to meters: 1 inch = 0.0254 meters
-            float horizontalResolutionMeters = width / DefaultDpi * 0.0254f;
-            float verticalResolutionMeters = height / DefaultDpi * 0.0254f;
-
-            // Convert meters to pixels per meter
-            int xpelsPerMeter = (int)Math.Round(1.0f / horizontalResolutionMeters);
-            int ypelsPerMeter = (int)Math.Round(1.0f / verticalResolutionMeters);
-
-            // Create a new BitmapInfoHeader based on the ImageFormat
-            BitmapInfoHeader header = new(width, height, (short)ImageFormat.Components.Length, (short)ImageFormat.Size, compressionFormat, Data.Count, xpelsPerMeter, ypelsPerMeter, 0, 0);
-            SaveBitmap(header, stream);
-        }
-
-        public void SaveBitmap(BitmapInfoHeader bitmapInfoHeader, Stream stream)
-        {
-            int headersSize = BitmapHeader.Length + BitmapInfoHeader.Length;
-            int fileSize = headersSize + Data.Array.Length;
-
-            BitmapHeader bitmapHeader = new BitmapHeader();
-            bitmapHeader.FileSignature = BitmapHeader.BMFileSignature;
-            bitmapHeader.FileSize = (uint)fileSize;
-            bitmapHeader.Reserved = Binary.ReadU32(Encoding.ASCII.GetBytes(ImageFormat.FormatString), 0, false);
-            bitmapHeader.DataOffset = (uint)headersSize;
-
-            // Write the BMP file header to the stream
-            stream.Write(bitmapHeader.Array, bitmapHeader.Offset, bitmapHeader.Count);
-            // Write the DIB header to the stream
-            stream.Write(bitmapInfoHeader.Array, bitmapInfoHeader.Offset, bitmapInfoHeader.Count);
-            // Write the image data to the stream
-            stream.Write(Data.Array, Data.Offset, Data.Count);
-        }
 
         public int PlaneWidth(int plane)
         {
@@ -546,171 +469,6 @@ namespace Media.UnitTests
                     if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new Exception("Did not set Component data");
                 }
             }
-        }
-
-        public static void TestSave()
-        {
-            var currentPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-
-            var outputDirectory = Directory.CreateDirectory(Path.Combine(currentPath, "Media", "BmpTest", "output"));
-
-            foreach (var dataLayout in Enum.GetValues<DataLayout>())
-            {
-                if (dataLayout == DataLayout.Unknown) continue;
-
-                using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8, Binary.SystemByteOrder, dataLayout), 696, 564))
-                {
-                    for (int i = 0; i < image.Width; i += 2)
-                    {
-                        for (int j = 0; j < image.Height; j += 2)
-                        {
-                            for (int c = 0; c < image.ImageFormat.Components.Length; ++c)
-                            {
-                                var data = image.GetComponentData(i, j, image.ImageFormat[c]);
-
-                                Array.Fill(data.Array, byte.MaxValue, data.Offset, data.Count);
-
-                                image.SetComponentData(i, j, c, data);
-                            }
-                        }
-                    }
-
-                    using (var outputBmpStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"rgb_{dataLayout}.bmp"), FileMode.OpenOrCreate))
-                    {
-                        image.SaveBitmap(outputBmpStream);
-                    }
-
-                    using (var inputBmp = Codecs.Image.Image.FromStream(new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"rgb_{dataLayout}.bmp"), FileMode.OpenOrCreate)))
-                    {
-                        if (inputBmp.Width != 696) throw new Exception();
-
-                        if (inputBmp.Height != 564) throw new Exception();
-                    }
-                }
-            }
-
-            foreach (var dataLayout in Enum.GetValues<DataLayout>())
-            {
-                if (dataLayout == DataLayout.Unknown) continue;
-
-                using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.BGR(8, Binary.SystemByteOrder, dataLayout), 696, 564))
-                {
-                    for (int i = 0; i < image.Width; i += 2)
-                    {
-                        for (int j = 0; j < image.Height; j += 2)
-                        {
-                            for (int c = 0; c < image.ImageFormat.Components.Length; ++c)
-                            {
-                                var data = image.GetComponentVector(i, j, c);
-
-                                data = Vector<byte>.One * byte.MaxValue;
-
-                                image.SetComponentVector(i, j, c, data);
-                            }
-                        }
-                    }
-
-                    using (var outputBmpStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"BGR_Vector_{dataLayout}.bmp"), FileMode.OpenOrCreate))
-                    {
-                        image.SaveBitmap(outputBmpStream);
-                    }
-                }
-            }
-
-            using (var image = new Codecs.Image.Image(ImageFormat.Binary(8), 696, 564))
-            {
-                for (int i = 0; i < image.Width; i += 4)
-                {
-                    for (int j = 0; j < image.Height; j += 4)
-                    {
-                        for (int c = 0; c < image.ImageFormat.Components.Length; ++c)
-                        {
-                            var data = image.GetComponentVector(i, j, c);
-
-                            data = Vector<byte>.One * byte.MaxValue;
-
-                            image.SetComponentVector(i, j, c, data);
-                        }
-                    }
-                }
-
-                using (var outputBmpStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, "Binary_packed_line2.bmp"), FileMode.OpenOrCreate))
-                {
-                    image.SaveBitmap(outputBmpStream);
-                }
-            }
-
-            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 696, 564))
-            {
-                for (int i = 0; i < image.Width; i += 4)
-                {
-                    for (int j = 0; j < image.Height; j += 4)
-                    {
-                        for (int c = 0; c < image.ImageFormat.Components.Length; ++c)
-                        {
-                            var data = image.GetComponentVector(i, j, c);
-
-                            data = Vector<byte>.One * byte.MaxValue;
-
-                            image.SetComponentVector(i, j, c, data);
-                        }
-                    }
-                }
-
-                using (var outputBmpStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, "rgb24_packed_line2.bmp"), FileMode.OpenOrCreate))
-                {
-                    image.SaveBitmap(outputBmpStream);
-                }
-            }
-
-            using (var image = new Codecs.Image.Image(Media.Codecs.Image.ImageFormat.RGB(8), 696, 564))
-            {
-                for (int i = 0; i < image.Width; i += 16)
-                {
-                    for (int j = 0; j < image.Height; j += 16)
-                    {
-                        for (int c = 0; c < image.ImageFormat.Length; ++c)
-                        {
-                            var data = image.GetComponentVector(i, j, c);
-
-                            data = Vector<byte>.One * byte.MaxValue;
-
-                            image.SetComponentVector(i, j, c, data);
-                        }
-                    }
-                }
-
-                using (var outputBmpStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, "rgb24_packed_line3.bmp"), FileMode.OpenOrCreate))
-                {
-                    image.SaveBitmap(outputBmpStream);
-                }
-            }
-        }
-
-        public static void TestLoad()
-        {
-            string currentPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-
-            using var grayStream = new FileStream(Path.Combine(currentPath, "Media", "BmpTest", "lena_gray.bmp"), FileMode.Open, FileAccess.Read);
-            using var grayImage = Codecs.Image.Image.FromStream(grayStream);
-
-            using var colorStream = new FileStream(Path.Combine(currentPath, "Media", "BmpTest", "lena_color.bmp"), FileMode.Open, FileAccess.Read);
-            using var colorImage = Codecs.Image.Image.FromStream(colorStream);
-
-            if (colorImage.Width != grayImage.Width) throw new InvalidOperationException();
-            if (colorImage.Height != grayImage.Height) throw new InvalidOperationException();
-
-            var outputGray = new FileStream(Path.Combine(currentPath, "Media", "BmpTest", "output", "lena_gray_save.bmp"), FileMode.OpenOrCreate, FileAccess.Write);
-            grayImage.SaveBitmap(outputGray);
-
-            var outputColor = new FileStream(Path.Combine(currentPath, "Media", "BmpTest", "output", "lena_color_save.bmp"), FileMode.OpenOrCreate, FileAccess.Write);
-            colorImage.SaveBitmap(outputColor);
-
-            var newImage = new Codecs.Image.Image(Codecs.Image.ImageFormat.RGB(8), grayImage.Width, grayImage.Height);
-            grayImage.Data.CopyTo(newImage.Data);
-
-            var outputNew = new FileStream(Path.Combine(currentPath, "Media", "BmpTest", "output", "lena_gray_new_save.bmp"), FileMode.OpenOrCreate, FileAccess.Write);
-            newImage.SaveBitmap(outputNew);
         }
 
         public void Test_CalculateComponentDataOffset_PlanarLayout()
@@ -1251,17 +1009,6 @@ namespace Media.UnitTests
             Console.WriteLine(planeWidth == 100 && planeHeight == 100 ? "Pass" : "Fail");
         }
 
-        public static void TestSaveBitmap()
-        {
-            var format = ImageFormat.RGB(8);
-            var image = new Image(format, 100, 100);
-            using (var stream = new MemoryStream())
-            {
-                image.SaveBitmap(stream);
-                Console.WriteLine(stream.Length > 0 ? "Pass" : "Fail");
-            }
-        }
-
         public static void TestFill()
         {
             var format = ImageFormat.RGB(8);
@@ -1384,19 +1131,6 @@ namespace Media.UnitTests
             // Assert
             System.Diagnostics.Debug.Assert(pixelData != null);
             System.Diagnostics.Debug.Assert(imageFormat.Length == pixelData.Count);
-
-            foreach (var component in image[101, 101])
-                component.Fill(byte.MaxValue);
-
-            // Save
-            var currentPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-
-            var outputDirectory = Directory.CreateDirectory(Path.Combine(currentPath, "Media", "BmpTest", "output"));
-
-            using (var outputBmpStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"rgb24_{imageFormat.DataLayout}.bmp"), FileMode.OpenOrCreate))
-            {
-                image.SaveBitmap(outputBmpStream);
-            }
         }
 
         public void Test_GetPixelDataAt_InvalidCoordinates_ThrowsException()

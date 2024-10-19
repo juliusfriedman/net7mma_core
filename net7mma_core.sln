@@ -81,6 +81,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Codec.Flac", "Codecs\Audio\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rtcp.Feedback", "RtcpFeedback\Rtcp.Feedback.csproj", "{29B9387E-F491-49DB-996A-27855DFE5C23}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codec.Bmp", "Codecs\Image\Bmp\Codec.Bmp\Codec.Bmp.csproj", "{839F7784-2C36-40D7-909F-873FE8D897D7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codec.Png", "Codecs\Image\Png\Codec.Png\Codec.Png.csproj", "{A897B44B-7C49-48A7-A2C9-8F726BF8BE3D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -243,6 +247,14 @@ Global
 		{29B9387E-F491-49DB-996A-27855DFE5C23}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{29B9387E-F491-49DB-996A-27855DFE5C23}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{29B9387E-F491-49DB-996A-27855DFE5C23}.Release|Any CPU.Build.0 = Release|Any CPU
+		{839F7784-2C36-40D7-909F-873FE8D897D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{839F7784-2C36-40D7-909F-873FE8D897D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{839F7784-2C36-40D7-909F-873FE8D897D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{839F7784-2C36-40D7-909F-873FE8D897D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A897B44B-7C49-48A7-A2C9-8F726BF8BE3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A897B44B-7C49-48A7-A2C9-8F726BF8BE3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A897B44B-7C49-48A7-A2C9-8F726BF8BE3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A897B44B-7C49-48A7-A2C9-8F726BF8BE3D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
