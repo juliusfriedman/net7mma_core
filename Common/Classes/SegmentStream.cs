@@ -38,8 +38,10 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 #region Using Statements
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 #endregion
 
 namespace Media.Common
@@ -47,7 +49,7 @@ namespace Media.Common
     /// <summary>
     /// Used to crete a continious stream to locations of memory which may not be next to each other and could even overlap.
     /// </summary>
-    public class SegmentStream : System.IO.Stream, IDisposed
+    public class SegmentStream : System.IO.Stream, IEnumerable<byte>, IDisposed
     {
         ///// <summary>
         ///// Combines all given instances into a single instance.
@@ -1093,6 +1095,18 @@ namespace Media.Common
         //Keep the same semantics as Stream...
 
         void IDisposable.Dispose() { Close(); }
+
+        public IEnumerator<byte> GetEnumerator()
+        {
+            int read = 0;
+            while ((read = ReadByte()) != -1)
+                yield return (byte)read;
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
 
         //~SegmentStream() { Close(); }
 

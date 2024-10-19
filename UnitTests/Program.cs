@@ -120,6 +120,7 @@ namespace Media.UnitTests
             //Codec
             TestCodec,
             TestAudioBuffer,
+            TestImageFormat,
             TestImageBuffer
             //Todo, serperate the tests that should be called either by attribute and use reflection or by using options in the project file.
             //E.g. Sources could be defined in appSettings and reused for the RtspServer or otherwise as desired or specified specifically
@@ -4560,10 +4561,15 @@ a=appversion:1.0");
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.AudioUnitTests), TypeOfVoid);
         }
 
+        private static void TestImageFormat()
+        {
+            CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.ImageFormatTests), TypeOfVoid);
+        }
+
         private static void TestImageBuffer()
         {
             CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.ImageUnitTests), TypeOfVoid);
-        }
+        }        
 
         #endregion
 

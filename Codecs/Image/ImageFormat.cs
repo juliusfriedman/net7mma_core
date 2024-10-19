@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using Media.Codec;
+using Media.Codecs.Image;
+using System.Linq;
 using System.Text;
 
 namespace Media.Codecs.Image
@@ -606,5 +608,125 @@ namespace Media.Codecs.Image
     //            }
     //        }
     //    }
-    //}
+    //}    
+}
+
+namespace Media.UnitTests
+{
+    internal class ImageFormatTests
+    {
+        public void TestWithoutAlphaComponent()
+        {
+            // Arrange
+            var originalFormat = ImageFormat.ARGB(8);
+
+            // Act
+            var result = ImageFormat.WithoutAlphaComponent(originalFormat);
+
+            // Assert
+            System.Diagnostics.Debug.Assert(originalFormat.HasAlphaComponent && !result.HasAlphaComponent);
+        }
+
+        public void TestWithProceedingAlphaComponent()
+        {
+            // Arrange
+            var originalFormat = ImageFormat.RGB(8);
+
+            // Act
+            var result = ImageFormat.WithProceedingAlphaComponent(originalFormat, 8);
+
+            // Assert
+            System.Diagnostics.Debug.Assert(result.HasAlphaComponent);
+        }
+
+        public void TestWithPreceedingAlphaComponent()
+        {
+            // Arrange
+            var originalFormat = ImageFormat.RGB(8);
+
+            // Act
+            var result = ImageFormat.WithPreceedingAlphaComponent(originalFormat, 8);
+
+            // Assert
+            System.Diagnostics.Debug.Assert(result.HasAlphaComponent);
+        }
+
+        public void TestBinaryFormat()
+        {
+            // Act
+            var result = ImageFormat.Binary(1);
+
+            // Assert
+            System.Diagnostics.Debug.Assert(1 == result.Widths.Length);
+            System.Diagnostics.Debug.Assert(1 == result.Heights.Length);
+        }
+
+        public void TestMonochromeFormat()
+        {
+            // Act
+            var result = ImageFormat.Monochrome(1);
+
+            // Assert
+            System.Diagnostics.Debug.Assert(1 == result.Widths.Length);
+            System.Diagnostics.Debug.Assert(1 == result.Heights.Length);
+        }
+
+        public void TestRGBFormat()
+        {
+            // Act
+            var result = ImageFormat.RGB(8);
+
+            // Assert
+            System.Diagnostics.Debug.Assert(3 == result.Widths.Length);
+            System.Diagnostics.Debug.Assert(3 == result.Heights.Length);
+        }
+
+        public void TestARGBFormat()
+        {
+            // Act
+            var result = ImageFormat.ARGB(8);
+
+            // Assert
+            System.Diagnostics.Debug.Assert(4 == result.Widths.Length);
+            System.Diagnostics.Debug.Assert(4 == result.Heights.Length);
+            System.Diagnostics.Debug.Assert(result.HasAlphaComponent);
+        }
+
+        public void TestWithSubSampling()
+        {
+            // Arrange
+            var originalFormat = ImageFormat.YUV(8);
+            int[] sampling = { 4, 2, 2 };
+
+            // Act
+            var result = ImageFormat.WithSubSampling(originalFormat, sampling);
+
+            // Assert
+            System.Diagnostics.Debug.Assert(result.IsSubSampled);
+        }
+
+        public void TestPackedFormat()
+        {
+            // Arrange
+            var originalFormat = ImageFormat.YUV(8);
+
+            // Act
+            var result = ImageFormat.Packed(originalFormat);
+
+            // Assert
+            System.Diagnostics.Debug.Assert(DataLayout.Packed == result.DataLayout);
+        }
+
+        public void TestPlanarFormat()
+        {
+            // Arrange
+            var originalFormat = ImageFormat.YUV(8);
+
+            // Act
+            var result = ImageFormat.Planar(originalFormat);
+
+            // Assert
+            System.Diagnostics.Debug.Assert(DataLayout.Planar == result.DataLayout);
+        }
+    }
 }

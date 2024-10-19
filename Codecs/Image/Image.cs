@@ -1185,5 +1185,53 @@ namespace Media.UnitTests
                 if (image.Data.Array.Any(b => b != byte.MaxValue)) throw new InvalidOperationException("Did not set Component data (Vector)");
             }
         }
+
+        public static void TestCalculateSize()
+        {
+            var format = ImageFormat.RGB(8);
+            int width = 100;
+            int height = 100;
+            int size = Image.CalculateSize(format, width, height);
+            Console.WriteLine(width * height * format.Length == size ? "Pass" : "Fail");
+        }
+
+        public static void TestPlaneDimensions()
+        {
+            var format = ImageFormat.RGB(8);
+            var image = new Image(format, 100, 100);
+            int planeWidth = image.PlaneWidth(0);
+            int planeHeight = image.PlaneHeight(0);
+            Console.WriteLine(planeWidth == 100 && planeHeight == 100 ? "Pass" : "Fail");
+        }
+
+        public static void TestSaveBitmap()
+        {
+            var format = ImageFormat.RGB(8);
+            var image = new Image(format, 100, 100);
+            using (var stream = new MemoryStream())
+            {
+                image.SaveBitmap(stream);
+                Console.WriteLine(stream.Length > 0 ? "Pass" : "Fail");
+            }
+        }
+
+        public static void TestFill()
+        {
+            var format = ImageFormat.RGB(8);
+            var image = new Image(format, 100, 100);
+            image.Fill(255);
+            var data = image.GetComponentData(0, 0, format.Components[0]);
+            Console.WriteLine(data.All(b => b == 255) ? "Pass" : "Fail");
+        }
+
+        public static void TestSetComponentData()
+        {
+            var format = ImageFormat.RGB(8);
+            var image = new Image(format, 100, 100);
+            var data = new MemorySegment(image.ImageFormat.Length);
+            image.SetComponentData(0, 0, 0, data);
+            var retrievedData = image.GetSampleData(0, 0);
+            Console.WriteLine(retrievedData.SequenceEqual(data) ? "Pass" : "Fail");
+        }
     }
 }

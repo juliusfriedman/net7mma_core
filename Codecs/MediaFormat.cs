@@ -246,7 +246,7 @@ namespace Media.Codec
         /// <summary>
         /// Indicates if there are an even amount of bits in the format.
         /// </summary>
-        public bool IsAligned { get { return Size % Common.Binary.BitsPerByte is 0; } }
+        public bool IsAligned => (Size & 7) == 0;
 
         /// <summary>
         /// Gets the component at the given index.
