@@ -1385,6 +1385,9 @@ namespace Media.UnitTests
             System.Diagnostics.Debug.Assert(pixelData != null);
             System.Diagnostics.Debug.Assert(imageFormat.Length == pixelData.Count);
 
+            foreach (var component in image[101, 101])
+                component.Fill(byte.MaxValue);
+
             // Save
             var currentPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 
@@ -1405,13 +1408,13 @@ namespace Media.UnitTests
             var image = new Image(imageFormat, width, height);
 
             // Act & Assert
-            try { image.PixAt(-1, 100, 0); }
+            try { image.GetPixelDataAt(-1, 100, 0); }
             catch (ArgumentOutOfRangeException) { }
-            try { image.PixAt(100, -1, 0); }
+            try { image.GetPixelDataAt(100, -1, 0); }
             catch (ArgumentOutOfRangeException) { }
-            try { image.PixAt(1920, 100, 0); }
+            try { image.GetPixelDataAt(1920, 100, 0); }
             catch (ArgumentOutOfRangeException) { }
-            try { image.PixAt(100, 1080, 0); }
+            try { image.GetPixelDataAt(100, 1080, 0); }
             catch (ArgumentOutOfRangeException) { }
         }
     }
