@@ -16,7 +16,7 @@ it to clients (you can also use it's frame types to handle
 depacketization of media) [which will eventually be seperated into their
 own classes so you don't need the server to packetize or depacketize].
 
-You can use the Image projects to create Images (Support for Bitmap or Portable Network Graphics formats only for now).
+You can use the Image projects to create Images (Support for Bitmap or Portable Network Graphics formats only for now, Jpeg is underway).
 
 You can use the Audio project to create Audio (See examples for saving to a Riff / Wave file).
 
