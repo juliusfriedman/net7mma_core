@@ -37,9 +37,11 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #endregion
 
 #region Using Statements
+using Media.Common;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 #endregion
@@ -1590,9 +1592,160 @@ namespace Media.UnitTests
             }
         }
 
-        //TestAppend
+        public static void TestAddMemory()
+        {
+            // Arrange
+            var segmentStream = new SegmentStream();
+            var memorySegment = new Common.MemorySegment(new byte[] { 1, 2, 3, 4 });
 
-        //Test whatever else.
+            // Act
+            segmentStream.AddMemory(memorySegment);
 
+            // Assert
+            // Add assertions to verify the memory segment was added correctly
+        }
+
+        public static void TestInsertMemory()
+        {
+            // Arrange
+            var segmentStream = new SegmentStream();
+            var memorySegment1 = new Common.MemorySegment(new byte[] { 1, 2, 3, 4 });
+            var memorySegment2 = new Common.MemorySegment(new byte[] { 5, 6, 7, 8 });
+
+            segmentStream.AddMemory(memorySegment1);
+
+            // Act
+            segmentStream.InsertMemory(0, memorySegment2);
+
+            // Assert
+            // Add assertions to verify the memory segment was inserted correctly
+        }
+
+        public static void TestCopyTo()
+        {
+            // Arrange
+            var segmentStream = new SegmentStream();
+            var memorySegment = new Common.MemorySegment(new byte[] { 1, 2, 3, 4 });
+            segmentStream.AddMemory(memorySegment);
+            var destination = new byte[4];
+
+            // Act
+            segmentStream.CopyTo(destination, 0);
+
+            // Assert
+            // Add assertions to verify the data was copied correctly
+        }
+
+        public static void TestToArray()
+        {
+            // Arrange
+            var segmentStream = new SegmentStream();
+            var memorySegment = new Common.MemorySegment(new byte[] { 1, 2, 3, 4 });
+            segmentStream.AddMemory(memorySegment);
+
+            // Act
+            var result = segmentStream.ToArray();
+
+            // Assert
+            // Add assertions to verify the array was created correctly
+        }
+
+        public static void TestDispose()
+        {
+            // Arrange
+            var segmentStream = new SegmentStream();
+
+            // Act
+            segmentStream.Dispose();
+
+            // Assert
+            // Add assertions to verify the stream was disposed correctly
+        }
+
+        public static void TestReadByte()
+        {
+            // Arrange
+            var segmentStream = new SegmentStream();
+            var memorySegment = new Common.MemorySegment(new byte[] { 1, 2, 3, 4 });
+            segmentStream.AddMemory(memorySegment);
+
+            // Act
+            var result = segmentStream.ReadByte();
+
+            // Assert
+            // Add assertions to verify the byte was read correctly
+        }
+
+        public static void TestWriteByte()
+        {
+            // Arrange
+            var segmentStream = new SegmentStream();
+            var memorySegment = new Common.MemorySegment(new byte[4]);
+            segmentStream.AddMemory(memorySegment);
+
+            // Act
+            segmentStream.WriteByte(1);
+
+            // Assert
+            // Add assertions to verify the byte was written correctly
+        }
+
+        public static void TestSeek()
+        {
+            // Arrange
+            var segmentStream = new SegmentStream();
+            var memorySegment = new Common.MemorySegment(new byte[] { 1, 2, 3, 4 });
+            segmentStream.AddMemory(memorySegment);
+
+            // Act
+            var result = segmentStream.Seek(2, SeekOrigin.Begin);
+
+            // Assert
+            // Add assertions to verify the seek operation was performed correctly
+        }
+
+        public static void TestAppend()
+    {
+        // Arrange
+        var segmentStream = new SegmentStream();
+        var memorySegment1 = new Common.MemorySegment(new byte[] { 1, 2, 3, 4 });
+        var memorySegment2 = new Common.MemorySegment(new byte[] { 5, 6, 7, 8 });
+
+        segmentStream.AddMemory(memorySegment1);
+
+        // Act
+        segmentStream.AddMemory(memorySegment2);
+
+        // Assert
+        // Add assertions to verify the memory segments were appended correctly
+        var result = segmentStream.ToArray();
+        if (result.Length != 8 || result[0] != 1 || result[4] != 5)
+        {
+            throw new Exception("TestAppend failed");
+        }
+    }
+
+        public static void TestEnumerator()
+        {
+            // Arrange
+            var segmentStream = new SegmentStream();
+            var memorySegment = new Common.MemorySegment(new byte[] { 1, 2, 3, 4 });
+            segmentStream.AddMemory(memorySegment);
+
+            // Act
+            var enumerator = segmentStream.GetEnumerator();
+            var result = new List<byte>();
+            while (enumerator.MoveNext())
+            {
+                result.Add(enumerator.Current);
+            }
+
+            // Assert
+            // Add assertions to verify the enumerator works correctly
+            if (result.Count != 4 || result[0] != 1 || result[3] != 4)
+            {
+                throw new Exception("TestEnumerator failed");
+            }
+        }
     }
 }
