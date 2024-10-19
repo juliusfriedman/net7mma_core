@@ -1361,7 +1361,7 @@ namespace Media.UnitTests
             catch (ArgumentOutOfRangeException) { }
         }
 
-        public void Test_PixAt_ValidCoordinates_ReturnsCorrectData()
+        public void Test_GetPixelDataAt_ValidCoordinates_ReturnsCorrectData()
         {
             // Arrange
             int width = 1920;
@@ -1399,7 +1399,7 @@ namespace Media.UnitTests
             }
         }
 
-        public void Test_PixAt_InvalidCoordinates_ThrowsException()
+        public void Test_GetPixelDataAt_InvalidCoordinates_ThrowsException()
         {
             // Arrange
             int width = 1920;
