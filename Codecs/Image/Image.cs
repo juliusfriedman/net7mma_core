@@ -258,6 +258,19 @@ namespace Media.Codecs.Image
             return plane < 0 || plane >= MediaFormat.Components.Length ? -1 : Binary.BitsToBytes(PlaneSize(plane));
         }
 
+        public Common.MemorySegment GetPlaneData(int plane)
+        {
+            int offset = 0;
+            for (int i = 0; i < plane; i++)
+                offset += PlaneLength(i);
+            return Data.Slice(offset, PlaneLength(plane));
+        }
+
+        public Common.MemorySegment GetPixelDataAt(int x, int y, int plane)
+        {
+            return GetPlaneData(plane).Slice(y * PlaneWidth(plane) + x, ImageFormat.Length);
+        }
+
         /// <summary>
         /// Calculates the byte offset to component/channel data
         /// </summary>
@@ -537,7 +550,7 @@ namespace Media.UnitTests
 
         public static void TestSave()
         {
-            string currentPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            var currentPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
 
             var outputDirectory = Directory.CreateDirectory(Path.Combine(currentPath, "Media", "BmpTest", "output"));
 
@@ -814,7 +827,7 @@ namespace Media.UnitTests
             //Create the source image
             using (Media.Codecs.Image.Image rgbImage = new(Media.Codecs.Image.ImageFormat.RGB(8), testWidth, testHeight))
             {
-                if (rgbImage.ImageFormat.HasAlphaComponent) throw new System.Exception("HasAlphaComponent should be false");             
+                if (rgbImage.ImageFormat.HasAlphaComponent) throw new System.Exception("HasAlphaComponent should be false");
 
                 //Create the ImageFormat based on YUV packed but in Planar format with a full height luma plane and half hight chroma planes
                 var Yuv420P = new Codecs.Image.ImageFormat(Media.Codecs.Image.ImageFormat.YUV(8, Common.Binary.ByteOrder.Little, Codec.DataLayout.Planar), new int[] { 0, 1, 1 });
@@ -1315,6 +1328,91 @@ namespace Media.UnitTests
             int rowSize = (width + 7) / Common.Binary.BitsPerByte; // 1 bit per pixel, convert width to bytes
             int expectedStride = (rowSize + 3) & ~3; // Align to 4 bytes
             System.Diagnostics.Debug.Assert(expectedStride == stride);
+        }
+
+        public void Test_GetPlaneData_ValidComponentIndex_ReturnsCorrectData()
+        {
+            // Arrange
+            int width = 1920;
+            int height = 1080;
+            var imageFormat = ImageFormat.RGB(24, Common.Binary.ByteOrder.Little, DataLayout.Planar);
+            var image = new Image(imageFormat, width, height);
+
+            // Act
+            var planeData = image.GetPlaneData(0);
+
+            // Assert
+            System.Diagnostics.Debug.Assert(planeData != null && planeData.Count > 0);
+            System.Diagnostics.Debug.Assert(image.PlaneLength(0) == planeData.Count);
+        }
+
+        public void Test_GetPlaneData_InvalidComponentIndex_ThrowsException()
+        {
+            // Arrange
+            int width = 1920;
+            int height = 1080;
+            var imageFormat = ImageFormat.RGB(24, Common.Binary.ByteOrder.Little, DataLayout.Planar);
+            var image = new Image(imageFormat, width, height);
+
+            // Act & Assert
+            try { image.GetPlaneData(-1); }
+            catch (ArgumentOutOfRangeException) { }
+            try { image.GetPlaneData(3); }
+            catch (ArgumentOutOfRangeException) { }
+        }
+
+        public void Test_PixAt_ValidCoordinates_ReturnsCorrectData()
+        {
+            // Arrange
+            int width = 1920;
+            int height = 1080;
+            var imageFormat = ImageFormat.RGB(8, Common.Binary.ByteOrder.Little, DataLayout.Packed);
+            var image = new Image(imageFormat, width, height);
+
+            // Act
+            var pixelData = image.GetPixelDataAt(100, 100, 0);
+            pixelData.Fill(byte.MaxValue);
+
+            //Lower left
+            pixelData = image.GetPixelDataAt(0, 0, 0);
+            pixelData.Fill(byte.MaxValue);
+
+            //Upper right
+            pixelData = image.GetPixelDataAt(width - 1, height -1, 0);
+            pixelData.Fill(byte.MaxValue);
+
+            // Assert
+            System.Diagnostics.Debug.Assert(pixelData != null);
+            System.Diagnostics.Debug.Assert(imageFormat.Length == pixelData.Count);
+
+            // Save
+            var currentPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+
+            var outputDirectory = Directory.CreateDirectory(Path.Combine(currentPath, "Media", "BmpTest", "output"));
+
+            using (var outputBmpStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"rgb24_{imageFormat.DataLayout}.bmp"), FileMode.OpenOrCreate))
+            {
+                image.SaveBitmap(outputBmpStream);
+            }
+        }
+
+        public void Test_PixAt_InvalidCoordinates_ThrowsException()
+        {
+            // Arrange
+            int width = 1920;
+            int height = 1080;
+            var imageFormat = ImageFormat.RGB(24, Common.Binary.ByteOrder.Little, DataLayout.Packed);
+            var image = new Image(imageFormat, width, height);
+
+            // Act & Assert
+            try { image.PixAt(-1, 100, 0); }
+            catch (ArgumentOutOfRangeException) { }
+            try { image.PixAt(100, -1, 0); }
+            catch (ArgumentOutOfRangeException) { }
+            try { image.PixAt(1920, 100, 0); }
+            catch (ArgumentOutOfRangeException) { }
+            try { image.PixAt(100, 1080, 0); }
+            catch (ArgumentOutOfRangeException) { }
         }
     }
 }

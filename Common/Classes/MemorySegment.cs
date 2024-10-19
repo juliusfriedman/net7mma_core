@@ -527,9 +527,9 @@ namespace Media.Common
     {
         public static void Clear(this MemorySegment segment) => Array.Clear(segment.Array, segment.Offset, segment.Count);
 
-        public static void Fill(this MemorySegment segment, byte value) => Array.Fill(segment.Array, value);
+        public static void Fill(this MemorySegment segment, byte value) => Array.Fill(segment.Array, value, segment.Offset, segment.Count);
 
-        public static MemorySegment Slice(this MemorySegment segment, int offset) => Slice(segment, offset, segment.Count - offset);
+        public static MemorySegment Slice(this MemorySegment segment, int offset) => Slice(segment, offset, Math.Max(0, segment.Count - offset));
 
         public static MemorySegment Slice(this MemorySegment segment, int offset, int count) => new(segment.Array, segment.Offset + offset, count);
 
