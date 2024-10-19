@@ -16,7 +16,16 @@ namespace Media.Codecs.Image.Jpeg
         private System.IO.Stream jpegStream;
         private int streamOffset;
         private readonly int streamLength;
-        public Marker current;
+
+        public Marker Current;
+
+        public int Remains => streamLength - streamOffset;
+
+        public MarkerReader(System.IO.Stream stream)
+        {
+            jpegStream = stream;
+            streamLength = (int)stream.Length;
+        }
 
         public IEnumerable<Marker> ReadMarkers()
         {
@@ -69,7 +78,7 @@ namespace Media.Codecs.Image.Jpeg
 
                     AtMarker:
 
-                    current = new Marker()
+                    Current = new Marker()
                     {
                         PrefixLength = prefixCount,
                         Code = (byte)FunctionCode,
@@ -77,9 +86,9 @@ namespace Media.Codecs.Image.Jpeg
                         Data = new byte[CodeSize]
                     };
 
-                    jpegStream.Read(current.Data, 0, CodeSize);
+                    jpegStream.Read(Current.Data, 0, CodeSize);
 
-                    yield return current;
+                    yield return Current;
 
                     CodeSize = prefixCount = 0;
                 }
@@ -126,7 +135,7 @@ namespace Media.Codecs.Image.Jpeg
 
         public IEnumerable<byte> Prepare() //bool includePrefix, includeCode, includeLength, includeData...
         {
-            if (PrefixLength > 0) foreach (byte b in Enumerable.Repeat<byte>(Jpeg.Markers.Prefix, PrefixLength)) yield return b;
+            if (PrefixLength > 0) foreach (byte b in Enumerable.Repeat(Markers.Prefix, PrefixLength)) yield return b;
 
             yield return Code;
 

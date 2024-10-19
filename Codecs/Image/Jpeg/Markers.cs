@@ -128,21 +128,6 @@ namespace Media.Codecs.Image.Jpeg
 
     public static class JpegMarkerExtensions
     {
-        public static byte[] CreateJFIFHeader()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public static byte[] CreateJFXXHeader()
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public static byte[] CreateStartOfFrameMarker()
-        {
-            throw new System.NotImplementedException();
-        }
-
         public static byte[] CreateHuffmanTableMarker(byte[] codeLens, byte[] symbols, int tableNo, int tableClass)
         {
             int symbolsLength = symbols.Length;
@@ -166,15 +151,9 @@ namespace Media.Codecs.Image.Jpeg
             return result;
         }
 
-        [System.CLSCompliant(false)]
         public static byte[] CreateDataRestartIntervalMarker(ushort dri)
-        {
-            return new byte[] { Media.Codecs.Image.Jpeg.Markers.Prefix, Media.Codecs.Image.Jpeg.Markers.DataRestartInterval, 0x00, 0x04, (byte)(dri >> 8), (byte)(dri) };
-        }
+            => [Media.Codecs.Image.Jpeg.Markers.Prefix, Media.Codecs.Image.Jpeg.Markers.DataRestartInterval, 0x00, 0x04, (byte)(dri >> 8), (byte)dri];
 
         public static byte[] CreateDataRestartIntervalMarker(int dri) { return CreateDataRestartIntervalMarker((ushort)dri); }
     }
-
-    //Todo Should be moved to JpegReader in Container or JpegReader should use this?
-    //JfifReader..
 }

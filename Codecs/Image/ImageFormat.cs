@@ -23,7 +23,7 @@ namespace Media.Codecs.Image
 
         //
 
-        public const byte LumaChannelId = (byte)'y';
+        public const byte LumaChannelId = (byte)'l';
 
         public const byte ChromaMajorChannelId = (byte)'u';
 
@@ -44,7 +44,7 @@ namespace Media.Codecs.Image
         public const byte MagentaChannelId = (byte)'m';
 
         //Capital of Luma
-        public const byte YellowChannelId = (byte)'Y';
+        public const byte YellowChannelId = (byte)'y';
 
         //Key
         public const byte KChannelId = (byte)'k';
@@ -215,6 +215,27 @@ namespace Media.Codecs.Image
                 new(ChromaMinorChannelId, bitsPerComponent),
                 new(ChromaMajorChannelId, bitsPerComponent),
                 new(premultipliedAlpha ? PreMultipliedAlphaChannelId : LumaChannelId, bitsPerComponent)
+            });
+        }
+
+        public static ImageFormat CMYK(int bitsPerComponent, Common.Binary.ByteOrder byteOrder = Common.Binary.ByteOrder.Little, Codec.DataLayout dataLayout = Codec.DataLayout.Packed)
+        {
+            return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[] {
+                new(CyanChannelId, bitsPerComponent),
+                new(MagentaChannelId, bitsPerComponent),
+                new(YellowChannelId, bitsPerComponent),
+                new(KChannelId, bitsPerComponent)
+            });
+        }
+
+        public static ImageFormat CMYKA(int bitsPerComponent, Common.Binary.ByteOrder byteOrder = Common.Binary.ByteOrder.Little, Codec.DataLayout dataLayout = Codec.DataLayout.Packed, bool premultipliedAlpha = false)
+        {
+            return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[] {
+                new(CyanChannelId, bitsPerComponent),
+                new(MagentaChannelId, bitsPerComponent),
+                new(YellowChannelId, bitsPerComponent),
+                new(KChannelId, bitsPerComponent),
+                new(premultipliedAlpha ? PreMultipliedAlphaChannelId : AlphaChannelId, bitsPerComponent)
             });
         }
 
