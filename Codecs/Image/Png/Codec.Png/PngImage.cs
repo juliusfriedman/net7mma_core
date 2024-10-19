@@ -27,14 +27,11 @@ public class PngImage : Image
         }
     }
 
-    private static byte[] CalculateCrc(string chunkType, byte[] chunkData)
+    private static byte[] CalculateCrc(IEnumerable<byte> bytes)
     {
-        var chunkTagSize = Encoding.ASCII.GetByteCount(chunkType);
-        var ms = new MemorySegment(chunkTagSize + chunkData.Length);
-        Encoding.ASCII.GetBytes(chunkType).CopyTo(ms.Array, chunkTagSize);
         uint checksum = 0;
-        foreach(var data in ms.Array)
-            checksum = (checksum >> 8) ^ BitOperations.Crc32C(checksum, data);
+        foreach (var b in bytes) 
+            checksum = (checksum >> 8) ^ BitOperations.Crc32C(checksum, b);
         return Binary.GetBytes(checksum, BitConverter.IsLittleEndian);
     }
 
@@ -74,11 +71,15 @@ public class PngImage : Image
         byte colorType = default;
         while (stream.Position < stream.Length)
         {
-            if (Binary.BytesPerInteger != stream.Read(bytes.Array, bytes.Offset, bytes.Count))
+            if (Binary.BytesPerInteger != stream.Read(bytes.Array, bytes.Offset, Binary.BytesPerInteger))
                 throw new InvalidDataException("Not enough bytes for chunk length.");
 
             int chunkLength = Binary.Read32(bytes.Array, bytes.Offset, Binary.IsLittleEndian);
-            string chunkType = Encoding.ASCII.GetString(bytes.Array, Binary.BitsPerInteger, Binary.BitsPerInteger);
+
+            if (Binary.BytesPerInteger != stream.Read(bytes.Array, bytes.Offset, Binary.BytesPerInteger))
+                throw new InvalidDataException("Not enough bytes for chunk type.");
+
+            string chunkType = Encoding.ASCII.GetString(bytes.Array, bytes.Offset, Binary.BytesPerInteger);
 
             if (chunkType == "IHDR")
             {
@@ -86,20 +87,24 @@ public class PngImage : Image
                     throw new InvalidDataException("Not enough bytes for IHDR.");
 
                 width = Binary.Read32(bytes.Array, bytes.Offset, Binary.IsLittleEndian);
-                height = Binary.Read32(bytes.Array, bytes.Offset + Binary.BitsPerInteger, Binary.IsLittleEndian);
+                height = Binary.Read32(bytes.Array, bytes.Offset + Binary.BytesPerInteger, Binary.IsLittleEndian);
                 int read = stream.ReadByte();
                 if (read == -1)
                     throw new InvalidDataException("Not enough bytes to read bitDepth");
                 byte bitDepth = (byte)read;
+                read = stream.ReadByte();
                 if (read == -1)
                     throw new InvalidDataException("Not enough bytes to read colorType");
                 colorType = (byte)read;
+                read = stream.ReadByte();
                 if (read == -1)
                     throw new InvalidDataException("Not enough bytes to read compressionMethod");
                 byte compressionMethod = (byte)read;
+                read = stream.ReadByte();
                 if (read == -1)
                     throw new InvalidDataException("Not enough bytes to read filterMethod");
                 byte filterMethod = (byte)read;
+                read = stream.ReadByte();
                 if (read == -1)
                     throw new InvalidDataException("Not enough bytes to read interlaceMethod");
                 byte interlaceMethod = (byte)read;
@@ -118,7 +123,7 @@ public class PngImage : Image
             else
             {
                 // Skip the chunk data and CRC
-                stream.Seek(chunkLength + 4, SeekOrigin.Current);
+                stream.Seek(chunkLength, SeekOrigin.Current);
             }
         }
 
@@ -134,6 +139,9 @@ public class PngImage : Image
         // Write the PNG signature
         stream.Write(Binary.GetBytes(PNGSignature, BitConverter.IsLittleEndian));
 
+        //TODO have Chunks class to make hanlding of reading and write more robust
+        //Should implement like MarkerReader and MarkerWriter in Codec.Jpeg
+
         // Write the IHDR chunk
         WriteChunk(stream, "IHDR", WriteIHDRChunk);
 
@@ -146,9 +154,9 @@ public class PngImage : Image
 
     private void WriteIHDRChunk(Stream stream)
     {
-        stream.Write(BitConverter.GetBytes(Width).Reverse().ToArray());
-        stream.Write(BitConverter.GetBytes(Height).Reverse().ToArray());
-        stream.Write(Binary.GetBytes(ImageFormat.Size, Binary.IsLittleEndian));
+        stream.Write(Binary.GetBytes(Width, Binary.IsLittleEndian));
+        stream.Write(Binary.GetBytes(Height, Binary.IsLittleEndian));
+        stream.WriteByte((byte)ImageFormat.Size);
         stream.WriteByte(ColorType);
         stream.WriteByte(0); // Compression method
         stream.WriteByte(0); // Filter method
@@ -159,12 +167,21 @@ public class PngImage : Image
     {
         using (MemoryStream ms = new MemoryStream())
         {
-            writeChunkData(writer);
+            // Write the chunk data to the MemoryStream
+            writeChunkData(ms);
             byte[] chunkData = ms.ToArray();
+
+            // Write the length of the chunk data (big-endian)
             writer.Write(BitConverter.GetBytes(chunkData.Length).Reverse().ToArray());
+
+            // Write the chunk type
             writer.Write(Encoding.ASCII.GetBytes(chunkType));
+
+            // Write the chunk data
             writer.Write(chunkData);
-            writer.Write(CalculateCrc(chunkType, chunkData));
+
+            // Calculate and write the CRC
+            writer.Write(CalculateCrc(Encoding.ASCII.GetBytes(chunkType).Concat(chunkData)));
         }
     }
 
@@ -207,5 +224,15 @@ public class PngImage : Image
         int offset = (y * rowSize) + (x * bytesPerPixel);
         offset -= offset % Vector<byte>.Count; // Align the offset to vector size
         return new Vector<byte>(Data.Array, Data.Offset + offset);
+    }
+
+    public void SetVectorDataAt(int x, int y, Vector<byte> vectorData)
+    {
+        // PNG format stores pixels from top to bottom
+        int bytesPerPixel = ImageFormat.Length;
+        int rowSize = Width * bytesPerPixel;
+        int offset = (y * rowSize) + (x * bytesPerPixel);
+        offset -= offset % Vector<byte>.Count; // Align the offset to vector size
+        vectorData.CopyTo(new Span<byte>(Data.Array, Data.Offset + offset, Vector<byte>.Count));
     }
 }

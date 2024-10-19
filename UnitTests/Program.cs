@@ -123,6 +123,7 @@ namespace Media.UnitTests
             TestImageFormat,
             TestImageBuffer,
             TestBitmapImage,
+            TestPngImage,
             //Todo, serperate the tests that should be called either by attribute and use reflection or by using options in the project file.
             //E.g. Sources could be defined in appSettings and reused for the RtspServer or otherwise as desired or specified specifically
             //Could define the first logic as key press program to enable or disable certin appSettings e.g. tests to run or otherwise.
@@ -4573,6 +4574,8 @@ a=appversion:1.0");
         }        
 
         private static void TestBitmapImage() => CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.BmpUnitTests), TypeOfVoid);
+        
+        private static void TestPngImage() => CreateInstanceAndInvokeAllMethodsWithReturnType(typeof(Media.UnitTests.PngUnitTests), TypeOfVoid);
 
         #endregion
 

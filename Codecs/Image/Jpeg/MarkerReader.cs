@@ -8,6 +8,9 @@ namespace Media.Codecs.Image.Jpeg
     //Would be helpful to have a Stream with a buffer for skipping
 
     //Should allow marker reading on it's own outside of the RFC2435 class to decouple logic.
+
+    //Should be a MediaContainer
+
     public class MarkerReader : IDisposable
     {
         private System.IO.Stream jpegStream;
