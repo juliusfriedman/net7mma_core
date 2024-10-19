@@ -109,8 +109,8 @@ public class VectorizedRgbToYuvImageTransformation : ImageTransformation
     private static bool IsRgbImage(ImageFormat format)
     {
         return format.Components.Length >= 3 &&
-               format.Components.Any(c => c.Id == ImageFormat.RedChannelId) &&
-               format.Components.Any(c => c.Id == ImageFormat.GreenChannelId) &&
+               format.GetComponentById(ImageFormat.RedChannelId) != null &&
+               format.GetComponentById(ImageFormat.GreenChannelId) != null &&
                format.GetComponentById(ImageFormat.BlueChannelId) != null;
     }
 
@@ -119,7 +119,7 @@ public class VectorizedRgbToYuvImageTransformation : ImageTransformation
     {
         return format.Components.Length >= 3 &&
                format.GetComponentById(ImageFormat.LumaChannelId) != null &&
-               format.GetComponentById(ImageFormat.ChromaMajorChannelId) != null&&
+               format.GetComponentById(ImageFormat.ChromaMajorChannelId) != null &&
                format.GetComponentById(ImageFormat.ChromaMinorChannelId) != null;
     }
 

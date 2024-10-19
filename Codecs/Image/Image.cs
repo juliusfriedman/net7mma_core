@@ -70,18 +70,52 @@ namespace Media.Codecs.Image
 
         internal static int CalculateSize(ImageFormat format, int width, int height)
         {
-            //The total size in bytes
-            int totalSize = 0;
+            int size = 0;
 
-            //Iterate each component in the ColorSpace
-            for (int i = 0, ie = format.Components.Length; i < ie; ++i)
+            switch (format.DataLayout)
             {
-                //Increment the total size in bytes by calculating the size in bytes of that plane using the ColorSpace information
-                totalSize += (width >> format.Widths[i]) * (height >> format.Heights[i]);
+                case DataLayout.Planar:
+                    // For planar layout, each component has its own plane
+                    for (int i = 0; i < format.Components.Length; i++)
+                    {
+                        int componentWidth = width >> format.Widths[i];
+                        int componentHeight = height >> format.Heights[i];
+                        size += componentWidth * componentHeight * format.Components[i].Length;
+                    }
+                    break;
+
+                case DataLayout.SemiPlanar:
+                    var fistComponentLength = format.Components[0].Length;
+                    // For semi-planar layout, the first component has its own plane)
+                    // the second plane is for the packed components
+                    size = width >> format.Widths[0] * height >> format.Heights[0] * fistComponentLength;
+                    width >>= format.Widths[1];
+                    height >>= format.Heights[1];
+                    goto case DataLayout.Packed;
+                case DataLayout.Packed:
+                    // For packed layout, all components are interleaved
+                    size += width * height * format.Length;
+                    break;
+
+                default:
+                    throw new NotSupportedException($"Data layout {format.DataLayout} is not supported.");
             }
 
-            //Return the amount of bytes
-            return totalSize;
+            return size;
+        }
+
+        internal int CalculateStride(int alignment = Common.Binary.BytesPerInteger)
+        {
+            // Calculate the number of bits per pixel
+            int bitsPerPixel = ImageFormat.Size;
+
+            // Calculate the number of bytes per row before alignment
+            int bytesPerRow = (Width * bitsPerPixel + 7) / Binary.BitsPerByte;
+
+            // Align the stride to the specified alignment
+            int stride = (bytesPerRow + alignment - 1) & ~(alignment - 1);
+
+            return stride;
         }
 
         #endregion
@@ -388,7 +422,7 @@ namespace Media.UnitTests
                 {
                     if (image.SampleCount != 1) throw new System.InvalidOperationException();
 
-                    if (image.Data.Count != image.Width * image.Height * image.MediaFormat.Length) throw new System.InvalidOperationException();
+                    if (image.Data.Count != Image.CalculateSize(image.ImageFormat, image.Width, image.Height)) throw new System.InvalidOperationException();
                 }
             }
         }
@@ -1232,6 +1266,55 @@ namespace Media.UnitTests
             image.SetComponentData(0, 0, 0, data);
             var retrievedData = image[0, 0];
             Console.WriteLine(retrievedData.SelectMany(arg => arg).SequenceEqual(data) ? "Pass" : "Fail");
+        }
+
+        public void CalculateStride_RGB8_ReturnsCorrectStride()
+        {
+            // Arrange
+            int width = 1920;
+            int height = 1080;
+            var imageFormat = ImageFormat.RGB(8);
+            var image = new Image(imageFormat, width, height);
+
+            // Act
+            int stride = image.CalculateStride();
+
+            // Assert
+            int expectedStride = ((width * 3) + 3) & ~3; // 3 bytes per pixel for RGB8, aligned to 4 bytes
+            System.Diagnostics.Debug.Assert(expectedStride == stride);
+        }
+
+        public void CalculateStride_ARGB8_ReturnsCorrectStride()
+        {
+            // Arrange
+            int width = 1920;
+            int height = 1080;
+            var imageFormat = ImageFormat.ARGB(8);
+            var image = new Image(imageFormat, width, height);
+
+            // Act
+            int stride = image.CalculateStride();
+
+            // Assert
+            int expectedStride = ((width * Common.Binary.BytesPerInteger) + 3) & ~3; // 4 bytes per pixel for ARGB8, aligned to 4 bytes
+            System.Diagnostics.Debug.Assert(expectedStride == stride);
+        }
+
+        public void CalculateStride_Monochrome1_ReturnsCorrectStride()
+        {
+            // Arrange
+            int width = 1920;
+            int height = 1080;
+            var imageFormat = ImageFormat.Monochrome(1);
+            var image = new Image(imageFormat, width, height);
+
+            // Act
+            int stride = image.CalculateStride();
+
+            // Assert
+            int rowSize = (width + 7) / Common.Binary.BitsPerByte; // 1 bit per pixel, convert width to bytes
+            int expectedStride = (rowSize + 3) & ~3; // Align to 4 bytes
+            System.Diagnostics.Debug.Assert(expectedStride == stride);
         }
     }
 }
