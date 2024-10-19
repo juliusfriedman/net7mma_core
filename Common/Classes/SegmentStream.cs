@@ -51,7 +51,7 @@ namespace Media.Common
     /// <summary>
     /// Used to crete a continious stream to locations of memory which may not be next to each other and could even overlap.
     /// </summary>
-    public class SegmentStream : System.IO.Stream, IEnumerable<byte>, IDisposed
+    public class SegmentStream : System.IO.Stream, IDisposed
     {
         ///// <summary>
         ///// Combines all given instances into a single instance.
@@ -1098,18 +1098,6 @@ namespace Media.Common
 
         void IDisposable.Dispose() { Close(); }
 
-        public IEnumerator<byte> GetEnumerator()
-        {
-            int read = 0;
-            while ((read = ReadByte()) != -1)
-                yield return (byte)read;
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
         //~SegmentStream() { Close(); }
 
         #endregion
@@ -1705,46 +1693,23 @@ namespace Media.UnitTests
         }
 
         public static void TestAppend()
-    {
-        // Arrange
-        var segmentStream = new SegmentStream();
-        var memorySegment1 = new Common.MemorySegment(new byte[] { 1, 2, 3, 4 });
-        var memorySegment2 = new Common.MemorySegment(new byte[] { 5, 6, 7, 8 });
-
-        segmentStream.AddMemory(memorySegment1);
-
-        // Act
-        segmentStream.AddMemory(memorySegment2);
-
-        // Assert
-        // Add assertions to verify the memory segments were appended correctly
-        var result = segmentStream.ToArray();
-        if (result.Length != 8 || result[0] != 1 || result[4] != 5)
-        {
-            throw new Exception("TestAppend failed");
-        }
-    }
-
-        public static void TestEnumerator()
         {
             // Arrange
             var segmentStream = new SegmentStream();
-            var memorySegment = new Common.MemorySegment(new byte[] { 1, 2, 3, 4 });
-            segmentStream.AddMemory(memorySegment);
+            var memorySegment1 = new Common.MemorySegment(new byte[] { 1, 2, 3, 4 });
+            var memorySegment2 = new Common.MemorySegment(new byte[] { 5, 6, 7, 8 });
+
+            segmentStream.AddMemory(memorySegment1);
 
             // Act
-            var enumerator = segmentStream.GetEnumerator();
-            var result = new List<byte>();
-            while (enumerator.MoveNext())
-            {
-                result.Add(enumerator.Current);
-            }
+            segmentStream.AddMemory(memorySegment2);
 
             // Assert
-            // Add assertions to verify the enumerator works correctly
-            if (result.Count != 4 || result[0] != 1 || result[3] != 4)
+            // Add assertions to verify the memory segments were appended correctly
+            var result = segmentStream.ToArray();
+            if (result.Length != 8 || result[0] != 1 || result[4] != 5)
             {
-                throw new Exception("TestEnumerator failed");
+                throw new Exception("TestAppend failed");
             }
         }
     }

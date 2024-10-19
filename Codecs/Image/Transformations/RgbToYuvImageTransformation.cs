@@ -23,18 +23,18 @@ public class RgbToYuvImageTransformation : ImageTransformation
     private static bool IsRgbImage(ImageFormat format)
     {
         return format.Components.Length >= 3 &&
-               format.Components.Any(c => c.Id == ImageFormat.RedChannelId) &&
-               format.Components.Any(c => c.Id == ImageFormat.GreenChannelId) &&
-               format.Components.Any(c => c.Id == ImageFormat.BlueChannelId);
+               format.GetComponentById(ImageFormat.RedChannelId) != null &&
+               format.GetComponentById(ImageFormat.GreenChannelId) != null &&
+               format.GetComponentById(ImageFormat.BlueChannelId) != null;
     }
 
     // Check if the image format is a YUV format
     private static bool IsYuvImage(ImageFormat format)
     {
         return format.Components.Length >= 3 &&
-               format.Components.Any(c => c.Id == ImageFormat.LumaChannelId) &&
-               format.Components.Any(c => c.Id == ImageFormat.ChromaMajorChannelId) &&
-               format.Components.Any(c => c.Id == ImageFormat.ChromaMinorChannelId);
+               format.GetComponentById(ImageFormat.LumaChannelId) != null &&
+               format.GetComponentById(ImageFormat.ChromaMajorChannelId) != null&&
+               format.GetComponentById(ImageFormat.ChromaMinorChannelId) != null;
     }
 
     public override void Transform()
@@ -111,16 +111,16 @@ public class VectorizedRgbToYuvImageTransformation : ImageTransformation
         return format.Components.Length >= 3 &&
                format.Components.Any(c => c.Id == ImageFormat.RedChannelId) &&
                format.Components.Any(c => c.Id == ImageFormat.GreenChannelId) &&
-               format.Components.Any(c => c.Id == ImageFormat.BlueChannelId);
+               format.GetComponentById(ImageFormat.BlueChannelId) != null;
     }
 
     // Check if the image format is a YUV format
     private static bool IsYuvImage(ImageFormat format)
     {
         return format.Components.Length >= 3 &&
-               format.Components.Any(c => c.Id == ImageFormat.LumaChannelId) &&
-               format.Components.Any(c => c.Id == ImageFormat.ChromaMajorChannelId) &&
-               format.Components.Any(c => c.Id == ImageFormat.ChromaMinorChannelId);
+               format.GetComponentById(ImageFormat.LumaChannelId) != null &&
+               format.GetComponentById(ImageFormat.ChromaMajorChannelId) != null&&
+               format.GetComponentById(ImageFormat.ChromaMinorChannelId) != null;
     }
 
     public override void Transform()

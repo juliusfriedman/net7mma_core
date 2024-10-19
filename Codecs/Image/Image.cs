@@ -1230,8 +1230,8 @@ namespace Media.UnitTests
             var image = new Image(format, 100, 100);
             var data = new MemorySegment(image.ImageFormat.Length);
             image.SetComponentData(0, 0, 0, data);
-            var retrievedData = image.GetSampleData(0, 0);
-            Console.WriteLine(retrievedData.SequenceEqual(data) ? "Pass" : "Fail");
+            var retrievedData = image[0, 0];
+            Console.WriteLine(retrievedData.SelectMany(arg => arg).SequenceEqual(data) ? "Pass" : "Fail");
         }
     }
 }
