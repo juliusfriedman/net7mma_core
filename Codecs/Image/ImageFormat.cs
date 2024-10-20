@@ -218,7 +218,7 @@ namespace Media.Codecs.Image
             });
         }
 
-        public static ImageFormat CMYK(int bitsPerComponent, Common.Binary.ByteOrder byteOrder = Common.Binary.ByteOrder.Little, Codec.DataLayout dataLayout = Codec.DataLayout.Packed)
+        public static ImageFormat CMYK(int bitsPerComponent, Common.Binary.ByteOrder byteOrder = Common.Binary.ByteOrder.Little, Codec.DataLayout dataLayout = Codec.DataLayout.Planar)
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[] {
                 new(CyanChannelId, bitsPerComponent),
@@ -228,7 +228,7 @@ namespace Media.Codecs.Image
             });
         }
 
-        public static ImageFormat CMYKA(int bitsPerComponent, Common.Binary.ByteOrder byteOrder = Common.Binary.ByteOrder.Little, Codec.DataLayout dataLayout = Codec.DataLayout.Packed, bool premultipliedAlpha = false)
+        public static ImageFormat CMYKA(int bitsPerComponent, Common.Binary.ByteOrder byteOrder = Common.Binary.ByteOrder.Little, Codec.DataLayout dataLayout = Codec.DataLayout.Planar, bool premultipliedAlpha = false)
         {
             return new ImageFormat(byteOrder, dataLayout, new Codec.MediaComponent[] {
                 new(CyanChannelId, bitsPerComponent),

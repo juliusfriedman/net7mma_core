@@ -1,72 +1,86 @@
 ﻿using System.IO;
 using System;
-using System.IO.Compression;
 using System.Numerics;
-using System.Text;
 using Media.Codecs.Image;
 using Media.Common;
-using Media.Codecs.Image.Jpeg;
-using System.Net.WebSockets;
-using System.Linq;
+using System.Collections.Generic;
 
-namespace Codec.Jpeg;
+namespace Media.Codec.Jpeg;
 
 public class JpegImage : Image
 {
-    public readonly byte ColorType;
+    public readonly bool Progressive;
+    public readonly List<Marker> Markers;
 
     public JpegImage(ImageFormat imageFormat, int width, int height)
         : base(imageFormat, width, height, new JpegCodec())
     {
     }
 
-    private JpegImage(ImageFormat imageFormat, int width, int height, MemorySegment data)
+    private JpegImage(ImageFormat imageFormat, int width, int height, MemorySegment data, bool progressive, List<Marker> markers)
         : base(imageFormat, width, height, data)
     {
-    }
-
-    private JpegImage(ImageFormat imageFormat, int width, int height, MemorySegment data, byte colorType)
-        : this(imageFormat, width, height, data)
-    {
-        ColorType = colorType;
+        Progressive = progressive;
+        Markers = markers;
     }
 
     public static JpegImage FromStream(Stream stream)
     {
-        using var markerRead = new MarkerReader(stream);
+        using var markerReader = new MarkerReader(stream);
 
         // Read the SOF0 (Start of Frame) marker
         int width = 0, height = 0;
         ImageFormat? imageFormat = default;
         MemorySegment? dataSegment = default;
-        byte colorType = default;
-        foreach (var marker in markerRead.ReadMarkers())
+        bool progressive = false;
+        List<Marker> markers = new List<Marker>();
+        foreach (var marker in markerReader.ReadMarkers())
         {
-            if (marker.Code == Markers.StartOfBaselineFrame) // SOF0 marker
+            if (marker.FunctionCode == Jpeg.Markers.StartOfBaselineFrame || marker.FunctionCode == Jpeg.Markers.StartOfProgressiveFrame) // SOF0 marker
             {
-                var offset = 3;
+                progressive = marker.FunctionCode == Jpeg.Markers.StartOfProgressiveFrame;
+
+                var offset = 0;
                 byte bitDepth = marker.Data[offset++];
                 height = Binary.Read16(marker.Data, offset, Binary.IsLittleEndian);
                 offset += 2;
                 width = Binary.Read16(marker.Data, offset, Binary.IsLittleEndian);
                 offset += 2;
-                colorType = marker.Data[offset];
+                var numberOfComponents = marker.Data[offset];
+
+                MediaComponent[] mediaComponents = new MediaComponent[numberOfComponents];
+
+                int[] widths = new int[numberOfComponents];
+                int[] heights = new int[numberOfComponents];
+
+                // Read the components and sampling information
+                for (int componentIndex = 0; componentIndex < numberOfComponents; componentIndex++)
+                {
+                    var componentId = marker.Data[offset++];
+                    var samplingFactors = marker.Data[offset++];
+                    widths[componentIndex] = samplingFactors & 0x0F;
+                    heights[componentIndex] = samplingFactors >> 4;
+                    var quantizationTableNumber = marker.Data[offset++];
+
+                    var mediaComponent = new MediaComponent(componentId, bitDepth);
+
+                    mediaComponents[componentIndex] = mediaComponent;
+                }
 
                 // Create the image format based on the SOF0 data
-                imageFormat = CreateImageFormat(bitDepth, colorType);
+                imageFormat = new ImageFormat(Binary.ByteOrder.Little, DataLayout.Planar, mediaComponents);
+                imageFormat.Widths = widths;
+                imageFormat.Heights = heights;
             }
-            else if (marker.Code == Markers.StartOfScan) // SOS marker
+            else if (marker.FunctionCode == Jpeg.Markers.StartOfScan) // SOS marker
             {
                 // Read the image data
-                dataSegment = new MemorySegment((int)(stream.Length - stream.Position));
-
-                if (dataSegment.Count != stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count))
-                    throw new InvalidDataException("Not enough bytes for image data.");
+                dataSegment = marker.Data;
                 break;
             }
             else
             {
-                stream.Seek(marker.Length - Binary.BytesPerShort, SeekOrigin.Current);
+                markers.Add(marker);
             }
         }
 
@@ -74,69 +88,84 @@ public class JpegImage : Image
             throw new InvalidDataException("The provided stream does not contain valid JPEG image data.");
 
         // Create and return the JpegImage
-        return new JpegImage(imageFormat, width, height, dataSegment, colorType);
-    }
-
-    private static ImageFormat CreateImageFormat(byte bitDepth, byte colorType)
-    {
-        switch (colorType)
-        {
-            case 1: // Grayscale
-                return ImageFormat.Monochrome(bitDepth);
-            case 3: // YCbCr
-                return ImageFormat.YUV(bitDepth);
-            case 4: // CMYK
-                return ImageFormat.CMYK(bitDepth);
-            default:
-                throw new NotSupportedException($"Color type {colorType} is not supported.");
-        }
+        return new JpegImage(imageFormat, width, height, dataSegment, progressive, markers);
     }
 
     public void Save(Stream stream)
     {
         // Write the JPEG signature
-        WriteMarker(stream, Markers.StartOfInformation, WriteEmptyMarker);
+        WriteMarker(stream, Jpeg.Markers.StartOfInformation, WriteEmptyMarker);
+
+        if (Markers != null)
+        {
+            foreach (var marker in Markers)
+            {
+                WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
+            }
+        }
 
         // Write the SOF0 marker
-        WriteMarker(stream, Markers.StartOfBaselineFrame, WriteSOF0Marker);
+        WriteMarker(stream, Progressive ? Jpeg.Markers.StartOfProgressiveFrame : Jpeg.Markers.StartOfBaselineFrame, WriteSOF0Marker);
 
         // Write the SOS marker
-        WriteMarker(stream, Markers.StartOfScan, WriteSOSMarker);
+        WriteMarker(stream, Jpeg.Markers.StartOfScan, WriteSOSMarker);
 
         // Write the image data
         stream.Write(Data.Array, Data.Offset, Data.Count);
 
         // Write the EOI marker
-        WriteMarker(stream, Markers.EndOfInformation, WriteEmptyMarker);
+        WriteMarker(stream, Jpeg.Markers.EndOfInformation, WriteEmptyMarker);
     }
 
     private void WriteSOF0Marker(Stream stream)
     {
-        stream.Write(Binary.GetBytes((ushort)(8 + 3 * ImageFormat.Components.Length), Binary.IsLittleEndian));
         stream.WriteByte((byte)ImageFormat.Size);
         stream.Write(Binary.GetBytes((ushort)Height, Binary.IsLittleEndian));
         stream.Write(Binary.GetBytes((ushort)Width, Binary.IsLittleEndian));
-        stream.WriteByte(ColorType);
+        stream.WriteByte((byte)ImageFormat.Components.Length);
         for (int i = 0; i < ImageFormat.Components.Length; i++)
         {
-            stream.WriteByte((byte)(i + 1)); // Component ID
-            stream.WriteByte(0x11); // Sampling factors
-            stream.WriteByte(0); // Quantization table number
+            switch (ImageFormat.Components[i].Id)
+            {
+                case ImageFormat.LumaChannelId:
+                case ImageFormat.CyanChannelId:
+                    stream.WriteByte(1);
+                    break;
+                case ImageFormat.ChromaMajorChannelId:
+                case ImageFormat.MagentaChannelId:
+                    stream.WriteByte(2);
+                    break;
+                case ImageFormat.ChromaMinorChannelId:
+                case ImageFormat.YellowChannelId:
+                    stream.WriteByte(3);
+                    break;
+                case ImageFormat.KChannelId:
+                    stream.WriteByte(4);
+                    break;
+                case ImageFormat.RedChannelId:
+                    stream.WriteByte(82); 
+                    break;
+                case ImageFormat.GreenChannelId:
+                    stream.WriteByte(71);
+                    break;
+                case ImageFormat.BlueChannelId:
+                    stream.WriteByte(66);
+                    break;
+            }            
+            stream.WriteByte((byte)(ImageFormat.Widths[i] << 4 | ImageFormat.Heights[i])); // Sampling factors
+            stream.WriteByte((byte)i); // Quantization table number
         }        
     }
 
     private void WriteMarker(Stream writer, byte functionCode, Action<Stream> writeMarkerData)
-    {
-        Marker marker = new Marker();
-        marker.PrefixLength = 1;
-        marker.Code = functionCode;
+    {        
         using (MemoryStream ms = new MemoryStream())
         {
             writeMarkerData(ms);
             ms.TryGetBuffer(out var markerData);
-            marker.Length = markerData.Count;
-            marker.Data = markerData.Array;
-            writer.Write(marker.Prepare().ToArray());
+            Marker marker = new Marker(functionCode, markerData.Count + Binary.BytesPerShort);
+            markerData.CopyTo(marker.Data.Array, marker.Data.Offset);
+            writer.Write(marker.Array, marker.Offset, marker.Count);
         }
     }
 

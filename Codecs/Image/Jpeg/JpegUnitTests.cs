@@ -1,5 +1,5 @@
-﻿using Codec.Jpeg;
-using Media.Codec;
+﻿using Media.Codec;
+using Media.Codec.Jpeg;
 using Media.Codecs.Image;
 using Media.Common;
 using System;
@@ -12,7 +12,7 @@ internal class JpegUnitTests
 {
     public static void TestSave()
     {
-        var format = ImageFormat.RGBA(8);
+        var format = ImageFormat.RGB(8);
         using (var image = new JpegImage(format, 100, 100))
         {
             using (var stream = new MemoryStream())
@@ -30,7 +30,7 @@ internal class JpegUnitTests
         {
             if (dataLayout == DataLayout.Unknown) continue;
 
-            using (var image = new JpegImage(Media.Codecs.Image.ImageFormat.RGBA(8, Binary.SystemByteOrder, dataLayout), 696, 564))
+            using (var image = new JpegImage(Media.Codecs.Image.ImageFormat.RGB(8, Binary.ByteOrder.Little, dataLayout), 696, 564))
             {
                 for (int i = 0; i < image.Width; i += 2)
                 {
@@ -47,16 +47,16 @@ internal class JpegUnitTests
                     }
                 }
 
-                using (var outputPngStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"rgba_{dataLayout}.jpg"), FileMode.OpenOrCreate))
+                using (var outputJpegStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"rgb_{dataLayout}.jpg"), FileMode.OpenOrCreate))
                 {
-                    image.Save(outputPngStream);
+                    image.Save(outputJpegStream);
                 }
 
-                using (var inputPng = JpegImage.FromStream(new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"rgba_{dataLayout}.jpg"), FileMode.OpenOrCreate)))
+                using (var inputJpeg = JpegImage.FromStream(new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"rgb_{dataLayout}.jpg"), FileMode.OpenOrCreate)))
                 {
-                    if (inputPng.Width != 696) throw new Exception();
+                    if (inputJpeg.Width != 696) throw new Exception();
 
-                    if (inputPng.Height != 564) throw new Exception();
+                    if (inputJpeg.Height != 564) throw new Exception();
                 }
             }
         }
@@ -82,9 +82,9 @@ internal class JpegUnitTests
                     }
                 }
 
-                using (var outputPngStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"RGB_Vector_{dataLayout}.jpg"), FileMode.OpenOrCreate))
+                using (var outputJpegStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"RGB_Vector_{dataLayout}.jpg"), FileMode.OpenOrCreate))
                 {
-                    image.Save(outputPngStream);
+                    image.Save(outputJpegStream);
                 }
             }
         }
@@ -103,13 +103,13 @@ internal class JpegUnitTests
                 }
             }
 
-            using (var outputPngStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, "Binary_packed_line2.jpg"), FileMode.OpenOrCreate))
+            using (var outputJpegStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, "Binary_packed_line.jpg"), FileMode.OpenOrCreate))
             {
-                image.Save(outputPngStream);
+                image.Save(outputJpegStream);
             }
         }
 
-        using (var image = new JpegImage(Media.Codecs.Image.ImageFormat.RGBA(8), 696, 564))
+        using (var image = new JpegImage(Media.Codecs.Image.ImageFormat.YUV(8), 696, 564))
         {
             for (int i = 0; i < image.Width; i += 4)
             {
@@ -123,13 +123,13 @@ internal class JpegUnitTests
                 }
             }
 
-            using (var outputPngStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, "rgba_packed_line2.jpg"), FileMode.OpenOrCreate))
+            using (var outputJpegStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, "YUV_packed_line.jpg"), FileMode.OpenOrCreate))
             {
-                image.Save(outputPngStream);
+                image.Save(outputJpegStream);
             }
         }
 
-        using (var image = new JpegImage(Media.Codecs.Image.ImageFormat.RGBA(8), 696, 564))
+        using (var image = new JpegImage(Media.Codecs.Image.ImageFormat.VUY(8), 696, 564))
         {
             for (int i = 0; i < image.Width; i += 16)
             {
@@ -143,13 +143,13 @@ internal class JpegUnitTests
                 }
             }
 
-            using (var outputPngStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, "rgba_packed_line3.jpg"), FileMode.OpenOrCreate))
+            using (var outputJpegStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, "VUY_packed_line.jpg"), FileMode.OpenOrCreate))
             {
-                image.Save(outputPngStream);
+                image.Save(outputJpegStream);
             }
         }
 
-        using (var image = new JpegImage(Media.Codecs.Image.ImageFormat.RGBA(8), 696, 564))
+        using (var image = new JpegImage(Media.Codecs.Image.ImageFormat.CMYK(8), 696, 564))
         {
             for (int i = 0; i < image.Width; i += 16)
             {
@@ -160,13 +160,13 @@ internal class JpegUnitTests
                 }
             }
 
-            using (var outputPngStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, "rgba_packed_dots.jpg"), FileMode.OpenOrCreate))
+            using (var outputJpegStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, "CMYK_planar_dots.jpg"), FileMode.OpenOrCreate))
             {
-                image.Save(outputPngStream);
+                image.Save(outputJpegStream);
             }
         }
 
-        using (var image = new JpegImage(Media.Codecs.Image.ImageFormat.RGBA(8), 696, 564))
+        using (var image = new JpegImage(Media.Codecs.Image.ImageFormat.BGR(8), 696, 564))
         {
             for (int i = 0; i < image.Width; i += 16)
             {
@@ -178,9 +178,9 @@ internal class JpegUnitTests
                 }
             }
 
-            using (var outputPngStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, "rgba_packed_lines.jpg"), FileMode.OpenOrCreate))
+            using (var outputJpegStream = new System.IO.FileStream(Path.Combine(outputDirectory.FullName, "bgr_packed_lines.jpg"), FileMode.OpenOrCreate))
             {
-                image.Save(outputPngStream);
+                image.Save(outputJpegStream);
             }
         }
     }
@@ -189,32 +189,31 @@ internal class JpegUnitTests
     {
         string currentPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!;
 
-        string pngTestDir = Path.Combine(currentPath, "Media", "JpegTest");
+        string jpegTestDir = Path.Combine(currentPath, "Media", "JpegTest");
 
         string outputDir = Path.Combine(currentPath, "Media", "JpegTest", "output");
 
-        foreach (var filePath in Directory.GetFiles(pngTestDir, "*.jpg"))
+        foreach (var filePath in Directory.GetFiles(jpegTestDir, "*.jpg"))
         {
             using var jpegStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Read);
 
             foreach (var marker in JpegCodec.ReadMarkers(jpegStream))
             {
-                Console.Write("PrefixLength:");
-                Console.WriteLine(marker.PrefixLength);
                 Console.Write("Function Code:");
-                Console.WriteLine(marker.Code);
+                Console.WriteLine($"{marker.FunctionCode} ({marker.FunctionCode:X})");
+                if (marker.Length == 0) continue;
                 Console.Write("Data:");
-                Console.WriteLine(BitConverter.ToString(marker.Data));
+                Console.WriteLine(BitConverter.ToString(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
             }
 
             jpegStream.Seek(0, SeekOrigin.Begin);
 
-            using var pngImage = JpegImage.FromStream(jpegStream);
+            using var jpgImage = JpegImage.FromStream(jpegStream);
 
             var saveFileName = Path.Combine(outputDir, Path.GetFileName(filePath));
 
             using var outputNew = new FileStream(saveFileName, FileMode.OpenOrCreate, FileAccess.Write);
-            pngImage.Save(outputNew);
+            jpgImage.Save(outputNew);
         }
     }
 }

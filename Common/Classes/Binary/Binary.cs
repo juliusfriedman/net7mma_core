@@ -2556,6 +2556,15 @@ namespace Media.Common
             return result;
         }
 
+        [CLSCompliant(false)]
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static byte[] GetBytes(ushort i, bool reverse = false)
+        {
+            byte[] result = new byte[Binary.BytesPerShort];
+            Write16(result, 0, reverse, i);
+            return result;
+        }
+
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static byte[] GetBytes(int i, bool reverse = false)
         {

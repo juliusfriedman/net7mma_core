@@ -1,12 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using Media.Codec;
 using Media.Codec.Interfaces;
 using Media.Codecs.Image;
-using Media.Codecs.Image.Jpeg;
 using Media.Common;
 
-namespace Codec.Jpeg
+namespace Media.Codec.Jpeg
 {
     public class JpegCodec : ImageCodec, IEncoder, IDecoder
     {
@@ -42,7 +40,7 @@ namespace Codec.Jpeg
 
         public static IEnumerable<Marker> ReadMarkers(Stream inputStream)
         {
-            MarkerReader markerReader = new MarkerReader(inputStream);
+            using MarkerReader markerReader = new MarkerReader(inputStream);
             foreach (var marker in markerReader.ReadMarkers())
                 yield return marker;
         }

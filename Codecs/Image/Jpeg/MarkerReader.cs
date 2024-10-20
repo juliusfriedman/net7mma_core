@@ -1,8 +1,9 @@
-﻿using System;
+﻿using Media.Common;
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 
-namespace Media.Codecs.Image.Jpeg
+namespace Media.Codec.Jpeg
 {
 
     //Would be helpful to have a Stream with a buffer for skipping
@@ -16,22 +17,23 @@ namespace Media.Codecs.Image.Jpeg
         private System.IO.Stream jpegStream;
         private int streamOffset;
         private readonly int streamLength;
+        private readonly bool leaveOpen;
 
         public Marker Current;
 
         public int Remains => streamLength - streamOffset;
 
-        public MarkerReader(System.IO.Stream stream)
+        public MarkerReader(System.IO.Stream stream, bool leaveOpen = true)
         {
             jpegStream = stream;
             streamLength = (int)stream.Length;
+            this.leaveOpen = leaveOpen;
         }
 
         public IEnumerable<Marker> ReadMarkers()
         {
             int FunctionCode, CodeSize = 0;
-
-            int prefixCount = 0;
+            byte[] sizeBytes = new byte[Binary.BytesPerShort];
 
             //Find a Jpeg Tag while we are not at the end of the stream
             //Tags come in the format 0xFFXX
@@ -39,114 +41,42 @@ namespace Media.Codecs.Image.Jpeg
             {
                 ++streamOffset;
 
-                //If the prefix is a tag prefix then read another byte as the Tag
-                if (FunctionCode == Media.Codecs.Image.Jpeg.Markers.Prefix)
-                {
-                    //Increase the count of prefix bytes
-                    ++prefixCount;
+                //If the byte is a prefix byte then continue
 
-                    //Get the underlying FunctionCode
-                    FunctionCode = jpegStream.ReadByte();
+                if (FunctionCode is 0 || FunctionCode is Markers.Prefix)
+                    continue;
 
-                    ++streamOffset;
+                if (FunctionCode is Markers.StartOfInformation)
+                    goto AtMarker;
 
-                    //If we are at the end break
-                    if (FunctionCode == -1) break;
+                //Read Length Bytes
+                if(Binary.BytesPerShort != jpegStream.Read(sizeBytes))
+                    throw new InvalidDataException("Not enough bytes to read marker Length.");
 
-                    //Ensure not padded
-                    if (FunctionCode is Media.Codecs.Image.Jpeg.Markers.Prefix
-                        or
-                        0) continue;
+                //Calculate Length
+                CodeSize = Binary.ReadU16(sizeBytes, 0, Binary.IsLittleEndian);
 
-                    //Last Tag
-                    if (FunctionCode is Media.Codecs.Image.Jpeg.Markers.StartOfInformation
-                        or
-                        Media.Codecs.Image.Jpeg.Markers.EndOfInformation) goto AtMarker;
+                if (CodeSize > Remains)
+                    CodeSize = Binary.ReadU16(sizeBytes, 0, Binary.IsBigEndian);
 
-                    //Read the Marker Length
+                AtMarker:
+                Current = new Marker((byte)FunctionCode, CodeSize);
 
-                    //Read Length Bytes
-                    byte h = (byte)jpegStream.ReadByte(), l = (byte)jpegStream.ReadByte();
+                jpegStream.Read(Current.Data.Array, Current.Data.Offset, Current.DataSize);
 
-                    streamOffset += 2;
+                streamOffset += Current.DataSize;
 
-                    //Calculate Length
-                    CodeSize = h * 256 + l;
+                yield return Current;
 
-                    //Correct Length
-                    CodeSize -= 2; //Not including their own length
-
-                    AtMarker:
-
-                    Current = new Marker()
-                    {
-                        PrefixLength = prefixCount,
-                        Code = (byte)FunctionCode,
-                        Length = CodeSize + 2,
-                        Data = new byte[CodeSize]
-                    };
-
-                    jpegStream.Read(Current.Data, 0, CodeSize);
-
-                    yield return Current;
-
-                    CodeSize = prefixCount = 0;
-                }
+                CodeSize = 0;
             }
         }
 
         public void Dispose()
         {
-            if (jpegStream is not null)
-            {
+            if (jpegStream is not null && leaveOpen == false)
                 jpegStream.Dispose();
-                jpegStream = null;
-            }
+            jpegStream = null;
         }
-    }
-
-    //Needs to implement a common class if the elements can be reused => 
-    public class Marker
-    {
-        //OriginOffset
-
-        //Should probably include data of prefix since entropy encoded sections can use ff 00 or ff 01
-        //can indicate this with -1 inter alia.
-        //bool IsRaw => PrefixLength == int.MinValue
-
-        public int PrefixLength;
-
-        public byte Code;
-
-        public int Length; //Can't exceed 65535 
-
-        /*
-         public int Length { 
-         get => _Length;
-         set => value = value > ushort.MaxValue ? ushort.MaxValue : value < 0 ? int.MinValue : value;
-         }
-         */
-
-        //DataSize => Length > 0 ? Length - 2 : 0;
-
-        public byte[] Data;
-
-        //TotalSize => PrefixLength + 1 + Length
-
-        public IEnumerable<byte> Prepare() //bool includePrefix, includeCode, includeLength, includeData...
-        {
-            if (PrefixLength > 0) foreach (byte b in Enumerable.Repeat(Markers.Prefix, PrefixLength)) yield return b;
-
-            yield return Code;
-
-            if (Code is Markers.StartOfInformation or Markers.EndOfInformation) yield break;
-
-            foreach (byte b in Common.Binary.GetBytes((short)Length, Media.Common.Binary.IsBigEndian)) yield return b;
-
-            if (Length > 0) foreach (byte b in Data) yield return b;
-
-            //Should project entire sequence rather than return one at a time.
-            //IEnumerable<byte> result...
-        }
-    }
+    }    
 }

@@ -414,8 +414,8 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 int tablesCount = tables.Count;
 
-                result.Add(Media.Codecs.Image.Jpeg.Markers.Prefix);
-                result.Add(Media.Codecs.Image.Jpeg.Markers.StartOfInformation);//SOI      
+                result.Add(Media.Codec.Jpeg.Markers.Prefix);
+                result.Add(Media.Codec.Jpeg.Markers.StartOfInformation);//SOI      
 
                 //JFIF marker should be included here if jfif header is required. (16 more bytes)
 
@@ -465,16 +465,16 @@ namespace Media.Rtsp.Server.MediaTypes
                  */
 
                 //Need a progrssive indication, problem is that CMYK and RGB also use that indication
-                bool progressive = false; /* = typeSpec == Media.Codecs.Image.Jpeg.Markers.StartOfProgressiveFrame;
+                bool progressive = false; /* = typeSpec == Media.Codec.Jpeg.Markers.StartOfProgressiveFrame;
                 if (progressive) typeSpec = 0;*/
 
-                result.Add(Media.Codecs.Image.Jpeg.Markers.Prefix);
+                result.Add(Media.Codec.Jpeg.Markers.Prefix);
 
                 //This is not soley based on progressive or not, this needs to include more types based on what is defined (above)
                 if (progressive)
-                    result.Add(Media.Codecs.Image.Jpeg.Markers.StartOfProgressiveFrame);//SOF
+                    result.Add(Media.Codec.Jpeg.Markers.StartOfProgressiveFrame);//SOF
                 else
-                    result.Add(Media.Codecs.Image.Jpeg.Markers.StartOfBaselineFrame);//SOF
+                    result.Add(Media.Codec.Jpeg.Markers.StartOfBaselineFrame);//SOF
 
                 //Todo properly build headers?
                 //If only 1 table (AND NOT PROGRESSIVE)
@@ -549,8 +549,8 @@ namespace Media.Rtsp.Server.MediaTypes
                 }
 
                 //Start Of Scan
-                result.Add(Media.Codecs.Image.Jpeg.Markers.Prefix);
-                result.Add(Media.Codecs.Image.Jpeg.Markers.StartOfScan);//Marker SOS
+                result.Add(Media.Codec.Jpeg.Markers.Prefix);
+                result.Add(Media.Codec.Jpeg.Markers.StartOfScan);//Marker SOS
 
                 //If only 1 table (AND NOT PROGRESSIVE)
                 if (tablesCount == 64)
@@ -596,7 +596,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 return result.ToArray();
             }
 
-            private static readonly Common.MemorySegment EndOfInformationMarkerSegment = new(new byte[] { Media.Codecs.Image.Jpeg.Markers.Prefix, Media.Codecs.Image.Jpeg.Markers.EndOfInformation });
+            private static readonly Common.MemorySegment EndOfInformationMarkerSegment = new(new byte[] { Media.Codec.Jpeg.Markers.Prefix, Media.Codec.Jpeg.Markers.EndOfInformation });
 
             // The default 'luma' and 'chroma' quantizer tables, in zigzag order and energy reduced
             private static readonly byte[] defaultQuantizers = new byte[]
@@ -794,8 +794,8 @@ namespace Media.Rtsp.Server.MediaTypes
                 //1 Table
 
                 //Define QTable
-                result[0] = Media.Codecs.Image.Jpeg.Markers.Prefix;
-                result[1] = Media.Codecs.Image.Jpeg.Markers.QuantizationTable;
+                result[0] = Media.Codec.Jpeg.Markers.Prefix;
+                result[1] = Media.Codec.Jpeg.Markers.QuantizationTable;
 
                 result[2] = 0;//Len
                 result[3] = len;
@@ -809,8 +809,8 @@ namespace Media.Rtsp.Server.MediaTypes
                 //2 Tables
                 if (tableCount > 1)
                 {
-                    result[tableSize + 5] = Media.Codecs.Image.Jpeg.Markers.Prefix;
-                    result[tableSize + 6] = Media.Codecs.Image.Jpeg.Markers.QuantizationTable;
+                    result[tableSize + 5] = Media.Codec.Jpeg.Markers.Prefix;
+                    result[tableSize + 6] = Media.Codec.Jpeg.Markers.QuantizationTable;
 
                     result[tableSize + 7] = 0;//Len LSB
                     result[tableSize + 8] = len;
@@ -825,8 +825,8 @@ namespace Media.Rtsp.Server.MediaTypes
                 //3 Tables
                 if (tableCount > 2)
                 {
-                    result[tableSize + 10] = Media.Codecs.Image.Jpeg.Markers.Prefix;
-                    result[tableSize + 11] = Media.Codecs.Image.Jpeg.Markers.QuantizationTable;
+                    result[tableSize + 10] = Media.Codec.Jpeg.Markers.Prefix;
+                    result[tableSize + 11] = Media.Codec.Jpeg.Markers.QuantizationTable;
 
                     result[tableSize + 12] = 0;//Len LSB
                     result[tableSize + 13] = len;
@@ -918,7 +918,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 0xf9, 0xfa
             };
 
-            //Todo, Move most of the logic here to Media.Codecs.Image.Jpeg
+            //Todo, Move most of the logic here to Media.Codec.Jpeg
 
             /// <summary>
             /// Average AC table values to estimate compression level, doesn't work well with 16 bit tables.
@@ -1048,8 +1048,8 @@ namespace Media.Rtsp.Server.MediaTypes
             {
                 List<byte> result =
                 [
-                    Media.Codecs.Image.Jpeg.Markers.Prefix,
-                    Media.Codecs.Image.Jpeg.Markers.HuffmanTable,
+                    Media.Codec.Jpeg.Markers.Prefix,
+                    Media.Codec.Jpeg.Markers.HuffmanTable,
                     0x00, //Legnth
                     (byte)(3 + codeLens.Length + symbols.Length), //Length
                     (byte)((tableClass << 4) | tableNo), //Id
@@ -1061,7 +1061,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
             internal static byte[] CreateDataRestartIntervalMarker(ushort dri)
             {
-                return new byte[] { Media.Codecs.Image.Jpeg.Markers.Prefix, Media.Codecs.Image.Jpeg.Markers.DataRestartInterval, 0x00, 0x04, (byte)(dri >> 8), (byte)(dri) };
+                return new byte[] { Media.Codec.Jpeg.Markers.Prefix, Media.Codec.Jpeg.Markers.DataRestartInterval, 0x00, 0x04, (byte)(dri >> 8), (byte)(dri) };
             }
 
             #endregion
@@ -1209,7 +1209,7 @@ namespace Media.Rtsp.Server.MediaTypes
                 jpegStream.Seek(0, System.IO.SeekOrigin.Begin);
 
                 //Check for the Start of Information Marker
-                if (jpegStream.ReadByte() is not Media.Codecs.Image.Jpeg.Markers.Prefix and not Media.Codecs.Image.Jpeg.Markers.StartOfInformation)
+                if (jpegStream.ReadByte() is not Media.Codec.Jpeg.Markers.Prefix and not Media.Codec.Jpeg.Markers.StartOfInformation)
                     throw new NotSupportedException("Data does not start with Start Of Information Marker");
 
                 //Check for the End of Information Marker, //If present do not include it.
@@ -1217,7 +1217,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 long streamLength = jpegStream.Length,
                     //Check for the eoi since we don't read in aligned MCU's yet
-                    endOffset = jpegStream.ReadByte() == Media.Codecs.Image.Jpeg.Markers.EndOfInformation ? streamLength - 2 : streamLength;
+                    endOffset = jpegStream.ReadByte() == Media.Codec.Jpeg.Markers.EndOfInformation ? streamLength - 2 : streamLength;
 
                 //From the beginning of the buffered stream after the Start of Information Marker
                 jpegStream.Seek(2, System.IO.SeekOrigin.Begin);
@@ -1272,7 +1272,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     ++streamOffset;
 
                     //If the prefix is a tag prefix then read another byte as the Tag
-                    if (FunctionCode == Media.Codecs.Image.Jpeg.Markers.Prefix)
+                    if (FunctionCode == Media.Codec.Jpeg.Markers.Prefix)
                     {
                         //Get the underlying FunctionCode
                         FunctionCode = jpegStream.ReadByte();
@@ -1283,13 +1283,13 @@ namespace Media.Rtsp.Server.MediaTypes
                         if (FunctionCode == -1) break;
 
                         //Ensure not padded
-                        if (FunctionCode is Media.Codecs.Image.Jpeg.Markers.Prefix
+                        if (FunctionCode is Media.Codec.Jpeg.Markers.Prefix
                             or
                             // ff00 is the escaped form of 0xff, will never be encountered the way data is read after the SOF
                             0) continue;
 
                         //Last Tag
-                        if (FunctionCode == Media.Codecs.Image.Jpeg.Markers.EndOfInformation) break;
+                        if (FunctionCode == Media.Codec.Jpeg.Markers.EndOfInformation) break;
 
                         //Read the Marker Length
 
@@ -1307,7 +1307,7 @@ namespace Media.Rtsp.Server.MediaTypes
                         //Determine what to do based on the FunctionCode
                         switch (FunctionCode)
                         {
-                            case Media.Codecs.Image.Jpeg.Markers.QuantizationTable:
+                            case Media.Codec.Jpeg.Markers.QuantizationTable:
                                 {
                                     //Note that RFC2035 allowed 100 - 127 to specify this.
 
@@ -1348,16 +1348,16 @@ namespace Media.Rtsp.Server.MediaTypes
                                     break;
                                 }
                             //Should store, must be present for 0 height and width in SOF
-                            //case Media.Codecs.Image.Jpeg.Markers.DefineNumberOfLines:
+                            //case Media.Codec.Jpeg.Markers.DefineNumberOfLines:
                             //    {
                             //        //ScanLines = (ushort)(jpegStream.ReadByte() * 256 + jpegStream.ReadByte());
                             //        //streamOffset += 2;
                             //        break;
                             //    }
                             //I assume this could really be based on the first few bits (startOf) 0xc where the 0 indicates baseline, etc.
-                            case Media.Codecs.Image.Jpeg.Markers.StartOfBaselineFrame:
+                            case Media.Codec.Jpeg.Markers.StartOfBaselineFrame:
                             //Extended sequential DCT
-                            case Media.Codecs.Image.Jpeg.Markers.StartOfProgressiveFrame:
+                            case Media.Codec.Jpeg.Markers.StartOfProgressiveFrame:
                                 //Lossless
                                 //etc
                                 {
@@ -1473,7 +1473,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                                     continue;
                                 }
-                            case Media.Codecs.Image.Jpeg.Markers.DataRestartInterval:
+                            case Media.Codec.Jpeg.Markers.DataRestartInterval:
                                 {
                                     #region RFC2435 - Restart Marker Header
 
@@ -1533,7 +1533,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                                     continue;
                                 }
-                            case Media.Codecs.Image.Jpeg.Markers.StartOfScan: //Last marker encountered
+                            case Media.Codec.Jpeg.Markers.StartOfScan: //Last marker encountered
                                 {
                                     long pos = streamOffset;
 
@@ -1583,7 +1583,7 @@ namespace Media.Rtsp.Server.MediaTypes
                                     if (pos + CodeSize != streamOffset) throw new InvalidOperationException("Invalid StartOfScan Marker");
 
                                     //Check for alternate endSpectral (63 = default)
-                                    //if (RtpJpegType > 0 && Ns > 0 && endSpectralSelection != 0x3f) RtpJpegTypeSpecific = Media.Codecs.Image.Jpeg.Markers.StartOfProgressiveFrame;
+                                    //if (RtpJpegType > 0 && Ns > 0 && endSpectralSelection != 0x3f) RtpJpegTypeSpecific = Media.Codec.Jpeg.Markers.StartOfProgressiveFrame;
 
                                     //Todo, determine which tables to look at based on how many tables and the type of sub sampling.                                    
 
@@ -2194,7 +2194,7 @@ namespace Media.Rtsp.Server.MediaTypes
                     depacketized ??= Depacketized.Values.Last();
 
                     //Check for EOI and if note present Add it at the FragmentOffset + 1
-                    if (depacketized.Array[depacketized.Count - 2] != Media.Codecs.Image.Jpeg.Markers.EndOfInformation)
+                    if (depacketized.Array[depacketized.Count - 2] != Media.Codec.Jpeg.Markers.EndOfInformation)
                         Depacketized.Add(packetKey++, EndOfInformationMarkerSegment);
                 }
 
