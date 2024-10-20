@@ -109,17 +109,17 @@ public sealed class Markers
 
     public const byte AppFirst = 0xe0;
 
-    //0xe1 => 0xee App 1 => App 14
+    // 0xe1 => 0xee App 1 => App 14
 
     public const byte AppLast = 0xef;
 
-    //0xf0 => 0xf6 Extension Data
+    // 0xf0 => 0xf6 Extension Data
 
     // 0xf7 => start of frame JPEG LS
 
     // 0xf8 = LSE extension parameters JPEG LS
 
-    //0xf9 => 0xfd Extension Data
+    // 0xf9 => 0xfd Extension Data
 
     public const byte TextComment = 0xfe;
 

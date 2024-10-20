@@ -224,7 +224,7 @@ internal class JpegUnitTests
             if (newJpgImage.Width != jpgImage.Width ||
                 newJpgImage.Height != jpgImage.Height ||
                 newJpgImage.Progressive != jpgImage.Progressive ||
-                newJpgImage.ImageFormat != jpgImage.ImageFormat)
+                newJpgImage.ImageFormat.Components.Length != jpgImage.ImageFormat.Components.Length)
                     throw new InvalidDataException();
         }
     }

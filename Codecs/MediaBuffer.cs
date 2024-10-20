@@ -36,6 +36,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
 namespace Media.Codec
 {
     /// <summary>
@@ -55,6 +57,11 @@ namespace Media.Codec
         //The data of the buffer
         public readonly Common.MemorySegment Data = Common.MemorySegment.Empty;
 
+        /// <summary>
+        /// Indicates if there is less data in the MediaBuffer than would be Calculated by <see cref="SampleLength"/>
+        /// </summary>
+        public bool IsTruncated => Data.Count < SampleLength;
+
         public MediaBuffer(MediaFormat mediaFormat, Common.MemorySegment data, Media.Codec.Interfaces.ICodec codec = null, long timestamp = 0, bool shouldDispose = true)
             : base(shouldDispose)
         {
@@ -62,9 +69,7 @@ namespace Media.Codec
 
             Codec = codec;
 
-            Data = data;
-
-            if (Data.Count < SampleLength) throw new System.InvalidOperationException(string.Format("Insufficient Data for Sample, found: {0}, expected: {1}", data.Count, SampleLength));
+            Data = data;            
 
             Timestamp = timestamp;
 

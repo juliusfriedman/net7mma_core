@@ -6,6 +6,7 @@ using Media.Common;
 using System.Collections.Generic;
 using System.Linq;
 using Media.Common.Collections.Generic;
+using Codec.Jpeg;
 
 namespace Media.Codec.Jpeg;
 
@@ -69,15 +70,15 @@ public class JpegImage : Image
                     heights[componentIndex] = samplingFactors >> 4;
                     
                     //TODO CMYK image throws this off?
-                    //var quantizationTableNumber = marker.Data[offset++];
+                    var quantizationTableNumber = offset >= marker.DataSize ? (byte)componentIndex : marker.Data[offset++];
 
-                    var mediaComponent = new MediaComponent(componentId, bitDepth);
+                    var mediaComponent = new JpegComponent(quantizationTableNumber, componentId, bitDepth);
 
                     mediaComponents[componentIndex] = mediaComponent;
                 }
 
                 // Create the image format based on the SOF0 data
-                imageFormat = new ImageFormat(Binary.ByteOrder.Little, DataLayout.Planar, mediaComponents);
+                imageFormat = new ImageFormat(Binary.ByteOrder.Little, DataLayout.SemiPlanar, mediaComponents);
                 imageFormat.Widths = widths;
                 imageFormat.Heights = heights;
             }
@@ -104,6 +105,14 @@ public class JpegImage : Image
     {
         // Write the JPEG signature
         WriteMarker(stream, Jpeg.Markers.StartOfInformation, WriteEmptyMarker);
+
+        if (Markers != null)
+        {
+            foreach (var marker in Markers.TryGetValue(Jpeg.Markers.TextComment, out var textComments) ? textComments : Enumerable.Empty<Marker>())
+            {
+                WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
+            }
+        }
 
         if (Markers != null)
         {
@@ -150,7 +159,8 @@ public class JpegImage : Image
         stream.WriteByte((byte)ImageFormat.Components.Length);
         for (int i = 0; i < ImageFormat.Components.Length; i++)
         {
-            switch (ImageFormat.Components[i].Id)
+            var component = ImageFormat.Components[i];
+            switch (component.Id)
             {
                 case ImageFormat.LumaChannelId:
                 case ImageFormat.CyanChannelId:
@@ -178,7 +188,7 @@ public class JpegImage : Image
                     break;
             }            
             stream.WriteByte((byte)(ImageFormat.Widths[i] << 4 | ImageFormat.Heights[i])); // Sampling factors
-            stream.WriteByte((byte)i); // Quantization table number
+            stream.WriteByte(component is JpegComponent jpegComponent ? jpegComponent.QuantizationTableNumber : (byte)i); // Quantization table number
         }        
     }
 
@@ -200,7 +210,8 @@ public class JpegImage : Image
         stream.WriteByte((byte)ImageFormat.Components.Length);
         for (int i = 0; i < ImageFormat.Components.Length; i++)
         {
-            stream.WriteByte((byte)(i + 1)); // Component ID
+            var component = ImageFormat.Components[i];
+            stream.WriteByte(component.Id); // Component ID
             stream.WriteByte(0); // Huffman table number
         }
         stream.WriteByte(0); // Start of spectral selection
