@@ -36,6 +36,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
+using System;
+
 namespace Media.Codec;
 
 /// <summary>
@@ -76,4 +78,13 @@ public class MediaComponent : Common.SuppressedFinalizerDisposable
     /// The size of the component in bytes
     /// </summary>
     public int Length { get { return Common.Binary.BitsToBytes(Size); } }
+
+    public override bool Equals(object obj)
+        => obj is MediaComponent component && Equals(component);
+
+    public bool Equals(MediaComponent component)
+        => ReferenceEquals(this, component) || component.Id == Id && component.Size == Size;
+
+    public override int GetHashCode()
+     => HashCode.Combine(Id, Size);
 }

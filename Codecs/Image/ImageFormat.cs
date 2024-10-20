@@ -1,5 +1,6 @@
 ﻿using Media.Codec;
 using Media.Codecs.Image;
+using System;
 using System.Linq;
 using System.Text;
 
@@ -436,6 +437,24 @@ namespace Media.Codecs.Image
         }
 
         public string FormatString => Encoding.ASCII.GetString(Components.Select(c => c.Id).ToArray());
+
+        #endregion
+
+        #region Methods
+
+        public override bool Equals(object obj)
+            => obj is ImageFormat other && Equals(other);
+
+        public bool Equals(ImageFormat imageFormat)
+        {
+            if (ReferenceEquals(this, imageFormat)) return true;
+            return imageFormat.Components.SequenceEqual(imageFormat.Components) &&
+                Widths.SequenceEqual(imageFormat.Widths) &&
+                Heights.SequenceEqual(imageFormat.Heights);
+        }
+
+        public override int GetHashCode()
+            => HashCode.Combine(Components, Widths, Heights);
 
         #endregion
     }

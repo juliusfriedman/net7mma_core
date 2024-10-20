@@ -5,13 +5,14 @@ using Media.Codecs.Image;
 using Media.Common;
 using System.Collections.Generic;
 using System.Linq;
+using Media.Common.Collections.Generic;
 
 namespace Media.Codec.Jpeg;
 
 public class JpegImage : Image
 {
     public readonly bool Progressive;
-    public readonly List<Marker> Markers;
+    public readonly ConcurrentThesaurus<byte, Marker> Markers;
 
     public JpegImage(ImageFormat imageFormat, int width, int height)
         : base(imageFormat, width, height, new JpegCodec())
@@ -19,11 +20,11 @@ public class JpegImage : Image
     }
 
     public JpegImage(ImageFormat imageFormat, int width, int height, MemorySegment data)
-    : base(imageFormat, width, height, new JpegCodec())
+    : base(imageFormat, width, height, data, new JpegCodec())
     {
     }
 
-    private JpegImage(ImageFormat imageFormat, int width, int height, MemorySegment data, bool progressive, List<Marker> markers)
+    private JpegImage(ImageFormat imageFormat, int width, int height, MemorySegment data, bool progressive, ConcurrentThesaurus<byte, Marker> markers)
         : this(imageFormat, width, height, data)
     {
         Progressive = progressive;
@@ -39,7 +40,7 @@ public class JpegImage : Image
         ImageFormat imageFormat = default;
         MemorySegment dataSegment = default;
         bool progressive = false;
-        List<Marker> markers = new List<Marker>();
+        Common.Collections.Generic.ConcurrentThesaurus<byte, Marker> markers = new Common.Collections.Generic.ConcurrentThesaurus<byte, Marker>();
         foreach (var marker in markerReader.ReadMarkers())
         {
             if (marker.FunctionCode == Jpeg.Markers.StartOfBaselineFrame || marker.FunctionCode == Jpeg.Markers.StartOfProgressiveFrame) // SOF0 marker
@@ -88,7 +89,7 @@ public class JpegImage : Image
             }
             else if (marker.FunctionCode != Jpeg.Markers.StartOfInformation)
             {
-                markers.Add(marker);
+                markers.Add(marker.FunctionCode, marker);
             }
         }
 
@@ -106,7 +107,7 @@ public class JpegImage : Image
 
         if (Markers != null)
         {
-            foreach (var marker in Markers.Where(marker => marker.FunctionCode == Jpeg.Markers.TextComment))
+            foreach (var marker in Markers.TryGetValue(Jpeg.Markers.TextComment,out var textComments) ? textComments : Enumerable.Empty<Marker>())
             {
                 WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
             }
@@ -114,7 +115,7 @@ public class JpegImage : Image
 
         if (Markers != null)
         {
-            foreach (var marker in Markers.Where(marker => marker.FunctionCode == Jpeg.Markers.QuantizationTable))
+            foreach (var marker in Markers.TryGetValue(Jpeg.Markers.QuantizationTable, out var quantizationTables) ? quantizationTables : Enumerable.Empty<Marker>())
             {
                 WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
             }
@@ -125,7 +126,7 @@ public class JpegImage : Image
 
         if (Markers != null)
         {
-            foreach (var marker in Markers.Where(marker => marker.FunctionCode == Jpeg.Markers.HuffmanTable))
+            foreach (var marker in Markers.TryGetValue(Jpeg.Markers.HuffmanTable, out var huffmanTables) ? huffmanTables : Enumerable.Empty<Marker>())
             {
                 WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
             }

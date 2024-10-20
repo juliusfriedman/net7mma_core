@@ -89,6 +89,8 @@ namespace Media.Common.Collections.Generic
 
         public IEnumerable<TKey> Keys { get { return Dictionary.Keys; } }
 
+        public IEnumerable<TValue> Values => Dictionary.Values.SelectMany(v => v);
+
         #endregion
 
         #region Methods
