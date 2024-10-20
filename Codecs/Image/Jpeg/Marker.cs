@@ -35,4 +35,8 @@ public class Marker : MemorySegment
         if (size > 0)
             Length = size;
     }
+
+    public Marker(MemorySegment data): base(data)
+    {
+    }
 }

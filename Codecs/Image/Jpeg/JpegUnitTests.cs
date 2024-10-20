@@ -2,6 +2,7 @@
 using Media.Codec.Jpeg;
 using Media.Codecs.Image;
 using Media.Common;
+using Media.Common.Classes.Loggers;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -196,6 +197,8 @@ internal class JpegUnitTests
 
         foreach (var filePath in Directory.GetFiles(jpegTestDir, "*.jpg"))
         {
+            Console.WriteLine($"Processing file: ${Path.GetFileName(filePath)}");
+
             List<Marker> sourceMarkers = new List<Marker>();
 
             using var jpegStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Read);

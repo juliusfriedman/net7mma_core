@@ -3,7 +3,6 @@ using System;
 using System.Numerics;
 using Media.Codecs.Image;
 using Media.Common;
-using System.Collections.Generic;
 using System.Linq;
 using Media.Common.Collections.Generic;
 using Codec.Jpeg;
@@ -106,10 +105,7 @@ public class JpegImage : Image
             {
                 WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
             }
-        }
 
-        if (Markers != null)
-        {
             foreach (var marker in Markers.TryGetValue(Jpeg.Markers.QuantizationTable, out var quantizationTables) ? quantizationTables : Enumerable.Empty<Marker>())
             {
                 WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));

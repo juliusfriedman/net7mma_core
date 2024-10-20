@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Windows.Markup;
+using Codec.Jpeg.Markers;
 using Media.Codec.Interfaces;
 using Media.Codecs.Image;
 using Media.Common;
@@ -27,16 +31,12 @@ namespace Media.Codec.Jpeg
         public int Encode(JpegImage image, Stream outputStream)
         {
             var position = outputStream.Position;
-            // Implement PNG encoding logic here
             image.Save(outputStream);
             return (int)(outputStream.Position - position);
         }
 
         public JpegImage Decode(Stream inputStream)
-        {
-            // Implement PNG decoding logic here
-            return JpegImage.FromStream(inputStream);
-        }
+            => JpegImage.FromStream(inputStream);
 
         public static IEnumerable<Marker> ReadMarkers(Stream jpegStream)
         {
@@ -68,6 +68,9 @@ namespace Media.Codec.Jpeg
                 //Calculate Length
                 CodeSize = Binary.ReadU16(sizeBytes, 0, Binary.IsLittleEndian);
 
+                if (CodeSize < 0)
+                    CodeSize = Binary.ReadU16(sizeBytes, 0, Binary.IsBigEndian);
+
             AtMarker:
                 var Current = new Marker((byte)FunctionCode, CodeSize);
 
@@ -86,13 +89,10 @@ namespace Media.Codec.Jpeg
 
         private static bool TryProcessStartofScan(Marker marker)
         {
-            if (marker.DataSize <= 0)
+            if (marker.FunctionCode != Markers.StartOfScan || marker.DataSize <= 0)
                 return false;
                  
             var bitOffset = Binary.BytesToBits(marker.Data.Offset);
-            
-            if (Binary.BitsToBytes(ref bitOffset) >= marker.Count)
-                return false;
 
             //Read the number of components
             var Ns = Binary.ReadBits(marker.Data.Array, ref bitOffset, Binary.BitsPerByte, Binary.BitOrder.MostSignificant);
@@ -100,44 +100,80 @@ namespace Media.Codec.Jpeg
             if (Binary.BitsToBytes(ref bitOffset) >= marker.Count)
                 return false;
 
+            List<ValueTuple<long, long, long>> test = new();
+
             //Read the components (Csj)
             for (int j = 0; j < Ns; ++j)
             {
                 var Csj = Binary.ReadBits(marker.Data.Array, ref bitOffset, Binary.BitsPerByte, Binary.BitOrder.MostSignificant);
-                if (bitOffset >= marker.Count)
+                if (Binary.BitsToBytes(ref bitOffset) >= marker.Count)
                     return false;
 
                 //Read the entropy coding table selectors DC nybble
-                var Tdj = Binary.ReadBits(marker.Data.Array, ref bitOffset, 4, Binary.BitOrder.MostSignificant);
-                if (bitOffset >= marker.Count)
+                var Tdj = Binary.ReadBits(marker.Data.Array, ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
+                if (Binary.BitsToBytes(ref bitOffset) >= marker.Count)
                     return false;
 
                 //Read the entropy coding table selectors AC nybble
-                var Taj = Binary.ReadBits(marker.Data.Array, ref bitOffset, 4, Binary.BitOrder.MostSignificant);
-                if (bitOffset >= marker.Count)
+                var Taj = Binary.ReadBits(marker.Data.Array, ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
+                if (Binary.BitsToBytes(ref bitOffset) >= marker.Count)
                     return false;
+
+                test.Add((Csj, Tdj, Taj));
             }
 
             //Read the Ss byte
             var Ss = Binary.ReadBits(marker.Data.Array, ref bitOffset, Binary.BitsPerByte, Binary.BitOrder.MostSignificant);
 
-            if (bitOffset >= marker.Count)
+            if (Binary.BitsToBytes(ref bitOffset) >= marker.Count)
                 return false;
 
             //Read the Se byte
             var Se = Binary.ReadBits(marker.Data.Array, ref bitOffset, Binary.BitsPerByte, Binary.BitOrder.MostSignificant);
 
-            if (bitOffset >= marker.Count)
+            if (Binary.BitsToBytes(ref bitOffset) >= marker.Count)
                 return false;
 
             //Read the Ah nybble
-            var Ah = Binary.ReadBits(marker.Data.Array, ref bitOffset, 4, Binary.BitOrder.MostSignificant);
+            var Ah = Binary.ReadBits(marker.Data.Array, ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
 
-            if (bitOffset >= marker.Count)
+            if (Binary.BitsToBytes(ref bitOffset) >= marker.Count)
                 return false;
 
             //Read the Al nybble
-            var Al = Binary.ReadBits(marker.Data.Array, ref bitOffset, 4, Binary.BitOrder.MostSignificant);
+            var Al = Binary.ReadBits(marker.Data.Array, ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
+
+            var StartOfScanMarker = new StartOfScanMarker(marker);
+
+            if (StartOfScanMarker.Ns != Ns)
+                return false;
+
+            if (StartOfScanMarker.Ss != Ss)
+                return false;
+
+            if (StartOfScanMarker.Se != Se)
+                return false;
+
+            if (StartOfScanMarker.Ah != Ah)
+                return false;
+
+            if (StartOfScanMarker.Al != Al)
+                return false;
+
+            var managedComponents = StartOfScanMarker.Components.ToList();
+
+            if (managedComponents.Count != Ns)
+                return false;
+
+            for(var i = 0; i < Ns; ++i)
+            {
+                var component = managedComponents[i];
+                var testComponent = test[i];
+                if (component.ScanComponentSelector != testComponent.Item1 ||
+                    component.EntropyCodingTableSelectorDC != testComponent.Item2 ||
+                    component.EntropyCodingTableSelectorAC != testComponent.Item3)
+                    return false;
+            }
 
             return true;
         }

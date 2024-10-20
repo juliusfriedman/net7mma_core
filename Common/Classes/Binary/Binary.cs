@@ -150,6 +150,8 @@ namespace Media.Common
 
         public const int Three = Binary.Tres;
 
+        public const int Four = Binary.Quattuor;
+
         public const int ThirtyOne = Binary.TrīgintāŪnus;
 
         #endregion
@@ -185,7 +187,7 @@ namespace Media.Common
         /// <summary>
         /// 256
         /// </summary>
-        internal const int TrīgintāDuoBitSize = Binary.BitsPerByte * QuadrupleBitSize;
+        internal const int TrīgintāDuoBitSize = Binary.BitsPerByte * QuadrupleBitSize;        
 
         /// <summary>
         /// The amount of bits available to the <see cref="byte"/> type.
