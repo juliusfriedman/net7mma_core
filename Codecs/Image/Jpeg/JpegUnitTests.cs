@@ -3,6 +3,7 @@ using Media.Codec.Jpeg;
 using Media.Codecs.Image;
 using Media.Common;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 
@@ -195,6 +196,8 @@ internal class JpegUnitTests
 
         foreach (var filePath in Directory.GetFiles(jpegTestDir, "*.jpg"))
         {
+            List<Marker> sourceMarkers = new List<Marker>();
+
             using var jpegStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Read);
 
             foreach (var marker in JpegCodec.ReadMarkers(jpegStream))
@@ -202,8 +205,11 @@ internal class JpegUnitTests
                 Console.Write("Function Code:");
                 Console.WriteLine($"{marker.FunctionCode} ({marker.FunctionCode:X})");
                 if (marker.Length == 0) continue;
+                Console.Write("Length:");
+                Console.WriteLine(marker.Length);
                 Console.Write("Data:");
                 Console.WriteLine(BitConverter.ToString(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
+                sourceMarkers.Add(marker);
             }
 
             jpegStream.Seek(0, SeekOrigin.Begin);
@@ -219,12 +225,29 @@ internal class JpegUnitTests
 
             using var inputNew = new FileStream(saveFileName, FileMode.OpenOrCreate, FileAccess.Read);
 
+            List<Marker> destinationMarkers = new List<Marker>();
+
+            foreach (var marker in JpegCodec.ReadMarkers(inputNew))
+            {
+                Console.Write("Function Code:");
+                Console.WriteLine($"{marker.FunctionCode} ({marker.FunctionCode:X})");
+                if (marker.Length == 0) continue;
+                Console.Write("Length:");
+                Console.WriteLine(marker.Length);
+                Console.Write("Data:");
+                Console.WriteLine(BitConverter.ToString(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
+                destinationMarkers.Add(marker);
+            }
+            
+            inputNew.Seek(0, SeekOrigin.Begin);
+
             using var newJpgImage = JpegImage.FromStream(inputNew);
 
             if (newJpgImage.Width != jpgImage.Width ||
                 newJpgImage.Height != jpgImage.Height ||
                 newJpgImage.Progressive != jpgImage.Progressive ||
-                newJpgImage.ImageFormat.Components.Length != jpgImage.ImageFormat.Components.Length)
+                newJpgImage.ImageFormat.Components.Length != jpgImage.ImageFormat.Components.Length ||
+                newJpgImage.ImageFormat.Size != jpgImage.ImageFormat.Size)
                     throw new InvalidDataException();
         }
     }

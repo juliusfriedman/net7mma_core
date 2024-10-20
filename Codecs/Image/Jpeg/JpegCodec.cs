@@ -38,11 +38,108 @@ namespace Media.Codec.Jpeg
             return JpegImage.FromStream(inputStream);
         }
 
-        public static IEnumerable<Marker> ReadMarkers(Stream inputStream)
+        public static IEnumerable<Marker> ReadMarkers(Stream jpegStream)
         {
-            using MarkerReader markerReader = new MarkerReader(inputStream);
-            foreach (var marker in markerReader.ReadMarkers())
-                yield return marker;
+            int streamOffset = 0;
+            int FunctionCode, CodeSize = 0;
+            byte[] sizeBytes = new byte[Binary.BytesPerShort];
+
+            //Find a Jpeg Tag while we are not at the end of the stream
+            //Tags come in the format 0xFFXX
+            while ((FunctionCode = jpegStream.ReadByte()) != -1)
+            {
+                ++streamOffset;
+
+                //If the byte is a prefix byte then continue
+                if (FunctionCode is 0 || FunctionCode is Markers.Prefix)
+                    continue;
+
+                switch (FunctionCode)
+                {
+                    case Markers.StartOfInformation:
+                    case Markers.EndOfInformation:
+                        goto AtMarker;
+                }
+
+                //Read Length Bytes
+                if (Binary.BytesPerShort != jpegStream.Read(sizeBytes))
+                    throw new InvalidDataException("Not enough bytes to read marker Length.");
+
+                //Calculate Length
+                CodeSize = Binary.ReadU16(sizeBytes, 0, Binary.IsLittleEndian);
+
+            AtMarker:
+                var Current = new Marker((byte)FunctionCode, CodeSize);
+
+                jpegStream.Read(Current.Data.Array, Current.Data.Offset, Current.DataSize);
+
+                if (Current.FunctionCode == Markers.StartOfScan)
+                    TryProcessStartofScan(Current);
+
+                streamOffset += Current.DataSize;
+
+                yield return Current;
+
+                CodeSize = 0;
+            }
+        }
+
+        private static bool TryProcessStartofScan(Marker marker)
+        {
+            if (marker.DataSize <= 0)
+                return false;
+                 
+            var bitOffset = Binary.BytesToBits(marker.Data.Offset);
+            
+            if (Binary.BitsToBytes(ref bitOffset) >= marker.Count)
+                return false;
+
+            //Read the number of components
+            var Ns = Binary.ReadBits(marker.Data.Array, ref bitOffset, Binary.BitsPerByte, Binary.BitOrder.MostSignificant);
+
+            if (Binary.BitsToBytes(ref bitOffset) >= marker.Count)
+                return false;
+
+            //Read the components (Csj)
+            for (int j = 0; j < Ns; ++j)
+            {
+                var Csj = Binary.ReadBits(marker.Data.Array, ref bitOffset, Binary.BitsPerByte, Binary.BitOrder.MostSignificant);
+                if (bitOffset >= marker.Count)
+                    return false;
+
+                //Read the entropy coding table selectors DC nybble
+                var Tdj = Binary.ReadBits(marker.Data.Array, ref bitOffset, 4, Binary.BitOrder.MostSignificant);
+                if (bitOffset >= marker.Count)
+                    return false;
+
+                //Read the entropy coding table selectors AC nybble
+                var Taj = Binary.ReadBits(marker.Data.Array, ref bitOffset, 4, Binary.BitOrder.MostSignificant);
+                if (bitOffset >= marker.Count)
+                    return false;
+            }
+
+            //Read the Ss byte
+            var Ss = Binary.ReadBits(marker.Data.Array, ref bitOffset, Binary.BitsPerByte, Binary.BitOrder.MostSignificant);
+
+            if (bitOffset >= marker.Count)
+                return false;
+
+            //Read the Se byte
+            var Se = Binary.ReadBits(marker.Data.Array, ref bitOffset, Binary.BitsPerByte, Binary.BitOrder.MostSignificant);
+
+            if (bitOffset >= marker.Count)
+                return false;
+
+            //Read the Ah nybble
+            var Ah = Binary.ReadBits(marker.Data.Array, ref bitOffset, 4, Binary.BitOrder.MostSignificant);
+
+            if (bitOffset >= marker.Count)
+                return false;
+
+            //Read the Al nybble
+            var Al = Binary.ReadBits(marker.Data.Array, ref bitOffset, 4, Binary.BitOrder.MostSignificant);
+
+            return true;
         }
     }
 }

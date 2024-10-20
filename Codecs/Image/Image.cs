@@ -16,7 +16,7 @@ namespace Media.Codecs.Image
 
         //static Image Crop(Image source)
 
-        internal static int CalculateSize(ImageFormat format, int width, int height)
+        public static int CalculateSize(ImageFormat format, int width, int height)
         {
             int size = 0;
 
@@ -52,7 +52,7 @@ namespace Media.Codecs.Image
             return size;
         }
 
-        internal int CalculateStride(int alignment = Common.Binary.BytesPerInteger)
+        public int CalculateStride(int alignment = Common.Binary.BytesPerInteger)
         {
             // Calculate the number of bits per pixel
             int bitsPerPixel = ImageFormat.Size;

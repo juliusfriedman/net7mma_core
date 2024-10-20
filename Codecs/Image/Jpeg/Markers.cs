@@ -59,7 +59,9 @@ public sealed class Markers
 
     public const byte StartOfBaselineFrame = 0xc0;
 
-    public const byte StartOfProgressiveFrame = 0xc2;
+    public const byte StartOfHuffmanFrame = 0xc1;
+
+    public const byte StartOfProgressiveHuffmanFrame = 0xc2;
 
     public const byte StartOfLosslessHuffmanFrame = 0xc3;
 

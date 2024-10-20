@@ -8,9 +8,7 @@ public class JpegComponent : MediaComponent
 
     public JpegComponent(byte quantizationTableNumber, byte id, int size)
         : base(id, size)
-    {
-        QuantizationTableNumber = quantizationTableNumber;
-    }
+            => QuantizationTableNumber = quantizationTableNumber;
 
     public override int GetHashCode()
         => System.HashCode.Combine(base.GetHashCode(), QuantizationTableNumber);

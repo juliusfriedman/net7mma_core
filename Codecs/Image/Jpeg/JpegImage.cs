@@ -20,44 +20,37 @@ public class JpegImage : Image
     {
     }
 
-    public JpegImage(ImageFormat imageFormat, int width, int height, MemorySegment data)
-    : base(imageFormat, width, height, data, new JpegCodec())
-    {
-    }
-
     private JpegImage(ImageFormat imageFormat, int width, int height, MemorySegment data, bool progressive, ConcurrentThesaurus<byte, Marker> markers)
-        : this(imageFormat, width, height, data)
+        : base(imageFormat, width, height, data, new JpegCodec())
     {
         Progressive = progressive;
         Markers = markers;
+
     }
 
     public static JpegImage FromStream(Stream stream)
     {
-        using var markerReader = new MarkerReader(stream);
-
         // Read the SOF0 (Start of Frame) marker
         int width = 0, height = 0;
         ImageFormat imageFormat = default;
         MemorySegment dataSegment = default;
         bool progressive = false;
         Common.Collections.Generic.ConcurrentThesaurus<byte, Marker> markers = new Common.Collections.Generic.ConcurrentThesaurus<byte, Marker>();
-        foreach (var marker in markerReader.ReadMarkers())
+        foreach (var marker in JpegCodec.ReadMarkers(stream))
         {
-            if (marker.FunctionCode == Jpeg.Markers.StartOfBaselineFrame || marker.FunctionCode == Jpeg.Markers.StartOfProgressiveFrame) // SOF0 marker
+            if (marker.FunctionCode == Jpeg.Markers.StartOfBaselineFrame || marker.FunctionCode == Jpeg.Markers.StartOfProgressiveHuffmanFrame) // SOF0 marker
             {
-                progressive = marker.FunctionCode == Jpeg.Markers.StartOfProgressiveFrame;
+                progressive = marker.FunctionCode == Jpeg.Markers.StartOfProgressiveHuffmanFrame;
 
                 var offset = 0;
-                byte bitDepth = marker.Data[offset++];
-                height = Binary.Read16(marker.Data, offset, Binary.IsLittleEndian);
-                offset += 2;
-                width = Binary.Read16(marker.Data, offset, Binary.IsLittleEndian);
-                offset += 2;
-                var numberOfComponents = marker.Data[offset];
+                byte bitDepth = marker.Data[offset++];                
+                height = Binary.Read16(marker.Data, ref offset, Binary.IsLittleEndian);
+                width = Binary.Read16(marker.Data, ref offset, Binary.IsLittleEndian);
+                var numberOfComponents = marker.Data[offset++];
+
+                int bitsPerComponent = bitDepth / numberOfComponents;
 
                 MediaComponent[] mediaComponents = new MediaComponent[numberOfComponents];
-
                 int[] widths = new int[numberOfComponents];
                 int[] heights = new int[numberOfComponents];
 
@@ -72,20 +65,21 @@ public class JpegImage : Image
                     //TODO CMYK image throws this off?
                     var quantizationTableNumber = offset >= marker.DataSize ? (byte)componentIndex : marker.Data[offset++];
 
-                    var mediaComponent = new JpegComponent(quantizationTableNumber, componentId, bitDepth);
+                    var mediaComponent = new JpegComponent(quantizationTableNumber, componentId, bitsPerComponent);
 
                     mediaComponents[componentIndex] = mediaComponent;
                 }
 
                 // Create the image format based on the SOF0 data
-                imageFormat = new ImageFormat(Binary.ByteOrder.Little, DataLayout.SemiPlanar, mediaComponents);
+                imageFormat = new ImageFormat(Binary.ByteOrder.Little, DataLayout.Packed, mediaComponents);
                 imageFormat.Widths = widths;
                 imageFormat.Heights = heights;
             }
             else if (marker.FunctionCode == Jpeg.Markers.StartOfScan) // SOS marker
             {
-                // Read the image data
-                dataSegment = marker.Data;
+                var dataSegmentSize = Image.CalculateSize(imageFormat, width, height);
+                dataSegment = new MemorySegment(dataSegmentSize);
+                stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count);
                 break;
             }
             else if (marker.FunctionCode != Jpeg.Markers.StartOfInformation)
@@ -116,22 +110,15 @@ public class JpegImage : Image
 
         if (Markers != null)
         {
-            foreach (var marker in Markers.TryGetValue(Jpeg.Markers.TextComment,out var textComments) ? textComments : Enumerable.Empty<Marker>())
-            {
-                WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
-            }
-        }
-
-        if (Markers != null)
-        {
             foreach (var marker in Markers.TryGetValue(Jpeg.Markers.QuantizationTable, out var quantizationTables) ? quantizationTables : Enumerable.Empty<Marker>())
             {
                 WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
             }
         }
 
+        // TODO revise to write correct start of scan header per coding.
         // Write the SOF0 marker
-        WriteMarker(stream, Progressive ? Jpeg.Markers.StartOfProgressiveFrame : Jpeg.Markers.StartOfBaselineFrame, WriteSOF0Marker);
+        WriteMarker(stream, Progressive ? Jpeg.Markers.StartOfProgressiveHuffmanFrame : Jpeg.Markers.StartOfBaselineFrame, WriteSOF0Marker);
 
         if (Markers != null)
         {
@@ -198,7 +185,7 @@ public class JpegImage : Image
         {
             writeMarkerData(ms);
             ms.TryGetBuffer(out var markerData);
-            Marker marker = new Marker(functionCode, markerData.Count > 0 ? markerData.Count + Binary.BytesPerShort : 0);
+            using Marker marker = new Marker(functionCode, markerData.Count > 0 ? markerData.Count + Binary.BytesPerShort : 0);
             markerData.CopyTo(marker.Data.Array, marker.Data.Offset);
             writer.Write(marker.Array, marker.Offset, marker.Count);
         }

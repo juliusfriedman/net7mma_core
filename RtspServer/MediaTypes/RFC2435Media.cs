@@ -472,7 +472,7 @@ namespace Media.Rtsp.Server.MediaTypes
 
                 //This is not soley based on progressive or not, this needs to include more types based on what is defined (above)
                 if (progressive)
-                    result.Add(Media.Codec.Jpeg.Markers.StartOfProgressiveFrame);//SOF
+                    result.Add(Media.Codec.Jpeg.Markers.StartOfProgressiveHuffmanFrame);//SOF
                 else
                     result.Add(Media.Codec.Jpeg.Markers.StartOfBaselineFrame);//SOF
 
@@ -1357,7 +1357,7 @@ namespace Media.Rtsp.Server.MediaTypes
                             //I assume this could really be based on the first few bits (startOf) 0xc where the 0 indicates baseline, etc.
                             case Media.Codec.Jpeg.Markers.StartOfBaselineFrame:
                             //Extended sequential DCT
-                            case Media.Codec.Jpeg.Markers.StartOfProgressiveFrame:
+                            case Media.Codec.Jpeg.Markers.StartOfProgressiveHuffmanFrame:
                                 //Lossless
                                 //etc
                                 {
