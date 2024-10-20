@@ -212,8 +212,19 @@ internal class JpegUnitTests
 
             var saveFileName = Path.Combine(outputDir, Path.GetFileName(filePath));
 
-            using var outputNew = new FileStream(saveFileName, FileMode.OpenOrCreate, FileAccess.Write);
-            jpgImage.Save(outputNew);
+            using (var outputNew = new FileStream(saveFileName, FileMode.OpenOrCreate, FileAccess.Write))
+            {
+                jpgImage.Save(outputNew);
+            }
+
+            using var inputNew = new FileStream(saveFileName, FileMode.OpenOrCreate, FileAccess.Read);
+
+            using var newJpgImage = JpegImage.FromStream(inputNew);
+
+            if (newJpgImage.Width != jpgImage.Width ||
+                newJpgImage.Height != jpgImage.Height ||
+                newJpgImage.Progressive != jpgImage.Progressive)
+                    throw new InvalidDataException();
         }
     }
 }

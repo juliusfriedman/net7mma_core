@@ -1,5 +1,5 @@
-﻿using Codecs.Image;
-using Media.Codec;
+﻿using Media.Codec;
+using Media.Codec.Interfaces;
 using Media.Codecs.Image;
 using Media.Common;
 using System;
@@ -7,8 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Text;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Media.Codecs.Image
 {
@@ -103,8 +101,8 @@ namespace Media.Codecs.Image
             Height = height;
         }
 
-        public Image(ImageFormat format, int width, int height, MemorySegment data)
-            : base(format, data)
+        public Image(ImageFormat format, int width, int height, MemorySegment data, ICodec codec = null)
+            : base(format, data, codec)
         {
             Width = width;
 
@@ -114,6 +112,8 @@ namespace Media.Codecs.Image
         #endregion
 
         #region Properties
+
+        public double AspectRatio => Width / Height;
 
         //Should be Vector<byte>?
 

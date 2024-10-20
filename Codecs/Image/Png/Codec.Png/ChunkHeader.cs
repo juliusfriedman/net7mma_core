@@ -23,6 +23,8 @@ public class ChunkHeader : MemorySegment
         set => Binary.Write32(Array, Offset, Binary.IsLittleEndian, value);
     }
 
+    public int TotalLength => (int)(Length + Binary.BytesPerInteger);
+
     public uint Type
     {
         get => Binary.ReadU32(Array, Offset + Binary.BytesPerInteger, Binary.IsLittleEndian);

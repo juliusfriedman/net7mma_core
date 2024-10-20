@@ -25,13 +25,14 @@ public class Marker : MemorySegment
 
     public int DataSize => Binary.Max(0, Length - 2);
 
-    public MemorySegment Data => new MemorySegment(Array, Offset + Binary.BytesPerInteger, DataSize);
+    public MemorySegment Data => DataSize > 0 ? new MemorySegment(Array, Offset + Binary.BytesPerInteger, DataSize) : Common.MemorySegment.Empty;
 
     public Marker(byte functionCode, int size)
-        : base(new byte[size + Binary.BytesPerInteger])
+        : base(new byte[size > 0 ? size + Binary.BytesPerInteger : size + Binary.BytesPerShort])
     {
         Prefix = Markers.Prefix;
         FunctionCode = functionCode;
-        Length = size;
+        if (size > 0)
+            Length = size;
     }
 }

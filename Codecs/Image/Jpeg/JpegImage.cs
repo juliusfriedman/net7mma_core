@@ -4,6 +4,7 @@ using System.Numerics;
 using Media.Codecs.Image;
 using Media.Common;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Media.Codec.Jpeg;
 
@@ -17,8 +18,13 @@ public class JpegImage : Image
     {
     }
 
+    public JpegImage(ImageFormat imageFormat, int width, int height, MemorySegment data)
+    : base(imageFormat, width, height, new JpegCodec())
+    {
+    }
+
     private JpegImage(ImageFormat imageFormat, int width, int height, MemorySegment data, bool progressive, List<Marker> markers)
-        : base(imageFormat, width, height, data)
+        : this(imageFormat, width, height, data)
     {
         Progressive = progressive;
         Markers = markers;
@@ -30,8 +36,8 @@ public class JpegImage : Image
 
         // Read the SOF0 (Start of Frame) marker
         int width = 0, height = 0;
-        ImageFormat? imageFormat = default;
-        MemorySegment? dataSegment = default;
+        ImageFormat imageFormat = default;
+        MemorySegment dataSegment = default;
         bool progressive = false;
         List<Marker> markers = new List<Marker>();
         foreach (var marker in markerReader.ReadMarkers())
@@ -60,7 +66,9 @@ public class JpegImage : Image
                     var samplingFactors = marker.Data[offset++];
                     widths[componentIndex] = samplingFactors & 0x0F;
                     heights[componentIndex] = samplingFactors >> 4;
-                    var quantizationTableNumber = marker.Data[offset++];
+                    
+                    //TODO CMYK image throws this off?
+                    //var quantizationTableNumber = marker.Data[offset++];
 
                     var mediaComponent = new MediaComponent(componentId, bitDepth);
 
@@ -78,7 +86,7 @@ public class JpegImage : Image
                 dataSegment = marker.Data;
                 break;
             }
-            else
+            else if (marker.FunctionCode != Jpeg.Markers.StartOfInformation)
             {
                 markers.Add(marker);
             }
@@ -98,7 +106,15 @@ public class JpegImage : Image
 
         if (Markers != null)
         {
-            foreach (var marker in Markers)
+            foreach (var marker in Markers.Where(marker => marker.FunctionCode == Jpeg.Markers.TextComment))
+            {
+                WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
+            }
+        }
+
+        if (Markers != null)
+        {
+            foreach (var marker in Markers.Where(marker => marker.FunctionCode == Jpeg.Markers.QuantizationTable))
             {
                 WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
             }
@@ -106,6 +122,14 @@ public class JpegImage : Image
 
         // Write the SOF0 marker
         WriteMarker(stream, Progressive ? Jpeg.Markers.StartOfProgressiveFrame : Jpeg.Markers.StartOfBaselineFrame, WriteSOF0Marker);
+
+        if (Markers != null)
+        {
+            foreach (var marker in Markers.Where(marker => marker.FunctionCode == Jpeg.Markers.HuffmanTable))
+            {
+                WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
+            }
+        }
 
         // Write the SOS marker
         WriteMarker(stream, Jpeg.Markers.StartOfScan, WriteSOSMarker);
@@ -163,7 +187,7 @@ public class JpegImage : Image
         {
             writeMarkerData(ms);
             ms.TryGetBuffer(out var markerData);
-            Marker marker = new Marker(functionCode, markerData.Count + Binary.BytesPerShort);
+            Marker marker = new Marker(functionCode, markerData.Count > 0 ? markerData.Count + Binary.BytesPerShort : 0);
             markerData.CopyTo(marker.Data.Array, marker.Data.Offset);
             writer.Write(marker.Array, marker.Offset, marker.Count);
         }

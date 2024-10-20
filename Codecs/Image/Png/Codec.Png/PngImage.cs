@@ -47,7 +47,7 @@ public class PngImage : Image
     }
 
     private PngImage(ImageFormat imageFormat, int width, int height, MemorySegment data)
-        : base(imageFormat, width, height, data)
+        : base(imageFormat, width, height, data, new PngCodec())
     {
     }
 
@@ -129,7 +129,7 @@ public class PngImage : Image
             else
             {
                 // Skip the chunk data and CRC
-                stream.Seek(chunkHeader.Length + Binary.BytesPerInteger, SeekOrigin.Current);
+                stream.Seek(chunkHeader.TotalLength, SeekOrigin.Current);
             }
         }
 
