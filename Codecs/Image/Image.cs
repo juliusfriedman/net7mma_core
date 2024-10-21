@@ -20,6 +20,8 @@ namespace Media.Codecs.Image
         {
             int size = 0;
 
+            if (format == null) return size;
+
             switch (format.DataLayout)
             {
                 case DataLayout.Planar:

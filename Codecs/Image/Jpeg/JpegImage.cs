@@ -95,7 +95,7 @@ public class JpegImage : Image
                     imageFormat = new ImageFormat(Binary.ByteOrder.Little, DataLayout.Planar, mediaComponents);
                     imageFormat.HorizontalSamplingFactors = widths;
                     imageFormat.VerticalSamplingFactors = heights;
-                    break;
+                    continue;
                 case Jpeg.Markers.StartOfScan:
                     {
                         var dataSegmentSize = CalculateSize(imageFormat, width, height);
@@ -113,7 +113,7 @@ public class JpegImage : Image
                         var read = stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count);
                         if (read < dataSegment.Count)
                             dataSegment = dataSegment.Slice(read);
-                        break;
+                        continue;
                     }
                 case Jpeg.Markers.AppFirst:
                 case Jpeg.Markers.AppLast:
@@ -134,10 +134,10 @@ public class JpegImage : Image
                         height = app.YThumbnail;
                     }
 
-                    break;
+                    continue;
                 default:
                     markers.Add(marker.FunctionCode, marker);
-                    break;
+                    continue;
             }
         }
 
