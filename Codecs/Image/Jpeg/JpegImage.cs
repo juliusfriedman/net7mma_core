@@ -287,7 +287,7 @@ public class JpegImage : Image
 
     private void WriteMarker(Stream stream, Marker marker)
     {
-        stream.Write(marker.Array, marker.Offset, marker.Count);
+        stream.Write(marker.Array, marker.Offset, marker.MarkerLength);
     }
 
     private void WriteEmptyMarker(Stream stream, byte functionCode)

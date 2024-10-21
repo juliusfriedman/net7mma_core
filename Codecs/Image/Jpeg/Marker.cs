@@ -35,6 +35,8 @@ public class Marker : MemorySegment
 
     public int DataLength => Binary.Max(0, Count - PrefixBytes - LengthBytes);
 
+    public int MarkerLength => DataLength + 2;
+
     public MemorySegment Data => Count > PrefixBytes + LengthBytes ? this.Slice(PrefixBytes + LengthBytes) : Empty;
 
     public bool IsEmpty => DataLength == 0;
