@@ -28,8 +28,8 @@ public class StartOfScan : Marker
     /// </summary>
     public int Ns
     {
-        get => Data[0];
-        set => Data[0] = (byte)value;
+        get => Array[DataOffset];
+        set => Array[DataOffset] = (byte)value;
     }
 
     /// <summary>
@@ -57,13 +57,13 @@ public class StartOfScan : Marker
         get
         {
             var offset = 1 + index * ScanComponentSelectorType.Length;
-            using var slice = Data.Slice(offset, ScanComponentSelectorType.Length);
+            using var slice = this.Slice(DataOffset + offset, ScanComponentSelectorType.Length);
             return new ScanComponentSelectorType(slice);
         }
         set
         {
             var offset = 1 + index * ScanComponentSelectorType.Length;
-            using var slice = Data.Slice(offset, ScanComponentSelectorType.Length);
+            using var slice = this.Slice(DataOffset + offset, ScanComponentSelectorType.Length);
             value.CopyTo(slice);
         }
     }
@@ -76,12 +76,12 @@ public class StartOfScan : Marker
         get
         {
             var offset = 1 + Ns * ScanComponentSelectorType.Length;
-            return Data[offset];
+            return Array[DataOffset + offset];
         }
         set
         {
             var offset = 1 + Ns * ScanComponentSelectorType.Length;
-            Data[offset] = (byte)value;
+            Array[DataOffset + offset] = (byte)value;
         }
     }
 
@@ -93,12 +93,12 @@ public class StartOfScan : Marker
         get
         {
             var offset = Ns * ScanComponentSelectorType.Length + 1;
-            return Data[offset];
+            return Array[DataOffset + offset];
         }
         set
         {
             var offset = Ns * ScanComponentSelectorType.Length + 1;
-            Data[offset] = (byte)value;
+            Array[DataOffset + offset] = (byte)value;
         }
     }
 
@@ -110,12 +110,14 @@ public class StartOfScan : Marker
         get
         {
             var bitOffset = Binary.BytesToBits(1 + Ns * ScanComponentSelectorType.Length + 1 + 1);
-            return (int)Binary.ReadBits(Data.Array, ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
+            using var slice = Data;
+            return (int)slice.ReadBits(ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
         }
         set
         {
             var bitOffset = Binary.BytesToBits(1 + Ns * ScanComponentSelectorType.Length + 1 + 1);
-            Binary.WriteBits(Data.Array, ref bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
+            using var slice = Data;
+            slice.WriteBits(ref bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
         }
     }
 
@@ -127,12 +129,14 @@ public class StartOfScan : Marker
         get
         {
             var bitOffset = Binary.BytesToBits(1 + Ns * ScanComponentSelectorType.Length + 1 + 1) + Binary.Four;
-            return (int)Binary.ReadBits(Data.Array, ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
+            using var slice = Data;
+            return (int)slice.ReadBits(ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
         }
         set
         {
             var bitOffset = Binary.BytesToBits(1 + Ns * ScanComponentSelectorType.Length + 1 + 1) + Binary.Four;
-            Binary.WriteBits(Data.Array, ref bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
+            using var slice = Data;
+            slice.WriteBits(ref bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
         }
     }
 }

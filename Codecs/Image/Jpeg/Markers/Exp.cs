@@ -11,12 +11,12 @@ public class Exp : Marker
     {
         get
         {
-            var bitOffset = Binary.BytesToBits(Data.Offset);
+            var bitOffset = Binary.BytesToBits(DataOffset);
             return (int)this.ReadBits(bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
         }
         set
         {
-            var bitOffset = Binary.BytesToBits(Data.Offset);
+            var bitOffset = Binary.BytesToBits(DataOffset);
             this.WriteBits(ref bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
         }
     }
@@ -25,12 +25,12 @@ public class Exp : Marker
     {
         get
         {
-            var bitOffset = Binary.BytesToBits(Data.Offset) + Binary.Four;
+            var bitOffset = Binary.BytesToBits(DataOffset) + Binary.Four;
             return (int)this.ReadBits(bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
         }
         set
         {
-            var bitOffset = Binary.BytesToBits(Data.Offset) + Binary.Four;
+            var bitOffset = Binary.BytesToBits(DataOffset) + Binary.Four;
             this.WriteBits(ref bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
         }
     }

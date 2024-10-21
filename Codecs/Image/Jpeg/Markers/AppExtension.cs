@@ -22,14 +22,14 @@ internal class AppExtension : Marker
 
     public string Identifier
     {
-        get => Encoding.UTF8.GetString(Data.Array, Data.Offset, 5);
-        set => Encoding.UTF8.GetBytes(value, 0, 5, Data.Array, Data.Offset);
+        get => Encoding.UTF8.GetString(Array, DataOffset, 5);
+        set => Encoding.UTF8.GetBytes(value, 0, 5, Array, DataOffset);
     }
 
     public int ThumbnailFormat
     {
-        get => Data[6];
-        set => Data[6] = (byte)value;
+        get => Array[DataOffset + 6];
+        set => Array[DataOffset + 6] = (byte)value;
     }
 
     public ThumbnailFormatType ThumbnailFormatType
@@ -40,7 +40,7 @@ internal class AppExtension : Marker
 
     public MemorySegment ThumbnailData
     {
-        get => Data.Slice(DataLength > 0 ? 6 : 0);
+        get => this.Slice(DataOffset + DataLength > 0 ? Length : 0);
         set
         {
             using var slice = ThumbnailData;

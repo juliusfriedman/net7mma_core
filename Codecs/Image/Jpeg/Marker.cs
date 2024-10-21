@@ -37,6 +37,8 @@ public class Marker : MemorySegment
 
     public int MarkerLength => DataLength + 2;
 
+    public int DataOffset => Offset + PrefixBytes + LengthBytes;
+
     public MemorySegment Data => Count > PrefixBytes + LengthBytes ? this.Slice(PrefixBytes + LengthBytes) : Empty;
 
     public bool IsEmpty => DataLength == 0;

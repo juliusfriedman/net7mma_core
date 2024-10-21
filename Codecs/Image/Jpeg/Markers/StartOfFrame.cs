@@ -17,8 +17,8 @@ public class StartOfFrame : Marker
     /// </summary>
     public int P
     {
-        get => Data[0];
-        set => Data[0] = (byte)value;
+        get => Array[DataOffset];
+        set => Array[DataOffset] = (byte)value;
     }
 
     /// <summary>
@@ -26,8 +26,8 @@ public class StartOfFrame : Marker
     /// </summary>
     public int Y
     {
-        get => Binary.ReadU16(Array, Data.Offset + 1, Binary.IsLittleEndian);
-        set => Binary.Write16(Array, Data.Offset + 1, Binary.IsLittleEndian, (ushort)value);
+        get => Binary.ReadU16(Array, DataOffset + 1, Binary.IsLittleEndian);
+        set => Binary.Write16(Array, DataOffset + 1, Binary.IsLittleEndian, (ushort)value);
     }
 
     /// <summary>
@@ -35,8 +35,8 @@ public class StartOfFrame : Marker
     /// </summary>
     public int X
     {
-        get => Binary.ReadU16(Array, Data.Offset + 3, Binary.IsLittleEndian);
-        set => Binary.Write16(Array, Data.Offset + 3, Binary.IsLittleEndian, (ushort)value);
+        get => Binary.ReadU16(Array, DataOffset + 3, Binary.IsLittleEndian);
+        set => Binary.Write16(Array, DataOffset + 3, Binary.IsLittleEndian, (ushort)value);
     }
 
     /// <summary>
@@ -44,8 +44,8 @@ public class StartOfFrame : Marker
     /// </summary>
     public int Nf
     {
-        get => Binary.ReadU8(Data.Array, Data.Offset + 5, Binary.IsBigEndian);
-        set => Binary.Write8(Data.Array, Data.Offset + 5, Binary.IsBigEndian, (byte)value);
+        get => Binary.ReadU8(Array, DataOffset + 5, Binary.IsBigEndian);
+        set => Binary.Write8(Array, DataOffset + 5, Binary.IsBigEndian, (byte)value);
     }
 
     /// <summary>
@@ -58,13 +58,12 @@ public class StartOfFrame : Marker
         get
         {
             var offset = Length + index * FrameComponent.Length;
-            using var slice = Data.Slice(offset, FrameComponent.Length);
-            return new FrameComponent(slice);
+            return new FrameComponent(this.Slice(DataOffset + offset, FrameComponent.Length));
         }
         set
         {
             var offset = Length + index * FrameComponent.Length;
-            using var slice = Data.Slice(offset, FrameComponent.Length);
+            using var slice = this.Slice(DataOffset + offset, FrameComponent.Length);
             value.CopyTo(slice);
         }
     }

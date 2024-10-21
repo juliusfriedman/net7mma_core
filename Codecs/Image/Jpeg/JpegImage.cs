@@ -56,7 +56,7 @@ public class JpegImage : Image
                 case Jpeg.Markers.StartOfDifferentialProgressiveArithmeticFrame:
                 case Jpeg.Markers.StartOfProgressiveArithmeticFrame:
                 case Jpeg.Markers.StartOfProgressiveHuffmanFrame:
-                case Jpeg.Markers.HeirarchicalProgression:                    
+                case Jpeg.Markers.HeirarchicalProgression:
                     switch (marker.FunctionCode)
                     {
                         case Jpeg.Markers.StartOfDifferentialProgressiveHuffmanFrame:
@@ -70,7 +70,7 @@ public class JpegImage : Image
 
                     StartOfFrame tag;
 
-                    if(marker.FunctionCode == Jpeg.Markers.HeirarchicalProgression)
+                    if (marker.FunctionCode == Jpeg.Markers.HeirarchicalProgression)
                     {
                         tag = new HeirarchicalProgression(marker);
                     }
@@ -78,7 +78,7 @@ public class JpegImage : Image
                     {
                         tag = new StartOfFrame(marker);
                     }
-                    
+
                     int bitDepth = Binary.Clamp(Binary.BitsPerByte, Binary.BitsPerInteger, tag.P);
                     height = tag.Y;
                     width = tag.X;
@@ -110,7 +110,7 @@ public class JpegImage : Image
                         var mediaComponent = new JpegComponent((byte)quantizationTableNumber, (byte)componentId, bitsPerComponent);
 
                         mediaComponents[componentIndex] = mediaComponent;
-                        
+
                         remains -= frameComponent.Count;
                     }
 
@@ -127,12 +127,12 @@ public class JpegImage : Image
                         if (read < dataSegment.Count)
                             dataSegment = dataSegment.Slice(0, read);
                         break;
-                    }                
+                    }
                 case Jpeg.Markers.AppFirst:
                 case Jpeg.Markers.AppLast:
                     var app = new App(marker);
 
-                    if(app.MajorVersion >= 1 && app.MinorVersion >= 2)
+                    if (app.MajorVersion >= 1 && app.MinorVersion >= 2)
                     {
                         var appExtension = new AppExtension(app);
                         thumbnailData = appExtension.ThumbnailData;
@@ -185,7 +185,7 @@ public class JpegImage : Image
 
             markerBuffer.Remove(Jpeg.Markers.QuantizationTable);
 
-            foreach(var marker in markerBuffer.Values.Where(markerBuffer => Jpeg.Markers.IsApplicationMarker(markerBuffer.FunctionCode)))
+            foreach (var marker in markerBuffer.Values.Where(markerBuffer => Jpeg.Markers.IsApplicationMarker(markerBuffer.FunctionCode)))
             {
                 WriteMarker(stream, marker);
 
@@ -222,8 +222,11 @@ public class JpegImage : Image
         // Write the image data
         stream.Write(Data.Array, Data.Offset, Data.Count);
 
-        // Write the EOI marker
-        WriteEmptyMarker(stream, Jpeg.Markers.EndOfInformation);
+        if (Data[Data.Count - 1] != Jpeg.Markers.EndOfInformation)
+        {
+            // Write the EOI marker
+            WriteEmptyMarker(stream, Jpeg.Markers.EndOfInformation);
+        }
     }
 
     private void WriteStartOfFrame(byte functionCode, Stream stream)

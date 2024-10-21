@@ -8,8 +8,8 @@ public class TextComment : Marker
 {
     public string Comment
     {
-        get => Encoding.UTF8.GetString(Array, Data.Offset, Data.Count);
-        set => Encoding.UTF8.GetBytes(value, 0, value.Length, Data.Array, Data.Offset);
+        get => Encoding.UTF8.GetString(Array, DataOffset, DataLength);
+        set => Encoding.UTF8.GetBytes(value, 0, value.Length, Array, DataOffset);
     }
 
     public TextComment(byte functionCode, string comment)

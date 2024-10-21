@@ -11,20 +11,44 @@ public class App : Marker
 
     public string Identifier
     {
-        get => Encoding.UTF8.GetString(Data.Array, Data.Offset, 5);
-        set => Encoding.UTF8.GetBytes(value, 0, 5, Data.Array, Data.Offset);
+        get
+        {
+            using var slice = Data;
+            return Encoding.UTF8.GetString(slice.Array, slice.Offset, 5);
+        }
+        set 
+        {
+            using var slice = Data;
+            Encoding.UTF8.GetBytes(value, 0, 5, slice.Array, slice.Offset);
+        }
     }
 
     public byte MajorVersion
     {
-        get => Data[6];
-        set => Data[6] = value;
+        get 
+        {
+            using var slice = Data;
+            return slice[6];
+        }
+        set 
+        {
+            using var slice = Data;
+            slice[6] = value;
+        }
     }
 
     public byte MinorVersion
     {
-        get => Data[7];
-        set => Data[7] = value;
+        get
+        {
+            using var slice = Data;
+            return slice[7];
+        }
+        set
+        {
+            using var slice = Data;
+            slice[7] = value;
+        }
     }
 
     public Version Version
@@ -39,44 +63,93 @@ public class App : Marker
 
     public int DensityUnits
     {
-        get => Data[8];
-        set => Data[8] = (byte)value;
+        get 
+        {
+            using var slice = Data;
+            return slice[8];
+        }
+        set
+        {
+            using var slice = Data;
+            slice[8] = (byte)value;
+        }
     }
 
     public int XDensity
     {
-        get => Binary.Read16(Data.Array, Data.Offset + 9, Binary.IsLittleEndian);
-        set => Binary.Write16(Data.Array, Data.Offset + 9, Binary.IsLittleEndian, (ushort)value);
+        get
+        {
+            using var slice = Data;
+            return Binary.Read16(slice.Array, slice.Offset + 9, Binary.IsLittleEndian);
+        }
+        set
+        {
+            using var slice = Data;
+            Binary.Write16(slice.Array, slice.Offset + 9, Binary.IsLittleEndian, (ushort)value);
+        }
     }
 
     public int YDensity
     {
-        get => Binary.Read16(Data.Array, Data.Offset + 11, Binary.IsLittleEndian);
-        set => Binary.Write16(Data.Array, Data.Offset + 11, Binary.IsLittleEndian, (ushort)value);
+        get
+        {
+            using var slice = Data;
+            return Binary.Read16(slice.Array, slice.Offset + 11, Binary.IsLittleEndian);
+        }
+        set
+        {
+            using var slice = Data;
+            Binary.Write16(slice.Array, slice.Offset + 11, Binary.IsLittleEndian, (ushort)value);
+        }
     }
 
     public int XThumbnail
     {
-        get => Data[12];
-        set => Data[12] = (byte)value;
+        get
+        {
+            using var slice = Data;
+            return slice[12];
+        }
+        set
+        {
+            using var slice = Data;
+            slice[12] = (byte)value;
+        }
     }
 
     public int YThumbnail
     {
-        get => Data[13];
-        set => Data[13] = (byte)value;
+        get
+        {
+            using var slice = Data;
+            return slice[13];
+        }
+        set
+        {
+            using var slice = Data;
+            slice[13] = (byte)value;
+        }
     }
 
     public MemorySegment ThumbnailData
     {
-        get => Data.Slice(14);
-        set => value.CopyTo(Data.Array, Data.Offset + 14);
+        get
+        {
+            using var slice = Data;
+            return slice.Slice(14);
+        }
+        set
+        {
+            using var slice = Data;
+            value.CopyTo(slice);
+        }
     }
 
     public App(byte functionCode, MemorySegment data)
         : base(functionCode, Length + data.Count)
     {
-        data.CopyTo(Data.Array, Data.Offset + 14);
+        using var slice = Data;
+        data.CopyTo(slice);
     }
 
     public App(Marker marker) : base(marker)

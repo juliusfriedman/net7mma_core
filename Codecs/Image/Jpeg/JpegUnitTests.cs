@@ -208,9 +208,10 @@ internal class JpegUnitTests
         }
         else
         {
-            Console.Write(BitConverter.ToString(marker.Data.Array, marker.Data.Offset, Math.Min(16, marker.Data.Count)));
+            using var slice = marker.Data;
+            Console.Write(BitConverter.ToString(slice.Array, slice.Offset, Math.Min(16, slice.Count)));
         }
-        if (marker.Data.Count > 16)
+        if (marker.DataLength > 16)
             Console.WriteLine(" ...");
         else 
             Console.WriteLine();
