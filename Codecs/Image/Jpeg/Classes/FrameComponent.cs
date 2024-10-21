@@ -19,12 +19,12 @@ public class FrameComponent : MemorySegment
         get
         {
             var bitOffset= Binary.BytesToBits(Offset + 1);
-            return (int)Binary.ReadBits(Array, ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
+            return (int)this.ReadBits(ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
         }
         set
         {
             var bitoffset = Binary.BytesToBits(Offset + 1);
-            Binary.WriteBits(Array, bitoffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
+            this.WriteBits(bitoffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
         }
     }
 
@@ -33,12 +33,12 @@ public class FrameComponent : MemorySegment
         get
         {
             var bitOffset = Binary.BytesToBits(Offset + 1) + Binary.Four;
-            return (int)Binary.ReadBits(Array, ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
+            return (int)this.ReadBits(ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
         }
         set
         {
             var bitoffset = Binary.BytesToBits(Offset + 1) + Binary.Four;
-            Binary.WriteBits(Array, bitoffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
+            this.WriteBits(bitoffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
         }
     }
     public int QuantizationTableDestinationSelector
