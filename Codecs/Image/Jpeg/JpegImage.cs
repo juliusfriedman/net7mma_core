@@ -95,7 +95,7 @@ public class JpegImage : Image
                     int[] widths = new int[numberOfComponents];
                     int[] heights = new int[numberOfComponents];
 
-                    int remains = tag.DataSize - StartOfFrame.Length;
+                    int remains = tag.DataLength - StartOfFrame.Length;
 
                     // Read the components and sampling information
                     for (int componentIndex = 0; componentIndex < numberOfComponents && remains > 0; componentIndex++)
@@ -288,21 +288,6 @@ public class JpegImage : Image
     private void WriteMarker(Stream stream, Marker marker)
     {
         stream.Write(marker.Array, marker.Offset, marker.Count);
-    }
-
-    private void WriteSOSMarker(Stream stream)
-    {
-        stream.Write(Binary.GetBytes((ushort)(6 + 2 * ImageFormat.Components.Length), Binary.IsLittleEndian));
-        stream.WriteByte((byte)ImageFormat.Components.Length);
-        for (int i = 0; i < ImageFormat.Components.Length; i++)
-        {
-            var component = ImageFormat.Components[i];
-            stream.WriteByte(component.Id); // Component ID
-            stream.WriteByte(0); // Huffman table number
-        }
-        stream.WriteByte(0); // Start of spectral selection
-        stream.WriteByte(63); // End of spectral selection
-        stream.WriteByte(0); // Successive approximation
     }
 
     private void WriteEmptyMarker(Stream stream, byte functionCode)

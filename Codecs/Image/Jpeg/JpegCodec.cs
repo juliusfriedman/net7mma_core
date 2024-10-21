@@ -72,7 +72,7 @@ namespace Media.Codec.Jpeg
 
                 using var slice = Current.Data;
 
-                var dataSize = Current.DataSize;
+                var dataSize = Current.DataLength;
 
                 if (dataSize > 0)
                 {

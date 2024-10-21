@@ -40,7 +40,7 @@ internal class AppExtension : Marker
 
     public MemorySegment ThumbnailData
     {
-        get => Data.Slice(DataSize > 0 ? 6 : 0);
+        get => Data.Slice(DataLength > 0 ? 6 : 0);
         set
         {
             using var slice = ThumbnailData;
