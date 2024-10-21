@@ -74,7 +74,7 @@ namespace Media.Codec.Jpeg
             AtMarker:
                 var Current = new Marker((byte)FunctionCode, CodeSize);
 
-                jpegStream.Read(Current.Data.Array, Current.Data.Offset, Current.DataSize);
+                jpegStream.Read(Current.Data.Array, Current.Data.Offset, CodeSize > 0 ? CodeSize - Marker.LengthBytes : CodeSize);
 
                 streamOffset += Current.DataSize;
 

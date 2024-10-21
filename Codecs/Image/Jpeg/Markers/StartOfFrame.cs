@@ -57,13 +57,13 @@ public class StartOfFrame : Marker
     {
         get
         {
-            var offset = 6 + (index * FrameComponent.Length);
+            var offset = Length + index * FrameComponent.Length;
             using var slice = Data.Slice(offset, FrameComponent.Length);
             return new FrameComponent(slice);
         }
         set
         {
-            var offset = 6 + (index * FrameComponent.Length);
+            var offset = Length + index * FrameComponent.Length;
             using var slice = Data.Slice(offset, FrameComponent.Length);
             value.CopyTo(slice);
         }
@@ -76,12 +76,9 @@ public class StartOfFrame : Marker
     {
         get
         {
-            var offset = 6;
             for (int nf = Nf, j = 0; j < nf; ++j)
             {
-                using var slice = Data.Slice(offset, FrameComponent.Length);
-                yield return new FrameComponent(slice);
-                offset += FrameComponent.Length;
+                yield return this[j];
             }
         }
     }

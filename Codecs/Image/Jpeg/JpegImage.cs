@@ -38,8 +38,6 @@ public class JpegImage : Image
         ConcurrentThesaurus<byte, Marker> markers = new ConcurrentThesaurus<byte, Marker>();
         foreach (var marker in JpegCodec.ReadMarkers(stream))
         {
-            if (marker.IsEmpty) continue;
-
             //Handle the marker to decode.
             switch (marker.FunctionCode)
             {
@@ -146,7 +144,10 @@ public class JpegImage : Image
                         width = app.XThumbnail;
                         height = app.YThumbnail;
                     }
-                    
+
+                    goto default;
+                case Jpeg.Markers.StartOfInformation:
+                case Jpeg.Markers.EndOfInformation:
                     continue;
                 default:
                     markers.Add(marker.FunctionCode, marker);
@@ -166,23 +167,30 @@ public class JpegImage : Image
         var markerBuffer = Markers != null ? new ConcurrentThesaurus<byte, Marker>(Markers) : null;
 
         // Write the JPEG signature
-        WriteMarker(stream, Jpeg.Markers.StartOfInformation, WriteEmptyMarker);
+        WriteEmptyMarker(stream, Jpeg.Markers.StartOfInformation);
 
         if (markerBuffer != null)
         {
             foreach (var marker in Markers.TryGetValue(Jpeg.Markers.TextComment, out var textComments) ? textComments : Enumerable.Empty<Marker>())
             {
-                WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
+                WriteMarker(stream, marker);
             }
 
             markerBuffer.Remove(Jpeg.Markers.TextComment);
 
             foreach (var marker in Markers.TryGetValue(Jpeg.Markers.QuantizationTable, out var quantizationTables) ? quantizationTables : Enumerable.Empty<Marker>())
             {
-                WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
+                WriteMarker(stream, marker);
             }
 
             markerBuffer.Remove(Jpeg.Markers.QuantizationTable);
+
+            foreach(var marker in markerBuffer.Values.Where(markerBuffer => Jpeg.Markers.IsApplicationMarker(markerBuffer.FunctionCode)))
+            {
+                WriteMarker(stream, marker);
+
+                markerBuffer.Remove(marker.FunctionCode);
+            }
         }
 
         // TODO revise to write correct start of scan header per coding.
@@ -193,7 +201,7 @@ public class JpegImage : Image
         {
             foreach (var marker in Markers.TryGetValue(Jpeg.Markers.HuffmanTable, out var huffmanTables) ? huffmanTables : Enumerable.Empty<Marker>())
             {
-                WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
+                WriteMarker(stream, marker);
             }
 
             markerBuffer.Remove(Jpeg.Markers.HuffmanTable);
@@ -203,7 +211,7 @@ public class JpegImage : Image
         {
             foreach (var marker in markerBuffer.Values)
             {
-                WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
+                WriteMarker(stream, marker);
                 markerBuffer.Clear();
             }
         }
@@ -215,7 +223,7 @@ public class JpegImage : Image
         stream.Write(Data.Array, Data.Offset, Data.Count);
 
         // Write the EOI marker
-        WriteMarker(stream, Jpeg.Markers.EndOfInformation, WriteEmptyMarker);
+        WriteEmptyMarker(stream, Jpeg.Markers.EndOfInformation);
     }
 
     private void WriteStartOfFrame(byte functionCode, Stream stream)
@@ -248,7 +256,7 @@ public class JpegImage : Image
         var numberOfComponents = ImageFormat.Components.Length;
         var sos = new StartOfScan(numberOfComponents);
         // Set the Ss, Se, Ah, and Al fields
-        // These values are typical for a baseline JPEG
+        // These values are typical for a baseline or progessive JPEG but not lossless. (1-7)
         sos.Ss = 0;  // Start of spectral selection
         sos.Se = 63; // End of spectral selection
         sos.Ah = 0;  // Successive approximation high
@@ -277,16 +285,9 @@ public class JpegImage : Image
         stream.Write(sos.Array, sos.Offset, sos.Count);
     }
 
-    private void WriteMarker(Stream writer, byte functionCode, Action<Stream> writeMarkerData)
-    {        
-        using (MemoryStream ms = new MemoryStream())
-        {
-            writeMarkerData(ms);
-            ms.TryGetBuffer(out var markerData);
-            using Marker marker = new Marker(functionCode, markerData.Count > 0 ? markerData.Count + Binary.BytesPerShort : 0);
-            markerData.CopyTo(marker.Data.Array, marker.Data.Offset);
-            writer.Write(marker.Array, marker.Offset, marker.Count);
-        }
+    private void WriteMarker(Stream stream, Marker marker)
+    {
+        stream.Write(marker.Array, marker.Offset, marker.Count);
     }
 
     private void WriteSOSMarker(Stream stream)
@@ -304,9 +305,10 @@ public class JpegImage : Image
         stream.WriteByte(0); // Successive approximation
     }
 
-    private void WriteEmptyMarker(Stream stream)
+    private void WriteEmptyMarker(Stream stream, byte functionCode)
     {
-        // EOI marker has no data
+        stream.WriteByte(Jpeg.Markers.Prefix);
+        stream.WriteByte(functionCode);
     }
 
     public MemorySegment GetPixelDataAt(int x, int y)

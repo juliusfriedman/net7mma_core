@@ -651,19 +651,19 @@ namespace Media.Common
 
         #region WriteBits
 
-        public static void WriteBits(this MemorySegment instance, int bitOffset, int bitCount, bool reverse, long value)
+        public static void WriteBits(this MemorySegment instance, int bitOffset, int bitCount, long value, bool reverse)
             => Binary.WriteBits(instance.Array, bitOffset, bitCount, value, reverse);
 
         [CLSCompliant(false)]
-        public static void WriteBits(this MemorySegment instance, ref int bitOffset, int bitCount, bool reverse, long value)
+        public static void WriteBits(this MemorySegment instance, ref int bitOffset, int bitCount, long value, bool reverse)
             => Binary.WriteBits(instance.Array, ref bitOffset, bitCount, value, reverse);
 
         [CLSCompliant(false)]
-        public static void WriteBits(this MemorySegment instance, ref int bitOffset, int bitCount, Binary.BitOrder bitOrder, long value)
+        public static void WriteBits(this MemorySegment instance, ref int bitOffset, int bitCount, long value, Binary.BitOrder bitOrder)
             => Binary.WriteBits(instance.Array, ref bitOffset, bitCount, value, bitOrder);
 
         [CLSCompliant(false)]
-        public static void WriteBits(this MemorySegment instance, int bitOffset, int bitCount, Binary.BitOrder bitOrder, long value)
+        public static void WriteBits(this MemorySegment instance, int bitOffset, int bitCount, long value, Binary.BitOrder bitOrder)
             => Binary.WriteBits(instance.Array, bitOffset, bitCount, value, bitOrder);
 
         #endregion

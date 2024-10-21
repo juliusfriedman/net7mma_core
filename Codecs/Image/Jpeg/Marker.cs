@@ -5,34 +5,42 @@ namespace Media.Codec.Jpeg;
 //Needs to implement a common class if the elements can be reused => 
 public class Marker : MemorySegment
 {
-    public const int LengthBytes = 2;
+    /// <summary>
+    /// The amount of bytes required at minimum to create a marker with a <see cref="Prefix"/> and <see cref="FunctionCode"/>
+    /// </summary>
+    public const int PrefixBytes = Binary.BytesPerShort;
+
+    /// <summary>
+    /// The amount of bytes which are required to store the <see cref="Length"/> of the marker.
+    /// </summary>
+    public const int LengthBytes = Binary.BytesPerShort;
 
     public byte Prefix
     {
-        get => Array[Offset];
-        set => Array[Offset] = value;
+        get => this[0];
+        set => this[0] = value;
     }
 
     public byte FunctionCode
     {
-        get => Array[Offset + 1];
-        set => Array[Offset + 1] = value;
+        get => this[1];
+        set => this[1] = value;
     }
 
     public int Length
     {
-        get => Binary.ReadU16(Array, Offset + 2, Binary.IsLittleEndian);
-        set => Binary.Write16(Array, Offset + 2, Binary.IsLittleEndian, (ushort)value);
+        get => Binary.ReadU16(Array, Offset + PrefixBytes, Binary.IsLittleEndian);
+        set => Binary.Write16(Array, Offset + PrefixBytes, Binary.IsLittleEndian, (ushort)value);
     }
 
-    public int DataSize => Binary.Max(0, Length - LengthBytes);
+    public int DataSize => Count - PrefixBytes - LengthBytes;
 
-    public MemorySegment Data => DataSize > 0 ? new MemorySegment(Array, Offset + Binary.BytesPerInteger, DataSize) : Empty;
+    public MemorySegment Data => DataSize > 0 ? this.Slice(PrefixBytes + LengthBytes) : Empty;
 
     public bool IsEmpty => DataSize == 0;
 
     public Marker(byte functionCode, int size)
-        : base(new byte[size > 0 ? size + Binary.BytesPerInteger : size + LengthBytes])
+        : base(new byte[size + PrefixBytes + LengthBytes])
     {
         Prefix = Markers.Prefix;
         FunctionCode = functionCode;
@@ -42,6 +50,8 @@ public class Marker : MemorySegment
 
     public Marker(MemorySegment data): base(data)
     {
+        if (Count < PrefixBytes)
+            throw new System.InvalidOperationException($"Atleast {PrefixBytes} are required to read a marker.");
     }
 
     public override string ToString()

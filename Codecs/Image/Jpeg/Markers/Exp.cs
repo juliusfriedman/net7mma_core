@@ -17,7 +17,7 @@ public class Exp : Marker
         set
         {
             var bitOffset = Binary.BytesToBits(Data.Offset);
-            this.WriteBits(ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant, value);
+            this.WriteBits(ref bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
         }
     }
 
@@ -31,7 +31,7 @@ public class Exp : Marker
         set
         {
             var bitOffset = Binary.BytesToBits(Data.Offset) + Binary.Four;
-            this.WriteBits(ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant, value);
+            this.WriteBits(ref bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
         }
     }
 

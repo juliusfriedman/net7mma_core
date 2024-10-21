@@ -1,4 +1,5 @@
-﻿using Media.Codec;
+﻿using Codec.Jpeg.Markers;
+using Media.Codec;
 using Media.Codec.Jpeg;
 using Media.Codecs.Image;
 using Media.Common;
@@ -195,7 +196,15 @@ internal class JpegUnitTests
         Console.Write("Length:");
         Console.WriteLine(marker.Length);
         Console.Write("Data:");
-        Console.Write(BitConverter.ToString(marker.Data.Array, marker.Data.Offset, Math.Min(16, marker.Data.Count)));
+        if (marker.FunctionCode is Markers.TextComment)
+        {
+            using var textComment = new TextComment(marker);
+            Console.Write(textComment.Comment);
+        }
+        else
+        {
+            Console.Write(BitConverter.ToString(marker.Data.Array, marker.Data.Offset, Math.Min(16, marker.Data.Count)));
+        }
         if (marker.Data.Count > 16)
             Console.WriteLine(" ...");
         else 
@@ -214,7 +223,7 @@ internal class JpegUnitTests
         {
             Console.WriteLine($"Processing file: {Path.GetFileName(filePath)}");
 
-            List<Marker> sourceMarkers = new List<Marker>();
+            var sourceMarkers = new List<Marker>();
 
             using var jpegStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Read);
 
@@ -237,7 +246,7 @@ internal class JpegUnitTests
 
             using var inputNew = new FileStream(saveFileName, FileMode.OpenOrCreate, FileAccess.Read);
 
-            List<Marker> destinationMarkers = new List<Marker>();
+            var destinationMarkers = new List<Marker>();
 
             foreach (var marker in JpegCodec.ReadMarkers(inputNew))
             {
