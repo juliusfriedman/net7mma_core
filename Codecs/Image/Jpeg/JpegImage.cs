@@ -248,13 +248,13 @@ public class JpegImage : Image
                 sof[i] = frameComponent;
             }
         }
-        stream.Write(sof.Array, sof.Offset, sof.Count);
+        WriteMarker(stream, sof);
     }
 
     private void WriteStartOfScan(Stream stream)
     {
         var numberOfComponents = ImageFormat.Components.Length;
-        var sos = new StartOfScan(numberOfComponents);
+        using var sos = new StartOfScan(numberOfComponents);
         // Set the Ss, Se, Ah, and Al fields
         // These values are typical for a baseline or progessive JPEG but not lossless. (1-7)
         sos.Ss = 0;  // Start of spectral selection
@@ -282,7 +282,7 @@ public class JpegImage : Image
                 sos[i] = componentSelector;
             }
         }
-        stream.Write(sos.Array, sos.Offset, sos.Count);
+        WriteMarker(stream, sos);
     }
 
     private void WriteMarker(Stream stream, Marker marker)

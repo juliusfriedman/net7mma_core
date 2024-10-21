@@ -21,7 +21,12 @@ internal class JpegUnitTests
             using (var stream = new MemoryStream())
             {
                 image.Save(stream);
-                Console.WriteLine(stream.Length > 0 ? "Pass" : "Fail");
+                stream.Position = 0;
+                using (var jpgImage = JpegImage.FromStream(stream))
+                {
+                    if (jpgImage.Width != 100) throw new Exception();
+                    if (jpgImage.Height != 100) throw new Exception();
+                }
             }
         }
 
