@@ -117,6 +117,22 @@ public class JpegImage : Image
                     }
                 case Jpeg.Markers.AppFirst:
                 case Jpeg.Markers.AppLast:
+                    var app = new App(marker);
+
+                    if(app.MajorVersion >= 1 && app.MinorVersion >= 2)
+                    {
+                        var appExtension = new AppExtension(app);
+                        var thumbnailData = appExtension.ThumbnailData;
+                        dataSegment = thumbnailData;
+                    }
+                    else
+                    {
+                        var thumbnailData = app.ThumbnailData;
+                        dataSegment = thumbnailData;
+                        imageFormat = ImageFormat.RGB(8);
+                        width = app.XThumbnail;
+                        height = app.YThumbnail;
+                    }
 
                     break;
                 default:
