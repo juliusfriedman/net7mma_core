@@ -187,6 +187,21 @@ internal class JpegUnitTests
         }
     }
 
+    private static void DumpMarker(Marker marker)
+    {
+        Console.Write("Function Code:");
+        Console.WriteLine($"{marker.FunctionCode} ({marker.FunctionCode:X}) - {marker.ToString()}");
+        if (marker.Length == 0) return;
+        Console.Write("Length:");
+        Console.WriteLine(marker.Length);
+        Console.Write("Data:");
+        Console.Write(BitConverter.ToString(marker.Data.Array, marker.Data.Offset, Math.Min(16, marker.Data.Count)));
+        if (marker.Data.Count > 16)
+            Console.WriteLine(" ...");
+        else 
+            Console.WriteLine();
+    }
+
     public static void TestLoad()
     {
         string currentPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!;
@@ -205,13 +220,7 @@ internal class JpegUnitTests
 
             foreach (var marker in JpegCodec.ReadMarkers(jpegStream))
             {
-                Console.Write("Function Code:");
-                Console.WriteLine($"{marker.FunctionCode} ({marker.FunctionCode:X})");
-                if (marker.Length == 0) continue;
-                Console.Write("Length:");
-                Console.WriteLine(marker.Length);
-                Console.Write("Data:");
-                Console.WriteLine(BitConverter.ToString(marker.Data.Array, marker.Data.Offset, Math.Min(16, marker.Data.Count)));
+                DumpMarker(marker);
                 sourceMarkers.Add(marker);
             }
 
@@ -232,14 +241,7 @@ internal class JpegUnitTests
 
             foreach (var marker in JpegCodec.ReadMarkers(inputNew))
             {
-                Console.Write("Function Code:");
-                Console.WriteLine($"{marker.FunctionCode} ({marker.FunctionCode:X})");
-                if (marker.Length == 0) continue;
-                Console.Write("Length:");
-                Console.WriteLine(marker.Length);
-                Console.Write("Data:");
-                Console.WriteLine(BitConverter.ToString(marker.Data.Array, marker.Data.Offset, Math.Min(16,marker.Data.Count)));
-                destinationMarkers.Add(marker);
+                DumpMarker(marker);
             }
             
             inputNew.Seek(0, SeekOrigin.Begin);

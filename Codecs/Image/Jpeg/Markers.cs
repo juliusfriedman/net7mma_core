@@ -49,9 +49,22 @@ public sealed class Markers
 {
     static Dictionary<byte, string> NameLookup = new();
 
-    public static string ToTextualConvention(byte functionCode) => NameLookup.TryGetValue(functionCode, out var textualConvention) ? textualConvention : string.Empty;
+    public static string ToTextualConvention(byte functionCode)
+        => NameLookup.TryGetValue(functionCode, out var textualConvention)
+        ? textualConvention
+        : IsRestartMarker(functionCode)
+            ? "RST"
+            : IsApplicationMarker(functionCode) 
+                ? "APP"
+                : IsExtensionData(functionCode)
+                    ? "EXT"
+                    : "Unknown";
 
-    public static bool IsKnownFunctionCode(byte functionCode) => NameLookup.TryGetValue(functionCode, out _);
+    public static bool IsKnownFunctionCode(byte functionCode) 
+        => NameLookup.TryGetValue(functionCode, out _) || 
+            IsRestartMarker(functionCode) || 
+            IsApplicationMarker(functionCode) || 
+            IsExtensionData(functionCode);
 
     static Markers()
     {
@@ -107,7 +120,7 @@ public sealed class Markers
     public const byte StartOfDifferentialLosslessArithmeticFrame = 0xcf;
 
     //0xd0 => 0xd7 RST => RestartMarker
-    public bool IsRestartMarker(byte functionCode)
+    public static bool IsRestartMarker(byte functionCode)
         => functionCode >= 0xd0 && functionCode <= 0xd7;
 
     public const byte StartOfInformation = 0xd8;
