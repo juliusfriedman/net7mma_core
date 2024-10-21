@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Windows.Markup;
-using Codec.Jpeg.Markers;
 using Media.Codec.Interfaces;
 using Media.Codecs.Image;
 using Media.Common;
@@ -71,12 +67,19 @@ namespace Media.Codec.Jpeg
                 if (CodeSize < 0)
                     CodeSize = Binary.ReadU16(sizeBytes, 0, Binary.IsBigEndian);
 
-            AtMarker:
+                AtMarker:
                 var Current = new Marker((byte)FunctionCode, CodeSize);
 
-                jpegStream.Read(Current.Data.Array, Current.Data.Offset, CodeSize > 0 ? CodeSize - Marker.LengthBytes : CodeSize);
+                using var slice = Current.Data;
 
-                streamOffset += Current.DataSize;
+                var dataSize = Current.DataSize;
+
+                if (dataSize > 0)
+                {
+                    jpegStream.Read(slice.Array, slice.Offset, dataSize - Marker.LengthBytes);
+
+                    streamOffset += dataSize;
+                }
 
                 yield return Current;
 

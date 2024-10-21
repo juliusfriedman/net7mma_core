@@ -33,14 +33,14 @@ public class Marker : MemorySegment
         set => Binary.Write16(Array, Offset + PrefixBytes, Binary.IsLittleEndian, (ushort)value);
     }
 
-    public int DataSize => Count - PrefixBytes - LengthBytes;
+    public int DataSize => Binary.Max(0, Count - PrefixBytes - LengthBytes);
 
-    public MemorySegment Data => DataSize > 0 ? this.Slice(PrefixBytes + LengthBytes) : Empty;
+    public MemorySegment Data => Count > PrefixBytes + LengthBytes ? this.Slice(PrefixBytes + LengthBytes) : Empty;
 
     public bool IsEmpty => DataSize == 0;
 
     public Marker(byte functionCode, int size)
-        : base(new byte[size + PrefixBytes + LengthBytes])
+        : base(new byte[size > 0 ? size + PrefixBytes + LengthBytes : PrefixBytes])
     {
         Prefix = Markers.Prefix;
         FunctionCode = functionCode;
