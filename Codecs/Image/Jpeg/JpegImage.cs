@@ -270,7 +270,7 @@ public class JpegImage : Image
 
             if (imageComponent is JpegComponent jpegComponent)
             {
-                var componentSelector = new ScanComponentSelectorType();
+                var componentSelector = new ScanComponentSelector();
                 componentSelector.Csj = jpegComponent.Id;
                 componentSelector.Tdj = jpegComponent.Id;
                 componentSelector.Taj = jpegComponent.Id;
@@ -278,7 +278,7 @@ public class JpegImage : Image
             }
             else
             {
-                var componentSelector = new ScanComponentSelectorType();
+                var componentSelector = new ScanComponentSelector();
                 componentSelector.Csj = (byte)i;
                 componentSelector.Tdj = (byte)i;
                 componentSelector.Taj = (byte)i;

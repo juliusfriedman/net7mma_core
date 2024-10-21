@@ -13,7 +13,7 @@ public class StartOfScan : Marker
     public new const int Length = 4;
 
     public StartOfScan(int numberOfComponentSelectors) 
-        : base(Media.Codec.Jpeg.Markers.StartOfScan, Length + numberOfComponentSelectors * ScanComponentSelectorType.Length) 
+        : base(Media.Codec.Jpeg.Markers.StartOfScan, Length + numberOfComponentSelectors * ScanComponentSelector.Length) 
     {
         Ns = numberOfComponentSelectors;
     }
@@ -33,9 +33,9 @@ public class StartOfScan : Marker
     }
 
     /// <summary>
-    /// Get the <see cref="ScanComponentSelectorType"/>s contained in the scan. (Should be equal to <see cref="Ns"/>)
+    /// Get the <see cref="ScanComponentSelector"/>s contained in the scan. (Should be equal to <see cref="Ns"/>)
     /// </summary>
-    public IEnumerable<ScanComponentSelectorType> Components
+    public IEnumerable<ScanComponentSelector> Components
     {
         get
         {
@@ -48,22 +48,22 @@ public class StartOfScan : Marker
     }
 
     /// <summary>
-    /// Gets or sets a <see cref="ScanComponentSelectorType"/> based on the given index.
+    /// Gets or sets a <see cref="ScanComponentSelector"/> based on the given index.
     /// </summary>
     /// <param name="index"></param>
     /// <returns></returns>
-    public new ScanComponentSelectorType this[int index]
+    public new ScanComponentSelector this[int index]
     {
         get
         {
-            var offset = 1 + index * ScanComponentSelectorType.Length;
-            using var slice = this.Slice(DataOffset + offset, ScanComponentSelectorType.Length);
-            return new ScanComponentSelectorType(slice);
+            var offset = 1 + index * ScanComponentSelector.Length;
+            using var slice = this.Slice(DataOffset + offset, ScanComponentSelector.Length);
+            return new ScanComponentSelector(slice);
         }
         set
         {
-            var offset = 1 + index * ScanComponentSelectorType.Length;
-            using var slice = this.Slice(DataOffset + offset, ScanComponentSelectorType.Length);
+            var offset = 1 + index * ScanComponentSelector.Length;
+            using var slice = this.Slice(DataOffset + offset, ScanComponentSelector.Length);
             value.CopyTo(slice);
         }
     }
@@ -75,12 +75,12 @@ public class StartOfScan : Marker
     {
         get
         {
-            var offset = 1 + Ns * ScanComponentSelectorType.Length;
+            var offset = 1 + Ns * ScanComponentSelector.Length;
             return Array[DataOffset + offset];
         }
         set
         {
-            var offset = 1 + Ns * ScanComponentSelectorType.Length;
+            var offset = 1 + Ns * ScanComponentSelector.Length;
             Array[DataOffset + offset] = (byte)value;
         }
     }
@@ -92,12 +92,12 @@ public class StartOfScan : Marker
     {
         get
         {
-            var offset = Ns * ScanComponentSelectorType.Length + 1;
+            var offset = Ns * ScanComponentSelector.Length + 1;
             return Array[DataOffset + offset];
         }
         set
         {
-            var offset = Ns * ScanComponentSelectorType.Length + 1;
+            var offset = Ns * ScanComponentSelector.Length + 1;
             Array[DataOffset + offset] = (byte)value;
         }
     }
@@ -109,13 +109,13 @@ public class StartOfScan : Marker
     {
         get
         {
-            var bitOffset = Binary.BytesToBits(1 + Ns * ScanComponentSelectorType.Length + 1 + 1);
+            var bitOffset = Binary.BytesToBits(1 + Ns * ScanComponentSelector.Length + 1 + 1);
             using var slice = Data;
             return (int)slice.ReadBits(ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
         }
         set
         {
-            var bitOffset = Binary.BytesToBits(1 + Ns * ScanComponentSelectorType.Length + 1 + 1);
+            var bitOffset = Binary.BytesToBits(1 + Ns * ScanComponentSelector.Length + 1 + 1);
             using var slice = Data;
             slice.WriteBits(ref bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
         }
@@ -128,13 +128,13 @@ public class StartOfScan : Marker
     {
         get
         {
-            var bitOffset = Binary.BytesToBits(1 + Ns * ScanComponentSelectorType.Length + 1 + 1) + Binary.Four;
+            var bitOffset = Binary.BytesToBits(1 + Ns * ScanComponentSelector.Length + 1 + 1) + Binary.Four;
             using var slice = Data;
             return (int)slice.ReadBits(ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
         }
         set
         {
-            var bitOffset = Binary.BytesToBits(1 + Ns * ScanComponentSelectorType.Length + 1 + 1) + Binary.Four;
+            var bitOffset = Binary.BytesToBits(1 + Ns * ScanComponentSelector.Length + 1 + 1) + Binary.Four;
             using var slice = Data;
             slice.WriteBits(ref bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
         }
