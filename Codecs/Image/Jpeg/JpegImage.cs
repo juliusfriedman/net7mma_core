@@ -33,8 +33,9 @@ public class JpegImage : Image
         int width = 0, height = 0;
         ImageFormat imageFormat = default;
         MemorySegment dataSegment = default;
+        MemorySegment thumbnailData = default;
         bool progressive = false;
-        Common.Collections.Generic.ConcurrentThesaurus<byte, Marker> markers = new Common.Collections.Generic.ConcurrentThesaurus<byte, Marker>();
+        ConcurrentThesaurus<byte, Marker> markers = new ConcurrentThesaurus<byte, Marker>();
         foreach (var marker in JpegCodec.ReadMarkers(stream))
         {
             if (marker.IsEmpty) continue;
@@ -101,8 +102,6 @@ public class JpegImage : Image
                         var dataSegmentSize = CalculateSize(imageFormat, width, height);
                         dataSegment = new MemorySegment(Math.Abs(dataSegmentSize));
                         var read = stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count);
-                        if (read < dataSegment.Count)
-                            dataSegment = dataSegment.Slice(read);
                         break;
                     }
                 case Jpeg.Markers.HierarchialProgression:
@@ -111,8 +110,6 @@ public class JpegImage : Image
                         var dataSegmentSize = CalculateSize(imageFormat, width, height);
                         dataSegment = new MemorySegment(Math.Abs(dataSegmentSize));
                         var read = stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count);
-                        if (read < dataSegment.Count)
-                            dataSegment = dataSegment.Slice(read);
                         continue;
                     }
                 case Jpeg.Markers.AppFirst:
@@ -122,13 +119,11 @@ public class JpegImage : Image
                     if(app.MajorVersion >= 1 && app.MinorVersion >= 2)
                     {
                         var appExtension = new AppExtension(app);
-                        var thumbnailData = appExtension.ThumbnailData;
-                        dataSegment = thumbnailData;
+                        thumbnailData = appExtension.ThumbnailData;
                     }
                     else
                     {
-                        var thumbnailData = app.ThumbnailData;
-                        dataSegment = thumbnailData;
+                        thumbnailData = app.ThumbnailData;
                         imageFormat = ImageFormat.RGB(8);
                         width = app.XThumbnail;
                         height = app.YThumbnail;
@@ -141,11 +136,11 @@ public class JpegImage : Image
             }
         }
 
-        if (imageFormat == null || dataSegment == null)
+        if (imageFormat == null || dataSegment == null && thumbnailData == null)
             throw new InvalidDataException("The provided stream does not contain valid JPEG image data.");
 
         // Create and return the JpegImage
-        return new JpegImage(imageFormat, width, height, dataSegment, progressive, markers);
+        return new JpegImage(imageFormat, width, height, dataSegment ?? thumbnailData, progressive, markers);
     }
 
     public void Save(Stream stream)
@@ -217,10 +212,12 @@ public class JpegImage : Image
     {
         var numberOfComponents = ImageFormat.Components.Length;
         var sos = new StartOfScan(numberOfComponents);
-        sos.Ss = 0;
-        sos.Se = 0;
-        sos.Ah = 0;
-        sos.Al = 0;
+        // Set the Ss, Se, Ah, and Al fields
+        // These values are typical for a baseline JPEG
+        sos.Ss = 0;  // Start of spectral selection
+        sos.Se = 63; // End of spectral selection
+        sos.Ah = 0;  // Successive approximation high
+        sos.Al = 0;  // Successive approximation low
         for (var i = 0; i < numberOfComponents; ++i)
         {
             var imageComponent = ImageFormat.Components[i];
