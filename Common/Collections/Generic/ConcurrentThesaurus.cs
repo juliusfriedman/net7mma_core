@@ -369,6 +369,9 @@ namespace Media.Common.Collections.Generic
 
         public ConcurrentThesaurus() : this(EqualityComparer<TKey>.Default) { }
 
+        public ConcurrentThesaurus(ConcurrentThesaurus<TKey, TValue> thesaurus)
+         => Dictionary = new ConcurrentDictionary<TKey, IList<TValue>>(thesaurus.Dictionary);
+
         #endregion
     }
 

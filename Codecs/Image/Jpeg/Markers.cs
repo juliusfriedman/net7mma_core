@@ -122,7 +122,8 @@ public sealed class Markers
 
     public const byte DataRestartInterval = 0xdd;
 
-    public const byte HierarchialProgression = 0xde;
+    public const byte HeirarchicalProgression = 0xde;
+
     /// <summary>
     /// Expand reference components
     /// </summary>

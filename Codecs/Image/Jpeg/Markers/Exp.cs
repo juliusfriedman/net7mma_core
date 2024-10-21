@@ -3,7 +3,7 @@ using Media.Common;
 
 namespace Codec.Jpeg.Markers;
 
-public class HierarchialProgression : Marker
+public class Exp : Marker
 {
     public new const int Length = 3;
 
@@ -35,13 +35,13 @@ public class HierarchialProgression : Marker
         }
     }
 
-    public HierarchialProgression()
-        : base(Media.Codec.Jpeg.Markers.HierarchialProgression, Length)
+    public Exp(MemorySegment data)
+      : base(data)
     {
     }
 
-    public HierarchialProgression(MemorySegment data)
-      : base(data)
+    public Exp()
+        : base(Media.Codec.Jpeg.Markers.Expand, Length)
     {
     }
 }

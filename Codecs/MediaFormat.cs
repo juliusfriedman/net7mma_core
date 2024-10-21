@@ -36,6 +36,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
+using System.ComponentModel;
 using System.Linq;
 
 namespace Media.Codec
@@ -218,13 +219,13 @@ namespace Media.Codec
             if (components is null) throw new System.ArgumentNullException("components");
 
             //Assign the components
-            Components = System.Linq.Enumerable.ToArray<MediaComponent>(components);
+            Components = components.Where(c => c != null).ToArray();
 
             //Validate the amount of components
             if (Components.Length < 1) throw new System.ArgumentException("components", "Must be greater than 0.");
 
             //Calulcate the size
-            foreach (MediaComponent mc in Components) Size += mc.Size;
+            foreach (MediaComponent mc in Components) if (mc is not null) Size += mc.Size;
         }
 
         public MediaFormat(MediaFormat other, Common.Binary.ByteOrder byteOrder, DataLayout dataLayout, params MediaComponent[] additionalComponents)

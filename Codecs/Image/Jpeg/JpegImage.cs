@@ -42,7 +42,11 @@ public class JpegImage : Image
 
             //Handle the marker to decode.
             switch (marker.FunctionCode)
-            {                
+            {
+                case Jpeg.Markers.NumberOfLines:
+                    var numberOfLines = new NumberOfLines(marker);
+                    height = numberOfLines.Nl;
+                    continue;
                 case Jpeg.Markers.StartOfBaselineFrame:
                 case Jpeg.Markers.StartOfHuffmanFrame:
                 case Jpeg.Markers.StartOfDifferentialSequentialArithmeticFrame:
@@ -54,33 +58,51 @@ public class JpegImage : Image
                 case Jpeg.Markers.StartOfDifferentialProgressiveArithmeticFrame:
                 case Jpeg.Markers.StartOfProgressiveArithmeticFrame:
                 case Jpeg.Markers.StartOfProgressiveHuffmanFrame:
+                case Jpeg.Markers.HeirarchicalProgression:                    
                     switch (marker.FunctionCode)
                     {
                         case Jpeg.Markers.StartOfDifferentialProgressiveHuffmanFrame:
                         case Jpeg.Markers.StartOfDifferentialProgressiveArithmeticFrame:
                         case Jpeg.Markers.StartOfProgressiveArithmeticFrame:
                         case Jpeg.Markers.StartOfProgressiveHuffmanFrame:
+                        case Jpeg.Markers.HeirarchicalProgression:
                             progressive = true;
                             break;
                     }
-                    var sof = new StartOfFrame(marker);
-                    int bitDepth = Binary.Max(Binary.BitsPerByte, sof.P);
-                    height = sof.Y;
-                    width = sof.X;
+
+                    StartOfFrame tag;
+
+                    if(marker.FunctionCode == Jpeg.Markers.HeirarchicalProgression)
+                    {
+                        tag = new HeirarchicalProgression(marker);
+                    }
+                    else
+                    {
+                        tag = new StartOfFrame(marker);
+                    }
+                    
+                    int bitDepth = Binary.Clamp(Binary.BitsPerByte, Binary.BitsPerInteger, tag.P);
+                    height = tag.Y;
+                    width = tag.X;
 
                     //Warning, check for invalid number of components.
-                    var numberOfComponents = Binary.Min(Binary.Four, sof.Nf);
+                    var numberOfComponents = Binary.Min(Binary.Four, tag.Nf);
 
                     int bitsPerComponent = bitDepth / numberOfComponents;
+
+                    if (bitsPerComponent == 0)
+                        bitsPerComponent = Binary.BitsPerByte;
 
                     MediaComponent[] mediaComponents = new MediaComponent[numberOfComponents];
                     int[] widths = new int[numberOfComponents];
                     int[] heights = new int[numberOfComponents];
 
+                    int remains = tag.DataSize - StartOfFrame.Length;
+
                     // Read the components and sampling information
-                    for (int componentIndex = 0; componentIndex < numberOfComponents; componentIndex++)
+                    for (int componentIndex = 0; componentIndex < numberOfComponents && remains > 0; componentIndex++)
                     {
-                        var frameComponent = sof[componentIndex];
+                        var frameComponent = tag[componentIndex];
                         var componentId = frameComponent.ComponentIdentifier;
                         widths[componentIndex] = frameComponent.HorizontalSamplingFactor;
                         heights[componentIndex] = frameComponent.VerticalSamplingFactor;
@@ -90,6 +112,8 @@ public class JpegImage : Image
                         var mediaComponent = new JpegComponent((byte)quantizationTableNumber, (byte)componentId, bitsPerComponent);
 
                         mediaComponents[componentIndex] = mediaComponent;
+                        
+                        remains -= frameComponent.Count;
                     }
 
                     // Create the image format based on the SOF0 data
@@ -105,17 +129,7 @@ public class JpegImage : Image
                         if (read < dataSegment.Count)
                             dataSegment = dataSegment.Slice(0, read);
                         break;
-                    }
-                case Jpeg.Markers.HierarchialProgression:
-                    {
-                        var exp = new HierarchialProgression(marker);
-                        var dataSegmentSize = CalculateSize(imageFormat, width, height);
-                        dataSegment = new MemorySegment(Math.Abs(dataSegmentSize));
-                        var read = stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count);
-                        if (read < dataSegment.Count)
-                            dataSegment = dataSegment.Slice(0, read);
-                        continue;
-                    }
+                    }                
                 case Jpeg.Markers.AppFirst:
                 case Jpeg.Markers.AppLast:
                     var app = new App(marker);
@@ -132,7 +146,7 @@ public class JpegImage : Image
                         width = app.XThumbnail;
                         height = app.YThumbnail;
                     }
-
+                    
                     continue;
                 default:
                     markers.Add(marker.FunctionCode, marker);
@@ -149,31 +163,48 @@ public class JpegImage : Image
 
     public void Save(Stream stream)
     {
+        var markerBuffer = Markers != null ? new ConcurrentThesaurus<byte, Marker>(Markers) : null;
+
         // Write the JPEG signature
         WriteMarker(stream, Jpeg.Markers.StartOfInformation, WriteEmptyMarker);
 
-        if (Markers != null)
+        if (markerBuffer != null)
         {
             foreach (var marker in Markers.TryGetValue(Jpeg.Markers.TextComment, out var textComments) ? textComments : Enumerable.Empty<Marker>())
             {
                 WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
             }
 
+            markerBuffer.Remove(Jpeg.Markers.TextComment);
+
             foreach (var marker in Markers.TryGetValue(Jpeg.Markers.QuantizationTable, out var quantizationTables) ? quantizationTables : Enumerable.Empty<Marker>())
             {
                 WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
             }
+
+            markerBuffer.Remove(Jpeg.Markers.QuantizationTable);
         }
 
         // TODO revise to write correct start of scan header per coding.
         // Write the SOF marker
         WriteStartOfFrame(Progressive ? Jpeg.Markers.StartOfProgressiveHuffmanFrame : Jpeg.Markers.StartOfBaselineFrame, stream);
 
-        if (Markers != null)
+        if (markerBuffer != null)
         {
             foreach (var marker in Markers.TryGetValue(Jpeg.Markers.HuffmanTable, out var huffmanTables) ? huffmanTables : Enumerable.Empty<Marker>())
             {
                 WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
+            }
+
+            markerBuffer.Remove(Jpeg.Markers.HuffmanTable);
+        }
+
+        if (markerBuffer != null)
+        {
+            foreach (var marker in markerBuffer.Values)
+            {
+                WriteMarker(stream, marker.FunctionCode, (s) => s.Write(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
+                markerBuffer.Clear();
             }
         }
 
