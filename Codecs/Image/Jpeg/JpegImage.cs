@@ -102,6 +102,8 @@ public class JpegImage : Image
                         var dataSegmentSize = CalculateSize(imageFormat, width, height);
                         dataSegment = new MemorySegment(Math.Abs(dataSegmentSize));
                         var read = stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count);
+                        if (read < dataSegment.Count)
+                            dataSegment = dataSegment.Slice(0, read);
                         break;
                     }
                 case Jpeg.Markers.HierarchialProgression:
@@ -110,6 +112,8 @@ public class JpegImage : Image
                         var dataSegmentSize = CalculateSize(imageFormat, width, height);
                         dataSegment = new MemorySegment(Math.Abs(dataSegmentSize));
                         var read = stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count);
+                        if (read < dataSegment.Count)
+                            dataSegment = dataSegment.Slice(0, read);
                         continue;
                     }
                 case Jpeg.Markers.AppFirst:
