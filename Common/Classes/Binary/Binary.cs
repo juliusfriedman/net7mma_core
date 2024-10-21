@@ -1618,6 +1618,13 @@ namespace Media.Common
                 (reverse ? BitOrder.MostSignificant : BitOrder.LeastSignificant)));
         }
 
+        [CLSCompliant(false)]
+        public static void WriteBits(byte[] bytes, ref int bitOffset, int bitCount, long value, bool reverse)
+        {
+            WriteBits(bytes, bitOffset, bitCount, value, reverse);
+            bitOffset += bitCount;
+        }
+
         public static void WriteBits(byte[] bytes, int bitOffset, int bitCount, long value, Binary.BitOrder order)
         {
             switch (order)
@@ -1626,6 +1633,13 @@ namespace Media.Common
                 case BitOrder.MostSignificant: WriteBitsMSB(bytes, bitOffset, (ulong)value, bitCount); return;
                 default: throw new NotImplementedException("A definite BitOrder must be supplied.");
             }
+        }
+
+        [CLSCompliant(false)]
+        public static void WriteBits(byte[] bytes, ref int bitOffset, int bitCount, long value, Binary.BitOrder order)
+        {
+            WriteBits(bytes, bitOffset, bitCount, value, order);
+            bitOffset += bitCount;
         }
 
         //ByteOrder overloads?

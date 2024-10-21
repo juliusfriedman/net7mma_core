@@ -26,8 +26,8 @@ namespace Media.Codecs.Image
                     // For planar layout, each component has its own plane
                     for (int i = 0; i < format.Components.Length; i++)
                     {
-                        int componentWidth = width >> format.Widths[i];
-                        int componentHeight = height >> format.Heights[i];
+                        int componentWidth = width >> format.HorizontalSamplingFactors[i];
+                        int componentHeight = height >> format.VerticalSamplingFactors[i];
                         size += componentWidth * componentHeight * format.Components[i].Length;
                     }
                     break;
@@ -36,9 +36,9 @@ namespace Media.Codecs.Image
                     var fistComponentLength = format.Components[0].Length;
                     // For semi-planar layout, the first component has its own plane)
                     // the second plane is for the packed components
-                    size = width >> format.Widths[0] * height >> format.Heights[0] * fistComponentLength;
-                    width >>= format.Widths[1];
-                    height >>= format.Heights[1];
+                    size = width >> format.HorizontalSamplingFactors[0] * height >> format.VerticalSamplingFactors[0] * fistComponentLength;
+                    width >>= format.HorizontalSamplingFactors[1];
+                    height >>= format.VerticalSamplingFactors[1];
                     goto case DataLayout.Packed;
                 case DataLayout.Packed:
                     // For packed layout, all components are interleaved
@@ -153,12 +153,12 @@ namespace Media.Codecs.Image
 
         public int PlaneWidth(int plane)
         {
-            return plane < 0 || plane >= MediaFormat.Components.Length ? -1 : Width >> ImageFormat.Widths[plane];
+            return plane < 0 || plane >= MediaFormat.Components.Length ? -1 : Width >> ImageFormat.HorizontalSamplingFactors[plane];
         }
 
         public int PlaneHeight(int plane)
         {
-            return plane < 0 || plane >= MediaFormat.Components.Length ? -1 : Height >> ImageFormat.Heights[plane];
+            return plane < 0 || plane >= MediaFormat.Components.Length ? -1 : Height >> ImageFormat.VerticalSamplingFactors[plane];
         }
 
         /// <summary>
@@ -226,8 +226,8 @@ namespace Media.Codecs.Image
                 case DataLayout.Planar:
                     // Each component is stored in a separate plane. The offset is calculated based on the plane's width and the pixel's position within the plane.
                     // Calculate the width and height of the plane for the given component
-                    int widthSampling = ImageFormat.Widths[componentIndex];
-                    int heightSampling = ImageFormat.Heights[componentIndex];
+                    int widthSampling = ImageFormat.HorizontalSamplingFactors[componentIndex];
+                    int heightSampling = ImageFormat.VerticalSamplingFactors[componentIndex];
 
                     int planeWidth = Width >> widthSampling;
                     int planeHeight = Height >> heightSampling;
@@ -242,8 +242,8 @@ namespace Media.Codecs.Image
                     // Add the base offset for the component's plane
                     for (int i = 0; i < componentIndex; i++)
                     {
-                        int previousPlaneWidth = Width >> ImageFormat.Widths[i];
-                        int previousPlaneHeight = Height >> ImageFormat.Heights[i];
+                        int previousPlaneWidth = Width >> ImageFormat.HorizontalSamplingFactors[i];
+                        int previousPlaneHeight = Height >> ImageFormat.VerticalSamplingFactors[i];
                         offset += previousPlaneWidth * previousPlaneHeight * ImageFormat.Components[i].Length;
                     }
                     break;
@@ -482,8 +482,8 @@ namespace Media.UnitTests
                 {
                     for (int componentIndex = 0; componentIndex < imageFormat.Length; componentIndex++)
                     {
-                        int widthSampling = imageFormat.Widths[componentIndex];
-                        int heightSampling = imageFormat.Heights[componentIndex];
+                        int widthSampling = imageFormat.HorizontalSamplingFactors[componentIndex];
+                        int heightSampling = imageFormat.VerticalSamplingFactors[componentIndex];
 
                         int planeWidth = image.Width >> widthSampling;
                         int planeX = x >> widthSampling;
@@ -493,8 +493,8 @@ namespace Media.UnitTests
 
                         for (int i = 0; i < componentIndex; i++)
                         {
-                            int previousPlaneWidth = image.Width >> image.ImageFormat.Widths[i];
-                            int previousPlaneHeight = image.Height >> image.ImageFormat.Heights[i];
+                            int previousPlaneWidth = image.Width >> image.ImageFormat.HorizontalSamplingFactors[i];
+                            int previousPlaneHeight = image.Height >> image.ImageFormat.VerticalSamplingFactors[i];
                             expectedOffset += previousPlaneWidth * previousPlaneHeight * image.ImageFormat.Components[i].Length;
                         }
 
@@ -524,8 +524,8 @@ namespace Media.UnitTests
                         {
                             case 0:
                                 // Calculate the width and height of the plane for the given component
-                                int widthSampling = image.ImageFormat.Widths[componentIndex];
-                                int heightSampling = image.ImageFormat.Heights[componentIndex];
+                                int widthSampling = image.ImageFormat.HorizontalSamplingFactors[componentIndex];
+                                int heightSampling = image.ImageFormat.VerticalSamplingFactors[componentIndex];
 
                                 int planeWidth = image.Width >> widthSampling;
                                 int planeHeight = image.Height >> heightSampling;

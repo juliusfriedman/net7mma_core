@@ -367,6 +367,16 @@ namespace Media.Codec
 
         #endregion
 
-        //Needs override for equals...
+        public override bool Equals(object obj)
+            => obj is MediaFormat other && Equals(other);
+
+        public bool Equals(MediaFormat other)
+        {
+            return other.MediaType == MediaType &&
+                other.Size == Size &&
+                other.ByteOrder == ByteOrder &&
+                other.DataLayout == DataLayout &&
+                other.Components.SequenceEqual(Components);
+        }
     }
 }

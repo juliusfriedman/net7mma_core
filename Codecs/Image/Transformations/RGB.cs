@@ -55,9 +55,9 @@ namespace Media.Codecs.Image.Transformations
 
             //Should be a constant in ImageFormat, 1 looks weird but >> 1 divides by 2, >> 2 by 4
             //Could also change the WidthsAndHights to be an enum or Rational... SubSampling...
-            if (dest.ImageFormat.Heights[1] != 1) return;
+            if (dest.ImageFormat.VerticalSamplingFactors[1] != 1) return;
 
-            if (dest.ImageFormat.Widths[1] != 1) return;
+            if (dest.ImageFormat.HorizontalSamplingFactors[1] != 1) return;
         }
 
         public override void Transform()
@@ -202,7 +202,7 @@ namespace Media.Codecs.Image.Transformations
                     //Needs Common.Binary.WriteBinaryInteger
 
                     //Determine how to write the Chroma data depending on the SubSampling.
-                    switch (dst.ImageFormat.Widths[1])
+                    switch (dst.ImageFormat.HorizontalSamplingFactors[1])
                     {
                         //No plane data
                         case -1: break;

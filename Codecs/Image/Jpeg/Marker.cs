@@ -5,6 +5,8 @@ namespace Media.Codec.Jpeg;
 //Needs to implement a common class if the elements can be reused => 
 public class Marker : MemorySegment
 {
+    public const int LengthBytes = 2;
+
     public byte Prefix
     {
         get => Array[Offset];
@@ -19,16 +21,18 @@ public class Marker : MemorySegment
 
     public int Length
     {
-        get => Binary.Read16(Array, Offset + 2, Binary.IsLittleEndian);
+        get => Binary.ReadU16(Array, Offset + 2, Binary.IsLittleEndian);
         set => Binary.Write16(Array, Offset + 2, Binary.IsLittleEndian, (ushort)value);
     }
 
-    public int DataSize => Binary.Max(0, Length - 2);
+    public int DataSize => Binary.Max(0, Length - LengthBytes);
 
-    public MemorySegment Data => DataSize > 0 ? new MemorySegment(Array, Offset + Binary.BytesPerInteger, DataSize) : Common.MemorySegment.Empty;
+    public MemorySegment Data => DataSize > 0 ? new MemorySegment(Array, Offset + Binary.BytesPerInteger, DataSize) : Empty;
+
+    public bool IsEmpty => DataSize == 0;
 
     public Marker(byte functionCode, int size)
-        : base(new byte[size > 0 ? size + Binary.BytesPerInteger : size + Binary.BytesPerShort])
+        : base(new byte[size > 0 ? size + Binary.BytesPerInteger : size + LengthBytes])
     {
         Prefix = Markers.Prefix;
         FunctionCode = functionCode;
@@ -39,4 +43,7 @@ public class Marker : MemorySegment
     public Marker(MemorySegment data): base(data)
     {
     }
+
+    public override string ToString()
+        => Markers.ToTextualConvention(FunctionCode);
 }

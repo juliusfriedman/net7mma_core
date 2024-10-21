@@ -197,7 +197,7 @@ internal class JpegUnitTests
 
         foreach (var filePath in Directory.GetFiles(jpegTestDir, "*.jpg"))
         {
-            Console.WriteLine($"Processing file: ${Path.GetFileName(filePath)}");
+            Console.WriteLine($"Processing file: {Path.GetFileName(filePath)}");
 
             List<Marker> sourceMarkers = new List<Marker>();
 
@@ -211,7 +211,7 @@ internal class JpegUnitTests
                 Console.Write("Length:");
                 Console.WriteLine(marker.Length);
                 Console.Write("Data:");
-                Console.WriteLine(BitConverter.ToString(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
+                Console.WriteLine(BitConverter.ToString(marker.Data.Array, marker.Data.Offset, Math.Min(16, marker.Data.Count)));
                 sourceMarkers.Add(marker);
             }
 
@@ -238,7 +238,7 @@ internal class JpegUnitTests
                 Console.Write("Length:");
                 Console.WriteLine(marker.Length);
                 Console.Write("Data:");
-                Console.WriteLine(BitConverter.ToString(marker.Data.Array, marker.Data.Offset, marker.Data.Count));
+                Console.WriteLine(BitConverter.ToString(marker.Data.Array, marker.Data.Offset, Math.Min(16,marker.Data.Count)));
                 destinationMarkers.Add(marker);
             }
             

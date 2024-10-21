@@ -6,6 +6,8 @@ using Media.Common;
 using System.Linq;
 using Media.Common.Collections.Generic;
 using Codec.Jpeg;
+using Codec.Jpeg.Markers;
+using Codec.Jpeg.Classes;
 
 namespace Media.Codec.Jpeg;
 
@@ -24,12 +26,10 @@ public class JpegImage : Image
     {
         Progressive = progressive;
         Markers = markers;
-
     }
 
     public static JpegImage FromStream(Stream stream)
     {
-        // Read the SOF0 (Start of Frame) marker
         int width = 0, height = 0;
         ImageFormat imageFormat = default;
         MemorySegment dataSegment = default;
@@ -37,53 +37,91 @@ public class JpegImage : Image
         Common.Collections.Generic.ConcurrentThesaurus<byte, Marker> markers = new Common.Collections.Generic.ConcurrentThesaurus<byte, Marker>();
         foreach (var marker in JpegCodec.ReadMarkers(stream))
         {
-            if (marker.FunctionCode == Jpeg.Markers.StartOfBaselineFrame || marker.FunctionCode == Jpeg.Markers.StartOfProgressiveHuffmanFrame) // SOF0 marker
-            {
-                progressive = marker.FunctionCode == Jpeg.Markers.StartOfProgressiveHuffmanFrame;
+            if (marker.IsEmpty) continue;
 
-                var offset = 0;
-                byte bitDepth = marker.Data[offset++];                
-                height = Binary.Read16(marker.Data, ref offset, Binary.IsLittleEndian);
-                width = Binary.Read16(marker.Data, ref offset, Binary.IsLittleEndian);
-                var numberOfComponents = marker.Data[offset++];
+            //Handle the marker to decode.
+            switch (marker.FunctionCode)
+            {                
+                case Jpeg.Markers.StartOfBaselineFrame:
+                case Jpeg.Markers.StartOfHuffmanFrame:
+                case Jpeg.Markers.StartOfDifferentialSequentialArithmeticFrame:
+                case Jpeg.Markers.StartOfLosslessHuffmanFrame:
+                case Jpeg.Markers.StartOfLosslessArithmeticFrame:
+                case Jpeg.Markers.StartOfDifferentialLosslessArithmeticFrame:
+                case Jpeg.Markers.StartOfDifferentialLosslessHuffmanFrame:
+                case Jpeg.Markers.StartOfDifferentialProgressiveHuffmanFrame:
+                case Jpeg.Markers.StartOfDifferentialProgressiveArithmeticFrame:
+                case Jpeg.Markers.StartOfProgressiveArithmeticFrame:
+                case Jpeg.Markers.StartOfProgressiveHuffmanFrame:
+                    switch (marker.FunctionCode)
+                    {
+                        case Jpeg.Markers.StartOfDifferentialProgressiveHuffmanFrame:
+                        case Jpeg.Markers.StartOfDifferentialProgressiveArithmeticFrame:
+                        case Jpeg.Markers.StartOfProgressiveArithmeticFrame:
+                        case Jpeg.Markers.StartOfProgressiveHuffmanFrame:
+                            progressive = true;
+                            break;
+                    }
+                    var sof = new StartOfFrame(marker);
+                    int bitDepth = Binary.Max(Binary.BitsPerByte, sof.P);
+                    height = sof.Y;
+                    width = sof.X;
 
-                int bitsPerComponent = bitDepth / numberOfComponents;
+                    //Warning, check for invalid number of components.
+                    var numberOfComponents = Binary.Min(Binary.Four, sof.Nf);
 
-                MediaComponent[] mediaComponents = new MediaComponent[numberOfComponents];
-                int[] widths = new int[numberOfComponents];
-                int[] heights = new int[numberOfComponents];
+                    int bitsPerComponent = bitDepth / numberOfComponents;
 
-                // Read the components and sampling information
-                for (int componentIndex = 0; componentIndex < numberOfComponents; componentIndex++)
-                {
-                    var componentId = marker.Data[offset++];
-                    var samplingFactors = marker.Data[offset++];
-                    widths[componentIndex] = samplingFactors & 0x0F;
-                    heights[componentIndex] = samplingFactors >> 4;
-                    
-                    //TODO CMYK image throws this off?
-                    var quantizationTableNumber = offset >= marker.DataSize ? (byte)componentIndex : marker.Data[offset++];
+                    MediaComponent[] mediaComponents = new MediaComponent[numberOfComponents];
+                    int[] widths = new int[numberOfComponents];
+                    int[] heights = new int[numberOfComponents];
 
-                    var mediaComponent = new JpegComponent(quantizationTableNumber, componentId, bitsPerComponent);
+                    // Read the components and sampling information
+                    for (int componentIndex = 0; componentIndex < numberOfComponents; componentIndex++)
+                    {
+                        var frameComponent = sof[componentIndex];
+                        var componentId = frameComponent.ComponentIdentifier;
+                        widths[componentIndex] = frameComponent.HorizontalSamplingFactor;
+                        heights[componentIndex] = frameComponent.VerticalSamplingFactor;
 
-                    mediaComponents[componentIndex] = mediaComponent;
-                }
+                        var quantizationTableNumber = frameComponent.QuantizationTableDestinationSelector;
 
-                // Create the image format based on the SOF0 data
-                imageFormat = new ImageFormat(Binary.ByteOrder.Little, DataLayout.Packed, mediaComponents);
-                imageFormat.Widths = widths;
-                imageFormat.Heights = heights;
-            }
-            else if (marker.FunctionCode == Jpeg.Markers.StartOfScan) // SOS marker
-            {
-                var dataSegmentSize = Image.CalculateSize(imageFormat, width, height);
-                dataSegment = new MemorySegment(dataSegmentSize);
-                stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count);
-                break;
-            }
-            else if (marker.FunctionCode != Jpeg.Markers.StartOfInformation)
-            {
-                markers.Add(marker.FunctionCode, marker);
+                        var mediaComponent = new JpegComponent((byte)quantizationTableNumber, (byte)componentId, bitsPerComponent);
+
+                        mediaComponents[componentIndex] = mediaComponent;
+                    }
+
+                    // Create the image format based on the SOF0 data
+                    imageFormat = new ImageFormat(Binary.ByteOrder.Little, DataLayout.Planar, mediaComponents);
+                    imageFormat.HorizontalSamplingFactors = widths;
+                    imageFormat.VerticalSamplingFactors = heights;
+                    break;
+                case Jpeg.Markers.StartOfScan:
+                    {
+                        var dataSegmentSize = CalculateSize(imageFormat, width, height);
+                        dataSegment = new MemorySegment(Math.Abs(dataSegmentSize));
+                        var read = stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count);
+                        if (read < dataSegment.Count)
+                            dataSegment = dataSegment.Slice(read);
+                        break;
+                    }
+                case Jpeg.Markers.HierarchialProgression:
+                    {
+                        var exp = new HierarchialProgression(marker);
+                        var dataSegmentSize = CalculateSize(imageFormat, width, height);
+                        dataSegment = new MemorySegment(Math.Abs(dataSegmentSize));
+                        var read = stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count);
+                        if (read < dataSegment.Count)
+                            dataSegment = dataSegment.Slice(read);
+                        break;
+                    }
+                case Jpeg.Markers.AppFirst:
+                case Jpeg.Markers.AppLast:
+
+                    break;
+                default:
+                    markers.Add(marker.FunctionCode, marker);
+                    break;
             }
         }
 
@@ -113,8 +151,8 @@ public class JpegImage : Image
         }
 
         // TODO revise to write correct start of scan header per coding.
-        // Write the SOF0 marker
-        WriteMarker(stream, Progressive ? Jpeg.Markers.StartOfProgressiveHuffmanFrame : Jpeg.Markers.StartOfBaselineFrame, WriteSOF0Marker);
+        // Write the SOF marker
+        WriteStartOfFrame(Progressive ? Jpeg.Markers.StartOfProgressiveHuffmanFrame : Jpeg.Markers.StartOfBaselineFrame, stream);
 
         if (Markers != null)
         {
@@ -125,7 +163,7 @@ public class JpegImage : Image
         }
 
         // Write the SOS marker
-        WriteMarker(stream, Jpeg.Markers.StartOfScan, WriteSOSMarker);
+        WriteStartOfScan(stream);
 
         // Write the image data
         stream.Write(Data.Array, Data.Offset, Data.Count);
@@ -134,45 +172,61 @@ public class JpegImage : Image
         WriteMarker(stream, Jpeg.Markers.EndOfInformation, WriteEmptyMarker);
     }
 
-    private void WriteSOF0Marker(Stream stream)
+    private void WriteStartOfFrame(byte functionCode, Stream stream)
     {
-        stream.WriteByte((byte)ImageFormat.Size);
-        stream.Write(Binary.GetBytes((ushort)Height, Binary.IsLittleEndian));
-        stream.Write(Binary.GetBytes((ushort)Width, Binary.IsLittleEndian));
-        stream.WriteByte((byte)ImageFormat.Components.Length);
-        for (int i = 0; i < ImageFormat.Components.Length; i++)
+        var componentCount = ImageFormat.Components.Length;
+        using StartOfFrame sof = new StartOfFrame(functionCode, componentCount);
+        sof.P = ImageFormat.Size;
+        sof.Y = Height;
+        sof.X = Width;
+        for (var i = 0; i < componentCount; ++i)
         {
-            var component = ImageFormat.Components[i];
-            switch (component.Id)
+            var imageComponent = ImageFormat.Components[i];
+
+            if (imageComponent is JpegComponent jpegComponent)
             {
-                case ImageFormat.LumaChannelId:
-                case ImageFormat.CyanChannelId:
-                    stream.WriteByte(1);
-                    break;
-                case ImageFormat.ChromaMajorChannelId:
-                case ImageFormat.MagentaChannelId:
-                    stream.WriteByte(2);
-                    break;
-                case ImageFormat.ChromaMinorChannelId:
-                case ImageFormat.YellowChannelId:
-                    stream.WriteByte(3);
-                    break;
-                case ImageFormat.KChannelId:
-                    stream.WriteByte(4);
-                    break;
-                case ImageFormat.RedChannelId:
-                    stream.WriteByte(82); 
-                    break;
-                case ImageFormat.GreenChannelId:
-                    stream.WriteByte(71);
-                    break;
-                case ImageFormat.BlueChannelId:
-                    stream.WriteByte(66);
-                    break;
-            }            
-            stream.WriteByte((byte)(ImageFormat.Widths[i] << 4 | ImageFormat.Heights[i])); // Sampling factors
-            stream.WriteByte(component is JpegComponent jpegComponent ? jpegComponent.QuantizationTableNumber : (byte)i); // Quantization table number
-        }        
+                var frameComponent = new FrameComponent(jpegComponent.Id, ImageFormat.HorizontalSamplingFactors[i], ImageFormat.VerticalSamplingFactors[i], jpegComponent.QuantizationTableNumber);
+                sof[i] = frameComponent;
+            }
+            else
+            {
+                var frameComponent = new FrameComponent(imageComponent.Id, ImageFormat.HorizontalSamplingFactors[i], ImageFormat.VerticalSamplingFactors[i], i);
+                sof[i] = frameComponent;
+            }
+        }
+        stream.Write(sof.Array, sof.Offset, sof.Count);
+    }
+
+    private void WriteStartOfScan(Stream stream)
+    {
+        var numberOfComponents = ImageFormat.Components.Length;
+        var sos = new StartOfScan(numberOfComponents);
+        sos.Ss = 0;
+        sos.Se = 0;
+        sos.Ah = 0;
+        sos.Al = 0;
+        for (var i = 0; i < numberOfComponents; ++i)
+        {
+            var imageComponent = ImageFormat.Components[i];
+
+            if (imageComponent is JpegComponent jpegComponent)
+            {
+                var componentSelector = new ScanComponentSelectorType();
+                componentSelector.Csj = jpegComponent.Id;
+                componentSelector.Tdj = jpegComponent.Id;
+                componentSelector.Taj = jpegComponent.Id;
+                sos[i] = componentSelector;
+            }
+            else
+            {
+                var componentSelector = new ScanComponentSelectorType();
+                componentSelector.Csj = (byte)i;
+                componentSelector.Tdj = (byte)i;
+                componentSelector.Taj = (byte)i;
+                sos[i] = componentSelector;
+            }
+        }
+        stream.Write(sos.Array, sos.Offset, sos.Count);
     }
 
     private void WriteMarker(Stream writer, byte functionCode, Action<Stream> writeMarkerData)

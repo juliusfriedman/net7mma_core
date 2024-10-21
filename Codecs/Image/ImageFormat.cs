@@ -331,7 +331,7 @@ namespace Media.Codecs.Image
         #region Fields
 
         //Used for subsampling.
-        public int[] Widths, Heights;
+        public int[] HorizontalSamplingFactors, VerticalSamplingFactors;
 
         #endregion
 
@@ -341,36 +341,36 @@ namespace Media.Codecs.Image
             : base(Codec.MediaType.Image, byteOrder, dataLayout, components, bitsPerComponent, componentIds)
         {
             //No sub sampling
-            Heights = Widths = new int[components];
+            VerticalSamplingFactors = HorizontalSamplingFactors = new int[components];
         }
 
         public ImageFormat(Common.Binary.ByteOrder byteOrder, Codec.DataLayout dataLayout, int components, int[] componentSizes, byte[] componentIds)
             : base(Codec.MediaType.Image, byteOrder, dataLayout, components, componentSizes, componentIds)
         {
             //No sub sampling
-            Heights = Widths = new int[components];
+            VerticalSamplingFactors = HorizontalSamplingFactors = new int[components];
         }
 
         public ImageFormat(Common.Binary.ByteOrder byteOrder, Codec.DataLayout dataLayout, System.Collections.Generic.IEnumerable<Codec.MediaComponent> components)
             : base(Codec.MediaType.Image, byteOrder, dataLayout, components)
         {
             //No sub sampling
-            Heights = Widths = new int[Components.Length];
+            VerticalSamplingFactors = HorizontalSamplingFactors = new int[Components.Length];
         }
 
         public ImageFormat(Common.Binary.ByteOrder byteOrder, Codec.DataLayout dataLayout, params Codec.MediaComponent[] components)
             : base(Codec.MediaType.Image, byteOrder, dataLayout, components)
         {
             //No sub sampling
-            Heights = Widths = new int[Components.Length];
+            VerticalSamplingFactors = HorizontalSamplingFactors = new int[Components.Length];
         }
 
         public ImageFormat(ImageFormat other, params Codec.MediaComponent[] components)
             : base(other, other.ByteOrder, other.DataLayout, components)
         {
-            Widths = other.Widths;
+            HorizontalSamplingFactors = other.HorizontalSamplingFactors;
 
-            Heights = other.Heights;
+            VerticalSamplingFactors = other.VerticalSamplingFactors;
         }
 
         public ImageFormat(ImageFormat other, int[] sampling, params Codec.MediaComponent[] components)
@@ -390,7 +390,7 @@ namespace Media.Codecs.Image
             //        0.25 |   3 | 8 >> 3 = 1
             //           0 |   -1| skip
 
-            Widths = Heights = sampling;
+            HorizontalSamplingFactors = VerticalSamplingFactors = sampling;
         }
 
         public ImageFormat(ImageFormat other, int[] widths, int[] heights, params Codec.MediaComponent[] components)
@@ -404,9 +404,9 @@ namespace Media.Codecs.Image
 
             if (heights.Length < Components.Length) throw new System.ArgumentOutOfRangeException("widths", "Must have the same amount of elements as Components");
 
-            Widths = widths;
+            HorizontalSamplingFactors = widths;
 
-            Heights = heights;
+            VerticalSamplingFactors = heights;
         }
 
         public ImageFormat(Codec.MediaFormat format)
@@ -421,7 +421,7 @@ namespace Media.Codecs.Image
 
         #region Properties
 
-        public bool IsSubSampled { get { return Widths.Any(c => c > 0) || Heights.Any(h => h > 0); } }
+        public bool IsSubSampled { get { return HorizontalSamplingFactors.Any(c => c > 0) || VerticalSamplingFactors.Any(h => h > 0); } }
 
         public Codec.MediaComponent AlphaComponent { get { return GetComponentById(AlphaChannelId); } }
 
@@ -436,7 +436,7 @@ namespace Media.Codecs.Image
             }
         }
 
-        public string FormatString => Encoding.ASCII.GetString(Components.Select(c => c.Id).ToArray());
+        public string FormatString => Encoding.UTF8.GetString(Components.Select(c => c.Id).ToArray());
 
         #endregion
 
@@ -449,12 +449,12 @@ namespace Media.Codecs.Image
         {
             if (ReferenceEquals(this, imageFormat)) return true;
             return imageFormat.Components.SequenceEqual(imageFormat.Components) &&
-                Widths.SequenceEqual(imageFormat.Widths) &&
-                Heights.SequenceEqual(imageFormat.Heights);
+                HorizontalSamplingFactors.SequenceEqual(imageFormat.HorizontalSamplingFactors) &&
+                VerticalSamplingFactors.SequenceEqual(imageFormat.VerticalSamplingFactors);
         }
 
         public override int GetHashCode()
-            => HashCode.Combine(Components, Widths, Heights);
+            => HashCode.Combine(Components, HorizontalSamplingFactors, VerticalSamplingFactors);
 
         #endregion
     }
@@ -697,8 +697,8 @@ namespace Media.UnitTests
             var result = ImageFormat.Binary(1);
 
             // Assert
-            System.Diagnostics.Debug.Assert(1 == result.Widths.Length);
-            System.Diagnostics.Debug.Assert(1 == result.Heights.Length);
+            System.Diagnostics.Debug.Assert(1 == result.HorizontalSamplingFactors.Length);
+            System.Diagnostics.Debug.Assert(1 == result.VerticalSamplingFactors.Length);
         }
 
         public void TestMonochromeFormat()
@@ -707,8 +707,8 @@ namespace Media.UnitTests
             var result = ImageFormat.Monochrome(1);
 
             // Assert
-            System.Diagnostics.Debug.Assert(1 == result.Widths.Length);
-            System.Diagnostics.Debug.Assert(1 == result.Heights.Length);
+            System.Diagnostics.Debug.Assert(1 == result.HorizontalSamplingFactors.Length);
+            System.Diagnostics.Debug.Assert(1 == result.VerticalSamplingFactors.Length);
         }
 
         public void TestRGBFormat()
@@ -717,8 +717,8 @@ namespace Media.UnitTests
             var result = ImageFormat.RGB(8);
 
             // Assert
-            System.Diagnostics.Debug.Assert(3 == result.Widths.Length);
-            System.Diagnostics.Debug.Assert(3 == result.Heights.Length);
+            System.Diagnostics.Debug.Assert(3 == result.HorizontalSamplingFactors.Length);
+            System.Diagnostics.Debug.Assert(3 == result.VerticalSamplingFactors.Length);
         }
 
         public void TestARGBFormat()
@@ -727,8 +727,8 @@ namespace Media.UnitTests
             var result = ImageFormat.ARGB(8);
 
             // Assert
-            System.Diagnostics.Debug.Assert(4 == result.Widths.Length);
-            System.Diagnostics.Debug.Assert(4 == result.Heights.Length);
+            System.Diagnostics.Debug.Assert(4 == result.HorizontalSamplingFactors.Length);
+            System.Diagnostics.Debug.Assert(4 == result.VerticalSamplingFactors.Length);
             System.Diagnostics.Debug.Assert(result.HasAlphaComponent);
         }
 

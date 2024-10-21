@@ -3,20 +3,25 @@
 namespace Codec.Jpeg.Classes;
 
 public sealed class ScanComponentSelectorType : MemorySegment
-{   
+{
     /// <summary>
-    /// Csj
+    /// The amount of bytes in a <see cref="ScanComponentSelectorType"/>.
     /// </summary>
-    public byte ScanComponentSelector
+    public const int Length = 2;
+
+    /// <summary>
+    /// Scan component selector.
+    /// </summary>
+    public byte Csj
     {
         get => Array[Offset];
         set => Array[Offset] = value;
     }
 
     /// <summary>
-    /// Tdj
+    /// Entropy coding table selector DC.
     /// </summary>
-    public byte EntropyCodingTableSelectorDC
+    public byte Tdj
     {
         get
         {
@@ -31,9 +36,9 @@ public sealed class ScanComponentSelectorType : MemorySegment
     }
 
     /// <summary>
-    /// Taj
+    /// Entropy coding table selector AC.
     /// </summary>
-    public byte EntropyCodingTableSelectorAC
+    public byte Taj
     {
         get
         {
@@ -52,8 +57,17 @@ public sealed class ScanComponentSelectorType : MemorySegment
     /// </summary>
     public MemorySegment RawData => new MemorySegment(Array, Offset, Binary.Two);
 
+    /// <summary>
+    /// Constructs a new <see cref="ScanComponentSelectorType"/> instance from the given <paramref name="other"/> <see cref="MemorySegment"/>.
+    /// </summary>
+    /// <param name="other">Data which corresponds to a <see cref="ScanComponentSelectorType"/></param>
     public ScanComponentSelectorType(MemorySegment other):
         base(other)
+    {
+    }
+
+    public ScanComponentSelectorType()
+        : base(Length)
     {
     }
 }

@@ -637,6 +637,36 @@ namespace Media.Common
             //return the index or the last partial match.
             return found;
         }
+
+        #region ReadBits
+
+        public static long ReadBits(this MemorySegment instance, int bitOffset, int bitCount, Binary.BitOrder bitOrder)
+            => Binary.ReadBits(instance.Array, bitOffset, bitCount, bitOrder);
+
+        [CLSCompliant(false)]
+        public static long ReadBits(this MemorySegment instance, ref int bitOffset, int bitCount, Binary.BitOrder bitOrder)
+            => Binary.ReadBits(instance.Array, ref bitOffset, bitCount, bitOrder);
+
+        #endregion
+
+        #region WriteBits
+
+        public static void WriteBits(this MemorySegment instance, int bitOffset, int bitCount, bool reverse, long value)
+            => Binary.WriteBits(instance.Array, bitOffset, bitCount, value, reverse);
+
+        [CLSCompliant(false)]
+        public static void WriteBits(this MemorySegment instance, ref int bitOffset, int bitCount, bool reverse, long value)
+            => Binary.WriteBits(instance.Array, ref bitOffset, bitCount, value, reverse);
+
+        [CLSCompliant(false)]
+        public static void WriteBits(this MemorySegment instance, ref int bitOffset, int bitCount, Binary.BitOrder bitOrder, long value)
+            => Binary.WriteBits(instance.Array, ref bitOffset, bitCount, value, bitOrder);
+
+        [CLSCompliant(false)]
+        public static void WriteBits(this MemorySegment instance, int bitOffset, int bitCount, Binary.BitOrder bitOrder, long value)
+            => Binary.WriteBits(instance.Array, bitOffset, bitCount, value, bitOrder);
+
+        #endregion
     }
 
     #region Musing

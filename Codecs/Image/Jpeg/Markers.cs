@@ -36,6 +36,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
+using System.Collections.Generic;
+using System.Reflection;
+
 namespace Media.Codec.Jpeg;
 
 /// <summary>
@@ -44,7 +47,21 @@ namespace Media.Codec.Jpeg;
 /// </summary>
 public sealed class Markers
 {
-    static Markers() { }
+    static Dictionary<byte, string> NameLookup = new();
+
+    public static string ToTextualConvention(byte functionCode) => NameLookup.TryGetValue(functionCode, out var textualConvention) ? textualConvention : string.Empty;
+
+    public static bool IsKnownFunctionCode(byte functionCode) => NameLookup.TryGetValue(functionCode, out _);
+
+    static Markers()
+    {
+        foreach(var staticField in typeof(Markers).GetFields(BindingFlags.Public | BindingFlags.Static | BindingFlags.FlattenHierarchy))
+        {
+            if (!staticField.IsLiteral && !staticField.IsInitOnly) continue;
+            var literalValue = (byte)staticField.GetRawConstantValue();
+            NameLookup.Add(literalValue, staticField.Name);
+        }
+    }
 
     /// <summary>
     /// In every marker segment the first two bytes after the marker shall be an unsigned value [In Network ByteOrder] that denotes the length in bytes of 
@@ -90,6 +107,8 @@ public sealed class Markers
     public const byte StartOfDifferentialLosslessArithmeticFrame = 0xcf;
 
     //0xd0 => 0xd7 RST => RestartMarker
+    public bool IsRestartMarker(byte functionCode)
+        => functionCode >= 0xd0 && functionCode <= 0xd7;
 
     public const byte StartOfInformation = 0xd8;
 
@@ -109,11 +128,13 @@ public sealed class Markers
     /// </summary>
     public const byte Expand = 0xdf;
 
+    // 0xe1 => 0xee App 1 => App 14
     public const byte AppFirst = 0xe0;
 
-    // 0xe1 => 0xee App 1 => App 14
-
     public const byte AppLast = 0xef;
+
+    public static bool IsApplicationMarker(byte functionCode)
+        => functionCode >= AppFirst && functionCode <= AppLast;
 
     // 0xf0 => 0xf6 Extension Data
 
@@ -122,6 +143,9 @@ public sealed class Markers
     // 0xf8 = LSE extension parameters JPEG LS
 
     // 0xf9 => 0xfd Extension Data
+
+    public static bool IsExtensionData(byte functionCode)
+        => functionCode >= 0xf0 && functionCode <= 0xf6 || functionCode >= 0xf9 && functionCode <= 0xfd;
 
     public const byte TextComment = 0xfe;
 
