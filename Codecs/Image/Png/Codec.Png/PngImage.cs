@@ -182,31 +182,30 @@ public class PngImage : Image
 
                 deflateStream.Close();
 
-                ms.Seek(0, SeekOrigin.Begin);
+                ms.TryGetBuffer(out var buffer);
 
                 const byte HeaderLength = 2;
                 const byte Deflate32KbWindow = 120;
                 const byte ChecksumBits = 1;
 
                 // Write the ZLib header
-                var result = new byte[HeaderLength + ms.Length + Chunk.ChecksumLength];
+                var result = new byte[HeaderLength + buffer.Count + Chunk.ChecksumLength];
 
                 // Write the ZLib header.
                 result[0] = Deflate32KbWindow;
                 result[1] = ChecksumBits;
 
                 // Write the compressed data.
-                int streamValue;
                 var i = 0;
-                while ((streamValue = ms.ReadByte()) != -1)
+                while (i < buffer.Count)
                 {
-                    result[HeaderLength + i] = (byte)streamValue;
+                    result[HeaderLength + i] = buffer[i];
                     i++;
                 }
 
                 //Todo calculate the CRC and write to result.
 
-                idat = new Chunk(ChunkName.Data, result.Length);
+                idat = new Chunk(ChunkName.Data, result.Length - Chunk.ChecksumLength);
                 result.CopyTo(idat.Array, idat.DataOffset);
             }            
         }
