@@ -24,6 +24,13 @@ public class Chunk : MemorySegment
         ChunkSize = chunkSize;
     }
 
+    public Chunk(ChunkName chunkName, int chunkSize)
+       : base(new MemorySegment(ChunkHeader.ChunkHeaderLength + Binary.BytesPerInteger + chunkSize))
+    {
+        ChunkName = chunkName;
+        ChunkSize = chunkSize;
+    }
+
     public ChunkHeader Header
     {
         get => new ChunkHeader(Array, Offset);

@@ -136,7 +136,7 @@ public class PngImage : Image
 
     private void WriteIHDRChunk(Stream stream)
     {
-        using var ihdr = new Chunk("IHDR", 13);
+        using var ihdr = new Chunk(ChunkName.Header, 13);
         var offset = ihdr.DataOffset;
         Binary.Write32(ihdr.Array, ref offset, Binary.IsLittleEndian, Width);
         Binary.Write32(ihdr.Array, ref offset, Binary.IsLittleEndian, Height);
@@ -159,15 +159,16 @@ public class PngImage : Image
             }
             ms.Seek(0, SeekOrigin.Begin);
             ms.TryGetBuffer(out var buffer);
-            idat = new Chunk("IDAT", buffer.Count);
+            idat = new Chunk(ChunkName.Data, buffer.Count);
             buffer.CopyTo(idat.Array, idat.DataOffset);            
         }
         stream.Write(idat.Array, idat.Offset, idat.Count);
+        idat.Dispose();
     }
 
     private void WriteIENDChunk(Stream stream)
     {
-        var iend = new Chunk("IEND", 0);
+        using var iend = new Chunk(ChunkName.End, 0);
         stream.Write(iend.Array, iend.Offset, iend.Count);
     }
 

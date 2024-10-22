@@ -8,6 +8,7 @@ namespace Media.Codecs.Image
 {
     /// <summary>
     /// Represents an image format with various properties and methods for creating specific formats.
+    /// Can be used as a base for a ColorSpace implementation
     /// </summary>
     public class ImageFormat : Codec.MediaFormat
     {
@@ -15,7 +16,7 @@ namespace Media.Codecs.Image
 
         public const byte AlphaChannelId = (byte)'a';
 
-        public const byte PreMultipliedAlphaChannelId = (byte)'A';
+        public const byte PreMultipliedAlphaChannelId = (byte)'p';
 
         //Possibly a type which has multiplied and straight types... 
         //public const byte MixedAlphaChannelId = (byte)'@';
@@ -44,11 +45,28 @@ namespace Media.Codecs.Image
 
         public const byte MagentaChannelId = (byte)'m';
 
-        //Capital of Luma
         public const byte YellowChannelId = (byte)'y';
 
         //Key
         public const byte KChannelId = (byte)'k';
+
+        //
+
+        //CIE
+
+        public const byte LChannelId = (byte)'L';
+
+        public const byte AChannelId = (byte)'A';
+
+        public const byte BChannelId = (byte)'B';
+
+        //
+
+        public const byte XChannelId = (byte)'X';
+
+        public const byte YChannelId = (byte)'Y';
+
+        public const byte ZChannelId = (byte)'Z';
 
         //Functions for reading lines are in the type which corresponds, e.g. Image.
 
@@ -238,6 +256,24 @@ namespace Media.Codecs.Image
                 new(KChannelId, bitsPerComponent),
                 new(premultipliedAlpha ? PreMultipliedAlphaChannelId : AlphaChannelId, bitsPerComponent)
             });
+        }
+
+        public static ImageFormat XYZ(int bitsPerComponent, Common.Binary.ByteOrder byteOrder = Common.Binary.ByteOrder.Little, Codec.DataLayout dataLayout = Codec.DataLayout.Planar)
+        {
+            return new ImageFormat(byteOrder, dataLayout, [
+                new(XChannelId, bitsPerComponent),
+                new(YChannelId, bitsPerComponent),
+                new(ZChannelId, bitsPerComponent),
+            ]);
+        }
+
+        public static ImageFormat LAB(int bitsPerComponent, Common.Binary.ByteOrder byteOrder = Common.Binary.ByteOrder.Little, Codec.DataLayout dataLayout = Codec.DataLayout.Planar)
+        {
+            return new ImageFormat(byteOrder, dataLayout, [
+                new(LChannelId, bitsPerComponent),
+                new(AChannelId, bitsPerComponent),
+                new(BChannelId, bitsPerComponent),
+            ]);
         }
 
         //Supports 565 formats... etc.
