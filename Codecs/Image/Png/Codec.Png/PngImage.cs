@@ -145,7 +145,7 @@ public class PngImage : Image
         // Write the PNG signature
         stream.Write(Binary.GetBytes(PNGSignature, BitConverter.IsLittleEndian));
 
-        //TODO have Chunks class to make hanlding of reading and write more robust
+        //TODO have Chunks class to make handling of reading and write more robust
         //Should implement like MarkerReader and MarkerWriter in Codec.Jpeg
 
         // Write the IHDR chunk
@@ -161,16 +161,16 @@ public class PngImage : Image
     private void WriteIHDRChunk(Stream stream)
     {
         using var ihdr = new Chunk("IHDR", 13);
-        var offset = ihdr.Data.Offset;
-        Binary.Write32(ihdr.Data.Array, offset, Binary.IsLittleEndian, Width);
+        var offset = ihdr.DataOffset;
+        Binary.Write32(ihdr.Array, offset, Binary.IsLittleEndian, Width);
         offset += Binary.BytesPerInteger;
-        Binary.Write32(ihdr.Data.Array, offset, Binary.IsLittleEndian, Height);
+        Binary.Write32(ihdr.Array, offset, Binary.IsLittleEndian, Height);
         offset += Binary.BytesPerInteger;
-        Binary.Write8(ihdr.Data.Array, offset++, Binary.IsBigEndian, (byte)ImageFormat.Size);
-        Binary.Write8(ihdr.Data.Array, offset++, Binary.IsBigEndian, ColorType);
-        Binary.Write8(ihdr.Data.Array, offset++, Binary.IsBigEndian, 0);
-        Binary.Write8(ihdr.Data.Array, offset++, Binary.IsBigEndian, 0);
-        Binary.Write8(ihdr.Data.Array, offset++, Binary.IsBigEndian, 0);
+        Binary.Write8(ihdr.Array, offset++, Binary.IsBigEndian, (byte)ImageFormat.Size);
+        Binary.Write8(ihdr.Array, offset++, Binary.IsBigEndian, ColorType);
+        Binary.Write8(ihdr.Array, offset++, Binary.IsBigEndian, 0);
+        Binary.Write8(ihdr.Array, offset++, Binary.IsBigEndian, 0);
+        Binary.Write8(ihdr.Array, offset++, Binary.IsBigEndian, 0);
         stream.Write(ihdr.Array, ihdr.Offset, ihdr.Count);
     }
 
@@ -186,7 +186,7 @@ public class PngImage : Image
             ms.Seek(0, SeekOrigin.Begin);
             ms.TryGetBuffer(out var buffer);
             idat = new Chunk("IDAT", buffer.Count);
-            buffer.CopyTo(idat.Data.Array, idat.Data.Offset);            
+            buffer.CopyTo(idat.Array, idat.DataOffset);            
         }
         stream.Write(idat.Array, idat.Offset, idat.Count);
     }

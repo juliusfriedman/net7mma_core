@@ -202,7 +202,7 @@ internal class PngUnitTests
                 Console.Write("ChunkSize:");
                 Console.WriteLine(chunk.ChunkSize);
                 Console.Write("Data:");
-                Console.WriteLine(BitConverter.ToString(chunk.Data.Array, chunk.Data.Offset, chunk.Data.Count));
+                Console.WriteLine(BitConverter.ToString(chunk.Array, chunk.DataOffset));
                 Console.Write("Chunk:");
                 Console.WriteLine(chunk.Crc);
             }

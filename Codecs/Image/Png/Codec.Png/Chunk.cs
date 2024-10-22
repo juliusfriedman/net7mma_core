@@ -30,7 +30,9 @@ public class Chunk : MemorySegment
         set { Header.Name = value; }
     }
 
-    public MemorySegment Data => new MemorySegment(Array, Offset + ChunkHeader.ChunkHeaderLength, (int)Header.Length);
+    public int DataOffset => Offset + ChunkHeader.ChunkHeaderLength;
+
+    public MemorySegment Data => new MemorySegment(Array, DataOffset, (int)Header.Length);
 
     public int Crc
     {
@@ -38,7 +40,9 @@ public class Chunk : MemorySegment
         set { Binary.Write32(Array, Offset + ChunkHeader.ChunkHeaderLength + ChunkSize, Binary.IsBigEndian, value); }
     }
 
-    public MemorySegment CrcData => new(Array, Offset + ChunkHeader.ChunkHeaderLength + ChunkSize, Binary.BytesPerInteger);
+    public int CrcDataOffset => Offset + ChunkHeader.ChunkHeaderLength + ChunkSize;
+
+    public MemorySegment CrcData => new(Array, CrcDataOffset, Binary.BytesPerInteger);
 
     internal static Chunk ReadChunk(Stream inputStream)
     {
@@ -46,9 +50,9 @@ public class Chunk : MemorySegment
         if (ChunkHeader.ChunkHeaderLength != inputStream.Read(header.Array, header.Offset, ChunkHeader.ChunkHeaderLength))
             throw new InvalidDataException("Not enough bytes for chunk length.");
         var chunk = new Chunk(header.Name, (int)header.Length);
-        if (header.Length != inputStream.Read(chunk.Data.Array, chunk.Data.Offset, (int)header.Length))
+        if (header.Length != inputStream.Read(chunk.Array, chunk.DataOffset, (int)header.Length))
             throw new InvalidDataException("Not enough bytes for chunk data.");
-        if (Binary.BytesPerInteger != inputStream.Read(chunk.CrcData.Array, chunk.CrcData.Offset, chunk.CrcData.Count))
+        if (Binary.BytesPerInteger != inputStream.Read(chunk.Array, chunk.CrcDataOffset, Binary.BytesPerInteger))
             throw new InvalidDataException("Not enough bytes for CrcData.");
         return chunk;
     }
