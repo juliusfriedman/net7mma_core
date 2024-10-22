@@ -206,7 +206,7 @@ public class PngImage : Image
 
                 //Todo calculate the CRC and write to result.
 
-                idat = new Chunk(ChunkName.Data, result.Length - Chunk.ChecksumLength);
+                idat = new Chunk(ChunkName.Data, result.Length);
                 result.CopyTo(idat.Array, idat.DataOffset);
             }            
         }
