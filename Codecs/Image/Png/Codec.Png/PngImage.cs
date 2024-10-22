@@ -1,13 +1,9 @@
-﻿using System;
-using System.IO.Compression;
-using System.Linq;
+﻿using System.IO.Compression;
 using System.Numerics;
-using System.Text;
-using System.Threading.Tasks.Sources;
 using Media.Codecs.Image;
 using Media.Common;
 
-namespace Codec.Png;
+namespace Media.Codec.Png;
 
 public class PngImage : Image
 {
@@ -59,77 +55,38 @@ public class PngImage : Image
 
     public static PngImage FromStream(Stream stream)
     {
-        // Read and validate the PNG signature
-        using MemorySegment bytes = new MemorySegment(new byte[Binary.BytesPerLong]);
-        if (Binary.BytesPerLong != stream.Read(bytes.Array, bytes.Offset, bytes.Count))
-            throw new InvalidDataException("Not enough bytes for PNGSignature.");
-        ulong signature = Binary.ReadU64(bytes.Array, bytes.Offset, Binary.IsLittleEndian);
-        if (signature != PNGSignature)
-            throw new InvalidDataException("The provided stream is not a valid PNG file.");
-
         // Read the IHDR chunk
         int width = 0, height = 0;
         ImageFormat? imageFormat = default;
         MemorySegment? dataSegment = default;
         byte colorType = default;
-        ChunkHeader chunkHeader;
-        while (stream.Position < stream.Length)
+
+        foreach(var chunk in PngCodec.ReadChunks(stream))
         {
-            chunkHeader = new ChunkHeader(bytes.Array, bytes.Offset);
-
-            if (ChunkHeader.ChunkHeaderLength != stream.Read(bytes.Array, bytes.Offset, ChunkHeader.ChunkHeaderLength))
-                throw new InvalidDataException("Not enough bytes for chunk length.");
-
-            string chunkType = chunkHeader.Name;
-
-            if (chunkType == "IHDR")
+            switch (chunk.ChunkName)
             {
-                if (bytes.Count != stream.Read(bytes.Array, bytes.Offset, bytes.Count))
-                    throw new InvalidDataException("Not enough bytes for IHDR.");
+                case ChunkNames.Header:
+                    var offset = chunk.DataOffset;
+                    width = Binary.Read32(chunk.Array, ref offset, Binary.IsLittleEndian);
+                    height = Binary.Read32(chunk.Array, ref offset, Binary.IsLittleEndian);
+                    byte bitDepth = chunk.Array[offset++];
+                    colorType = chunk.Array[offset++];
+                    byte compressionMethod = chunk.Array[offset++];
+                    byte filterMethod = chunk.Array[offset++];
+                    byte interlaceMethod = chunk.Array[offset++];
 
-                width = Binary.Read32(bytes.Array, bytes.Offset, Binary.IsLittleEndian);
-                height = Binary.Read32(bytes.Array, bytes.Offset + Binary.BytesPerInteger, Binary.IsLittleEndian);
-                int read = stream.ReadByte();
-                if (read == -1)
-                    throw new InvalidDataException("Not enough bytes to read bitDepth");
-                byte bitDepth = (byte)read;
-                read = stream.ReadByte();
-                if (read == -1)
-                    throw new InvalidDataException("Not enough bytes to read colorType");
-                colorType = (byte)read;
-                read = stream.ReadByte();
-                if (read == -1)
-                    throw new InvalidDataException("Not enough bytes to read compressionMethod");
-                byte compressionMethod = (byte)read;
-                read = stream.ReadByte();
-                if (read == -1)
-                    throw new InvalidDataException("Not enough bytes to read filterMethod");
-                byte filterMethod = (byte)read;
-                read = stream.ReadByte();
-                if (read == -1)
-                    throw new InvalidDataException("Not enough bytes to read interlaceMethod");
-                byte interlaceMethod = (byte)read;
-
-                // Create the image format based on the IHDR data
-                imageFormat = CreateImageFormat(bitDepth, colorType);
-
-                stream.Seek(Binary.BytesPerInteger, SeekOrigin.Current); // Skip the CRC
-
-            }
-            else if (chunkType == "IDAT")
-            {
-                // Read the image data
-                dataSegment = new MemorySegment(chunkHeader.Length);
-
-                if(chunkHeader.Length != stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count))
-                    throw new InvalidDataException("Not enough bytes for IDAT.");
-
-                stream.Seek(Binary.BytesPerInteger, SeekOrigin.Current); // Skip the CRC
-            }
-            else
-            {
-                // Skip the chunk data and CRC
-                stream.Seek(chunkHeader.TotalLength, SeekOrigin.Current);
+                    // Create the image format based on the IHDR data
+                    imageFormat = CreateImageFormat(bitDepth, colorType);
+                    //ToDo, Crc is in data segment, so we need to read it and validate it.
+                    continue;
+                case ChunkNames.Data:
+                    //ToDo, Crc is in data segment, so we need to read it and validate it.
+                    dataSegment = chunk.Data.Slice(0);
+                    continue;
+                case ChunkNames.End:
+                    continue;
+                default:
+                    continue;
             }
         }
 
@@ -162,15 +119,13 @@ public class PngImage : Image
     {
         using var ihdr = new Chunk("IHDR", 13);
         var offset = ihdr.DataOffset;
-        Binary.Write32(ihdr.Array, offset, Binary.IsLittleEndian, Width);
-        offset += Binary.BytesPerInteger;
-        Binary.Write32(ihdr.Array, offset, Binary.IsLittleEndian, Height);
-        offset += Binary.BytesPerInteger;
-        Binary.Write8(ihdr.Array, offset++, Binary.IsBigEndian, (byte)ImageFormat.Size);
-        Binary.Write8(ihdr.Array, offset++, Binary.IsBigEndian, ColorType);
-        Binary.Write8(ihdr.Array, offset++, Binary.IsBigEndian, 0);
-        Binary.Write8(ihdr.Array, offset++, Binary.IsBigEndian, 0);
-        Binary.Write8(ihdr.Array, offset++, Binary.IsBigEndian, 0);
+        Binary.Write32(ihdr.Array, ref offset, Binary.IsLittleEndian, Width);
+        Binary.Write32(ihdr.Array, ref offset, Binary.IsLittleEndian, Height);
+        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, (byte)ImageFormat.Size);
+        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, ColorType);
+        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, 0);
+        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, 0);
+        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, 0);
         stream.Write(ihdr.Array, ihdr.Offset, ihdr.Count);
     }
 

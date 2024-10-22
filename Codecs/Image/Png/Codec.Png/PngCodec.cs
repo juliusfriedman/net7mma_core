@@ -1,12 +1,8 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using Media.Codec;
-using Media.Codec.Interfaces;
+﻿using Media.Codec.Interfaces;
 using Media.Codecs.Image;
 using Media.Common;
 
-namespace Codec.Png
+namespace Media.Codec.Png
 {
     public class PngCodec : ImageCodec, IEncoder, IDecoder
     {
@@ -53,9 +49,7 @@ namespace Codec.Png
 
             while (inputStream.Position < inputStream.Length)
             {
-                var chunk = Chunk.ReadChunk(inputStream);
-                if (chunk == null)
-                    yield break;
+                using var chunk = Chunk.ReadChunk(inputStream);
                 yield return chunk;
             }
         }

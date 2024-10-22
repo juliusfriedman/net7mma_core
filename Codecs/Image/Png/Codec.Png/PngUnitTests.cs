@@ -1,5 +1,5 @@
-﻿using Codec.Png;
-using Media.Codec;
+﻿using Media.Codec;
+using Media.Codec.Png;
 using Media.Codecs.Image;
 using Media.Common;
 using System.Numerics;

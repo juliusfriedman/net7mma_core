@@ -1,7 +1,7 @@
 ﻿using Media.Common;
 using System.Text;
 
-namespace Codec.Png;
+namespace Media.Codec.Png;
 
 public class ChunkHeader : MemorySegment
 {
@@ -21,9 +21,7 @@ public class ChunkHeader : MemorySegment
     {
         get => Binary.ReadU32(Array, Offset, Binary.IsLittleEndian);
         set => Binary.Write32(Array, Offset, Binary.IsLittleEndian, value);
-    }
-
-    public int TotalLength => (int)(Length + Binary.BytesPerInteger);
+    }    
 
     public uint Type
     {
