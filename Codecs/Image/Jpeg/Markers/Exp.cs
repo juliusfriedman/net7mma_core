@@ -41,7 +41,7 @@ public class Exp : Marker
     }
 
     public Exp()
-        : base(Media.Codec.Jpeg.Markers.Expand, Length)
+        : base(Media.Codec.Jpeg.Markers.Expand, LengthBytes + Length)
     {
     }
 }

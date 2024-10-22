@@ -146,7 +146,7 @@ public class App : Marker
     }
 
     public App(byte functionCode, MemorySegment data)
-        : base(functionCode, Length + data.Count)
+        : base(functionCode, LengthBytes + Length + data.Count)
     {
         using var slice = Data;
         data.CopyTo(slice);

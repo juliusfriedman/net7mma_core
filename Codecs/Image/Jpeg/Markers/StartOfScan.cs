@@ -13,7 +13,7 @@ public sealed class StartOfScan : Marker
     public new const int Length = 4;
 
     public StartOfScan(int numberOfComponentSelectors) 
-        : base(Media.Codec.Jpeg.Markers.StartOfScan, Length + numberOfComponentSelectors * ScanComponentSelector.Length) 
+        : base(Media.Codec.Jpeg.Markers.StartOfScan, LengthBytes + Length + numberOfComponentSelectors * ScanComponentSelector.Length) 
     {
         Ns = numberOfComponentSelectors;
     }

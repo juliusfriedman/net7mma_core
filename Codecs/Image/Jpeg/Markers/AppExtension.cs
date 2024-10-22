@@ -10,7 +10,7 @@ internal class AppExtension : Marker
     public new const int Length = 6;
 
     public AppExtension(byte functionCode, MemorySegment data)
-        : base(functionCode, Length + data.Count)
+        : base(functionCode, LengthBytes + Length + data.Count)
     {
         data.CopyTo(ThumbnailData);
     }

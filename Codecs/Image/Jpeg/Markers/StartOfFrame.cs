@@ -89,7 +89,7 @@ public class StartOfFrame : Marker
     /// <param name="functionCode"></param>
     /// <param name="componentCount">How many components this <see cref="Marker"/> should hold. (Multiples of <see cref="FrameComponent.Length"/>)</param>
     public StartOfFrame(byte functionCode, int componentCount)
-        : base(functionCode, Length + componentCount * FrameComponent.Length)
+        : base(functionCode, LengthBytes + Length + componentCount * FrameComponent.Length)
     {
         Nf = componentCount;
     }

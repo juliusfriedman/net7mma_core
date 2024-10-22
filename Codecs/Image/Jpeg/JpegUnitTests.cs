@@ -7,7 +7,9 @@ using Media.Common.Classes.Loggers;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
+using System.Security.Cryptography;
 
 namespace Media.UnitTests;
 
@@ -217,6 +219,16 @@ internal class JpegUnitTests
             Console.WriteLine();
     }
 
+    private static void VerifyMarker(Marker marker)
+    {
+        using var memory = new MemorySegment(marker);
+        using var data = marker.Data;
+        var fromBytes = new Marker(marker.FunctionCode, marker.Length);
+        data.CopyTo(fromBytes.Array, fromBytes.DataOffset);
+        if(!memory.SequenceEqual(fromBytes))
+            throw new InvalidDataException();
+    }
+
     public static void TestLoad()
     {
         string currentPath = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location)!;
@@ -235,6 +247,7 @@ internal class JpegUnitTests
 
             foreach (var marker in JpegCodec.ReadMarkers(jpegStream))
             {
+                VerifyMarker(marker);
                 DumpMarker(marker);
                 sourceMarkers.Add(marker);
             }
@@ -256,6 +269,7 @@ internal class JpegUnitTests
 
                 foreach (var marker in JpegCodec.ReadMarkers(inputNew))
                 {
+                    VerifyMarker(marker);
                     DumpMarker(marker);
                 }
 

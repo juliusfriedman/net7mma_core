@@ -11,8 +11,8 @@ public class NumberOfLines : Marker
     /// </summary>
     public int Nl
     {
-        get => Binary.Read16(Array, DataOffset + 2, Binary.IsLittleEndian);
-        set => Binary.Write16(Array, DataOffset + 2, Binary.IsLittleEndian, (ushort)value);
+        get => Binary.Read16(Array, DataOffset + Length, Binary.IsLittleEndian);
+        set => Binary.Write16(Array, DataOffset + Length, Binary.IsLittleEndian, (ushort)value);
     }
 
     public NumberOfLines(byte functionCode, int numberOfLines)

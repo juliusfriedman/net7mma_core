@@ -57,8 +57,8 @@ public sealed class FrameComponent : MemorySegment
     /// </summary>
     public int QuantizationTableDestinationSelector
     {
-        get => Count > 3 ? Array[Offset + 3] : 0;
-        set => Array[Offset + 3] = (byte)value;
+        get => Array[Offset + 2];
+        set => Array[Offset + 2] = (byte)value;
     }
 
     public FrameComponent(MemorySegment other)

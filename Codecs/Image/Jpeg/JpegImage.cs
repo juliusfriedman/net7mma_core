@@ -7,6 +7,7 @@ using System.Linq;
 using Media.Common.Collections.Generic;
 using Codec.Jpeg.Markers;
 using Codec.Jpeg.Classes;
+using Media.Common.Classes;
 
 namespace Media.Codec.Jpeg;
 
@@ -166,6 +167,8 @@ public class JpegImage : Image
                             width = app.XThumbnail;
                             height = app.YThumbnail;
                         }
+
+                        markers.Add(marker.FunctionCode, marker);
                     }
                     goto default;
                 case Jpeg.Markers.StartOfInformation:
@@ -216,7 +219,7 @@ public class JpegImage : Image
         }
 
         // Write the SOF marker
-        WriteStartOfFrame(JpegState.StartOfFrameFunctionCode, stream);
+        WriteStartOfFrame(JpegState, stream);
 
         if (markerBuffer != null)
         {
@@ -250,11 +253,11 @@ public class JpegImage : Image
         }
     }
 
-    private void WriteStartOfFrame(byte functionCode, Stream stream)
+    private void WriteStartOfFrame(JpegState jpegState, Stream stream)
     {
         var componentCount = ImageFormat.Components.Length;
-        using StartOfFrame sof = new StartOfFrame(functionCode, componentCount);
-        sof.P = ImageFormat.Size;
+        using StartOfFrame sof = new StartOfFrame(jpegState.StartOfFrameFunctionCode, componentCount);
+        sof.P = Binary.Clamp(ImageFormat.Size, Binary.BitsPerByte, byte.MaxValue);
         sof.Y = Height;
         sof.X = Width;
         for (var i = 0; i < componentCount; ++i)

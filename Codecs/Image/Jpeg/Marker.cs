@@ -35,7 +35,7 @@ public class Marker : MemorySegment
 
     public int DataLength => Binary.Max(0, Count - PrefixBytes - LengthBytes);
 
-    public int MarkerLength => DataLength + 2;
+    public int MarkerLength => DataLength + LengthBytes;
 
     public int DataOffset => DataLength > 0 ? Offset + PrefixBytes + LengthBytes : Count - 1;
 

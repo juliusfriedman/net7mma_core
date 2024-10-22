@@ -8,7 +8,7 @@ namespace Media.Codec.Jpeg
 {
     public class JpegCodec : ImageCodec, IEncoder, IDecoder
     {
-        const int ComponentCount = 3;
+        public const int ComponentCount = 4;
 
         public static ImageFormat DefaultImageFormat
         {
@@ -17,9 +17,9 @@ namespace Media.Codec.Jpeg
                     Binary.ByteOrder.Big,
                     DataLayout.Packed,
                     new JpegComponent(0, 1, 8),
-                    new JpegComponent(0, 2, 8),
-                    new JpegComponent(0, 3, 8),
-                    new JpegComponent(0, 4, 8)
+                    new JpegComponent(1, 2, 8),
+                    new JpegComponent(2, 3, 8),
+                    new JpegComponent(3, 4, 8)
                 );
         }
 
@@ -83,15 +83,11 @@ namespace Media.Codec.Jpeg
                 AtMarker:
                 var Current = new Marker((byte)FunctionCode, CodeSize);
 
-                using var slice = Current.Data;
-
-                var dataSize = Current.DataLength;
-
-                if (dataSize > 0)
+                if (CodeSize > 0)
                 {
-                    jpegStream.Read(slice.Array, slice.Offset, dataSize - Marker.LengthBytes);
+                    jpegStream.Read(Current.Array, Current.DataOffset, CodeSize - 2);
 
-                    streamOffset += dataSize;
+                    streamOffset += CodeSize;
                 }
 
                 yield return Current;
