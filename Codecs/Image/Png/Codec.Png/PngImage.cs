@@ -3,6 +3,7 @@ using System.Numerics;
 using Media.Codecs.Image;
 using Media.Common;
 using Media.Common.Collections.Generic;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Media.Codec.Png;
 
@@ -90,16 +91,38 @@ public class PngImage : Image
                     //ToDo, Crc is in data segment, so we need to read it and validate it.
                     continue;
                 case ChunkName.Data:
-                    //ToDo, Crc is in data segment, so we need to read it and validate it.
-                    dataSegment = chunk.Data.Slice(0);
+
+                    //TODO
+                    //We should have a MeorySegmentStream and append to it because there can be multiple data chunks.
+                    using(var ms = new MemoryStream(chunk.Array, chunk.DataOffset + 2, chunk.Count - chunk.DataOffset - 2))
+                    {
+                        using (MemoryStream decompressedStream = new MemoryStream())
+                        {
+                            using (DeflateStream deflateStream = new DeflateStream(ms, CompressionMode.Decompress))
+                            {
+                                try
+                                {
+                                    deflateStream.CopyTo(decompressedStream);
+                                    dataSegment = new(decompressedStream.ToArray());
+                                }
+                                catch(InvalidDataException)
+                                {
+                                    dataSegment = chunk.Data;
+                                }
+                            }
+                        }
+                    }
+
                     continue;
                 case ChunkName.End:
-                    continue;
+                    goto LoadImage;
                 default:
                     chunks.Add(chunkName, chunk);
                     continue;
             }
         }
+
+    LoadImage:
 
         if(imageFormat == null || dataSegment == null)
             throw new InvalidDataException("The provided stream does not contain valid PNG image data.");
@@ -108,7 +131,7 @@ public class PngImage : Image
         return new PngImage(imageFormat, width, height, dataSegment, colorType, chunks);
     }
 
-    public void Save(Stream stream)
+    public void Save(Stream stream, CompressionLevel compressionLevel = CompressionLevel.Optimal)
     {
         // Write the PNG signature
         stream.Write(Binary.GetBytes(PNGSignature, BitConverter.IsLittleEndian));
@@ -120,7 +143,7 @@ public class PngImage : Image
         WriteIHDRChunk(stream);
 
         // Write the IDAT chunk
-        WriteIDATChunk(stream);
+        WriteIDATChunk(stream, compressionLevel);
 
         if (Chunks != null)
         {
@@ -156,11 +179,36 @@ public class PngImage : Image
             using (DeflateStream deflateStream = new DeflateStream(ms, compressionLevel, true))
             {
                 deflateStream.Write(Data.Array, Data.Offset, Data.Count);
-            }
-            ms.Seek(0, SeekOrigin.Begin);
-            ms.TryGetBuffer(out var buffer);
-            idat = new Chunk(ChunkName.Data, buffer.Count);
-            buffer.CopyTo(idat.Array, idat.DataOffset);            
+
+                deflateStream.Close();
+
+                ms.Seek(0, SeekOrigin.Begin);
+
+                const byte HeaderLength = 2;
+                const byte Deflate32KbWindow = 120;
+                const byte ChecksumBits = 1;
+
+                // Write the ZLib header
+                var result = new byte[HeaderLength + ms.Length + Chunk.ChecksumLength];
+
+                // Write the ZLib header.
+                result[0] = Deflate32KbWindow;
+                result[1] = ChecksumBits;
+
+                // Write the compressed data.
+                int streamValue;
+                var i = 0;
+                while ((streamValue = ms.ReadByte()) != -1)
+                {
+                    result[HeaderLength + i] = (byte)streamValue;
+                    i++;
+                }
+
+                //Todo calculate the CRC and write to result.
+
+                idat = new Chunk(ChunkName.Data, result.Length - Chunk.ChecksumLength);
+                result.CopyTo(idat.Array, idat.DataOffset);
+            }            
         }
         stream.Write(idat.Array, idat.Offset, idat.Count);
         idat.Dispose();
