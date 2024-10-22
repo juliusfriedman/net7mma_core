@@ -5,7 +5,6 @@ using Media.Codecs.Image;
 using Media.Common;
 using System.Linq;
 using Media.Common.Collections.Generic;
-using Codec.Jpeg;
 using Codec.Jpeg.Markers;
 using Codec.Jpeg.Classes;
 
@@ -13,18 +12,19 @@ namespace Media.Codec.Jpeg;
 
 public class JpegImage : Image
 {
-    public readonly bool Progressive;
+    internal readonly JpegState JpegState;    
     public readonly ConcurrentThesaurus<byte, Marker> Markers;
 
     public JpegImage(ImageFormat imageFormat, int width, int height)
         : base(imageFormat, width, height, new JpegCodec())
     {
+        JpegState = new JpegState(Jpeg.Markers.StartOfBaselineFrame, 0, 63, 0, 0);
     }
 
-    private JpegImage(ImageFormat imageFormat, int width, int height, MemorySegment data, bool progressive, ConcurrentThesaurus<byte, Marker> markers)
+    private JpegImage(ImageFormat imageFormat, int width, int height, MemorySegment data, JpegState jpegState, ConcurrentThesaurus<byte, Marker> markers)
         : base(imageFormat, width, height, data, new JpegCodec())
     {
-        Progressive = progressive;
+        JpegState = jpegState;
         Markers = markers;
     }
 
@@ -34,7 +34,7 @@ public class JpegImage : Image
         ImageFormat imageFormat = default;
         MemorySegment dataSegment = default;
         MemorySegment thumbnailData = default;
-        bool progressive = false;
+        JpegState jpegState = new(Jpeg.Markers.Prefix, 0, 63, 0, 0);
         ConcurrentThesaurus<byte, Marker> markers = new ConcurrentThesaurus<byte, Marker>();        
         foreach (var marker in JpegCodec.ReadMarkers(stream))
         {
@@ -57,16 +57,8 @@ public class JpegImage : Image
                 case Jpeg.Markers.StartOfProgressiveArithmeticFrame:
                 case Jpeg.Markers.StartOfProgressiveHuffmanFrame:
                 case Jpeg.Markers.HeirarchicalProgression:
-                    switch (marker.FunctionCode)
-                    {
-                        case Jpeg.Markers.StartOfDifferentialProgressiveHuffmanFrame:
-                        case Jpeg.Markers.StartOfDifferentialProgressiveArithmeticFrame:
-                        case Jpeg.Markers.StartOfProgressiveArithmeticFrame:
-                        case Jpeg.Markers.StartOfProgressiveHuffmanFrame:
-                        case Jpeg.Markers.HeirarchicalProgression:
-                            progressive = true;
-                            break;
-                    }
+
+                    jpegState.StartOfFrameFunctionCode = marker.FunctionCode;
 
                     StartOfFrame tag;
 
@@ -77,9 +69,9 @@ public class JpegImage : Image
                     else
                     {
                         tag = new StartOfFrame(marker);
-                    }
+                    }                    
 
-                    int bitDepth = Binary.Clamp(Binary.BitsPerByte, Binary.BitsPerInteger, tag.P);
+                    int bitDepth = Binary.Clamp(tag.P, Binary.BitsPerByte, Binary.BitsPerInteger);
                     height = tag.Y;
                     width = tag.X;
 
@@ -115,7 +107,7 @@ public class JpegImage : Image
                     }
 
                     // Create the image format based on the SOF0 data
-                    imageFormat = new ImageFormat(Binary.ByteOrder.Little, DataLayout.Planar, mediaComponents);
+                    imageFormat = new ImageFormat(Binary.ByteOrder.Big, DataLayout.Planar, mediaComponents);
                     imageFormat.HorizontalSamplingFactors = widths;
                     imageFormat.VerticalSamplingFactors = heights;
                     tag.Dispose();
@@ -123,9 +115,25 @@ public class JpegImage : Image
                     continue;
                 case Jpeg.Markers.StartOfScan:
                     {
-                        using var sos = new StartOfScan(marker);
+                        using var sos = new StartOfScan(marker);                        
+                        
+                        jpegState.Ss = (byte)sos.Ss;                        
 
-                        for(int ns = sos.Ns, i = 0; i < ns; ++i)
+                        if (sos.Se > 0)
+                            jpegState.Se = (byte)sos.Se;
+
+                        jpegState.Ah = (byte)sos.Ah;
+                        jpegState.Al = (byte)sos.Al;
+
+                        if (jpegState.StartOfFrameFunctionCode == Jpeg.Markers.StartOfProgressiveHuffmanFrame)
+                            jpegState.Al = 1;
+
+                        if (imageFormat == null)
+                            imageFormat = JpegCodec.DefaultImageFormat;
+
+                        ///If Ns > 1, the following restriction shall be placed on the image components contained in the scan:
+                        ///(The summation of all components products of thier respective values correspond to 10.
+                        for (int ns = Binary.Min(4, sos.Ns), i = 0; i < ns; ++i)
                         {
                             using var scanComponentSelector = sos[i];
                             var jpegComponent = imageFormat.GetComponentById(scanComponentSelector.Csj) as JpegComponent ?? imageFormat.Components[i] as JpegComponent;
@@ -138,6 +146,7 @@ public class JpegImage : Image
                         var read = stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count);
                         if (read < dataSegment.Count)
                             dataSegment = dataSegment.Slice(0, read);
+
                         break;
                     }
                 case Jpeg.Markers.AppFirst:
@@ -171,8 +180,8 @@ public class JpegImage : Image
         if (imageFormat == null || dataSegment == null && thumbnailData == null)
             throw new InvalidDataException("The provided stream does not contain valid JPEG image data.");
 
-        // Create and return the JpegImage
-        return new JpegImage(imageFormat, width, height, dataSegment ?? thumbnailData, progressive, markers);
+        // Create and return the JpegImage (Could use a Default Jpeg State?)
+        return new JpegImage(imageFormat, width, height, dataSegment ?? thumbnailData, jpegState, markers);
     }
 
     public void Save(Stream stream)
@@ -206,9 +215,8 @@ public class JpegImage : Image
             }
         }
 
-        // TODO revise to write correct start of scan header per coding.
         // Write the SOF marker
-        WriteStartOfFrame(Progressive ? Jpeg.Markers.StartOfProgressiveHuffmanFrame : Jpeg.Markers.StartOfBaselineFrame, stream);
+        WriteStartOfFrame(JpegState.StartOfFrameFunctionCode, stream);
 
         if (markerBuffer != null)
         {
@@ -268,15 +276,16 @@ public class JpegImage : Image
     }
 
     private void WriteStartOfScan(Stream stream)
-    {
+    {        
         var numberOfComponents = ImageFormat.Components.Length;
+
         using var sos = new StartOfScan(numberOfComponents);
-        // Set the Ss, Se, Ah, and Al fields
-        // These values are typical for a baseline or progessive JPEG but not lossless. (1-7)
-        sos.Ss = 0;  // Start of spectral selection
-        sos.Se = 63; // End of spectral selection
-        sos.Ah = 0;  // Successive approximation high
-        sos.Al = 0;  // Successive approximation low
+
+        sos.Ss = JpegState.Ss;
+        sos.Se = JpegState.Se;
+        sos.Ah = JpegState.Ah;
+        sos.Al = JpegState.Al;
+
         for (var i = 0; i < numberOfComponents; ++i)
         {
             var imageComponent = ImageFormat.Components[i];

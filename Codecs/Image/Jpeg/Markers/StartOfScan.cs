@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Codec.Jpeg.Markers;
 
-public class StartOfScan : Marker
+public sealed class StartOfScan : Marker
 {
     /// <summary>
     /// The number of bytes in the <see cref="Data"/> segment of this marker when <see cref="Ns"/> is 0.
@@ -56,15 +56,11 @@ public class StartOfScan : Marker
     {
         get
         {
-            var offset = 1 + index * ScanComponentSelector.Length;
-            using var slice = this.Slice(DataOffset + offset, ScanComponentSelector.Length);
+            var offset = index * ScanComponentSelector.Length;
+            using var slice = this.Slice(DataOffset + 1 + offset, ScanComponentSelector.Length);
             return new ScanComponentSelector(slice);
         }
-        set
-        {
-            var offset = DataOffset + 1 + index * ScanComponentSelector.Length;
-            value.CopyTo(Array, offset);
-        }
+        set => value.CopyTo(Array, DataOffset + 1 + (index * ScanComponentSelector.Length));
     }
 
     /// <summary>
@@ -91,12 +87,12 @@ public class StartOfScan : Marker
     {
         get
         {
-            var offset = Ns * ScanComponentSelector.Length + 1;
+            var offset = 1 + Ns * ScanComponentSelector.Length + 1;
             return Array[DataOffset + offset];
         }
         set
         {
-            var offset = Ns * ScanComponentSelector.Length + 1;
+            var offset = 1 + Ns * ScanComponentSelector.Length + 1;
             Array[DataOffset + offset] = (byte)value;
         }
     }

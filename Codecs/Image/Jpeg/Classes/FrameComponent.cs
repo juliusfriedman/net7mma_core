@@ -2,7 +2,7 @@
 
 namespace Codec.Jpeg.Classes;
 
-public class FrameComponent : MemorySegment
+public sealed class FrameComponent : MemorySegment
 {
     /// <summary>
     /// The length of a <see cref="FrameComponent"/> in bytes.
@@ -25,7 +25,7 @@ public class FrameComponent : MemorySegment
     {
         get
         {
-            var bitOffset= Binary.BytesToBits(Offset + 1);
+            var bitOffset = Binary.BytesToBits(Offset + 1);
             return (int)this.ReadBits(ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
         }
         set

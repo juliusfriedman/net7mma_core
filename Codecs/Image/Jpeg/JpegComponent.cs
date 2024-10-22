@@ -1,6 +1,4 @@
-﻿using Media.Codec;
-
-namespace Codec.Jpeg;
+﻿namespace Media.Codec.Jpeg;
 
 public class JpegComponent : MediaComponent
 {

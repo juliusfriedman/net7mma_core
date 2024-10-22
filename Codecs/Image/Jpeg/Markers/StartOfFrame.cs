@@ -57,13 +57,14 @@ public class StartOfFrame : Marker
     {
         get
         {
-            var offset = Length + index * FrameComponent.Length;
-            return new FrameComponent(this.Slice(DataOffset + offset, FrameComponent.Length));
+            var offset = DataOffset + Length + index * FrameComponent.Length;
+            using var slice = this.Slice(offset, FrameComponent.Length);
+            return new FrameComponent(slice);
         }
         set
         {
-            var offset = Length + index * FrameComponent.Length;
-            using var slice = this.Slice(DataOffset + offset, FrameComponent.Length);
+            var offset = DataOffset + Length + index * FrameComponent.Length;
+            using var slice = this.Slice(offset, FrameComponent.Length);
             value.CopyTo(slice);
         }
     }

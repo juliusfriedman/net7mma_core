@@ -250,25 +250,27 @@ internal class JpegUnitTests
                 jpgImage.Save(outputNew);
             }
 
-            using var inputNew = new FileStream(saveFileName, FileMode.OpenOrCreate, FileAccess.Read);
-
-            var destinationMarkers = new List<Marker>();
-
-            foreach (var marker in JpegCodec.ReadMarkers(inputNew))
+            using (var inputNew = new FileStream(saveFileName, FileMode.OpenOrCreate, FileAccess.Read))
             {
-                DumpMarker(marker);
+                var destinationMarkers = new List<Marker>();
+
+                foreach (var marker in JpegCodec.ReadMarkers(inputNew))
+                {
+                    DumpMarker(marker);
+                }
+
+                inputNew.Seek(0, SeekOrigin.Begin);
+
+                using (var newJpgImage = JpegImage.FromStream(inputNew))
+                {
+                    if (newJpgImage.Width != jpgImage.Width ||
+                        newJpgImage.Height != jpgImage.Height ||
+                        newJpgImage.JpegState != jpgImage.JpegState ||
+                        newJpgImage.ImageFormat.Components.Length != jpgImage.ImageFormat.Components.Length ||
+                        newJpgImage.ImageFormat.Size != jpgImage.ImageFormat.Size)
+                        throw new InvalidDataException();
+                }
             }
-            
-            inputNew.Seek(0, SeekOrigin.Begin);
-
-            using var newJpgImage = JpegImage.FromStream(inputNew);
-
-            if (newJpgImage.Width != jpgImage.Width ||
-                newJpgImage.Height != jpgImage.Height ||
-                newJpgImage.Progressive != jpgImage.Progressive ||
-                newJpgImage.ImageFormat.Components.Length != jpgImage.ImageFormat.Components.Length ||
-                newJpgImage.ImageFormat.Size != jpgImage.ImageFormat.Size)
-                    throw new InvalidDataException();
         }
     }
 }

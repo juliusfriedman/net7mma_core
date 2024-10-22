@@ -10,6 +10,19 @@ namespace Media.Codec.Jpeg
     {
         const int ComponentCount = 3;
 
+        public static ImageFormat DefaultImageFormat
+        {
+            get => new
+                (
+                    Binary.ByteOrder.Big,
+                    DataLayout.Packed,
+                    new JpegComponent(0, 1, 8),
+                    new JpegComponent(0, 2, 8),
+                    new JpegComponent(0, 3, 8),
+                    new JpegComponent(0, 4, 8)
+                );
+        }
+
         public JpegCodec()
             : base("JPEG", Binary.ByteOrder.Little, ComponentCount, Binary.BitsPerByte)
         {

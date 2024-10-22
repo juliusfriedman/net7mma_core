@@ -25,15 +25,13 @@ public sealed class ScanComponentSelector : MemorySegment
     {
         get
         {
-            using var slice = RawData;
             var bitOffset = Binary.BytesToBits(Offset + 1);
-            return (byte)slice.ReadBits(bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
+            return (byte)this.ReadBits(bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
         }
         set
         {
-            using var slice = RawData;
             var bitOffset = Binary.BytesToBits(Offset + 1);
-            slice.WriteBits(bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
+            this.WriteBits(bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
         }
     }
 
@@ -44,15 +42,13 @@ public sealed class ScanComponentSelector : MemorySegment
     {
         get
         {
-            using var slice = RawData;
             var bitOffset = Binary.BytesToBits(Offset + 1) + Binary.Four;
-            return (byte)slice.ReadBits(bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
+            return (byte)this.ReadBits(bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
         }
         set
         {
-            using var slice = RawData;
             var bitOffset = Binary.BytesToBits(Offset + 1) + Binary.Four;
-            slice.WriteBits(bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
+            this.WriteBits(bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
         }
     }
 
