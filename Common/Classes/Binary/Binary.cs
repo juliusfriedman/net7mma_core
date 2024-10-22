@@ -1792,7 +1792,7 @@ namespace Media.Common
 
         //Todo, CopyBits should allow destination to be specified...
 
-        //Not used anywhere besides UnitTests...
+        //Not used anywhere besides UnitTests... Should work on this. (Improve API)
 
         #region CopyBits
 
@@ -2300,7 +2300,7 @@ namespace Media.Common
         #endregion
 
         #region Writing
-
+        
         public static void WriteGuid(byte[] data, int offset, Guid value, bool reverse)
         {
             GetBytes(value, reverse).CopyTo(data, offset);
@@ -2793,7 +2793,6 @@ namespace Media.Common
 
         //ZigZag
 
-
         #region Log2i
 
         /// <summary>
@@ -2858,6 +2857,18 @@ namespace Media.Common
             if (0 != (v & 0xff00)) { v >>= BitsPerByte; n += BitsPerByte; }
             return n + ByteLog2Table[v];
         }
+
+        #endregion
+
+        #region Rounding
+
+        [CLSCompliant(false)]
+        public static uint RoundUpToNextMultiple(uint number, uint product)
+            => (number + product) & ~product;
+
+        [CLSCompliant(false)]
+        public static uint RoundDownToNextMultiple(uint number, uint product)
+            => number & ~product;
 
         #endregion
 
