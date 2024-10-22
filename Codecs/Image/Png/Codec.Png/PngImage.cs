@@ -142,9 +142,6 @@ public class PngImage : Image
         // Write the IHDR chunk
         WriteIHDRChunk(stream);
 
-        // Write the IDAT chunk
-        WriteIDATChunk(stream, compressionLevel);
-
         if (Chunks != null)
         {
             foreach (var chunk in Chunks.Values)
@@ -152,6 +149,9 @@ public class PngImage : Image
                 stream.Write(chunk.Array, chunk.Offset, chunk.Count);
             }
         }
+
+        // Write the IDAT chunk
+        WriteIDATChunk(stream, compressionLevel);
 
         // Write the IEND chunk
         WriteIENDChunk(stream);
