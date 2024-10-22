@@ -9,11 +9,18 @@ public class FrameComponent : MemorySegment
     /// </summary>
     public const int Length = 3;
 
+    /// <summary>
+    /// Ci
+    /// </summary>
     public int ComponentIdentifier
     {
         get => Array[Offset];
         set => Array[Offset] = (byte)value;
     }
+
+    /// <summary>
+    /// Hi
+    /// </summary>
     public int HorizontalSamplingFactor
     {
         get
@@ -28,6 +35,9 @@ public class FrameComponent : MemorySegment
         }
     }
 
+    /// <summary>
+    /// Vi
+    /// </summary>
     public int VerticalSamplingFactor
     {
         get
@@ -41,11 +51,16 @@ public class FrameComponent : MemorySegment
             this.WriteBits(bitoffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
         }
     }
+
+    /// <summary>
+    /// Tqi
+    /// </summary>
     public int QuantizationTableDestinationSelector
     {
         get => Count > 3 ? Array[Offset + 3] : 0;
         set => Array[Offset + 3] = (byte)value;
     }
+
     public FrameComponent(MemorySegment other)
         : base(other)
     {

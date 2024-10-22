@@ -35,7 +35,7 @@ public class JpegImage : Image
         MemorySegment dataSegment = default;
         MemorySegment thumbnailData = default;
         bool progressive = false;
-        ConcurrentThesaurus<byte, Marker> markers = new ConcurrentThesaurus<byte, Marker>();
+        ConcurrentThesaurus<byte, Marker> markers = new ConcurrentThesaurus<byte, Marker>();        
         foreach (var marker in JpegCodec.ReadMarkers(stream))
         {
             //Handle the marker to decode.
@@ -91,7 +91,7 @@ public class JpegImage : Image
                     if (bitsPerComponent == 0)
                         bitsPerComponent = Binary.BitsPerByte;
 
-                    MediaComponent[] mediaComponents = new MediaComponent[numberOfComponents];
+                    JpegComponent[] mediaComponents = new JpegComponent[numberOfComponents];
                     int[] widths = new int[numberOfComponents];
                     int[] heights = new int[numberOfComponents];
 
@@ -118,9 +118,21 @@ public class JpegImage : Image
                     imageFormat = new ImageFormat(Binary.ByteOrder.Little, DataLayout.Planar, mediaComponents);
                     imageFormat.HorizontalSamplingFactors = widths;
                     imageFormat.VerticalSamplingFactors = heights;
+                    tag.Dispose();
+                    tag = null;
                     continue;
                 case Jpeg.Markers.StartOfScan:
                     {
+                        using var sos = new StartOfScan(marker);
+
+                        for(int ns = sos.Ns, i = 0; i < ns; ++i)
+                        {
+                            using var scanComponentSelector = sos[i];
+                            var jpegComponent = imageFormat.GetComponentById(scanComponentSelector.Csj) as JpegComponent ?? imageFormat.Components[i] as JpegComponent;
+                            jpegComponent.Tdj = scanComponentSelector.Tdj;
+                            jpegComponent.Taj = scanComponentSelector.Taj;
+                        }
+
                         var dataSegmentSize = CalculateSize(imageFormat, width, height);
                         dataSegment = new MemorySegment(Math.Abs(dataSegmentSize));
                         var read = stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count);
@@ -130,21 +142,22 @@ public class JpegImage : Image
                     }
                 case Jpeg.Markers.AppFirst:
                 case Jpeg.Markers.AppLast:
-                    var app = new App(marker);
-
-                    if (app.MajorVersion >= 1 && app.MinorVersion >= 2)
                     {
-                        var appExtension = new AppExtension(app);
-                        thumbnailData = appExtension.ThumbnailData;
-                    }
-                    else
-                    {
-                        thumbnailData = app.ThumbnailData;
-                        imageFormat = ImageFormat.RGB(8);
-                        width = app.XThumbnail;
-                        height = app.YThumbnail;
-                    }
+                        using var app = new App(marker);
 
+                        if (app.MajorVersion >= 1 && app.MinorVersion >= 2)
+                        {
+                            using var appExtension = new AppExtension(app);
+                            thumbnailData = appExtension.ThumbnailData;
+                        }
+                        else
+                        {
+                            thumbnailData = app.ThumbnailData;
+                            imageFormat = ImageFormat.RGB(8);
+                            width = app.XThumbnail;
+                            height = app.YThumbnail;
+                        }
+                    }
                     goto default;
                 case Jpeg.Markers.StartOfInformation:
                 case Jpeg.Markers.EndOfInformation:
@@ -242,7 +255,7 @@ public class JpegImage : Image
 
             if (imageComponent is JpegComponent jpegComponent)
             {
-                var frameComponent = new FrameComponent(jpegComponent.Id, ImageFormat.HorizontalSamplingFactors[i], ImageFormat.VerticalSamplingFactors[i], jpegComponent.QuantizationTableNumber);
+                var frameComponent = new FrameComponent(jpegComponent.Id, ImageFormat.HorizontalSamplingFactors[i], ImageFormat.VerticalSamplingFactors[i], jpegComponent.Tqi);
                 sof[i] = frameComponent;
             }
             else
@@ -272,8 +285,8 @@ public class JpegImage : Image
             {
                 var componentSelector = new ScanComponentSelector();
                 componentSelector.Csj = jpegComponent.Id;
-                componentSelector.Tdj = jpegComponent.Id;
-                componentSelector.Taj = jpegComponent.Id;
+                componentSelector.Tdj = jpegComponent.Tdj;
+                componentSelector.Taj = jpegComponent.Taj;
                 sos[i] = componentSelector;
             }
             else

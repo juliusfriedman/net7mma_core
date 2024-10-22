@@ -62,9 +62,8 @@ public class StartOfScan : Marker
         }
         set
         {
-            var offset = 1 + index * ScanComponentSelector.Length;
-            using var slice = this.Slice(DataOffset + offset, ScanComponentSelector.Length);
-            value.CopyTo(slice);
+            var offset = DataOffset + 1 + index * ScanComponentSelector.Length;
+            value.CopyTo(Array, offset);
         }
     }
 
@@ -109,15 +108,13 @@ public class StartOfScan : Marker
     {
         get
         {
-            var bitOffset = Binary.BytesToBits(1 + Ns * ScanComponentSelector.Length + 1 + 1);
-            using var slice = Data;
-            return (int)slice.ReadBits(ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
+            var bitOffset = Binary.BytesToBits(DataOffset + 1 + Ns * ScanComponentSelector.Length + 1 + 1);
+            return (int)this.ReadBits(ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
         }
         set
         {
-            var bitOffset = Binary.BytesToBits(1 + Ns * ScanComponentSelector.Length + 1 + 1);
-            using var slice = Data;
-            slice.WriteBits(ref bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
+            var bitOffset = Binary.BytesToBits(DataOffset + 1 + Ns * ScanComponentSelector.Length + 1 + 1);
+            this.WriteBits(ref bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
         }
     }
 
@@ -128,15 +125,13 @@ public class StartOfScan : Marker
     {
         get
         {
-            var bitOffset = Binary.BytesToBits(1 + Ns * ScanComponentSelector.Length + 1 + 1) + Binary.Four;
-            using var slice = Data;
-            return (int)slice.ReadBits(ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
+            var bitOffset = Binary.BytesToBits(DataOffset + 1 + Ns * ScanComponentSelector.Length + 1 + 1) + Binary.Four;
+            return (int)this.ReadBits(ref bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
         }
         set
         {
-            var bitOffset = Binary.BytesToBits(1 + Ns * ScanComponentSelector.Length + 1 + 1) + Binary.Four;
-            using var slice = Data;
-            slice.WriteBits(ref bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
+            var bitOffset = Binary.BytesToBits(DataOffset + 1 + Ns * ScanComponentSelector.Length + 1 + 1) + Binary.Four;
+            this.WriteBits(ref bitOffset, Binary.Four, value, Binary.BitOrder.MostSignificant);
         }
     }
 }
