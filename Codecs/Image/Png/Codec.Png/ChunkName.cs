@@ -1,6 +1,6 @@
 ﻿namespace Media.Codec.Png;
 
-public enum ChunkNames : uint
+public enum ChunkName : uint
 {
     /// <summary>
     /// This chunk contains the actual image data. The image can contains more

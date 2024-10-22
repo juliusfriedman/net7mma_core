@@ -209,12 +209,27 @@ internal class PngUnitTests
 
             pngStream.Seek(0, SeekOrigin.Begin);
 
-            using var pngImage = PngImage.FromStream(pngStream);
+            using (var pngImage = PngImage.FromStream(pngStream))
+            {
+                var saveFileName = Path.Combine(outputDir, Path.GetFileName(filePath));
 
-            var saveFileName = Path.Combine(outputDir, Path.GetFileName(filePath));
+                using (var outputNew = new FileStream(saveFileName, FileMode.OpenOrCreate, FileAccess.Write))
+                {
+                    pngImage.Save(outputNew);
+                }
 
-            using var outputNew = new FileStream(saveFileName, FileMode.OpenOrCreate, FileAccess.Write);
-            pngImage.Save(outputNew);
+                using (var inputNew = new FileStream(saveFileName, FileMode.OpenOrCreate, FileAccess.Read))
+                {
+                    using (var newPngImage = PngImage.FromStream(inputNew))
+                    {
+                        if (newPngImage.Width != pngImage.Width ||
+                                   newPngImage.Height != pngImage.Height ||
+                                   newPngImage.ImageFormat.Components.Length != pngImage.ImageFormat.Components.Length ||
+                                   newPngImage.ImageFormat.Size != pngImage.ImageFormat.Size)
+                            throw new InvalidDataException();
+                    }
+                }
+            }
         }
     }
 }

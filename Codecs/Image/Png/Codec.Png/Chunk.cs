@@ -60,9 +60,9 @@ public class Chunk : MemorySegment
         set => Header.Type = value;
     }
 
-    public ChunkNames ChunkName 
+    public ChunkName ChunkName 
     {
-        get => (ChunkNames)RawType;
+        get => (ChunkName)RawType;
         set => RawType = (uint)value;
     }
 

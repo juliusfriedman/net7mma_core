@@ -2,6 +2,7 @@
 using System.Numerics;
 using Media.Codecs.Image;
 using Media.Common;
+using Media.Common.Collections.Generic;
 
 namespace Media.Codec.Png;
 
@@ -14,13 +15,14 @@ public class PngImage : Image
         switch (colorType)
         {
             case 0: // Grayscale
-            case 3: // Indexed-color
-            case 4: // Grayscale with alpha
+            case 3: // Indexed-color            
                 return ImageFormat.Monochrome(bitDepth);
+            case 4: // Grayscale with alpha
+                return ImageFormat.WithPreceedingAlphaComponent(ImageFormat.Monochrome(bitDepth / 2), bitDepth / 2);
             case 2: // Truecolor (RGB)
-                return ImageFormat.RGB(bitDepth);            
+                return ImageFormat.RGB(bitDepth/ 3);            
             case 6: // Truecolor with alpha (RGBA)
-                return ImageFormat.RGBA(bitDepth);
+                return ImageFormat.RGBA(bitDepth / 4);
             default:
                 throw new NotSupportedException($"Color type {colorType} is not supported.");
         }
@@ -28,7 +30,7 @@ public class PngImage : Image
 
     private static byte[] CalculateCrc(IEnumerable<byte> bytes)
     {
-        uint checksum = 0;
+        uint checksum = 0; //Should be seed value...
         foreach (var b in bytes) 
             checksum = (checksum >> 8) ^ BitOperations.Crc32C(checksum, b);
         return Binary.GetBytes(checksum, BitConverter.IsLittleEndian);
@@ -37,20 +39,25 @@ public class PngImage : Image
 
     public readonly byte ColorType;
 
+    public readonly ConcurrentThesaurus<ChunkName, Chunk> Chunks;
+
     public PngImage(ImageFormat imageFormat, int width, int height)
         : base(imageFormat, width, height, new PngCodec())
     {
+        Chunks = new ConcurrentThesaurus<ChunkName, Chunk>();
     }
 
     private PngImage(ImageFormat imageFormat, int width, int height, MemorySegment data)
         : base(imageFormat, width, height, data, new PngCodec())
     {
+        Chunks = new ConcurrentThesaurus<ChunkName, Chunk>();
     }
 
-    private PngImage(ImageFormat imageFormat, int width, int height, MemorySegment data, byte colorType)
+    private PngImage(ImageFormat imageFormat, int width, int height, MemorySegment data, byte colorType, ConcurrentThesaurus<ChunkName, Chunk> chunks)
         : this(imageFormat, width, height, data)
     {
         ColorType = colorType;
+        Chunks = chunks;
     }
 
     public static PngImage FromStream(Stream stream)
@@ -60,12 +67,14 @@ public class PngImage : Image
         ImageFormat? imageFormat = default;
         MemorySegment? dataSegment = default;
         byte colorType = default;
+        ConcurrentThesaurus<ChunkName, Chunk> chunks = new ConcurrentThesaurus<ChunkName, Chunk>();
 
         foreach(var chunk in PngCodec.ReadChunks(stream))
         {
-            switch (chunk.ChunkName)
+            var chunkName = chunk.ChunkName;
+            switch (chunkName)
             {
-                case ChunkNames.Header:
+                case ChunkName.Header:
                     var offset = chunk.DataOffset;
                     width = Binary.Read32(chunk.Array, ref offset, Binary.IsLittleEndian);
                     height = Binary.Read32(chunk.Array, ref offset, Binary.IsLittleEndian);
@@ -77,15 +86,17 @@ public class PngImage : Image
 
                     // Create the image format based on the IHDR data
                     imageFormat = CreateImageFormat(bitDepth, colorType);
+
                     //ToDo, Crc is in data segment, so we need to read it and validate it.
                     continue;
-                case ChunkNames.Data:
+                case ChunkName.Data:
                     //ToDo, Crc is in data segment, so we need to read it and validate it.
                     dataSegment = chunk.Data.Slice(0);
                     continue;
-                case ChunkNames.End:
+                case ChunkName.End:
                     continue;
                 default:
+                    chunks.Add(chunkName, chunk);
                     continue;
             }
         }
@@ -94,7 +105,7 @@ public class PngImage : Image
             throw new InvalidDataException("The provided stream does not contain valid PNG image data.");
 
         // Create and return the PngImage
-        return new PngImage(imageFormat, width, height, dataSegment, colorType);
+        return new PngImage(imageFormat, width, height, dataSegment, colorType, chunks);
     }
 
     public void Save(Stream stream)
@@ -110,6 +121,14 @@ public class PngImage : Image
 
         // Write the IDAT chunk
         WriteIDATChunk(stream);
+
+        if (Chunks != null)
+        {
+            foreach (var chunk in Chunks.Values)
+            {
+                stream.Write(chunk.Array, chunk.Offset, chunk.Count);
+            }
+        }
 
         // Write the IEND chunk
         WriteIENDChunk(stream);
