@@ -42,10 +42,10 @@ namespace Media.Codec.Jpeg
         public IEncoder Encoder => this;
         public IDecoder Decoder => this;
 
-        public int Encode(JpegImage image, Stream outputStream)
+        public int Encode(JpegImage image, Stream outputStream, int quality = 0)
         {
             var position = outputStream.Position;
-            image.Save(outputStream);
+            image.Save(outputStream, quality);
             return (int)(outputStream.Position - position);
         }
 
@@ -101,8 +101,8 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        private const int BlockSize = 8;
-        private static readonly double SqrtHalf = 1.0 / System.Math.Sqrt(2.0);
+        internal const int BlockSize = 8;
+        internal static readonly double SqrtHalf = 1.0 / System.Math.Sqrt(2.0);
 
         private static void InverseQuantize(short[] block, short[] quantizationTable)
         {
@@ -112,7 +112,9 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        private static void VIDCT(short[] block, double[] output)
+        //Decompress
+
+        internal static void VIDCT(short[] block, double[] output)
         {
             const int BlockSize = 8;
             double SqrtHalf = 1.0 / System.Math.Sqrt(2.0);
@@ -150,7 +152,7 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        private static void IDCT(short[] block, double[] output)
+        internal static void IDCT(short[] block, double[] output)
         {
             for (int y = 0; y < BlockSize; y++)
             {
@@ -176,7 +178,9 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        private static void FDCT(double[] input, double[] output)
+        //Compress
+
+        internal static void FDCT(double[] input, double[] output)
         {
             for (int u = 0; u < BlockSize; u++)
             {
@@ -199,7 +203,7 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        private static void VFDCT(double[] input, double[] output)
+        internal static void VFDCT(double[] input, double[] output)
         {
             for (int u = 0; u < BlockSize; u++)
             {
@@ -280,7 +284,7 @@ namespace Media.Codec.Jpeg
             return size;
         }
 
-        private static void VQuantize(double[] block, short[] quantizationTable, short[] output)
+        internal static void VQuantize(double[] block, short[] quantizationTable, short[] output)
         {
             int VectorSize = Vector<double>.Count;
             int i = 0;
@@ -306,7 +310,7 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        private static void Quantize(double[] block, short[] quantizationTable, short[] output)
+        internal static void Quantize(double[] block, short[] quantizationTable, short[] output)
         {
             for (int i = 0; i < BlockSize * BlockSize; i++)
             {
@@ -400,7 +404,7 @@ namespace Media.Codec.Jpeg
                 IDCT(block, output);
         }
 
-        public static void Compress(Stream inputStream, Stream outputStream)
+        public static void Compress(Stream inputStream, Stream outputStream, int quality)
         {
             using (var reader = new BitReader(inputStream))
             using (var writer = new BitWriter(outputStream))

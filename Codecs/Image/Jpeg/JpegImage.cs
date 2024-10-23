@@ -7,8 +7,6 @@ using System.Linq;
 using Media.Common.Collections.Generic;
 using Codec.Jpeg.Markers;
 using Codec.Jpeg.Classes;
-using static Media.Codec.Jpeg.JpegCodec;
-using System.Collections.Generic;
 
 namespace Media.Codec.Jpeg;
 
@@ -192,7 +190,7 @@ public class JpegImage : Image
         return new JpegImage(imageFormat, width, height, dataSegment ?? thumbnailData, jpegState, markers);
     }
 
-    public void Save(Stream stream)
+    public void Save(Stream stream, int quality = 99)
     {
         var markerBuffer = Markers != null ? new ConcurrentThesaurus<byte, Marker>(Markers) : null;
 
@@ -221,6 +219,23 @@ public class JpegImage : Image
 
                 markerBuffer.Remove(marker.FunctionCode);
             }
+        }
+        else
+        {
+            //// Step 4: Perform the compression (Example)
+            //foreach (var component in ImageFormat.Components)
+            //{
+            //    // Step 4.1: Perform Forward Discrete Cosine Transform (FDCT)
+            //    double[] dctCoefficients = new double[BlockSize];
+            //    JpegCodec.FDCT(component.Data, dctCoefficients);
+
+            //    // Step 4.2: Quantize the DCT coefficients
+            //    Span<short> quantizedCoefficients = [BlockSize];
+            //    JpegCodec.Quantize(dctCoefficients, GetQuantizationTable(quality), quantizedCoefficients);
+
+            //    // Step 4.3: Huffman encode the quantized coefficients
+            //    JpegCodec.HuffmanEncode(quantizedCoefficients, GetHuffmanTable(component.Id, true), GetHuffmanTable(component.Id, false), writer);
+            //}
         }
 
         // Write the SOF marker
@@ -257,7 +272,7 @@ public class JpegImage : Image
         {
             // Create a stream around the raw data and compress it to the stream
             using var inputStream = new MemoryStream(Data.Array, Data.Offset, Data.Count, true);
-            JpegCodec.Compress(inputStream, stream);
+            JpegCodec.Compress(inputStream, stream, quality);
         }
 
         if (Data[Data.Count - 1] != Jpeg.Markers.EndOfInformation)
