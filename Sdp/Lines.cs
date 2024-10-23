@@ -1652,7 +1652,7 @@ namespace Media.Sdp
             internal const char TimeType = 't';
 
             //internal protected for setters or this can be changed on accident.
-            public static SessionTimeDescriptionLine Permanent = new(0, 0);
+            public static readonly SessionTimeDescriptionLine Permanent = new(0, 0);
 
             //Method for Permanent or Unbounded?
 

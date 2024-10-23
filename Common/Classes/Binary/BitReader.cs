@@ -5,7 +5,6 @@
     /// </summary>
     public class BitReader : BaseDisposable
     {
-
         #region Statics
 
         public static readonly byte[] ByteToUnary = new byte[]

@@ -90,7 +90,7 @@ namespace Media.Codec.Jpeg
 
                 if (CodeSize > 0)
                 {
-                    jpegStream.Read(Current.Array, Current.DataOffset, CodeSize - 2);
+                    jpegStream.Read(Current.Array, Current.DataOffset, CodeSize - Marker.LengthBytes);
 
                     streamOffset += CodeSize;
                 }
