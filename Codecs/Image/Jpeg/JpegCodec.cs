@@ -5,9 +5,12 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
+using Codec.Jpeg.Classes;
+using Codec.Jpeg.Markers;
 using Media.Codec.Interfaces;
 using Media.Codecs.Image;
 using Media.Common;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Media.Codec.Jpeg
 {
@@ -21,10 +24,10 @@ namespace Media.Codec.Jpeg
                 (
                     Binary.ByteOrder.Big,
                     DataLayout.Packed,
-                    new JpegComponent(0, 1, 8),
-                    new JpegComponent(1, 2, 8),
-                    new JpegComponent(2, 3, 8),
-                    new JpegComponent(3, 4, 8)
+                    new JpegComponent(0, 1, Binary.BitsPerByte),
+                    new JpegComponent(1, 2, Binary.BitsPerByte),
+                    new JpegComponent(2, 3, Binary.BitsPerByte),
+                    new JpegComponent(3, 4, Binary.BitsPerByte)
                 );
         }
 
@@ -320,6 +323,8 @@ namespace Media.Codec.Jpeg
 
         internal class HuffmanTable
         {
+            public byte Id;
+
             public int[] MinCode { get; set; }
             public int[] MaxCode { get; set; }
             public int[] ValPtr { get; set; }
@@ -381,8 +386,8 @@ namespace Media.Codec.Jpeg
         {
             // Todo, these should be passed out to the caller so they can be installed (copied to the resulting image)
             // Example Huffman tables (you need to initialize these properly)
-            HuffmanTable dcTable = new HuffmanTable();
-            HuffmanTable acTable = new HuffmanTable();
+            HuffmanTable dcTable = new HuffmanTable() { Id = 0 };
+            HuffmanTable acTable = new HuffmanTable() { Id = 1 };
 
             // Decode DC and AC values
             int dcValue = DecodeHuffman(stream, dcTable);
@@ -404,8 +409,10 @@ namespace Media.Codec.Jpeg
                 IDCT(block, output);
         }
 
-        public static void Compress(Stream inputStream, Stream outputStream, int quality)
+        public static void Compress(JpegImage jpegImage, Stream outputStream, int quality)
         {
+            // Create a stream around the raw data and compress it to the stream
+            using var inputStream = new MemoryStream(jpegImage.Data.Array, jpegImage.Data.Offset, jpegImage.Data.Count, true);
             using (var reader = new BitReader(inputStream))
             using (var writer = new BitWriter(outputStream))
             {
@@ -416,6 +423,7 @@ namespace Media.Codec.Jpeg
                 // Example Huffman tables (you need to initialize these properly)
                 HuffmanTable dcTable = new HuffmanTable
                 {
+                    Id = 0,
                     MinCode = [0, 1, 5, 6, 14, 30, 62, 126, 254, 510, 1022, 2046, 4094, 8190, 16382, 32766],
                     MaxCode = [0, 1, 5, 6, 14, 30, 62, 126, 254, 510, 1022, 2046, 4094, 8190, 16382, 32766],
                     ValPtr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
@@ -443,6 +451,7 @@ namespace Media.Codec.Jpeg
 
                 HuffmanTable acTable = new HuffmanTable
                 {
+                    Id = 1,
                     MinCode = [0, 1, 5, 6, 14, 30, 62, 126, 254, 510, 1022, 2046, 4094, 8190, 16382, 32766],
                     MaxCode = [0, 1, 5, 6, 14, 30, 62, 126, 254, 510, 1022, 2046, 4094, 8190, 16382, 32766],
                     ValPtr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
@@ -488,25 +497,137 @@ namespace Media.Codec.Jpeg
                 {
                     VFDCT(inputBlock, dctBlock);
                     VQuantize(dctBlock, quantizationTable, quantizedBlock);
+                    WriteQuantizationTableMarker(outputStream, quality); // Write the quantization table
                 }
                 else
                 {
                     FDCT(inputBlock, dctBlock);
                     Quantize(dctBlock, quantizationTable, quantizedBlock);
+                    WriteQuantizationTableMarker(outputStream, quality); // Write the quantization table
                 }
 
                 // Perform Huffman encoding
                 HuffmanEncode(quantizedBlock, dcTable, acTable, writer);
             }
+
+            // Write the SOS marker
+            WriteStartOfScan(jpegImage, outputStream);
         }
 
-
-        private static void WriteQuantizationTableMarker(Stream stream)
+        internal static void WriteStartOfScan(JpegImage jpegImage, Stream stream)
         {
-            // Implementation to write the Quantization Table marker
-            // This is a placeholder and should be replaced with actual logic
-            using var quantizationTableMarker = new Marker(Jpeg.Markers.QuantizationTable, 64); // Example marker
-            WriteMarker(stream, quantizationTableMarker);
+            var numberOfComponents = jpegImage.ImageFormat.Components.Length;
+
+            using var sos = new StartOfScan(numberOfComponents);
+
+            sos.Ss = jpegImage.JpegState.Ss;
+            sos.Se = jpegImage.JpegState.Se;
+            sos.Ah = jpegImage.JpegState.Ah;
+            sos.Al = jpegImage.JpegState.Al;
+
+            for (var i = 0; i < numberOfComponents; ++i)
+            {
+                var imageComponent = jpegImage.ImageFormat.Components[i];
+
+                if (imageComponent is JpegComponent jpegComponent)
+                {
+                    var componentSelector = new ScanComponentSelector();
+                    componentSelector.Csj = jpegComponent.Id;
+                    componentSelector.Tdj = jpegComponent.Tdj;
+                    componentSelector.Taj = jpegComponent.Taj;
+                    sos[i] = componentSelector;
+                }
+                else
+                {
+                    var componentSelector = new ScanComponentSelector();
+                    componentSelector.Csj = (byte)i;
+                    componentSelector.Tdj = (byte)i;
+                    componentSelector.Taj = (byte)i;
+                    sos[i] = componentSelector;
+                }
+            }
+
+            WriteMarker(stream, sos);
+        }
+
+        internal static void WriteStartOfFrame(JpegImage jpegImage, Stream stream)
+        {
+            var componentCount = jpegImage.ImageFormat.Components.Length;
+            using StartOfFrame sof = new StartOfFrame(jpegImage.JpegState.StartOfFrameFunctionCode, componentCount);
+            sof.P = Binary.Clamp(jpegImage.ImageFormat.Size, Binary.BitsPerByte, byte.MaxValue);
+            sof.Y = jpegImage.Height;
+            sof.X = jpegImage.Width;
+            for (var i = 0; i < componentCount; ++i)
+            {
+                var imageComponent = jpegImage.ImageFormat.Components[i];
+
+                if (imageComponent is JpegComponent jpegComponent)
+                {
+                    var frameComponent = new FrameComponent(jpegComponent.Id, jpegImage.ImageFormat.HorizontalSamplingFactors[i], jpegImage.ImageFormat.VerticalSamplingFactors[i], jpegComponent.Tqi);
+                    sof[i] = frameComponent;
+                }
+                else
+                {
+                    var frameComponent = new FrameComponent(imageComponent.Id, jpegImage.ImageFormat.HorizontalSamplingFactors[i], jpegImage.ImageFormat.VerticalSamplingFactors[i], i);
+                    sof[i] = frameComponent;
+                }
+            }
+            JpegCodec.WriteMarker(stream, sof);
+        }
+
+        internal static void WriteInformationMarker(byte functionCode, Stream stream)
+        {
+            stream.WriteByte(Markers.Prefix);
+            stream.WriteByte(functionCode);
+        }
+
+        private static void WriteQuantizationTableMarker(Stream stream, int quality)
+        {
+            const int QuantizationTableLength = 64; // Each quantization table has 64 values
+
+            // Calculate the quantization table based on the quality
+            short[] quantizationTable = GetQuantizationTable(quality);
+
+            // Write the DQT marker
+            WriteMarker(stream, new Marker(Markers.QuantizationTable, Marker.LengthBytes + 1 + QuantizationTableLength));
+
+            // Write the precision and identifier (assuming 8-bit precision and identifier 0)
+            byte precisionAndIdentifier = 0; // 0 for 8-bit precision and identifier 0
+            stream.WriteByte(precisionAndIdentifier);
+
+            // Write the quantization table values
+            foreach (short value in quantizationTable)
+            {
+                stream.WriteByte((byte)value);
+            }
+        }
+
+        private static short[] GetQuantizationTable(int quality)
+        {
+            // Standard JPEG quantization table for luminance
+            short[] baseTable =
+            [
+                16, 11, 10, 16, 24, 40, 51, 61,
+                12, 12, 14, 19, 26, 58, 60, 55,
+                14, 13, 16, 24, 40, 57, 69, 56,
+                14, 17, 22, 29, 51, 87, 80, 62,
+                18, 22, 37, 56, 68, 109, 103, 77,
+                24, 35, 55, 64, 81, 104, 113, 92,
+                49, 64, 78, 87, 103, 121, 120, 101,
+                72, 92, 95, 98, 112, 100, 103, 99
+            ];
+
+            // Scale the base table based on the quality
+            double scaleFactor = (quality < 50) ? 5000.0 / quality : 200.0 - 2.0 * quality;
+            short[] quantizationTable = new short[baseTable.Length];
+
+            for (int i = 0; i < baseTable.Length; i++)
+            {
+                int scaledValue = (int)((baseTable[i] * scaleFactor + 50) / 100);
+                quantizationTable[i] = (short)Math.Clamp(scaledValue, 1, 255);
+            }
+
+            return quantizationTable;
         }
 
         private static void WriteHuffmanTableMarkers(Stream stream, params HuffmanTable[] huffmanTables)
@@ -514,13 +635,19 @@ namespace Media.Codec.Jpeg
             foreach (var huffmanTable in huffmanTables)
             {
                 // Create a marker for the Huffman table
-                Marker huffmanTableMarker = new Marker(0xC4, CalculateHuffmanTableSize(huffmanTable));
+                Marker huffmanTableMarker = new Marker(Markers.HuffmanTable, Marker.LengthBytes + CalculateHuffmanTableSize(huffmanTable));
+
+                //Todo make use of data offset.
+                using var slice = huffmanTableMarker.Data;
+
+                using var memoryStream = slice.ToMemoryStream();
+
+                // Write the Huffman table data to the stream
+                WriteHuffmanTableData(stream, huffmanTable);
 
                 // Write the marker to the stream
                 WriteMarker(stream, huffmanTableMarker);
 
-                // Write the Huffman table data to the stream
-                WriteHuffmanTableData(stream, huffmanTable);
             }
         }
 

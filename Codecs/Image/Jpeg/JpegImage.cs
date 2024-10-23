@@ -195,7 +195,7 @@ public class JpegImage : Image
         var markerBuffer = Markers != null ? new ConcurrentThesaurus<byte, Marker>(Markers) : null;
 
         // Write the JPEG signature
-        WriteEmptyMarker(stream, Jpeg.Markers.StartOfInformation);
+        JpegCodec.WriteInformationMarker(Jpeg.Markers.StartOfInformation, stream);
 
         if (markerBuffer != null)
         {
@@ -238,9 +238,6 @@ public class JpegImage : Image
             //}
         }
 
-        // Write the SOF marker
-        WriteStartOfFrame(JpegState, stream);
-
         if (markerBuffer != null)
         {
             foreach (var marker in Markers.TryGetValue(Jpeg.Markers.HuffmanTable, out var huffmanTables) ? huffmanTables : Enumerable.Empty<Marker>())
@@ -259,94 +256,37 @@ public class JpegImage : Image
                 markerBuffer.Clear();
             }
         }
+        else
+        {
+            //// Step 5: Write the compressed image data to the stream
+            //// Write the DQT marker
+            //JpegCodec.WriteMarker(stream, JpegCodec.GetQuantizationTableMarker(this, quality));
+            //// Write the DHT marker
+            //JpegCodec.WriteMarker(stream, JpegCodec.GetHuffmanTableMarker(this, true));
+            //JpegCodec.WriteMarker(stream, JpegCodec.GetHuffmanTableMarker(this, false));
+        }
 
-        // Write the SOS marker
-        WriteStartOfScan(stream);
+        // Write the SOF marker
+        JpegCodec.WriteStartOfFrame(this, stream);
+
+        JpegCodec.WriteStartOfScan(this, stream);
 
         if (markerBuffer != null)
         {
             // Write the compressed image data to the stream
             stream.Write(Data.Array, Data.Offset, Data.Count);
         }
-        else 
-        {
-            // Create a stream around the raw data and compress it to the stream
-            using var inputStream = new MemoryStream(Data.Array, Data.Offset, Data.Count, true);
-            JpegCodec.Compress(inputStream, stream, quality);
+        else
+        {            
+            JpegCodec.Compress(this, stream, quality);
         }
 
         if (Data[Data.Count - 1] != Jpeg.Markers.EndOfInformation)
         {
             // Write the EOI marker
-            WriteEmptyMarker(stream, Jpeg.Markers.EndOfInformation);
+            JpegCodec.WriteInformationMarker(Jpeg.Markers.EndOfInformation, stream);
         }
-    }
-
-    private void WriteStartOfFrame(JpegState jpegState, Stream stream)
-    {
-        var componentCount = ImageFormat.Components.Length;
-        using StartOfFrame sof = new StartOfFrame(jpegState.StartOfFrameFunctionCode, componentCount);
-        sof.P = Binary.Clamp(ImageFormat.Size, Binary.BitsPerByte, byte.MaxValue);
-        sof.Y = Height;
-        sof.X = Width;
-        for (var i = 0; i < componentCount; ++i)
-        {
-            var imageComponent = ImageFormat.Components[i];
-
-            if (imageComponent is JpegComponent jpegComponent)
-            {
-                var frameComponent = new FrameComponent(jpegComponent.Id, ImageFormat.HorizontalSamplingFactors[i], ImageFormat.VerticalSamplingFactors[i], jpegComponent.Tqi);
-                sof[i] = frameComponent;
-            }
-            else
-            {
-                var frameComponent = new FrameComponent(imageComponent.Id, ImageFormat.HorizontalSamplingFactors[i], ImageFormat.VerticalSamplingFactors[i], i);
-                sof[i] = frameComponent;
-            }
-        }
-        JpegCodec.WriteMarker(stream, sof);
-    }
-
-    private void WriteStartOfScan(Stream stream)
-    {        
-        var numberOfComponents = ImageFormat.Components.Length;
-
-        using var sos = new StartOfScan(numberOfComponents);
-
-        sos.Ss = JpegState.Ss;
-        sos.Se = JpegState.Se;
-        sos.Ah = JpegState.Ah;
-        sos.Al = JpegState.Al;
-
-        for (var i = 0; i < numberOfComponents; ++i)
-        {
-            var imageComponent = ImageFormat.Components[i];
-
-            if (imageComponent is JpegComponent jpegComponent)
-            {
-                var componentSelector = new ScanComponentSelector();
-                componentSelector.Csj = jpegComponent.Id;
-                componentSelector.Tdj = jpegComponent.Tdj;
-                componentSelector.Taj = jpegComponent.Taj;
-                sos[i] = componentSelector;
-            }
-            else
-            {
-                var componentSelector = new ScanComponentSelector();
-                componentSelector.Csj = (byte)i;
-                componentSelector.Tdj = (byte)i;
-                componentSelector.Taj = (byte)i;
-                sos[i] = componentSelector;
-            }
-        }
-        JpegCodec.WriteMarker(stream, sos);
-    }      
-
-    private void WriteEmptyMarker(Stream stream, byte functionCode)
-    {
-        stream.WriteByte(Jpeg.Markers.Prefix);
-        stream.WriteByte(functionCode);
-    }
+    }    
 
     public MemorySegment GetPixelDataAt(int x, int y)
     {
