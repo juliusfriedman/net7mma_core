@@ -2859,19 +2859,6 @@ namespace Media.Common
         }
 
         #endregion
-
-        #region Rounding
-
-        [CLSCompliant(false)]
-        public static uint RoundUpToNextMultiple(uint number, uint product)
-            => (number + product) & ~product;
-
-        [CLSCompliant(false)]
-        public static uint RoundDownToNextMultiple(uint number, uint product)
-            => number & ~product;
-
-        #endregion
-
     }
 
     //MemSet, Copy

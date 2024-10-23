@@ -463,62 +463,64 @@ namespace Media.Common
     //}
 #endif
 
-    /////!
-    //Should propably be the base class of MemorySegment because it's a lower order concept
-    /// <summary>
-    /// Extends MemorySegment with the ability to store certain bit offsets
-    /// </summary>
-    public class BitSegment : MemorySegment
-    {
-        private ulong m_BitOffset, m_BitCount;
+    #region BitSegment
 
-        public int BitCount
-        {
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return (int)m_BitCount; }
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            protected set { m_BitCount = (ulong)value; }
-        }
+    ///////!
+    ////Should propably be the base class of MemorySegment because it's a lower order concept
+    ///// <summary>
+    ///// Extends MemorySegment with the ability to store certain bit offsets
+    ///// </summary>
+    //public class BitSegment : MemorySegment
+    //{
+    //    private ulong m_BitOffset, m_BitCount;
 
-        public long LongBitCount
-        {
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return (long)m_BitCount; }
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            protected set { m_BitCount = (ulong)value; }
-        }
+    //    public int BitCount
+    //    {
+    //        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    //        get { return (int)m_BitCount; }
+    //        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    //        protected set { m_BitCount = (ulong)value; }
+    //    }
 
-        public int BitOffset
-        {
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get { return (int)m_BitOffset; }
-            [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            protected set { m_BitOffset = (ulong)value; }
-        }
+    //    public long LongBitCount
+    //    {
+    //        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    //        get { return (long)m_BitCount; }
+    //        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    //        protected set { m_BitCount = (ulong)value; }
+    //    }
 
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public BitSegment(int bitSize, bool shouldDispose = true) : base(Common.Binary.BitsToBytes(ref bitSize), shouldDispose) { m_BitCount = (ulong)bitSize; }
+    //    public int BitOffset
+    //    {
+    //        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    //        get { return (int)m_BitOffset; }
+    //        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    //        protected set { m_BitOffset = (ulong)value; }
+    //    }
 
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public BitSegment(byte[] reference, int bitOffset, int bitCount, bool shouldDispose = true)
-            : base(reference, Common.Binary.BitsToBytes(ref bitOffset), Common.Binary.BitsToBytes(ref bitCount), shouldDispose)
-        {
-            m_BitOffset = (ulong)bitOffset;
+    //    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    //    public BitSegment(int bitSize, bool shouldDispose = true) : base(Common.Binary.BitsToBytes(ref bitSize), shouldDispose) { m_BitCount = (ulong)bitSize; }
 
-            m_BitCount = (ulong)bitCount;
-        }
+    //    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    //    public BitSegment(byte[] reference, int bitOffset, int bitCount, bool shouldDispose = true)
+    //        : base(reference, Common.Binary.BitsToBytes(ref bitOffset), Common.Binary.BitsToBytes(ref bitCount), shouldDispose)
+    //    {
+    //        m_BitOffset = (ulong)bitOffset;
 
-        //reference may be null
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public BitSegment(byte[] reference, int bitOffset, bool shouldDispose = true) : this(reference, bitOffset, Common.Binary.BytesToBits(reference.Length) - bitOffset, shouldDispose) { }
+    //        m_BitCount = (ulong)bitCount;
+    //    }
 
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public BitSegment(byte[] reference) : this(reference, 0, Common.Binary.BytesToBits(reference.Length)) { }
+    //    //reference may be null
+    //    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    //    public BitSegment(byte[] reference, int bitOffset, bool shouldDispose = true) : this(reference, bitOffset, Common.Binary.BytesToBits(reference.Length) - bitOffset, shouldDispose) { }
 
+    //    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+    //    public BitSegment(byte[] reference) : this(reference, 0, Common.Binary.BytesToBits(reference.Length)) { }
 
-        //Would have to implement a Copy virtual method to ensure that bitOffsets were not accidentally copied using Array.Copy
+    //    //Would have to implement a Copy virtual method to ensure that bitOffsets were not accidentally copied using Array.Copy
+    //}
 
-    }
+    #endregion
 
     /// <summary>
     /// Provides useful extension methods for the <see cref="MemorySegment"/> class
@@ -591,6 +593,18 @@ namespace Media.Common
             //could check dest and also verify length 
 
             Array.Copy(segment.Array, segment.Offset, dest, destinationIndex, length);
+        }
+
+        /// <summary>
+        /// Copies the bytes from the segment to the stream
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="stream"></param>
+        public static void CopyTo(this MemorySegment segment, System.IO.Stream stream)
+        {
+            if (Common.IDisposedExtensions.IsNullOrDisposed(segment)) return;
+
+            stream.Write(segment.Array, segment.Offset, segment.Count);
         }
 
         //make Left / Right or expect the callers to use -length when they need to...
