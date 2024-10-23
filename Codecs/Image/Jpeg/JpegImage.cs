@@ -7,7 +7,8 @@ using System.Linq;
 using Media.Common.Collections.Generic;
 using Codec.Jpeg.Markers;
 using Codec.Jpeg.Classes;
-using Media.Common.Classes;
+using static Media.Codec.Jpeg.JpegCodec;
+using System.Collections.Generic;
 
 namespace Media.Codec.Jpeg;
 
@@ -180,6 +181,10 @@ public class JpegImage : Image
             }
         }
 
+        using var bitStream = new BitReader(dataSegment.Array, Binary.BitOrder.MostSignificant, 0, 0, true, Environment.ProcessorCount * Environment.ProcessorCount);
+
+        JpegCodec.Decompress(bitStream);
+
         if (imageFormat == null || dataSegment == null && thumbnailData == null)
             throw new InvalidDataException("The provided stream does not contain valid JPEG image data.");
 
@@ -198,21 +203,21 @@ public class JpegImage : Image
         {
             foreach (var marker in Markers.TryGetValue(Jpeg.Markers.TextComment, out var textComments) ? textComments : Enumerable.Empty<Marker>())
             {
-                WriteMarker(stream, marker);
+                JpegCodec.WriteMarker(stream, marker);
             }
 
             markerBuffer.Remove(Jpeg.Markers.TextComment);
 
             foreach (var marker in Markers.TryGetValue(Jpeg.Markers.QuantizationTable, out var quantizationTables) ? quantizationTables : Enumerable.Empty<Marker>())
             {
-                WriteMarker(stream, marker);
+                JpegCodec.WriteMarker(stream, marker);
             }
 
             markerBuffer.Remove(Jpeg.Markers.QuantizationTable);
 
             foreach (var marker in markerBuffer.Values.Where(markerBuffer => Jpeg.Markers.IsApplicationMarker(markerBuffer.FunctionCode)))
             {
-                WriteMarker(stream, marker);
+                JpegCodec.WriteMarker(stream, marker);
 
                 markerBuffer.Remove(marker.FunctionCode);
             }
@@ -225,7 +230,7 @@ public class JpegImage : Image
         {
             foreach (var marker in Markers.TryGetValue(Jpeg.Markers.HuffmanTable, out var huffmanTables) ? huffmanTables : Enumerable.Empty<Marker>())
             {
-                WriteMarker(stream, marker);
+                JpegCodec.WriteMarker(stream, marker);
             }
 
             markerBuffer.Remove(Jpeg.Markers.HuffmanTable);
@@ -235,7 +240,7 @@ public class JpegImage : Image
         {
             foreach (var marker in markerBuffer.Values)
             {
-                WriteMarker(stream, marker);
+                JpegCodec.WriteMarker(stream, marker);
                 markerBuffer.Clear();
             }
         }
@@ -243,8 +248,17 @@ public class JpegImage : Image
         // Write the SOS marker
         WriteStartOfScan(stream);
 
-        // Write the image data
-        stream.Write(Data.Array, Data.Offset, Data.Count);
+        if (markerBuffer != null)
+        {
+            // Write the compressed image data to the stream
+            stream.Write(Data.Array, Data.Offset, Data.Count);
+        }
+        else 
+        {
+            // Create a stream around the raw data and compress it to the stream
+            using var inputStream = new MemoryStream(Data.Array, Data.Offset, Data.Count, true);
+            JpegCodec.Compress(inputStream, stream);
+        }
 
         if (Data[Data.Count - 1] != Jpeg.Markers.EndOfInformation)
         {
@@ -275,7 +289,7 @@ public class JpegImage : Image
                 sof[i] = frameComponent;
             }
         }
-        WriteMarker(stream, sof);
+        JpegCodec.WriteMarker(stream, sof);
     }
 
     private void WriteStartOfScan(Stream stream)
@@ -310,13 +324,8 @@ public class JpegImage : Image
                 sos[i] = componentSelector;
             }
         }
-        WriteMarker(stream, sos);
-    }
-
-    private void WriteMarker(Stream stream, Marker marker)
-    {
-        stream.Write(marker.Array, marker.Offset, marker.MarkerLength);
-    }
+        JpegCodec.WriteMarker(stream, sos);
+    }      
 
     private void WriteEmptyMarker(Stream stream, byte functionCode)
     {
@@ -336,7 +345,7 @@ public class JpegImage : Image
 
         return Data.Slice(offset, ImageFormat.Length);
     }
-
+    
     public Vector<byte> GetVectorDataAt(int x, int y)
     {
         // JPEG format stores pixels from top to bottom
