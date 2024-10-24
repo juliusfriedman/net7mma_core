@@ -48,7 +48,7 @@ public class JpegImage : Image
                     continue;
                 case Jpeg.Markers.HuffmanTable:
                     var dht = new HuffmanTable(marker);
-                    jpegState.HuffmanTables[dht.Th] = dht;
+                    jpegState.HuffmanTables.Add(dht);
                     continue;
                 case Jpeg.Markers.NumberOfLines:
                     var numberOfLines = new NumberOfLines(marker);
@@ -181,8 +181,6 @@ public class JpegImage : Image
                             width = app.XThumbnail;
                             height = app.YThumbnail;
                         }
-
-                        markers.Add(marker.FunctionCode, marker);
                     }
                     goto default;
                 case Jpeg.Markers.StartOfInformation:
@@ -203,24 +201,14 @@ public class JpegImage : Image
 
     public void Save(Stream stream, int quality = 99)
     {
-        var markerBuffer = Markers != null ? new ConcurrentThesaurus<byte, Marker>(Markers) : null;
-
         // Write the JPEG signature
         JpegCodec.WriteInformationMarker(Jpeg.Markers.StartOfInformation, stream);
 
-        if (markerBuffer != null)
+        if (Markers != null)
         {
-            foreach (var marker in Markers.TryGetValue(Jpeg.Markers.TextComment, out var textComments) ? textComments : Enumerable.Empty<Marker>())
+            foreach (var marker in Markers.Values)
             {
                 JpegCodec.WriteMarker(stream, marker);
-            }
-
-            markerBuffer.Remove(Jpeg.Markers.TextComment);
-            
-            foreach (var marker in markerBuffer.Values)
-            {
-                JpegCodec.WriteMarker(stream, marker);
-                markerBuffer.Clear();
             }
         }
         else
@@ -246,13 +234,14 @@ public class JpegImage : Image
         
         JpegCodec.WriteStartOfScan(this, stream);
 
-        if (markerBuffer != null)
+        if (Markers != null)
         {
             // Write the compressed image data to the stream
             stream.Write(Data.Array, Data.Offset, Data.Count);
         }
         else
-        {            
+        {
+            // Compress this image data to the stream
             JpegCodec.Compress(this, stream, quality);
         }
 

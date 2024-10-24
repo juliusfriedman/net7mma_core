@@ -228,7 +228,7 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        internal static void HuffmanEncode(Span<short> block, BitWriter writer, params HuffmanTable[] huffmanTables)
+        internal static void HuffmanEncode(Span<short> block, BitWriter writer, IEnumerable<HuffmanTable> huffmanTables)
         {
             foreach(var huffmanTable in huffmanTables)
             {

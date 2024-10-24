@@ -101,7 +101,7 @@ internal sealed class JpegState : IEquatable<JpegState>
     /// <summary>
     /// 
     /// </summary>
-    public readonly HuffmanTable[] HuffmanTables = new HuffmanTable[4];
+    public readonly List<HuffmanTable> HuffmanTables = new();
 
     /// <summary>
     /// Constructors a <see cref="JpegState"/>
@@ -123,17 +123,21 @@ internal sealed class JpegState : IEquatable<JpegState>
     internal void InitializeDefaultHuffmanTables()
     {
         // Define default Huffman tables for DC and AC components
-        HuffmanTables[0] = new HuffmanTable(DefaultLuminanceDCHuffmanTable.Length);
-        HuffmanTables[0].Data = new MemorySegment(DefaultLuminanceDCHuffmanTable);
+        var HuffmanTable = new HuffmanTable(DefaultLuminanceDCHuffmanTable.Length);
+        HuffmanTable.Data = new MemorySegment(DefaultLuminanceDCHuffmanTable);
+        HuffmanTables.Add(HuffmanTable);
 
-        HuffmanTables[1] = new HuffmanTable(DefaultChrominanceDCHuffmanTable.Length);
-        HuffmanTables[1].Data = new MemorySegment(DefaultChrominanceDCHuffmanTable);
+        HuffmanTable = new HuffmanTable(DefaultChrominanceDCHuffmanTable.Length);
+        HuffmanTable.Data = new MemorySegment(DefaultChrominanceDCHuffmanTable);
+        HuffmanTables.Add(HuffmanTable);
 
-        HuffmanTables[2] = new HuffmanTable(DefaultLuminanceACHuffmanTable.Length);
-        HuffmanTables[2].Data = new MemorySegment(DefaultLuminanceACHuffmanTable);
+        HuffmanTable = new HuffmanTable(DefaultLuminanceACHuffmanTable.Length);
+        HuffmanTable.Data = new MemorySegment(DefaultLuminanceACHuffmanTable);
+        HuffmanTables.Add(HuffmanTable);
 
-        HuffmanTables[3] = new HuffmanTable(DefaultChrominanceACHuffmanTable.Length);
-        HuffmanTables[3].Data = new MemorySegment(DefaultChrominanceACHuffmanTable);
+        HuffmanTable = new HuffmanTable(DefaultChrominanceACHuffmanTable.Length);
+        HuffmanTable.Data = new MemorySegment(DefaultChrominanceACHuffmanTable);
+        HuffmanTables.Add(HuffmanTable);
     }
 
     public override bool Equals(object obj)
