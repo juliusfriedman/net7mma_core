@@ -4,6 +4,7 @@ using Media.Codecs.Image;
 using Media.Common;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -14,7 +15,49 @@ namespace Media.Codecs.Image
     {
         #region Statics
 
-        //static Image Crop(Image source)
+        public Image Crop(Rectangle cropArea)
+        {
+            var croppedData = new byte[cropArea.Width * cropArea.Height * Planes];
+
+            for (int y = 0; y < cropArea.Height; y++)
+            {
+                for (int x = 0; x < cropArea.Width; x++)
+                {
+                    for (int plane = 0; plane < Planes; plane++)
+                    {
+                        int srcIndex = CalculateComponentDataOffset(cropArea.X + x, cropArea.Y + y, plane);
+                        int destIndex = (y * cropArea.Width + x) * Planes + plane;
+                        croppedData[destIndex] = GetPlaneData(plane)[srcIndex];
+                    }
+                }
+            }
+
+            return new Image(ImageFormat, cropArea.Width, cropArea.Height, new(croppedData), ImageCodec);
+        }
+
+        public Image Resize(int newWidth, int newHeight)
+        {
+            var resizedData = new byte[newWidth * newHeight * Planes];
+            double xRatio = (double)Width / newWidth;
+            double yRatio = (double)Height / newHeight;
+
+            for (int y = 0; y < newHeight; y++)
+            {
+                for (int x = 0; x < newWidth; x++)
+                {
+                    int srcX = (int)(x * xRatio);
+                    int srcY = (int)(y * yRatio);
+                    for (int plane = 0; plane < Planes; plane++)
+                    {
+                        int srcIndex = CalculateComponentDataOffset(srcX, srcY, plane);
+                        int destIndex = (y * newWidth + x) * Planes + plane;
+                        resizedData[destIndex] = GetPlaneData(plane)[srcIndex];
+                    }
+                }
+            }
+
+            return new Image(ImageFormat, newWidth, newHeight, new(resizedData), ImageCodec);
+        }
 
         public static int CalculateSize(ImageFormat format, int width, int height)
         {

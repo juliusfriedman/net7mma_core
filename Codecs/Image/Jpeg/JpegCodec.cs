@@ -489,50 +489,104 @@ namespace Media.Codec.Jpeg
             const int QuantizationTableLength = 64; // Each quantization table has 64 values
 
             // Calculate the quantization table based on the quality
-            short[] quantizationTable = GetQuantizationTable(quality);
+            short[] quantizationTable = GetQuantizationTable(quality, QuantizationTableType.Luminance);
 
             var outputMarker = new Marker(Markers.QuantizationTable, Marker.LengthBytes + 1 + QuantizationTableLength);
 
-            using var outputStream = outputMarker.ToMemoryStream();
-            outputStream.Seek(outputMarker.DataOffset, SeekOrigin.Begin);
-
             // Write the precision and identifier (assuming 8-bit precision and identifier 0)
             byte precisionAndIdentifier = 0; // 0 for 8-bit precision and identifier 0
-            stream.WriteByte(precisionAndIdentifier);
+            outputMarker.Array[outputMarker.DataOffset] = precisionAndIdentifier;
+
+            var i = 1;
 
             // Write the quantization table values
             foreach (short value in quantizationTable)
             {
-                outputStream.WriteByte((byte)value);
+                outputMarker.Array[outputMarker.DataOffset + i ++] = (byte)value;
             }
 
             // Write the DQT marker
             WriteMarker(stream, outputMarker);
+
+            outputMarker.Dispose();
+            outputMarker = null;
+
+            // Calculate the quantization table based on the quality
+            quantizationTable = GetQuantizationTable(quality, QuantizationTableType.Luminance);
+
+            outputMarker = new Marker(Markers.QuantizationTable, Marker.LengthBytes + 1 + QuantizationTableLength);
+
+            // Write the precision and identifier (assuming 8-bit precision and identifier 0)
+            precisionAndIdentifier = 1; // 0 for 8-bit precision and identifier 0
+            outputMarker.Array[outputMarker.DataOffset] = precisionAndIdentifier;
+
+            i = 1;
+
+            // Write the quantization table values
+            foreach (short value in quantizationTable)
+            {
+                outputMarker.Array[outputMarker.DataOffset + i++] = (byte)value;
+            }
+
+            // Write the DQT marker
+            WriteMarker(stream, outputMarker);
+            outputMarker.Dispose();
+            outputMarker = null;
         }
 
-        internal static short[] GetQuantizationTable(int quality)
+        private static readonly short[] DefaultLuminanceQuantTable = new short[64]
+    {
+        16, 11, 10, 16, 24, 40, 51, 61,
+        12, 12, 14, 19, 26, 58, 60, 55,
+        14, 13, 16, 24, 40, 57, 69, 56,
+        14, 17, 22, 29, 51, 87, 80, 62,
+        18, 22, 37, 56, 68, 109, 103, 77,
+        24, 35, 55, 64, 81, 104, 113, 92,
+        49, 64, 78, 87, 103, 121, 120, 101,
+        72, 92, 95, 98, 112, 100, 103, 99
+    };
+
+        private static readonly short[] DefaultChrominanceQuantTable = new short[64]
         {
-            // Standard JPEG quantization table for luminance
-            short[] baseTable =
-            [
-                16, 11, 10, 16, 24, 40, 51, 61,
-                12, 12, 14, 19, 26, 58, 60, 55,
-                14, 13, 16, 24, 40, 57, 69, 56,
-                14, 17, 22, 29, 51, 87, 80, 62,
-                18, 22, 37, 56, 68, 109, 103, 77,
-                24, 35, 55, 64, 81, 104, 113, 92,
-                49, 64, 78, 87, 103, 121, 120, 101,
-                72, 92, 95, 98, 112, 100, 103, 99
-            ];
+        17, 18, 24, 47, 99, 99, 99, 99,
+        18, 21, 26, 66, 99, 99, 99, 99,
+        24, 26, 56, 99, 99, 99, 99, 99,
+        47, 66, 99, 99, 99, 99, 99, 99,
+        99, 99, 99, 99, 99, 99, 99, 99,
+        99, 99, 99, 99, 99, 99, 99, 99,
+        99, 99, 99, 99, 99, 99, 99, 99,
+        99, 99, 99, 99, 99, 99, 99, 99
+        };
 
-            // Scale the base table based on the quality
-            double scaleFactor = (quality < 50) ? 5000.0 / quality : 200.0 - 2.0 * quality;
-            short[] quantizationTable = new short[baseTable.Length];
+        internal enum QuantizationTableType
+        {
+            Luminance,
+            Chrominance
+        }
 
-            for (int i = 0; i < baseTable.Length; i++)
+        internal static short[] GetQuantizationTable(int quality, QuantizationTableType tableType)
+        {
+            if (quality < 1 || quality > 100)
             {
-                int scaledValue = (int)((baseTable[i] * scaleFactor + 50) / 100);
-                quantizationTable[i] = (short)Math.Clamp(scaledValue, 1, 255);
+                throw new ArgumentOutOfRangeException(nameof(quality), "Quality must be between 1 and 100.");
+            }
+
+            short[] baseTable = tableType == QuantizationTableType.Luminance
+                ? DefaultLuminanceQuantTable
+                : DefaultChrominanceQuantTable;
+
+            if (quality == 50)
+            {
+                return (short[])baseTable.Clone();
+            }
+
+            int scaleFactor = quality < 50 ? 5000 / quality : 200 - quality * 2;
+
+            short[] quantizationTable = new short[64];
+            for (int i = 0; i < 64; i++)
+            {
+                int value = (baseTable[i] * scaleFactor + 50) / 100;
+                quantizationTable[i] = (short)Math.Clamp(value, 1, 255);
             }
 
             return quantizationTable;
