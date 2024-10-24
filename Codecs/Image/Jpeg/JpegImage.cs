@@ -157,10 +157,7 @@ public class JpegImage : Image
                         var read = stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count);
                         
                         if (read < dataSegment.Count)
-                            dataSegment = dataSegment.Slice(0, read);
-
-                        using var bitStream = new BitReader(dataSegment.Array, Binary.BitOrder.MostSignificant, 0, 0, true, Environment.ProcessorCount * Environment.ProcessorCount);
-                        JpegCodec.Decompress(imageFormat, jpegState, bitStream);
+                            dataSegment = dataSegment.Slice(0, read);                        
 
                         break;
                     }
@@ -192,11 +189,18 @@ public class JpegImage : Image
             }
         }       
 
+        // If the required tags were not present throw an exception.
         if (imageFormat == null || dataSegment == null && thumbnailData == null)
             throw new InvalidDataException("The provided stream does not contain valid JPEG image data.");
 
-        // Create and return the JpegImage (Could use a Default Jpeg State?)
-        return new JpegImage(imageFormat, width, height, dataSegment ?? thumbnailData, jpegState, markers);
+        // Create the JpegImage which still contains compressed image data.
+        var result = new JpegImage(imageFormat, width, height, dataSegment ?? thumbnailData, jpegState, markers);
+        
+        //Decompress the JpegImage using the JpegCodec.
+        JpegCodec.Decompress(result);
+
+        //Return the result.
+        return result;
     }
 
     public void Save(Stream stream, int quality = 99)

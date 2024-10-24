@@ -105,7 +105,7 @@ namespace Media.Codec.Jpeg
         internal const int BlockSize = 8;
         internal static readonly double SqrtHalf = 1.0 / System.Math.Sqrt(2.0);
 
-        private static void InverseQuantize(short[] block, short[] quantizationTable)
+        private static void InverseQuantize(Span<short> block, Span<short> quantizationTable)
         {
             for (int i = 0; i < block.Length; i++)
             {
@@ -355,35 +355,87 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        internal static void Decompress(ImageFormat imageFormat, JpegState jpegImage, BitReader stream)
+        private static short[] ReadBlock(BitReader stream, HuffmanTable dcTable, HuffmanTable acTable, ref int previousDC)
         {
-            //Span<double> output = stackalloc double[BlockSize];
+            var block = new short[BlockSize * BlockSize];  // Assuming 8x8 block
+
+            // Decode DC coefficient
+            int dcDifference = DecodeHuffman(stream, dcTable);
+            previousDC += dcDifference;
+            block[0] = (short)previousDC;
+
+            // Decode AC coefficients
+            int i = 1;
+            while (i < 64)
+            {
+                int acValue = DecodeHuffman(stream, acTable);
+
+                if (acValue == 0)  // End of Block (EOB)
+                    break;
+
+                int runLength = (acValue >> 4) & 0xF;  // Upper 4 bits
+                int coefficient = acValue & 0xF;       // Lower 4 bits
+
+                i += runLength;  // Skip zeros
+                if (i < 64)
+                {
+                    block[i] = (short)DecodeCoefficient(stream, coefficient);
+                    i++;
+                }
+            }
+
+            return block;
+        }
+
+        private static int DecodeCoefficient(BitReader stream, int size)
+        {
+            if (size == 0)
+                return 0;
+
+            // Read 'size' number of bits
+            int value = (int)stream.ReadBits(size);
+
+            // Convert to a signed integer
+            int signBit = 1 << (size - 1);
+            if ((value & signBit) == 0)
+            {
+                // If the sign bit is not set, the number is negative
+                value -= (1 << size) - 1;
+            }
+
+            return value;
+        }
+
+        internal static void Decompress(JpegImage jpegImage)
+        {
+            using var bitStream = new BitReader(jpegImage.Data.Array, Binary.BitOrder.MostSignificant, 0, 0, true, Environment.ProcessorCount * Environment.ProcessorCount);
+
+            //int previousDc = 0;
 
             //// Step 2: Decode Huffman encoded data
-            //foreach (var component in imageFormat.Components)
+            //foreach (var component in jpegImage.ImageFormat.Components)
             //{
             //    for (int i = 0; i < component.Blocks.Length; i++)
             //    {
-            //        var block = new short[BlockSize];
-            //        // Decode DC coefficient
-            //        int dcCoefficient = DecodeHuffman(stream, jpegState.HuffmanTables[component.Id]);
-            //        block[0] = dcCoefficient;
+            //        var block = ReadBlock(stream, jpegImage.JpegState.HuffmanTables[0], jpegImage.JpegState.HuffmanTables[1], ref previousDc);
 
-            //        // Decode AC coefficients
-            //        for (int j = 1; j < block.Length; j++)
-            //        {
-            //            int acCoefficient = DecodeHuffman(stream, jegState.HuffmanTables[component.Id]);
-            //            block[j] = acCoefficient;
-            //        }
+            //        using var Qk = jpegImage.JpegState.QuantizationTables[component.Id].Qk;
+
+            //        var span = Qk.ToSpan();
+
+            //        var reinterpret = MemoryMarshal.Cast<byte, short>(span);
 
             //        // Step 3: Inverse Quantize
-            //        InverseQuantize(block, jpegState.QuantizationTables[component.Id].Qk);
+            //        InverseQuantize(block, reinterpret);
 
             //        // Step 4: Apply IDCT
-            //        IDCT(block, output);
+            //        if (Vector.IsHardwareAccelerated)
+            //            VIDCT(block, output);
+            //        else
+            //            IDCT(block, output);
 
             //        // Step 5: Store block data for the specific component
-            //        component.Blocks[i] = block;
+            //        ??
             //    }
             //}
         }
