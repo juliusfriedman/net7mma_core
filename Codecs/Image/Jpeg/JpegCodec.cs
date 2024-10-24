@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
 using Codec.Jpeg.Classes;
 using Codec.Jpeg.Markers;
 using Media.Codec.Interfaces;
 using Media.Codecs.Image;
 using Media.Common;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Media.Codec.Jpeg
 {
@@ -230,61 +228,76 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        internal static void HuffmanEncode(Span<short> block, HuffmanTable dcTable, HuffmanTable acTable, BitWriter writer)
+        internal static void HuffmanEncode(Span<short> block, BitWriter writer, params HuffmanTable[] huffmanTables)
         {
-            // DC coefficient encoding
-            int dcValue = block[0];
-            var (dcCode, dcLength) = dcTable.GetCode(dcValue);
-            writer.WriteBits(dcCode, dcLength);
-
-            // AC coefficients encoding
-            int zeroCount = 0;
-            for (int i = 1; i < block.Length; i++)
+            foreach(var huffmanTable in huffmanTables)
             {
-                if (block[i] == 0)
+                if (huffmanTable == null) continue;
+
+                // Step 1: Encode the DC coefficient
+                int dcCoefficient = block[0];
+                int dcCategory = GetBitSize(dcCoefficient);
+                int dcCode = huffmanTable.GetCode(dcCategory);
+                writer.WriteBits(dcCode, huffmanTable.GetCodeLength(dcCategory));
+
+                if (dcCategory > 0)
                 {
-                    zeroCount++;
-                }
-                else
-                {
-                    while (zeroCount > 15)
+                    int dcValue = dcCoefficient;
+                    if (dcCoefficient < 0)
                     {
-                        // Write the special code for 16 zeros in a row
-                        var (acCode, acLength) = acTable.GetCode(0xF0);
-                        writer.WriteBits(acCode, acLength);
-                        zeroCount -= 16;
+                        dcValue = dcCoefficient - 1;
                     }
-
-                    // Encode the non-zero coefficient
-                    int acValue = block[i];
-                    int size = GetBitSize(acValue);
-                    int acCodeValue = (zeroCount << 4) | size;
-                    var ac = acTable.GetCode(acCodeValue);
-                    writer.WriteBits(ac.code, ac.length);
-                    writer.WriteBits(acValue, size);
-
-                    zeroCount = 0;
+                    writer.WriteBits(dcValue, dcCategory);
                 }
-            }
 
-            // Write the end-of-block (EOB) code if there are trailing zeros
-            if (zeroCount > 0)
-            {
-                var (eobCode, eobLength) = acTable.GetCode(0x00);
-                writer.WriteBits(eobCode, eobLength);
+                // Step 2: Encode the AC coefficients
+                int zeroCount = 0;
+                for (int i = 1; i < block.Length; i++)
+                {
+                    int acCoefficient = block[i];
+                    if (acCoefficient == 0)
+                    {
+                        zeroCount++;
+                    }
+                    else
+                    {
+                        while (zeroCount > 15)
+                        {
+                            // Write ZRL (Zero Run Length) code
+                            int zrlCode = huffmanTable.GetCode(0xF0);
+                            writer.WriteBits(zrlCode, huffmanTable.GetCodeLength(0xF0));
+                            zeroCount -= 16;
+                        }
+
+                        int acCategory = GetBitSize(acCoefficient);
+                        int acCode = huffmanTable.GetCode((zeroCount << 4) + acCategory);
+                        writer.WriteBits(acCode, huffmanTable.GetCodeLength((zeroCount << 4) + acCategory));
+
+                        int acValue = acCoefficient;
+                        if (acCoefficient < 0)
+                        {
+                            acValue = acCoefficient - 1;
+                        }
+                        writer.WriteBits(acValue, acCategory);
+
+                        zeroCount = 0;
+                    }
+                }
+
+                // Step 3: Write EOB (End of Block) if there are trailing zeros
+                if (zeroCount > 0)
+                {
+                    int eobCode = huffmanTable.GetCode(0x00);
+                    writer.WriteBits(eobCode, huffmanTable.GetCodeLength(0x00));
+                }
             }
         }
 
+
         private static int GetBitSize(int value)
         {
-            int absValue = Binary.Abs(value);
-            int size = 0;
-            while (absValue > 0)
-            {
-                absValue >>= 1;
-                size++;
-            }
-            return size;
+            if (value == 0) return 0;
+            return (int)Math.Floor(Math.Log2(Math.Abs(value))) + 1;
         }
 
         internal static void VQuantize(Span<double> block, Span<short> quantizationTable, Span<short> output)
@@ -326,52 +339,56 @@ namespace Media.Codec.Jpeg
             int code = 0;
             int length = 0;
 
-            for (int i = 0; i < table.MaxCode.Length; i++)
+            while (true)
             {
-                code = (code << 1) | (stream.ReadBit() ? Binary.One : Binary.Zero);
+                // Read one bit from the stream
+                int bit = (int)stream.ReadBits(1);
+                code = (code << 1) | bit;
                 length++;
 
-                if (code <= table.MaxCode[i])
+                // Try to get the code from the Huffman table
+                int codeLength = table.GetCodeLength(code);
+                if (codeLength == length)
                 {
-                    int index = table.ValPtr[i] + (code - table.MinCode[i]);
-                    if (index < table.Values.Length)
-                    {
-                        return table.Values[index];
-                    }
+                    return table.GetCode(codeLength);
                 }
             }
-
-            return 0;
         }
 
-        public static void Decompress(BitReader stream)
+        internal static void Decompress(JpegImage jpegImage, BitReader stream)
         {
-            // Todo, these should be passed out to the caller so they can be installed (copied to the resulting image)
-            // Example Huffman tables (you need to initialize these properly)
-            HuffmanTable dcTable = new HuffmanTable() { Id = 0 };
-            HuffmanTable acTable = new HuffmanTable() { Id = 1 };
+            //Span<double> output = stackalloc double[BlockSize];
 
-            // Decode DC and AC values
-            int dcValue = DecodeHuffman(stream, dcTable);
-            int acValue = DecodeHuffman(stream, acTable);
+            //// Step 2: Decode Huffman encoded data
+            //foreach (var component in jpegImage.ImageFormat.Components)
+            //{
+            //    for (int i = 0; i < component.Blocks.Length; i++)
+            //    {
+            //        var block = new short[BlockSize];
+            //        // Decode DC coefficient
+            //        int dcCoefficient = DecodeHuffman(stream, jpegImage.JpegState.HuffmanTables[component.Id]);
+            //        block[0] = dcCoefficient;
 
-            // Example block and quantization table
-            short[] block = new short[BlockSize * BlockSize];
-            short[] quantizationTable = new short[BlockSize * BlockSize];
+            //        // Decode AC coefficients
+            //        for (int j = 1; j < block.Length; j++)
+            //        {
+            //            int acCoefficient = DecodeHuffman(stream, jpegImage.JpegState.HuffmanTables[component.Id]);
+            //            block[j] = acCoefficient;
+            //        }
 
-            // Perform inverse quantization
-            InverseQuantize(block, quantizationTable);
+            //        // Step 3: Inverse Quantize
+            //        InverseQuantize(block, jpegImage.JpegState.QuantizationTables[component.Id].Qk);
 
-            // Perform IDCT
-            double[] output = new double[BlockSize * BlockSize];
-            
-            if (Vector.IsHardwareAccelerated)
-                VIDCT(block, output);
-            else
-                IDCT(block, output);
+            //        // Step 4: Apply IDCT
+            //        IDCT(block, output);
+
+            //        // Step 5: Store block data for the specific component
+            //        component.Blocks[i] = block;
+            //    }
+            //}
         }
 
-        public static void Compress(JpegImage jpegImage, Stream outputStream, int quality)
+        internal static void Compress(JpegImage jpegImage, Stream outputStream, int quality)
         {
             // Create a stream around the raw data and compress it to the stream
             using var inputStream = new MemoryStream(jpegImage.Data.Array, jpegImage.Data.Offset, jpegImage.Data.Count, true);
@@ -410,7 +427,7 @@ namespace Media.Codec.Jpeg
                 }
 
                 // Perform Huffman encoding
-                HuffmanEncode(quantizedBlock, jpegImage.JpegState.DcTable, jpegImage.JpegState.AcTable, writer);
+                HuffmanEncode(quantizedBlock, writer, jpegImage.JpegState.HuffmanTables);
             }
 
             // Write the SOS marker
@@ -534,97 +551,29 @@ namespace Media.Codec.Jpeg
             outputMarker = null;
         }
 
-        internal static void ReadQuantizationTable(JpegState jpegState, Stream stream)
-        {
-            // Read the length of the quantization table segment
-            int length = (stream.ReadByte() << 8) | stream.ReadByte();
-            length -= 2; // Subtract the length bytes
+        private static readonly short[] DefaultLuminanceQuantTable =
+        [
+            16, 11, 10, 16, 24, 40, 51, 61,
+            12, 12, 14, 19, 26, 58, 60, 55,
+            14, 13, 16, 24, 40, 57, 69, 56,
+            14, 17, 22, 29, 51, 87, 80, 62,
+            18, 22, 37, 56, 68, 109, 103, 77,
+            24, 35, 55, 64, 81, 104, 113, 92,
+            49, 64, 78, 87, 103, 121, 120, 101,
+            72, 92, 95, 98, 112, 100, 103, 99
+        ];
 
-            while (length > 0)
-            {
-                byte qtInfo = (byte)stream.ReadByte();
-                int precision = (qtInfo >> 4) == 0 ? 8 : 16;
-                int tableId = qtInfo & 0x0F;
-
-                var quantizationTable = new short[64];
-                for (int i = 0; i < 64; i++)
-                {
-                    quantizationTable[i] = precision == Binary.BitsPerByte ? (short)stream.ReadByte() : (short)((stream.ReadByte() << 8) | stream.ReadByte());
-                }
-
-                // Store the quantization table in the JpegState or another suitable data structure
-                jpegState.QuantizationTables[tableId] = new QuantizationTable(length);
-
-                length -= (precision == 8 ? 65 : 129);
-            }
-        }
-
-        internal static void ReadHuffmanTable(JpegState jpegState, Stream stream)
-        {
-            // Read the length of the Huffman table segment
-            int length = (stream.ReadByte() << 8) | stream.ReadByte();
-            length -= 2; // Subtract the length bytes
-
-            while (length > 0)
-            {
-                byte htInfo = (byte)stream.ReadByte();
-                int tableClass = (htInfo >> 4) & 0x0F;
-                int tableId = htInfo & 0x0F;
-
-                var huffmanTable = new HuffmanTable();
-
-                // Read the number of codes for each length
-                var codeLengths = new byte[16];
-                for (int i = 0; i < 16; i++)
-                {
-                    codeLengths[i] = (byte)stream.ReadByte();
-                }
-
-                // Read the Huffman codes
-                var codes = new List<byte>();
-                for (int i = 0; i < 16; i++)
-                {
-                    for (int j = 0; j < codeLengths[i]; j++)
-                    {
-                        codes.Add((byte)stream.ReadByte());
-                    }
-                }
-
-                //todo
-                // Build the Huffman table
-                //huffmanTable.Build(codeLengths, codes.ToArray());
-
-                //Todo
-                // Store the Huffman table in the JpegState or another suitable data structure
-                //jpegState.HuffmanTables[tableClass, tableId] = huffmanTable;
-
-                length -= (1 + 16 + codes.Count);
-            }
-        }
-
-        private static readonly short[] DefaultLuminanceQuantTable = new short[64]
-    {
-        16, 11, 10, 16, 24, 40, 51, 61,
-        12, 12, 14, 19, 26, 58, 60, 55,
-        14, 13, 16, 24, 40, 57, 69, 56,
-        14, 17, 22, 29, 51, 87, 80, 62,
-        18, 22, 37, 56, 68, 109, 103, 77,
-        24, 35, 55, 64, 81, 104, 113, 92,
-        49, 64, 78, 87, 103, 121, 120, 101,
-        72, 92, 95, 98, 112, 100, 103, 99
-    };
-
-        private static readonly short[] DefaultChrominanceQuantTable = new short[64]
-        {
-        17, 18, 24, 47, 99, 99, 99, 99,
-        18, 21, 26, 66, 99, 99, 99, 99,
-        24, 26, 56, 99, 99, 99, 99, 99,
-        47, 66, 99, 99, 99, 99, 99, 99,
-        99, 99, 99, 99, 99, 99, 99, 99,
-        99, 99, 99, 99, 99, 99, 99, 99,
-        99, 99, 99, 99, 99, 99, 99, 99,
-        99, 99, 99, 99, 99, 99, 99, 99
-        };
+        private static readonly short[] DefaultChrominanceQuantTable =
+        [
+            17, 18, 24, 47, 99, 99, 99, 99,
+            18, 21, 26, 66, 99, 99, 99, 99,
+            24, 26, 56, 99, 99, 99, 99, 99,
+            47, 66, 99, 99, 99, 99, 99, 99,
+            99, 99, 99, 99, 99, 99, 99, 99,
+            99, 99, 99, 99, 99, 99, 99, 99,
+            99, 99, 99, 99, 99, 99, 99, 99,
+            99, 99, 99, 99, 99, 99, 99, 99
+        ];
 
         internal enum QuantizationTableType
         {
@@ -664,45 +613,8 @@ namespace Media.Codec.Jpeg
         {
             foreach (var huffmanTable in huffmanTables)
             {
-                // Create a marker for the Huffman table
-                Marker huffmanTableMarker = new Marker(Markers.HuffmanTable, Marker.LengthBytes + CalculateHuffmanTableSize(huffmanTable));
-
-                //Todo make use of data offset.
-                using var slice = huffmanTableMarker.Data;
-
-                using var memoryStream = slice.ToMemoryStream();
-
-                // Write the Huffman table data to the stream
-                WriteHuffmanTableData(memoryStream, huffmanTable);
-
-                // Write the marker to the stream
-                WriteMarker(stream, huffmanTableMarker);
+                WriteMarker(stream, huffmanTable);
             }
-        }
-
-        private static void WriteHuffmanTableData(Stream stream, HuffmanTable huffmanTable)
-        {
-            // Write the table class and identifier (assuming 0 for DC and 1 for AC)
-            //TODO
-            byte tableClassAndId = 0; // Replace with actual logic to determine the table class and identifier
-            stream.WriteByte(tableClassAndId);
-
-            // Write the number of codes for each bit length (1 to 16)
-            for (int i = 0; i < 16; i++)
-            {
-                byte codeLengthCount = (byte)huffmanTable.CodeTable.Count(kv => kv.Value.length == i + 1);
-                stream.WriteByte(codeLengthCount);
-            }
-
-            // Write the values
-            stream.Write(huffmanTable.Values, 0, huffmanTable.Values.Length);
-        }
-
-        private static int CalculateHuffmanTableSize(HuffmanTable huffmanTable)
-        {
-            // Calculate the size of the Huffman table based on its CodeTable
-            // This is a placeholder implementation and should be replaced with actual logic
-            return huffmanTable.CodeTable.Count * 2; // Example calculation
         }
 
         internal static void WriteMarker(Stream stream, Marker marker)

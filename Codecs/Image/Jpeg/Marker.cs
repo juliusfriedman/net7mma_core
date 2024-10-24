@@ -39,7 +39,11 @@ public class Marker : MemorySegment
 
     public int DataOffset => DataLength > 0 ? Offset + PrefixBytes + LengthBytes : Count - 1;
 
-    public MemorySegment Data => Count > PrefixBytes + LengthBytes ? this.Slice(PrefixBytes + LengthBytes) : Empty;
+    public MemorySegment Data 
+    {
+        get => Count > PrefixBytes + LengthBytes ? this.Slice(PrefixBytes + LengthBytes) : Empty;
+        set => value.CopyTo(Array, DataOffset);
+    }
 
     public bool IsEmpty => DataLength == 0;
 

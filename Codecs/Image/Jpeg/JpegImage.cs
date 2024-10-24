@@ -43,10 +43,12 @@ public class JpegImage : Image
             switch (marker.FunctionCode)
             {
                 case Jpeg.Markers.QuantizationTable:
-                    JpegCodec.ReadQuantizationTable(jpegState, stream);
+                    var dqt = new QuantizationTable(marker);
+                    jpegState.QuantizationTables.Add(dqt);
                     continue;
                 case Jpeg.Markers.HuffmanTable:
-                    JpegCodec.ReadHuffmanTable(jpegState, stream);
+                    var dht = new HuffmanTable(marker);
+                    jpegState.HuffmanTables[dht.Th] = dht;
                     continue;
                 case Jpeg.Markers.NumberOfLines:
                     var numberOfLines = new NumberOfLines(marker);
@@ -157,8 +159,8 @@ public class JpegImage : Image
                         if (read < dataSegment.Count)
                             dataSegment = dataSegment.Slice(0, read);
 
-                        using var bitStream = new BitReader(dataSegment.Array, Binary.BitOrder.MostSignificant, 0, 0, true, Environment.ProcessorCount * Environment.ProcessorCount);
-                        JpegCodec.Decompress(bitStream);
+                        //using var bitStream = new BitReader(dataSegment.Array, Binary.BitOrder.MostSignificant, 0, 0, true, Environment.ProcessorCount * Environment.ProcessorCount);
+                        //JpegCodec.Decompress(this, bitStream);
 
                         break;
                     }
@@ -198,12 +200,6 @@ public class JpegImage : Image
         // Create and return the JpegImage (Could use a Default Jpeg State?)
         return new JpegImage(imageFormat, width, height, dataSegment ?? thumbnailData, jpegState, markers);
     }
-    private void ReadQuantizationTable(Stream stream)
-    {
-        var quantizationTable = new QuantizationTable(stream);
-    }
-
-
 
     public void Save(Stream stream, int quality = 99)
     {
@@ -220,60 +216,7 @@ public class JpegImage : Image
             }
 
             markerBuffer.Remove(Jpeg.Markers.TextComment);
-
-            foreach (var marker in Markers.TryGetValue(Jpeg.Markers.QuantizationTable, out var quantizationTables) ? quantizationTables : Enumerable.Empty<Marker>())
-            {
-                JpegCodec.WriteMarker(stream, marker);
-            }
-
-            markerBuffer.Remove(Jpeg.Markers.QuantizationTable);
-
-            foreach (var marker in markerBuffer.Values.Where(markerBuffer => Jpeg.Markers.IsApplicationMarker(markerBuffer.FunctionCode)))
-            {
-                JpegCodec.WriteMarker(stream, marker);
-
-                markerBuffer.Remove(marker.FunctionCode);
-            }
-        }
-        //else
-        //{
-        //    Span<double> coefficients = stackalloc double[JpegCodec.BlockSize];
-
-        //    Span<short> quantizedCoefficients = stackalloc short[JpegCodec.BlockSize];
-        //    var quantizationTable = JpegCodec.GetQuantizationTable(quality);
-
-        //    using var writer = new BitWriter(stream, Environment.ProcessorCount * Environment.ProcessorCount, true);
-
-        //    Span<byte> bytes = stackalloc byte[Vector<byte>.Count];
-
-        //    // Iterate over each block of the image
-        //    for (int y = 0; y < Height; y += JpegCodec.BlockSize)
-        //    {
-        //        for (int x = 0; x < Width; x += JpegCodec.BlockSize)
-        //        {
-        //            foreach(var mediaComponent in ImageFormat.Components)
-        //            {
-        //                // Step 4.0: Get the pixel data for the media component
-        //                var componentData = GetComponentVector(x, y, mediaComponent.Id); // Y component
-
-        //                componentData.CopyTo(bytes);
-
-        //                // Process each component separately
-        //                ProcessComponent(bytes, quantizationTable, coefficients, quantizedCoefficients, writer);
-        //            }
-        //        }
-        //    }
-        //}
-
-        if (markerBuffer != null)
-        {
-            foreach (var marker in Markers.TryGetValue(Jpeg.Markers.HuffmanTable, out var huffmanTables) ? huffmanTables : Enumerable.Empty<Marker>())
-            {
-                JpegCodec.WriteMarker(stream, marker);
-            }
-
-            markerBuffer.Remove(Jpeg.Markers.HuffmanTable);
-
+            
             foreach (var marker in markerBuffer.Values)
             {
                 JpegCodec.WriteMarker(stream, marker);
@@ -282,11 +225,23 @@ public class JpegImage : Image
         }
         else
         {
-            JpegCodec.WriteQuantizationTableMarker(stream, quality);
+            JpegState.InitializeDefaultHuffmanTables();
+            
+            //JpegCodec.WriteQuantizationTableMarker(stream, JpegState.QuantizationTables[0]);
+        }
 
-            JpegCodec.WriteStartOfFrame(this, stream);
+        foreach (var marker in JpegState.QuantizationTables)
+        {
+            JpegCodec.WriteMarker(stream, marker);
+        }
 
-            JpegCodec.WriteHuffmanTableMarkers(stream, JpegState.DcTable, JpegState.AcTable);
+        JpegCodec.WriteStartOfFrame(this, stream);
+
+        foreach (var marker in JpegState.HuffmanTables)
+        {
+            if (marker == null) continue;
+
+            JpegCodec.WriteMarker(stream, marker);
         }
         
         JpegCodec.WriteStartOfScan(this, stream);
@@ -323,7 +278,7 @@ public class JpegImage : Image
         JpegCodec.Quantize(dctCoefficients, quantizationTable, quantizedCoefficients);
 
         // Step 4.3: Huffman encode the quantized coefficients
-        JpegCodec.HuffmanEncode(quantizedCoefficients, JpegState.DcTable, JpegState.AcTable, writer);
+        JpegCodec.HuffmanEncode(quantizedCoefficients, writer, JpegState.HuffmanTables);
     }
 
     public MemorySegment GetPixelDataAt(int x, int y)
