@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Codec.Jpeg.Classes;
@@ -17,6 +15,10 @@ namespace Media.Codec.Jpeg
     {
         public const int ComponentCount = 4;
 
+        internal const int BlockSize = 8;
+
+        internal static readonly double SqrtHalf = 1.0 / System.Math.Sqrt(2.0);
+
         public static ImageFormat DefaultImageFormat
         {
             get => new
@@ -30,10 +32,65 @@ namespace Media.Codec.Jpeg
                 );
         }
 
+        private static ReadOnlySpan<short> DefaultLuminanceQuantTable =>
+        [
+            16, 11, 10, 16, 24, 40, 51, 61,
+            12, 12, 14, 19, 26, 58, 60, 55,
+            14, 13, 16, 24, 40, 57, 69, 56,
+            14, 17, 22, 29, 51, 87, 80, 62,
+            18, 22, 37, 56, 68, 109, 103, 77,
+            24, 35, 55, 64, 81, 104, 113, 92,
+            49, 64, 78, 87, 103, 121, 120, 101,
+            72, 92, 95, 98, 112, 100, 103, 99
+        ];
+
+        private static ReadOnlySpan<short> DefaultChrominanceQuantTable =>
+        [
+            17, 18, 24, 47, 99, 99, 99, 99,
+            18, 21, 26, 66, 99, 99, 99, 99,
+            24, 26, 56, 99, 99, 99, 99, 99,
+            47, 66, 99, 99, 99, 99, 99, 99,
+            99, 99, 99, 99, 99, 99, 99, 99,
+            99, 99, 99, 99, 99, 99, 99, 99,
+            99, 99, 99, 99, 99, 99, 99, 99,
+            99, 99, 99, 99, 99, 99, 99, 99
+        ];
+
+        private static ReadOnlySpan<short> GetQuantizationTable(int quality, QuantizationTableType tableType)
+        {
+            if (quality < 1 || quality > 100)
+            {
+                throw new ArgumentOutOfRangeException(nameof(quality), "Quality must be between 1 and 100.");
+            }
+
+            var baseTable = tableType == QuantizationTableType.Luminance
+                ? DefaultLuminanceQuantTable
+                : DefaultChrominanceQuantTable;
+
+            if (quality == 50)
+            {
+                return baseTable;
+            }
+
+            int scaleFactor = quality < 50 ? 5000 / quality : 200 - quality * 2;
+
+            var quantizationTable = new short[BlockSize * BlockSize];
+
+            for (int i = 0; i < 64; i++)
+            {
+                int value = (baseTable[i] * scaleFactor + 50) / 100;
+                quantizationTable[i] = (short)Math.Clamp(value, 1, 255);
+            }
+
+            return quantizationTable;
+        }
+
         public JpegCodec()
             : base("JPEG", Binary.ByteOrder.Little, ComponentCount, Binary.BitsPerByte)
         {
         }
+
+        #region ImageCodec
 
         public override MediaType MediaTypes => MediaType.Image;
 
@@ -42,6 +99,7 @@ namespace Media.Codec.Jpeg
         public override bool CanDecode => true;
 
         public IEncoder Encoder => this;
+
         public IDecoder Decoder => this;
 
         public int Encode(JpegImage image, Stream outputStream, int quality = 0)
@@ -54,57 +112,9 @@ namespace Media.Codec.Jpeg
         public JpegImage Decode(Stream inputStream)
             => JpegImage.FromStream(inputStream);
 
-        public static IEnumerable<Marker> ReadMarkers(Stream jpegStream)
-        {
-            int streamOffset = 0;
-            int FunctionCode, CodeSize = 0;
-            byte[] sizeBytes = new byte[Binary.BytesPerShort];
+        #endregion        
 
-            //Find a Jpeg Tag while we are not at the end of the stream
-            //Tags come in the format 0xFFXX
-            while ((FunctionCode = jpegStream.ReadByte()) != -1)
-            {
-                ++streamOffset;
-
-                //If the byte is a prefix byte then continue
-                if (FunctionCode is 0 || FunctionCode is Markers.Prefix || false == Markers.IsKnownFunctionCode((byte)FunctionCode))
-                    continue;
-
-                switch (FunctionCode)
-                {
-                    case Markers.StartOfInformation:
-                    case Markers.EndOfInformation:
-                        goto AtMarker;
-                }
-
-                //Read Length Bytes
-                if (Binary.BytesPerShort != jpegStream.Read(sizeBytes))
-                    throw new InvalidDataException("Not enough bytes to read marker Length.");
-
-                //Calculate Length
-                CodeSize = Binary.ReadU16(sizeBytes, 0, Binary.IsLittleEndian);
-
-                if (CodeSize < 0)
-                    CodeSize = Binary.ReadU16(sizeBytes, 0, Binary.IsBigEndian);
-
-                AtMarker:
-                var Current = new Marker((byte)FunctionCode, CodeSize);
-
-                if (CodeSize > 0)
-                {
-                    jpegStream.Read(Current.Array, Current.DataOffset, CodeSize - Marker.LengthBytes);
-
-                    streamOffset += CodeSize;
-                }
-
-                yield return Current;
-
-                CodeSize = 0;
-            }
-        }
-
-        internal const int BlockSize = 8;
-        internal static readonly double SqrtHalf = 1.0 / System.Math.Sqrt(2.0);
+        #region Decompress
 
         private static void InverseQuantize(Span<short> block, Span<short> quantizationTable)
         {
@@ -113,8 +123,6 @@ namespace Media.Codec.Jpeg
                 block[i] *= quantizationTable[i];
             }
         }
-
-        //Decompress
 
         internal static void VIDCT(Span<short> block, Span<double> output)
         {
@@ -180,7 +188,115 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        //Compress
+        private static int DecodeHuffman(BitReader stream, HuffmanTable table)
+        {
+            int code = 0;
+            int length = 0;
+
+            while (true)
+            {
+                // Read one bit from the stream
+                int bit = (int)stream.ReadBits(1);
+                code = (code << 1) | bit;
+                length++;
+
+                // Try to get the code from the Huffman table
+                int codeLength = table.GetCodeLength(code);
+                if (codeLength == length)
+                {
+                    return table.GetCode(codeLength);
+                }
+            }
+        }
+
+        private static short[] ReadBlock(BitReader stream, HuffmanTable dcTable, HuffmanTable acTable, ref int previousDC)
+        {
+            var block = new short[BlockSize * BlockSize];  // Assuming 8x8 block
+
+            // Decode DC coefficient
+            int dcDifference = DecodeHuffman(stream, dcTable);
+            previousDC += dcDifference;
+            block[0] = (short)previousDC;
+
+            // Decode AC coefficients
+            int i = 1;
+            while (i < 64)
+            {
+                int acValue = DecodeHuffman(stream, acTable);
+
+                if (acValue == 0)  // End of Block (EOB)
+                    break;
+
+                int runLength = (acValue >> 4) & 0xF;  // Upper 4 bits
+                int coefficient = acValue & 0xF;       // Lower 4 bits
+
+                i += runLength;  // Skip zeros
+                if (i < 64)
+                {
+                    block[i] = (short)DecodeCoefficient(stream, coefficient);
+                    i++;
+                }
+            }
+
+            return block;
+        }
+
+        private static int DecodeCoefficient(BitReader stream, int size)
+        {
+            if (size == 0)
+                return 0;
+
+            // Read 'size' number of bits
+            int value = (int)stream.ReadBits(size);
+
+            // Convert to a signed integer
+            int signBit = 1 << (size - 1);
+            if ((value & signBit) == 0)
+            {
+                // If the sign bit is not set, the number is negative
+                value -= (1 << size) - 1;
+            }
+
+            return value;
+        }
+
+        internal static void Decompress(JpegImage jpegImage)
+        {
+            using var bitStream = new BitReader(jpegImage.Data.Array, Binary.BitOrder.MostSignificant, 0, 0, true, Environment.ProcessorCount * Environment.ProcessorCount);
+
+            //int previousDc = 0;
+
+            //// Step 2: Decode Huffman encoded data
+            //foreach (var component in jpegImage.ImageFormat.Components)
+            //{
+            //    for (int i = 0; i < component.Blocks.Length; i++)
+            //    {
+            //        var block = ReadBlock(stream, jpegImage.JpegState.HuffmanTables[0], jpegImage.JpegState.HuffmanTables[1], ref previousDc);
+
+            //        using var Qk = jpegImage.JpegState.QuantizationTables[component.Id].Qk;
+
+            //        var span = Qk.ToSpan();
+
+            //        var reinterpret = MemoryMarshal.Cast<byte, short>(span);
+
+            //        // Step 3: Inverse Quantize
+            //        InverseQuantize(block, reinterpret);
+
+            //        // Step 4: Apply IDCT
+            //        if (Vector.IsHardwareAccelerated)
+            //            VIDCT(block, output);
+            //        else
+            //            IDCT(block, output);
+
+            //        // Step 5: Store block data for the specific component
+            //        ??
+            //    }
+            //}
+        }
+
+        #endregion
+
+        #region Compress
 
         internal static void FDCT(Span<double> input, Span<double> output)
         {
@@ -294,7 +410,6 @@ namespace Media.Codec.Jpeg
             }
         }
 
-
         private static int GetBitSize(int value)
         {
             if (value == 0) return 0;
@@ -333,112 +448,6 @@ namespace Media.Codec.Jpeg
             {
                 output[i] = (short)System.Math.Round(block[i] / quantizationTable[i]);
             }
-        }
-
-        private static int DecodeHuffman(BitReader stream, HuffmanTable table)
-        {
-            int code = 0;
-            int length = 0;
-
-            while (true)
-            {
-                // Read one bit from the stream
-                int bit = (int)stream.ReadBits(1);
-                code = (code << 1) | bit;
-                length++;
-
-                // Try to get the code from the Huffman table
-                int codeLength = table.GetCodeLength(code);
-                if (codeLength == length)
-                {
-                    return table.GetCode(codeLength);
-                }
-            }
-        }
-
-        private static short[] ReadBlock(BitReader stream, HuffmanTable dcTable, HuffmanTable acTable, ref int previousDC)
-        {
-            var block = new short[BlockSize * BlockSize];  // Assuming 8x8 block
-
-            // Decode DC coefficient
-            int dcDifference = DecodeHuffman(stream, dcTable);
-            previousDC += dcDifference;
-            block[0] = (short)previousDC;
-
-            // Decode AC coefficients
-            int i = 1;
-            while (i < 64)
-            {
-                int acValue = DecodeHuffman(stream, acTable);
-
-                if (acValue == 0)  // End of Block (EOB)
-                    break;
-
-                int runLength = (acValue >> 4) & 0xF;  // Upper 4 bits
-                int coefficient = acValue & 0xF;       // Lower 4 bits
-
-                i += runLength;  // Skip zeros
-                if (i < 64)
-                {
-                    block[i] = (short)DecodeCoefficient(stream, coefficient);
-                    i++;
-                }
-            }
-
-            return block;
-        }
-
-        private static int DecodeCoefficient(BitReader stream, int size)
-        {
-            if (size == 0)
-                return 0;
-
-            // Read 'size' number of bits
-            int value = (int)stream.ReadBits(size);
-
-            // Convert to a signed integer
-            int signBit = 1 << (size - 1);
-            if ((value & signBit) == 0)
-            {
-                // If the sign bit is not set, the number is negative
-                value -= (1 << size) - 1;
-            }
-
-            return value;
-        }
-
-        internal static void Decompress(JpegImage jpegImage)
-        {
-            using var bitStream = new BitReader(jpegImage.Data.Array, Binary.BitOrder.MostSignificant, 0, 0, true, Environment.ProcessorCount * Environment.ProcessorCount);
-
-            //int previousDc = 0;
-
-            //// Step 2: Decode Huffman encoded data
-            //foreach (var component in jpegImage.ImageFormat.Components)
-            //{
-            //    for (int i = 0; i < component.Blocks.Length; i++)
-            //    {
-            //        var block = ReadBlock(stream, jpegImage.JpegState.HuffmanTables[0], jpegImage.JpegState.HuffmanTables[1], ref previousDc);
-
-            //        using var Qk = jpegImage.JpegState.QuantizationTables[component.Id].Qk;
-
-            //        var span = Qk.ToSpan();
-
-            //        var reinterpret = MemoryMarshal.Cast<byte, short>(span);
-
-            //        // Step 3: Inverse Quantize
-            //        InverseQuantize(block, reinterpret);
-
-            //        // Step 4: Apply IDCT
-            //        if (Vector.IsHardwareAccelerated)
-            //            VIDCT(block, output);
-            //        else
-            //            IDCT(block, output);
-
-            //        // Step 5: Store block data for the specific component
-            //        ??
-            //    }
-            //}
         }
 
         internal static void Compress(JpegImage jpegImage, Stream outputStream, int quality)
@@ -481,6 +490,63 @@ namespace Media.Codec.Jpeg
             // Perform Huffman encoding
             HuffmanEncode(quantizedBlock, writer, jpegImage.JpegState.HuffmanTables);
         }
+
+        #endregion
+
+        #region Marker Reading
+
+        public static IEnumerable<Marker> ReadMarkers(Stream jpegStream)
+        {
+            int streamOffset = 0;
+            int FunctionCode, CodeSize = 0;
+            byte[] sizeBytes = new byte[Binary.BytesPerShort];
+
+            //Find a Jpeg Tag while we are not at the end of the stream
+            //Tags come in the format 0xFFXX
+            while ((FunctionCode = jpegStream.ReadByte()) != -1)
+            {
+                ++streamOffset;
+
+                //If the byte is a prefix byte then continue
+                if (FunctionCode is 0 || FunctionCode is Markers.Prefix || false == Markers.IsKnownFunctionCode((byte)FunctionCode))
+                    continue;
+
+                switch (FunctionCode)
+                {
+                    case Markers.StartOfInformation:
+                    case Markers.EndOfInformation:
+                        goto AtMarker;
+                }
+
+                //Read Length Bytes
+                if (Binary.BytesPerShort != jpegStream.Read(sizeBytes))
+                    throw new InvalidDataException("Not enough bytes to read marker Length.");
+
+                //Calculate Length
+                CodeSize = Binary.ReadU16(sizeBytes, 0, Binary.IsLittleEndian);
+
+                if (CodeSize < 0)
+                    CodeSize = Binary.ReadU16(sizeBytes, 0, Binary.IsBigEndian);
+
+                AtMarker:
+                var Current = new Marker((byte)FunctionCode, CodeSize);
+
+                if (CodeSize > 0)
+                {
+                    jpegStream.Read(Current.Array, Current.DataOffset, CodeSize - Marker.LengthBytes);
+
+                    streamOffset += CodeSize;
+                }
+
+                yield return Current;
+
+                CodeSize = 0;
+            }
+        }
+
+        #endregion
+
+        #region Marker Writing
 
         internal static void WriteStartOfScan(JpegImage jpegImage, Stream stream)
         {
@@ -582,66 +648,6 @@ namespace Media.Codec.Jpeg
             outputMarker = null;
         }
 
-        public static ReadOnlySpan<short> DefaultLuminanceQuantTable =>
-        [
-            16, 11, 10, 16, 24, 40, 51, 61,
-            12, 12, 14, 19, 26, 58, 60, 55,
-            14, 13, 16, 24, 40, 57, 69, 56,
-            14, 17, 22, 29, 51, 87, 80, 62,
-            18, 22, 37, 56, 68, 109, 103, 77,
-            24, 35, 55, 64, 81, 104, 113, 92,
-            49, 64, 78, 87, 103, 121, 120, 101,
-            72, 92, 95, 98, 112, 100, 103, 99
-        ];
-
-        private static ReadOnlySpan<short> DefaultChrominanceQuantTable =>
-        [
-            17, 18, 24, 47, 99, 99, 99, 99,
-            18, 21, 26, 66, 99, 99, 99, 99,
-            24, 26, 56, 99, 99, 99, 99, 99,
-            47, 66, 99, 99, 99, 99, 99, 99,
-            99, 99, 99, 99, 99, 99, 99, 99,
-            99, 99, 99, 99, 99, 99, 99, 99,
-            99, 99, 99, 99, 99, 99, 99, 99,
-            99, 99, 99, 99, 99, 99, 99, 99
-        ];
-
-        internal enum QuantizationTableType
-        {
-            Luminance,
-            Chrominance
-        }
-
-        
-        internal static ReadOnlySpan<short> GetQuantizationTable(int quality, QuantizationTableType tableType)
-        {
-            if (quality < 1 || quality > 100)
-            {
-                throw new ArgumentOutOfRangeException(nameof(quality), "Quality must be between 1 and 100.");
-            }
-
-            var baseTable = tableType == QuantizationTableType.Luminance
-                ? DefaultLuminanceQuantTable
-                : DefaultChrominanceQuantTable;
-
-            if (quality == 50)
-            {
-                return baseTable;
-            }
-
-            int scaleFactor = quality < 50 ? 5000 / quality : 200 - quality * 2;
-
-            var quantizationTable = new short[BlockSize * BlockSize];
-
-            for (int i = 0; i < 64; i++)
-            {
-                int value = (baseTable[i] * scaleFactor + 50) / 100;
-                quantizationTable[i] = (short)Math.Clamp(value, 1, 255);
-            }
-
-            return quantizationTable;
-        }
-
         internal static void WriteHuffmanTableMarkers(Stream stream, params HuffmanTable[] huffmanTables)
         {
             foreach (var huffmanTable in huffmanTables)
@@ -654,5 +660,7 @@ namespace Media.Codec.Jpeg
         {
             stream.Write(marker.Array, marker.Offset, marker.MarkerLength);
         }
+        
+        #endregion
     }
 }
