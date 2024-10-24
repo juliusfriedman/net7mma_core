@@ -3,7 +3,7 @@ using Media.Common;
 
 namespace Codec.Jpeg.Markers;
 
-public class Exp : Marker
+public class Expand : Marker
 {
     public new const int Length = 3;
 
@@ -35,12 +35,12 @@ public class Exp : Marker
         }
     }
 
-    public Exp(MemorySegment data)
+    public Expand(MemorySegment data)
       : base(data)
     {
     }
 
-    public Exp()
+    public Expand()
         : base(Media.Codec.Jpeg.Markers.Expand, LengthBytes + Length)
     {
     }

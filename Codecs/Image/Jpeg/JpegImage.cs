@@ -88,16 +88,16 @@ public class JpegImage : Image
                     //Warning, check for invalid number of components.
                     var numberOfComponents = Binary.Min(Binary.Four, tag.Nf);
 
-                    int bitsPerComponent = bitDepth / numberOfComponents;
+                    var bitsPerComponent = bitDepth / numberOfComponents;
 
                     if (bitsPerComponent == 0)
                         bitsPerComponent = Binary.BitsPerByte;
 
-                    JpegComponent[] mediaComponents = new JpegComponent[numberOfComponents];
-                    int[] widths = new int[numberOfComponents];
-                    int[] heights = new int[numberOfComponents];
+                    var mediaComponents = new JpegComponent[numberOfComponents];
+                    var widths = new int[numberOfComponents];
+                    var heights = new int[numberOfComponents];
 
-                    int remains = tag.DataLength - StartOfFrame.Length;
+                    var remains = tag.DataLength - StartOfFrame.Length;
 
                     // Read the components and sampling information
                     for (int componentIndex = 0; componentIndex < numberOfComponents && remains > 0; componentIndex++)
@@ -170,6 +170,16 @@ public class JpegImage : Image
                         {
                             using var appExtension = new AppExtension(app);
                             thumbnailData = appExtension.ThumbnailData;
+                            switch (appExtension.ThumbnailFormatType)
+                            {
+                                default:
+                                case ThumbnailFormatType.RGB:
+                                    imageFormat = ImageFormat.RGB(8);
+                                    break;
+                                case ThumbnailFormatType.YCbCr:
+                                    imageFormat = ImageFormat.YUV(8);
+                                    break;
+                            }
                         }
                         else
                         {
@@ -257,7 +267,6 @@ public class JpegImage : Image
             JpegCodec.WriteInformationMarker(Jpeg.Markers.EndOfInformation, stream);
         }
     }
-
 
     private void ProcessComponent(Span<byte> span, Span<short> quantizationTable, Span<double> coefficients, Span<short> quantizedCoefficients, BitWriter writer)
     {

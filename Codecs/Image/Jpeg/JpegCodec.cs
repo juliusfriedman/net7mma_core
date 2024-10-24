@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Numerics;
@@ -444,42 +445,41 @@ namespace Media.Codec.Jpeg
         {
             // Create a stream around the raw data and compress it to the stream
             using var inputStream = new MemoryStream(jpegImage.Data.Array, jpegImage.Data.Offset, jpegImage.Data.Count, true);
-            using (var reader = new BitReader(inputStream))
-            using (var writer = new BitWriter(outputStream))
+            using var reader = new BitReader(inputStream);
+            using var writer = new BitWriter(outputStream);
+
+            var blockSizeSquared = BlockSize * BlockSize;
+
+            // Example quantization table (you need to initialize this properly)
+            Span<short> quantizationTable = stackalloc short[blockSizeSquared];
+
+            // Span
+            // Read the input data (this part is simplified for illustration purposes)
+            Span<double> inputBlock = stackalloc double[blockSizeSquared];
+
+            for (int i = 0; i < BlockSize * BlockSize; i++)
             {
-                var blockSizeSquared = BlockSize * BlockSize;
-
-                // Example quantization table (you need to initialize this properly)
-                Span<short> quantizationTable = stackalloc short[blockSizeSquared];
-
-                // Span
-                // Read the input data (this part is simplified for illustration purposes)
-                Span<double> inputBlock = stackalloc double[blockSizeSquared];
-
-                for (int i = 0; i < BlockSize * BlockSize; i++)
-                {
-                    inputBlock[i] = reader.Read8();
-                }
-
-                // Span
-                // Perform forward DCT and quantization
-                Span<double> dctBlock = stackalloc double[blockSizeSquared];
-                Span<short> quantizedBlock = stackalloc short[blockSizeSquared];
-
-                if (Vector.IsHardwareAccelerated)
-                {
-                    VFDCT(inputBlock, dctBlock);
-                    VQuantize(dctBlock, quantizationTable, quantizedBlock);
-                }
-                else
-                {
-                    FDCT(inputBlock, dctBlock);
-                    Quantize(dctBlock, quantizationTable, quantizedBlock);
-                }
-
-                // Perform Huffman encoding
-                HuffmanEncode(quantizedBlock, writer, jpegImage.JpegState.HuffmanTables);
+                inputBlock[i] = reader.Read8();
             }
+
+            // Span
+            // Perform forward DCT and quantization
+            Span<double> dctBlock = stackalloc double[blockSizeSquared];
+            Span<short> quantizedBlock = stackalloc short[blockSizeSquared];
+
+            if (Vector.IsHardwareAccelerated)
+            {
+                VFDCT(inputBlock, dctBlock);
+                VQuantize(dctBlock, quantizationTable, quantizedBlock);
+            }
+            else
+            {
+                FDCT(inputBlock, dctBlock);
+                Quantize(dctBlock, quantizationTable, quantizedBlock);
+            }
+
+            // Perform Huffman encoding
+            HuffmanEncode(quantizedBlock, writer, jpegImage.JpegState.HuffmanTables);
         }
 
         internal static void WriteStartOfScan(JpegImage jpegImage, Stream stream)
@@ -554,13 +554,11 @@ namespace Media.Codec.Jpeg
             const int QuantizationTableLength = 64; // Each quantization table has 64 values
 
             // Calculate the quantization table based on the quality
-            short[] quantizationTable = GetQuantizationTable(quality, QuantizationTableType.Luminance);
+            var quantizationTable = GetQuantizationTable(quality, QuantizationTableType.Luminance);
 
-            var outputMarker = new Marker(Markers.QuantizationTable, Marker.LengthBytes + 1 + QuantizationTableLength * 2);
+            var outputMarker = new QuantizationTable(QuantizationTableLength * 2 + 1);
 
-            // Write the precision and identifier (assuming 8-bit precision and identifier 0)
-            byte precisionAndIdentifier = 0; // 0 for 8-bit precision and identifier 0
-            outputMarker.Array[outputMarker.DataOffset] = precisionAndIdentifier;
+            outputMarker.Pq = 0; // 8-bit precision
 
             var i = 1;
 
@@ -584,7 +582,7 @@ namespace Media.Codec.Jpeg
             outputMarker = null;
         }
 
-        private static readonly short[] DefaultLuminanceQuantTable =
+        public static ReadOnlySpan<short> DefaultLuminanceQuantTable =>
         [
             16, 11, 10, 16, 24, 40, 51, 61,
             12, 12, 14, 19, 26, 58, 60, 55,
@@ -596,7 +594,7 @@ namespace Media.Codec.Jpeg
             72, 92, 95, 98, 112, 100, 103, 99
         ];
 
-        private static readonly short[] DefaultChrominanceQuantTable =
+        private static ReadOnlySpan<short> DefaultChrominanceQuantTable =>
         [
             17, 18, 24, 47, 99, 99, 99, 99,
             18, 21, 26, 66, 99, 99, 99, 99,
@@ -614,25 +612,27 @@ namespace Media.Codec.Jpeg
             Chrominance
         }
 
-        internal static short[] GetQuantizationTable(int quality, QuantizationTableType tableType)
+        
+        internal static ReadOnlySpan<short> GetQuantizationTable(int quality, QuantizationTableType tableType)
         {
             if (quality < 1 || quality > 100)
             {
                 throw new ArgumentOutOfRangeException(nameof(quality), "Quality must be between 1 and 100.");
             }
 
-            short[] baseTable = tableType == QuantizationTableType.Luminance
+            var baseTable = tableType == QuantizationTableType.Luminance
                 ? DefaultLuminanceQuantTable
                 : DefaultChrominanceQuantTable;
 
             if (quality == 50)
             {
-                return (short[])baseTable.Clone();
+                return baseTable;
             }
 
             int scaleFactor = quality < 50 ? 5000 / quality : 200 - quality * 2;
 
-            short[] quantizationTable = new short[64];
+            var quantizationTable = new short[BlockSize * BlockSize];
+
             for (int i = 0; i < 64; i++)
             {
                 int value = (baseTable[i] * scaleFactor + 50) / 100;
