@@ -41,6 +41,7 @@ public class HuffmanTable : Marker
 
     /// <summary>
     /// Table class, 0 = DC table or lossless table, 1 = AC table
+    /// Baseline 0 or 1, Progressive DCT or Lossless = 0
     /// </summary>
     public int Te
     {
@@ -58,6 +59,7 @@ public class HuffmanTable : Marker
 
     /// <summary>
     /// Huffman table destination identifier, (one of four possible destination identifiers).
+    /// Baseline 0 or 1, Extended 0 to 3
     /// </summary>
     public int Th
     {

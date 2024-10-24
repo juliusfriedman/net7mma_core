@@ -355,29 +355,29 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        internal static void Decompress(JpegImage jpegImage, BitReader stream)
+        internal static void Decompress(ImageFormat imageFormat, JpegState jpegImage, BitReader stream)
         {
             //Span<double> output = stackalloc double[BlockSize];
 
             //// Step 2: Decode Huffman encoded data
-            //foreach (var component in jpegImage.ImageFormat.Components)
+            //foreach (var component in imageFormat.Components)
             //{
             //    for (int i = 0; i < component.Blocks.Length; i++)
             //    {
             //        var block = new short[BlockSize];
             //        // Decode DC coefficient
-            //        int dcCoefficient = DecodeHuffman(stream, jpegImage.JpegState.HuffmanTables[component.Id]);
+            //        int dcCoefficient = DecodeHuffman(stream, jpegState.HuffmanTables[component.Id]);
             //        block[0] = dcCoefficient;
 
             //        // Decode AC coefficients
             //        for (int j = 1; j < block.Length; j++)
             //        {
-            //            int acCoefficient = DecodeHuffman(stream, jpegImage.JpegState.HuffmanTables[component.Id]);
+            //            int acCoefficient = DecodeHuffman(stream, jegState.HuffmanTables[component.Id]);
             //            block[j] = acCoefficient;
             //        }
 
             //        // Step 3: Inverse Quantize
-            //        InverseQuantize(block, jpegImage.JpegState.QuantizationTables[component.Id].Qk);
+            //        InverseQuantize(block, jpegState.QuantizationTables[component.Id].Qk);
 
             //        // Step 4: Apply IDCT
             //        IDCT(block, output);
@@ -508,7 +508,7 @@ namespace Media.Codec.Jpeg
             // Calculate the quantization table based on the quality
             short[] quantizationTable = GetQuantizationTable(quality, QuantizationTableType.Luminance);
 
-            var outputMarker = new Marker(Markers.QuantizationTable, Marker.LengthBytes + 1 + QuantizationTableLength);
+            var outputMarker = new Marker(Markers.QuantizationTable, Marker.LengthBytes + 1 + QuantizationTableLength * 2);
 
             // Write the precision and identifier (assuming 8-bit precision and identifier 0)
             byte precisionAndIdentifier = 0; // 0 for 8-bit precision and identifier 0
@@ -522,22 +522,7 @@ namespace Media.Codec.Jpeg
                 outputMarker.Array[outputMarker.DataOffset + i ++] = (byte)value;
             }
 
-            // Write the DQT marker
-            WriteMarker(stream, outputMarker);
-
-            outputMarker.Dispose();
-            outputMarker = null;
-
-            // Calculate the quantization table based on the quality
-            quantizationTable = GetQuantizationTable(quality, QuantizationTableType.Luminance);
-
-            outputMarker = new Marker(Markers.QuantizationTable, Marker.LengthBytes + 1 + QuantizationTableLength);
-
-            // Write the precision and identifier (assuming 8-bit precision and identifier 0)
-            precisionAndIdentifier = 1; // 0 for 8-bit precision and identifier 0
-            outputMarker.Array[outputMarker.DataOffset] = precisionAndIdentifier;
-
-            i = 1;
+            quantizationTable = GetQuantizationTable(quality, QuantizationTableType.Chrominance);
 
             // Write the quantization table values
             foreach (short value in quantizationTable)

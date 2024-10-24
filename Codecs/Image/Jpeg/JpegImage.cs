@@ -126,10 +126,9 @@ public class JpegImage : Image
                     {
                         using var sos = new StartOfScan(marker);                        
                         
-                        jpegState.Ss = (byte)sos.Ss;                        
+                        jpegState.Ss = (byte)sos.Ss;
 
-                        if (sos.Se > 0)
-                            jpegState.Se = (byte)sos.Se;
+                        jpegState.Se = (byte)sos.Se;
 
                         jpegState.Ah = (byte)sos.Ah;
                         jpegState.Al = (byte)sos.Al;
@@ -159,8 +158,8 @@ public class JpegImage : Image
                         if (read < dataSegment.Count)
                             dataSegment = dataSegment.Slice(0, read);
 
-                        //using var bitStream = new BitReader(dataSegment.Array, Binary.BitOrder.MostSignificant, 0, 0, true, Environment.ProcessorCount * Environment.ProcessorCount);
-                        //JpegCodec.Decompress(this, bitStream);
+                        using var bitStream = new BitReader(dataSegment.Array, Binary.BitOrder.MostSignificant, 0, 0, true, Environment.ProcessorCount * Environment.ProcessorCount);
+                        JpegCodec.Decompress(imageFormat, jpegState, bitStream);
 
                         break;
                     }

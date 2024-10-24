@@ -13,24 +13,24 @@ namespace Codec.Jpeg.Classes;
 internal sealed class JpegState : IEquatable<JpegState>
 {
     // Default Huffman tables
-    private static readonly byte[] DefaultLuminanceDCHuffmanTable = new byte[]
-    {
+    private static ReadOnlySpan<byte> DefaultLuminanceDCHuffmanTable
+    => [
         0x00, 0x01, 0x05, 0x01, 0x01, 0x01, 0x01, 0x01,
         0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
         0x08, 0x09, 0x0A, 0x0B
-    };
+    ];
 
-    private static readonly byte[] DefaultChrominanceDCHuffmanTable = new byte[]
-    {
+    private static ReadOnlySpan<byte> DefaultChrominanceDCHuffmanTable
+    => [
         0x00, 0x03, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01,
         0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00,
         0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
         0x07, 0x08, 0x09, 0x0A, 0x0B
-    };
+    ];
 
-    private static readonly byte[] DefaultLuminanceACHuffmanTable = new byte[]
-    {
+    private static ReadOnlySpan<byte> DefaultLuminanceACHuffmanTable
+    => [
         0x00, 0x02, 0x01, 0x03, 0x03, 0x02, 0x04, 0x03,
         0x05, 0x05, 0x04, 0x04, 0x00, 0x00, 0x01, 0x7D,
         0x01, 0x02, 0x03, 0x00, 0x04, 0x11, 0x05, 0x12,
@@ -54,10 +54,10 @@ internal sealed class JpegState : IEquatable<JpegState>
         0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9, 0xEA,
         0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8,
         0xF9, 0xFA
-    };
+    ];
 
-    private static readonly byte[] DefaultChrominanceACHuffmanTable = new byte[]
-    {
+    private static ReadOnlySpan<byte> DefaultChrominanceACHuffmanTable
+    => [
         0x00, 0x02, 0x01, 0x02, 0x04, 0x04, 0x03, 0x04,
         0x07, 0x05, 0x04, 0x04, 0x00, 0x01, 0x02, 0x77,
         0x00, 0x01, 0x02, 0x03, 0x11, 0x04, 0x05, 0x21,
@@ -66,7 +66,7 @@ internal sealed class JpegState : IEquatable<JpegState>
         0xA1, 0xB1, 0xC1, 0x09, 0x23, 0x33, 0x52, 0xF0,
         0x15, 0x62, 0x72, 0xD1, 0x0A, 0x16, 0x24, 0x34,
         0xE1, 0x25, 0xF1, 0x17, 0x18, 0x19, 0x1A, 0x26
-    };
+    ];
 
     /// <summary>
     /// The function code which corresponds to the StartOfScan marker.
@@ -123,21 +123,27 @@ internal sealed class JpegState : IEquatable<JpegState>
     internal void InitializeDefaultHuffmanTables()
     {
         // Define default Huffman tables for DC and AC components
-        var HuffmanTable = new HuffmanTable(DefaultLuminanceDCHuffmanTable.Length);
-        HuffmanTable.Data = new MemorySegment(DefaultLuminanceDCHuffmanTable);
-        HuffmanTables.Add(HuffmanTable);
+        var huffmanTable = new HuffmanTable(DefaultLuminanceDCHuffmanTable.Length + DefaultChrominanceDCHuffmanTable.Length + DefaultLuminanceACHuffmanTable.Length + DefaultChrominanceACHuffmanTable.Length);
 
-        HuffmanTable = new HuffmanTable(DefaultChrominanceDCHuffmanTable.Length);
-        HuffmanTable.Data = new MemorySegment(DefaultChrominanceDCHuffmanTable);
-        HuffmanTables.Add(HuffmanTable);
+        var span = huffmanTable.ToSpan();
 
-        HuffmanTable = new HuffmanTable(DefaultLuminanceACHuffmanTable.Length);
-        HuffmanTable.Data = new MemorySegment(DefaultLuminanceACHuffmanTable);
-        HuffmanTables.Add(HuffmanTable);
+        var offset = huffmanTable.DataOffset;
 
-        HuffmanTable = new HuffmanTable(DefaultChrominanceACHuffmanTable.Length);
-        HuffmanTable.Data = new MemorySegment(DefaultChrominanceACHuffmanTable);
-        HuffmanTables.Add(HuffmanTable);
+        DefaultLuminanceDCHuffmanTable.CopyTo(span.Slice(offset));
+
+        offset += DefaultLuminanceDCHuffmanTable.Length;
+
+        DefaultChrominanceDCHuffmanTable.CopyTo(span.Slice(offset));
+
+        offset += DefaultChrominanceDCHuffmanTable.Length;
+
+        DefaultLuminanceACHuffmanTable.CopyTo(span.Slice(offset));
+
+        offset += DefaultLuminanceACHuffmanTable.Length;
+
+        DefaultChrominanceACHuffmanTable.CopyTo(span.Slice(offset));
+
+        HuffmanTables.Add(huffmanTable);
     }
 
     public override bool Equals(object obj)
