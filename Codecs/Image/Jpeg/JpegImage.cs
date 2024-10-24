@@ -215,7 +215,7 @@ public class JpegImage : Image
         {
             JpegState.InitializeDefaultHuffmanTables();
             
-            //JpegCodec.WriteQuantizationTableMarker(stream, JpegState.QuantizationTables[0]);
+            JpegCodec.WriteQuantizationTableMarker(stream, quality);
         }
 
         foreach (var marker in JpegState.QuantizationTables)
