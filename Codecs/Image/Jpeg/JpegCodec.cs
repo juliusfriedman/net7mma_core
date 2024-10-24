@@ -117,7 +117,7 @@ namespace Media.Codec.Jpeg
 
         //Decompress
 
-        internal static void VIDCT(short[] block, double[] output)
+        internal static void VIDCT(Span<short> block, Span<double> output)
         {
             const int BlockSize = 8;
             double SqrtHalf = 1.0 / System.Math.Sqrt(2.0);
@@ -155,7 +155,7 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        internal static void IDCT(short[] block, double[] output)
+        internal static void IDCT(Span<short> block, Span<double> output)
         {
             for (int y = 0; y < BlockSize; y++)
             {
@@ -183,7 +183,7 @@ namespace Media.Codec.Jpeg
 
         //Compress
 
-        internal static void FDCT(double[] input, double[] output)
+        internal static void FDCT(Span<double> input, Span<double> output)
         {
             for (int u = 0; u < BlockSize; u++)
             {
@@ -206,7 +206,7 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        internal static void VFDCT(double[] input, double[] output)
+        internal static void VFDCT(Span<double> input, Span<double> output)
         {
             for (int u = 0; u < BlockSize; u++)
             {
@@ -217,7 +217,7 @@ namespace Media.Codec.Jpeg
                     {
                         for (int y = 0; y < BlockSize; y += Vector<double>.Count)
                         {
-                            var inputVector = new Vector<double>(input, y * BlockSize + x);
+                            var inputVector = new Vector<double>(input);
                             var cosX = new Vector<double>(System.Math.Cos((2 * x + 1) * u * System.Math.PI / 16));
                             var cosY = new Vector<double>(System.Math.Cos((2 * y + 1) * v * System.Math.PI / 16));
                             sum += inputVector * cosX * cosY;
@@ -230,7 +230,7 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        private static void HuffmanEncode(short[] block, HuffmanTable dcTable, HuffmanTable acTable, BitWriter writer)
+        internal static void HuffmanEncode(Span<short> block, HuffmanTable dcTable, HuffmanTable acTable, BitWriter writer)
         {
             // DC coefficient encoding
             int dcValue = block[0];
@@ -287,7 +287,7 @@ namespace Media.Codec.Jpeg
             return size;
         }
 
-        internal static void VQuantize(double[] block, short[] quantizationTable, short[] output)
+        internal static void VQuantize(Span<double> block, Span<short> quantizationTable, Span<short> output)
         {
             int VectorSize = Vector<double>.Count;
             int i = 0;
@@ -295,7 +295,7 @@ namespace Media.Codec.Jpeg
             // Process in chunks of VectorSize
             for (; i <= block.Length - VectorSize; i += VectorSize)
             {
-                var blockVector = new Vector<double>(block, i);
+                var blockVector = new Vector<double>(block);
                 var quantizationVector = new Vector<double>(MemoryMarshal.Cast<short, byte>(quantizationTable));
                 var resultVector = blockVector / quantizationVector;
 
@@ -313,49 +313,11 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        internal static void Quantize(double[] block, short[] quantizationTable, short[] output)
+        internal static void Quantize(Span<double> block, Span<short> quantizationTable, Span<short> output)
         {
             for (int i = 0; i < BlockSize * BlockSize; i++)
             {
                 output[i] = (short)System.Math.Round(block[i] / quantizationTable[i]);
-            }
-        }
-
-        internal class HuffmanTable
-        {
-            public byte Id;
-
-            public int[] MinCode { get; set; }
-            public int[] MaxCode { get; set; }
-            public int[] ValPtr { get; set; }
-            public byte[] Values { get; set; }
-            public Dictionary<int, (int code, int length)> CodeTable { get; set; }
-
-            public HuffmanTable()
-            {
-                MinCode = new int[16];
-                MaxCode = new int[16];
-                ValPtr = new int[16];
-                Values = new byte[256];
-                CodeTable = new Dictionary<int, (int code, int length)>();
-            }
-
-            public (int code, int length) GetCode(int value)
-            {
-                if (CodeTable.TryGetValue(value, out var codeInfo))
-                {
-                    return codeInfo;
-                }
-                return (0, 0);
-            }
-
-            public int GetCodeLength(int value)
-            {
-                if (CodeTable.TryGetValue(value, out var codeInfo))
-                {
-                    return codeInfo.length;
-                }
-                return 0;
             }
         }
 
@@ -416,72 +378,15 @@ namespace Media.Codec.Jpeg
             using (var reader = new BitReader(inputStream))
             using (var writer = new BitWriter(outputStream))
             {
+                var blockSizeSquared = BlockSize * BlockSize;
+
                 // Span
                 // Example quantization table (you need to initialize this properly)
-                short[] quantizationTable = new short[BlockSize * BlockSize];
-
-                // Example Huffman tables (you need to initialize these properly)
-                HuffmanTable dcTable = new HuffmanTable
-                {
-                    Id = 0,
-                    MinCode = [0, 1, 5, 6, 14, 30, 62, 126, 254, 510, 1022, 2046, 4094, 8190, 16382, 32766],
-                    MaxCode = [0, 1, 5, 6, 14, 30, 62, 126, 254, 510, 1022, 2046, 4094, 8190, 16382, 32766],
-                    ValPtr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-                    Values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-                    CodeTable = new Dictionary<int, (int code, int length)>
-                    {
-                        { 0, (0b00, 2) },
-                        { 1, (0b01, 2) },
-                        { 2, (0b100, 3) },
-                        { 3, (0b101, 3) },
-                        { 4, (0b1100, 4) },
-                        { 5, (0b1101, 4) },
-                        { 6, (0b11100, 5) },
-                        { 7, (0b11101, 5) },
-                        { 8, (0b111100, 6) },
-                        { 9, (0b111101, 6) },
-                        { 10, (0b1111100, 7) },
-                        { 11, (0b1111101, 7) },
-                        { 12, (0b11111100, 8) },
-                        { 13, (0b11111101, 8) },
-                        { 14, (0b111111100, 9) },
-                        { 15, (0b111111101, 9) }
-                    }
-                };
-
-                HuffmanTable acTable = new HuffmanTable
-                {
-                    Id = 1,
-                    MinCode = [0, 1, 5, 6, 14, 30, 62, 126, 254, 510, 1022, 2046, 4094, 8190, 16382, 32766],
-                    MaxCode = [0, 1, 5, 6, 14, 30, 62, 126, 254, 510, 1022, 2046, 4094, 8190, 16382, 32766],
-                    ValPtr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-                    Values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
-                    CodeTable = new Dictionary<int, (int code, int length)>
-                    {
-                        { 0, (0b00, 2) },
-                        { 1, (0b01, 2) },
-                        { 2, (0b100, 3) },
-                        { 3, (0b101, 3) },
-                        { 4, (0b1100, 4) },
-                        { 5, (0b1101, 4) },
-                        { 6, (0b11100, 5) },
-                        { 7, (0b11101, 5) },
-                        { 8, (0b111100, 6) },
-                        { 9, (0b111101, 6) },
-                        { 10, (0b1111100, 7) },
-                        { 11, (0b1111101, 7) },
-                        { 12, (0b11111100, 8) },
-                        { 13, (0b11111101, 8) },
-                        { 14, (0b111111100, 9) },
-                        { 15, (0b111111101, 9) }
-                    }
-                };
-
-                WriteHuffmanTableMarkers(outputStream, dcTable, acTable);
+                Span<short> quantizationTable = stackalloc short[blockSizeSquared];
 
                 // Span
                 // Read the input data (this part is simplified for illustration purposes)
-                double[] inputBlock = new double[BlockSize * BlockSize];
+                Span<double> inputBlock = stackalloc double[blockSizeSquared];
 
                 for (int i = 0; i < BlockSize * BlockSize; i++)
                 {
@@ -490,24 +395,22 @@ namespace Media.Codec.Jpeg
 
                 // Span
                 // Perform forward DCT and quantization
-                double[] dctBlock = new double[BlockSize * BlockSize];
-                short[] quantizedBlock = new short[BlockSize * BlockSize];
+                Span<double> dctBlock = stackalloc double[blockSizeSquared];
+                Span<short> quantizedBlock = stackalloc short[blockSizeSquared];
 
                 if (Vector.IsHardwareAccelerated)
                 {
                     VFDCT(inputBlock, dctBlock);
                     VQuantize(dctBlock, quantizationTable, quantizedBlock);
-                    WriteQuantizationTableMarker(outputStream, quality); // Write the quantization table
                 }
                 else
                 {
                     FDCT(inputBlock, dctBlock);
                     Quantize(dctBlock, quantizationTable, quantizedBlock);
-                    WriteQuantizationTableMarker(outputStream, quality); // Write the quantization table
                 }
 
                 // Perform Huffman encoding
-                HuffmanEncode(quantizedBlock, dcTable, acTable, writer);
+                HuffmanEncode(quantizedBlock, jpegImage.JpegState.DcTable, jpegImage.JpegState.AcTable, writer);
             }
 
             // Write the SOS marker
@@ -581,15 +484,17 @@ namespace Media.Codec.Jpeg
             stream.WriteByte(functionCode);
         }
 
-        private static void WriteQuantizationTableMarker(Stream stream, int quality)
+        internal static void WriteQuantizationTableMarker(Stream stream, int quality)
         {
             const int QuantizationTableLength = 64; // Each quantization table has 64 values
 
             // Calculate the quantization table based on the quality
             short[] quantizationTable = GetQuantizationTable(quality);
 
-            // Write the DQT marker
-            WriteMarker(stream, new Marker(Markers.QuantizationTable, Marker.LengthBytes + 1 + QuantizationTableLength));
+            var outputMarker = new Marker(Markers.QuantizationTable, Marker.LengthBytes + 1 + QuantizationTableLength);
+
+            using var outputStream = outputMarker.ToMemoryStream();
+            outputStream.Seek(outputMarker.DataOffset, SeekOrigin.Begin);
 
             // Write the precision and identifier (assuming 8-bit precision and identifier 0)
             byte precisionAndIdentifier = 0; // 0 for 8-bit precision and identifier 0
@@ -598,11 +503,14 @@ namespace Media.Codec.Jpeg
             // Write the quantization table values
             foreach (short value in quantizationTable)
             {
-                stream.WriteByte((byte)value);
+                outputStream.WriteByte((byte)value);
             }
+
+            // Write the DQT marker
+            WriteMarker(stream, outputMarker);
         }
 
-        private static short[] GetQuantizationTable(int quality)
+        internal static short[] GetQuantizationTable(int quality)
         {
             // Standard JPEG quantization table for luminance
             short[] baseTable =
@@ -630,7 +538,7 @@ namespace Media.Codec.Jpeg
             return quantizationTable;
         }
 
-        private static void WriteHuffmanTableMarkers(Stream stream, params HuffmanTable[] huffmanTables)
+        internal static void WriteHuffmanTableMarkers(Stream stream, params HuffmanTable[] huffmanTables)
         {
             foreach (var huffmanTable in huffmanTables)
             {
@@ -643,11 +551,10 @@ namespace Media.Codec.Jpeg
                 using var memoryStream = slice.ToMemoryStream();
 
                 // Write the Huffman table data to the stream
-                WriteHuffmanTableData(stream, huffmanTable);
+                WriteHuffmanTableData(memoryStream, huffmanTable);
 
                 // Write the marker to the stream
                 WriteMarker(stream, huffmanTableMarker);
-
             }
         }
 

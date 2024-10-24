@@ -1,5 +1,7 @@
 ﻿using Codec.Jpeg.Markers;
 using System;
+using static Media.Codec.Jpeg.JpegCodec;
+using System.Collections.Generic;
 
 namespace Codec.Jpeg.Classes;
 
@@ -32,6 +34,62 @@ internal sealed class JpegState : IEquatable<JpegState>
     /// Successive approximation bit position low or point transform
     /// </summary>
     public byte Al;
+
+    public HuffmanTable DcTable = new HuffmanTable
+    {
+        Id = 0,
+        MinCode = [0, 1, 5, 6, 14, 30, 62, 126, 254, 510, 1022, 2046, 4094, 8190, 16382, 32766],
+        MaxCode = [0, 1, 5, 6, 14, 30, 62, 126, 254, 510, 1022, 2046, 4094, 8190, 16382, 32766],
+        ValPtr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+        Values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+        CodeTable = new Dictionary<int, (int code, int length)>
+                    {
+                        { 0, (0b00, 2) },
+                        { 1, (0b01, 2) },
+                        { 2, (0b100, 3) },
+                        { 3, (0b101, 3) },
+                        { 4, (0b1100, 4) },
+                        { 5, (0b1101, 4) },
+                        { 6, (0b11100, 5) },
+                        { 7, (0b11101, 5) },
+                        { 8, (0b111100, 6) },
+                        { 9, (0b111101, 6) },
+                        { 10, (0b1111100, 7) },
+                        { 11, (0b1111101, 7) },
+                        { 12, (0b11111100, 8) },
+                        { 13, (0b11111101, 8) },
+                        { 14, (0b111111100, 9) },
+                        { 15, (0b111111101, 9) }
+                    }
+    };
+
+    public HuffmanTable AcTable = new HuffmanTable
+    {
+        Id = 1,
+        MinCode = [0, 1, 5, 6, 14, 30, 62, 126, 254, 510, 1022, 2046, 4094, 8190, 16382, 32766],
+        MaxCode = [0, 1, 5, 6, 14, 30, 62, 126, 254, 510, 1022, 2046, 4094, 8190, 16382, 32766],
+        ValPtr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+        Values = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+        CodeTable = new Dictionary<int, (int code, int length)>
+                    {
+                        { 0, (0b00, 2) },
+                        { 1, (0b01, 2) },
+                        { 2, (0b100, 3) },
+                        { 3, (0b101, 3) },
+                        { 4, (0b1100, 4) },
+                        { 5, (0b1101, 4) },
+                        { 6, (0b11100, 5) },
+                        { 7, (0b11101, 5) },
+                        { 8, (0b111100, 6) },
+                        { 9, (0b111101, 6) },
+                        { 10, (0b1111100, 7) },
+                        { 11, (0b1111101, 7) },
+                        { 12, (0b11111100, 8) },
+                        { 13, (0b11111101, 8) },
+                        { 14, (0b111111100, 9) },
+                        { 15, (0b111111101, 9) }
+                    }
+    };
 
     /// <summary>
     /// Constructors a <see cref="JpegState"/>

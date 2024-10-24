@@ -7,6 +7,9 @@ using System.Linq;
 using Media.Common.Collections.Generic;
 using Codec.Jpeg.Markers;
 using Codec.Jpeg.Classes;
+using System.Runtime.InteropServices;
+using System.ComponentModel;
+using Media.Common.Interfaces;
 
 namespace Media.Codec.Jpeg;
 
@@ -142,10 +145,16 @@ public class JpegImage : Image
                         }
 
                         var dataSegmentSize = CalculateSize(imageFormat, width, height);
+
                         dataSegment = new MemorySegment(Math.Abs(dataSegmentSize));
+                        
                         var read = stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count);
+                        
                         if (read < dataSegment.Count)
                             dataSegment = dataSegment.Slice(0, read);
+
+                        using var bitStream = new BitReader(dataSegment.Array, Binary.BitOrder.MostSignificant, 0, 0, true, Environment.ProcessorCount * Environment.ProcessorCount);
+                        JpegCodec.Decompress(bitStream);
 
                         break;
                     }
@@ -177,11 +186,7 @@ public class JpegImage : Image
                     markers.Add(marker.FunctionCode, marker);
                     continue;
             }
-        }
-
-        using var bitStream = new BitReader(dataSegment.Array, Binary.BitOrder.MostSignificant, 0, 0, true, Environment.ProcessorCount * Environment.ProcessorCount);
-
-        JpegCodec.Decompress(bitStream);
+        }       
 
         if (imageFormat == null || dataSegment == null && thumbnailData == null)
             throw new InvalidDataException("The provided stream does not contain valid JPEG image data.");
@@ -220,23 +225,35 @@ public class JpegImage : Image
                 markerBuffer.Remove(marker.FunctionCode);
             }
         }
-        else
-        {
-            //// Step 4: Perform the compression (Example)
-            //foreach (var component in ImageFormat.Components)
-            //{
-            //    // Step 4.1: Perform Forward Discrete Cosine Transform (FDCT)
-            //    double[] dctCoefficients = new double[BlockSize];
-            //    JpegCodec.FDCT(component.Data, dctCoefficients);
+        //else
+        //{
+        //    Span<double> coefficients = stackalloc double[JpegCodec.BlockSize];
 
-            //    // Step 4.2: Quantize the DCT coefficients
-            //    Span<short> quantizedCoefficients = [BlockSize];
-            //    JpegCodec.Quantize(dctCoefficients, GetQuantizationTable(quality), quantizedCoefficients);
+        //    Span<short> quantizedCoefficients = stackalloc short[JpegCodec.BlockSize];
+        //    var quantizationTable = JpegCodec.GetQuantizationTable(quality);
 
-            //    // Step 4.3: Huffman encode the quantized coefficients
-            //    JpegCodec.HuffmanEncode(quantizedCoefficients, GetHuffmanTable(component.Id, true), GetHuffmanTable(component.Id, false), writer);
-            //}
-        }
+        //    using var writer = new BitWriter(stream, Environment.ProcessorCount * Environment.ProcessorCount, true);
+
+        //    Span<byte> bytes = stackalloc byte[Vector<byte>.Count];
+
+        //    // Iterate over each block of the image
+        //    for (int y = 0; y < Height; y += JpegCodec.BlockSize)
+        //    {
+        //        for (int x = 0; x < Width; x += JpegCodec.BlockSize)
+        //        {
+        //            foreach(var mediaComponent in ImageFormat.Components)
+        //            {
+        //                // Step 4.0: Get the pixel data for the media component
+        //                var componentData = GetComponentVector(x, y, mediaComponent.Id); // Y component
+
+        //                componentData.CopyTo(bytes);
+
+        //                // Process each component separately
+        //                ProcessComponent(bytes, quantizationTable, coefficients, quantizedCoefficients, writer);
+        //            }
+        //        }
+        //    }
+        //}
 
         if (markerBuffer != null)
         {
@@ -246,10 +263,7 @@ public class JpegImage : Image
             }
 
             markerBuffer.Remove(Jpeg.Markers.HuffmanTable);
-        }
 
-        if (markerBuffer != null)
-        {
             foreach (var marker in markerBuffer.Values)
             {
                 JpegCodec.WriteMarker(stream, marker);
@@ -258,17 +272,14 @@ public class JpegImage : Image
         }
         else
         {
-            //// Step 5: Write the compressed image data to the stream
-            //// Write the DQT marker
-            //JpegCodec.WriteMarker(stream, JpegCodec.GetQuantizationTableMarker(this, quality));
-            //// Write the DHT marker
-            //JpegCodec.WriteMarker(stream, JpegCodec.GetHuffmanTableMarker(this, true));
-            //JpegCodec.WriteMarker(stream, JpegCodec.GetHuffmanTableMarker(this, false));
+            JpegCodec.WriteQuantizationTableMarker(stream, quality);
+            JpegCodec.WriteHuffmanTableMarkers(stream, JpegState.DcTable, JpegState.AcTable);
         }
 
         // Write the SOF marker
         JpegCodec.WriteStartOfFrame(this, stream);
 
+        //Write the SOS marker
         JpegCodec.WriteStartOfScan(this, stream);
 
         if (markerBuffer != null)
@@ -286,7 +297,25 @@ public class JpegImage : Image
             // Write the EOI marker
             JpegCodec.WriteInformationMarker(Jpeg.Markers.EndOfInformation, stream);
         }
-    }    
+    }
+
+
+    private void ProcessComponent(Span<byte> span, Span<short> quantizationTable, Span<double> coefficients, Span<short> quantizedCoefficients, BitWriter writer)
+    {
+        // Step 4.1: Perform Forward Discrete Cosine Transform (FDCT)
+        ref Span<double> dctCoefficients = ref coefficients;
+
+        if (Vector.IsHardwareAccelerated)
+            JpegCodec.VFDCT(MemoryMarshal.Cast<byte, double>(span), dctCoefficients);
+        else
+            JpegCodec.FDCT(MemoryMarshal.Cast<byte, double>(span), dctCoefficients);
+
+        // Step 4.2: Quantize the DCT coefficients
+        JpegCodec.Quantize(dctCoefficients, quantizationTable, quantizedCoefficients);
+
+        // Step 4.3: Huffman encode the quantized coefficients
+        JpegCodec.HuffmanEncode(quantizedCoefficients, JpegState.DcTable, JpegState.AcTable, writer);
+    }
 
     public MemorySegment GetPixelDataAt(int x, int y)
     {
