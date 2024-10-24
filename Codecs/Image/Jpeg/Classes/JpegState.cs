@@ -2,6 +2,8 @@
 using System;
 using static Media.Codec.Jpeg.JpegCodec;
 using System.Collections.Generic;
+using Media.Common;
+using Media.Codec.Jpeg;
 
 namespace Codec.Jpeg.Classes;
 
@@ -90,6 +92,8 @@ internal sealed class JpegState : IEquatable<JpegState>
                         { 15, (0b111111101, 9) }
                     }
     };
+
+    public List<QuantizationTable> QuantizationTables = new();
 
     /// <summary>
     /// Constructors a <see cref="JpegState"/>

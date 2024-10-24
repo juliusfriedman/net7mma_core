@@ -534,6 +534,74 @@ namespace Media.Codec.Jpeg
             outputMarker = null;
         }
 
+        internal static void ReadQuantizationTable(JpegState jpegState, Stream stream)
+        {
+            // Read the length of the quantization table segment
+            int length = (stream.ReadByte() << 8) | stream.ReadByte();
+            length -= 2; // Subtract the length bytes
+
+            while (length > 0)
+            {
+                byte qtInfo = (byte)stream.ReadByte();
+                int precision = (qtInfo >> 4) == 0 ? 8 : 16;
+                int tableId = qtInfo & 0x0F;
+
+                var quantizationTable = new short[64];
+                for (int i = 0; i < 64; i++)
+                {
+                    quantizationTable[i] = precision == Binary.BitsPerByte ? (short)stream.ReadByte() : (short)((stream.ReadByte() << 8) | stream.ReadByte());
+                }
+
+                // Store the quantization table in the JpegState or another suitable data structure
+                jpegState.QuantizationTables[tableId] = new QuantizationTable(length);
+
+                length -= (precision == 8 ? 65 : 129);
+            }
+        }
+
+        internal static void ReadHuffmanTable(JpegState jpegState, Stream stream)
+        {
+            // Read the length of the Huffman table segment
+            int length = (stream.ReadByte() << 8) | stream.ReadByte();
+            length -= 2; // Subtract the length bytes
+
+            while (length > 0)
+            {
+                byte htInfo = (byte)stream.ReadByte();
+                int tableClass = (htInfo >> 4) & 0x0F;
+                int tableId = htInfo & 0x0F;
+
+                var huffmanTable = new HuffmanTable();
+
+                // Read the number of codes for each length
+                var codeLengths = new byte[16];
+                for (int i = 0; i < 16; i++)
+                {
+                    codeLengths[i] = (byte)stream.ReadByte();
+                }
+
+                // Read the Huffman codes
+                var codes = new List<byte>();
+                for (int i = 0; i < 16; i++)
+                {
+                    for (int j = 0; j < codeLengths[i]; j++)
+                    {
+                        codes.Add((byte)stream.ReadByte());
+                    }
+                }
+
+                //todo
+                // Build the Huffman table
+                //huffmanTable.Build(codeLengths, codes.ToArray());
+
+                //Todo
+                // Store the Huffman table in the JpegState or another suitable data structure
+                //jpegState.HuffmanTables[tableClass, tableId] = huffmanTable;
+
+                length -= (1 + 16 + codes.Count);
+            }
+        }
+
         private static readonly short[] DefaultLuminanceQuantTable = new short[64]
     {
         16, 11, 10, 16, 24, 40, 51, 61,

@@ -15,6 +15,39 @@ namespace Media.Codecs.Image
     {
         #region Statics
 
+        public Image Rotate(double angle)
+        {
+            double radians = angle * Math.PI / 180.0;
+            double cos = Math.Cos(radians);
+            double sin = Math.Sin(radians);
+
+            int newWidth = (int)(Math.Abs(Width * cos) + Math.Abs(Height * sin));
+            int newHeight = (int)(Math.Abs(Width * sin) + Math.Abs(Height * cos));
+
+            var rotatedData = new byte[newWidth * newHeight];
+
+            int x0 = Width / 2;
+            int y0 = Height / 2;
+            int x1 = newWidth / 2;
+            int y1 = newHeight / 2;
+
+            for (int y = 0; y < newHeight; y++)
+            {
+                for (int x = 0; x < newWidth; x++)
+                {
+                    int srcX = (int)((x - x1) * cos + (y - y1) * sin + x0);
+                    int srcY = (int)(-(x - x1) * sin + (y - y1) * cos + y0);
+
+                    if (srcX >= 0 && srcX < Width && srcY >= 0 && srcY < Height)
+                    {
+                        rotatedData[y * newWidth + x] = Data[srcY * Width + srcX];
+                    }
+                }
+            }
+
+            return new Image(ImageFormat, newWidth, newHeight, rotatedData);
+        }
+
         public Image Crop(Rectangle cropArea)
         {
             var croppedData = new byte[cropArea.Width * cropArea.Height * Planes];

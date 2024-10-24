@@ -8,8 +8,6 @@ using Media.Common.Collections.Generic;
 using Codec.Jpeg.Markers;
 using Codec.Jpeg.Classes;
 using System.Runtime.InteropServices;
-using System.ComponentModel;
-using Media.Common.Interfaces;
 
 namespace Media.Codec.Jpeg;
 
@@ -44,6 +42,12 @@ public class JpegImage : Image
             //Handle the marker to decode.
             switch (marker.FunctionCode)
             {
+                case Jpeg.Markers.QuantizationTable:
+                    JpegCodec.ReadQuantizationTable(jpegState, stream);
+                    continue;
+                case Jpeg.Markers.HuffmanTable:
+                    JpegCodec.ReadHuffmanTable(jpegState, stream);
+                    continue;
                 case Jpeg.Markers.NumberOfLines:
                     var numberOfLines = new NumberOfLines(marker);
                     height = numberOfLines.Nl;
@@ -194,6 +198,12 @@ public class JpegImage : Image
         // Create and return the JpegImage (Could use a Default Jpeg State?)
         return new JpegImage(imageFormat, width, height, dataSegment ?? thumbnailData, jpegState, markers);
     }
+    private void ReadQuantizationTable(Stream stream)
+    {
+        var quantizationTable = new QuantizationTable(stream);
+    }
+
+
 
     public void Save(Stream stream, int quality = 99)
     {
@@ -273,13 +283,12 @@ public class JpegImage : Image
         else
         {
             JpegCodec.WriteQuantizationTableMarker(stream, quality);
+
+            JpegCodec.WriteStartOfFrame(this, stream);
+
             JpegCodec.WriteHuffmanTableMarkers(stream, JpegState.DcTable, JpegState.AcTable);
         }
-
-        // Write the SOF marker
-        JpegCodec.WriteStartOfFrame(this, stream);
-
-        //Write the SOS marker
+        
         JpegCodec.WriteStartOfScan(this, stream);
 
         if (markerBuffer != null)
