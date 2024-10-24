@@ -8,6 +8,7 @@ using Media.Common.Collections.Generic;
 using Codec.Jpeg.Markers;
 using Codec.Jpeg.Classes;
 using System.Runtime.InteropServices;
+using Media.Codecs.Image.Transformations;
 
 namespace Media.Codec.Jpeg;
 

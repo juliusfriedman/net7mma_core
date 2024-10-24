@@ -397,7 +397,6 @@ namespace Media.Codec.Jpeg
             {
                 var blockSizeSquared = BlockSize * BlockSize;
 
-                // Span
                 // Example quantization table (you need to initialize this properly)
                 Span<short> quantizationTable = stackalloc short[blockSizeSquared];
 
@@ -429,9 +428,6 @@ namespace Media.Codec.Jpeg
                 // Perform Huffman encoding
                 HuffmanEncode(quantizedBlock, writer, jpegImage.JpegState.HuffmanTables);
             }
-
-            // Write the SOS marker
-            WriteStartOfScan(jpegImage, outputStream);
         }
 
         internal static void WriteStartOfScan(JpegImage jpegImage, Stream stream)
@@ -460,7 +456,7 @@ namespace Media.Codec.Jpeg
                 else
                 {
                     var componentSelector = new ScanComponentSelector();
-                    componentSelector.Csj = (byte)i;
+                    componentSelector.Csj = (byte)(i + 1);
                     componentSelector.Tdj = (byte)i;
                     componentSelector.Taj = (byte)i;
                     sos[i] = componentSelector;
