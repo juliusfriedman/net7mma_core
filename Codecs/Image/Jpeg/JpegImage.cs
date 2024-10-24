@@ -238,16 +238,18 @@ public class JpegImage : Image
         {
             // Write the compressed image data to the stream
             stream.Write(Data.Array, Data.Offset, Data.Count);
+            
+            if (Data[Data.Count - 1] != Jpeg.Markers.EndOfInformation)
+            {
+                // Write the EOI marker
+                JpegCodec.WriteInformationMarker(Jpeg.Markers.EndOfInformation, stream);
+            }
         }
         else
         {
             // Compress this image data to the stream
             JpegCodec.Compress(this, stream, quality);
-        }
 
-        if (Data[Data.Count - 1] != Jpeg.Markers.EndOfInformation)
-        {
-            // Write the EOI marker
             JpegCodec.WriteInformationMarker(Jpeg.Markers.EndOfInformation, stream);
         }
     }
