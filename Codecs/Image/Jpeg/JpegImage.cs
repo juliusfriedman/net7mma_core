@@ -268,7 +268,7 @@ public class JpegImage : Image
         else
         {
             // Compress this image data to the stream
-            JpegCodec.Compress(this, stream, quality);
+            JpegCodec.Compress(this, stream);
 
             JpegCodec.WriteInformationMarker(Jpeg.Markers.EndOfInformation, stream);
         }

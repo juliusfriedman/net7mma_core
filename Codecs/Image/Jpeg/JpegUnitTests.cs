@@ -3,13 +3,11 @@ using Media.Codec;
 using Media.Codec.Jpeg;
 using Media.Codecs.Image;
 using Media.Common;
-using Media.Common.Classes.Loggers;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
-using System.Security.Cryptography;
 
 namespace Media.UnitTests;
 
@@ -119,7 +117,7 @@ internal class JpegUnitTests
             }
         }
 
-        using (var image = new JpegImage(Media.Codecs.Image.ImageFormat.YUV(8), 696, 564))
+        using (var image = new JpegImage(ImageFormat.WithSubSampling(Media.Codecs.Image.ImageFormat.YUV(8), [2, 1, 1], [2, 1, 1]), 696, 564))
         {
             for (int i = 0; i < image.Width; i += 4)
             {

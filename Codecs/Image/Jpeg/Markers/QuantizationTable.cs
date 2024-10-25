@@ -6,7 +6,7 @@ public class QuantizationTable : Marker
 {
     public new const int Length = 1;
 
-    public QuantizationTable(int size) : base(LengthBytes + Length + Markers.QuantizationTable, size)
+    public QuantizationTable(int size) : base(Markers.QuantizationTable, LengthBytes + Length + size)
     {
 
     }

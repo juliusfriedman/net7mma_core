@@ -335,12 +335,6 @@ namespace Media.Codec.Jpeg
             //Todo: Implement Huffman encoding
         }
 
-        private static int GetBitSize(int value)
-        {
-            if (value == 0) return 0;
-            return (int)Math.Floor(Math.Log2(Math.Abs(value))) + 1;
-        }
-
         internal static void VQuantize(Span<double> block, Span<short> quantizationTable, Span<short> output)
         {
             int VectorSize = Vector<double>.Count;
@@ -375,7 +369,7 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        internal static void Compress(JpegImage jpegImage, Stream outputStream, int quality)
+        internal static void Compress(JpegImage jpegImage, Stream outputStream)
         {
             // Create a stream around the raw data and compress it to the stream
             using var inputStream = new MemoryStream(jpegImage.Data.Array, jpegImage.Data.Offset, jpegImage.Data.Count, true);
@@ -513,7 +507,7 @@ namespace Media.Codec.Jpeg
         {
             var componentCount = jpegImage.ImageFormat.Components.Length;
             using StartOfFrame sof = new StartOfFrame(jpegImage.JpegState.StartOfFrameFunctionCode, componentCount);
-            sof.P = Binary.Clamp(jpegImage.ImageFormat.Size, Binary.BitsPerByte, byte.MaxValue);
+            sof.P = Binary.Clamp(jpegImage.ImageFormat.Size, Binary.BitsPerByte, Binary.BitsPerShort);
             sof.Y = jpegImage.Height;
             sof.X = jpegImage.Width;
             for (var i = 0; i < componentCount; ++i)
@@ -547,7 +541,8 @@ namespace Media.Codec.Jpeg
             // Calculate the quantization table based on the quality
             var quantizationTable = GetQuantizationTable(quality, QuantizationTableType.Luminance);
 
-            var outputMarker = new QuantizationTable(QuantizationTableLength * 2 + 1);
+            //Output 2 tables
+            var outputMarker = new QuantizationTable(QuantizationTableLength * 2 + QuantizationTable.Length);
 
             outputMarker.Pq = 0; // 8-bit precision
 
