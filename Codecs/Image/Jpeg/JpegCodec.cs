@@ -13,7 +13,7 @@ namespace Media.Codec.Jpeg
 {
     public class JpegCodec : ImageCodec, IEncoder, IDecoder
     {
-        public const int ComponentCount = 4;
+        public new const int DefaultComponentCount = 4;
 
         internal const int BlockSize = 8;
 
@@ -86,7 +86,7 @@ namespace Media.Codec.Jpeg
         }
 
         public JpegCodec()
-            : base("JPEG", Binary.ByteOrder.Little, ComponentCount, Binary.BitsPerByte)
+            : base("JPEG", Binary.ByteOrder.Big, DefaultComponentCount, Binary.BitsPerByte)
         {
         }
 

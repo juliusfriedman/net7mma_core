@@ -22,20 +22,52 @@ public class HuffmanTable : Marker
 
     private void PopulateCodeTable()
     {
-        //int code = 0;
         //using var li = Li;
         //using var vi = Vi;
 
-        //for (int length = 1; length <= 16; length++)
+        //int offset = 0;
+        //while (offset < vi.Count)
         //{
-        //    int numCodes = li[length - 1];
-        //    for (int i = 0; i < numCodes; i++)
+        //    int totalCodes = 0;
+
+        //    // Calculate the total number of codes for the current table
+        //    for (int length = 1; length <= 16; length++)
         //    {
-        //        int value = vi[code];
-        //        _codeTable[value] = (code, length);
-        //        code++;
+        //        totalCodes += li[offset + length - 1];
         //    }
-        //    code <<= 1; // Move to the next bit length
+
+        //    // Ensure the total number of codes does not exceed the length of the Vi segment
+        //    if (totalCodes > vi.Count - offset)
+        //    {
+        //        throw new InvalidOperationException("Total number of codes exceeds the segment length.");
+        //    }
+
+        //    for (int length = 1; length <= 16; length++)
+        //    {
+        //        int numCodes = li[offset + length - 1];
+        //        for (int i = 0; i < numCodes; i++)
+        //        {
+        //            int code = GetCode(length);
+                    
+        //            int codeLength = GetCodeLength(code);
+
+        //            if (codeLength != length)
+        //            {
+        //                throw new InvalidOperationException("Code length mismatch.");
+        //            }
+
+        //            if (offset + code >= vi.Count)
+        //            {
+        //                throw new IndexOutOfRangeException("Code index out of range.");
+        //            }
+
+        //            int value = vi[offset + code];
+        //            _codeTable[value] = (code, length);
+        //        }
+        //    }
+
+        //    // Move to the next Huffman table in the segment
+        //    offset += totalCodes;
         //}
     }
 
@@ -80,8 +112,8 @@ public class HuffmanTable : Marker
     /// </summary>
     public MemorySegment Li
     {
-        get => this.Slice(DataOffset + 1, 16);
-        set => value.CopyTo(Array, DataOffset + 1, 16);
+        get => this.Slice(DataOffset + Length, 16);
+        set => value.CopyTo(Array, DataOffset + Length, 16);
     }
 
     /// <summary>
@@ -89,8 +121,8 @@ public class HuffmanTable : Marker
     /// </summary>
     public MemorySegment Vi
     {
-        get => this.Slice(DataOffset + 1 + 16);
-        set => value.CopyTo(Array, DataOffset + 1 + 16);
+        get => this.Slice(DataOffset + Length + 16);
+        set => value.CopyTo(Array, DataOffset + Length + 16);
     }
 
     public int GetCodeLength(int code)
