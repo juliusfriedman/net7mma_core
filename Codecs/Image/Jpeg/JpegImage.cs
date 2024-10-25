@@ -179,6 +179,14 @@ public class JpegImage : Image
                                 case ThumbnailFormatType.YCbCr:
                                     imageFormat = ImageFormat.YUV(8);
                                     break;
+                                case ThumbnailFormatType.Jpeg:
+                                    {
+                                        using var ms = thumbnailData.ToMemoryStream();
+                                        using var jpegImage = JpegImage.FromStream(ms);
+                                        imageFormat = jpegImage.ImageFormat;
+                                        thumbnailData = jpegImage.Data;
+                                        break;
+                                    }
                             }
                         }
                         else

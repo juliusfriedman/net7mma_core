@@ -132,9 +132,6 @@ internal sealed class JpegState : IEquatable<JpegState>
         // Define default Huffman tables for DC and AC components
         var huffmanTable = new HuffmanTable(DefaultLuminanceDCHuffmanTable.Length + DefaultChrominanceDCHuffmanTable.Length + DefaultLuminanceACHuffmanTable.Length + DefaultChrominanceACHuffmanTable.Length);
 
-        huffmanTable.Th = 0;
-        huffmanTable.Te = 0;
-
         var span = huffmanTable.ToSpan();
 
         var offset = huffmanTable.DataOffset;
