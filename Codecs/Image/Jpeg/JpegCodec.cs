@@ -190,23 +190,8 @@ namespace Media.Codec.Jpeg
 
         private static int DecodeHuffman(BitReader stream, HuffmanTable table)
         {
-            int code = 0;
-            int length = 0;
-
-            while (true)
-            {
-                // Read one bit from the stream
-                int bit = (int)stream.ReadBits(1);
-                code = (code << 1) | bit;
-                length++;
-
-                // Try to get the code from the Huffman table
-                int codeLength = table.GetCodeLength(code);
-                if (codeLength == length)
-                {
-                    return table.GetCode(codeLength);
-                }
-            }
+            //Todo implemented decoding of huffman tables.
+            return 0;
         }
 
         private static short[] ReadBlock(BitReader stream, HuffmanTable dcTable, HuffmanTable acTable, ref int previousDC)
@@ -347,67 +332,7 @@ namespace Media.Codec.Jpeg
 
         internal static void HuffmanEncode(Span<short> block, BitWriter writer, IEnumerable<HuffmanTable> huffmanTables)
         {
-            foreach(var huffmanTable in huffmanTables)
-            {
-                if (huffmanTable == null) continue;
-
-                // Step 1: Encode the DC coefficient
-                int dcCoefficient = block[0];
-                int dcCategory = GetBitSize(dcCoefficient);
-                int dcCode = huffmanTable.GetCode(dcCategory);
-                writer.WriteBits(dcCode, huffmanTable.GetCodeLength(dcCategory));
-
-                if (dcCategory > 0)
-                {
-                    int dcValue = dcCoefficient;
-                    if (dcCoefficient < 0)
-                    {
-                        dcValue = dcCoefficient - 1;
-                    }
-                    writer.WriteBits(dcValue, dcCategory);
-                }
-
-                // Step 2: Encode the AC coefficients
-                int zeroCount = 0;
-                for (int i = 1; i < block.Length; i++)
-                {
-                    int acCoefficient = block[i];
-                    if (acCoefficient == 0)
-                    {
-                        zeroCount++;
-                    }
-                    else
-                    {
-                        while (zeroCount > 15)
-                        {
-                            // Write ZRL (Zero Run Length) code
-                            int zrlCode = huffmanTable.GetCode(0xF0);
-                            writer.WriteBits(zrlCode, huffmanTable.GetCodeLength(0xF0));
-                            zeroCount -= 16;
-                        }
-
-                        int acCategory = GetBitSize(acCoefficient);
-                        int acCode = huffmanTable.GetCode((zeroCount << 4) + acCategory);
-                        writer.WriteBits(acCode, huffmanTable.GetCodeLength((zeroCount << 4) + acCategory));
-
-                        int acValue = acCoefficient;
-                        if (acCoefficient < 0)
-                        {
-                            acValue = acCoefficient - 1;
-                        }
-                        writer.WriteBits(acValue, acCategory);
-
-                        zeroCount = 0;
-                    }
-                }
-
-                // Step 3: Write EOB (End of Block) if there are trailing zeros
-                if (zeroCount > 0)
-                {
-                    int eobCode = huffmanTable.GetCode(0x00);
-                    writer.WriteBits(eobCode, huffmanTable.GetCodeLength(0x00));
-                }
-            }
+            //Todo: Implement Huffman encoding
         }
 
         private static int GetBitSize(int value)
