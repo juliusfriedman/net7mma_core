@@ -7,9 +7,7 @@ namespace Media.Codec.Jpeg;
 
 public class HuffmanTable : Marker
 {
-    public new const int Length = 1;
-
-    public HuffmanTable(int size) : base(Markers.HuffmanTable, LengthBytes + Length + size)
+    public HuffmanTable(int size) : base(Markers.HuffmanTable, LengthBytes + size)
     {
     }
 
@@ -20,8 +18,8 @@ public class HuffmanTable : Marker
 
     public MemorySegment TableData
     {
-        get => this.Slice(DataOffset + Length);
-        set => value.CopyTo(Array, DataOffset + Length);
+        get => this.Slice(DataOffset);
+        set => value.CopyTo(Array, DataOffset);
     }
 
     internal IEnumerable<DerivedTable> Tables
