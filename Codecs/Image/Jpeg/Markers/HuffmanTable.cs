@@ -33,7 +33,7 @@ public class HuffmanTable : Marker
                 using var slice = this.Slice(offset);
                 using var derivedTable = new DerivedTable(slice);
                 yield return derivedTable;
-                offset += DerivedTable.Length + derivedTable.ValuesCount;
+                offset += DerivedTable.Length + DerivedTable.CodeLength + derivedTable.CodeLengthSum;
             }
         }
     }

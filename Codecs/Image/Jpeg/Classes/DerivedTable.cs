@@ -5,9 +5,15 @@ namespace Codec.Jpeg.Classes;
 
 internal class DerivedTable : MemorySegment
 {
-    public const int Length = 17;
+    public const int Length = 1;
+
+    public const int CodeLength = 16;
 
     public DerivedTable(MemorySegment segment) : base(segment)
+    {
+    }
+
+    public DerivedTable(int size) : base(new byte[Length + size])
     {
     }
 
@@ -52,11 +58,11 @@ internal class DerivedTable : MemorySegment
     /// </summary>
     public MemorySegment Li
     {
-        get => this.Slice(Offset + 1, Length - 1);
-        set => value.CopyTo(Array, Offset + 1, Length - 1);
+        get => this.Slice(Offset + Length, CodeLength);
+        set => value.CopyTo(Array, Offset + Length, CodeLength);
     }
 
-    public int ValuesCount 
+    public int CodeLengthSum 
     {
         get
         {
@@ -70,7 +76,7 @@ internal class DerivedTable : MemorySegment
     /// </summary>
     public MemorySegment Vi
     {
-        get => this.Slice(Offset + Length, ValuesCount);
-        set => value.CopyTo(Array, Offset + Length, ValuesCount);
+        get => this.Slice(Offset + CodeLength, CodeLengthSum);
+        set => value.CopyTo(Array, Offset + CodeLength, CodeLengthSum);
     }
 }
