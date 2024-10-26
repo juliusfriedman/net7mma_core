@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Media.Codec.Jpeg;
 
 public class HuffmanTable : Marker
-{
+{    
     public HuffmanTable(int size) : base(Markers.HuffmanTable, LengthBytes + size)
     {
     }
@@ -26,15 +26,46 @@ public class HuffmanTable : Marker
     {
         get
         {
-            var offset = DataOffset;
-
-            while(offset < Count)
+            byte[] bits = new byte[DerivedTable.Length + DerivedTable.CodeLength];
+            byte[] huffval = new byte[byte.MaxValue + 1];
+            var length = Count;
+            int offset = DataOffset;
+            while (length > DerivedTable.CodeLength)
             {
-                using var slice = this.Slice(offset);
-                using var derivedTable = new DerivedTable(slice);
-                yield return derivedTable;
-                offset += DerivedTable.Length + DerivedTable.CodeLength + derivedTable.CodeLengthSum;
-            }
+                byte index = Array[offset++];
+
+                int count = 0;
+
+                for (int i = DerivedTable.Length; i <= DerivedTable.CodeLength; i++)
+                {
+                    byte temp = Array[offset++];
+                    
+                    bits[i] = temp;
+                    count += temp;
+                }
+                
+                length -= DerivedTable.Length + DerivedTable.CodeLength;
+
+                for (int i = 0; i < count; i++)
+                {
+                    huffval[i] = Array[offset++];
+                }
+
+                length -= count;
+
+                var result = new DerivedTable(index, bits, huffval, count);
+
+                using var slice = this.Slice(
+                    offset - count - DerivedTable.CodeLength - DerivedTable.Length, 
+                    count + DerivedTable.CodeLength + DerivedTable.Length);
+
+                slice.CopyTo(result);
+
+                yield return result;
+
+                System.Array.Clear(bits, 0, bits.Length); // Clear bits array
+                System.Array.Clear(huffval, 0, huffval.Length); // Clear huffval array
+            }            
         }
     }
 }

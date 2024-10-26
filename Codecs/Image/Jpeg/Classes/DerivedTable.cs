@@ -1,20 +1,55 @@
 ﻿using Media.Common;
+using System;
 using System.Linq;
 
 namespace Codec.Jpeg.Classes;
 
 internal class DerivedTable : MemorySegment
 {
+    public static DerivedTable Create(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> val)
+    {
+        int nsymbols = 0;
+        for (int len = Length; len <= CodeLength; len++)
+            nsymbols += bits[len];
+
+        var derivedTable = new DerivedTable(nsymbols + Length + CodeLength);
+
+        bits.CopyTo(derivedTable.Bits);
+
+        val.CopyTo(new Span<byte>(derivedTable.HuffVal, 0, nsymbols));
+
+        var span = derivedTable.ToSpan();
+
+        span = span.Slice(Length);
+
+        bits.CopyTo(span);
+
+        span = span.Slice(CodeLength);
+
+        val.CopyTo(span);
+
+        return derivedTable;
+    }
+
     public const int Length = 1;
 
     public const int CodeLength = 16;
 
-    public DerivedTable(MemorySegment segment) : base(segment)
+    /* These two fields directly represent the contents of a JPEG DHT marker */
+    internal readonly byte[] Bits = new byte[17];     /* bits[k] = # of symbols with codes of */
+
+    /* length k bits; bits[0] is unused */
+    internal readonly byte[] HuffVal = new byte[256];     /* The symbols, in order of incr code length */
+
+    public DerivedTable(int size) : base(size)
     {
     }
 
-    public DerivedTable(int size) : base(new byte[Length + size])
+    public DerivedTable(byte index, byte[] bits, byte[] huffval, int size) : base(new byte[Length + CodeLength + size])
     {
+        Array[Offset] = index;
+        Bits = bits;
+        HuffVal = huffval;
     }
 
     /// <summary>
@@ -76,7 +111,7 @@ internal class DerivedTable : MemorySegment
     /// </summary>
     public MemorySegment Vi
     {
-        get => this.Slice(Offset + CodeLength, CodeLengthSum);
-        set => value.CopyTo(Array, Offset + CodeLength, CodeLengthSum);
+        get => this.Slice(Offset + Length +  CodeLength, CodeLengthSum);
+        set => value.CopyTo(Array, Offset + Length + CodeLength, CodeLengthSum);
     }
 }
