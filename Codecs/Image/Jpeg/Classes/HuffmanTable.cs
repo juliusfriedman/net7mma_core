@@ -4,19 +4,22 @@ using System.Linq;
 
 namespace Codec.Jpeg.Classes;
 
-internal class DerivedTable : MemorySegment
+/// <summary>
+/// A class which represents a single Huffman table.
+/// </summary>
+internal class HuffmanTable : MemorySegment
 {
-    public static DerivedTable Create(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> val)
+    public static HuffmanTable Create(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> values)
     {
-        int nsymbols = 0;
+        int numberOfSymbols = 0;
         for (int len = Length; len <= CodeLength; len++)
-            nsymbols += bits[len];
+            numberOfSymbols += bits[len];
 
-        var derivedTable = new DerivedTable(nsymbols + Length + CodeLength);
+        var derivedTable = new HuffmanTable(numberOfSymbols + Length + CodeLength);
 
         bits.CopyTo(derivedTable.Bits);
 
-        val.CopyTo(new Span<byte>(derivedTable.HuffVal, 0, nsymbols));
+        values.CopyTo(new Span<byte>(derivedTable.HuffVal, 0, numberOfSymbols));
 
         var span = derivedTable.ToSpan();
 
@@ -26,7 +29,7 @@ internal class DerivedTable : MemorySegment
 
         span = span.Slice(CodeLength);
 
-        val.CopyTo(span);
+        values.CopyTo(span);
 
         return derivedTable;
     }
@@ -41,15 +44,15 @@ internal class DerivedTable : MemorySegment
     /* length k bits; bits[0] is unused */
     internal readonly byte[] HuffVal = new byte[256];     /* The symbols, in order of incr code length */
 
-    public DerivedTable(int size) : base(size)
+    public HuffmanTable(int size) : base(size)
     {
     }
 
-    public DerivedTable(MemorySegment segment) : base(segment)
+    public HuffmanTable(MemorySegment segment) : base(segment)
     {
     }   
 
-    public DerivedTable(byte index, byte[] bits, byte[] huffval, int size) : base(new byte[Length + CodeLength + size])
+    public HuffmanTable(byte index, byte[] bits, byte[] huffval, int size) : base(new byte[Length + CodeLength + size])
     {
         Array[Offset] = index;
         Bits = bits;
@@ -102,7 +105,8 @@ internal class DerivedTable : MemorySegment
     }
 
     /// <summary>
-    /// The sum of bytes of the <see cref="Li"/> segment
+    /// The sum of bytes of the <see cref="Li"/> segment.
+    /// Indicates the length of <see cref="Vi"/>
     /// </summary>
     public int CodeLengthSum 
     {
@@ -121,4 +125,9 @@ internal class DerivedTable : MemorySegment
         get => this.Slice(Offset + Length +  CodeLength, CodeLengthSum);
         set => value.CopyTo(Array, Offset + Length + CodeLength, CodeLengthSum);
     }
+
+    /// <summary>
+    /// The total length of the <see cref="HuffmanTable"/> in bytes.
+    /// </summary>
+    public int TotalLength => Length + CodeLength + CodeLengthSum;
 }

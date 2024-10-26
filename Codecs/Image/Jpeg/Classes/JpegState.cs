@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Media.Common;
 using Media.Codec.Jpeg;
+using Media.Codec.Jpeg.Segments;
 
 namespace Codec.Jpeg.Classes;
 
@@ -86,12 +87,12 @@ internal sealed class JpegState : IEquatable<JpegState>
     /// <summary>
     /// 
     /// </summary>
-    public readonly List<QuantizationTable> QuantizationTables = new();
+    public readonly List<QuantizationTables> QuantizationTables = new();
 
     /// <summary>
     /// 
     /// </summary>
-    public readonly List<HuffmanTable> HuffmanTables = new();
+    public readonly List<HuffmanTables> HuffmanTables = new();
 
     /// <summary>
     /// Constructors a <see cref="JpegState"/>
@@ -112,26 +113,26 @@ internal sealed class JpegState : IEquatable<JpegState>
 
     internal void InitializeDefaultHuffmanTables()
     {
-        var derivedTables = new DerivedTable[4];
-        derivedTables[0] = DerivedTable.Create(bits_dc_luminance, val_dc_luminance);
-        derivedTables[0].Te = 0;
-        derivedTables[0].Th = 0;
+        var huffmanTables = new HuffmanTable[4];
+        huffmanTables[0] = HuffmanTable.Create(bits_dc_luminance, val_dc_luminance);
+        huffmanTables[0].Te = 0;
+        huffmanTables[0].Th = 0;
 
-        derivedTables[1] = DerivedTable.Create(bits_ac_luminance, val_ac_luminance);
-        derivedTables[1].Te = 1;
-        derivedTables[1].Th = 0;
+        huffmanTables[1] = HuffmanTable.Create(bits_ac_luminance, val_ac_luminance);
+        huffmanTables[1].Te = 1;
+        huffmanTables[1].Th = 0;
 
-        derivedTables[2] = DerivedTable.Create(bits_dc_chrominance, val_dc_chrominance);
-        derivedTables[2].Te = 0;
-        derivedTables[2].Th = 1;
+        huffmanTables[2] = HuffmanTable.Create(bits_dc_chrominance, val_dc_chrominance);
+        huffmanTables[2].Te = 0;
+        huffmanTables[2].Th = 1;
 
-        derivedTables[3] = DerivedTable.Create(bits_ac_chrominance, val_ac_chrominance);
-        derivedTables[3].Te = 1;
-        derivedTables[3].Th = 1;
+        huffmanTables[3] = HuffmanTable.Create(bits_ac_chrominance, val_ac_chrominance);
+        huffmanTables[3].Te = 1;
+        huffmanTables[3].Th = 1;
 
-        var huffmanTable = new HuffmanTable(derivedTables[0].Count + derivedTables[1].Count + derivedTables[2].Count + derivedTables[3].Count);
+        var huffmanTable = new HuffmanTables(huffmanTables[0].Count + huffmanTables[1].Count + huffmanTables[2].Count + huffmanTables[3].Count);
 
-        huffmanTable.Tables = derivedTables;
+        huffmanTable.Tables = huffmanTables;
 
         HuffmanTables.Add(huffmanTable);
     }

@@ -1,7 +1,7 @@
 ﻿using Media.Codec.Jpeg;
 using Media.Common;
 
-namespace Codec.Jpeg.Markers;
+namespace Media.Codec.Jpeg.Segments;
 public class NumberOfLines : Marker
 {
     public new const int Length = 2;

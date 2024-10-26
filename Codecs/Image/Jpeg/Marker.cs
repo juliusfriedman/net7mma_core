@@ -29,7 +29,7 @@ public class Marker : MemorySegment
 
     public int Length
     {
-        get => Binary.ReadU16(Array, Offset + PrefixBytes, Binary.IsLittleEndian);
+        get => Count > PrefixBytes ? Binary.ReadU16(Array, Offset + PrefixBytes, Binary.IsLittleEndian) : 0;
         set => Binary.Write16(Array, Offset + PrefixBytes, Binary.IsLittleEndian, (ushort)value);
     }
 

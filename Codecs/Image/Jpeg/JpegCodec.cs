@@ -4,8 +4,8 @@ using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Codec.Jpeg.Classes;
-using Codec.Jpeg.Markers;
 using Media.Codec.Interfaces;
+using Media.Codec.Jpeg.Segments;
 using Media.Codecs.Image;
 using Media.Common;
 
@@ -188,13 +188,13 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        private static int DecodeHuffman(BitReader stream, HuffmanTable table)
+        private static int DecodeHuffman(BitReader stream, HuffmanTables table)
         {
             //Todo implemented decoding of huffman tables.
             return 0;
         }
 
-        private static short[] ReadBlock(BitReader stream, HuffmanTable dcTable, HuffmanTable acTable, ref int previousDC)
+        private static short[] ReadBlock(BitReader stream, HuffmanTables dcTable, HuffmanTables acTable, ref int previousDC)
         {
             var block = new short[BlockSize * BlockSize];  // Assuming 8x8 block
 
@@ -341,7 +341,7 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        internal static void HuffmanEncode(Span<short> block, BitWriter writer, IEnumerable<HuffmanTable> huffmanTables)
+        internal static void HuffmanEncode(Span<short> block, BitWriter writer, IEnumerable<HuffmanTables> huffmanTables)
         {
             //Todo: Implement Huffman encoding
         }
@@ -553,7 +553,7 @@ namespace Media.Codec.Jpeg
             var quantizationTable = GetQuantizationTable(quality, QuantizationTableType.Luminance);
 
             //Output 2 tables
-            var outputMarker = new QuantizationTable(QuantizationTableLength * 2 + QuantizationTable.Length);
+            var outputMarker = new QuantizationTables(QuantizationTableLength * 2 + QuantizationTables.Length);
 
             outputMarker.Pq = 0; // 8-bit precision
 
@@ -579,7 +579,7 @@ namespace Media.Codec.Jpeg
             outputMarker = null;
         }
 
-        internal static void WriteHuffmanTableMarkers(Stream stream, params HuffmanTable[] huffmanTables)
+        internal static void WriteHuffmanTableMarkers(Stream stream, params HuffmanTables[] huffmanTables)
         {
             foreach (var huffmanTable in huffmanTables)
             {

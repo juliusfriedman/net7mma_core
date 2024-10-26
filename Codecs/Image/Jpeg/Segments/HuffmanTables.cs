@@ -3,40 +3,40 @@ using Media.Common;
 using System;
 using System.Collections.Generic;
 
-namespace Media.Codec.Jpeg;
+namespace Media.Codec.Jpeg.Segments;
 
-public class HuffmanTable : Marker
+public class HuffmanTables : Marker, IEnumerable<HuffmanTable>
 {
-    public HuffmanTable(int size) : base(Markers.HuffmanTable, LengthBytes + size)
+    public HuffmanTables(int size) : base(Markers.HuffmanTable, LengthBytes + size)
     {
     }
 
-    public HuffmanTable(MemorySegment segment)
+    public HuffmanTables(MemorySegment segment)
         : base(segment)
     {
     }
 
-    public MemorySegment TableData
+    public MemorySegment TablesData
     {
         get => this.Slice(DataOffset);
         set => value.CopyTo(Array, DataOffset);
     }
 
-    internal IEnumerable<DerivedTable> Tables
+    internal IEnumerable<HuffmanTable> Tables
     {
         get
         {
-            byte[] bits = new byte[DerivedTable.Length + DerivedTable.CodeLength];
+            byte[] bits = new byte[HuffmanTable.Length + HuffmanTable.CodeLength];
             byte[] huffval = new byte[byte.MaxValue + 1];
             var length = Count;
             int offset = DataOffset;
-            while (length > DerivedTable.CodeLength)
+            while (length > HuffmanTable.CodeLength)
             {
                 byte index = Array[offset++];
 
                 int count = 0;
 
-                for (int i = DerivedTable.Length; i <= DerivedTable.CodeLength; i++)
+                for (int i = HuffmanTable.Length; i <= HuffmanTable.CodeLength; i++)
                 {
                     byte temp = Array[offset++];
 
@@ -44,7 +44,7 @@ public class HuffmanTable : Marker
                     count += temp;
                 }
 
-                length -= DerivedTable.Length + DerivedTable.CodeLength;
+                length -= HuffmanTable.Length + HuffmanTable.CodeLength;
 
                 for (int i = 0; i < count; i++)
                 {
@@ -53,13 +53,13 @@ public class HuffmanTable : Marker
 
                 length -= count;
 
-                var result = new DerivedTable(index, bits, huffval, count);
+                using var result = new HuffmanTable(index, bits, huffval, count);
 
                 using var slice = this.Slice(
-                    offset - count - DerivedTable.CodeLength,
-                    count + DerivedTable.CodeLength);
+                    offset - count - HuffmanTable.CodeLength,
+                    count + HuffmanTable.CodeLength);
 
-                slice.CopyTo(result.Array, result.Offset + DerivedTable.Length);
+                slice.CopyTo(result.Array, result.Offset + HuffmanTable.Length);
 
                 yield return result;
 
@@ -74,8 +74,13 @@ public class HuffmanTable : Marker
             foreach(var derviedTable in value)
             {
                 derviedTable.CopyTo(Array, offset);
-                offset += derviedTable.Count;
+                offset += derviedTable.TotalLength;
             }
         }
+    }
+
+    IEnumerator<HuffmanTable> IEnumerable<HuffmanTable>.GetEnumerator()
+    {
+        return Tables.GetEnumerator();
     }
 }

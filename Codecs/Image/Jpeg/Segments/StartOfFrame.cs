@@ -3,7 +3,7 @@ using Media.Codec.Jpeg;
 using Media.Common;
 using System.Collections.Generic;
 
-namespace Codec.Jpeg.Markers;
+namespace Media.Codec.Jpeg.Segments;
 
 public class StartOfFrame : Marker
 {

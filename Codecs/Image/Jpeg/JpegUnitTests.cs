@@ -1,6 +1,6 @@
-﻿using Codec.Jpeg.Markers;
-using Media.Codec;
+﻿using Media.Codec;
 using Media.Codec.Jpeg;
+using Media.Codec.Jpeg.Segments;
 using Media.Codecs.Image;
 using Media.Common;
 using System;

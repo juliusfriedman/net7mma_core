@@ -1,8 +1,7 @@
 ﻿using System.Text;
-using Media.Codec.Jpeg;
 using Media.Common;
 
-namespace Codec.Jpeg.Markers;
+namespace Media.Codec.Jpeg.Segments;
 
 public class TextComment : Marker
 {

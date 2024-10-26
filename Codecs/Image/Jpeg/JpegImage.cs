@@ -4,9 +4,9 @@ using System.Numerics;
 using Media.Codecs.Image;
 using Media.Common;
 using Media.Common.Collections.Generic;
-using Codec.Jpeg.Markers;
 using Codec.Jpeg.Classes;
 using System.Runtime.InteropServices;
+using Media.Codec.Jpeg.Segments;
 
 namespace Media.Codec.Jpeg;
 
@@ -42,11 +42,11 @@ public class JpegImage : Image
             switch (marker.FunctionCode)
             {
                 case Jpeg.Markers.QuantizationTable:
-                    var dqt = new QuantizationTable(marker);
+                    var dqt = new QuantizationTables(marker);
                     jpegState.QuantizationTables.Add(dqt);
                     continue;
                 case Jpeg.Markers.HuffmanTable:
-                    var dht = new HuffmanTable(marker);
+                    var dht = new HuffmanTables(marker);
                     jpegState.HuffmanTables.Add(dht);
                     continue;
                 case Jpeg.Markers.NumberOfLines:

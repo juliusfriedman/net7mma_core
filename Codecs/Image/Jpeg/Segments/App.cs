@@ -1,9 +1,8 @@
-﻿using Media.Codec.Jpeg;
-using Media.Common;
+﻿using Media.Common;
 using System;
 using System.Text;
 
-namespace Codec.Jpeg.Markers;
+namespace Media.Codec.Jpeg.Segments;
 
 public class App : Marker
 {

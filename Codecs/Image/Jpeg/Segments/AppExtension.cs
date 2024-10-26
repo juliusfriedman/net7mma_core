@@ -1,9 +1,8 @@
 ﻿using Codec.Jpeg.Classes;
-using Media.Codec.Jpeg;
 using Media.Common;
 using System.Text;
 
-namespace Codec.Jpeg.Markers;
+namespace Media.Codec.Jpeg.Segments;
 
 internal class AppExtension : Marker
 {

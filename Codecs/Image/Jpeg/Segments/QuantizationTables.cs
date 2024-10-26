@@ -1,17 +1,17 @@
 ﻿using Media.Common;
 
-namespace Media.Codec.Jpeg;
+namespace Media.Codec.Jpeg.Segments;
 
-public class QuantizationTable : Marker
+public class QuantizationTables : Marker
 {
     public new const int Length = 1;
 
-    public QuantizationTable(int size) : base(Markers.QuantizationTable, LengthBytes + Length + size)
+    public QuantizationTables(int size) : base(Markers.QuantizationTable, LengthBytes + Length + size)
     {
 
     }
 
-    public QuantizationTable(MemorySegment segment)
+    public QuantizationTables(MemorySegment segment)
         : base(segment)
     {
 
