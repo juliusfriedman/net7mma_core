@@ -22,7 +22,7 @@ internal class DerivedTable : MemorySegment
 
         span = span.Slice(Length);
 
-        bits.CopyTo(span);
+        bits.Slice(Length).CopyTo(span);
 
         span = span.Slice(CodeLength);
 
@@ -44,6 +44,10 @@ internal class DerivedTable : MemorySegment
     public DerivedTable(int size) : base(size)
     {
     }
+
+    public DerivedTable(MemorySegment segment) : base(segment)
+    {
+    }   
 
     public DerivedTable(byte index, byte[] bits, byte[] huffval, int size) : base(new byte[Length + CodeLength + size])
     {
@@ -97,6 +101,9 @@ internal class DerivedTable : MemorySegment
         set => value.CopyTo(Array, Offset + Length, CodeLength);
     }
 
+    /// <summary>
+    /// The sum of bytes of the <see cref="Li"/> segment
+    /// </summary>
     public int CodeLengthSum 
     {
         get

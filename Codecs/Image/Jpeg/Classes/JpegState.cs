@@ -131,19 +131,7 @@ internal sealed class JpegState : IEquatable<JpegState>
 
         var huffmanTable = new HuffmanTable(derivedTables[0].Count + derivedTables[1].Count + derivedTables[2].Count + derivedTables[3].Count);
 
-        var offset = huffmanTable.DataOffset;
-
-        derivedTables[0].CopyTo(huffmanTable.Array, offset);
-        offset += derivedTables[0].Count;
-
-        derivedTables[1].CopyTo(huffmanTable.Array, offset);
-        offset += derivedTables[1].Count;
-
-        derivedTables[2].CopyTo(huffmanTable.Array, offset);
-        offset += derivedTables[2].Count;
-
-        derivedTables[3].CopyTo(huffmanTable.Array, offset);
-        offset += derivedTables[3].Count;
+        huffmanTable.Tables = derivedTables;
 
         HuffmanTables.Add(huffmanTable);
     }

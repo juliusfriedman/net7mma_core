@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Media.Codec.Jpeg;
 
 public class HuffmanTable : Marker
-{    
+{
     public HuffmanTable(int size) : base(Markers.HuffmanTable, LengthBytes + size)
     {
     }
@@ -39,11 +39,11 @@ public class HuffmanTable : Marker
                 for (int i = DerivedTable.Length; i <= DerivedTable.CodeLength; i++)
                 {
                     byte temp = Array[offset++];
-                    
+
                     bits[i] = temp;
                     count += temp;
                 }
-                
+
                 length -= DerivedTable.Length + DerivedTable.CodeLength;
 
                 for (int i = 0; i < count; i++)
@@ -56,16 +56,26 @@ public class HuffmanTable : Marker
                 var result = new DerivedTable(index, bits, huffval, count);
 
                 using var slice = this.Slice(
-                    offset - count - DerivedTable.CodeLength - DerivedTable.Length, 
-                    count + DerivedTable.CodeLength + DerivedTable.Length);
+                    offset - count - DerivedTable.CodeLength,
+                    count + DerivedTable.CodeLength);
 
-                slice.CopyTo(result);
+                slice.CopyTo(result.Array, result.Offset + DerivedTable.Length);
 
                 yield return result;
 
                 System.Array.Clear(bits, 0, bits.Length); // Clear bits array
                 System.Array.Clear(huffval, 0, huffval.Length); // Clear huffval array
-            }            
+            }
+        }
+        set
+        {
+            int offset = DataOffset;
+            
+            foreach(var derviedTable in value)
+            {
+                derviedTable.CopyTo(Array, offset);
+                offset += derviedTable.Count;
+            }
         }
     }
 }
