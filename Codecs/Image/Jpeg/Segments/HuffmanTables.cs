@@ -28,9 +28,9 @@ public class HuffmanTables : Marker, IEnumerable<HuffmanTable>
         {
             byte[] bits = new byte[HuffmanTable.Length + HuffmanTable.CodeLength];
             byte[] huffval = new byte[byte.MaxValue + 1];
-            var length = Count;
+            var length = MarkerLength;
             int offset = DataOffset;
-            while (length > HuffmanTable.CodeLength)
+            while (length > HuffmanTable.Length + HuffmanTable.CodeLength)
             {
                 byte index = Array[offset++];
 
@@ -71,10 +71,10 @@ public class HuffmanTables : Marker, IEnumerable<HuffmanTable>
         {
             int offset = DataOffset;
             
-            foreach(var derviedTable in value)
+            foreach(var huffmanTable in value)
             {
-                derviedTable.CopyTo(Array, offset);
-                offset += derviedTable.TotalLength;
+                huffmanTable.CopyTo(Array, offset);
+                offset += huffmanTable.TotalLength;
             }
         }
     }

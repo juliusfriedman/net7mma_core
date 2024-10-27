@@ -9,6 +9,12 @@ namespace Codec.Jpeg.Classes;
 /// </summary>
 internal class HuffmanTable : MemorySegment
 {
+    /// <summary>
+    /// Creates a <see cref="HuffmanTable"/> from the given bits and values.
+    /// </summary>
+    /// <param name="bits"></param>
+    /// <param name="values"></param>
+    /// <returns></returns>
     public static HuffmanTable Create(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> values)
     {
         int numberOfSymbols = 0;
@@ -19,7 +25,7 @@ internal class HuffmanTable : MemorySegment
 
         bits.CopyTo(derivedTable.Bits);
 
-        values.CopyTo(new Span<byte>(derivedTable.HuffVal, 0, numberOfSymbols));
+        values.CopyTo(new Span<byte>(derivedTable.Values, 0, numberOfSymbols));
 
         var span = derivedTable.ToSpan();
 
@@ -39,10 +45,10 @@ internal class HuffmanTable : MemorySegment
     public const int CodeLength = 16;
 
     /* These two fields directly represent the contents of a JPEG DHT marker */
-    internal readonly byte[] Bits = new byte[17];     /* bits[k] = # of symbols with codes of */
+    internal readonly byte[] Bits = new byte[Length + CodeLength];     /* bits[k] = # of symbols with codes of */
 
     /* length k bits; bits[0] is unused */
-    internal readonly byte[] HuffVal = new byte[256];     /* The symbols, in order of incr code length */
+    internal readonly byte[] Values = new byte[256];     /* The symbols, in order of incr code length */
 
     public HuffmanTable(int size) : base(size)
     {
@@ -56,7 +62,7 @@ internal class HuffmanTable : MemorySegment
     {
         Array[Offset] = index;
         Bits = bits;
-        HuffVal = huffval;
+        Values = huffval;
     }
 
     /// <summary>
@@ -105,8 +111,8 @@ internal class HuffmanTable : MemorySegment
     }
 
     /// <summary>
-    /// The sum of bytes of the <see cref="Li"/> segment.
-    /// Indicates the length of <see cref="Vi"/>
+    /// The sum of bytes of <see cref="Li"/>.
+    /// Indicates the length of <see cref="Vi"/>.
     /// </summary>
     public int CodeLengthSum 
     {

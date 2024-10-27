@@ -26,7 +26,7 @@ public class QuantizationTables : Marker, IEnumerable<QuantizationTable>
             var offset = DataOffset;
             while (offset < MarkerLength)
             {
-                using var result = new QuantizationTable(this.Slice(offset, 64));
+                using var result = new QuantizationTable(this.Slice(offset, QuantizationTable.Length));
                 offset += result.TotalLength;
                 yield return result;
             }
