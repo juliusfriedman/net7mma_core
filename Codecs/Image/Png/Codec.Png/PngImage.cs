@@ -30,11 +30,27 @@ public class PngImage : Image
             case 4: // Grayscale with alpha
                 return ImageFormat.WithPreceedingAlphaComponent(ImageFormat.Monochrome(bitDepth / 2), bitDepth / 2);
             case 2: // Truecolor (RGB)
-                return ImageFormat.RGB(bitDepth/ 3);            
+                return ImageFormat.RGB(bitDepth / 3);            
             case 6: // Truecolor with alpha (RGBA)
                 return ImageFormat.RGBA(bitDepth / 4);
             default:
                 throw new NotSupportedException($"Color type {colorType} is not supported.");
+        }
+    }
+
+    private static ColorType ResolveColorType(ImageFormat imageFormat)
+    {
+        switch (imageFormat.Components.Length)
+        {
+            case 1:
+                return ColorType.Grayscale;
+            case 2:
+                return ColorType.GrayscaleWithAlpha;
+            case 3:
+                return ColorType.Rgb;
+            case 4:
+                return ColorType.RgbWithAlpha;
+            default: throw new ArgumentException("Cannot determine ColorType from ImageFormat.");
         }
     }
 
@@ -54,10 +70,15 @@ public class PngImage : Image
     /// <param name="imageFormat"></param>
     /// <param name="width"></param>
     /// <param name="height"></param>
-    public PngImage(ImageFormat imageFormat, int width, int height)
+    public PngImage(ImageFormat imageFormat, int width, int height, ulong fileSignature = PNGSignature)
         : base(imageFormat, width, height, new PngCodec())
     {
-        PngState = new PngState();
+        PngState = new PngState()
+        {
+            FileSignature = fileSignature,
+            BitDepth = (byte)imageFormat.Size,
+            ColorType = (byte)ResolveColorType(imageFormat)
+        };
     }
 
     /// <summary>
@@ -67,16 +88,15 @@ public class PngImage : Image
     /// <param name="width"></param>
     /// <param name="height"></param>
     /// <param name="data"></param>
-    private PngImage(ImageFormat imageFormat, int width, int height, MemorySegment data)
+    private PngImage(ImageFormat imageFormat, int width, int height, MemorySegment data, PngState pngState)
         : base(imageFormat, width, height, data, new PngCodec())
     {
-        PngState = new PngState();
+        PngState = pngState;
     }
 
     private PngImage(ImageFormat imageFormat, int width, int height, MemorySegment data, PngState pngState, ConcurrentThesaurus<ChunkName, Chunk> chunks)
-        : this(imageFormat, width, height, data)
+        : this(imageFormat, width, height, data, pngState)
     {
-        PngState = pngState;
         Chunks = chunks;
     }
 
@@ -89,7 +109,10 @@ public class PngImage : Image
         int width = 0, height = 0;
         ImageFormat? imageFormat = default;
         SegmentStream dataSegments = new SegmentStream();
-        PngState pngState = new();
+        PngState pngState = new()
+        {
+            FileSignature = expectedSignature,
+        };
         ConcurrentThesaurus<ChunkName, Chunk> chunks = new ConcurrentThesaurus<ChunkName, Chunk>();
         Crc32 crc32 = new Crc32();
         foreach(var chunk in PngCodec.ReadChunks(stream, expectedSignature))
@@ -117,13 +140,13 @@ public class PngImage : Image
                         var offset = chunk.DataOffset;
                         width = Binary.Read32(chunk.Array, ref offset, Binary.IsLittleEndian);
                         height = Binary.Read32(chunk.Array, ref offset, Binary.IsLittleEndian);
-                        var bitDepth = chunk.Array[offset++];
+                        pngState.BitDepth = chunk.Array[offset++];
                         pngState.ColorType = chunk.Array[offset++];
                         pngState.CompressionMethod = chunk.Array[offset++];
                         pngState.FilterMethod = chunk.Array[offset++];
                         pngState.InterlaceMethod = chunk.Array[offset++];
                         // Create the image format based on the IHDR data
-                        imageFormat = CreateImageFormat(bitDepth, pngState.ColorType);
+                        imageFormat = CreateImageFormat(pngState.BitDepth, pngState.ColorType);
                         continue;
                     }
                 case ChunkName.Data:
@@ -183,11 +206,8 @@ public class PngImage : Image
 
     public void Save(Stream stream, CompressionLevel compressionLevel = CompressionLevel.Optimal)
     {
-        // Write the PNG signature
-        stream.Write(Binary.GetBytes(PNGSignature, BitConverter.IsLittleEndian));
-
-        //TODO have Chunks class to make handling of reading and write more robust
-        //Should implement like MarkerReader and MarkerWriter in Codec.Jpeg
+        // Write the file signature
+        stream.Write(Binary.GetBytes(PngState.FileSignature, BitConverter.IsLittleEndian));
 
         // Write the IHDR chunk
         WriteHeader(stream);
@@ -197,7 +217,7 @@ public class PngImage : Image
         {
             foreach (var chunk in Chunks.Values)
             {
-                stream.Write(chunk.Array, chunk.Offset, chunk.Count);
+                WriteChunk(stream, chunk);
             }
         }
 
@@ -214,7 +234,7 @@ public class PngImage : Image
         var offset = ihdr.DataOffset;
         Binary.Write32(ihdr.Array, ref offset, Binary.IsLittleEndian, Width);
         Binary.Write32(ihdr.Array, ref offset, Binary.IsLittleEndian, Height);
-        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, (byte)ImageFormat.Size);
+        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, PngState.BitDepth);
         Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, PngState.ColorType);
         Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, PngState.CompressionMethod);
         Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, PngState.FilterMethod);

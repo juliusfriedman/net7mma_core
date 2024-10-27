@@ -52,9 +52,13 @@ internal class PngUnitTests
 
                 using (var inputPng = PngImage.FromStream(new System.IO.FileStream(Path.Combine(outputDirectory.FullName, $"rgba_{dataLayout}.png"), FileMode.OpenOrCreate)))
                 {
-                    if (inputPng.Width != 696) throw new Exception();
+                    if (inputPng.Width != image.Width ||
+                                   inputPng.Height != image.Height ||
+                                   inputPng.ImageFormat.Components.Length != image.ImageFormat.Components.Length ||
+                                   inputPng.ImageFormat.Size != image.ImageFormat.Size ||
+                                   inputPng.PngState != image.PngState)
+                        throw new InvalidDataException();
 
-                    if (inputPng.Height != 564) throw new Exception();
                 }
             }
         }
