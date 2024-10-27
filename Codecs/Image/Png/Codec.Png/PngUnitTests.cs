@@ -225,7 +225,8 @@ internal class PngUnitTests
                         if (newPngImage.Width != pngImage.Width ||
                                    newPngImage.Height != pngImage.Height ||
                                    newPngImage.ImageFormat.Components.Length != pngImage.ImageFormat.Components.Length ||
-                                   newPngImage.ImageFormat.Size != pngImage.ImageFormat.Size)
+                                   newPngImage.ImageFormat.Size != pngImage.ImageFormat.Size ||
+                                   newPngImage.PngState != pngImage.PngState)
                             throw new InvalidDataException();
                     }
                 }

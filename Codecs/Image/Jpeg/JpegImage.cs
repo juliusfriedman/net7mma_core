@@ -13,7 +13,7 @@ namespace Media.Codec.Jpeg;
 public class JpegImage : Image
 {
     internal readonly JpegState JpegState;    
-    public readonly ConcurrentThesaurus<byte, Marker> Markers;
+    internal readonly ConcurrentThesaurus<byte, Marker> Markers;
 
     public JpegImage(ImageFormat imageFormat, int width, int height)
         : base(imageFormat, width, height, new JpegCodec())

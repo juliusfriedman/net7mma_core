@@ -1,6 +1,7 @@
 ﻿using System.IO.Compression;
 using System.IO.Hashing;
 using System.Numerics;
+using Codec.Png;
 using Media.Codecs.Image;
 using Media.Common;
 using Media.Common.Collections.Generic;
@@ -40,30 +41,49 @@ public class PngImage : Image
 
     #region Fields    
 
-    public readonly byte ColorType;
+    internal readonly PngState PngState;
 
     public readonly ConcurrentThesaurus<ChunkName, Chunk> Chunks;
 
     #endregion
 
+    #region Constructors
+
+    /// <summary>
+    /// Construct a new instance with the given format, width and height.
+    /// </summary>
+    /// <param name="imageFormat"></param>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
     public PngImage(ImageFormat imageFormat, int width, int height)
         : base(imageFormat, width, height, new PngCodec())
     {
-        Chunks = new ConcurrentThesaurus<ChunkName, Chunk>();
+        PngState = new PngState();
     }
 
+    /// <summary>
+    /// Construct an instance from existing data
+    /// </summary>
+    /// <param name="imageFormat"></param>
+    /// <param name="width"></param>
+    /// <param name="height"></param>
+    /// <param name="data"></param>
     private PngImage(ImageFormat imageFormat, int width, int height, MemorySegment data)
         : base(imageFormat, width, height, data, new PngCodec())
     {
-        Chunks = new ConcurrentThesaurus<ChunkName, Chunk>();
+        PngState = new PngState();
     }
 
-    private PngImage(ImageFormat imageFormat, int width, int height, MemorySegment data, byte colorType, ConcurrentThesaurus<ChunkName, Chunk> chunks)
+    private PngImage(ImageFormat imageFormat, int width, int height, MemorySegment data, PngState pngState, ConcurrentThesaurus<ChunkName, Chunk> chunks)
         : this(imageFormat, width, height, data)
     {
-        ColorType = colorType;
+        PngState = pngState;
         Chunks = chunks;
     }
+
+    #endregion
+
+    #region Writing
 
     public static PngImage FromStream(Stream stream)
     {
@@ -71,7 +91,7 @@ public class PngImage : Image
         int width = 0, height = 0;
         ImageFormat? imageFormat = default;
         SegmentStream dataSegments = new SegmentStream();
-        byte colorType = default;
+        PngState pngState = new();
         ConcurrentThesaurus<ChunkName, Chunk> chunks = new ConcurrentThesaurus<ChunkName, Chunk>();
         Crc32 crc32 = new Crc32();
         foreach(var chunk in PngCodec.ReadChunks(stream))
@@ -95,34 +115,51 @@ public class PngImage : Image
             switch (chunkName)
             {
                 case ChunkName.Header:
-                    var offset = chunk.DataOffset;
-                    width = Binary.Read32(chunk.Array, ref offset, Binary.IsLittleEndian);
-                    height = Binary.Read32(chunk.Array, ref offset, Binary.IsLittleEndian);
-                    var bitDepth = chunk.Array[offset++];
-                    colorType = chunk.Array[offset++];
-                    var compressionMethod = chunk.Array[offset++];
-                    var filterMethod = chunk.Array[offset++];
-                    var interlaceMethod = chunk.Array[offset++];
-
-                    // Create the image format based on the IHDR data
-                    imageFormat = CreateImageFormat(bitDepth, colorType);
-                    continue;
-                case ChunkName.Data:
-                    using (var ms = new MemoryStream(chunk.Array, chunk.DataOffset + ZLibHeaderLength, chunk.Count - chunk.DataOffset - ZLibHeaderLength))
                     {
-                        using (MemoryStream decompressedStream = new MemoryStream())
+                        var offset = chunk.DataOffset;
+                        width = Binary.Read32(chunk.Array, ref offset, Binary.IsLittleEndian);
+                        height = Binary.Read32(chunk.Array, ref offset, Binary.IsLittleEndian);
+                        var bitDepth = chunk.Array[offset++];
+                        pngState.ColorType = chunk.Array[offset++];
+                        pngState.CompressionMethod = chunk.Array[offset++];
+                        pngState.FilterMethod = chunk.Array[offset++];
+                        pngState.InterlaceMethod = chunk.Array[offset++];
+                        // Create the image format based on the IHDR data
+                        imageFormat = CreateImageFormat(bitDepth, pngState.ColorType);
+                        continue;
+                    }
+                case ChunkName.Data:
+                    {
+
+                        //Zlib header, http://tools.ietf.org/html/rfc1950
+                        var cmf = chunk[chunk.DataOffset];
+                        var flg = chunk[chunk.DataOffset + 1];
+
+                        var offset = chunk.DataOffset + ZLibHeaderLength;
+
+                        // The preset dictionary.
+                        bool fdict = (flg & 32) != 0;
+                        if (fdict)
                         {
-                            using (DeflateStream deflateStream = new DeflateStream(ms, CompressionMode.Decompress))
+                            offset += Chunk.ChecksumLength;
+                        }
+
+                        using (var ms = new MemoryStream(chunk.Array, offset, chunk.Count - offset))
+                        {
+                            using (MemoryStream decompressedStream = new MemoryStream())
                             {
-                                try
+                                using (DeflateStream deflateStream = new DeflateStream(ms, CompressionMode.Decompress))
                                 {
-                                    deflateStream.CopyTo(decompressedStream);
-                                    var dataSegment = new MemorySegment(decompressedStream.ToArray());
-                                    dataSegments.AddMemory(dataSegment);
-                                }
-                                catch (InvalidDataException)
-                                {
-                                    dataSegments.AddMemory(chunk.Data);
+                                    try
+                                    {
+                                        deflateStream.CopyTo(decompressedStream);
+                                        var dataSegment = new MemorySegment(decompressedStream.ToArray());
+                                        dataSegments.AddMemory(dataSegment);
+                                    }
+                                    catch (InvalidDataException)
+                                    {
+                                        dataSegments.AddMemory(chunk.Data);
+                                    }
                                 }
                             }
                         }
@@ -142,7 +179,7 @@ public class PngImage : Image
             throw new InvalidDataException("The provided stream does not contain valid PNG image data.");
 
         // Create and return the PngImage
-        return new PngImage(imageFormat, width, height, new(dataSegments.ToArray()), colorType, chunks);
+        return new PngImage(imageFormat, width, height, new(dataSegments.ToArray()), pngState, chunks);
     }
 
     public void Save(Stream stream, CompressionLevel compressionLevel = CompressionLevel.Optimal)
@@ -154,7 +191,7 @@ public class PngImage : Image
         //Should implement like MarkerReader and MarkerWriter in Codec.Jpeg
 
         // Write the IHDR chunk
-        WriteIHdr(stream);
+        WriteHeader(stream);
 
         //Write any chunks we found while processing
         if (Chunks != null)
@@ -166,27 +203,27 @@ public class PngImage : Image
         }
 
         // Write the IDAT chunk
-        WriteIDat(stream, compressionLevel);
+        WriteData(stream, compressionLevel);
 
         // Write the IEND chunk
-        WriteIEnd(stream);
+        WriteEnd(stream);
     }
 
-    private void WriteIHdr(Stream stream)
+    private void WriteHeader(Stream stream)
     {
         using var ihdr = new Chunk(ChunkName.Header, 13);
         var offset = ihdr.DataOffset;
         Binary.Write32(ihdr.Array, ref offset, Binary.IsLittleEndian, Width);
         Binary.Write32(ihdr.Array, ref offset, Binary.IsLittleEndian, Height);
         Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, (byte)ImageFormat.Size);
-        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, ColorType);
-        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, 0);
-        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, 0);
-        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, 0);
+        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, PngState.ColorType);
+        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, PngState.CompressionMethod);
+        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, PngState.FilterMethod);
+        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, PngState.InterlaceMethod);
         WriteChunk(stream, ihdr);
     }
 
-    private void WriteIDat(Stream stream, CompressionLevel compressionLevel = CompressionLevel.Optimal)
+    private void WriteData(Stream stream, CompressionLevel compressionLevel = CompressionLevel.Optimal)
     {
         Chunk idat;
         using (MemoryStream ms = new MemoryStream(Data.Count))
@@ -216,7 +253,7 @@ public class PngImage : Image
         idat.Dispose();
     }
 
-    private void WriteIEnd(Stream stream)
+    private void WriteEnd(Stream stream)
     {
         using var iend = new Chunk(ChunkName.End, 0);
         WriteChunk(stream, iend);
@@ -235,6 +272,8 @@ public class PngImage : Image
         chunk.Crc = (int)expectedCrc;
         stream.Write(chunk.Array, chunk.Offset, chunk.Count);
     }
+
+    #endregion
 
     public MemorySegment GetPixelDataAt(int x, int y)
     {

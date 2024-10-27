@@ -146,7 +146,7 @@ internal sealed class JpegState : IEquatable<JpegState>
         QuantizationTables.Add(dqt);
     }
 
-    public override bool Equals(object obj)
+    public override bool Equals(object? obj)
      => obj is JpegState jpegState && Equals(jpegState);
 
     public bool Equals(JpegState other)
