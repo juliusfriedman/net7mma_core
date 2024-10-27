@@ -13,6 +13,7 @@ namespace Media.Codec.Png
         internal const byte ZLibHeaderLength = 2;
         internal const byte Deflate32KbWindow = 120;
         internal const byte ChecksumBits = 1;
+        internal const int MaxBlockSize = ushort.MaxValue;
 
         public PngCodec()
             : base("PNG", Binary.ByteOrder.Little, ComponentCount, Binary.BitsPerByte)
@@ -71,9 +72,14 @@ namespace Media.Codec.Png
             WriteChunk(stream, ihdr);
         }
 
-        internal static void WriteData(Stream stream, PngImage pngImage, CompressionLevel compressionLevel = CompressionLevel.Optimal)
+        /// <summary>
+        /// Mostly working but has unexpected end of data.
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="pngImage"></param>
+        /// <param name="compressionLevel"></param>
+        internal static void WriteDataChunk(Stream stream, PngImage pngImage, CompressionLevel compressionLevel = CompressionLevel.Optimal)
         {
-            Chunk idat;
             using (MemoryStream ms = new MemoryStream(pngImage.Data.Count))
             {
                 using (DeflateStream deflateStream = new DeflateStream(ms, compressionLevel, true))
@@ -83,21 +89,138 @@ namespace Media.Codec.Png
 
                     ms.TryGetBuffer(out var buffer);
 
-                    // Create the chunk memory segment
-                    idat = new Chunk(ChunkName.Data, buffer.Count + ZLibHeaderLength);
+                    const int Cmf = 0x78;
+                    int flg = 218;
 
-                    // Write the ZLib header.
-                    idat[idat.DataOffset] = Deflate32KbWindow;
-                    idat[idat.DataOffset + 1] = ChecksumBits;
+                    // http://stackoverflow.com/a/2331025/277304
+                    if ((int)compressionLevel >= 5 && (int)compressionLevel <= 6)
+                    {
+                        flg = 156;
+                    }
+                    else if ((int)compressionLevel >= 3 && (int)compressionLevel <= 4)
+                    {
+                        flg = 94;
+                    }
+                    else if ((int)compressionLevel <= 2)
+                    {
+                        flg = 1;
+                    }
 
-                    // Copy the compressed data.
-                    Buffer.BlockCopy(buffer.Array!, buffer.Offset, idat.Array, idat.DataOffset + ZLibHeaderLength, buffer.Count);
+                    // Just in case
+                    flg -= ((Cmf * 256) + flg) % 31;
 
-                    //Todo calculate the CRC and write to idat.
+                    if (flg < 0)
+                    {
+                        flg += 31;
+                    }
+
+                    // Create the data chunk memory segment
+                    using (var idat = new Chunk(ChunkName.Data, buffer.Count + ZLibHeaderLength))
+                    {
+                        // Write the ZLib header.
+                        idat[idat.DataOffset] = Cmf;
+                        idat[idat.DataOffset + 1] = (byte)flg;
+
+                        // Copy the compressed data.
+                        Buffer.BlockCopy(buffer.Array!, buffer.Offset, idat.Array, idat.DataOffset + ZLibHeaderLength, buffer.Count);
+
+                        //Wrote the data chunk
+                        WriteChunk(stream, idat);
+                    }
                 }
             }
-            WriteChunk(stream, idat);
-            idat.Dispose();
+        }
+
+        /// <summary>
+        /// Not yet working 100% (unexpected end of data)
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="pngImage"></param>
+        /// <param name="compressionLevel"></param>
+        internal static void WriteDataChunks(Stream stream, PngImage pngImage, CompressionLevel compressionLevel = CompressionLevel.Optimal)
+        {
+            const int Cmf = 0x78;
+            int flg = 218;
+
+            // http://stackoverflow.com/a/2331025/277304
+            if ((int)compressionLevel >= 5 && (int)compressionLevel <= 6)
+            {
+                flg = 156;
+            }
+            else if ((int)compressionLevel >= 3 && (int)compressionLevel <= 4)
+            {
+                flg = 94;
+            }
+            else if ((int)compressionLevel <= 2)
+            {
+                flg = 1;
+            }
+
+            // Just in case
+            flg -= ((Cmf * 256) + flg) % 31;
+
+            if (flg < 0)
+            {
+                flg += 31;
+            }
+
+            using (MemoryStream ms = new MemoryStream(pngImage.Data.Count))
+            {
+                using (DeflateStream deflateStream = new DeflateStream(ms, compressionLevel, true))
+                {
+                    //Compress the data
+                    deflateStream.Write(pngImage.Data.Array, pngImage.Data.Offset, pngImage.Data.Count);
+
+                    //Close the stream so headers are written.
+                    deflateStream.Close();
+
+                    //Get the compressed data buffer.
+                    ms.TryGetBuffer(out var buffer);
+
+                    var remains = buffer.Count;
+
+                    var bufferOffset = buffer.Offset;
+
+                    // Determine the size of the chunk
+                    var chunkLength = Binary.Min(remains, MaxBlockSize);
+
+                    // Create the chunk memory segment containing the zlib header.
+                    using (var idat = new Chunk(ChunkName.Data, chunkLength + ZLibHeaderLength))
+                    {
+                        //Write the zlib header into the data
+                        idat.Array[idat.DataOffset] = Cmf;
+                        idat.Array[idat.DataOffset + 1] = (byte)flg;
+
+                        // Copy the compressed data.
+                        Buffer.BlockCopy(buffer.Array!, bufferOffset, idat.Array, idat.DataOffset + ZLibHeaderLength, chunkLength);
+
+                        WriteChunk(stream, idat);
+
+                        remains -= chunkLength;
+
+                        bufferOffset += chunkLength;
+                    }
+
+                    while (remains > 0)
+                    {
+                        // Determine the size of the chunk
+                        chunkLength = Binary.Min(remains, MaxBlockSize);
+
+                        // Create the chunk memory segment
+                        using (var idat = new Chunk(ChunkName.Data, chunkLength))
+                        {
+                            // Copy the compressed data.
+                            Buffer.BlockCopy(buffer.Array!, bufferOffset, idat.Array, idat.DataOffset, chunkLength);
+
+                            WriteChunk(stream, idat);
+                            
+                            remains -= chunkLength;
+
+                            bufferOffset += chunkLength;
+                        }
+                    }
+                }
+            }
         }
 
         internal static void WriteEnd(Stream stream)

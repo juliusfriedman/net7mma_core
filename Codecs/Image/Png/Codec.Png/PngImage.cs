@@ -162,12 +162,13 @@ public class PngImage : Image
                     {
 
                         //Zlib header, http://tools.ietf.org/html/rfc1950
+                        //Compression Method and flags
                         var cmf = chunk[chunk.DataOffset];
                         var flg = chunk[chunk.DataOffset + 1];
 
                         var offset = chunk.DataOffset + PngCodec.ZLibHeaderLength;
 
-                        // The preset dictionary.
+                        //Preset dictionary.
                         bool fdict = (flg & 32) != 0;
                         if (fdict)
                         {
@@ -233,8 +234,10 @@ public class PngImage : Image
             }
         }
 
-        // Write the IDAT chunk
-        PngCodec.WriteData(stream, this, compressionLevel);
+        // Write the data chunk(s)
+        PngCodec.WriteDataChunk(stream, this, compressionLevel);
+        // Todo, write multiple data chunks if needed.
+        //PngCodec.WriteDataChunks(stream, this, compressionLevel);
 
         // Write the IEND chunk
         PngCodec.WriteEnd(stream);

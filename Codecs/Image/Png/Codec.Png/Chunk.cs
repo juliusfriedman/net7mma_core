@@ -122,4 +122,7 @@ public class Chunk : MemorySegment
     public MemorySegment CrcData => new(Array, CrcDataOffset, ChecksumLength);
 
     #endregion
+
+    public override string ToString()
+        => ChunkType;
 }
