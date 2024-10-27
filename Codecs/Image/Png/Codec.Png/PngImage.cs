@@ -11,6 +11,7 @@ public class PngImage : Image
 {
 
     //There also exists MNG and JNG which are similar to PNG but not the same.
+    //They would be able to read in chunks by this codec
     //https://en.wikipedia.org/wiki/JPEG_Network_Graphics
     //https://en.wikipedia.org/wiki/Multiple-image_Network_Graphics
     public const ulong PNGSignature = 0x89504E470D0A1A0A;
@@ -105,13 +106,8 @@ public class PngImage : Image
 
                     // Create the image format based on the IHDR data
                     imageFormat = CreateImageFormat(bitDepth, colorType);
-
-                    //ToDo, Crc is in data segment, so we need to read it and validate it.
                     continue;
                 case ChunkName.Data:
-
-                    //TODO
-                    //We should have a MeorySegmentStream and append to it because there can be multiple data chunks.
                     using(var ms = new MemoryStream(chunk.Array, chunk.DataOffset + ZLibHeaderLength, chunk.Count - chunk.DataOffset - ZLibHeaderLength))
                     {
                         using (MemoryStream decompressedStream = new MemoryStream())
