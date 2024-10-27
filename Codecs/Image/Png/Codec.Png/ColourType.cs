@@ -1,6 +1,6 @@
 ﻿namespace Media.Codec.Png;
 
-public enum ColorType
+public enum ColourType
 {
     Grayscale = 0,
     Rgb = 2,

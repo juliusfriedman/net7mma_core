@@ -19,6 +19,11 @@ public class Chunk : MemorySegment
 
     #region Constructors
 
+    public Chunk(Chunk other)
+        : base(other)
+    {
+    }
+
     public Chunk(ChunkHeader header)
         : base(new MemorySegment(ChunkHeader.ChunkHeaderLength + Binary.BytesPerInteger + header.Length))
     {

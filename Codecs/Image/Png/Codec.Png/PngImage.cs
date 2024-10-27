@@ -1,6 +1,7 @@
 ﻿using System.IO.Compression;
 using System.IO.Hashing;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using Media.Codecs.Image;
 using Media.Common;
 using Media.Common.Collections.Generic;
@@ -40,21 +41,21 @@ public class PngImage : Image
         }
     }
 
-    private static ColorType ResolveColorType(ImageFormat imageFormat)
+    private static ColourType ResolveColourType(ImageFormat imageFormat)
     {
         switch (imageFormat.Components.Length)
         {
             case 1:
                 return 
                     imageFormat.Components[0].Id == ImageFormat.PaletteChannelId 
-                    ? ColorType.Palette 
-                    : ColorType.Grayscale;
+                    ? ColourType.Palette 
+                    : ColourType.Grayscale;
             case 2:
-                return ColorType.GrayscaleWithAlpha;
+                return ColourType.GrayscaleWithAlpha;
             case 3:
-                return ColorType.Rgb;
+                return ColourType.Rgb;
             case 4:
-                return ColorType.RgbWithAlpha;
+                return ColourType.RgbWithAlpha;
             default: throw new ArgumentException("Cannot determine ColorType from ImageFormat.");
         }
     }
@@ -84,7 +85,7 @@ public class PngImage : Image
         {
             FileSignature = fileSignature,
             BitDepth = (byte)imageFormat.Size,
-            ColorType = (byte)ResolveColorType(imageFormat)
+            ColourType = (byte)ResolveColourType(imageFormat)
         };
     }
 
@@ -116,6 +117,7 @@ public class PngImage : Image
         int width = 0, height = 0;
         ImageFormat? imageFormat = default;
         var dataSegments = new SegmentStream();
+        var dataSegment = MemorySegment.Empty;
         PngState pngState = new()
         {
             FileSignature = expectedSignature,
@@ -144,16 +146,16 @@ public class PngImage : Image
             {
                 case ChunkName.Header:
                     {
-                        var offset = chunk.DataOffset;
-                        width = Binary.Read32(chunk.Array, ref offset, Binary.IsLittleEndian);
-                        height = Binary.Read32(chunk.Array, ref offset, Binary.IsLittleEndian);
-                        pngState.BitDepth = chunk.Array[offset++];
-                        pngState.ColorType = chunk.Array[offset++];
-                        pngState.CompressionMethod = chunk.Array[offset++];
-                        pngState.FilterMethod = chunk.Array[offset++];
-                        pngState.InterlaceMethod = chunk.Array[offset++];
+                        using var header = new Chunks.Header(chunk);
+                        width = header.Width;
+                        height = header.Height;
+                        pngState.BitDepth = header.BitDepth;
+                        pngState.ColourType = header.ColourType;
+                        pngState.CompressionMethod = header.CompressionMethod;
+                        pngState.FilterMethod = header.FilterMethod;
+                        pngState.InterlaceMethod = header.InterlaceMethod;
                         // Create the image format based on the IHDR data
-                        imageFormat = CreateImageFormat(pngState.BitDepth, pngState.ColorType);
+                        imageFormat = CreateImageFormat(pngState.BitDepth, pngState.ColourType);
                         continue;
                     }
                 case ChunkName.Data:
@@ -172,29 +174,28 @@ public class PngImage : Image
                             offset += Chunk.ChecksumLength;
                         }
 
-                        using (var ms = new MemoryStream(chunk.Array, offset, chunk.Count - offset))
-                        {
-                            using (MemoryStream decompressedStream = new MemoryStream())
-                            {
-                                using (DeflateStream deflateStream = new DeflateStream(ms, CompressionMode.Decompress))
-                                {
-                                    try
-                                    {
-                                        deflateStream.CopyTo(decompressedStream);
-                                        decompressedStream.TryGetBuffer(out var buffer);
-                                        var dataSegment = new MemorySegment(buffer.Array, buffer.Offset, buffer.Count);
-                                        dataSegments.AddMemory(dataSegment);
-                                    }
-                                    catch (InvalidDataException)
-                                    {
-                                        dataSegments.AddMemory(chunk.Data);
-                                    }
-                                }
-                            }
-                        }
+                        dataSegment = chunk.Slice(offset);
+
+                        dataSegments.AddMemory(dataSegment);                        
                     }
                     continue;
                 case ChunkName.End:
+                    using (MemoryStream decompressedStream = new MemoryStream())
+                    {
+                        using (DeflateStream deflateStream = new DeflateStream(dataSegments, CompressionMode.Decompress))
+                        {
+                            try
+                            {
+                                deflateStream.CopyTo(decompressedStream);
+                                decompressedStream.TryGetBuffer(out var buffer);
+                                dataSegment = new MemorySegment(buffer.Array, buffer.Offset, buffer.Count);
+                            }
+                            catch (InvalidDataException)
+                            {
+                                throw;
+                            }
+                        }
+                    }
                     goto LoadImage;
                 default:
                     chunks.Add(chunkName, chunk);
@@ -204,11 +205,11 @@ public class PngImage : Image
 
     LoadImage:
 
-        if (imageFormat == null || dataSegments.Length == 0)
+        if (imageFormat == null || dataSegment.Count == 0)
             throw new InvalidDataException("The provided stream does not contain valid PNG image data.");
 
         // Create and return the PngImage
-        return new PngImage(imageFormat, width, height, new(dataSegments.ToArray()), pngState, chunks);
+        return new PngImage(imageFormat, width, height, dataSegment, pngState, chunks);
     }
 
     #endregion

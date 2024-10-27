@@ -1,6 +1,7 @@
 ﻿using Media.Codec.Interfaces;
 using Media.Codecs.Image;
 using Media.Common;
+using System.Buffers.Binary;
 using System.IO.Compression;
 using System.IO.Hashing;
 
@@ -44,14 +45,12 @@ namespace Media.Codec.Png
 
         public static IEnumerable<Chunk> ReadChunks(Stream inputStream, ulong expectedSignature = PngImage.PNGSignature)
         {
-            // Read and validate the PNG signature
-            using MemorySegment bytes = new MemorySegment(new byte[Binary.BytesPerLong]);
-            if (Binary.BytesPerLong != inputStream.Read(bytes.Array, bytes.Offset, bytes.Count))
-                throw new InvalidDataException("Not enough bytes for PNGSignature.");
-            ulong signature = Binary.ReadU64(bytes.Array, bytes.Offset, Binary.IsLittleEndian);
+            Span<byte> bytes = stackalloc byte[ChunkHeader.ChunkHeaderLength];
+            if (ChunkHeader.ChunkHeaderLength != inputStream.Read(bytes))
+                throw new InvalidDataException("Not enough bytes for signature.");
+            ulong signature = BinaryPrimitives.ReadUInt64BigEndian(bytes);
             if (signature != expectedSignature)
-                throw new InvalidDataException("The provided stream is not a valid PNG file.");
-
+                throw new InvalidDataException($"Invalid signature, Expected: {expectedSignature}, Found: ${signature}");
             while (inputStream.Position < inputStream.Length)
             {
                 using var chunk = Chunk.ReadChunk(inputStream);
@@ -61,15 +60,14 @@ namespace Media.Codec.Png
 
         internal static void WriteHeader(Stream stream, PngImage pngImage)
         {
-            using var ihdr = new Chunk(ChunkName.Header, 13);
-            var offset = ihdr.DataOffset;
-            Binary.Write32(ihdr.Array, ref offset, Binary.IsLittleEndian, pngImage.Width);
-            Binary.Write32(ihdr.Array, ref offset, Binary.IsLittleEndian, pngImage.Height);
-            Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, pngImage.PngState.BitDepth);
-            Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, pngImage.PngState.ColorType);
-            Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, pngImage.PngState.CompressionMethod);
-            Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, pngImage.PngState.FilterMethod);
-            Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, pngImage.PngState.InterlaceMethod);
+            using var ihdr = new Chunks.Header();
+            ihdr.Width = pngImage.Width;
+            ihdr.Height = pngImage.Height;
+            ihdr.BitDepth = pngImage.PngState.BitDepth;
+            ihdr.ColourType = pngImage.PngState.ColourType;
+            ihdr.CompressionMethod = pngImage.PngState.CompressionMethod;
+            ihdr.FilterMethod = pngImage.PngState.FilterMethod;
+            ihdr.InterlaceMethod = pngImage.PngState.InterlaceMethod;
             WriteChunk(stream, ihdr);
         }
 

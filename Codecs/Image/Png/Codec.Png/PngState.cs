@@ -7,7 +7,7 @@ internal class PngState
 
     public byte BitDepth;
 
-    public byte ColorType;
+    public byte ColourType;
 
     public byte CompressionMethod;
 
@@ -21,7 +21,7 @@ internal class PngState
     public bool Equals(PngState other)
         => FileSignature == other.FileSignature &&
            BitDepth == other.BitDepth &&
-           ColorType == other.ColorType &&
+           ColourType == other.ColourType &&
            CompressionMethod == other.CompressionMethod &&
            FilterMethod == other.FilterMethod &&
            InterlaceMethod == other.InterlaceMethod;
@@ -30,7 +30,7 @@ internal class PngState
         => HashCode.Combine(
             FileSignature, 
             BitDepth, 
-            ColorType, 
+            ColourType, 
             CompressionMethod, 
             FilterMethod, 
             InterlaceMethod);
