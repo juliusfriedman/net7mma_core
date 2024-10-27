@@ -49,7 +49,7 @@ using System.Reflection.Metadata.Ecma335;
 namespace Media.Common
 {
     /// <summary>
-    /// Used to crete a continious stream to locations of memory which may not be next to each other and could even overlap.
+    /// Used to crete a continious stream to locations of memory which may not be contiguous and could even overlap.
     /// </summary>
     public class SegmentStream : System.IO.Stream, IDisposed
     {
