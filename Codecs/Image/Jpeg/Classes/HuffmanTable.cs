@@ -106,7 +106,7 @@ internal class HuffmanTable : MemorySegment
     /// </summary>
     public MemorySegment Li
     {
-        get => this.Slice(Offset + Length, CodeLength);
+        get => this.Slice(Length, CodeLength);
         set => value.CopyTo(Array, Offset + Length, CodeLength);
     }
 
@@ -128,8 +128,8 @@ internal class HuffmanTable : MemorySegment
     /// </summary>
     public MemorySegment Vi
     {
-        get => this.Slice(Offset + Length +  CodeLength, CodeLengthSum);
-        set => value.CopyTo(Array, Offset + Length + CodeLength, CodeLengthSum);
+        get => this.Slice(Length + CodeLength, CodeLengthSum);
+        set => value.CopyTo(Array, Length + CodeLength, CodeLengthSum);
     }
 
     /// <summary>

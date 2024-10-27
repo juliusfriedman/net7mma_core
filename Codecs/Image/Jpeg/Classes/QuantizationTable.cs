@@ -65,7 +65,7 @@ internal class QuantizationTable : MemorySegment
     /// </summary>
     public MemorySegment Qk
     {
-        get => this.Slice(Offset + Length, TableLength);
+        get => this.Slice(Length, TableLength);
         set => value.CopyTo(Array, Offset + TableLength);
     }
 

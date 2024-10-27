@@ -528,6 +528,9 @@ namespace Media.Common
     public static class MemorySegmentExtensions
     {
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static Span<TType> GetSpan<TType>(this MemorySegment segment, int index, int length) => System.Runtime.InteropServices.MemoryMarshal.CreateSpan(ref System.Runtime.CompilerServices.Unsafe.Add(ref System.Runtime.CompilerServices.Unsafe.As<byte[], TType>(ref segment.m_Array), index), length);
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void Clear(this MemorySegment segment) => Array.Clear(segment.Array, segment.Offset, segment.Count);
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
