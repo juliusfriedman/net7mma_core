@@ -18,7 +18,7 @@ namespace Media.Codecs.Image
 
         public const byte PreMultipliedAlphaChannelId = (byte)'p';
 
-        //Possibly a type which has multiplied and straight types... 
+        //Possibly a type which has multiplied and normal types... 
         //public const byte MixedAlphaChannelId = (byte)'@';
 
         public const byte DeltaChannelId = (byte)'d';
@@ -38,6 +38,10 @@ namespace Media.Codecs.Image
         public const byte GreenChannelId = (byte)'g';
 
         public const byte BlueChannelId = (byte)'b';
+
+        //
+
+        public const byte PaletteChannelId = (byte)'p';
 
         //Printing...
 
@@ -104,6 +108,14 @@ namespace Media.Codecs.Image
             return new ImageFormat(Common.Binary.ByteOrder.Little, Codec.DataLayout.Packed, new Codec.MediaComponent[]
             {
                 new(LumaChannelId, bitsPerComponent)
+            });
+        }
+
+        public static ImageFormat Palette(int bitsPerComponent)
+        {
+            return new ImageFormat(Common.Binary.ByteOrder.Little, Codec.DataLayout.Packed, new Codec.MediaComponent[]
+            {
+                new(PaletteChannelId, bitsPerComponent)
             });
         }
 

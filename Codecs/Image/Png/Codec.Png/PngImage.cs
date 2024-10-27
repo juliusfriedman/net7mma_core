@@ -25,8 +25,9 @@ public class PngImage : Image
         switch (colorType)
         {
             case 0: // Grayscale
-            case 3: // Indexed-color            
                 return ImageFormat.Monochrome(bitDepth);
+            case 3: // Indexed-color            
+                return ImageFormat.Palette(bitDepth);
             case 4: // Grayscale with alpha
                 return ImageFormat.WithPreceedingAlphaComponent(ImageFormat.Monochrome(bitDepth / 2), bitDepth / 2);
             case 2: // Truecolor (RGB)
@@ -43,7 +44,10 @@ public class PngImage : Image
         switch (imageFormat.Components.Length)
         {
             case 1:
-                return ColorType.Grayscale;
+                return 
+                    imageFormat.Components[0].Id == ImageFormat.PaletteChannelId 
+                    ? ColorType.Palette 
+                    : ColorType.Grayscale;
             case 2:
                 return ColorType.GrayscaleWithAlpha;
             case 3:
