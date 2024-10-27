@@ -1,5 +1,4 @@
-﻿using Codec.Jpeg.Classes;
-using Media.Codec.Jpeg;
+﻿using Media.Codec.Jpeg.Classes;
 using Media.Common;
 using System.Collections.Generic;
 

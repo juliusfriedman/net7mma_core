@@ -1,69 +1,84 @@
 ﻿using Media.Common;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
-namespace Codec.Jpeg.Classes;
+namespace Media.Codec.Jpeg.Classes;
 
 /// <summary>
 /// A class which represents a single Huffman table.
 /// </summary>
 internal class HuffmanTable : MemorySegment
 {
-    /// <summary>
-    /// Creates a <see cref="HuffmanTable"/> from the given bits and values.
-    /// </summary>
-    /// <param name="bits"></param>
-    /// <param name="values"></param>
-    /// <returns></returns>
-    public static HuffmanTable Create(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> values)
-    {
-        int numberOfSymbols = 0;
-        for (int len = Length; len <= CodeLength; len++)
-            numberOfSymbols += bits[len];
-
-        var derivedTable = new HuffmanTable(numberOfSymbols + Length + CodeLength);
-
-        bits.CopyTo(derivedTable.Bits);
-
-        values.CopyTo(new Span<byte>(derivedTable.Values, 0, numberOfSymbols));
-
-        var span = derivedTable.ToSpan();
-
-        span = span.Slice(Length);
-
-        bits.Slice(Length).CopyTo(span);
-
-        span = span.Slice(CodeLength);
-
-        values.CopyTo(span);
-
-        return derivedTable;
-    }
-
     public const int Length = 1;
 
     public const int CodeLength = 16;
 
-    /* These two fields directly represent the contents of a JPEG DHT marker */
-    internal readonly byte[] Bits = new byte[Length + CodeLength];     /* bits[k] = # of symbols with codes of */
+    private readonly Dictionary<byte, (ushort code, byte length)> _codeTable = new();
 
-    /* length k bits; bits[0] is unused */
-    internal readonly byte[] Values = new byte[256];     /* The symbols, in order of incr code length */
+    internal void BuildCodeTable()
+    {
+        using var Bits = Li;
+        using var Values = Vi;
 
-    public HuffmanTable(int size) : base(size)
+        int code = 0;
+        int valueIndex = 0;
+
+        for (int i = 0; i < Bits.Count; i++)
+        {
+            int bitLength = Bits[i];
+
+            for (int j = 0; j < bitLength; j++)
+            {
+                byte value = Values[valueIndex++];
+                _codeTable[value] = ((ushort)code, (byte)(i + 1));
+                code++;
+            }
+
+            code <<= 1;
+        }
+    }
+
+    public (ushort code, byte length) GetCode(byte value)
+    {
+        if (_codeTable.TryGetValue(value, out var codeInfo))
+        {
+            return codeInfo;
+        }
+
+        throw new ArgumentException($"Value {value} not found in Huffman table.");
+    }
+
+    public bool TryGetCode(int code, int length, out (ushort code, byte length) value)
+    {
+        // Convert the code and length to a byte key
+        byte key = (byte)((code << 4) | length);
+
+        if (_codeTable.TryGetValue(key, out value))
+        {
+            return true;
+        }
+
+        value = default;
+        return false;
+    }
+
+    public HuffmanTable(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> values) 
+        : base(Length +bits.Length + values.Length)
+    {
+        using var li = Li;
+        bits.CopyTo(li.ToSpan());
+        using var vi = Vi;
+        values.CopyTo(vi.ToSpan());
+    }
+
+    public HuffmanTable(int size) : base(Length + size)
     {
     }
 
     public HuffmanTable(MemorySegment segment) : base(segment)
     {
     }   
-
-    public HuffmanTable(byte index, byte[] bits, byte[] huffval, int size) : base(new byte[Length + CodeLength + size])
-    {
-        Array[Offset] = index;
-        Bits = bits;
-        Values = huffval;
-    }
 
     /// <summary>
     /// Table class, 0 = DC table or lossless table, 1 = AC table

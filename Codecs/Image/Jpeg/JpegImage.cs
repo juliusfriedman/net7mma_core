@@ -4,9 +4,9 @@ using System.Numerics;
 using Media.Codecs.Image;
 using Media.Common;
 using Media.Common.Collections.Generic;
-using Codec.Jpeg.Classes;
-using System.Runtime.InteropServices;
+using Media.Codec.Jpeg.Classes;
 using Media.Codec.Jpeg.Segments;
+using System.Runtime.InteropServices;
 
 namespace Media.Codec.Jpeg;
 

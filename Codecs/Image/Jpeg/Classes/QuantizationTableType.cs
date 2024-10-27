@@ -1,4 +1,4 @@
-﻿namespace Codec.Jpeg.Classes;
+﻿namespace Media.Codec.Jpeg.Classes;
 
 internal enum QuantizationTableType
 {

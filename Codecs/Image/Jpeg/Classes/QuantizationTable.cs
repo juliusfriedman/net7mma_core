@@ -1,6 +1,6 @@
 ﻿using Media.Common;
 
-namespace Codec.Jpeg.Classes;
+namespace Media.Codec.Jpeg.Classes;
 
 internal class QuantizationTable : MemorySegment
 {
