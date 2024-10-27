@@ -1,7 +1,6 @@
 ﻿using System.IO.Compression;
 using System.IO.Hashing;
 using System.Numerics;
-using Codec.Png;
 using Media.Codecs.Image;
 using Media.Common;
 using Media.Common.Collections.Generic;
@@ -10,15 +9,17 @@ namespace Media.Codec.Png;
 
 public class PngImage : Image
 {
+    #region Constants
+
     //https://en.wikipedia.org/wiki/JPEG_Network_Graphics
     //https://en.wikipedia.org/wiki/Multiple-image_Network_Graphics
     public const ulong PNGSignature = 0x89504E470D0A1A0A;
     public const ulong MNGSignature = 0x8A4D4E470D0A1A0A;
     public const ulong JNGSignature = 0x8B4A4E470D0A1A0A;
 
-    const byte ZLibHeaderLength = 2;
-    const byte Deflate32KbWindow = 120;
-    const byte ChecksumBits = 1;
+    #endregion
+
+    #region Private Static Functions
 
     private static ImageFormat CreateImageFormat(byte bitDepth, byte colorType)
     {
@@ -57,6 +58,8 @@ public class PngImage : Image
             default: throw new ArgumentException("Cannot determine ColorType from ImageFormat.");
         }
     }
+
+    #endregion
 
     #region Fields    
 
@@ -106,20 +109,20 @@ public class PngImage : Image
 
     #endregion
 
-    #region Writing
+    #region Reading
 
     public static PngImage FromStream(Stream stream, ulong expectedSignature = PNGSignature)
     {
         int width = 0, height = 0;
         ImageFormat? imageFormat = default;
-        SegmentStream dataSegments = new SegmentStream();
+        var dataSegments = new SegmentStream();
         PngState pngState = new()
         {
             FileSignature = expectedSignature,
         };
-        ConcurrentThesaurus<ChunkName, Chunk> chunks = new ConcurrentThesaurus<ChunkName, Chunk>();
-        Crc32 crc32 = new Crc32();
-        foreach(var chunk in PngCodec.ReadChunks(stream, expectedSignature))
+        var chunks = new ConcurrentThesaurus<ChunkName, Chunk>();
+        var crc32 = new Crc32();
+        foreach (var chunk in PngCodec.ReadChunks(stream, expectedSignature))
         {
             var actualCrc = chunk.Crc;
             if (actualCrc > 0)
@@ -131,7 +134,7 @@ public class PngImage : Image
                 using var chunkData = chunk.Data;
                 var chunkSpan = chunkData.ToSpan();
                 crc32.Append(chunkSpan);
-                var expectedCrc = crc32.GetCurrentHashAsUInt32();                
+                var expectedCrc = crc32.GetCurrentHashAsUInt32();
                 if (actualCrc > 0 && expectedCrc != actualCrc)
                     throw new InvalidDataException($"There is an error in the provided stream Crc32 failed, Expected: ${expectedCrc}, Found: {actualCrc}.");
             }
@@ -160,7 +163,7 @@ public class PngImage : Image
                         var cmf = chunk[chunk.DataOffset];
                         var flg = chunk[chunk.DataOffset + 1];
 
-                        var offset = chunk.DataOffset + ZLibHeaderLength;
+                        var offset = chunk.DataOffset + PngCodec.ZLibHeaderLength;
 
                         // The preset dictionary.
                         bool fdict = (flg & 32) != 0;
@@ -201,12 +204,16 @@ public class PngImage : Image
 
     LoadImage:
 
-        if(imageFormat == null || dataSegments.Length == 0)
+        if (imageFormat == null || dataSegments.Length == 0)
             throw new InvalidDataException("The provided stream does not contain valid PNG image data.");
 
         // Create and return the PngImage
         return new PngImage(imageFormat, width, height, new(dataSegments.ToArray()), pngState, chunks);
     }
+
+    #endregion
+
+    #region Writing    
 
     public void Save(Stream stream, CompressionLevel compressionLevel = CompressionLevel.Optimal)
     {
@@ -214,89 +221,27 @@ public class PngImage : Image
         stream.Write(Binary.GetBytes(PngState.FileSignature, BitConverter.IsLittleEndian));
 
         // Write the IHDR chunk
-        WriteHeader(stream);
+        PngCodec.WriteHeader(stream, this);
 
         //Write any chunks we found while processing
         if (Chunks != null)
         {
             foreach (var chunk in Chunks.Values)
             {
-                WriteChunk(stream, chunk);
+                PngCodec.WriteChunk(stream, chunk);
             }
         }
 
         // Write the IDAT chunk
-        WriteData(stream, compressionLevel);
+        PngCodec.WriteData(stream, this, compressionLevel);
 
         // Write the IEND chunk
-        WriteEnd(stream);
-    }
-
-    private void WriteHeader(Stream stream)
-    {
-        using var ihdr = new Chunk(ChunkName.Header, 13);
-        var offset = ihdr.DataOffset;
-        Binary.Write32(ihdr.Array, ref offset, Binary.IsLittleEndian, Width);
-        Binary.Write32(ihdr.Array, ref offset, Binary.IsLittleEndian, Height);
-        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, PngState.BitDepth);
-        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, PngState.ColorType);
-        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, PngState.CompressionMethod);
-        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, PngState.FilterMethod);
-        Binary.Write8(ihdr.Array, ref offset, Binary.IsBigEndian, PngState.InterlaceMethod);
-        WriteChunk(stream, ihdr);
-    }
-
-    private void WriteData(Stream stream, CompressionLevel compressionLevel = CompressionLevel.Optimal)
-    {
-        Chunk idat;
-        using (MemoryStream ms = new MemoryStream(Data.Count))
-        {
-            using (DeflateStream deflateStream = new DeflateStream(ms, compressionLevel, true))
-            {
-                deflateStream.Write(Data.Array, Data.Offset, Data.Count);
-
-                deflateStream.Close();
-
-                ms.TryGetBuffer(out var buffer);                
-
-                // Create the chunk memory segment
-                idat = new Chunk(ChunkName.Data, buffer.Count + ZLibHeaderLength);
-
-                // Write the ZLib header.
-                idat[idat.DataOffset] = Deflate32KbWindow;
-                idat[idat.DataOffset + 1] = ChecksumBits;
-
-                // Copy the compressed data.
-                Buffer.BlockCopy(buffer.Array!, buffer.Offset, idat.Array, idat.DataOffset + ZLibHeaderLength, buffer.Count);
-
-                //Todo calculate the CRC and write to idat.
-            }
-        }
-        WriteChunk(stream, idat);
-        idat.Dispose();
-    }
-
-    private void WriteEnd(Stream stream)
-    {
-        using var iend = new Chunk(ChunkName.End, 0);
-        WriteChunk(stream, iend);
-    }
-
-    private void WriteChunk(Stream stream, Chunk chunk)
-    {
-        Crc32 crc32 = new();
-        using var header = chunk.Header;
-        var headerSpan = header.ToSpan();
-        crc32.Append(headerSpan.Slice(ChunkHeader.LengthBytes, ChunkHeader.NameLength));
-        using var chunkData = chunk.Data;
-        var chunkSpan = chunkData.ToSpan();
-        crc32.Append(chunkSpan);
-        var expectedCrc = crc32.GetCurrentHashAsUInt32();
-        chunk.Crc = (int)expectedCrc;
-        stream.Write(chunk.Array, chunk.Offset, chunk.Count);
+        PngCodec.WriteEnd(stream);
     }
 
     #endregion
+
+    #region Pixel Data Access
 
     public MemorySegment GetPixelDataAt(int x, int y)
     {
@@ -330,4 +275,6 @@ public class PngImage : Image
         offset -= offset % Vector<byte>.Count; // Align the offset to vector size
         vectorData.CopyTo(new Span<byte>(Data.Array, Data.Offset + offset, Vector<byte>.Count));
     }
+
+    #endregion
 }

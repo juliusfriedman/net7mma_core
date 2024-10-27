@@ -1,5 +1,5 @@
 ﻿
-namespace Codec.Png;
+namespace Media.Codec.Png;
 
 internal class PngState
 {
