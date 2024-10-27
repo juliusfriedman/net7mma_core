@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.AccessControl;
 using Codec.Jpeg.Classes;
 using Media.Codec.Interfaces;
 using Media.Codec.Jpeg.Segments;
@@ -17,7 +19,7 @@ namespace Media.Codec.Jpeg
 
         internal const int BlockSize = 8;
 
-        internal static readonly double SqrtHalf = 1.0 / System.Math.Sqrt(2.0);
+        internal static readonly double SqrtHalf = 1.0 / Math.Sqrt(2.0);
 
         public static ImageFormat DefaultImageFormat
         {
@@ -32,7 +34,7 @@ namespace Media.Codec.Jpeg
                 );
         }
 
-        private static ReadOnlySpan<short> DefaultLuminanceQuantTable =>
+        private static ReadOnlySpan<byte> DefaultLuminanceQuantTable =>
         [
             16, 11, 10, 16, 24, 40, 51, 61,
             12, 12, 14, 19, 26, 58, 60, 55,
@@ -44,7 +46,7 @@ namespace Media.Codec.Jpeg
             72, 92, 95, 98, 112, 100, 103, 99
         ];
 
-        private static ReadOnlySpan<short> DefaultChrominanceQuantTable =>
+        private static ReadOnlySpan<byte> DefaultChrominanceQuantTable =>
         [
             17, 18, 24, 47, 99, 99, 99, 99,
             18, 21, 26, 66, 99, 99, 99, 99,
@@ -56,7 +58,7 @@ namespace Media.Codec.Jpeg
             99, 99, 99, 99, 99, 99, 99, 99
         ];
 
-        private static ReadOnlySpan<short> GetQuantizationTable(int quality, QuantizationTableType tableType)
+        internal static QuantizationTable GetQuantizationTable(int pq, int tq, int quality, QuantizationTableType tableType)
         {
             if (quality < 1 || quality > 100)
             {
@@ -67,22 +69,60 @@ namespace Media.Codec.Jpeg
                 ? DefaultLuminanceQuantTable
                 : DefaultChrominanceQuantTable;
 
+            var length = pq == 0 ? 64 : 128;
+
+            QuantizationTable result;
+
             if (quality == 50)
             {
-                return baseTable;
+                result = new QuantizationTable(pq, tq);
+                using (var qk = result.Qk)
+                {
+                    if(pq == 0)
+                    {
+                        baseTable.CopyTo(qk.ToSpan());
+                    }
+                    else
+                    {
+                        int offset = 0;
+                        foreach(var b in baseTable)
+                        {
+                            Binary.Write16(result.Array, ref offset, Binary.IsLittleEndian, b);
+                        }
+                    }
+
+                    return result;
+                }
             }
 
             int scaleFactor = quality < 50 ? 5000 / quality : 200 - quality * 2;
 
-            var quantizationTable = new short[BlockSize * BlockSize];
+            var quantizationTable = new byte[length];
 
-            for (int i = 0; i < 64; i++)
+            for (int i = 0; i < QuantizationTable.Length; i++)
             {
                 int value = (baseTable[i] * scaleFactor + 50) / 100;
-                quantizationTable[i] = (short)Math.Clamp(value, 1, 255);
+                quantizationTable[i] = (byte)Binary.Clamp(value, 1, 255);
             }
 
-            return quantizationTable;
+            result = new QuantizationTable(pq, tq);
+
+            using (var qk = result.Qk)
+            {
+                if (pq == 0)
+                {
+                    quantizationTable.AsSpan().CopyTo(qk.ToSpan());
+                }
+                else
+                {
+                    int offset = 0;
+                    foreach (var b in baseTable)
+                    {
+                        Binary.Write16(result.Array, ref offset, Binary.IsLittleEndian, b);
+                    }
+                }
+                return result;
+            }
         }
 
         public JpegCodec()
@@ -545,38 +585,19 @@ namespace Media.Codec.Jpeg
             stream.WriteByte(functionCode);
         }
 
-        internal static void WriteQuantizationTableMarker(Stream stream, int quality)
+        internal static void WriteQuantizationTableMarker(Stream stream, int precision, int quality)
         {
-            const int QuantizationTableLength = 64; // Each quantization table has 64 values
+            var quantizationTables = new QuantizationTable[2];
 
-            // Calculate the quantization table based on the quality
-            var quantizationTable = GetQuantizationTable(quality, QuantizationTableType.Luminance);
+            quantizationTables[0] = GetQuantizationTable(precision, 0, quality, QuantizationTableType.Luminance);
 
-            //Output 2 tables
-            var outputMarker = new QuantizationTables(QuantizationTableLength * 2 + QuantizationTables.Length);
+            quantizationTables[1] = GetQuantizationTable(precision, 1, quality, QuantizationTableType.Chrominance);
 
-            outputMarker.Pq = 0; // 8-bit precision
+            using var dqt = new QuantizationTables(quantizationTables[0].Count + quantizationTables[1].Count);
+            
+            dqt.Tables = quantizationTables;
 
-            var i = 1;
-
-            // Write the quantization table values
-            foreach (short value in quantizationTable)
-            {
-                outputMarker.Array[outputMarker.DataOffset + i ++] = (byte)value;
-            }
-
-            quantizationTable = GetQuantizationTable(quality, QuantizationTableType.Chrominance);
-
-            // Write the quantization table values
-            foreach (short value in quantizationTable)
-            {
-                outputMarker.Array[outputMarker.DataOffset + i++] = (byte)value;
-            }
-
-            // Write the DQT marker
-            WriteMarker(stream, outputMarker);
-            outputMarker.Dispose();
-            outputMarker = null;
+            WriteMarker(stream, dqt);
         }
 
         internal static void WriteHuffmanTableMarkers(Stream stream, params HuffmanTables[] huffmanTables)

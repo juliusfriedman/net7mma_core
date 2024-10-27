@@ -1,61 +1,49 @@
-﻿using Media.Common;
+﻿using Codec.Jpeg.Classes;
+using Media.Common;
+using System.Collections.Generic;
 
 namespace Media.Codec.Jpeg.Segments;
 
-public class QuantizationTables : Marker
+public class QuantizationTables : Marker, IEnumerable<QuantizationTable>
 {
-    public new const int Length = 1;
-
-    public QuantizationTables(int size) : base(Markers.QuantizationTable, LengthBytes + Length + size)
+    public QuantizationTables(int size) 
+        : base(Markers.QuantizationTable, LengthBytes + size)
     {
-
     }
 
     public QuantizationTables(MemorySegment segment)
         : base(segment)
     {
-
     }
 
     /// <summary>
-    /// Quantization table element precision.
-    /// 0 indicates 8 bit values, 1 indicates 16 bit values.
+    /// Gets any contained <see cref="QuantizationTable"/>
     /// </summary>
-    public int Pq
+    internal IEnumerable<QuantizationTable> Tables
     {
         get
         {
-            var bitOffset = Binary.BytesToBits(DataOffset);
-            return (int)this.ReadBits(bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
+            var offset = DataOffset;
+            while (offset < MarkerLength)
+            {
+                using var result = new QuantizationTable(this.Slice(offset, 64));
+                offset += result.TotalLength;
+                yield return result;
+            }
         }
         set
         {
-            var bitOffset = Binary.BytesToBits(DataOffset);
-            this.WriteBits(bitOffset, Binary.Four, (uint)value, Binary.BitOrder.MostSignificant);
+            var offset = DataOffset;
+            foreach (var table in value)
+            {
+                table.CopyTo(Array, offset);
+                offset += table.Count;
+            }
         }
     }
 
-    /// <summary>
-    /// Quantization table destination identifier.
-    /// Specifies one of four possible destinations at the decoder into which the quantization table shall be installed.
-    /// </summary>
-    public int Tq
+    IEnumerator<QuantizationTable> IEnumerable<QuantizationTable>.GetEnumerator()
     {
-        get
-        {
-            var bitOffset = Binary.BytesToBits(DataOffset) + Binary.Four;
-            return (int)this.ReadBits(bitOffset, Binary.Four, Binary.BitOrder.MostSignificant);
-        }
-        set
-        {
-            var bitOffset = Binary.BytesToBits(DataOffset) + Binary.Four;
-            this.WriteBits(bitOffset, Binary.Four, (uint)value, Binary.BitOrder.MostSignificant);
-        }
-    }
-
-    public MemorySegment Qk
-    {
-        get => this.Slice(DataOffset + 1);
-        set => value.CopyTo(Array, DataOffset + 1);
+        return Tables.GetEnumerator();
     }
 }

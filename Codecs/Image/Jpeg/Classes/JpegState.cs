@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Media.Common;
 using Media.Codec.Jpeg;
 using Media.Codec.Jpeg.Segments;
+using System.IO;
 
 namespace Codec.Jpeg.Classes;
 
@@ -85,12 +86,17 @@ internal sealed class JpegState : IEquatable<JpegState>
     public byte Al;
 
     /// <summary>
-    /// 
+    /// Defines the precision of any contained <see cref="QuantizationTables"/>
+    /// </summary>
+    public byte Precision;
+
+    /// <summary>
+    /// Any <see cref="Media.Codec.Jpeg.Segments.QuantizationTables"/> which are contained in the image.
     /// </summary>
     public readonly List<QuantizationTables> QuantizationTables = new();
 
     /// <summary>
-    /// 
+    /// Any <see cref="Media.Codec.Jpeg.Segments.HuffmanTables"/> which are contained in the image.
     /// </summary>
     public readonly List<HuffmanTables> HuffmanTables = new();
 
@@ -130,11 +136,26 @@ internal sealed class JpegState : IEquatable<JpegState>
         huffmanTables[3].Te = 1;
         huffmanTables[3].Th = 1;
 
-        var huffmanTable = new HuffmanTables(huffmanTables[0].Count + huffmanTables[1].Count + huffmanTables[2].Count + huffmanTables[3].Count);
+        var dht = new HuffmanTables(huffmanTables[0].Count + huffmanTables[1].Count + huffmanTables[2].Count + huffmanTables[3].Count);
 
-        huffmanTable.Tables = huffmanTables;
+        dht.Tables = huffmanTables;
 
-        HuffmanTables.Add(huffmanTable);
+        HuffmanTables.Add(dht);
+    }
+
+    public void InitializeDefaultQuantizationTables(int precision, int quality)
+    {
+        var quantizationTables = new QuantizationTable[2];
+
+        quantizationTables[0] = JpegCodec.GetQuantizationTable(precision, 0, quality, QuantizationTableType.Luminance);
+
+        quantizationTables[1] = JpegCodec.GetQuantizationTable(precision, 1, quality, QuantizationTableType.Chrominance);
+
+        using var dqt = new QuantizationTables(quantizationTables[0].Count + quantizationTables[1].Count);
+
+        dqt.Tables = quantizationTables;
+
+        QuantizationTables.Add(dqt);
     }
 
     public override bool Equals(object obj)
