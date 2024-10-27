@@ -4,12 +4,15 @@ using System.Numerics;
 using Media.Codecs.Image;
 using Media.Common;
 using Media.Common.Collections.Generic;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Media.Codec.Png;
 
 public class PngImage : Image
 {
+
+    //There also exists MNG and JNG which are similar to PNG but not the same.
+    //https://en.wikipedia.org/wiki/JPEG_Network_Graphics
+    //https://en.wikipedia.org/wiki/Multiple-image_Network_Graphics
     public const ulong PNGSignature = 0x89504E470D0A1A0A;
 
     const byte ZLibHeaderLength = 2;
@@ -109,7 +112,7 @@ public class PngImage : Image
 
                     //TODO
                     //We should have a MeorySegmentStream and append to it because there can be multiple data chunks.
-                    using(var ms = new MemoryStream(chunk.Array, chunk.DataOffset + 2, chunk.Count - chunk.DataOffset - 2))
+                    using(var ms = new MemoryStream(chunk.Array, chunk.DataOffset + ZLibHeaderLength, chunk.Count - chunk.DataOffset - ZLibHeaderLength))
                     {
                         using (MemoryStream decompressedStream = new MemoryStream())
                         {
@@ -157,7 +160,7 @@ public class PngImage : Image
         //Should implement like MarkerReader and MarkerWriter in Codec.Jpeg
 
         // Write the IHDR chunk
-        WriteIHDRChunk(stream);
+        WriteIHdr(stream);
 
         //Write any chunks we found while processing
         if (Chunks != null)
@@ -169,13 +172,13 @@ public class PngImage : Image
         }
 
         // Write the IDAT chunk
-        WriteIDATChunk(stream, compressionLevel);
+        WriteIDat(stream, compressionLevel);
 
         // Write the IEND chunk
-        WriteIENDChunk(stream);
+        WriteIEnd(stream);
     }
 
-    private void WriteIHDRChunk(Stream stream)
+    private void WriteIHdr(Stream stream)
     {
         using var ihdr = new Chunk(ChunkName.Header, 13);
         var offset = ihdr.DataOffset;
@@ -189,7 +192,7 @@ public class PngImage : Image
         WriteChunk(stream, ihdr);
     }
 
-    private void WriteIDATChunk(Stream stream, CompressionLevel compressionLevel = CompressionLevel.Optimal)
+    private void WriteIDat(Stream stream, CompressionLevel compressionLevel = CompressionLevel.Optimal)
     {
         Chunk idat;
         using (MemoryStream ms = new MemoryStream(Data.Count))
@@ -219,7 +222,7 @@ public class PngImage : Image
         idat.Dispose();
     }
 
-    private void WriteIENDChunk(Stream stream)
+    private void WriteIEnd(Stream stream)
     {
         using var iend = new Chunk(ChunkName.End, 0);
         WriteChunk(stream, iend);
