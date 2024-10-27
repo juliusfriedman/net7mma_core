@@ -44,6 +44,11 @@ internal sealed class JpegState : IEquatable<JpegState>
     /// </summary>
     public readonly List<QuantizationTables> QuantizationTables = new();
 
+    /// <summary>
+    /// Get a <see cref="QuantizationTable"/> by its table id.
+    /// </summary>
+    /// <param name="tableId"></param>
+    /// <returns></returns>
     public QuantizationTable? GetQuantizationTable(int tableId)
     {
         foreach(var quantizationTable in QuantizationTables)
