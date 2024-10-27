@@ -108,7 +108,7 @@ public class PngImage : Image
                     imageFormat = CreateImageFormat(bitDepth, colorType);
                     continue;
                 case ChunkName.Data:
-                    using(var ms = new MemoryStream(chunk.Array, chunk.DataOffset + ZLibHeaderLength, chunk.Count - chunk.DataOffset - ZLibHeaderLength))
+                    using (var ms = new MemoryStream(chunk.Array, chunk.DataOffset + ZLibHeaderLength, chunk.Count - chunk.DataOffset - ZLibHeaderLength))
                     {
                         using (MemoryStream decompressedStream = new MemoryStream())
                         {
@@ -127,12 +127,10 @@ public class PngImage : Image
                             }
                         }
                     }
-
                     continue;
                 case ChunkName.End:
                     goto LoadImage;
                 default:
-
                     chunks.Add(chunkName, chunk);
                     continue;
             }
