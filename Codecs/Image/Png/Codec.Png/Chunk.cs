@@ -5,6 +5,19 @@ namespace Media.Codec.Png;
 public class Chunk : MemorySegment
 {
     public const int ChecksumLength = Binary.BytesPerInteger;
+    
+    internal static Chunk ReadChunk(Stream inputStream)
+    {
+        using ChunkHeader header = new ChunkHeader();
+        if (ChunkHeader.ChunkHeaderLength != inputStream.Read(header.Array, header.Offset, ChunkHeader.ChunkHeaderLength))
+            throw new InvalidDataException("Not enough bytes for chunk header.");
+        var chunk = new Chunk(header);
+        if (chunk.TotalLength != inputStream.Read(chunk.Array, chunk.DataOffset, chunk.TotalLength))
+            throw new InvalidDataException("Not enough bytes for chunk data.");
+        return chunk;
+    }
+
+    #region Constructors
 
     public Chunk(ChunkHeader header)
         : base(new MemorySegment(ChunkHeader.ChunkHeaderLength + Binary.BytesPerInteger + header.Length))
@@ -40,6 +53,10 @@ public class Chunk : MemorySegment
         ChunkLength = chunkSize;
     }
 
+    #endregion
+
+    #region Properties
+
     public ChunkHeader Header
     {
         get => new ChunkHeader(Array, Offset);
@@ -53,7 +70,7 @@ public class Chunk : MemorySegment
     /// <summary>
     /// Number of bytes contained including the <see cref="Crc"/>
     /// </summary>
-    public int TotalLength => (int)(Header.Length + ChecksumLength);
+    public int TotalLength => ChunkLength + ChecksumLength;
 
     /// <summary>
     /// The number of bytes contained in the <see cref="Data"/> segment.
@@ -87,26 +104,17 @@ public class Chunk : MemorySegment
     /// </summary>
     public int DataOffset => Offset + ChunkHeader.ChunkHeaderLength;
 
-    public MemorySegment Data => new MemorySegment(Array, DataOffset, (int)Header.Length);
+    public MemorySegment Data => new MemorySegment(Array, DataOffset, ChunkLength);
 
     public int Crc
     {
-        get { return Binary.Read32(Array, Offset + ChunkHeader.ChunkHeaderLength + ChunkLength, Binary.IsBigEndian); }
-        set { Binary.Write32(Array, Offset + ChunkHeader.ChunkHeaderLength + ChunkLength, Binary.IsBigEndian, value); }
+        get { return Binary.Read32(Array, CrcDataOffset, Binary.IsLittleEndian); }
+        set { Binary.Write32(Array, CrcDataOffset, Binary.IsLittleEndian, value); }
     }
 
-    public int CrcDataOffset => Offset + ChunkHeader.ChunkHeaderLength + ChunkLength;
+    public int CrcDataOffset => DataOffset + ChunkLength;
 
     public MemorySegment CrcData => new(Array, CrcDataOffset, ChecksumLength);
 
-    internal static Chunk ReadChunk(Stream inputStream)
-    {
-        using ChunkHeader header = new ChunkHeader();
-        if (ChunkHeader.ChunkHeaderLength != inputStream.Read(header.Array, header.Offset, ChunkHeader.ChunkHeaderLength))
-            throw new InvalidDataException("Not enough bytes for chunk header.");
-        var chunk = new Chunk(header);
-        if (chunk.TotalLength != inputStream.Read(chunk.Array, chunk.DataOffset, chunk.TotalLength))
-            throw new InvalidDataException("Not enough bytes for chunk data.");
-        return chunk;
-    }
+    #endregion
 }

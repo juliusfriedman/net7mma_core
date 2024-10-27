@@ -5,7 +5,10 @@ namespace Media.Codec.Png;
 
 public class ChunkHeader : MemorySegment
 {
-    public const int ChunkHeaderLength = 8;
+    public const int ChunkHeaderLength = Binary.BytesPerLong;
+    public const int TypeLength = Binary.BytesPerInteger;
+    public const int NameLength = Binary.BytesPerInteger;
+    public const int LengthBytes = Binary.BytesPerInteger;
 
     public ChunkHeader()
         : this(new byte[ChunkHeaderLength], 0)

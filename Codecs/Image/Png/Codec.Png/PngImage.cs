@@ -1,4 +1,5 @@
 ﻿using System.IO.Compression;
+using System.IO.Hashing;
 using System.Numerics;
 using Media.Codecs.Image;
 using Media.Common;
@@ -29,18 +30,13 @@ public class PngImage : Image
         }
     }
 
-    private static byte[] CalculateCrc(IEnumerable<byte> bytes)
-    {
-        uint checksum = 0; //Should be seed value...
-        foreach (var b in bytes) 
-            checksum = (checksum >> 8) ^ BitOperations.Crc32C(checksum, b);
-        return Binary.GetBytes(checksum, BitConverter.IsLittleEndian);
-    }
-
+    #region Fields    
 
     public readonly byte ColorType;
 
     public readonly ConcurrentThesaurus<ChunkName, Chunk> Chunks;
+
+    #endregion
 
     public PngImage(ImageFormat imageFormat, int width, int height)
         : base(imageFormat, width, height, new PngCodec())
@@ -69,9 +65,24 @@ public class PngImage : Image
         MemorySegment? dataSegment = default;
         byte colorType = default;
         ConcurrentThesaurus<ChunkName, Chunk> chunks = new ConcurrentThesaurus<ChunkName, Chunk>();
-
+        Crc32 crc32 = new Crc32();
         foreach(var chunk in PngCodec.ReadChunks(stream))
         {
+            var actualCrc = chunk.Crc;
+            if (actualCrc > 0)
+            {
+                crc32.Reset();
+                using var header = chunk.Header;
+                var headerSpan = header.ToSpan();
+                crc32.Append(headerSpan.Slice(ChunkHeader.LengthBytes, ChunkHeader.NameLength));
+                using var chunkData = chunk.Data;
+                var chunkSpan = chunkData.ToSpan();
+                crc32.Append(chunkSpan);
+                var expectedCrc = crc32.GetCurrentHashAsUInt32();                
+                if (actualCrc > 0 && expectedCrc != actualCrc)
+                    throw new InvalidDataException($"There is an error in the provided stream Crc32 failed, Expected: ${expectedCrc}, Found: {actualCrc}.");
+            }
+
             var chunkName = chunk.ChunkName;
             switch (chunkName)
             {
@@ -117,6 +128,7 @@ public class PngImage : Image
                 case ChunkName.End:
                     goto LoadImage;
                 default:
+
                     chunks.Add(chunkName, chunk);
                     continue;
             }
