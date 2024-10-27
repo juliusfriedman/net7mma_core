@@ -37,14 +37,14 @@ namespace Media.Codec.Png
             return PngImage.FromStream(inputStream);
         }
 
-        public static IEnumerable<Chunk> ReadChunks(Stream inputStream)
+        public static IEnumerable<Chunk> ReadChunks(Stream inputStream, ulong expectedSignature = PngImage.PNGSignature)
         {
             // Read and validate the PNG signature
             using MemorySegment bytes = new MemorySegment(new byte[Binary.BytesPerLong]);
             if (Binary.BytesPerLong != inputStream.Read(bytes.Array, bytes.Offset, bytes.Count))
                 throw new InvalidDataException("Not enough bytes for PNGSignature.");
             ulong signature = Binary.ReadU64(bytes.Array, bytes.Offset, Binary.IsLittleEndian);
-            if (signature != PngImage.PNGSignature)
+            if (signature != expectedSignature)
                 throw new InvalidDataException("The provided stream is not a valid PNG file.");
 
             while (inputStream.Position < inputStream.Length)

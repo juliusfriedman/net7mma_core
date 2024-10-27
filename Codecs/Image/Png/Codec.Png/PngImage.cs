@@ -10,12 +10,11 @@ namespace Media.Codec.Png;
 
 public class PngImage : Image
 {
-
-    //There also exists MNG and JNG which are similar to PNG but not the same.
-    //They would be able to read in chunks by this codec
     //https://en.wikipedia.org/wiki/JPEG_Network_Graphics
     //https://en.wikipedia.org/wiki/Multiple-image_Network_Graphics
     public const ulong PNGSignature = 0x89504E470D0A1A0A;
+    public const ulong MNGSignature = 0x8A4D4E470D0A1A0A;
+    public const ulong JNGSignature = 0x8B4A4E470D0A1A0A;
 
     const byte ZLibHeaderLength = 2;
     const byte Deflate32KbWindow = 120;
@@ -43,7 +42,7 @@ public class PngImage : Image
 
     internal readonly PngState PngState;
 
-    public readonly ConcurrentThesaurus<ChunkName, Chunk> Chunks;
+    public readonly ConcurrentThesaurus<ChunkName, Chunk>? Chunks;
 
     #endregion
 
@@ -85,16 +84,15 @@ public class PngImage : Image
 
     #region Writing
 
-    public static PngImage FromStream(Stream stream)
+    public static PngImage FromStream(Stream stream, ulong expectedSignature = PNGSignature)
     {
-        // Read the IHDR chunk
         int width = 0, height = 0;
         ImageFormat? imageFormat = default;
         SegmentStream dataSegments = new SegmentStream();
         PngState pngState = new();
         ConcurrentThesaurus<ChunkName, Chunk> chunks = new ConcurrentThesaurus<ChunkName, Chunk>();
         Crc32 crc32 = new Crc32();
-        foreach(var chunk in PngCodec.ReadChunks(stream))
+        foreach(var chunk in PngCodec.ReadChunks(stream, expectedSignature))
         {
             var actualCrc = chunk.Crc;
             if (actualCrc > 0)
@@ -153,7 +151,8 @@ public class PngImage : Image
                                     try
                                     {
                                         deflateStream.CopyTo(decompressedStream);
-                                        var dataSegment = new MemorySegment(decompressedStream.ToArray());
+                                        decompressedStream.TryGetBuffer(out var buffer);
+                                        var dataSegment = new MemorySegment(buffer.Array, buffer.Offset, buffer.Count);
                                         dataSegments.AddMemory(dataSegment);
                                     }
                                     catch (InvalidDataException)
