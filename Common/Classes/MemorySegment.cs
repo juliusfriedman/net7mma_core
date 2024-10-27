@@ -527,22 +527,34 @@ namespace Media.Common
     /// </summary>
     public static class MemorySegmentExtensions
     {
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void Clear(this MemorySegment segment) => Array.Clear(segment.Array, segment.Offset, segment.Count);
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void Fill(this MemorySegment segment, byte value) => Array.Fill(segment.Array, value, segment.Offset, segment.Count);
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static MemorySegment Slice(this MemorySegment segment, int offset) => Slice(segment, offset, Math.Max(0, segment.Count - offset));
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static MemorySegment Slice(this MemorySegment segment, int offset, int count) => new(segment.Array, segment.Offset + offset, count);
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void CopyTo(this MemorySegment segment, MemorySegment other) => Buffer.BlockCopy(segment.Array, segment.Offset, other.Array, other.Offset, segment.Count);
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static void CopyFrom(this MemorySegment segment, MemorySegment other) => Buffer.BlockCopy(other.Array, other.Offset, segment.Array, segment.Offset, other.Count);
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static void CopyFrom(this MemorySegment segment, ReadOnlySpan<byte> other) => other.CopyTo(segment.ToSpan());
+
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static System.IO.MemoryStream ToMemoryStream(this MemorySegment segment) => new(segment.Array, segment.Offset, segment.Count, true);
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static Span<byte> ToSpan(this MemorySegment segment) => new(segment.Array, segment.Offset, segment.Count);
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static Memory<byte> ToMemory(this MemorySegment segment) => new(segment.Array, segment.Offset, segment.Count);
 
         public static byte[] ToArray(this MemorySegment segment)

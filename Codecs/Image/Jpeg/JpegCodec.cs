@@ -85,9 +85,9 @@ namespace Media.Codec.Jpeg
                     else
                     {
                         int offset = 0;
-                        foreach(var b in baseTable)
+                        foreach(var q in baseTable)
                         {
-                            Binary.Write16(result.Array, ref offset, Binary.IsLittleEndian, b);
+                            Binary.Write16(result.Array, ref offset, Binary.IsLittleEndian, q);
                         }
                     }
 
@@ -116,9 +116,9 @@ namespace Media.Codec.Jpeg
                 else
                 {
                     int offset = 0;
-                    foreach (var b in baseTable)
+                    foreach (var q in baseTable)
                     {
-                        Binary.Write16(result.Array, ref offset, Binary.IsLittleEndian, b);
+                        Binary.Write16(result.Array, ref offset, Binary.IsLittleEndian, q);
                     }
                 }
                 return result;
