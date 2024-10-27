@@ -130,9 +130,9 @@ internal sealed class JpegState : IEquatable<JpegState>
     {
         var quantizationTables = new QuantizationTable[2];
 
-        quantizationTables[0] = JpegCodec.GetQuantizationTable(precision, 0, quality, QuantizationTableType.Luminance);
+        quantizationTables[0] = QuantizationTable.CreateQuantizationTable(precision, 0, quality, QuantizationTableType.Luminance);
 
-        quantizationTables[1] = JpegCodec.GetQuantizationTable(precision, 1, quality, QuantizationTableType.Chrominance);
+        quantizationTables[1] = QuantizationTable.CreateQuantizationTable(precision, 1, quality, QuantizationTableType.Chrominance);
 
         using var dqt = new QuantizationTables(quantizationTables[0].Count + quantizationTables[1].Count);
 

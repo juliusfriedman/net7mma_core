@@ -93,7 +93,7 @@ namespace Media.Codec.Jpeg
 
         #region Quantization Tables
 
-        private static ReadOnlySpan<byte> DefaultLuminanceQuantTable =>
+        internal static ReadOnlySpan<byte> DefaultLuminanceQuantTable =>
         [
             16, 11, 10, 16, 24, 40, 51, 61,
             12, 12, 14, 19, 26, 58, 60, 55,
@@ -105,7 +105,7 @@ namespace Media.Codec.Jpeg
             72, 92, 95, 98, 112, 100, 103, 99
         ];
 
-        private static ReadOnlySpan<byte> DefaultChrominanceQuantTable =>
+        internal static ReadOnlySpan<byte> DefaultChrominanceQuantTable =>
         [
             17, 18, 24, 47, 99, 99, 99, 99,
             18, 21, 26, 66, 99, 99, 99, 99,
@@ -119,72 +119,20 @@ namespace Media.Codec.Jpeg
 
         #endregion
 
-        internal static QuantizationTable GetQuantizationTable(int pq, int tq, int quality, QuantizationTableType tableType)
-        {
-            if (quality < 1 || quality > 100)
-            {
-                throw new ArgumentOutOfRangeException(nameof(quality), "Quality must be between 1 and 100.");
-            }
-
-            var baseTable = tableType == QuantizationTableType.Luminance
-                ? DefaultLuminanceQuantTable
-                : DefaultChrominanceQuantTable;
-
-            var length = pq == 0 ? 64 : 128;
-
-            QuantizationTable result;
-
-            if (quality == 50)
-            {
-                result = new QuantizationTable(pq, tq);
-                using (var qk = result.Qk)
-                {
-                    if(pq == 0)
-                    {
-                        baseTable.CopyTo(qk.ToSpan());
-                    }
-                    else
-                    {
-                        int offset = 0;
-                        foreach(var q in baseTable)
-                        {
-                            Binary.Write16(result.Array, ref offset, Binary.IsLittleEndian, q);
-                        }
-                    }
-
-                    return result;
-                }
-            }
-
-            int scaleFactor = quality < 50 ? 5000 / quality : 200 - quality * 2;
-
-            var quantizationTable = new byte[length];
-
-            for (int i = 0; i < QuantizationTable.Length; i++)
-            {
-                int value = (baseTable[i] * scaleFactor + 50) / 100;
-                quantizationTable[i] = (byte)Binary.Clamp(value, 1, 255);
-            }
-
-            result = new QuantizationTable(pq, tq);
-
-            using (var qk = result.Qk)
-            {
-                if (pq == 0)
-                {
-                    quantizationTable.AsSpan().CopyTo(qk.ToSpan());
-                }
-                else
-                {
-                    int offset = 0;
-                    foreach (var q in baseTable)
-                    {
-                        Binary.Write16(result.Array, ref offset, Binary.IsLittleEndian, q);
-                    }
-                }
-                return result;
-            }
-        }
+        /// <summary>
+        /// 
+        /// </summary>
+        internal ReadOnlySpan<byte> ZigZag => 
+        [
+             0, 1, 5, 6,14,15,27,28,
+             2, 4, 7,13,16,26,29,42,
+             3, 8,12,17,25,30,41,43,
+             9,11,18,24,31,40,44,53,
+            10,19,23,32,39,45,52,54,
+            20,22,33,38,46,51,55,60,
+            21,34,37,47,50,56,59,61,
+            35,36,48,49,57,58,62,63
+        ];        
 
         public JpegCodec()
             : base("JPEG", Binary.ByteOrder.Big, DefaultComponentCount, Binary.BitsPerByte)
@@ -409,18 +357,7 @@ namespace Media.Codec.Jpeg
 
         #endregion
 
-        #region Compress
-
-        internal ReadOnlySpan<byte> ZigZag => [
-             0, 1, 5, 6,14,15,27,28,
-             2, 4, 7,13,16,26,29,42,
-             3, 8,12,17,25,30,41,43,
-             9,11,18,24,31,40,44,53,
-            10,19,23,32,39,45,52,54,
-            20,22,33,38,46,51,55,60,
-            21,34,37,47,50,56,59,61,
-            35,36,48,49,57,58,62,63
-        ];
+        #region Compress        
 
         internal static void FDCT(Span<double> input, Span<double> output)
         {
@@ -743,9 +680,9 @@ namespace Media.Codec.Jpeg
         {
             var quantizationTables = new QuantizationTable[2];
 
-            quantizationTables[0] = GetQuantizationTable(precision, 0, quality, QuantizationTableType.Luminance);
+            quantizationTables[0] = QuantizationTable.CreateQuantizationTable(precision, 0, quality, QuantizationTableType.Luminance);
 
-            quantizationTables[1] = GetQuantizationTable(precision, 1, quality, QuantizationTableType.Chrominance);
+            quantizationTables[1] = QuantizationTable.CreateQuantizationTable(precision, 1, quality, QuantizationTableType.Chrominance);
 
             using var dqt = new QuantizationTables(quantizationTables[0].Count + quantizationTables[1].Count);
             

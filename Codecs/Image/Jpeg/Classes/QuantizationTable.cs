@@ -1,9 +1,77 @@
 ﻿using Media.Common;
+using System;
 
 namespace Media.Codec.Jpeg.Classes;
 
 internal class QuantizationTable : MemorySegment
 {
+    internal static QuantizationTable CreateQuantizationTable(int pq, int tq, int quality, QuantizationTableType tableType)
+    {
+        if (quality < 1 || quality > 100)
+        {
+            throw new ArgumentOutOfRangeException(nameof(quality), "Quality must be between 1 and 100.");
+        }
+
+        var baseTable = tableType == QuantizationTableType.Luminance
+            ? JpegCodec.DefaultLuminanceQuantTable
+            : JpegCodec.DefaultChrominanceQuantTable;
+
+        var length = pq == 0 ? 64 : 128;
+
+        QuantizationTable result;
+
+        if (quality == 50)
+        {
+            result = new QuantizationTable(pq, tq);
+            using (var qk = result.Qk)
+            {
+                if (pq == 0)
+                {
+                    baseTable.CopyTo(qk.ToSpan());
+                }
+                else
+                {
+                    int offset = 0;
+                    foreach (var q in baseTable)
+                    {
+                        Binary.Write16(result.Array, ref offset, Binary.IsLittleEndian, q);
+                    }
+                }
+
+                return result;
+            }
+        }
+
+        int scaleFactor = quality < 50 ? 5000 / quality : 200 - quality * 2;
+
+        var quantizationTable = new byte[length];
+
+        for (int i = 0; i < QuantizationTable.Length; i++)
+        {
+            int value = (baseTable[i] * scaleFactor + 50) / 100;
+            quantizationTable[i] = (byte)Binary.Clamp(value, 1, 255);
+        }
+
+        result = new QuantizationTable(pq, tq);
+
+        using (var qk = result.Qk)
+        {
+            if (pq == 0)
+            {
+                quantizationTable.AsSpan().CopyTo(qk.ToSpan());
+            }
+            else
+            {
+                int offset = 0;
+                foreach (var q in baseTable)
+                {
+                    Binary.Write16(result.Array, ref offset, Binary.IsLittleEndian, q);
+                }
+            }
+            return result;
+        }
+    }
+
     /// <summary>
     /// The length of <see cref="Pq"/> and <see cref="Tq"/>
     /// </summary>
