@@ -51,7 +51,7 @@ internal sealed class JpegState : IEquatable<JpegState>
     /// <returns></returns>
     public QuantizationTable? GetQuantizationTable(int tableId)
     {
-        foreach(var quantizationTable in QuantizationTables)
+        foreach (var quantizationTable in QuantizationTables)
         {
             foreach (var table in quantizationTable.Tables)
             {

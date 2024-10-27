@@ -209,7 +209,7 @@ public class PngImage : Image
                 idat[idat.DataOffset + 1] = ChecksumBits;
 
                 // Copy the compressed data.
-                Buffer.BlockCopy(buffer.Array!, buffer.Offset, idat.Array, idat.DataOffset, buffer.Count);
+                Buffer.BlockCopy(buffer.Array!, buffer.Offset, idat.Array, idat.DataOffset + ZLibHeaderLength, buffer.Count);
 
                 //Todo calculate the CRC and write to idat.
             }
