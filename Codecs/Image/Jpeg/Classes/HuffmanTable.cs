@@ -49,12 +49,9 @@ internal class HuffmanTable : MemorySegment
         throw new ArgumentException($"Value {value} not found in Huffman table.");
     }
 
-    public bool TryGetCode(int code, int length, out (ushort code, byte length) value)
+    public bool TryGetCode(int code, out (ushort code, byte length) value)
     {
-        // Convert the code and length to a byte key
-        byte key = (byte)((code << 4) | length);
-
-        if (_codeTable.TryGetValue(key, out value))
+        if (_codeTable.TryGetValue((byte)code, out value))
         {
             return true;
         }

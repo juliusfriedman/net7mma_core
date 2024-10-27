@@ -255,9 +255,9 @@ namespace Media.Codec.Jpeg
                 length++;
 
                 // Try to get the Huffman code from the table
-                if (table.TryGetCode(code, length, out var value))
+                if (table.TryGetCode(code, out var value))
                 {
-                    return value.code;
+                    return value.length;
                 }
 
                 // Check for an invalid length (e.g., exceeding the maximum code length)
@@ -270,8 +270,8 @@ namespace Media.Codec.Jpeg
 
         private static short[] ReadBlock(BitReader stream, HuffmanTable dcTable, HuffmanTable acTable, ref int previousDC)
         {
+            //Todo, should not build every time called.
             dcTable.BuildCodeTable();
-
             acTable.BuildCodeTable();
 
             var block = new short[BlockSize * BlockSize];  // Assuming 8x8 block
@@ -337,6 +337,10 @@ namespace Media.Codec.Jpeg
 
                 var quantTable = jpegImage.JpegState.GetQuantizationTable(component.Tqi);
 
+                //Should have logging support
+                if (dcTable == null || acTable == null || quantTable == null)
+                    continue;
+                
                 int previousDC = 0;
                 for (int i = 0; i < BlockSize; i++)
                 {
