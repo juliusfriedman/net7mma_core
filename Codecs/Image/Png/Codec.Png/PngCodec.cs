@@ -201,6 +201,7 @@ namespace Media.Codec.Png
                         bufferOffset += chunkLength;
                     }
 
+                    //Create any remaining data chunks
                     while (remains > 0)
                     {
                         // Determine the size of the chunk

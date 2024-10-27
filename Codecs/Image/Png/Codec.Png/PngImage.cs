@@ -160,24 +160,28 @@ public class PngImage : Image
                     }
                 case ChunkName.Data:
                     {
-
-                        //Zlib header, http://tools.ietf.org/html/rfc1950
-                        //Compression Method and flags
-                        var cmf = chunk[chunk.DataOffset];
-                        var flg = chunk[chunk.DataOffset + 1];
-
-                        var offset = chunk.DataOffset + PngCodec.ZLibHeaderLength;
-
-                        //Preset dictionary.
-                        bool fdict = (flg & 32) != 0;
-                        if (fdict)
+                        if (dataSegments.Length == 0)
                         {
-                            offset += Chunk.ChecksumLength;
+                            //Todo, need option to not read zlib headers.
+
+                            //Zlib header, http://tools.ietf.org/html/rfc1950
+                            //Compression Method and flags
+                            var cmf = chunk[chunk.DataOffset];
+                            var flg = chunk[chunk.DataOffset + 1];
+
+                            var offset = chunk.DataOffset + PngCodec.ZLibHeaderLength;
+
+                            //Preset dictionary.
+                            bool fdict = (flg & 32) != 0;
+                            if (fdict)
+                            {
+                                offset += Chunk.ChecksumLength;
+                            }
+
+                            dataSegment = chunk.Slice(offset);
+
+                            dataSegments.AddMemory(dataSegment);
                         }
-
-                        dataSegment = chunk.Slice(offset);
-
-                        dataSegments.AddMemory(dataSegment);                        
                     }
                     continue;
                 case ChunkName.End:
@@ -235,9 +239,9 @@ public class PngImage : Image
         }
 
         // Write the data chunk(s)
-        PngCodec.WriteDataChunk(stream, this, compressionLevel);
+        //PngCodec.WriteDataChunk(stream, this, compressionLevel);
         // Todo, write multiple data chunks if needed.
-        //PngCodec.WriteDataChunks(stream, this, compressionLevel);
+        PngCodec.WriteDataChunks(stream, this, compressionLevel);
 
         // Write the IEND chunk
         PngCodec.WriteEnd(stream);

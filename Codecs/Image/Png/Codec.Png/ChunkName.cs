@@ -162,9 +162,16 @@ public enum ChunkName : uint
     FrameData = 0x66644154U,
 
     /// <summary>
-    /// Malformed chunk named CgBI produced by apple, which is not conform to the specification.
-    /// Related issue is here https://github.com/SixLabors/ImageSharp/issues/410
+    /// CgBI chunk produced by apple.
+    /// <see href="https://theapplewiki.com/wiki/PNG_CgBI_Format"> Apple Wiki </see>
+    /// <see href="https://github.com/quamotion/PNGDecrush/blob/master/PNGDecrush/PNGDecrusher.cs">PNGDecrusher</see>
     /// </summary>
     /// <remarks>CgBI</remarks>
-    ProprietaryApple = 0x43674249
+    CgBI = 0x43674249,
+
+    /// <summary>
+    /// A chunk produced by apple.
+    /// <see href="https://www.hackerfactor.com/blog/index.php?/archives/895-Connecting-the-iDOTs.html">Hacker Factor</see>
+    /// </summary>
+    iDOT = 0x69444f54U,
 }
