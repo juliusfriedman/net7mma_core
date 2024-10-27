@@ -200,7 +200,7 @@ internal class PngUnitTests
                 Console.Write("ChunkType:");
                 Console.WriteLine(chunk.ChunkType);
                 Console.Write("ChunkSize:");
-                Console.WriteLine(chunk.ChunkSize);
+                Console.WriteLine(chunk.ChunkLength);
                 Console.Write("Data:");
                 Console.WriteLine(BitConverter.ToString(chunk.Array, chunk.DataOffset));
                 Console.Write("Chunk:");

@@ -16,21 +16,28 @@ public class Chunk : MemorySegment
         : base(new MemorySegment(ChunkHeader.ChunkHeaderLength + Binary.BytesPerInteger + chunkSize))
     {
         ChunkType = chunkType;
-        ChunkSize = chunkSize;
+        ChunkLength = chunkSize;
     }
 
     public Chunk(uint chunkType, int chunkSize)
        : base(new MemorySegment(ChunkHeader.ChunkHeaderLength + Binary.BytesPerInteger + chunkSize))
     {
         RawType = chunkType;
-        ChunkSize = chunkSize;
+        ChunkLength = chunkSize;
     }
 
     public Chunk(ChunkName chunkName, int chunkSize)
        : base(new MemorySegment(ChunkHeader.ChunkHeaderLength + Binary.BytesPerInteger + chunkSize))
     {
         ChunkName = chunkName;
-        ChunkSize = chunkSize;
+        ChunkLength = chunkSize;
+    }
+
+    public Chunk(ChunkName chunkName, int chunkSize, byte[] data, int offset)
+        :base(data, offset)
+    {
+        ChunkName = chunkName;
+        ChunkLength = chunkSize;
     }
 
     public ChunkHeader Header
@@ -39,7 +46,7 @@ public class Chunk : MemorySegment
         set
         {
             RawType = value.Type;
-            ChunkSize = (int)value.Length;
+            ChunkLength = (int)value.Length;
         }
     }
 
@@ -51,7 +58,7 @@ public class Chunk : MemorySegment
     /// <summary>
     /// The number of bytes contained in the <see cref="Data"/> segment.
     /// </summary>
-    public int ChunkSize
+    public int ChunkLength
     {
         get { return (int)Header.Length; }
         set { Header.Length = (uint)value; }
@@ -84,11 +91,11 @@ public class Chunk : MemorySegment
 
     public int Crc
     {
-        get { return Binary.Read32(Array, Offset + ChunkHeader.ChunkHeaderLength + ChunkSize, Binary.IsBigEndian); }
-        set { Binary.Write32(Array, Offset + ChunkHeader.ChunkHeaderLength + ChunkSize, Binary.IsBigEndian, value); }
+        get { return Binary.Read32(Array, Offset + ChunkHeader.ChunkHeaderLength + ChunkLength, Binary.IsBigEndian); }
+        set { Binary.Write32(Array, Offset + ChunkHeader.ChunkHeaderLength + ChunkLength, Binary.IsBigEndian, value); }
     }
 
-    public int CrcDataOffset => Offset + ChunkHeader.ChunkHeaderLength + ChunkSize;
+    public int CrcDataOffset => Offset + ChunkHeader.ChunkHeaderLength + ChunkLength;
 
     public MemorySegment CrcData => new(Array, CrcDataOffset, ChecksumLength);
 

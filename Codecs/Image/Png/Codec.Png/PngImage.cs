@@ -79,11 +79,11 @@ public class PngImage : Image
                     var offset = chunk.DataOffset;
                     width = Binary.Read32(chunk.Array, ref offset, Binary.IsLittleEndian);
                     height = Binary.Read32(chunk.Array, ref offset, Binary.IsLittleEndian);
-                    byte bitDepth = chunk.Array[offset++];
+                    var bitDepth = chunk.Array[offset++];
                     colorType = chunk.Array[offset++];
-                    byte compressionMethod = chunk.Array[offset++];
-                    byte filterMethod = chunk.Array[offset++];
-                    byte interlaceMethod = chunk.Array[offset++];
+                    var compressionMethod = chunk.Array[offset++];
+                    var filterMethod = chunk.Array[offset++];
+                    var interlaceMethod = chunk.Array[offset++];
 
                     // Create the image format based on the IHDR data
                     imageFormat = CreateImageFormat(bitDepth, colorType);
@@ -184,30 +184,22 @@ public class PngImage : Image
 
                 ms.TryGetBuffer(out var buffer);
 
-                const byte HeaderLength = 2;
+                const byte ZLibHeaderLength = 2;
                 const byte Deflate32KbWindow = 120;
                 const byte ChecksumBits = 1;
 
-                // Write the ZLib header
-                var result = new byte[HeaderLength + buffer.Count + Chunk.ChecksumLength];
+                // Create the chunk memory segment
+                idat = new Chunk(ChunkName.Data, buffer.Count + ZLibHeaderLength);
 
                 // Write the ZLib header.
-                result[0] = Deflate32KbWindow;
-                result[1] = ChecksumBits;
+                idat[idat.DataOffset] = Deflate32KbWindow;
+                idat[idat.DataOffset + 1] = ChecksumBits;
 
-                // Write the compressed data.
-                var i = 0;
-                while (i < buffer.Count)
-                {
-                    result[HeaderLength + i] = buffer[i];
-                    i++;
-                }
+                // Copy the compressed data.
+                Buffer.BlockCopy(buffer.Array!, buffer.Offset, idat.Array, idat.DataOffset, buffer.Count);
 
-                //Todo calculate the CRC and write to result.
-
-                idat = new Chunk(ChunkName.Data, result.Length - Chunk.ChecksumLength);
-                result.CopyTo(idat.Array, idat.DataOffset);
-            }            
+                //Todo calculate the CRC and write to idat.
+            }
         }
         stream.Write(idat.Array, idat.Offset, idat.Count);
         idat.Dispose();
