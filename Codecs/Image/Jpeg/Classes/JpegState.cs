@@ -147,10 +147,11 @@ internal sealed class JpegState : IEquatable<JpegState>
     }
 
     public override bool Equals(object? obj)
-     => obj is JpegState jpegState && Equals(jpegState);
+     => ReferenceEquals(this, obj) || obj is JpegState jpegState && Equals(jpegState);
 
-    public bool Equals(JpegState other)
-        => StartOfFrameFunctionCode == other.StartOfFrameFunctionCode &&
+    public bool Equals(JpegState? other)
+        => other is not null &&
+           StartOfFrameFunctionCode == other.StartOfFrameFunctionCode &&
            Ss == other.Ss &&
            Se == other.Se &&
            Ah == other.Ah &&

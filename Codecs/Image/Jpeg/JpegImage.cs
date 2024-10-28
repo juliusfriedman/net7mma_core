@@ -119,16 +119,13 @@ public class JpegImage : Image
                     imageFormat.HorizontalSamplingFactors = widths;
                     imageFormat.VerticalSamplingFactors = heights;
                     tag.Dispose();
-                    tag = null;
                     continue;
                 case Jpeg.Markers.StartOfScan:
                     {
                         using var sos = new StartOfScan(marker);                        
                         
                         jpegState.Ss = (byte)sos.Ss;
-
                         jpegState.Se = (byte)sos.Se;
-
                         jpegState.Ah = (byte)sos.Ah;
                         jpegState.Al = (byte)sos.Al;
 
@@ -143,7 +140,12 @@ public class JpegImage : Image
                         for (int ns = Binary.Min(4, sos.Ns), i = 0; i < ns; ++i)
                         {
                             using var scanComponentSelector = sos[i];
+
                             var jpegComponent = imageFormat.GetComponentById(scanComponentSelector.Csj) as JpegComponent ?? imageFormat.Components[i] as JpegComponent;
+
+                            if (jpegComponent == null)
+                                continue;
+
                             jpegComponent.Tdj = scanComponentSelector.Tdj;
                             jpegComponent.Taj = scanComponentSelector.Taj;
                         }
@@ -210,7 +212,7 @@ public class JpegImage : Image
             throw new InvalidDataException("The provided stream does not contain valid JPEG image data.");
 
         // Create the JpegImage which still contains compressed image data.
-        var result = new JpegImage(imageFormat, width, height, dataSegment ?? thumbnailData, jpegState, markers);
+        var result = new JpegImage(imageFormat, width, height, dataSegment ?? thumbnailData ?? MemorySegment.Empty, jpegState, markers);
         
         //Decompress the JpegImage using the JpegCodec.
         JpegCodec.Decompress(result);
