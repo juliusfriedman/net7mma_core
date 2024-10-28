@@ -559,7 +559,7 @@
             {
                 ReadBytesForBits(count);
 
-                return PeekBits(count);
+                return PeekBits(count, reverse);
             }
             finally
             {
@@ -581,7 +581,7 @@
             {
                 ReadBytesForBits(count);
 
-                return (long)PeekBits(count);
+                return (long)PeekBits(count, reverse);
             }
             finally
             {

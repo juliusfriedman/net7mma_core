@@ -3310,7 +3310,7 @@ namespace Media.UnitTests
                         if (br.BaseStream.Position != Common.Binary.Zero) throw new Exception("BitWriter - Position");
 
                         result = br.ReadBits(Common.Binary.BitsPerLong, reverse);
-                        if (result != (reverse ? r : i)) throw new Exception(string.Format("BitReader.ReadBits - Expected:{0}, Found:{1}", (reverse ? r : i), result));
+                        if (result != i) throw new Exception(string.Format("BitReader.ReadBits - Expected:{0}, Found:{1}", (reverse ? r : i), result));
                     }
 
                     //Test moving the position of the writer back to 0
@@ -3329,7 +3329,7 @@ namespace Media.UnitTests
                         //Set Position and ReadBits
                         br.BaseStream.Position = Common.Binary.Zero;
                         result = br.ReadBits(Common.Binary.BitsPerLong, reverse);
-                        if (result != (reverse ? r : i)) throw new Exception(string.Format("ReadBits - Expected:{0}, Found:{1}", (reverse ? r : i), result));
+                        if (result != i) throw new Exception(string.Format("ReadBits - Expected:{0}, Found:{1}", (reverse ? r : i), result));
                         if (br.BaseStream.Position != Common.Binary.BytesPerLong) throw new Exception("Position");
 
                         //Set Position and Read64
