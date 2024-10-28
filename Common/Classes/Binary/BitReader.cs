@@ -1,4 +1,6 @@
-﻿namespace Media.Common//.Binary
+﻿using System.IO;
+
+namespace Media.Common//.Binary
 {
     /// <summary>
     /// Allows for reading bits from a <see cref="System.IO.Stream"/> with a variable sized buffer (should be a streamreader?)
@@ -307,11 +309,13 @@
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public bool PeekBit(bool reverse = false)
         {
-            return reverse switch
+            int bits = Media.Common.Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
+
+            return m_BitOrder switch
             {
-                true => Common.Binary.GetBit(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex),
-                //.net core 3.1 requires this or the build error is that this method doesn't return on all code paths....
-                _ => Common.Binary.GetBitReverse(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex),
+                Binary.BitOrder.LeastSignificant => reverse ? Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.One) > 0 : Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.One) > 0,
+                Binary.BitOrder.MostSignificant => reverse ? Common.Binary.ReadBitsLSB(m_ByteCache.Array, bits, Common.Binary.One) > 0 : Common.Binary.ReadBitsMSB(m_ByteCache.Array, bits, Common.Binary.One) > 0,
+                _ => throw new System.NotSupportedException("Please create an issue for your use case"),
             };
         }
 
@@ -406,7 +410,8 @@
         {
             try
             {
-                ReadBytesForBits(Common.Binary.One);
+                if(ReadBytesForBits(Common.Binary.One) > 0) 
+                    throw new EndOfStreamException();
 
                 return PeekBit(reverse);
             }
@@ -426,7 +431,8 @@
         {
             try
             {
-                ReadBytesForBits(Common.Binary.BitsPerByte);
+                if (ReadBytesForBits(Common.Binary.BitsPerByte) > 0)
+                    throw new EndOfStreamException();
 
                 return Peek8(reverse);
             }
@@ -446,7 +452,8 @@
         {
             try
             {
-                ReadBytesForBits(Common.Binary.BitsPerShort);
+                if (ReadBytesForBits(Common.Binary.BitsPerShort) > 0)
+                    throw new EndOfStreamException();
 
                 return Peek16(reverse);
             }
@@ -466,7 +473,8 @@
         {
             try
             {
-                ReadBytesForBits(Common.Binary.TripleBitSize);
+                if (ReadBytesForBits(Common.Binary.TripleBitSize) > 0)
+                    throw new EndOfStreamException();
 
                 return Peek24(reverse);
             }
@@ -486,7 +494,8 @@
         {
             try
             {
-                ReadBytesForBits(Common.Binary.BitsPerInteger);
+                if (ReadBytesForBits(Common.Binary.BitsPerInteger) > 0)
+                    throw new EndOfStreamException();
 
                 return Peek32(reverse);
             }
@@ -506,7 +515,8 @@
         {
             try
             {
-                ReadBytesForBits(Common.Binary.BitsPerLong);
+                if (ReadBytesForBits(Common.Binary.BitsPerLong) > 0)
+                    throw new EndOfStreamException();
 
                 return Peek64(reverse);
             }
@@ -557,7 +567,8 @@
         {
             try
             {
-                ReadBytesForBits(count);
+                if (ReadBytesForBits(count) > 0)
+                    throw new EndOfStreamException();
 
                 return PeekBits(count, reverse);
             }

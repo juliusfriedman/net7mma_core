@@ -378,7 +378,6 @@ namespace Media.Codecs.Image
 
         #region Fields
 
-        //Used for subsampling.
         public int[] HorizontalSamplingFactors, VerticalSamplingFactors;
 
         #endregion

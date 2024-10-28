@@ -257,24 +257,10 @@ public class JpegImage : Image
         
         JpegCodec.WriteStartOfScan(this, stream);
 
-        if (Markers != null)
-        {
-            // Write the compressed image data to the stream
-            stream.Write(Data.Array, Data.Offset, Data.Count);
-            
-            if (Data[Data.Count - 1] != Jpeg.Markers.EndOfInformation)
-            {
-                // Write the EOI marker
-                JpegCodec.WriteInformationMarker(Jpeg.Markers.EndOfInformation, stream);
-            }
-        }
-        else
-        {
-            // Compress this image data to the stream
-            JpegCodec.Compress(this, stream);
+        // Compress this image data to the stream
+        JpegCodec.Compress(this, stream);
 
-            JpegCodec.WriteInformationMarker(Jpeg.Markers.EndOfInformation, stream);
-        }
+        JpegCodec.WriteInformationMarker(Jpeg.Markers.EndOfInformation, stream);
     }
 
     private void ProcessComponent(Span<byte> span, Span<short> quantizationTable, Span<double> coefficients, Span<short> quantizedCoefficients, BitWriter writer)

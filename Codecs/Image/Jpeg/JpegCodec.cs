@@ -168,9 +168,21 @@ namespace Media.Codec.Jpeg
         private static void InverseQuantize(Span<short> block, QuantizationTable quantizationTable)
         {
             using var qk = quantizationTable.Qk;
-            for (int i = 0; i < block.Length; i++)
+
+            if (quantizationTable.Pq > 0)
             {
-                block[i] *= qk[i];
+                var span = MemoryMarshal.Cast<byte, short>(qk.ToSpan());
+                for (int i = 0; i < block.Length; i++)
+                {
+                    block[i] *= span[i];
+                }
+            }
+            else
+            {
+                for (int i = 0; i < block.Length; i++)
+                {
+                    block[i] *= qk[i];
+                }
             }
         }
 
@@ -327,10 +339,6 @@ namespace Media.Codec.Jpeg
         {
             using var bitReader = new BitReader(jpegImage.Data.Array, Binary.BitOrder.MostSignificant, 0, 0, true, Environment.ProcessorCount * Environment.ProcessorCount);
 
-            var decodedBlocks = new List<short[]>();
-
-            //var dataSpan = jpegImage.Data.ToSpan();
-
             foreach (JpegComponent component in jpegImage.ImageFormat.Components)
             {
                 var dcTable = jpegImage.JpegState.GetHuffmanTable(0, component.Tdj);
@@ -342,28 +350,44 @@ namespace Media.Codec.Jpeg
                 //Should have logging support
                 if (dcTable == null || acTable == null || quantTable == null)
                     continue;
-                
+
+                int blockWidth = (jpegImage.Width + 7) / 8;
+                int blockHeight = (jpegImage.Height + 7) / 8;
                 int previousDC = 0;
-                for (int i = 0; i < BlockSize; i++)
+                for (int by = 0; by < blockHeight; by++)
                 {
-                    var block = ReadBlock(bitReader, dcTable, acTable, ref previousDC);
-                    InverseQuantize(block, quantTable);
-                    decodedBlocks.Add(block);
+                    for (int bx = 0; bx < blockWidth; bx++)
+                    {
+                        var block = ReadBlock(bitReader, dcTable, acTable, ref previousDC);
+
+                        // Step 4: Dequantize
+                        InverseQuantize(block, quantTable);
+
+                        // Step 5: Inverse DCT
+                        var output = new double[BlockSize * BlockSize];
+                        IDCT(block, output);
+
+                        // Step 6: Reconstruct Image
+                        PlaceBlockInImage(jpegImage, component, output, bx, by);
+                    }
                 }
             }
+        }
 
-            // Step 4: Perform IDCT on each block
-            var output = new double[BlockSize * BlockSize];
+        private static void PlaceBlockInImage(JpegImage jpegImage, JpegComponent component, double[] block, int blockX, int blockY)
+        {
+            int blockSize = BlockSize;
+            int width = jpegImage.Width;
+            int height = jpegImage.Height;
 
-
-
-            foreach (var block in decodedBlocks)
+            for (int i = 0; i < blockSize; i++)
             {
-                IDCT(block, output);
-                var span = block.AsSpan();
-                var bytes = MemoryMarshal.Cast<short, byte>(span);
-                //bytes.CopyTo(dataSpan);
-                //dataSpan = dataSpan.Slice(bytes.Length);
+                for (int j = 0; j < blockSize; j++)
+                {
+                    int x = blockX * blockSize + j;
+                    int y = blockY * blockSize + i;
+                    jpegImage.SetComponentData(x, y, component.Id, new MemorySegment(BitConverter.GetBytes((short)block[i * blockSize + j])));
+                }
             }
         }
 
