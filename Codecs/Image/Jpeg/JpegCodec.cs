@@ -329,6 +329,8 @@ namespace Media.Codec.Jpeg
 
             var decodedBlocks = new List<short[]>();
 
+            //var dataSpan = jpegImage.Data.ToSpan();
+
             foreach (JpegComponent component in jpegImage.ImageFormat.Components)
             {
                 var dcTable = jpegImage.JpegState.GetHuffmanTable(0, component.Tdj);
@@ -352,10 +354,16 @@ namespace Media.Codec.Jpeg
 
             // Step 4: Perform IDCT on each block
             var output = new double[BlockSize * BlockSize];
+
+
+
             foreach (var block in decodedBlocks)
             {
                 IDCT(block, output);
-                // Process the output as needed (e.g., store in the image buffer)
+                var span = block.AsSpan();
+                var bytes = MemoryMarshal.Cast<short, byte>(span);
+                //bytes.CopyTo(dataSpan);
+                //dataSpan = dataSpan.Slice(bytes.Length);
             }
         }
 
@@ -412,15 +420,12 @@ namespace Media.Codec.Jpeg
 
         internal static void HuffmanEncode(Span<short> block, BitWriter writer, IEnumerable<HuffmanTables> huffmanTables)
         {
-
             foreach (var dht in huffmanTables)
             {
                 var tables = dht.Tables.ToArray();
 
                 var dcTable = tables[0];
-                dcTable.BuildCodeTable();
-                var acTable = tables[1];
-                acTable.BuildCodeTable();
+                dcTable.BuildCodeTable();               
 
                 // Encode the DC coefficient
                 short dcCoefficient = block[0];
@@ -433,43 +438,49 @@ namespace Media.Codec.Jpeg
                     writer.WriteBits(dcCoefficient, dcSize);
                 }
 
-                // Encode the AC coefficients
-                int zeroCount = 0;
-                for (int i = 1; i < block.Length; i++)
+                if(tables.Length > 1)
                 {
-                    short acCoefficient = block[i];
-                    if (acCoefficient == 0)
+                    var acTable = tables[1];
+                    acTable.BuildCodeTable();
+
+                    // Encode the AC coefficients
+                    int zeroCount = 0;
+                    for (int i = 1; i < block.Length; i++)
                     {
-                        zeroCount++;
+                        short acCoefficient = block[i];
+                        if (acCoefficient == 0)
+                        {
+                            zeroCount++;
+                        }
+                        else
+                        {
+                            while (zeroCount > 15)
+                            {
+                                var (zrlCode, zrlLength) = acTable.GetCode(0xF0); // ZRL (Zero Run Length)
+                                writer.WriteBits(zrlCode, zrlLength);
+                                zeroCount -= 16;
+                            }
+
+                            int acSize = GetCoefficientSize(acCoefficient);
+                            int runSize = (zeroCount << 4) | acSize;
+                            var (acCode, acLength) = acTable.GetCode((byte)runSize);
+                            writer.WriteBits(acCode, acLength);
+
+                            if (acSize > 0)
+                            {
+                                writer.WriteBits(acCoefficient, acSize);
+                            }
+
+                            zeroCount = 0;
+                        }
                     }
-                    else
+
+                    // Write EOB (End of Block) if there are trailing zeros
+                    if (zeroCount > 0)
                     {
-                        while (zeroCount > 15)
-                        {
-                            var (zrlCode, zrlLength) = acTable.GetCode(0xF0); // ZRL (Zero Run Length)
-                            writer.WriteBits(zrlCode, zrlLength);
-                            zeroCount -= 16;
-                        }
-
-                        int acSize = GetCoefficientSize(acCoefficient);
-                        int runSize = (zeroCount << 4) | acSize;
-                        var (acCode, acLength) = acTable.GetCode((byte)runSize);
-                        writer.WriteBits(acCode, acLength);
-
-                        if (acSize > 0)
-                        {
-                            writer.WriteBits(acCoefficient, acSize);
-                        }
-
-                        zeroCount = 0;
+                        var (eobCode, eobLength) = acTable.GetCode(0x00); // EOB
+                        writer.WriteBits(eobCode, eobLength);
                     }
-                }
-
-                // Write EOB (End of Block) if there are trailing zeros
-                if (zeroCount > 0)
-                {
-                    var (eobCode, eobLength) = acTable.GetCode(0x00); // EOB
-                    writer.WriteBits(eobCode, eobLength);
                 }
             }
         }
@@ -479,7 +490,6 @@ namespace Media.Codec.Jpeg
             if (coefficient == 0) return 0;
             return Binary.Log2i(coefficient) + 1;
         }
-
 
         internal static void VQuantize(Span<double> block, Span<short> quantizationTable, Span<short> output)
         {

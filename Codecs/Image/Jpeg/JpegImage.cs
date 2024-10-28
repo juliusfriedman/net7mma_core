@@ -31,9 +31,9 @@ public class JpegImage : Image
     public static JpegImage FromStream(Stream stream)
     {
         int width = 0, height = 0;
-        ImageFormat imageFormat = default;
-        MemorySegment dataSegment = default;
-        MemorySegment thumbnailData = default;
+        ImageFormat? imageFormat = default;
+        MemorySegment? dataSegment = default;
+        MemorySegment? thumbnailData = default;
         JpegState jpegState = new(Jpeg.Markers.Prefix, 0, 63, 0, 0);
         ConcurrentThesaurus<byte, Marker> markers = new ConcurrentThesaurus<byte, Marker>();        
         foreach (var marker in JpegCodec.ReadMarkers(stream))
@@ -152,12 +152,13 @@ public class JpegImage : Image
 
                         var dataSegmentSize = CalculateSize(imageFormat, width, height);
 
-                        dataSegment = new MemorySegment(Math.Abs(dataSegmentSize));
+                        dataSegment = new MemorySegment(Binary.Abs(dataSegmentSize));
                         
                         var read = stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count);
                         
-                        if (read < dataSegment.Count)
-                            dataSegment = dataSegment.Slice(0, read);                        
+                        //Was making the data segment smaller but the extra space is required to decompress
+                        //if (read < dataSegment.Count)
+                            //dataSegment = dataSegment.Slice(0, read);                        
 
                         break;
                     }
