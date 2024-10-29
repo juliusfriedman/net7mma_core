@@ -261,24 +261,7 @@ public class JpegImage : Image
         JpegCodec.Compress(this, stream);
 
         JpegCodec.WriteInformationMarker(Jpeg.Markers.EndOfInformation, stream);
-    }
-
-    private void ProcessComponent(Span<byte> span, Span<short> quantizationTable, Span<double> coefficients, Span<short> quantizedCoefficients, BitWriter writer)
-    {
-        // Step 4.1: Perform Forward Discrete Cosine Transform (FDCT)
-        ref Span<double> dctCoefficients = ref coefficients;
-
-        if (Vector.IsHardwareAccelerated)
-            JpegCodec.VFDCT(MemoryMarshal.Cast<byte, double>(span), dctCoefficients);
-        else
-            JpegCodec.FDCT(MemoryMarshal.Cast<byte, double>(span), dctCoefficients);
-
-        // Step 4.2: Quantize the DCT coefficients
-        JpegCodec.Quantize(dctCoefficients, quantizationTable, quantizedCoefficients);
-
-        // Step 4.3: Huffman encode the quantized coefficients
-        JpegCodec.HuffmanEncode(quantizedCoefficients, writer, JpegState.HuffmanTables);
-    }
+    }    
 
     public MemorySegment GetPixelDataAt(int x, int y)
     {
