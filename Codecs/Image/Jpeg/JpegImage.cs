@@ -213,13 +213,7 @@ public class JpegImage : Image
             throw new InvalidDataException("The provided stream does not contain valid JPEG image data.");
 
         // Create the JpegImage which still contains compressed image data.
-        var result = new JpegImage(imageFormat, width, height, dataSegment ?? thumbnailData ?? MemorySegment.Empty, jpegState, markers);
-        
-        //Decompress the JpegImage using the JpegCodec.
-        JpegCodec.Decompress(result);
-
-        //Return the result.
-        return result;
+        return new JpegImage(imageFormat, width, height, dataSegment ?? thumbnailData ?? MemorySegment.Empty, jpegState, markers);
     }
 
     public void Save(Stream stream, int quality = 99)
@@ -257,10 +251,24 @@ public class JpegImage : Image
         
         JpegCodec.WriteStartOfScan(this, stream);
 
-        // Compress this image data to the stream
-        JpegCodec.Compress(this, stream);
+        if (Markers != null)
+        {
+            // Write the compressed image data to the stream
+            stream.Write(Data.Array, Data.Offset, Data.Count);
 
-        JpegCodec.WriteInformationMarker(Jpeg.Markers.EndOfInformation, stream);
+            if (Data[Data.Count - 1] != Jpeg.Markers.EndOfInformation)
+            {
+                // Write the EOI marker
+                JpegCodec.WriteInformationMarker(Jpeg.Markers.EndOfInformation, stream);
+            }
+        }
+        else
+        {
+            // Compress this image data to the stream
+            JpegCodec.Compress(this, stream);
+
+            JpegCodec.WriteInformationMarker(Jpeg.Markers.EndOfInformation, stream);
+        }
     }    
 
     public MemorySegment GetPixelDataAt(int x, int y)

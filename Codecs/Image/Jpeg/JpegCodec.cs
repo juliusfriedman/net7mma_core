@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Numerics;
 using System.Runtime.InteropServices;
 using Media.Codec.Interfaces;
 using Media.Codec.Jpeg.Classes;
 using Media.Codec.Jpeg.Segments;
 using Media.Codecs.Image;
-using Media.Codecs.Image.Transformations;
 using Media.Common;
 
 namespace Media.Codec.Jpeg
@@ -520,10 +518,12 @@ namespace Media.Codec.Jpeg
 
                     int acCoefficientSize = GetCoefficientSize(acCoefficient);
                     int acCodeValue = (runLength << 4) | acCoefficientSize;
-                    var acCode = acTable.GetCode((byte)acCodeValue);
-                    writer.WriteBits(acCode.length, acCode.code);
-                    writer.WriteBits(acCoefficientSize, acCoefficient);
-                    runLength = 0;
+                    if (acTable.TryGetCode((byte)acCodeValue, out var ac))
+                    {
+                        writer.WriteBits(ac.length, ac.code);
+                        writer.WriteBits(acCoefficientSize, acCoefficient);
+                        runLength = 0;
+                    }
                 }
             }
 
@@ -547,7 +547,7 @@ namespace Media.Codec.Jpeg
             return Binary.Log2i(coefficient) + 1;
         }
 
-        internal static void VQuantize(Span<short> block, QuantizationTable quantizationTable)
+        internal static void Quantize(Span<short> block, QuantizationTable quantizationTable)
         {
             // Process the block in chunks of Vector<short>.Count
             int vectorSize = Vector<short>.Count;
@@ -596,18 +596,21 @@ namespace Media.Codec.Jpeg
                 if (quantizationTable == null)
                     continue;
 
+                // Perform the DCT
                 if (Vector.IsHardwareAccelerated)
                 {
                     VFDCT(block.data);
-                    VQuantize(block.Item1, quantizationTable);
                 }
                 else
                 {
                     FDCT(block.data);
-                    VQuantize(block.Item1, quantizationTable);
                 }
 
-                HuffmanEncode(block.Item1, writer, jpegImage.JpegState);
+                // Step 5: Quantization
+                Quantize(block.data, quantizationTable);
+
+                // Step 6: Huffman Encoding
+                HuffmanEncode(block.data, writer, jpegImage.JpegState);
             }
         }
 
@@ -620,9 +623,14 @@ namespace Media.Codec.Jpeg
             for (int componentIndex = 0; componentIndex < jpegImage.ImageFormat.Components.Length; componentIndex++)
             {
                 var mediaComponent = jpegImage.ImageFormat.Components[componentIndex] as JpegComponent;
-                for (int y = 0; y < height; y += BlockSize)
+
+                var componentHeight = jpegImage.ImageFormat.VerticalSamplingFactors[componentIndex];
+
+                var componentWidth = jpegImage.ImageFormat.HorizontalSamplingFactors[componentIndex];
+
+                for (int y = 0; y < componentHeight; y += BlockSize)
                 {
-                    for (int x = 0; x < width; x += BlockSize)
+                    for (int x = 0; x < componentWidth; x += BlockSize)
                     {
                         short[] block = new short[BlockSize * BlockSize];
                         for (int by = 0; by < BlockSize; by++)
