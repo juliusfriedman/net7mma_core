@@ -624,9 +624,9 @@ namespace Media.Codec.Jpeg
             {
                 var mediaComponent = jpegImage.ImageFormat.Components[componentIndex] as JpegComponent;
 
-                var componentHeight = jpegImage.ImageFormat.VerticalSamplingFactors[componentIndex];
+                var componentHeight = jpegImage.PlaneHeight(componentIndex);
 
-                var componentWidth = jpegImage.ImageFormat.HorizontalSamplingFactors[componentIndex];
+                var componentWidth = jpegImage.PlaneWidth(componentIndex);
 
                 for (int y = 0; y < componentHeight; y += BlockSize)
                 {
@@ -639,7 +639,7 @@ namespace Media.Codec.Jpeg
                             {
                                 int pixelX = x + bx;
                                 int pixelY = y + by;
-                                if (pixelX < width && pixelY < height)
+                                if (pixelX < componentWidth && pixelY < componentHeight)
                                 {
                                     block[by * BlockSize + bx] = jpegImage.GetComponentData(pixelX, pixelY, mediaComponent)[0];
                                 }
