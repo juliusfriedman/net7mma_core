@@ -18,6 +18,10 @@ internal class HuffmanTable : MemorySegment
 
     internal void BuildCodeTable()
     {
+        if (_codeTable.Count > 0)
+        {
+            return;
+        }
         using var Bits = Li;
         using var Values = Vi;
 

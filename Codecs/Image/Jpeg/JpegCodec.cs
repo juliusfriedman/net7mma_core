@@ -496,49 +496,46 @@ namespace Media.Codec.Jpeg
                     writer.WriteBits(dcCoefficient, dcSize);
                 }
 
-                if(tables.Length > 1)
+                var acTable = tables[1];
+                acTable.BuildCodeTable();
+
+                // Encode the AC coefficients
+                int zeroCount = 0;
+                for (int i = 1; i < block.Length; i++)
                 {
-                    var acTable = tables[1];
-                    acTable.BuildCodeTable();
-
-                    // Encode the AC coefficients
-                    int zeroCount = 0;
-                    for (int i = 1; i < block.Length; i++)
+                    short acCoefficient = block[i];
+                    if (acCoefficient == 0)
                     {
-                        short acCoefficient = block[i];
-                        if (acCoefficient == 0)
-                        {
-                            zeroCount++;
-                        }
-                        else
-                        {
-                            while (zeroCount > 15)
-                            {
-                                var (zrlCode, zrlLength) = acTable.GetCode(0xF0); // ZRL (Zero Run Length)
-                                writer.WriteBits(zrlCode, zrlLength);
-                                zeroCount -= 16;
-                            }
-
-                            int acSize = GetCoefficientSize(acCoefficient);
-                            int runSize = (zeroCount << 4) | acSize;
-                            var (acCode, acLength) = acTable.GetCode((byte)runSize);
-                            writer.WriteBits(acCode, acLength);
-
-                            if (acSize > 0)
-                            {
-                                writer.WriteBits(acCoefficient, acSize);
-                            }
-
-                            zeroCount = 0;
-                        }
+                        zeroCount++;
                     }
-
-                    // Write EOB (End of Block) if there are trailing zeros
-                    if (zeroCount > 0)
+                    else
                     {
-                        var (eobCode, eobLength) = acTable.GetCode(0x00); // EOB
-                        writer.WriteBits(eobCode, eobLength);
+                        while (zeroCount > 15)
+                        {
+                            var (zrlCode, zrlLength) = acTable.GetCode(0xF0); // ZRL (Zero Run Length)
+                            writer.WriteBits(zrlLength, zrlCode);
+                            zeroCount -= 16;
+                        }
+
+                        int acSize = GetCoefficientSize(acCoefficient);
+                        int runSize = (zeroCount << 4) | acSize;
+                        var (acCode, acLength) = acTable.GetCode((byte)runSize);
+                        writer.WriteBits(acCode, acLength);
+
+                        if (acSize > 0)
+                        {
+                            writer.WriteBits(acCoefficient, acSize);
+                        }
+
+                        zeroCount = 0;
                     }
+                }
+
+                // Write EOB (End of Block) if there are trailing zeros
+                if (zeroCount > 0)
+                {
+                    var (eobCode, eobLength) = acTable.GetCode(0x00); // EOB
+                    writer.WriteBits(eobCode, eobLength);
                 }
             }
         }

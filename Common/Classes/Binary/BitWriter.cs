@@ -278,6 +278,7 @@
             }
             finally
             {
+                Flush();
                 Common.Binary.ComputeBits(Common.Binary.BitsPerByte, ref m_BitIndex, ref m_ByteIndex);
             }
         }
@@ -307,6 +308,7 @@
             }
             finally
             {
+                Flush();
                 Common.Binary.ComputeBits(Common.Binary.BitsPerLong, ref m_BitIndex, ref m_ByteIndex);
             }
         }
@@ -335,6 +337,7 @@
             }
             finally
             {
+                Flush();
                 Common.Binary.ComputeBits(Common.Binary.BitsPerLong, ref m_BitIndex, ref m_ByteIndex);
             }
         }
@@ -420,6 +423,7 @@
             }
             finally
             {
+                Flush();
                 Common.Binary.ComputeBits(bits, ref m_BitIndex, ref m_ByteIndex);
             }
         }
@@ -446,6 +450,7 @@
             }
             finally
             {
+                Flush();
                 Common.Binary.ComputeBits(bitCount, ref m_BitIndex, ref m_ByteIndex);
             }
         }
