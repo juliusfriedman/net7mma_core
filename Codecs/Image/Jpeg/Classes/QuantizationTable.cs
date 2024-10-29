@@ -1,5 +1,6 @@
 ﻿using Media.Common;
 using System;
+using System.Runtime.InteropServices;
 
 namespace Media.Codec.Jpeg.Classes;
 
@@ -146,4 +147,25 @@ internal class QuantizationTable : MemorySegment
     /// The total amount of bytes contained.
     /// </summary>
     public int TotalLength => Length + TableLength;
+
+    /// <summary>
+    /// Gets a span of the table data.
+    /// </summary>
+    /// <returns></returns>
+    public Span<byte> GetTableData()
+    {
+        using var qk = Qk;
+        return qk.ToSpan();
+    }
+
+    /// <summary>
+    /// Gets a span of the table data as 16-bit values.
+    /// </summary>
+    /// <returns></returns>
+    public Span<short> GetTableData16()
+    {
+        using var qk = Qk;
+        var span = qk.ToSpan();
+        return MemoryMarshal.Cast<byte, short>(span);
+    }
 }
