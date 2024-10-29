@@ -8,6 +8,7 @@ using Media.Codec.Interfaces;
 using Media.Codec.Jpeg.Classes;
 using Media.Codec.Jpeg.Segments;
 using Media.Codecs.Image;
+using Media.Codecs.Image.Transformations;
 using Media.Common;
 
 namespace Media.Codec.Jpeg
@@ -395,8 +396,18 @@ namespace Media.Codec.Jpeg
 
         #region Compress        
 
-        internal static void FDCT(Span<double> input, Span<double> output)
+        internal static void FDCT(Span<short> input)
         {
+            Span<double> temp = stackalloc double[BlockSize * BlockSize];
+
+            // Convert input from short to double
+            for (int i = 0; i < input.Length; i++)
+            {
+                temp[i] = input[i];
+            }
+
+            Span<double> output = stackalloc double[BlockSize * BlockSize];
+
             for (int u = 0; u < BlockSize; u++)
             {
                 for (int v = 0; v < BlockSize; v++)
@@ -406,9 +417,10 @@ namespace Media.Codec.Jpeg
                     {
                         for (int y = 0; y < BlockSize; y++)
                         {
-                            sum += input[y * BlockSize + x] *
-                                   System.Math.Cos((2 * x + 1) * u * System.Math.PI / 16) *
-                                   System.Math.Cos((2 * y + 1) * v * System.Math.PI / 16);
+                            double inputVal = temp[y * BlockSize + x];
+                            double cosX = Math.Cos((2 * x + 1) * u * Math.PI / 16);
+                            double cosY = Math.Cos((2 * y + 1) * v * Math.PI / 16);
+                            sum += inputVal * cosX * cosY;
                         }
                     }
                     double cu = (u == 0) ? SqrtHalf : 1.0;
@@ -416,29 +428,51 @@ namespace Media.Codec.Jpeg
                     output[v * BlockSize + u] = 0.25 * cu * cv * sum;
                 }
             }
+
+            // Convert output from double to short
+            for (int i = 0; i < output.Length; i++)
+            {
+                input[i] = (short)Math.Round(output[i]);
+            }
         }
 
-        internal static void VFDCT(Span<double> input, Span<double> output)
+        internal static void VFDCT(Span<short> input)
         {
+            Span<double> temp = stackalloc double[BlockSize * BlockSize];
+
+            // Convert input from short to double
+            for (int i = 0; i < input.Length; i++)
+            {
+                temp[i] = input[i];
+            }
+
+            Span<double> output = stackalloc double[BlockSize * BlockSize];
+
             for (int u = 0; u < BlockSize; u++)
             {
                 for (int v = 0; v < BlockSize; v++)
                 {
-                    Vector<double> sum = Vector<double>.Zero;
+                    double sum = 0.0;
                     for (int x = 0; x < BlockSize; x++)
                     {
-                        for (int y = 0; y < BlockSize; y += Vector<double>.Count)
+                        for (int y = 0; y < BlockSize; y++)
                         {
-                            var inputVector = new Vector<double>(input);
-                            var cosX = new Vector<double>(System.Math.Cos((2 * x + 1) * u * System.Math.PI / 16));
-                            var cosY = new Vector<double>(System.Math.Cos((2 * y + 1) * v * System.Math.PI / 16));
-                            sum += inputVector * cosX * cosY;
+                            double inputVal = temp[y * BlockSize + x];
+                            double cosX = Math.Cos((2 * x + 1) * u * Math.PI / 16);
+                            double cosY = Math.Cos((2 * y + 1) * v * Math.PI / 16);
+                            sum += inputVal * cosX * cosY;
                         }
                     }
                     double cu = (u == 0) ? SqrtHalf : 1.0;
                     double cv = (v == 0) ? SqrtHalf : 1.0;
-                    output[v * BlockSize + u] = 0.25 * cu * cv * Vector.Dot(sum, Vector<double>.One);
+                    output[v * BlockSize + u] = 0.25 * cu * cv * sum;
                 }
+            }
+
+            // Convert output from double to short
+            for (int i = 0; i < output.Length; i++)
+            {
+                input[i] = (short)Math.Round(output[i]);
             }
         }
 
@@ -515,37 +549,22 @@ namespace Media.Codec.Jpeg
             return Binary.Log2i(coefficient) + 1;
         }
 
-        internal static void VQuantize(Span<double> block, Span<short> quantizationTable, Span<short> output)
+        internal static void VQuantize(Span<short> block, QuantizationTable quantizationTable)
         {
-            int VectorSize = Vector<double>.Count;
-            int i = 0;
-
-            // Process in chunks of VectorSize
-            for (; i <= block.Length - VectorSize; i += VectorSize)
+            // Process the block in chunks of Vector<short>.Count
+            int vectorSize = Vector<short>.Count;
+            var tableData = quantizationTable.GetTableData();
+            for (int i = 0; i < block.Length; i += vectorSize)
             {
-                var blockVector = new Vector<double>(block);
-                var quantizationVector = new Vector<double>(MemoryMarshal.Cast<short, byte>(quantizationTable));
-                var resultVector = blockVector / quantizationVector;
+                // Load a chunk of the block and quantization table into vectors
+                var blockVector = new Vector<short>(block.Slice(i, vectorSize));
+                var quantVector = new Vector<short>(tableData);
 
-                // Convert to short and store in output
-                for (int j = 0; j < VectorSize; j++)
-                {
-                    output[i + j] = (short)System.Math.Round(resultVector[j]);
-                }
-            }
+                // Perform the quantization
+                var resultVector = Vector.Divide(blockVector, quantVector);
 
-            // Process remaining elements
-            for (; i < block.Length; i++)
-            {
-                output[i] = (short)System.Math.Round(block[i] / quantizationTable[i]);
-            }
-        }
-
-        internal static void Quantize(Span<double> block, Span<short> quantizationTable, Span<short> output)
-        {
-            for (int i = 0; i < BlockSize * BlockSize; i++)
-            {
-                output[i] = (short)Math.Round(block[i] / quantizationTable[i]);
+                // Store the result back into the block
+                resultVector.CopyTo(block.Slice(i, vectorSize));
             }
         }
 
@@ -556,38 +575,79 @@ namespace Media.Codec.Jpeg
             using var reader = new BitReader(inputStream);
             using var writer = new BitWriter(outputStream);
 
-            var blockSizeSquared = BlockSize * BlockSize;
-
-            // Example quantization table (you need to initialize this properly)
-            Span<short> quantizationTable = stackalloc short[blockSizeSquared];
-
-            // Span
-            // Read the input data (this part is simplified for illustration purposes)
-            Span<double> inputBlock = stackalloc double[blockSizeSquared];
-
-            for (int i = 0; i < BlockSize * BlockSize; i++)
+            for (var i = 0; i < jpegImage.ImageFormat.Components.Length; ++i)
             {
-                inputBlock[i] = reader.Read8();
+                var mediaComponent = jpegImage.ImageFormat.Components[i];
+
+                if(mediaComponent is not JpegComponent)
+                {
+                    mediaComponent = new JpegComponent((byte)i, mediaComponent.Id, mediaComponent.Size);
+                    jpegImage.ImageFormat.Components[i] = mediaComponent;
+                }
             }
 
-            // Span
-            // Perform forward DCT and quantization
-            Span<double> dctBlock = stackalloc double[blockSizeSquared];
-            Span<short> quantizedBlock = stackalloc short[blockSizeSquared];
+            // Step 3: Block Splitting
+            var blocks = SplitIntoBlocks(jpegImage);
 
-            if (Vector.IsHardwareAccelerated)
+            // Step 4: Discrete Cosine Transform (DCT)
+            foreach (var block in blocks)
             {
-                VFDCT(inputBlock, dctBlock);
-                VQuantize(dctBlock, quantizationTable, quantizedBlock);
-            }
-            else
-            {
-                FDCT(inputBlock, dctBlock);
-                Quantize(dctBlock, quantizationTable, quantizedBlock);
-            }
+                // Determine the quantization table to use based on the component
+                var quantizationTable = jpegImage.JpegState.GetQuantizationTable(block.component.Tqi);
 
-            // Perform Huffman encoding
-            HuffmanEncode(quantizedBlock, writer, jpegImage.JpegState.HuffmanTables);
+                if (quantizationTable == null)
+                    continue;
+
+                if (Vector.IsHardwareAccelerated)
+                {
+                    VFDCT(block.data);
+                    VQuantize(block.Item1, quantizationTable);
+                }
+                else
+                {
+                    FDCT(block.data);
+                    VQuantize(block.Item1, quantizationTable);
+                }
+
+                HuffmanEncode(block.Item1, writer, jpegImage.JpegState.HuffmanTables);
+            }
+        }
+
+        private static List<(short[] data, JpegComponent component)> SplitIntoBlocks(JpegImage jpegImage)
+        {
+            int width = jpegImage.Width;
+            int height = jpegImage.Height;
+            var blocks = new List<(short[] block, JpegComponent component)>();
+
+            for (int componentIndex = 0; componentIndex < jpegImage.ImageFormat.Components.Length; componentIndex++)
+            {
+                var mediaComponent = jpegImage.ImageFormat.Components[componentIndex] as JpegComponent;
+                for (int y = 0; y < height; y += BlockSize)
+                {
+                    for (int x = 0; x < width; x += BlockSize)
+                    {
+                        short[] block = new short[BlockSize * BlockSize];
+                        for (int by = 0; by < BlockSize; by++)
+                        {
+                            for (int bx = 0; bx < BlockSize; bx++)
+                            {
+                                int pixelX = x + bx;
+                                int pixelY = y + by;
+                                if (pixelX < width && pixelY < height)
+                                {
+                                    block[by * BlockSize + bx] = jpegImage.GetComponentData(pixelX, pixelY, mediaComponent)[0];
+                                }
+                                else
+                                {
+                                    block[by * BlockSize + bx] = 0; // Padding for blocks that go beyond image boundaries
+                                }
+                            }
+                        }
+                        blocks.Add((block, mediaComponent));
+                    }
+                }
+            }
+            return blocks;
         }
 
         #endregion
