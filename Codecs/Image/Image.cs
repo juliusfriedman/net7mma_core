@@ -388,6 +388,21 @@ namespace Media.Codecs.Image
             Buffer.BlockCopy(data.Array, data.Offset, Data.Array, Data.Offset + offset, data.Count);
         }
 
+        public void SetComponentData(int x, int y, int componentIndex, ReadOnlySpan<byte> data)
+        {
+            if (x < 0 || y < 0 || x >= Width || y >= Height)
+                return; // or throw an exception
+
+            int offset = CalculateComponentDataOffset(x, y, componentIndex);
+
+            if (offset < 0 || offset >= data.Length)
+                return; // or throw an exception
+
+            var span = new Span<byte>(Data.Array, Data.Offset + offset, data.Length);
+
+            data.CopyTo(span);
+        }
+
         public void SetComponentVector(int x, int y, int componentIndex, Vector<byte> componentVector)
         {
             if (x < 0 || y < 0 || x >= Width || y >= Height)

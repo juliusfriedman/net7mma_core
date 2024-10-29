@@ -379,13 +379,18 @@ namespace Media.Codec.Jpeg
             int width = jpegImage.Width;
             int height = jpegImage.Height;
 
+            var memory = new MemorySegment(2);
+
             for (int i = 0; i < blockSize; i++)
             {
                 for (int j = 0; j < blockSize; j++)
                 {
                     int x = blockX * blockSize + j;
                     int y = blockY * blockSize + i;
-                    jpegImage.SetComponentData(x, y, component.Id, new MemorySegment(BitConverter.GetBytes((short)block[i * blockSize + j])));
+
+                    Binary.Write16(memory.Array, memory.Offset, Binary.IsLittleEndian, (short)block[i * blockSize + j]);
+
+                    jpegImage.SetComponentData(x, y, component.Id, memory);
                 }
             }
         }
@@ -771,7 +776,7 @@ namespace Media.Codec.Jpeg
                     sof[i] = frameComponent;
                 }
             }
-            JpegCodec.WriteMarker(stream, sof);
+            WriteMarker(stream, sof);
         }
 
         internal static void WriteInformationMarker(byte functionCode, Stream stream)
