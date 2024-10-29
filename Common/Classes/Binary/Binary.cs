@@ -3426,6 +3426,85 @@ namespace Media.UnitTests
             }
         }
 
+        public static void TestWriteBit_SingleBit_WritesCorrectly()
+        {
+            // Arrange
+            using var ms = new MemoryStream();
+            using var bitWriter = new BitWriter(ms, Binary.BitOrder.MostSignificant);
+
+            // Act
+            bitWriter.WriteBit(true);
+            bitWriter.Flush();
+            ms.TryGetBuffer(out var result);
+
+            // Assert
+            if (result.Count != 1 || result[0] != 0b10000000)
+            {
+                throw new Exception("TestWriteBit_SingleBit_WritesCorrectly failed.");
+            }
+        }
+
+        public static void TestWriteBit_MultipleBits_WritesCorrectly()
+        {
+            // Arrange
+            using var bitWriter = new BitWriter(new MemoryStream(), Binary.BitOrder.MostSignificant);
+
+            // Act
+            bitWriter.WriteBit(true);  // 1
+            bitWriter.WriteBit(false); // 0
+            bitWriter.WriteBit(true);  // 1
+            bitWriter.WriteBit(true);  // 1
+            var result = bitWriter.CurrentByte;
+
+            // Assert
+            if (result != 0b10110000)
+            {
+                throw new Exception("TestWriteBit_MultipleBits_WritesCorrectly failed.");
+            }
+        }
+
+        public static void TestWriteBit_MoreThanOneByte_WritesCorrectly()
+        {
+            // Arrange
+            using var ms = new MemoryStream();
+            using var bitWriter = new BitWriter(ms, Binary.BitOrder.MostSignificant);
+
+            // Act
+            for (int i = 0; i < 16; i++)
+            {
+                bitWriter.WriteBit(true);
+            }
+
+            bitWriter.Flush();
+
+            ms.TryGetBuffer(out var result);
+
+            // Assert
+            if (result.Count != 2 || result[0] != 0b11111111 || result[1] != 0b11111111)
+            {
+                throw new Exception("TestWriteBit_MoreThanOneByte_WritesCorrectly failed.");
+            }
+        }
+
+        public static void TestGetBytes_EmptyWriter_ReturnsEmptyArray()
+        {
+            // Arrange
+            using var ms = new MemoryStream();
+            using var bitWriter = new BitWriter(ms);
+
+            bitWriter.Flush();
+
+            // Act
+            ms.TryGetBuffer(out var result);
+
+            // Assert
+            if (result.Count != 0)
+            {
+                throw new Exception("TestGetBytes_EmptyWriter_ReturnsEmptyArray failed.");
+            }
+        }
+
+
         public static void Test_BitReader()
         {
             var toRead = new byte[] { 1, 1, 1, 1, 1, 1, 1, 1 };

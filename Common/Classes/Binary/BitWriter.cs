@@ -212,16 +212,28 @@
         /// Write a bit to the <see cref="Cache"/>
         /// </summary>
         /// <param name="value"></param>
-        public void WriteBit(bool value)
+        public void WriteBit(bool value, bool reverse = false)
         {
             try
             {
-                //Set the bit and move the bit index
-                Binary.ExchangeBit(ref m_ByteCache.Array[m_ByteIndex], m_BitIndex, value);
+                var bitOffset = Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
+                switch (m_BitOrder)
+                {
+                    case Binary.BitOrder.LeastSignificant:
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, (ulong)(value ? 1 : 0), Common.Binary.One);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, (ulong)(value ? 1 : 0), Common.Binary.One);
+                        return;
+                    case Binary.BitOrder.MostSignificant:
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, (ulong)(value ? 1 : 0), Common.Binary.One);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, (ulong)(value ? 1 : 0), Common.Binary.One);
+                        return;
+                    default: throw new System.NotSupportedException("Please create an issue for your use case");
+                }
             }
             finally
             {
                 Common.Binary.ComputeBits(Common.Binary.One, ref m_BitIndex, ref m_ByteIndex);
+                if (m_BitIndex == 0) Flush();
             }
         }
 
@@ -235,22 +247,24 @@
         {
             try
             {
+                var bitOffset = Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
                 switch (m_BitOrder)
                 {
                     case Binary.BitOrder.LeastSignificant:
-                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (byte)value, Common.Binary.BitsPerByte);
-                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (byte)value, Common.Binary.BitsPerByte);
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, (byte)value, Common.Binary.BitsPerByte);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, (byte)value, Common.Binary.BitsPerByte);
                         return;
                     case Binary.BitOrder.MostSignificant:
-                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (byte)value, Common.Binary.BitsPerByte);
-                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (byte)value, Common.Binary.BitsPerByte);
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, (byte)value, Common.Binary.BitsPerByte);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, (byte)value, Common.Binary.BitsPerByte);
                         return;
                     default: throw new System.NotSupportedException("Please create an issue for your use case");
                 }
             }
             finally
-            {
+            {                
                 Common.Binary.ComputeBits(Common.Binary.BitsPerByte, ref m_BitIndex, ref m_ByteIndex);
+                if (m_BitIndex == 0) Flush();
             }
         }
 
@@ -263,23 +277,24 @@
         {
             try
             {
+                var bitOffset = Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
                 switch (m_BitOrder)
                 {
                     case Binary.BitOrder.LeastSignificant:
-                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerByte);
-                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerByte);
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, value, Common.Binary.BitsPerByte);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, value, Common.Binary.BitsPerByte);
                         return;
                     case Binary.BitOrder.MostSignificant:
-                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerByte);
-                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerByte);
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, value, Common.Binary.BitsPerByte);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, value, Common.Binary.BitsPerByte);
                         return;
                     default: throw new System.NotSupportedException("Please create an issue for your use case");
                 }
             }
             finally
             {
-                Flush();
                 Common.Binary.ComputeBits(Common.Binary.BitsPerByte, ref m_BitIndex, ref m_ByteIndex);
+                if (m_BitIndex == 0) Flush();
             }
         }
 
@@ -293,23 +308,24 @@
         {
             try
             {
+                var bitOffset = Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
                 switch (m_BitOrder)
                 {
                     case Binary.BitOrder.LeastSignificant:
-                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
-                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, value, Common.Binary.BitsPerLong);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, value, Common.Binary.BitsPerLong);
                         return;
                     case Binary.BitOrder.MostSignificant:
-                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
-                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, Common.Binary.BitsPerLong);
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, value, Common.Binary.BitsPerLong);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, value, Common.Binary.BitsPerLong);
                         return;
                     default: throw new System.NotSupportedException("Please create an issue for your use case");
                 }
             }
             finally
             {
-                Flush();
                 Common.Binary.ComputeBits(Common.Binary.BitsPerLong, ref m_BitIndex, ref m_ByteIndex);
+                if (m_BitIndex == 0) Flush();
             }
         }
 
@@ -322,23 +338,24 @@
         {
             try
             {
+                var bitOffset = Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
                 switch (m_BitOrder)
                 {
                     case Binary.BitOrder.LeastSignificant:
-                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
-                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, (ulong)value, Common.Binary.BitsPerLong);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, (ulong)value, Common.Binary.BitsPerLong);
                         return;
                     case Binary.BitOrder.MostSignificant:
-                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
-                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, (ulong)value, Common.Binary.BitsPerLong);
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, (ulong)value, Common.Binary.BitsPerLong);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, (ulong)value, Common.Binary.BitsPerLong);
                         return;
                     default: throw new System.NotSupportedException("Please create an issue for your use case");
                 }
             }
             finally
             {
-                Flush();
                 Common.Binary.ComputeBits(Common.Binary.BitsPerLong, ref m_BitIndex, ref m_ByteIndex);
+                if (m_BitIndex == 0) Flush();
             }
         }
 
@@ -408,23 +425,24 @@
         {
             try
             {
+                var bitOffset = Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
                 switch (m_BitOrder)
                 {
                     case Binary.BitOrder.LeastSignificant:
-                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, bits);
-                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, bits);
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, value, bits);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, value, bits);
                         return;
                     case Binary.BitOrder.MostSignificant:
-                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, m_BitIndex, value, bits);
-                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, m_BitIndex, value, bits);
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, value, bits);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, value, bits);
                         return;
                     default: throw new System.NotSupportedException("Please create an issue for your use case");
                 }
             }
             finally
             {
-                Flush();
                 Common.Binary.ComputeBits(bits, ref m_BitIndex, ref m_ByteIndex);
+                if (m_BitIndex == 0) Flush();
             }
         }
 
@@ -439,19 +457,14 @@
         {
             try
             {
-                int bytes = Common.Binary.BitsToBytes(ref bitCount), toCopy = Common.Binary.Min(bytes, m_ByteCache.Array.Length);
-
-                while (bytes > 0)
-                {
-                    Binary.CopyBitsTo(buffer, byteOffset, bitOffset, m_ByteCache.Array, m_ByteCache.Offset, m_BitIndex, toCopy);
-                    Flush();
-                    bytes -= toCopy;
-                }
+                var sourceBitOffset = Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
+                Binary.CopyBitsTo(buffer, byteOffset, bitOffset, m_ByteCache.Array, m_ByteCache.Offset, sourceBitOffset, bitCount);
+                Flush();
             }
             finally
             {
-                Flush();
                 Common.Binary.ComputeBits(bitCount, ref m_BitIndex, ref m_ByteIndex);
+                if (m_BitIndex == 0) Flush();
             }
         }
 
