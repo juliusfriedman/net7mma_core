@@ -15,6 +15,11 @@ internal sealed class JpegState : IEquatable<JpegState>
     public byte StartOfFrameFunctionCode;
 
     /// <summary>
+    /// The <see cref="JpegScan"/> which is currently being processed."/>
+    /// </summary>
+    public JpegScan? Scan;
+
+    /// <summary>
     /// Start of spectral or predictor selection
     /// </summary>
     public byte Ss;
@@ -105,7 +110,7 @@ internal sealed class JpegState : IEquatable<JpegState>
         Al = al;
     }
 
-    internal void InitializeDefaultHuffmanTables()
+    public void InitializeDefaultHuffmanTables()
     {
         var huffmanTables = new HuffmanTable[4];
         huffmanTables[0] = new HuffmanTable(JpegCodec.DcLuminanceBits, JpegCodec.DcLuminanceValues);
@@ -144,6 +149,28 @@ internal sealed class JpegState : IEquatable<JpegState>
         dqt.Tables = quantizationTables;
 
         QuantizationTables.Add(dqt);
+    }
+
+    public void InitializeScan()
+    {
+        switch (StartOfFrameFunctionCode)
+        {
+            case Markers.StartOfBaselineFrame:
+            case Markers.StartOfHuffmanFrame:
+            case Markers.StartOfProgressiveHuffmanFrame:
+                Scan = new BaselineScan();
+                break;
+            case Markers.StartOfExtendedSequentialArithmeticFrame:
+            case Markers.StartOfProgressiveArithmeticFrame:
+            case Markers.StartOfLosslessArithmeticFrame:
+            case Markers.ArithmeticConditioning:
+            case Markers.StartOfDifferentialSequentialArithmeticFrame:
+            case Markers.StartOfDifferentialProgressiveArithmeticFrame:
+                Scan = new ArithmeticScan();
+                break;
+            default:
+                throw new NotImplementedException("Create an issue for your use case.");
+        }
     }
 
     public override bool Equals(object? obj)

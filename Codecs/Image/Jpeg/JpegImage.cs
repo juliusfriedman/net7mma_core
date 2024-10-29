@@ -76,7 +76,7 @@ public class JpegImage : Image
                     }
                     else
                     {
-                        tag = new StartOfFrame(marker);
+                        tag = new StartOfFrame(marker);                        
                     }                    
 
                     int bitDepth = Binary.Clamp(tag.P, Binary.BitsPerByte, Binary.BitsPerInteger);
@@ -216,7 +216,7 @@ public class JpegImage : Image
         return new JpegImage(imageFormat, width, height, dataSegment ?? thumbnailData ?? MemorySegment.Empty, jpegState, markers);
     }
 
-    public void Save(Stream stream, int quality = 99)
+    public void Save(Stream stream, int quality = 100)
     {
         // Write the JPEG signature
         JpegCodec.WriteInformationMarker(Jpeg.Markers.StartOfInformation, stream);
@@ -233,6 +233,8 @@ public class JpegImage : Image
             JpegState.InitializeDefaultHuffmanTables();
 
             JpegState.InitializeDefaultQuantizationTables(JpegState.Precision, quality);
+
+            JpegState.InitializeScan();
         }
 
         foreach (var marker in JpegState.QuantizationTables)
@@ -265,7 +267,7 @@ public class JpegImage : Image
         else
         {
             // Compress this image data to the stream
-            JpegCodec.Compress(this, stream);
+            JpegState.Scan!.Compress(this, stream);
 
             JpegCodec.WriteInformationMarker(Jpeg.Markers.EndOfInformation, stream);
         }
