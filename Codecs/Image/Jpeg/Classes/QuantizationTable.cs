@@ -32,10 +32,10 @@ internal class QuantizationTable : MemorySegment
                 }
                 else
                 {
-                    int offset = 0;
+                    int offset = qk.Offset;
                     foreach (var q in baseTable)
                     {
-                        Binary.Write16(result.Array, ref offset, Binary.IsLittleEndian, q);
+                        Binary.Write16(qk.Array, ref offset, Binary.IsLittleEndian, q);
                     }
                 }
 
@@ -45,9 +45,9 @@ internal class QuantizationTable : MemorySegment
 
         int scaleFactor = quality < 50 ? 5000 / quality : 200 - quality * 2;
 
-        var quantizationTable = new byte[length];
+        Span<byte> quantizationTable = stackalloc byte[length];
 
-        for (int i = 0; i < QuantizationTable.Length; i++)
+        for (int i = 0; i < length; i++)
         {
             int value = (baseTable[i] * scaleFactor + 50) / 100;
             quantizationTable[i] = (byte)Binary.Clamp(value, 1, 255);
@@ -59,11 +59,11 @@ internal class QuantizationTable : MemorySegment
         {
             if (pq == 0)
             {
-                quantizationTable.AsSpan().CopyTo(qk.ToSpan());
+                quantizationTable.CopyTo(qk.ToSpan());
             }
             else
             {
-                int offset = 0;
+                int offset = qk.Offset;
                 foreach (var q in baseTable)
                 {
                     Binary.Write16(result.Array, ref offset, Binary.IsLittleEndian, q);

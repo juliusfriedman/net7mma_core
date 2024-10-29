@@ -13,7 +13,7 @@ public class JpegComponent : MediaComponent
     public byte Tdj;
 
     /// <summary>
-    /// AC Entropy coding table desintation selector.
+    /// AC Entropy coding table destination selector.
     /// </summary>
     public byte Taj;
 

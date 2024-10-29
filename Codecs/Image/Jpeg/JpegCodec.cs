@@ -476,9 +476,9 @@ namespace Media.Codec.Jpeg
             }
         }
 
-        internal static void HuffmanEncode(Span<short> block, BitWriter writer, IEnumerable<HuffmanTables> huffmanTables)
+        internal static void HuffmanEncode(Span<short> block, BitWriter writer, JpegState jpegState)
         {
-            foreach (var dht in huffmanTables)
+            foreach (var dht in jpegState.HuffmanTables)
             {
                 var tables = dht.Tables.ToArray();
 
@@ -581,7 +581,7 @@ namespace Media.Codec.Jpeg
 
                 if(mediaComponent is not JpegComponent)
                 {
-                    mediaComponent = new JpegComponent((byte)i, mediaComponent.Id, mediaComponent.Size);
+                    mediaComponent = new JpegComponent((byte)(i == 0 ? 0 : 1), mediaComponent.Id, mediaComponent.Size);
                     jpegImage.ImageFormat.Components[i] = mediaComponent;
                 }
             }
@@ -609,7 +609,7 @@ namespace Media.Codec.Jpeg
                     VQuantize(block.Item1, quantizationTable);
                 }
 
-                HuffmanEncode(block.Item1, writer, jpegImage.JpegState.HuffmanTables);
+                HuffmanEncode(block.Item1, writer, jpegImage.JpegState);
             }
         }
 
