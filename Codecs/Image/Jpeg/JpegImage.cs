@@ -137,6 +137,7 @@ public class JpegImage : Image
 
                         ///If Ns > 1, the following restriction shall be placed on the image components contained in the scan:
                         ///(The summation of all components products of thier respective values correspond to 10.
+                        ///1, 2, 3, 4 => 1 + 2 + 3 + 4 = 10
                         for (int ns = Binary.Min(4, sos.Ns), i = 0; i < ns; ++i)
                         {
                             using var scanComponentSelector = sos[i];
@@ -150,16 +151,15 @@ public class JpegImage : Image
                             jpegComponent.Taj = scanComponentSelector.Taj;
                         }
 
+                        //Calculate the size of the raw image data. (We will decompress in place)
                         var dataSegmentSize = CalculateSize(imageFormat, width, height);
 
+                        //Create a new segment to hold the compressed data
                         dataSegment = new MemorySegment(Binary.Abs(dataSegmentSize));
-                        
+
+                        //Read the compressed data into the data segment
                         var read = stream.Read(dataSegment.Array, dataSegment.Offset, dataSegment.Count);
                         
-                        //Was making the data segment smaller but the extra space is required to decompress
-                        //if (read < dataSegment.Count)
-                            //dataSegment = dataSegment.Slice(0, read);                        
-
                         break;
                     }
                 case Jpeg.Markers.AppFirst:
