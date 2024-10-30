@@ -200,9 +200,6 @@ internal class HuffmanScan : Scan
 
     public override void Compress(JpegImage jpegImage, Stream outputStream)
     {
-        // Create a stream around the raw data and compress it to the stream
-        using var inputStream = new MemoryStream(jpegImage.Data.Array, jpegImage.Data.Offset, jpegImage.Data.Count, true);
-        using var reader = new BitReader(inputStream, Environment.ProcessorCount * Environment.ProcessorCount);
         using var writer = new BitWriter(outputStream, Environment.ProcessorCount * Environment.ProcessorCount);
 
         var imageData = jpegImage.Data;
