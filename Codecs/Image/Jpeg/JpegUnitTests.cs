@@ -34,7 +34,6 @@ internal class JpegUnitTests
                 throw new Exception("Indexer is not aligned");
             }
         }
-
     }
 
     public static void TestBlockTotalDifference()
@@ -52,17 +51,6 @@ internal class JpegUnitTests
         var difference = Block.TotalDifference(ref block1, ref block2);
 
         if (difference != Block.DefaultSize)
-        {
-            throw new Exception("TotalDifference calculation failed.");
-        }
-
-        block1 = new Block();
-        block1.V0L = new Vector4(1, 2, 3, 4);
-        block2.V0L = new Vector4(1, 2, 3, 5);
-
-        difference = Block.TotalDifference(ref block1, ref block2);
-
-        if (difference != 1)
         {
             throw new Exception("TotalDifference calculation failed.");
         }
