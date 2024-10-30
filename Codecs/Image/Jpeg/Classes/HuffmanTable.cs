@@ -89,7 +89,10 @@ internal class HuffmanTable : MemorySegment
         get
         {
             using var slice = Li;
-            return slice.Sum(li => li);
+            var sum = 0;
+            for (var i = 0; i < slice.Count; ++i)
+                sum += slice[i];
+            return sum;
         }
     }
 
