@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using Media.Codec.Jpeg.Segments;
+using Media.Codecs.Image;
+using Media.Common;
+using Media.Common.Interfaces;
 
 namespace Media.Codec.Jpeg.Classes;
 
@@ -119,7 +122,17 @@ internal sealed class JpegState : IEquatable<JpegState>
     }
 
     /// <summary>
-    /// Constructors a <see cref="JpegState"/>
+    /// Stores any Thumbnail data.
+    /// </summary>
+    public MemorySegment? ThumbnailData;
+    
+    /// <summary>
+    /// Data from the <see cref="Scan"/> (Compressed or Decompressed)
+    /// </summary>
+    public MemorySegment? ScanData;
+
+    /// <summary>
+    /// Constructs a <see cref="JpegState"/>
     /// </summary>
     /// <param name="startOfScanFunctionCode"></param>
     /// <param name="ss"></param>
@@ -176,7 +189,7 @@ internal sealed class JpegState : IEquatable<JpegState>
         QuantizationTables.Add(dqt);
     }
 
-    public void InitializeScan()
+    public void InitializeScan(JpegImage jpegImage)
     {
         switch (StartOfFrameFunctionCode)
         {
@@ -195,7 +208,24 @@ internal sealed class JpegState : IEquatable<JpegState>
                 break;
             default:
                 throw new NotImplementedException("Create an issue for your use case.");
+        }        
+
+        //Create Jpeg.Components from the MediaComponents
+        for(var i = 0; i < jpegImage.ImageFormat.Components.Length; ++i)
+        {
+            var mediaComponent = jpegImage.ImageFormat.Components[i];
+
+            if(mediaComponent is not Component jpegComponent)
+            {
+                jpegComponent = new Component((byte)i, (byte)i, mediaComponent.Size);
+                jpegImage.ImageFormat.Components[i] = jpegComponent;
+                jpegImage.ImageFormat.VerticalSamplingFactors[i] = 0;
+                jpegImage.ImageFormat.HorizontalSamplingFactors[i] = 0;
+            }
         }
+
+        //Create the memory which will store the scan data
+        ScanData = new MemorySegment(jpegImage.Data.Count);
     }
 
     public override bool Equals(object? obj)

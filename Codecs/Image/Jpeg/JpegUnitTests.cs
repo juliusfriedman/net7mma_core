@@ -392,6 +392,9 @@ internal class JpegUnitTests
                         newJpgImage.ImageFormat.Components.Length != jpgImage.ImageFormat.Components.Length ||
                         newJpgImage.ImageFormat.Size != jpgImage.ImageFormat.Size)
                         throw new InvalidDataException();
+
+                    var pixelData = newJpgImage.GetPixelDataAt(0, 0);
+
                 }
             }
         }

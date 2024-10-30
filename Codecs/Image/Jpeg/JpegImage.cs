@@ -6,7 +6,6 @@ using Media.Common;
 using Media.Common.Collections.Generic;
 using Media.Codec.Jpeg.Classes;
 using Media.Codec.Jpeg.Segments;
-using System.Runtime.InteropServices;
 
 namespace Media.Codec.Jpeg;
 
@@ -33,7 +32,6 @@ public class JpegImage : Image
         int width = 0, height = 0;
         ImageFormat? imageFormat = default;
         MemorySegment? dataSegment = default;
-        MemorySegment? thumbnailData = default;
         JpegState jpegState = new(Jpeg.Markers.Prefix, 0, 63, 0, 0);
         ConcurrentThesaurus<byte, Marker> markers = new ConcurrentThesaurus<byte, Marker>();        
         foreach (var marker in JpegCodec.ReadMarkers(stream))
@@ -156,7 +154,7 @@ public class JpegImage : Image
                         }
 
                         //Calculate the size of the raw image data. (We will decompress in place)
-                        var dataSegmentSize = CalculateSize(imageFormat, width, height);
+                        var dataSegmentSize = imageFormat.Length * width * height * JpegCodec.BlockSize;
 
                         //Create a new segment to hold the compressed data
                         dataSegment = new MemorySegment(Binary.Abs(dataSegmentSize));
@@ -174,7 +172,7 @@ public class JpegImage : Image
                         if (app.MajorVersion >= 1 && app.MinorVersion >= 2)
                         {
                             using var appExtension = new AppExtension(app);
-                            thumbnailData = appExtension.ThumbnailData;
+                            jpegState.ThumbnailData = appExtension.ThumbnailData;
                             switch (appExtension.ThumbnailFormatType)
                             {
                                 default:
@@ -186,19 +184,19 @@ public class JpegImage : Image
                                     break;
                                 case ThumbnailFormatType.Jpeg:
                                     {
-                                        using var ms = thumbnailData.ToMemoryStream();
+                                        using var ms = jpegState.ThumbnailData.ToMemoryStream();
                                         using var jpegImage = FromStream(ms);
-                                        jpegImage.JpegState.InitializeScan();
+                                        jpegImage.JpegState.InitializeScan(jpegImage);
                                         jpegImage.JpegState.Scan!.Decompress(jpegImage);
                                         imageFormat = jpegImage.ImageFormat;
-                                        thumbnailData = jpegImage.Data;
+                                        jpegState.ThumbnailData = jpegImage.Data;
                                         break;
                                     }
                             }
                         }
                         else
                         {
-                            thumbnailData = app.ThumbnailData;
+                            jpegState.ThumbnailData = app.ThumbnailData;
                             imageFormat = ImageFormat.RGB(8);
                             width = app.XThumbnail;
                             height = app.YThumbnail;
@@ -206,8 +204,9 @@ public class JpegImage : Image
                     }
                     goto default;
                 case Jpeg.Markers.StartOfInformation:
-                case Jpeg.Markers.EndOfInformation:
                     continue;
+                case Jpeg.Markers.EndOfInformation:
+                    break;
                 default:
                     markers.Add(marker.FunctionCode, marker);
                     continue;
@@ -215,11 +214,11 @@ public class JpegImage : Image
         }       
 
         // If the required tags were not present throw an exception.
-        if (imageFormat == null || dataSegment == null && thumbnailData == null)
+        if (imageFormat == null || dataSegment == null)
             throw new InvalidDataException("The provided stream does not contain valid JPEG image data.");
 
         // Create the JpegImage which still contains compressed image data.
-        return new JpegImage(imageFormat, width, height, dataSegment ?? thumbnailData ?? MemorySegment.Empty, jpegState, markers);
+        return new JpegImage(imageFormat, width, height, dataSegment ?? MemorySegment.Empty, jpegState, markers);
     }
 
     public void Save(Stream stream, int quality = 100)
@@ -240,7 +239,7 @@ public class JpegImage : Image
 
             JpegState.InitializeDefaultQuantizationTables(JpegState.Precision, quality);
 
-            JpegState.InitializeScan();
+            JpegState.InitializeScan(this);
         }
 
         foreach (var marker in JpegState.QuantizationTables)
@@ -282,8 +281,18 @@ public class JpegImage : Image
         }
     }    
 
+    internal void Decompress()
+    {
+        if(JpegState.ScanData != null)
+            return; // Already decompressed
+        JpegState.InitializeScan(this);
+        JpegState.Scan!.Decompress(this);
+    }
+
     public MemorySegment GetPixelDataAt(int x, int y)
     {
+        Decompress();
+
         if (x < 0 || x >= Width || y < 0 || y >= Height)
             return MemorySegment.Empty;
 
@@ -292,26 +301,36 @@ public class JpegImage : Image
         int rowSize = Width * bytesPerPixel;
         int offset = (y * rowSize) + (x * bytesPerPixel);
 
-        return Data.Slice(offset, ImageFormat.Length);
+        return JpegState.ScanData.Slice(offset, ImageFormat.Length);
     }
     
     public Vector<byte> GetVectorDataAt(int x, int y)
     {
+        Decompress();
+
+        if(JpegState.ScanData is null)
+            return Vector<byte>.Zero;
+
         // JPEG format stores pixels from top to bottom
         int bytesPerPixel = ImageFormat.Length;
         int rowSize = Width * bytesPerPixel;
         int offset = (y * rowSize) + (x * bytesPerPixel);
         offset -= offset % Vector<byte>.Count; // Align the offset to vector size
-        return new Vector<byte>(Data.Array, Data.Offset + offset);
+        return new Vector<byte>(JpegState.ScanData.Array, JpegState.ScanData.Offset + offset);
     }
 
     public void SetVectorDataAt(int x, int y, Vector<byte> vectorData)
     {
+        Decompress();
+
+        if (JpegState.ScanData is null)
+            return;
+
         // JPEG format stores pixels from top to bottom
         int bytesPerPixel = ImageFormat.Length;
         int rowSize = Width * bytesPerPixel;
         int offset = (y * rowSize) + (x * bytesPerPixel);
         offset -= offset % Vector<byte>.Count; // Align the offset to vector size
-        vectorData.CopyTo(new Span<byte>(Data.Array, Data.Offset + offset, Vector<byte>.Count));
+        vectorData.CopyTo(new Span<byte>(JpegState.ScanData.Array, JpegState.ScanData.Offset + offset, Vector<byte>.Count));
     }
 }

@@ -1,8 +1,6 @@
 ﻿using Media.Common;
-using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
-using System.Runtime.InteropServices;
 using System;
 using Codec.Jpeg.Classes;
 using Codec.Jpeg.Segments;
@@ -13,6 +11,42 @@ namespace Media.Codec.Jpeg.Classes;
 internal class HuffmanScan : Scan
 {
     #region Constants
+
+    /// <summary>
+    /// The size of the huffman decoder register.
+    /// </summary>
+    public const int RegisterSize = 64;
+
+    /// <summary>
+    /// The number of bits to fetch when filling the <see cref="JpegBitReader"/> buffer.
+    /// </summary>
+    public const int FetchBits = 48;
+
+    /// <summary>
+    /// The number of times to read the input stream when filling the <see cref="JpegBitReader"/> buffer.
+    /// </summary>
+    public const int FetchLoop = FetchBits / Binary.BitsPerByte;
+
+    /// <summary>
+    /// The minimum number of bits allowed before by the <see cref="JpegBitReader"/> before fetching.
+    /// </summary>
+    public const int MinBits = RegisterSize - FetchBits;
+
+    /// <summary>
+    /// If the next Huffman code is no more than this number of bits, we can obtain its length
+    /// and the corresponding symbol directly from the tables.
+    /// </summary>
+    public const int LookupBits = Binary.BitsPerByte;
+
+    /// <summary>
+    /// If a Huffman code is this number of bits we cannot use the lookup table to determine its value.
+    /// </summary>
+    public const int SlowBits = LookupBits + 1;
+
+    /// <summary>
+    /// The size of the lookup table.
+    /// </summary>
+    public const int LookupSize = 1 << LookupBits;
 
     /// <summary>
     /// Multiplier used within cache buffers size calculation.
@@ -125,17 +159,57 @@ internal class HuffmanScan : Scan
                     using Block block = ReadBlock(bitReader, dcTable, acTable, ref previousDC);
 
                     // Step 4: Dequantize
-                    //InverseQuantize(block, quantTable);
+                    InverseQuantize(block, quantTable.AsBlock());
 
                     // Step 5: Inverse DCT
                     DiscreteCosineTransformation.TransformIDCT(block);
 
                     // Step 6: Reconstruct Image
-                    //PlaceBlockInImage(jpegImage, component, block, bx, by);
+                    PlaceBlockInImage(jpegImage, component, block, bx, by);
                 }
             }
         }
     }
+
+    private void PlaceBlockInImage(JpegImage jpegImage, Component component, Block block, int bx, int by)
+    {
+        // Calculate the starting position in the image
+        int startX = bx * block.FloatLength;
+        int startY = by * block.FloatLength;
+
+        // Copy the block data into the image's pixel data
+        for (int y = 0; y < BlockSize; y++)
+        {
+            for (int x = 0; x < BlockSize; x++)
+            {
+                int imageX = bx * BlockSize + x;
+                int imageY = by * BlockSize + y;
+
+                // Check if the calculated coordinates are within the image bounds
+                if (imageX >= 0 && imageX < jpegImage.Width && imageY >= 0 && imageY < jpegImage.Height)
+                {
+                    int pixelIndex = (startY + y) * jpegImage.Width + startX + x;
+                    jpegImage.JpegState.ScanData![pixelIndex] = (byte)block[x, y];
+                }
+            }
+        }
+    }
+
+    private void InverseQuantize(Block block, Block quantTable)
+    {
+        for (int i = 0; i < quantTable.ShortLength; i++)
+        {
+            block.V0 = block.V0 * quantTable[i];
+            block.V1 = block.V1 * quantTable[i];
+            block.V2 = block.V2 * quantTable[i];
+            block.V3 = block.V3 * quantTable[i];
+            block.V4 = block.V4 * quantTable[i];
+            block.V5 = block.V5 * quantTable[i];
+            block.V6 = block.V6 * quantTable[i];
+            block.V7 = block.V7 * quantTable[i];
+        }
+    }
+
 
     internal Block ReadBlock(BitReader bitReader, HuffmanTable dcTable, HuffmanTable acTable, ref int previousDC)
     {
@@ -179,19 +253,23 @@ internal class HuffmanScan : Scan
 
     private int DecodeHuffman(BitReader bitReader, HuffmanTable table)
     {
-        int code = 0;
-        int length = 0;
+        var lookupTable = new HuffmanLookupTable(table);
 
-        while (true)
+        ulong index = bitReader.ReadBits(LookupBits);
+        int size = lookupTable.LookaheadSize[index];
+
+        if (size < SlowBits)
         {
-            code = (code << 1) | (bitReader.ReadBit() ? 1 : 0);
-            length++;
-
-            if (table.TryGetCode((byte)code, out var huffmanCode) && huffmanCode.length == length)
-            {
-                return huffmanCode.code;
-            }
+            return lookupTable.LookaheadValue[index];
         }
+
+        ulong x = index << (RegisterSize - bitReader.BufferBitsRemaining);
+        while (x > lookupTable.MaxCode[size])
+        {
+            size++;
+        }
+
+        return lookupTable.Values[(lookupTable.ValOffset[size] + (int)(x >> (RegisterSize - size))) & 0xFF];
     }
 
     #endregion

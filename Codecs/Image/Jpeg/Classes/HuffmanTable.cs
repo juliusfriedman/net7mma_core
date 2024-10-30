@@ -14,58 +14,10 @@ internal class HuffmanTable : MemorySegment
 
     public const int CodeLength = 16;
 
-    private readonly Dictionary<byte, (ushort code, byte length)> _codeTable = new();
+    #region Constructors
 
-    internal void BuildCodeTable()
-    {
-        if (_codeTable.Count > 0)
-        {
-            return;
-        }
-        using var Bits = Li;
-        using var Values = Vi;
-
-        int code = 0;
-        int valueIndex = 0;
-
-        for (int i = 0; i < Bits.Count; i++)
-        {
-            int bitLength = Bits[i];
-
-            for (int j = 0; j < bitLength; j++)
-            {
-                byte value = Values[valueIndex++];
-                _codeTable[value] = ((ushort)code, (byte)(i + 1));
-                code++;
-            }
-
-            code <<= 1;
-        }
-    }
-
-    public (ushort code, byte length) GetCode(byte value)
-    {
-        if (_codeTable.TryGetValue(value, out var codeInfo))
-        {
-            return codeInfo;
-        }
-
-        throw new ArgumentException($"Value {value} not found in Huffman table.");
-    }
-
-    public bool TryGetCode(int code, out (ushort code, byte length) value)
-    {
-        if (_codeTable.TryGetValue((byte)code, out value))
-        {
-            return true;
-        }
-
-        value = default;
-        return false;
-    }
-
-    public HuffmanTable(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> values) 
-        : base(Length +bits.Length + values.Length)
+    public HuffmanTable(ReadOnlySpan<byte> bits, ReadOnlySpan<byte> values)
+        : base(Length + bits.Length + values.Length)
     {
         using var li = Li;
         bits.CopyTo(li.ToSpan());
@@ -79,7 +31,9 @@ internal class HuffmanTable : MemorySegment
 
     public HuffmanTable(MemorySegment segment) : base(segment)
     {
-    }   
+    }
+
+    #endregion
 
     /// <summary>
     /// Table class, 0 = DC table or lossless table, 1 = AC table
