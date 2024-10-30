@@ -90,7 +90,7 @@ internal class JpegUnitTests
         if (block.V0L != vector ||
             span[0] != vector.X || span[1] != vector.Y || span[2] != vector.Z || span[3] != vector.W)
         {
-            throw new Exception("GetSpan method failed.");
+            throw new Exception("TestBlockGetFourFloats method failed.");
         }
     }
 
