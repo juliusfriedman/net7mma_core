@@ -2,9 +2,9 @@
 
 namespace Media.Codec.Jpeg.Classes;
 
-internal abstract class JpegScan
+internal abstract class Scan
 {
-    protected JpegScan()
+    protected Scan()
     {
     }
 

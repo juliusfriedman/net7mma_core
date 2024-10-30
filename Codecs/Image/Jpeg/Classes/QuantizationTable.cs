@@ -1,11 +1,53 @@
 ﻿using Media.Common;
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Media.Codec.Jpeg.Classes;
 
 internal class QuantizationTable : MemorySegment
 {
+    #region Static Methods
+
+    public static Block ScaleQuantizationTable(int scale, ReadOnlySpan<byte> unscaledTable)
+    {
+        Block table = new();
+        for (int j = 0; j < table.FloatLength; j++)
+        {
+            int x = ((unscaledTable[j] * scale) + 50) / 100;
+            table[j] = (short)Binary.Clamp(x, 1, 255);
+        }
+
+        return table;
+    }
+
+    public static Block ScaleQuantizationTable(int quality, Block unscaledTable)
+    {
+        int scale = QualityToScale(quality);
+        Block table = new();
+        for (int j = 0; j < table.FloatLength; j++)
+        {
+            int x = ((unscaledTable[j] * scale) + 50) / 100;
+            table[j] = (short)(uint)Binary.Clamp(x, 1, 255);
+        }
+
+        return table;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static int QualityToScale(int quality)
+    {
+        return quality < 50 ? (5000 / quality) : (200 - (quality * 2));
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Block ScaleLuminanceTable(int quality)
+       => ScaleQuantizationTable(scale: QualityToScale(quality), JpegCodec.DefaultChrominanceQuantTable);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Block ScaleChrominanceTable(int quality)
+        => ScaleQuantizationTable(scale: QualityToScale(quality), JpegCodec.DefaultLuminanceQuantTable);
+
     internal static QuantizationTable CreateQuantizationTable(int pq, int tq, int quality, QuantizationTableType tableType)
     {
         if (quality < 1 || quality > 100)
@@ -72,6 +114,8 @@ internal class QuantizationTable : MemorySegment
             return result;
         }
     }
+
+    #endregion
 
     /// <summary>
     /// The length of <see cref="Pq"/> and <see cref="Tq"/>
@@ -167,5 +211,14 @@ internal class QuantizationTable : MemorySegment
         using var qk = Qk;
         var span = qk.ToSpan();
         return MemoryMarshal.Cast<byte, short>(span);
+    }
+
+    /// <summary>
+    /// Returns the <see cref="Qk"/> segment as a <see cref="Block"/>
+    /// </summary>
+    /// <returns></returns>
+    public Block AsBlock()
+    {
+        return new Block(Qk);
     }
 }

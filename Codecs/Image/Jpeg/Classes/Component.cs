@@ -1,6 +1,6 @@
-﻿namespace Media.Codec.Jpeg;
+﻿namespace Media.Codec.Jpeg.Classes;
 
-public class JpegComponent : MediaComponent
+public class Component : MediaComponent
 {
     /// <summary>
     /// Quantization table destination selector
@@ -23,14 +23,18 @@ public class JpegComponent : MediaComponent
     public byte Reserved;
 
     /// <summary>
+    /// </summary>
+    public int DcPredictor;
+
+    /// <summary>
     /// 
     /// </summary>
     /// <param name="quantizationTableNumber"></param>
     /// <param name="id"></param>
     /// <param name="size"></param>
-    public JpegComponent(byte quantizationTableNumber, byte id, int size)
+    public Component(byte quantizationTableNumber, byte id, int size)
         : base(id, size)
-            => Tqi = quantizationTableNumber;
+            => Tqi = quantizationTableNumber;    
 
     /// <summary>
     /// 

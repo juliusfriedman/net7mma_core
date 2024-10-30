@@ -33,6 +33,35 @@ internal class Block : MemorySegment
     #region Static Functions
 
     /// <summary>
+    /// Swaps the two references.
+    /// </summary>
+    /// <typeparam name="T">The type to swap.</typeparam>
+    /// <param name="a">The first item.</param>
+    /// <param name="b">The second item.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Swap<T>(ref T a, ref T b)
+    {
+        T tmp = a;
+        a = b;
+        b = tmp;
+    }
+
+    /// <summary>
+    /// Swaps the two references.
+    /// </summary>
+    /// <typeparam name="T">The type to swap.</typeparam>
+    /// <param name="a">The first item.</param>
+    /// <param name="b">The second item.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static void Swap<T>(ref Span<T> a, ref Span<T> b)
+    {
+        // Tuple swap uses 2 more IL bytes
+        Span<T> tmp = a;
+        a = b;
+        b = tmp;
+    }
+
+    /// <summary>
     /// Transform all scalars in 'v' in a way that converting them to <see cref="int"/> would have rounding semantics.
     /// </summary>
     /// <param name="v">The vector</param>
@@ -87,6 +116,12 @@ internal class Block : MemorySegment
         return FastRound(row);
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <param name="dest"></param>
     private static void MultiplyIntoInt16_Avx2(Block a, Block b, Block dest)
     {
         Vector256<float> aBase = a.V0f;
@@ -107,12 +142,16 @@ internal class Block : MemorySegment
         }
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="a"></param>
+    /// <param name="b"></param>
+    /// <param name="dest"></param>
     private static void MultiplyIntoInt16_Sse2(Block a, Block b, Block dest)
     {
-        //Must redo as we can't use unsafe As with classes easily (without chaning the layout of the base class)
-
-        ref Vector128<float> aBase = ref Unsafe.As<Block, Vector128<float>>(ref a);
-        ref Vector128<float> bBase = ref Unsafe.As<Block, Vector128<float>>(ref b);
+        ref Vector128<float> aBase = ref Unsafe.As<byte, Vector128<float>>(ref a.Array[a.Offset]);
+        ref Vector128<float> bBase = ref Unsafe.As<byte, Vector128<float>>(ref b.Array[b.Offset]);
 
         ref Vector128<short> destBase = ref Unsafe.As<Block, Vector128<short>>(ref dest);
 
@@ -126,6 +165,9 @@ internal class Block : MemorySegment
         }
     }
 
+    /// <summary>
+    /// Transposes the block in place with AVX instructions.
+    /// </summary>
     private void TransposeInplace_Avx()
     {
         // https://stackoverflow.com/questions/25622745/transpose-an-8x8-float-using-avx-avx2/25627536#25627536
@@ -209,7 +251,7 @@ internal class Block : MemorySegment
     /// <summary>
     /// Calculate the total sum of absolute differences of elements in 'a' and 'b'.
     /// </summary>
-    public static long TotalDifference(ref Block a, ref Block b)
+    public static long TotalDifference(Block a, Block b)
     {
         long result = 0;
 
@@ -269,6 +311,15 @@ internal class Block : MemorySegment
         : base(coefficientCount * Binary.BytesPerInteger)
     {
 
+    }
+
+    /// <summary>
+    /// Constructs a <see cref="Block"/> from the given <see cref="MemorySegment"/>.
+    /// </summary>
+    /// <param name="segment"></param>
+    public Block(MemorySegment segment)
+        : base(segment)
+    {
     }
 
     #endregion
@@ -839,7 +890,7 @@ internal class Block : MemorySegment
     /// <param name="block">Source block.</param>
     /// <param name="dest">Destination block.</param>
     /// <param name="qt">The quantization table.</param>
-    public static void Quantize(Block block, ref Block dest, ref Block qt)
+    public static void Quantize(Block block, Block dest, Block qt)
     {
         if (Avx2.IsSupported)
         {
@@ -916,6 +967,72 @@ internal class Block : MemorySegment
         {
             this[i] = MathF.Round(this[i]);
         }
+    }
+
+    /// <summary>
+    /// Transpose the block inplace.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void TransposeInplace()
+    {
+        if (Avx.IsSupported)
+        {
+            TransposeInplace_Avx();
+        }
+        else
+        {
+            TransposeInplace_Scalar();
+        }
+    }
+
+    /// <summary>
+    /// Transposes the block in place with scalar instructions.
+    /// </summary>
+    private void TransposeInplace_Scalar()
+    {
+        ref float elemRef = ref Unsafe.As<byte, float>(ref Array[Offset]);
+
+        // row #0
+        Swap(ref Unsafe.Add(ref elemRef, 1), ref Unsafe.Add(ref elemRef, 8));
+        Swap(ref Unsafe.Add(ref elemRef, 2), ref Unsafe.Add(ref elemRef, 16));
+        Swap(ref Unsafe.Add(ref elemRef, 3), ref Unsafe.Add(ref elemRef, 24));
+        Swap(ref Unsafe.Add(ref elemRef, 4), ref Unsafe.Add(ref elemRef, 32));
+        Swap(ref Unsafe.Add(ref elemRef, 5), ref Unsafe.Add(ref elemRef, 40));
+        Swap(ref Unsafe.Add(ref elemRef, 6), ref Unsafe.Add(ref elemRef, 48));
+        Swap(ref Unsafe.Add(ref elemRef, 7), ref Unsafe.Add(ref elemRef, 56));
+
+        // row #1
+        Swap(ref Unsafe.Add(ref elemRef, 10), ref Unsafe.Add(ref elemRef, 17));
+        Swap(ref Unsafe.Add(ref elemRef, 11), ref Unsafe.Add(ref elemRef, 25));
+        Swap(ref Unsafe.Add(ref elemRef, 12), ref Unsafe.Add(ref elemRef, 33));
+        Swap(ref Unsafe.Add(ref elemRef, 13), ref Unsafe.Add(ref elemRef, 41));
+        Swap(ref Unsafe.Add(ref elemRef, 14), ref Unsafe.Add(ref elemRef, 49));
+        Swap(ref Unsafe.Add(ref elemRef, 15), ref Unsafe.Add(ref elemRef, 57));
+
+        // row #2
+        Swap(ref Unsafe.Add(ref elemRef, 19), ref Unsafe.Add(ref elemRef, 26));
+        Swap(ref Unsafe.Add(ref elemRef, 20), ref Unsafe.Add(ref elemRef, 34));
+        Swap(ref Unsafe.Add(ref elemRef, 21), ref Unsafe.Add(ref elemRef, 42));
+        Swap(ref Unsafe.Add(ref elemRef, 22), ref Unsafe.Add(ref elemRef, 50));
+        Swap(ref Unsafe.Add(ref elemRef, 23), ref Unsafe.Add(ref elemRef, 58));
+
+        // row #3
+        Swap(ref Unsafe.Add(ref elemRef, 28), ref Unsafe.Add(ref elemRef, 35));
+        Swap(ref Unsafe.Add(ref elemRef, 29), ref Unsafe.Add(ref elemRef, 43));
+        Swap(ref Unsafe.Add(ref elemRef, 30), ref Unsafe.Add(ref elemRef, 51));
+        Swap(ref Unsafe.Add(ref elemRef, 31), ref Unsafe.Add(ref elemRef, 59));
+
+        // row #4
+        Swap(ref Unsafe.Add(ref elemRef, 37), ref Unsafe.Add(ref elemRef, 44));
+        Swap(ref Unsafe.Add(ref elemRef, 38), ref Unsafe.Add(ref elemRef, 52));
+        Swap(ref Unsafe.Add(ref elemRef, 39), ref Unsafe.Add(ref elemRef, 60));
+
+        // row #5
+        Swap(ref Unsafe.Add(ref elemRef, 46), ref Unsafe.Add(ref elemRef, 53));
+        Swap(ref Unsafe.Add(ref elemRef, 47), ref Unsafe.Add(ref elemRef, 61));
+
+        // row #6
+        Swap(ref Unsafe.Add(ref elemRef, 55), ref Unsafe.Add(ref elemRef, 62));
     }
 
     /// <summary>

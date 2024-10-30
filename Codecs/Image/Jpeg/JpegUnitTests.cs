@@ -48,7 +48,7 @@ internal class JpegUnitTests
             block2[i] = (short)(i + 1);
         }
 
-        var difference = Block.TotalDifference(ref block1, ref block2);
+        var difference = Block.TotalDifference(block1, block2);
 
         if (difference != Block.DefaultSize)
         {

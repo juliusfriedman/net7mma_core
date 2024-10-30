@@ -23,10 +23,10 @@ namespace Media.Codec.Jpeg
                 (
                     Binary.ByteOrder.Big,
                     DataLayout.Packed,
-                    new JpegComponent(0, 1, Binary.BitsPerByte),
-                    new JpegComponent(1, 2, Binary.BitsPerByte),
-                    new JpegComponent(2, 3, Binary.BitsPerByte),
-                    new JpegComponent(3, 4, Binary.BitsPerByte)
+                    new Component(0, 1, Binary.BitsPerByte),
+                    new Component(1, 2, Binary.BitsPerByte),
+                    new Component(2, 3, Binary.BitsPerByte),
+                    new Component(3, 4, Binary.BitsPerByte)
                 );
         }
 
@@ -230,7 +230,7 @@ namespace Media.Codec.Jpeg
             {
                 var imageComponent = jpegImage.ImageFormat.Components[i];
 
-                if (imageComponent is JpegComponent jpegComponent)
+                if (imageComponent is Component jpegComponent)
                 {
                     var componentSelector = new ScanComponentSelector();
                     componentSelector.Csj = jpegComponent.Id;
@@ -262,7 +262,7 @@ namespace Media.Codec.Jpeg
             {
                 var imageComponent = jpegImage.ImageFormat.Components[i];
 
-                if (imageComponent is JpegComponent jpegComponent)
+                if (imageComponent is Component jpegComponent)
                 {
                     var frameComponent = new FrameComponent(jpegComponent.Id, jpegImage.ImageFormat.HorizontalSamplingFactors[i], jpegImage.ImageFormat.VerticalSamplingFactors[i], jpegComponent.Tqi);
                     sof[i] = frameComponent;

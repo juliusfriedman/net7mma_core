@@ -41,6 +41,10 @@ public class JpegImage : Image
             //Handle the marker to decode.
             switch (marker.FunctionCode)
             {
+                case Jpeg.Markers.ArithmeticConditioning:
+                    var dac = new ArithmeticConditioningTables(marker);
+                    jpegState.ArithmeticConditioningTables.Add(dac);
+                    continue;
                 case Jpeg.Markers.QuantizationTable:
                     var dqt = new QuantizationTables(marker);
                     jpegState.QuantizationTables.Add(dqt);
@@ -91,7 +95,7 @@ public class JpegImage : Image
                     if (bitsPerComponent == 0)
                         bitsPerComponent = Binary.BitsPerByte;
 
-                    var mediaComponents = new JpegComponent[numberOfComponents];
+                    var mediaComponents = new Component[numberOfComponents];
                     var widths = new int[numberOfComponents];
                     var heights = new int[numberOfComponents];
 
@@ -107,7 +111,7 @@ public class JpegImage : Image
 
                         var quantizationTableNumber = frameComponent.QuantizationTableDestinationSelector;
 
-                        var mediaComponent = new JpegComponent((byte)quantizationTableNumber, (byte)componentId, bitsPerComponent);
+                        var mediaComponent = new Component((byte)quantizationTableNumber, (byte)componentId, bitsPerComponent);
 
                         mediaComponents[componentIndex] = mediaComponent;
 
@@ -142,7 +146,7 @@ public class JpegImage : Image
                         {
                             using var scanComponentSelector = sos[i];
 
-                            var jpegComponent = imageFormat.GetComponentById(scanComponentSelector.Csj) as JpegComponent ?? imageFormat.Components[i] as JpegComponent;
+                            var jpegComponent = imageFormat.GetComponentById(scanComponentSelector.Csj) as Component ?? imageFormat.Components[i] as Component;
 
                             if (jpegComponent == null)
                                 continue;
@@ -248,11 +252,14 @@ public class JpegImage : Image
 
         foreach (var marker in JpegState.HuffmanTables)
         {
-            if (marker == null) continue;
-
             JpegCodec.WriteMarker(stream, marker);
         }
-        
+
+        foreach(var marker in JpegState.ArithmeticConditioningTables)
+        {
+            JpegCodec.WriteMarker(stream, marker);
+        }
+
         JpegCodec.WriteStartOfScan(this, stream);
 
         if (Markers != null)

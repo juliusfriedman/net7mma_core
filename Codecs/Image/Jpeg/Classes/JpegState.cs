@@ -15,9 +15,9 @@ internal sealed class JpegState : IEquatable<JpegState>
     public byte StartOfFrameFunctionCode;
 
     /// <summary>
-    /// The <see cref="JpegScan"/> which is currently being processed."/>
+    /// The <see cref="Classes.Scan"/> which is currently being processed."/>
     /// </summary>
-    public JpegScan? Scan;
+    public Scan? Scan;
 
     /// <summary>
     /// Start of spectral or predictor selection
@@ -45,7 +45,7 @@ internal sealed class JpegState : IEquatable<JpegState>
     public byte Precision;
 
     /// <summary>
-    /// Any <see cref="Media.Codec.Jpeg.Segments.QuantizationTables"/> which are contained in the image.
+    /// Any <see cref="Segments.QuantizationTables"/> which are contained in the image.
     /// </summary>
     public readonly List<QuantizationTables> QuantizationTables = new();
 
@@ -69,7 +69,7 @@ internal sealed class JpegState : IEquatable<JpegState>
     }
 
     /// <summary>
-    /// Any <see cref="Media.Codec.Jpeg.Segments.HuffmanTables"/> which are contained in the image.
+    /// Any <see cref="Segments.HuffmanTables"/> which are contained in the image.
     /// </summary>
     public readonly List<HuffmanTables> HuffmanTables = new();
 
@@ -90,6 +90,31 @@ internal sealed class JpegState : IEquatable<JpegState>
             }
         }
         
+        return null;
+    }
+
+    /// <summary>
+    /// Any <see cref="Segments.ArithmeticConditioningTables"/> which are contained in the image.
+    /// </summary>
+    public readonly List<ArithmeticConditioningTables> ArithmeticConditioningTables = new();
+
+    /// <summary>
+    /// Gets a <see cref="ArithmeticConditioningTable"/> by its table class and table id."/>
+    /// </summary>
+    /// <param name="tableClass"></param>
+    /// <param name="tableId"></param>
+    /// <returns></returns>
+    public ArithmeticConditioningTable? GetArithmeticConditioningTable(int tableClass, int tableId)
+    {
+        foreach (var arithmeticConditioningTable in ArithmeticConditioningTables)
+        {
+            foreach (var table in arithmeticConditioningTable.Tables)
+            {
+                if (table.Tc == tableClass && table.Tb == tableId)
+                    return table;
+            }
+        }
+
         return null;
     }
 
@@ -158,7 +183,7 @@ internal sealed class JpegState : IEquatable<JpegState>
             case Markers.StartOfBaselineFrame:
             case Markers.StartOfHuffmanFrame:
             case Markers.StartOfProgressiveHuffmanFrame:
-                Scan = new BaselineScan();
+                Scan = new HuffmanScan();
                 break;
             case Markers.StartOfExtendedSequentialArithmeticFrame:
             case Markers.StartOfProgressiveArithmeticFrame:
