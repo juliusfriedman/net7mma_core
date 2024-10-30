@@ -79,7 +79,7 @@ internal class JpegUnitTests
 
     }
 
-    public static void TestBlockGetSpan()
+    public static void TestBlockGetFourFloats()
     {
         var block = new Block();
         var vector = new Vector4(1, 2, 3, 4);
