@@ -18,11 +18,6 @@ public class Component : MediaComponent
     public byte Taj;
 
     /// <summary>
-    /// Not yet useful.
-    /// </summary>
-    public byte Reserved;
-
-    /// <summary>
     /// </summary>
     public int DcPredictor;
 
