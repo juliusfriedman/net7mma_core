@@ -1,5 +1,6 @@
 ﻿using Media.Codec;
 using Media.Codec.Jpeg;
+using Media.Codec.Jpeg.Classes;
 using Media.Codec.Jpeg.Segments;
 using Media.Codecs.Image;
 using Media.Common;
@@ -13,6 +14,128 @@ namespace Media.UnitTests;
 
 internal class JpegUnitTests
 {
+    public static void TestBlockSetGetVector4Properties()
+    {
+        var block = new Block();
+        var vector = new Vector4(1, 2, 3, 4);
+        block.V0L = vector;
+
+        if (block.V0L != vector)
+        {
+            throw new Exception("Vector4 property set/get failed.");
+        }
+
+        for(int i = 0; i < 4; i++)
+        {
+            var value = block[(nuint)i];
+
+            if(value != i + 1)
+            {
+                throw new Exception("Indexer is not aligned");
+            }
+        }
+
+    }
+
+    public static void TestBlockTotalDifference()
+    {
+        var block1 = new Block();
+        var block2 = new Block();
+        
+        // Initialize block1 and block2 with some values
+        for (int i = 0; i < Block.DefaultSize; i++)
+        {
+            block1[i] = (short)i;
+            block2[i] = (short)(i + 1);
+        }
+
+        var difference = Block.TotalDifference(ref block1, ref block2);
+
+        if (difference != Block.DefaultSize)
+        {
+            throw new Exception("TotalDifference calculation failed.");
+        }
+
+        block1 = new Block();
+        block1.V0L = new Vector4(1, 2, 3, 4);
+        block2.V0L = new Vector4(1, 2, 3, 5);
+
+        difference = Block.TotalDifference(ref block1, ref block2);
+
+        if (difference != 1)
+        {
+            throw new Exception("TotalDifference calculation failed.");
+        }
+    }
+
+    public static void TestBlockLoad()
+    {
+        var data = new short[Block.DefaultSize];
+        for (int i = 0; i < data.Length; i++)
+        {
+            data[i] = (short)i;
+        }
+
+        var block = Block.Load(data);
+
+        if (block == null)
+        {
+            throw new Exception("Block load failed.");
+        }
+
+        for (int i = 0; i < data.Length; i++)
+        {
+            if (data[i] != block[i])
+                throw new Exception("Block indexer not aligned.");
+        }
+
+    }
+
+    public static void TestBlockGetSpan()
+    {
+        var block = new Block();
+        var vector = new Vector4(1, 2, 3, 4);
+        block.V0L = vector;
+
+        var span = block.GetFourFloats(0);
+
+        if (block.V0L != vector ||
+            span[0] != vector.X || span[1] != vector.Y || span[2] != vector.Z || span[3] != vector.W)
+        {
+            throw new Exception("GetSpan method failed.");
+        }
+    }
+
+    public static void TestBlockAligment()
+    {
+        using var block = new Block();
+        block.V0L = new Vector4(0, 1, 2, 3);
+        block.V0R = new Vector4(4, 5, 6, 7);
+        block.V1L = new Vector4(8, 9, 10, 11);
+        block.V1R = new Vector4(12, 13, 14, 15);
+        block.V2L = new Vector4(16, 17, 18, 19);
+        block.V2R = new Vector4(20, 21, 22, 23);
+        block.V3L = new Vector4(24, 25, 26, 27);
+        block.V3R = new Vector4(28, 29, 30, 31);
+        block.V4L = new Vector4(32, 33, 34, 35);
+        block.V4R = new Vector4(36, 37, 38, 39);
+        block.V5L = new Vector4(40, 41, 42, 43);
+        block.V5R = new Vector4(44, 45, 46, 47);
+        block.V6L = new Vector4(48, 49, 50, 51);
+        block.V6R = new Vector4(52, 53, 54, 55);
+        block.V7L = new Vector4(56, 57, 58, 59);
+        block.V7R = new Vector4(60, 61, 62, 63);
+
+        for (var i = 0; i < Block.DefaultSize; ++i)
+        {
+            var value = block[(uint)i];
+            if (value != i)
+            {
+                throw new Exception("Not aligned.");
+            }
+        }
+    }
+
     public static void TestSave()
     {
         var format = ImageFormat.RGB(8);

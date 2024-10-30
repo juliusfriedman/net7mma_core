@@ -183,7 +183,9 @@ public class JpegImage : Image
                                 case ThumbnailFormatType.Jpeg:
                                     {
                                         using var ms = thumbnailData.ToMemoryStream();
-                                        using var jpegImage = JpegImage.FromStream(ms);
+                                        using var jpegImage = FromStream(ms);
+                                        jpegImage.JpegState.InitializeScan();
+                                        jpegImage.JpegState.Scan!.Decompress(jpegImage);
                                         imageFormat = jpegImage.ImageFormat;
                                         thumbnailData = jpegImage.Data;
                                         break;
