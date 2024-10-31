@@ -158,8 +158,10 @@ internal class HuffmanScan : Scan
                 {
                     using Block block = ReadBlock(bitReader, dcTable, acTable, ref previousDC);
 
+                    using var quantBlock = quantTable.AsBlock();
+
                     // Step 4: Dequantize
-                    InverseQuantize(block, quantTable.AsBlock());
+                    DiscreteCosineTransformation.AdjustToIDCT(quantBlock);
 
                     // Step 5: Inverse DCT
                     DiscreteCosineTransformation.TransformIDCT(block);

@@ -10,9 +10,13 @@ namespace Media.Codec.Jpeg.Classes;
 /// </summary>
 internal class HuffmanTable : MemorySegment
 {
+    #region Constants
+
     public const int Length = 1;
 
     public const int CodeLength = 16;
+
+    #endregion
 
     #region Constructors
 
@@ -34,6 +38,8 @@ internal class HuffmanTable : MemorySegment
     }
 
     #endregion
+
+    #region Propeties
 
     /// <summary>
     /// Table class, 0 = DC table or lossless table, 1 = AC table
@@ -109,4 +115,6 @@ internal class HuffmanTable : MemorySegment
     /// The total length of the <see cref="HuffmanTable"/> in bytes.
     /// </summary>
     public int TotalLength => Length + CodeLength + CodeLengthSum;
+
+    #endregion
 }

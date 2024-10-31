@@ -214,11 +214,26 @@ internal class QuantizationTable : MemorySegment
     }
 
     /// <summary>
-    /// Returns the <see cref="Qk"/> segment as a <see cref="Block"/>
+    /// Returns the <see cref="Qk"/> segment as a <see cref="Block"/>.
+    /// Ensures the coefficients are in zig-zag order.
     /// </summary>
     /// <returns></returns>
     public Block AsBlock()
     {
-        return new Block(Qk);
+        using var qk = Qk;
+        var block = new Block();
+        for (int i = 0; i < qk.Count; ++i)
+        {
+            switch(Pq)
+            {
+                case 0:
+                    block[ZigZag.ZigZagOrder[i]] = qk[i];
+                    break;
+                case 1:
+                    block[ZigZag.ZigZagOrder[i]] = Binary.Read16(qk.Array, qk.Offset + i * Binary.BitsPerShort, Binary.IsLittleEndian);
+                    break;
+            }
+        }
+        return block;
     }
 }

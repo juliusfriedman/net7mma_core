@@ -130,26 +130,22 @@ internal class HuffmanLookupTable
         ref byte lookupSizeRef = ref LookaheadSize[0];
         Unsafe.InitBlockUnaligned(ref lookupSizeRef, HuffmanScan.SlowBits, HuffmanScan.LookupSize);
 
-        //Todo fix this, it doesn't seem to work correctly when codeLengths are adjusted to be exactly 16 bytes.
-        //Most implementations use 1 as the starting value for the loops but the memory here is 0 based.
-        //Until fixed decoding time will suffer.
-
-        //p = 0;
-        //for (int length = 0; length <= HuffmanScan.LookupBits; length++)
-        //{
-        //    int jShift = HuffmanScan.LookupBits - length;
-        //    for (int i = 0, e = codeLengths[length]; i < e; i++, p++)
-        //    {
-        //        // length = current code's length, p = its index in huffCode[] & Values[].
-        //        // Generate left-justified code followed by all possible bit sequences
-        //        int lookBits = (int)(workspace[p] << jShift);
-        //        for (int ctr = 1 << (HuffmanScan.LookupBits - length); ctr > 0; --ctr)
-        //        {
-        //            LookaheadSize[lookBits] = (byte)length;
-        //            LookaheadValue[lookBits] = Values[p];
-        //            lookBits++;
-        //        }
-        //    }
-        //}
+        p = 0;
+        for (int length = 0; length <= HuffmanScan.LookupBits; length++)
+        {
+            int jShift = HuffmanScan.LookupBits - length;
+            for (int i = 0, e = codeLengths[length]; i < e; i++, p++)
+            {
+                // length = current code's length, p = its index in huffCode[] & Values[].
+                // Generate left-justified code followed by all possible bit sequences
+                int lookBits = (int)(workspace[p] << jShift);
+                for (int ctr = 1 << (HuffmanScan.LookupBits - length); ctr > 0; --ctr)
+                {
+                    LookaheadSize[lookBits] = (byte)length;
+                    LookaheadValue[lookBits] = Values[p];
+                    lookBits++;
+                }
+            }
+        }
     }
 }
