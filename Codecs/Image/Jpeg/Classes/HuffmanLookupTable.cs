@@ -19,12 +19,12 @@ internal class HuffmanLookupTable
     /// <summary>
     /// Memory segment used for temporary storage.
     /// </summary>
-    public readonly MemorySegment Workspace = new MemorySegment(new byte[HuffmanTable.CodeLength + 256 + 256 * Binary.BytesPerInteger]);
+    public readonly MemorySegment Workspace = new MemorySegment(new byte[HuffmanTable.CodeLength + HuffmanScan.LookupSize + HuffmanScan.LookupSize * Binary.BytesPerInteger]);
 
     /// <summary>
     /// Derived from the DHT marker. Contains the symbols, in order of incremental code length.
     /// </summary>
-    public readonly byte[] Values = new byte[257];
+    public readonly byte[] Values = new byte[HuffmanScan.LookupSize];
 
     /// <summary>
     /// Contains the largest code of length k (0 if none). MaxCode[17] is a sentinel to ensure <see cref="DecodeHuffman"/> terminates.
@@ -36,7 +36,7 @@ internal class HuffmanLookupTable
     /// k, less the smallest code of length k; so given a code of length k, the corresponding symbol is
     /// Values[code + ValOffset[k]].
     /// </summary>
-    public readonly int[] ValOffset = new int[18];
+    public readonly int[] ValOffset = new int[19];
 
     /// <summary>
     /// Contains the length of bits for the given k value.
@@ -119,7 +119,7 @@ internal class HuffmanLookupTable
             }
         }
 
-        ValOffset[17] = 0;
+        ValOffset[18] = 0;
         MaxCode[17] = ulong.MaxValue; // Ensures huff decode terminates
 
         // Compute lookahead tables to speed up decoding.
@@ -134,22 +134,22 @@ internal class HuffmanLookupTable
         //Most implementations use 1 as the starting value for the loops but the memory here is 0 based.
         //Until fixed decoding time will suffer.
 
-        p = 0;
-        for (int length = 0; length <= HuffmanScan.LookupBits; length++)
-        {
-            int jShift = HuffmanScan.LookupBits - length;
-            for (int i = 0, e = codeLengths[length]; i < e; i++, p++)
-            {
-                // length = current code's length, p = its index in huffCode[] & Values[].
-                // Generate left-justified code followed by all possible bit sequences
-                int lookBits = (int)(workspace[p] << jShift);
-                for (int ctr = 1 << (HuffmanScan.LookupBits - length); ctr > 0; --ctr)
-                {
-                    LookaheadSize[lookBits] = (byte)length;
-                    LookaheadValue[lookBits] = Values[p];
-                    lookBits++;
-                }
-            }
-        }
+        //p = 0;
+        //for (int length = 1; length <= HuffmanScan.LookupBits; length++)
+        //{
+        //    int jShift = HuffmanScan.LookupBits - length;
+        //    for (int i = 1, e = codeLengths[length]; i < e; i++, p++)
+        //    {
+        //        // length = current code's length, p = its index in huffCode[] & Values[].
+        //        // Generate left-justified code followed by all possible bit sequences
+        //        int lookBits = (int)(workspace[p] << jShift);
+        //        for (int ctr = 1 << (HuffmanScan.LookupBits - length); ctr > 0; --ctr)
+        //        {
+        //            LookaheadSize[lookBits] = (byte)length;
+        //            LookaheadValue[lookBits] = Values[p];
+        //            lookBits++;
+        //        }
+        //    }
+        //}
     }
 }
