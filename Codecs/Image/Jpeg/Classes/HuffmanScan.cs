@@ -237,7 +237,7 @@ internal class HuffmanScan : Scan
         return block;
     }
 
-    private int DecodeHuffman(BitReader bitReader, HuffmanTable table)
+    private static int DecodeHuffman(BitReader bitReader, HuffmanTable table)
     {
         var lookupTable = new HuffmanLookupTable(table);
 
@@ -297,7 +297,7 @@ internal class HuffmanScan : Scan
         }
     }
 
-    private void WriteBlock(
+    private static void WriteBlock(
         Component component,
         Block block,
         HuffmanTable dcTable,
@@ -314,7 +314,7 @@ internal class HuffmanScan : Scan
         JpegCodec.WriteMarker(output, dri);
     }
 
-    private void WriteDc(
+    private static void WriteDc(
        Component component,
        Block block,
        HuffmanTable dcTable,
@@ -327,7 +327,7 @@ internal class HuffmanScan : Scan
         component.DcPredictor = dc;
     }
 
-    private void WriteAcBlock(
+    private static void WriteAcBlock(
         Block block,
         nint start,
         nint end,
@@ -374,13 +374,13 @@ internal class HuffmanScan : Scan
     /// <param name="value">Value to encode.</param>
     /// <param name="output">Output bit writer.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void EmitHuff(HuffmanLookupTable table, int value, BitWriter output)
+    private static void EmitHuff(HuffmanLookupTable table, int value, BitWriter output)
     {
         int x = table.Values[value];
         Emit((uint)x & 0xffff_ff00u, x & 0xff, output);
     }
 
-    private void EmitHuffRLE(HuffmanLookupTable table, int runLength, int value, BitWriter writer)
+    private static void EmitHuffRLE(HuffmanLookupTable table, int runLength, int value, BitWriter writer)
     {
         int a = value;
         int b = value;
@@ -411,7 +411,7 @@ internal class HuffmanScan : Scan
     /// <param name="count"></param>
     /// <param name="output"></param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void Emit(uint bits, int count, BitWriter output)
+    private static void Emit(uint bits, int count, BitWriter output)
     {
         output.WriteBits(count, bits);
     }
