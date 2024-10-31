@@ -47,7 +47,7 @@ internal class HuffmanLookupTable
     /// Lookahead table: indexed by the next <see cref="HuffmanScan.LookupBits"/> bits of
     /// the input data stream.  If the next Huffman code is no more
     /// than <see cref="HuffmanScan.LookupBits"/> bits long, we can obtain its length and
-    /// the corresponding symbol directly from this tables.
+    /// the corresponding symbol directly from this table.
     ///
     /// The lower 8 bits of each table entry contain the number of
     /// bits in the corresponding Huffman code, or <see cref="HuffmanScan.LookupBits"/> + 1
@@ -64,7 +64,18 @@ internal class HuffmanLookupTable
     /// <exception cref="InvalidDataException"></exception>
     public HuffmanLookupTable(HuffmanTable huffmanTable)
     {
-        using var codeLengths = huffmanTable.Li;
+        //Using the raw codeLengths seems to cause some strange issue with the decoding...
+        //To make the logic `work` can take huffmanTable.ToSpan().Slice(0, HuffmanTable.Length + HuffmanTable.CodeLength) and use that instead
+        //using var codeLengths = huffmanTable.Li;
+
+        //Neither the rust or stb implementations seem to use the extra byte for the code lengths
+        //https://github.com/nothings/stb/blob/ea2f937a01ce39795ab02b6c6e30173b4f1ed46c/stb_image.h#L1942
+        //https://github.com/image-rs/jpeg-decoder/blob/ab6d326a7b194568725731a19603fb580814452d/src/huffman.rs#L217
+        //To investigate further, the original code is here:
+        //https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/src/jdhuff.c#L143
+
+        var codeLengths = huffmanTable.ToSpan().Slice(0, HuffmanTable.Length + HuffmanTable.CodeLength);
+
         using var values = huffmanTable.Vi;
 
         var workspaceSpan = Workspace.ToSpan();
@@ -76,7 +87,7 @@ internal class HuffmanLookupTable
         uint code = 0;
         int si = 1;
         int p = 0;
-        for (int i = 0; i < codeLengths.Count; i++)
+        for (int i = 1; i <= HuffmanTable.CodeLength; i++)
         {
             int count = codeLengths[i];
             for (int j = 0; j < count; j++)
@@ -102,7 +113,7 @@ internal class HuffmanLookupTable
 
         // Figure F.15: generate decoding tables for bit-sequential decoding
         p = 0;
-        for (int j = 0; j < codeLengths.Count; j++)
+        for (int j = 1; j <= HuffmanTable.CodeLength; j++)
         {
             var codeLength = codeLengths[j];
             if (codeLength != 0)
@@ -130,26 +141,22 @@ internal class HuffmanLookupTable
         ref byte lookupSizeRef = ref LookaheadSize[0];
         Unsafe.InitBlockUnaligned(ref lookupSizeRef, HuffmanScan.SlowBits, HuffmanScan.LookupSize);
 
-        //Todo fix this, it doesn't seem to work correctly when codeLengths are adjusted to be exactly 16 bytes.
-        //Most implementations use 1 as the starting value for the loops but the memory here is 0 based.
-        //Until fixed decoding time will suffer.
-
-        //p = 0;
-        //for (int length = 1; length <= HuffmanScan.LookupBits; length++)
-        //{
-        //    int jShift = HuffmanScan.LookupBits - length;
-        //    for (int i = 1, e = codeLengths[length]; i < e; i++, p++)
-        //    {
-        //        // length = current code's length, p = its index in huffCode[] & Values[].
-        //        // Generate left-justified code followed by all possible bit sequences
-        //        int lookBits = (int)(workspace[p] << jShift);
-        //        for (int ctr = 1 << (HuffmanScan.LookupBits - length); ctr > 0; --ctr)
-        //        {
-        //            LookaheadSize[lookBits] = (byte)length;
-        //            LookaheadValue[lookBits] = Values[p];
-        //            lookBits++;
-        //        }
-        //    }
-        //}
+        p = 0;
+        for (int length = 1; length < HuffmanScan.SlowBits; length++)
+        {
+            int jShift = HuffmanScan.LookupBits - length;
+            for (int i = 1, e = codeLengths[length]; i <= e; i++, p++)
+            {
+                // length = current code's length, p = its index in huffCode[] & Values[].
+                // Generate left-justified code followed by all possible bit sequences
+                int lookBits = (int)(workspace[p] << jShift);
+                for (int ctr = 1 << (HuffmanScan.LookupBits - length); ctr > 0; --ctr)
+                {
+                    LookaheadSize[lookBits] = (byte)length;
+                    LookaheadValue[lookBits] = Values[p];
+                    lookBits++;
+                }
+            }
+        }
     }
 }

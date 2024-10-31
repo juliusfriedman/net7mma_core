@@ -271,7 +271,7 @@ internal class HuffmanScan : Scan
             size++;
         }
 
-        return lookupTable.Values[(lookupTable.ValOffset[size] + (int)(x >> (RegisterSize - size))) & 0xFF];
+        return lookupTable.Values[(lookupTable.ValOffset[size] + (int)(x >> (RegisterSize - size))) & byte.MaxValue];
     }
 
     #endregion
