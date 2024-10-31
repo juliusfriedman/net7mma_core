@@ -197,22 +197,6 @@ internal class HuffmanScan : Scan
         }
     }
 
-    private void InverseQuantize(Block block, Block quantTable)
-    {
-        for (int i = 0; i < quantTable.ShortLength; i++)
-        {
-            block.V0 = block.V0 * quantTable[i];
-            block.V1 = block.V1 * quantTable[i];
-            block.V2 = block.V2 * quantTable[i];
-            block.V3 = block.V3 * quantTable[i];
-            block.V4 = block.V4 * quantTable[i];
-            block.V5 = block.V5 * quantTable[i];
-            block.V6 = block.V6 * quantTable[i];
-            block.V7 = block.V7 * quantTable[i];
-        }
-    }
-
-
     internal Block ReadBlock(BitReader bitReader, HuffmanTable dcTable, HuffmanTable acTable, ref int previousDC)
     {
         // Initialize a new block

@@ -77,6 +77,7 @@ internal class HuffmanLookupTable
         //Which is very similar to the libjpeg-turbo code here:
         //https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/src/jdhuff.c#L143
 
+        //Use the workaround... not sure how this is physically possible but it seems to work
         var codeLengths = huffmanTable.ToSpan().Slice(0, HuffmanTable.Length + HuffmanTable.CodeLength);
 
         using var values = huffmanTable.Vi;
