@@ -130,6 +130,10 @@ internal class HuffmanLookupTable
         ref byte lookupSizeRef = ref LookaheadSize[0];
         Unsafe.InitBlockUnaligned(ref lookupSizeRef, HuffmanScan.SlowBits, HuffmanScan.LookupSize);
 
+        //Todo fix this, it doesn't seem to work correctly when codeLengths are adjusted to be exactly 16 bytes.
+        //Most implementations use 1 as the starting value for the loops but the memory here is 0 based.
+        //Until fixed decoding time will suffer.
+
         p = 0;
         for (int length = 0; length <= HuffmanScan.LookupBits; length++)
         {
