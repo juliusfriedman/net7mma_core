@@ -71,7 +71,10 @@ internal class HuffmanLookupTable
         //Neither the rust or stb implementations seem to use the extra byte for the code lengths
         //https://github.com/nothings/stb/blob/ea2f937a01ce39795ab02b6c6e30173b4f1ed46c/stb_image.h#L1942
         //https://github.com/image-rs/jpeg-decoder/blob/ab6d326a7b194568725731a19603fb580814452d/src/huffman.rs#L217
+        //https://github.com/jpeg-js/jpeg-js/blob/master/lib/decoder.js#L59
         //To investigate further, the original code is here:
+        //https://github.com/SixLabors/ImageSharp/blob/main/src/ImageSharp/Formats/Jpeg/Components/Decoder/HuffmanTable.cs
+        //Which is very similar to the libjpeg-turbo code here:
         //https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/src/jdhuff.c#L143
 
         var codeLengths = huffmanTable.ToSpan().Slice(0, HuffmanTable.Length + HuffmanTable.CodeLength);
