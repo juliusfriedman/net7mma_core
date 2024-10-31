@@ -266,7 +266,7 @@ internal class HuffmanScan : Scan
     {
         using var writer = new BitWriter(outputStream, Environment.ProcessorCount * Environment.ProcessorCount);
 
-        var imageData = jpegImage.Data;
+        var imageData = jpegImage.JpegState.ScanData;
 
         var offset = 0;
 
