@@ -278,10 +278,8 @@ internal class HuffmanScan : Scan
 
             if (component is null)
             {
-                var jpegComponent = new Component((byte)(i == 0 ? 0 : 1), mediaComponent.Id, mediaComponent.Size);
-                mediaComponent = jpegComponent;
-                jpegImage.ImageFormat.Components[i] = mediaComponent;
-                component = jpegComponent;
+                component = new Component((byte)(i == 0 ? 0 : 1), mediaComponent.Id, mediaComponent.Size);
+                jpegImage.ImageFormat.Components[i] = component;
             }
 
             var acTable = jpegImage.JpegState.GetHuffmanTable(0, component.Taj);
@@ -307,10 +305,10 @@ internal class HuffmanScan : Scan
         BitWriter writer)
     {
         WriteDc(component, block, dcTable, writer);
-        WriteAcBlock(block, 1, BlockSize * BlockSize, acTable, writer);
+        WriteAcBlock(block, 1, 64, acTable, writer);
     }
 
-    private void WriteRestart(int restartInterval, Stream output)
+    private static void WriteRestart(int restartInterval, Stream output)
     {
         using var dri = new RestartInterval(restartInterval);
         JpegCodec.WriteMarker(output, dri);
@@ -335,7 +333,6 @@ internal class HuffmanScan : Scan
         HuffmanTable acTable,
         BitWriter writer)
     {
-
         int runLength = 0;
         ref short blockRef = ref Unsafe.As<byte, short>(ref block.Array[block.Offset]);
         for (nint zig = start; zig < end; zig++)
