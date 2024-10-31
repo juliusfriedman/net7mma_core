@@ -99,31 +99,15 @@ internal class HuffmanScan : Scan
 
     internal static readonly double SqrtHalf = 1.0 / Math.Sqrt(2.0);
 
-    /// <summary>
-    /// Calculates how many minimum bits needed to store given value for Huffman jpeg encoding.
-    /// </summary>
-    /// <remarks>
-    /// This is an internal operation supposed to be used only in <see cref="HuffmanScanEncoder"/> class for jpeg encoding.
-    /// </remarks>
-    /// <param name="value">The value.</param>
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    internal static int GetHuffmanEncodingLength(uint value)
-    {
-        // This should have been implemented as (BitOperations.Log2(value) + 1) as in non-intrinsic implementation
-        // But internal log2 is implemented like this: (31 - (int)Lzcnt.LeadingZeroCount(value))
-
-        // BitOperations.Log2 implementation also checks if input value is zero for the convention 0->0
-        // Lzcnt would return 32 for input value of 0 - no need to check that with branching
-        // Fallback code if Lzcnt is not supported still use if-check
-        // But most modern CPUs support this instruction so this should not be a problem
-        return 32 - BitOperations.LeadingZeroCount(value);
-    }
-
     #endregion
+
+    #region Constructor
 
     public HuffmanScan() : base()
     {
     }
+
+    #endregion
 
     #region Fields
 
@@ -266,12 +250,13 @@ internal class HuffmanScan : Scan
     {
         using var writer = new BitWriter(outputStream, Environment.ProcessorCount * Environment.ProcessorCount);
 
-        var imageData = jpegImage.JpegState.ScanData;
+        var imageData = jpegImage.JpegState.ScanData ?? jpegImage.Data;
 
         var offset = 0;
 
         for (var i = 0; i < jpegImage.ImageFormat.Components.Length; ++i)
         {
+            //Components should be created in Initialize scan or from reading the file.
             var mediaComponent = jpegImage.ImageFormat.Components[i];
 
             var component = mediaComponent as Component;
@@ -414,6 +399,26 @@ internal class HuffmanScan : Scan
     private static void Emit(uint bits, int count, BitWriter output)
     {
         output.WriteBits(count, bits);
+    }
+
+    /// <summary>
+    /// Calculates how many minimum bits needed to store given value for Huffman jpeg encoding.
+    /// </summary>
+    /// <remarks>
+    /// This is an internal operation supposed to be used only in <see cref="HuffmanScanEncoder"/> class for jpeg encoding.
+    /// </remarks>
+    /// <param name="value">The value.</param>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    internal static int GetHuffmanEncodingLength(uint value)
+    {
+        // This should have been implemented as (BitOperations.Log2(value) + 1) as in non-intrinsic implementation
+        // But internal log2 is implemented like this: (31 - (int)Lzcnt.LeadingZeroCount(value))
+
+        // BitOperations.Log2 implementation also checks if input value is zero for the convention 0->0
+        // Lzcnt would return 32 for input value of 0 - no need to check that with branching
+        // Fallback code if Lzcnt is not supported still use if-check
+        // But most modern CPUs support this instruction so this should not be a problem
+        return 32 - BitOperations.LeadingZeroCount(value);
     }
 
     #endregion

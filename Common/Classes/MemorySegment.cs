@@ -429,6 +429,12 @@ namespace Media.Common
             return Common.IDisposedExtensions.IsNullOrDisposed(other) is false && Common.IDisposedExtensions.IsNullOrDisposed(this) is false && other.GetHashCode() == GetHashCode();
         }
 
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public ref byte GetReference(int offset)
+        {
+            return ref m_Array[m_Offset + offset];
+        }
+
         #region Operators
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

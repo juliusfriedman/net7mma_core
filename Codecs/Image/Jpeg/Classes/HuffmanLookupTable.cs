@@ -77,7 +77,7 @@ internal class HuffmanLookupTable
         //Which is very similar to the libjpeg-turbo code here:
         //https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/src/jdhuff.c#L143
 
-        //Use the workaround... not sure how this is physically possible but it seems to work
+        //Use the workaround... not sure how this is physically possible but it seems to `work`
         var codeLengths = huffmanTable.ToSpan().Slice(0, HuffmanTable.Length + HuffmanTable.CodeLength);
 
         using var values = huffmanTable.Vi;
@@ -85,7 +85,7 @@ internal class HuffmanLookupTable
         var workspaceSpan = Workspace.ToSpan();
         var workspace = MemoryMarshal.Cast<byte, uint>(workspaceSpan);
 
-        Unsafe.CopyBlockUnaligned(ref Values[0], ref values.Array[values.Offset], (uint)values.Count);
+        Unsafe.CopyBlockUnaligned(ref Values[0], ref values.GetReference(0), (uint)values.Count);
 
         // Generate codes
         uint code = 0;

@@ -337,65 +337,65 @@ internal class Block : MemorySegment
     public Vector256<float> V0f
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<float>>(ref Array[Offset]);
+        get => Unsafe.ReadUnaligned<Vector256<float>>(ref GetReference(0));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset], value);
+        set => Unsafe.WriteUnaligned(ref GetReference(0), value);
     }
     
     public Vector256<float> V1f
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<float>>(ref Array[Offset + 32]);
+        get => Unsafe.ReadUnaligned<Vector256<float>>(ref GetReference(32));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 32], value);
+        set => Unsafe.WriteUnaligned(ref GetReference(32), value);
     }
     
     public Vector256<float> V2f 
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<float>>(ref Array[Offset + 64]);
+        get => Unsafe.ReadUnaligned<Vector256<float>>(ref GetReference(64));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 64], value);
+        set => Unsafe.WriteUnaligned(ref GetReference(64), value);
     }
     
     public Vector256<float> V3f
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<float>>(ref Array[Offset + 96]);
+        get => Unsafe.ReadUnaligned<Vector256<float>>(ref GetReference(96));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 96], value);
+        set => Unsafe.WriteUnaligned(ref GetReference(96), value);
     }
     
     public Vector256<float> V4f
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<float>>(ref Array[Offset + 128]);
+        get => Unsafe.ReadUnaligned<Vector256<float>>(ref GetReference(128));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 128], value);
+        set => Unsafe.WriteUnaligned(ref GetReference(128), value);
     }
     
     public Vector256<float> V5f
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<float>>(ref Array[Offset + 160]);
+        get => Unsafe.ReadUnaligned<Vector256<float>>(ref GetReference(160));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 160], value);
+        set => Unsafe.WriteUnaligned(ref GetReference(160), value);
     }
     
     public Vector256<float> V6f
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<float>>(ref Array[Offset + 192]);
+        get => Unsafe.ReadUnaligned<Vector256<float>>(ref GetReference(192));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 192], value);
+        set => Unsafe.WriteUnaligned(ref GetReference(192), value);
     }
     
     public Vector256<float> V7f
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<float>>(ref Array[Offset + 224]);
+        get => Unsafe.ReadUnaligned<Vector256<float>>(ref GetReference(224));
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 224], value);
+        set => Unsafe.WriteUnaligned(ref GetReference(224), value);
     }
 
     #endregion
