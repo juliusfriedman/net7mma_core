@@ -4,6 +4,8 @@ namespace Media.Codec.Jpeg.Classes;
 
 internal abstract class Scan
 {
+    //Todo should scan hold memory or jpegState?
+
     protected Scan()
     {
     }

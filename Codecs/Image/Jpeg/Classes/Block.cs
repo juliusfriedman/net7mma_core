@@ -1,5 +1,6 @@
 ﻿using Media.Common;
 using System;
+using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -695,6 +696,64 @@ internal class Block : MemorySegment
 
     #region Methods
 
+    /// <summary>
+    /// Returns index of the last non-zero element in given matrix.
+    /// </summary>
+    /// <returns>
+    /// Index of the last non-zero element. Returns -1 if all elements are equal to zero.
+    /// </returns>
+    public nint GetLastNonZeroIndex()
+    {
+        if (Avx2.IsSupported)
+        {
+            const int equalityMask = unchecked((int)0b1111_1111_1111_1111_1111_1111_1111_1111);
+
+            Vector256<short> zero16 = Vector256<short>.Zero;
+
+            ref Vector256<short> mcuStride = ref Unsafe.As<byte, Vector256<short>>(ref Array[Offset]);
+
+            for (nint i = 3; i >= 0; i--)
+            {
+                int areEqual = Avx2.MoveMask(Avx2.CompareEqual(Unsafe.Add(ref mcuStride, i), zero16).AsByte());
+
+                if (areEqual != equalityMask)
+                {
+                    // Each 2 bits represents comparison operation for each 2-byte element in input vectors
+                    // LSB represents first element in the stride
+                    // MSB represents last element in the stride
+                    // lzcnt operation would calculate number of zero numbers at the end
+
+                    // Given mask is not actually suitable for lzcnt as 1's represent zero elements and 0's represent non-zero elements
+                    // So we need to invert it
+                    uint lzcnt = (uint)BitOperations.LeadingZeroCount(~(uint)areEqual);
+
+                    // As input number is represented by 2 bits in the mask, we need to divide lzcnt result by 2
+                    // to get the exact number of zero elements in the stride
+                    uint strideRelativeIndex = 15 - (lzcnt / 2);
+                    return (i * 16) + (nint)strideRelativeIndex;
+                }
+            }
+
+            return -1;
+        }
+        else
+        {
+            nint index = ShortLength - 1;
+            ref short elemRef = ref Unsafe.As<byte, short>(ref Array[Offset]);
+
+            while (index >= 0 && Unsafe.Add(ref elemRef, index) == 0)
+            {
+                index--;
+            }
+
+            return index;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="maximum"></param>
     public void NormalizeColorsAndRoundInPlaceVector8(float maximum)
     {
         var off = new Vector<float>(MathF.Ceiling(maximum * 0.5F));
@@ -895,12 +954,12 @@ internal class Block : MemorySegment
         if (Avx2.IsSupported)
         {
             MultiplyIntoInt16_Avx2(block, qt, dest);
-            //ZigZag.ApplyTransposingZigZagOrderingAvx2(ref dest);
+            ZigZag.ApplyTransposingZigZagOrderingAvx2(dest);
         }
         else if (Ssse3.IsSupported)
         {
             MultiplyIntoInt16_Sse2(block, qt, dest);
-            //ZigZag.ApplyTransposingZigZagOrderingSsse3(ref dest);
+            ZigZag.ApplyTransposingZigZagOrderingSsse3(dest);
         }
         else
         {
