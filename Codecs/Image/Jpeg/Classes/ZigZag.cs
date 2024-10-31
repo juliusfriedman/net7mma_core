@@ -6,6 +6,9 @@ using System.Runtime.CompilerServices;
 
 namespace Media.Codec.Jpeg.Classes;
 
+/// <summary>
+/// 
+/// </summary>
 internal class ZigZag
 {
     /// <summary>
