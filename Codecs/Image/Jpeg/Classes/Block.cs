@@ -25,6 +25,11 @@ internal class Block : MemorySegment
     public const int DefaultSize = JpegCodec.BlockSize * JpegCodec.BlockSize;
 
     /// <summary>
+    /// A number of rows of 8 scalar coefficients each in <see cref="Block8x8F"/>
+    /// </summary>
+    public const int RowCount = 8;
+
+    /// <summary>
     /// Gets a value indicating whether <see cref="Vector{T}"/> code is being JIT-ed to AVX2 instructions
     /// where both float and integer registers are of size 256 byte.
     /// </summary>
@@ -695,6 +700,238 @@ internal class Block : MemorySegment
     #endregion
 
     #region Methods
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public void LoadFrom(Block source)
+    {
+        if (HasVector8)
+        {
+            LoadFromInt16ExtendedAvx2(source);
+            return;
+        }
+
+        LoadFromInt16Scalar(source);
+    }
+
+    public void LoadFromInt16Scalar(Block source)
+    {
+        ref short selfRef = ref Unsafe.As<byte, short>(ref source.Array[Offset]);
+
+        Vector4 stack = V0L;
+
+        stack.X = Unsafe.Add(ref selfRef, 0);
+        stack.Y = Unsafe.Add(ref selfRef, 1);
+        stack.Z = Unsafe.Add(ref selfRef, 2);
+        stack.W = Unsafe.Add(ref selfRef, 3);
+
+        V0L = stack;
+
+        stack = V0R;
+
+        stack.X = Unsafe.Add(ref selfRef, 4);
+        stack.Y = Unsafe.Add(ref selfRef, 5);
+        stack.Z = Unsafe.Add(ref selfRef, 6);
+        stack.W = Unsafe.Add(ref selfRef, 7);
+
+        V0R = stack;
+
+        stack = V1L;
+
+        stack.X = Unsafe.Add(ref selfRef, 8);
+        stack.Y = Unsafe.Add(ref selfRef, 9);
+        stack.Z = Unsafe.Add(ref selfRef, 10);
+        stack.W = Unsafe.Add(ref selfRef, 11);
+        
+        V1L = stack;
+
+        stack = V1R;
+
+        stack.X = Unsafe.Add(ref selfRef, 12);
+        stack.Y = Unsafe.Add(ref selfRef, 13);
+        stack.Z = Unsafe.Add(ref selfRef, 14);
+        stack.W = Unsafe.Add(ref selfRef, 15);
+
+        V1R = stack;
+
+        stack = V2L;
+
+        stack.X = Unsafe.Add(ref selfRef, 16);
+        stack.Y = Unsafe.Add(ref selfRef, 17);
+        stack.Z = Unsafe.Add(ref selfRef, 18);
+        stack.W = Unsafe.Add(ref selfRef, 19);
+
+        V2L = stack;
+
+        stack = V2R;
+
+        stack.X = Unsafe.Add(ref selfRef, 20);
+        stack.Y = Unsafe.Add(ref selfRef, 21);
+        stack.Z = Unsafe.Add(ref selfRef, 22);
+        stack.W = Unsafe.Add(ref selfRef, 23);
+
+        V2R = stack;
+
+        stack = V3L;
+
+        stack.X = Unsafe.Add(ref selfRef, 24);
+        stack.Y = Unsafe.Add(ref selfRef, 25);
+        stack.Z = Unsafe.Add(ref selfRef, 26);
+        stack.W = Unsafe.Add(ref selfRef, 27);
+
+        V3L = stack;
+
+        stack = V3R;
+
+        stack.X = Unsafe.Add(ref selfRef, 28);
+        stack.Y = Unsafe.Add(ref selfRef, 29);
+        stack.Z = Unsafe.Add(ref selfRef, 30);
+        stack.W = Unsafe.Add(ref selfRef, 31);
+
+        V3R = stack;
+
+        stack = V4L;
+
+        stack.X = Unsafe.Add(ref selfRef, 32);
+        stack.Y = Unsafe.Add(ref selfRef, 33);
+        stack.Z = Unsafe.Add(ref selfRef, 34);
+        stack.W = Unsafe.Add(ref selfRef, 35);
+
+        V4L = stack;
+
+        stack = V4R;
+
+        stack.X = Unsafe.Add(ref selfRef, 36);
+        stack.Y = Unsafe.Add(ref selfRef, 37);
+        stack.Z = Unsafe.Add(ref selfRef, 38);
+        stack.W = Unsafe.Add(ref selfRef, 39);
+
+        V4R = stack;
+
+        stack = V5L;
+
+        stack.X = Unsafe.Add(ref selfRef, 40);
+        stack.Y = Unsafe.Add(ref selfRef, 41);
+        stack.Z = Unsafe.Add(ref selfRef, 42);
+        stack.W = Unsafe.Add(ref selfRef, 43);
+
+        V5L = stack;
+
+        stack = V5R;
+
+        stack.X = Unsafe.Add(ref selfRef, 44);
+        stack.Y = Unsafe.Add(ref selfRef, 45);
+        stack.Z = Unsafe.Add(ref selfRef, 46);
+        stack.W = Unsafe.Add(ref selfRef, 47);
+
+        V5R = stack;
+
+        stack = V6L;
+
+        stack.X = Unsafe.Add(ref selfRef, 48);
+        stack.Y = Unsafe.Add(ref selfRef, 49);
+        stack.Z = Unsafe.Add(ref selfRef, 50);
+        stack.W = Unsafe.Add(ref selfRef, 51);
+
+        V6L = stack;
+
+        stack = V6R;
+
+        stack.X = Unsafe.Add(ref selfRef, 52);
+        stack.Y = Unsafe.Add(ref selfRef, 53);
+        stack.Z = Unsafe.Add(ref selfRef, 54);
+        stack.W = Unsafe.Add(ref selfRef, 55);
+
+        V6R = stack;
+
+        stack = V7L;
+
+        stack.X = Unsafe.Add(ref selfRef, 56);
+        stack.Y = Unsafe.Add(ref selfRef, 57);
+        stack.Z = Unsafe.Add(ref selfRef, 58);
+        stack.W = Unsafe.Add(ref selfRef, 59);
+
+        V7L = stack;
+
+        stack = V7R;
+
+        stack.X = Unsafe.Add(ref selfRef, 60);
+        stack.Y = Unsafe.Add(ref selfRef, 61);
+        stack.Z = Unsafe.Add(ref selfRef, 62);
+        stack.W = Unsafe.Add(ref selfRef, 63);
+
+        V7R = stack;
+    }
+
+    /// <summary>
+    /// Loads values from <paramref name="source"/> using extended AVX2 intrinsics.
+    /// </summary>
+    /// <param name="source">The source <see cref="Block8x8"/></param>
+    public void LoadFromInt16ExtendedAvx2(Block source)
+    {
+        ref short sRef = ref Unsafe.As<byte, short>(ref Array[Offset]);
+        ref Vector256<float> dRef = ref Unsafe.As<byte, Vector256<float>>(ref Array[Offset]);
+
+        // Vector256<ushort>.Count == 16 on AVX2
+        // We can process 2 block rows in a single step
+        Vector256<int> top = Avx2.ConvertToVector256Int32(Vector128.LoadUnsafe(ref sRef));
+        Vector256<int> bottom = Avx2.ConvertToVector256Int32(Vector128.LoadUnsafe(ref sRef, (nuint)Vector256<int>.Count));
+        dRef = Avx.ConvertToVector256Single(top);
+        Unsafe.Add(ref dRef, 1) = Avx.ConvertToVector256Single(bottom);
+
+        top = Avx2.ConvertToVector256Int32(Vector128.LoadUnsafe(ref sRef, (nuint)(Vector256<int>.Count * 2)));
+        bottom = Avx2.ConvertToVector256Int32(Vector128.LoadUnsafe(ref sRef, (nuint)(Vector256<int>.Count * 3)));
+        Unsafe.Add(ref dRef, 2) = Avx.ConvertToVector256Single(top);
+        Unsafe.Add(ref dRef, 3) = Avx.ConvertToVector256Single(bottom);
+
+        top = Avx2.ConvertToVector256Int32(Vector128.LoadUnsafe(ref sRef, (nuint)(Vector256<int>.Count * 4)));
+        bottom = Avx2.ConvertToVector256Int32(Vector128.LoadUnsafe(ref sRef, (nuint)(Vector256<int>.Count * 5)));
+        Unsafe.Add(ref dRef, 4) = Avx.ConvertToVector256Single(top);
+        Unsafe.Add(ref dRef, 5) = Avx.ConvertToVector256Single(bottom);
+
+        top = Avx2.ConvertToVector256Int32(Vector128.LoadUnsafe(ref sRef, (nuint)(Vector256<int>.Count * 6)));
+        bottom = Avx2.ConvertToVector256Int32(Vector128.LoadUnsafe(ref sRef, (nuint)(Vector256<int>.Count * 7)));
+        Unsafe.Add(ref dRef, 6) = Avx.ConvertToVector256Single(top);
+        Unsafe.Add(ref dRef, 7) = Avx.ConvertToVector256Single(bottom);
+    }
+
+    /// <summary>
+    /// Compares entire 8x8 block to a single scalar value.
+    /// </summary>
+    /// <param name="value">Value to compare to.</param>
+    public bool EqualsToScalar(int value)
+    {
+        if (Avx2.IsSupported)
+        {
+            const int equalityMask = unchecked((int)0b1111_1111_1111_1111_1111_1111_1111_1111);
+
+            Vector256<int> targetVector = Vector256.Create(value);
+            Vector256<float> v0f = V0f;
+            ref Vector256<float> blockStride = ref v0f;
+
+            for (nuint i = 0; i < RowCount; i++)
+            {
+                Vector256<int> areEqual = Avx2.CompareEqual(Avx.ConvertToVector256Int32WithTruncation(Unsafe.Add(ref v0f, i)), targetVector);
+                if (Avx2.MoveMask(areEqual.AsByte()) != equalityMask)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        ref float scalars = ref Unsafe.As<byte, float>(ref Array[Offset]);
+
+        for (nuint i = 0, e = (nuint)FloatLength; i < e; i++)
+        {
+            if ((int)Unsafe.Add(ref scalars, i) != value)
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     /// <summary>
     /// Returns index of the last non-zero element in given matrix.

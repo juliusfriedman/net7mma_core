@@ -14,10 +14,12 @@ namespace Codec.Jpeg.Classes;
 /// </summary>
 internal class HuffmanLookupTable
 {
+    #region Fields
+
     /// <summary>
     /// Memory segment used for temporary storage.
     /// </summary>
-    private static readonly MemorySegment Workspace = new MemorySegment(new byte[HuffmanTable.CodeLength + 256 + 256 * Binary.BytesPerInteger]);
+    public readonly MemorySegment Workspace = new MemorySegment(new byte[HuffmanTable.CodeLength + 256 + 256 * Binary.BytesPerInteger]);
 
     /// <summary>
     /// Derived from the DHT marker. Contains the symbols, in order of incremental code length.
@@ -52,6 +54,8 @@ internal class HuffmanLookupTable
     /// if too long.  The next 8 bits of each entry contain the symbol.
     /// </summary>
     public readonly byte[] LookaheadValue = new byte[HuffmanScan.LookupSize];
+
+    #endregion
 
     /// <summary>
     /// Constructs a <see cref="HuffmanLookupTable"/>
@@ -126,8 +130,10 @@ internal class HuffmanLookupTable
         ref byte lookupSizeRef = ref LookaheadSize[0];
         Unsafe.InitBlockUnaligned(ref lookupSizeRef, HuffmanScan.SlowBits, HuffmanScan.LookupSize);
 
+        //Todo fix this, it doesn't seem to work correctly when codeLengths are adjusted to be exactly 16 bytes.
+
         p = 0;
-        for (int length = 0; length < HuffmanScan.LookupBits; length++)
+        for (int length = 0; length <= HuffmanScan.LookupBits; length++)
         {
             int jShift = HuffmanScan.LookupBits - length;
             for (int i = 0, e = codeLengths[length]; i < e; i++, p++)
