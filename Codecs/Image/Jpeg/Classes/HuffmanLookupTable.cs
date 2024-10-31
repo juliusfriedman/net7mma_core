@@ -91,7 +91,7 @@ internal class HuffmanLookupTable
             // but it must still fit in 'si' bits since no huffman code can be equal to all 1s
             // if last code is all ones, e.g. 1111(1), then incrementing it by 1 would yield
             // a new code which occupies one extra bit, e.g. 1111(1) +1 => (1)1111(0)
-            if (code >= (1 << si))
+            if (code > (1 << si))
             {
                 throw new InvalidDataException("Bad huffman table.");
             }
@@ -132,22 +132,22 @@ internal class HuffmanLookupTable
 
         //Todo fix this, it doesn't seem to work correctly when codeLengths are adjusted to be exactly 16 bytes.
 
-        p = 0;
-        for (int length = 0; length <= HuffmanScan.LookupBits; length++)
-        {
-            int jShift = HuffmanScan.LookupBits - length;
-            for (int i = 0, e = codeLengths[length]; i < e; i++, p++)
-            {
-                // length = current code's length, p = its index in huffCode[] & Values[].
-                // Generate left-justified code followed by all possible bit sequences
-                int lookBits = (int)(workspace[p] << jShift);
-                for (int ctr = 1 << (HuffmanScan.LookupBits - length); ctr > 0; --ctr)
-                {
-                    LookaheadSize[lookBits] = (byte)length;
-                    LookaheadValue[lookBits] = Values[p];
-                    lookBits++;
-                }
-            }
-        }
+        //p = 0;
+        //for (int length = 0; length <= HuffmanScan.LookupBits; length++)
+        //{
+        //    int jShift = HuffmanScan.LookupBits - length;
+        //    for (int i = 0, e = codeLengths[length]; i < e; i++, p++)
+        //    {
+        //        // length = current code's length, p = its index in huffCode[] & Values[].
+        //        // Generate left-justified code followed by all possible bit sequences
+        //        int lookBits = (int)(workspace[p] << jShift);
+        //        for (int ctr = 1 << (HuffmanScan.LookupBits - length); ctr > 0; --ctr)
+        //        {
+        //            LookaheadSize[lookBits] = (byte)length;
+        //            LookaheadValue[lookBits] = Values[p];
+        //            lookBits++;
+        //        }
+        //    }
+        //}
     }
 }
