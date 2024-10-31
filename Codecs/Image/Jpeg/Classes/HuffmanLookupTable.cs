@@ -24,7 +24,7 @@ internal class HuffmanLookupTable
     /// <summary>
     /// Derived from the DHT marker. Contains the symbols, in order of incremental code length.
     /// </summary>
-    public readonly byte[] Values = new byte[256];
+    public readonly byte[] Values = new byte[257];
 
     /// <summary>
     /// Contains the largest code of length k (0 if none). MaxCode[17] is a sentinel to ensure <see cref="DecodeHuffman"/> terminates.
@@ -36,7 +36,7 @@ internal class HuffmanLookupTable
     /// k, less the smallest code of length k; so given a code of length k, the corresponding symbol is
     /// Values[code + ValOffset[k]].
     /// </summary>
-    public readonly int[] ValOffset = new int[19];
+    public readonly int[] ValOffset = new int[18];
 
     /// <summary>
     /// Contains the length of bits for the given k value.
@@ -119,7 +119,7 @@ internal class HuffmanLookupTable
             }
         }
 
-        ValOffset[18] = 0;
+        ValOffset[17] = 0;
         MaxCode[17] = ulong.MaxValue; // Ensures huff decode terminates
 
         // Compute lookahead tables to speed up decoding.
@@ -131,6 +131,8 @@ internal class HuffmanLookupTable
         Unsafe.InitBlockUnaligned(ref lookupSizeRef, HuffmanScan.SlowBits, HuffmanScan.LookupSize);
 
         //Todo fix this, it doesn't seem to work correctly when codeLengths are adjusted to be exactly 16 bytes.
+        //Most implementations use 1 as the starting value for the loops but the memory here is 0 based.
+        //Until fixed decoding time will suffer.
 
         //p = 0;
         //for (int length = 0; length <= HuffmanScan.LookupBits; length++)
