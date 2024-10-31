@@ -134,7 +134,7 @@ internal class HuffmanLookupTable
             }
         }
 
-        ValOffset[18] = 0;
+        ValOffset[18] = 0; //LibJpeg-turbo does this, but it sets index 17 to 0, not 18
         MaxCode[17] = ulong.MaxValue; // Ensures huff decode terminates
 
         // Compute lookahead tables to speed up decoding.
