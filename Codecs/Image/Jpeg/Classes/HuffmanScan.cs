@@ -289,7 +289,7 @@ internal class HuffmanScan : Scan
             if (acTable == null || dcTable == null)
                 continue;
 
-            using var slice = imageData.Slice(offset, Block.DefaultSize);
+            using var slice = imageData.Slice(offset, Binary.Min(imageData.Count, Block.DefaultSize));
 
             using var block = new Block(slice);
 
@@ -320,9 +320,10 @@ internal class HuffmanScan : Scan
        HuffmanTable dcTable,
        BitWriter writer)
     {
+        var lookupTable = new HuffmanLookupTable(dcTable);
         // Emit the DC delta.
         int dc = block[0];
-        EmitHuffRLE(dcTable, 0, dc - component.DcPredictor, writer);
+        EmitHuffRLE(lookupTable, 0, dc - component.DcPredictor, writer);
         component.DcPredictor = dc;
     }
 
@@ -333,6 +334,7 @@ internal class HuffmanScan : Scan
         HuffmanTable acTable,
         BitWriter writer)
     {
+        var lookupTable = new HuffmanLookupTable(acTable);
         int runLength = 0;
         ref short blockRef = ref Unsafe.As<byte, short>(ref block.Array[block.Offset]);
         for (nint zig = start; zig < end; zig++)
@@ -349,11 +351,11 @@ internal class HuffmanScan : Scan
             {
                 while (runLength >= zeroRun16)
                 {
-                    EmitHuff(acTable, 0xf0, writer);
+                    EmitHuff(lookupTable, 0xf0, writer);
                     runLength -= zeroRun16;
                 }
 
-                EmitHuffRLE(acTable, runLength, ac, writer);
+                EmitHuffRLE(lookupTable, runLength, ac, writer);
                 runLength = 0;
             }
         }
@@ -361,7 +363,7 @@ internal class HuffmanScan : Scan
         // if mcu block contains trailing zeros - we must write end of block (EOB) value indicating that current block is over
         if (runLength > 0)
         {
-            EmitHuff(acTable, 0x00, writer);
+            EmitHuff(lookupTable, 0x00, writer);
         }
     }
 
@@ -372,14 +374,13 @@ internal class HuffmanScan : Scan
     /// <param name="value">Value to encode.</param>
     /// <param name="output">Output bit writer.</param>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private void EmitHuff(HuffmanTable table, int value, BitWriter output)
+    private void EmitHuff(HuffmanLookupTable table, int value, BitWriter output)
     {
-        using var vi = table.Vi;
-        int x = vi[value];
+        int x = table.Values[value];
         Emit((uint)x & 0xffff_ff00u, x & 0xff, output);
     }
 
-    private void EmitHuffRLE(HuffmanTable table, int runLength, int value, BitWriter writer)
+    private void EmitHuffRLE(HuffmanLookupTable table, int runLength, int value, BitWriter writer)
     {
         int a = value;
         int b = value;
@@ -392,7 +393,7 @@ internal class HuffmanScan : Scan
         int valueLen = GetHuffmanEncodingLength((uint)a);
 
         // Huffman prefix code
-        int huffPackage = table[runLength | valueLen];
+        int huffPackage = table.Values[runLength | valueLen];
         int prefixLen = huffPackage & 0xff;
         uint prefix = (uint)huffPackage & 0xffff_0000u;
 

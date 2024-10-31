@@ -262,8 +262,7 @@ public class JpegImage : Image
         JpegCodec.WriteStartOfScan(this, stream);
 
         //Todo need to ensure that we have option to write scandata...
-        //&& JpegState.ScanData == null
-        if (Markers != null)
+        if (Markers != null && JpegState.ScanData == null)
         {
             // Write the compressed image data to the stream
             stream.Write(Data.Array, Data.Offset, Data.Count);
