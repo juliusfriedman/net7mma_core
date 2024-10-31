@@ -55,6 +55,12 @@ internal class HuffmanLookupTable
     /// </summary>
     public readonly byte[] LookaheadValue = new byte[HuffmanScan.LookupSize];
 
+    /// <summary>
+    /// Bits[k] = # of symbols with codes of length k bits.
+    /// Bits[0] is unused 
+    /// </summary>
+    public readonly byte[] Bits = new byte[17];
+
     #endregion
 
     /// <summary>
@@ -64,28 +70,17 @@ internal class HuffmanLookupTable
     /// <exception cref="InvalidDataException"></exception>
     public HuffmanLookupTable(HuffmanTable huffmanTable)
     {
-        //Using the raw codeLengths seems to cause some strange issue with the decoding...
-        //To make the logic `work` can take huffmanTable.ToSpan().Slice(0, HuffmanTable.Length + HuffmanTable.CodeLength) and use that instead
-        //using var codeLengths = huffmanTable.Li;
-
-        //Neither the rust or stb implementations seem to use the extra byte for the code lengths
-        //https://github.com/nothings/stb/blob/ea2f937a01ce39795ab02b6c6e30173b4f1ed46c/stb_image.h#L1942
-        //https://github.com/image-rs/jpeg-decoder/blob/ab6d326a7b194568725731a19603fb580814452d/src/huffman.rs#L217
-        //https://github.com/jpeg-js/jpeg-js/blob/master/lib/decoder.js#L59
-        //To investigate further, the original code is here:
-        //https://github.com/SixLabors/ImageSharp/blob/main/src/ImageSharp/Formats/Jpeg/Components/Decoder/HuffmanTable.cs
-        //Which is very similar to the libjpeg-turbo code here:
-        //https://github.com/libjpeg-turbo/libjpeg-turbo/blob/main/src/jdhuff.c#L143
-
-        //Use the workaround... not sure how this is physically possible but it seems to `work`
-        var codeLengths = huffmanTable.ToSpan().Slice(0, HuffmanTable.Length + HuffmanTable.CodeLength);
-
+        using var codeLengths = huffmanTable.Li;
         using var values = huffmanTable.Vi;
 
         var workspaceSpan = Workspace.ToSpan();
         var workspace = MemoryMarshal.Cast<byte, uint>(workspaceSpan);
 
+        //Copy the values
         Unsafe.CopyBlockUnaligned(ref Values[0], ref values.GetReference(0), (uint)values.Count);
+
+        //Copy the code lengths
+        Unsafe.CopyBlockUnaligned(ref Bits[1], ref codeLengths.GetReference(0), (uint)codeLengths.Count);
 
         // Generate codes
         uint code = 0;
@@ -93,7 +88,7 @@ internal class HuffmanLookupTable
         int p = 0;
         for (int i = 1; i <= HuffmanTable.CodeLength; i++)
         {
-            int count = codeLengths[i];
+            int count = Bits[i];
             for (int j = 0; j < count; j++)
             {
                 workspace[p++] = code;
@@ -119,7 +114,7 @@ internal class HuffmanLookupTable
         p = 0;
         for (int j = 1; j <= HuffmanTable.CodeLength; j++)
         {
-            var codeLength = codeLengths[j];
+            var codeLength = Bits[j];
             if (codeLength != 0)
             {
                 ValOffset[j] = p - (int)workspace[p];
@@ -149,7 +144,7 @@ internal class HuffmanLookupTable
         for (int length = 1; length < HuffmanScan.SlowBits; length++)
         {
             int jShift = HuffmanScan.LookupBits - length;
-            for (int i = 1, e = codeLengths[length]; i <= e; i++, p++)
+            for (int i = 1, e = Bits[length]; i <= e; i++, p++)
             {
                 // length = current code's length, p = its index in huffCode[] & Values[].
                 // Generate left-justified code followed by all possible bit sequences
