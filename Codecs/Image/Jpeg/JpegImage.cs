@@ -136,8 +136,7 @@ public class JpegImage : Image
                     {
                         var jpegComponent = mediaComponents[i];
 
-                        jpegState.McusPerLine = (int)Binary.DivideCeil((uint)width, (uint)jpegState.MaximumHorizontalSamplingFactor * JpegCodec.BlockSize);
-                        jpegState.McusPerColumn = (int)Binary.DivideCeil((uint)height, (uint)jpegState.MaximumVerticalSamplingFactor * JpegCodec.BlockSize);
+                        jpegState.BlocksPerMcu += jpegComponent.HorizontalSamplingFactor * jpegComponent.VerticalSamplingFactor;                       
 
                         uint widthInBlocks = ((uint)width + 7) / JpegCodec.BlockSize;
                         uint heightInBlocks = ((uint)height + 7) / JpegCodec.BlockSize;
@@ -151,6 +150,7 @@ public class JpegImage : Image
                         int blocksPerLineForMcu = jpegState.McusPerLine * jpegComponent.HorizontalSamplingFactor;
                         int blocksPerColumnForMcu = jpegState.McusPerColumn * jpegComponent.VerticalSamplingFactor;
                         jpegComponent.SizeInBlocks = new Size(blocksPerLineForMcu, blocksPerColumnForMcu);
+
                         jpegComponent.SamplingFactors = new Size(jpegComponent.HorizontalSamplingFactor, jpegComponent.VerticalSamplingFactor);
 
                         jpegComponent.SubSamplingDivisors = new Size(jpegState.MaximumHorizontalSamplingFactor, jpegState.MaximumVerticalSamplingFactor) / jpegComponent.SamplingFactors;
@@ -160,6 +160,10 @@ public class JpegImage : Image
                             throw new InvalidDataException("Bad Subsampling.");
                         }
                     }
+
+                    jpegState.McusPerLine = (int)Binary.DivideCeil((uint)width, (uint)jpegState.MaximumHorizontalSamplingFactor * JpegCodec.BlockSize);
+
+                    jpegState.McusPerColumn = (int)Binary.DivideCeil((uint)height, (uint)jpegState.MaximumVerticalSamplingFactor * JpegCodec.BlockSize);
 
                     // Create the image format based on the SOF0 data
                     imageFormat = new ImageFormat(Binary.ByteOrder.Big, DataLayout.Planar, mediaComponents);

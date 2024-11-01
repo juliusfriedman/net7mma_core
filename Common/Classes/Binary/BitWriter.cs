@@ -220,12 +220,12 @@
                 switch (m_BitOrder)
                 {
                     case Binary.BitOrder.LeastSignificant:
-                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, (ulong)(value ? 1 : 0), Common.Binary.One);
-                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, (ulong)(value ? 1 : 0), Common.Binary.One);
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, ref bitOffset, (ulong)(value ? 1 : 0), Common.Binary.One);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, ref bitOffset, (ulong)(value ? 1 : 0), Common.Binary.One);
                         return;
                     case Binary.BitOrder.MostSignificant:
-                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, (ulong)(value ? 1 : 0), Common.Binary.One);
-                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, (ulong)(value ? 1 : 0), Common.Binary.One);
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, ref bitOffset, (ulong)(value ? 1 : 0), Common.Binary.One);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, ref bitOffset, (ulong)(value ? 1 : 0), Common.Binary.One);
                         return;
                     default: throw new System.NotSupportedException("Please create an issue for your use case");
                 }
@@ -251,11 +251,11 @@
                 switch (m_BitOrder)
                 {
                     case Binary.BitOrder.LeastSignificant:
-                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, (byte)value, Common.Binary.BitsPerByte);
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, ref bitOffset, (byte)value, Common.Binary.BitsPerByte);
                         else Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, (byte)value, Common.Binary.BitsPerByte);
                         return;
                     case Binary.BitOrder.MostSignificant:
-                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, (byte)value, Common.Binary.BitsPerByte);
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, ref bitOffset, (byte)value, Common.Binary.BitsPerByte);
                         else Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, (byte)value, Common.Binary.BitsPerByte);
                         return;
                     default: throw new System.NotSupportedException("Please create an issue for your use case");
@@ -281,12 +281,12 @@
                 switch (m_BitOrder)
                 {
                     case Binary.BitOrder.LeastSignificant:
-                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, value, Common.Binary.BitsPerByte);
-                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, value, Common.Binary.BitsPerByte);
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, ref bitOffset, value, Common.Binary.BitsPerByte);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, ref bitOffset, value, Common.Binary.BitsPerByte);
                         return;
                     case Binary.BitOrder.MostSignificant:
-                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, value, Common.Binary.BitsPerByte);
-                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, value, Common.Binary.BitsPerByte);
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, ref bitOffset, value, Common.Binary.BitsPerByte);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, ref bitOffset, value, Common.Binary.BitsPerByte);
                         return;
                     default: throw new System.NotSupportedException("Please create an issue for your use case");
                 }
@@ -312,12 +312,12 @@
                 switch (m_BitOrder)
                 {
                     case Binary.BitOrder.LeastSignificant:
-                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, value, Common.Binary.BitsPerLong);
-                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, value, Common.Binary.BitsPerLong);
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, ref bitOffset, value, Common.Binary.BitsPerLong);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, ref bitOffset, value, Common.Binary.BitsPerLong);
                         return;
                     case Binary.BitOrder.MostSignificant:
-                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, value, Common.Binary.BitsPerLong);
-                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, value, Common.Binary.BitsPerLong);
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, ref bitOffset, value, Common.Binary.BitsPerLong);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, ref bitOffset, value, Common.Binary.BitsPerLong);
                         return;
                     default: throw new System.NotSupportedException("Please create an issue for your use case");
                 }
@@ -342,12 +342,12 @@
                 switch (m_BitOrder)
                 {
                     case Binary.BitOrder.LeastSignificant:
-                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, (ulong)value, Common.Binary.BitsPerLong);
-                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, (ulong)value, Common.Binary.BitsPerLong);
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, ref bitOffset, (ulong)value, Common.Binary.BitsPerLong);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, ref bitOffset, (ulong)value, Common.Binary.BitsPerLong);
                         return;
                     case Binary.BitOrder.MostSignificant:
-                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, (ulong)value, Common.Binary.BitsPerLong);
-                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, (ulong)value, Common.Binary.BitsPerLong);
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, ref bitOffset, (ulong)value, Common.Binary.BitsPerLong);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, ref bitOffset, (ulong)value, Common.Binary.BitsPerLong);
                         return;
                     default: throw new System.NotSupportedException("Please create an issue for your use case");
                 }
@@ -410,7 +410,7 @@
         /// <param name="bits"></param>
         /// <param name="val"></param>
         public void WriteBits(int bits, long val, bool reverse = false)
-        {
+        {            
             WriteBits(bits, (ulong)val, reverse);
         }
 
@@ -423,18 +423,19 @@
         [System.CLSCompliant(false)]
         public void WriteBits(int bits, ulong value, bool reverse = false)
         {
+            if (bits > Binary.BitsPerLong) throw new System.InvalidOperationException("Cannot write more than 64 bits of a 64 bit value.");
             try
             {
                 var bitOffset = Binary.BytesToBits(ref m_ByteIndex) + m_BitIndex;
                 switch (m_BitOrder)
                 {
                     case Binary.BitOrder.LeastSignificant:
-                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, value, bits);
-                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, value, bits);
+                        if (reverse) Common.Binary.WriteBitsMSB(m_ByteCache.Array, ref bitOffset, value, bits);
+                        else Common.Binary.WriteBitsLSB(m_ByteCache.Array, ref bitOffset, value, bits);
                         return;
                     case Binary.BitOrder.MostSignificant:
-                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, bitOffset, value, bits);
-                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, bitOffset, value, bits);
+                        if (reverse) Common.Binary.WriteBitsLSB(m_ByteCache.Array, ref bitOffset, value, bits);
+                        else Common.Binary.WriteBitsMSB(m_ByteCache.Array, ref bitOffset, value, bits);
                         return;
                     default: throw new System.NotSupportedException("Please create an issue for your use case");
                 }

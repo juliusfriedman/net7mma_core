@@ -48,16 +48,34 @@ internal sealed class JpegState : IEquatable<JpegState>
     public byte Precision;
 
     /// <summary>
+    /// The maximum horizontal sampling factor of all components.
     /// </summary>
     public byte MaximumHorizontalSamplingFactor;
 
     /// <summary>
+    /// The maximum vertical sampling factor of all components.
     /// </summary>
     public byte MaximumVerticalSamplingFactor;
 
+    /// <summary>
+    /// Minimum Coded Unit per line
+    /// </summary>
     public int McusPerLine;
 
+    /// <summary>
+    /// Minimum Coded Unit per column
+    /// </summary>
     public int McusPerColumn;
+
+    /// <summary>
+    /// The amount of blocks per Minimum Coded Unit.
+    /// </summary>
+    public int BlocksPerMcu;
+
+    /// <summary>
+    /// Gets the maximum color value derived from <see cref="Precision"/>.
+    /// </summary>
+    public float MaxColorChannelValue;
 
     /// <summary>
     /// Any <see cref="Segments.QuantizationTables"/> which are contained in the image.
@@ -199,6 +217,8 @@ internal sealed class JpegState : IEquatable<JpegState>
         dqt.Tables = quantizationTables;
 
         QuantizationTables.Add(dqt);
+
+        MaxColorChannelValue = MathF.Pow(2, precision) - 1;
     }
 
     public void InitializeScan(JpegImage jpegImage)
@@ -239,7 +259,7 @@ internal sealed class JpegState : IEquatable<JpegState>
         }
 
         //Create the memory which will store the scan data
-        ScanData = new MemorySegment(jpegImage.Data.Count);
+        ScanData = new MemorySegment(Binary.Max(jpegImage.Data.Count, Block.DefaultSize * Binary.BitsPerInteger));
     }
 
     public override bool Equals(object? obj)

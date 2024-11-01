@@ -288,7 +288,7 @@ namespace Media.Common//.Binary
         protected internal bool Recycle(bool clear = false)
         {
             //If there are any bytes then copy them to the offset of the cache from the index
-            if (m_Remaining > 0 && m_ByteIndex > Common.Binary.Zero && m_ByteIndex < m_ByteCache.Count)
+            if (m_Remaining > 0 && m_ByteIndex > Common.Binary.Zero)
             {
                 int count = m_ByteCache.Count - m_ByteIndex;
                 System.Buffer.BlockCopy(m_ByteCache.Array, m_ByteIndex, m_ByteCache.Array, m_ByteCache.Offset, count);
@@ -298,7 +298,7 @@ namespace Media.Common//.Binary
             }
             //Leave the BitIndex in place
             //Indicate if the ByteIndex needs to be reset.
-            return m_ByteIndex >= m_ByteCache.Count;
+            return m_ByteIndex >= m_ByteCache.Count - 1;
         }
 
         /// <summary>
@@ -553,7 +553,9 @@ namespace Media.Common//.Binary
         /// <returns>The number of bits read or 0 for EOF.</returns>
         public int Fill()
         {
-            return m_Remaining = Common.Binary.BitsPerByte * m_BaseStream.Read(m_ByteCache.Array, m_ByteCache.Offset, m_ByteCache.Count - m_ByteIndex);
+            var readBits = Common.Binary.BitsPerByte * m_BaseStream.Read(m_ByteCache.Array, m_ByteIndex, m_ByteCache.Count - m_ByteIndex);
+            m_Remaining += readBits;
+            return readBits;
         }
 
         /// <summary>

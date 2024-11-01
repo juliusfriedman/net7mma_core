@@ -3396,7 +3396,10 @@ namespace Media.UnitTests
                         if (br.BaseStream.Position != Common.Binary.Zero) throw new Exception("Seek Bits");
 
                         //Fill the reader
-                        br.Fill();
+                        int filled = br.Fill();
+
+                        if (filled != Common.Binary.BitsPerLong)
+                            throw new Exception("Did not fill correctly");
 
                         //Loop for all bytes in the buffer.
                         while (br.RemainingBits > 0)
@@ -3547,7 +3550,7 @@ namespace Media.UnitTests
 
             using var bitReader = new BitReader(toRead, Binary.SystemBitOrder, 0, 0, false, 4);
 
-            for (var b = 0; b < toRead.Length; ++b) 
+            for (var b = 0; b < toRead.Length; ++b)
             {
                 if (!bitReader.ReadBit())
                     throw new Exception("BitReader.ReadBit() did not return true.");
@@ -3639,6 +3642,142 @@ namespace Media.UnitTests
             catch (EndOfStreamException)
             {
                 // Expected exception
+            }
+        }
+
+        public static void TestInitialization()
+        {
+            using (var stream = new MemoryStream([0xFF, 0x00]))
+            {
+                var bitReader = new BitReader(stream);
+                if (bitReader.BitIndex != 0) throw new Exception("BitIndex is not 0");
+                if (bitReader.ByteIndex != 0) throw new Exception("ByteIndex is not 0");
+                if (bitReader.BaseStream != stream) throw new Exception("BaseStream is not set correctly");
+            }
+        }
+
+        public static void TestReadBit()
+        {
+            using (var stream = new MemoryStream([0b10000000]))
+            {
+                using var bitReader = new BitReader(stream, Binary.BitOrder.MostSignificant);
+                if (!bitReader.ReadBit()) throw new Exception("First bit is not 1");
+                for (int i = 0; i < 7; i++)
+                {
+                    if (bitReader.ReadBit()) throw new Exception($"Bit {i + 2} is not 0");
+                }
+            }
+        }
+
+        public static void TestRead8()
+        {
+            using (var stream = new MemoryStream([0xAB]))
+            {
+                using var bitReader = new BitReader(stream, Binary.BitOrder.MostSignificant);
+                if (bitReader.Read8() != 0xAB) throw new Exception("Read8 did not return 0xAB");
+            }
+        }
+
+        public static void TestRead16()
+        {
+            using (var stream = new MemoryStream([0xAB, 0xCD]))
+            {
+                using var bitReader = new BitReader(stream, Binary.BitOrder.MostSignificant);
+                var read = (ushort)bitReader.Read16();
+                if (read != 0xABCD) throw new Exception("Read16 did not return 0xABCD");
+            }
+        }
+
+        public static void TestPeekBit()
+        {
+            using (var stream = new MemoryStream([0b10000000]))
+            {
+                using var bitReader = new BitReader(stream, Binary.BitOrder.MostSignificant);
+                bitReader.Fill();
+                if (!bitReader.PeekBit()) throw new Exception("PeekBit did not return 1");
+                if (bitReader.BitIndex != 0) throw new Exception("BitIndex advanced after PeekBit");
+            }
+        }
+
+        public static void TestByteAlign()
+        {
+            using (var stream = new MemoryStream([0xFF, 0x00]))
+            {
+                using var bitReader = new BitReader(stream, Binary.BitOrder.MostSignificant);
+                bitReader.ReadBit(); // Read 1 bit
+                bitReader.ByteAlign();
+                if (bitReader.ByteIndex != 1) throw new Exception("ByteIndex is not 1 after ByteAlign");
+                if (bitReader.BitIndex != 0) throw new Exception("BitIndex is not 0 after ByteAlign");
+            }
+        }
+
+        public static void TestSeekBits()
+        {
+            using (var stream = new MemoryStream([0xFF, 0x00]))
+            {
+                using var bitReader = new BitReader(stream, Binary.BitOrder.MostSignificant);
+                bitReader.SeekBits(8); // Seek 8 bits
+                if (bitReader.ByteIndex != 1) throw new Exception("ByteIndex is not 1 after SeekBits");
+                if (bitReader.BitIndex != 0) throw new Exception("BitIndex is not 0 after SeekBits");
+            }
+        }
+
+        public static void TestReadBits()
+        {
+            using (var stream = new MemoryStream(
+                [
+                    1, 2, 3, 4, 5, 6, 7, 8,
+                    9, 10, 11, 12, 13, 14, 15, 16,
+                    17, 18, 19, 20, 21, 22, 23, 24,
+                    25, 26, 27, 28, 29, 30, 31, 32,
+                    33, 34, 35, 36, 37, 38, 39, 40,
+                    41, 42, 43, 44, 45, 46, 47, 48,
+                    49, 50, 51, 52, 53, 54, 55, 56,
+                    57, 58, 59, 60, 61, 62, 63, 64
+                ]))
+            {
+                using var bitReader = new BitReader(stream, Binary.BitOrder.MostSignificant, 32);
+                var bytesRemaining = bitReader.BufferBytesRemaining; //Cache size
+                for (var i = 0; i < bytesRemaining; ++i)
+                {
+                    var result = (int)bitReader.ReadBits(Binary.BitsPerByte);
+                    if (result != i + 1)
+                        throw new Exception("ReadBits failed");
+                }
+
+                if(bitReader.BufferBytesRemaining != bytesRemaining - 1)
+                    throw new Exception("BufferBytesRemaining is not 31");
+
+                bytesRemaining = bitReader.BufferBytesRemaining;
+                for (var i = 0; i < bytesRemaining; ++i)
+                {
+                    var result = (int)bitReader.ReadBits(Binary.BitsPerByte);
+                    if (result != 32 + i + 1)
+                        throw new Exception("ReadBits failed");
+                }
+            }
+        }
+
+        public static void TestReadBits256()
+        {
+            using (var stream = new MemoryStream(
+                [
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 1,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 1,
+                ]))
+            {
+                using var bitReader = new BitReader(stream, Binary.BitOrder.MostSignificant);
+                for(var i = 0; i < 2; ++i)
+                {
+                    var read = bitReader.ReadBits(256);
+                    if (read != 1) throw new Exception("ReadBits Fails");
+                }
             }
         }
     }

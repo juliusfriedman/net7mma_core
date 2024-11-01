@@ -432,7 +432,7 @@ internal class JpegUnitTests
 
                     var pixelData = newJpgImage.GetPixelDataAt(0, 0);
 
-                    using (var outputNew = new FileStream(Path.Combine(outputDir, "decoded_" + Path.GetFileName(filePath)), FileMode.OpenOrCreate, FileAccess.Write))
+                    using (var outputNew = new FileStream(Path.Combine(outputDir, "re_encoded_" + Path.GetFileName(filePath)), FileMode.OpenOrCreate, FileAccess.Write))
                     {
                         newJpgImage.Save(outputNew);
                     }
