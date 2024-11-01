@@ -45,6 +45,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 
 #endregion
 
@@ -2800,25 +2801,25 @@ namespace Media.Common
         /// Used for <see cref="Log2i"/> calls
         /// </summary>
         /// <remarks><see cref="https://github.com/xVir/FLACTools/blob/master/FLACCodecWin8/BitReader.cs">See Also</see></remarks>
-        internal static readonly byte[] ByteLog2Table = new byte[]
-    {
-            0,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3,
-            4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
-            5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
-            5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
-            6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-            6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-            6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-            6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-            7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-            7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-            7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-            7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-            7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-            7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-            7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-            7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7
-    };
+        internal static readonly byte[] ByteLog2Table =
+        [
+                0,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3,
+                4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+                5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
+                5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
+                6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+                6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+                6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+                6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+                7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+                7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+                7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+                7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+                7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+                7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+                7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+                7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7
+        ];
 
         /// <summary>
         /// Integer space based implementation of <see cref="System.Math.Log(double, double)"/> or <see cref="System.Math.Log2(double)"/>
@@ -2860,10 +2861,45 @@ namespace Media.Common
         }
 
         #endregion
-    }
 
-    //MemSet, Copy
-    //https://github.com/filoe/cscore/blob/af1792ea680743c5172ece4727e2b331012e99de/CSCore/Utils/ILUtils.cs
+        #region Numerics
+
+        /// <summary>
+        /// Fast division with ceiling for <see cref="uint"/> numbers.
+        /// </summary>
+        /// <param name="value">Divident value.</param>
+        /// <param name="divisor">Divisor value.</param>
+        /// <returns>Ceiled division result.</returns>
+        [CLSCompliant(false)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint DivideCeil(uint value, uint divisor) => (value + divisor - 1) / divisor;
+
+        /// <summary>
+        /// Determine the Greatest CommonDivisor (GCD) of two numbers.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int GreatestCommonDivisor(int a, int b)
+        {
+            while (b != 0)
+            {
+                int temp = b;
+                b = a % b;
+                a = temp;
+            }
+
+            return a;
+        }
+
+        /// <summary>
+        /// Determine the Least Common Multiple (LCM) of two numbers.
+        /// See https://en.wikipedia.org/wiki/Least_common_multiple#Reduction_by_the_greatest_common_divisor.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int LeastCommonMultiple(int a, int b)
+            => a / GreatestCommonDivisor(a, b) * b;
+
+        #endregion
+    }
 }
 
 //Move to seperate assembly

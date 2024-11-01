@@ -1,5 +1,6 @@
 ﻿using Media.Common;
 using System;
+using System.Drawing;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 
@@ -359,6 +360,16 @@ public class Size : MemorySegment, IEquatable<Size>
         => new(left.WidthF / right, left.HeightF / right);
 
     /// <summary>
+    /// Multiplies 'a.Width' with 'b.Width' and 'a.Height' with 'b.Height'.
+    /// </summary>
+    public static Size operator *(Size a, Size b) => new Size(a.Width * b.Width, a.Height * b.Height);
+
+    /// <summary>
+    /// Divides 'a.Width' with 'b.Width' and 'a.Height' with 'b.Height'.
+    /// </summary>
+    public static Size operator /(Size a, Size b) => new Size(a.Width / b.Width, a.Height / b.Height);
+
+    /// <summary>
     /// Creates a <see cref="Vector2"/> with the coordinates of the specified <see cref="PointF"/>.
     /// </summary>
     /// <param name="point">The point.</param>
@@ -369,4 +380,35 @@ public class Size : MemorySegment, IEquatable<Size>
     public static implicit operator Vector2(Size point) => new(point.WidthF, point.HeightF);
 
     #endregion
+}
+
+/// <summary>
+/// Extension methods for <see cref="Size"/>
+/// </summary>
+internal static class SizeExtensions
+{    
+    /// <summary>
+    /// Divide Width and Height as real numbers and return the Ceiling.
+    /// </summary>
+    public static Size DivideRoundUp(this Size originalSize, int divX, int divY)
+    {
+        var sizeVect = (Vector2)originalSize;
+        sizeVect /= new Vector2(divX, divY);
+        sizeVect.X = MathF.Ceiling(sizeVect.X);
+        sizeVect.Y = MathF.Ceiling(sizeVect.Y);
+
+        return new Size((int)sizeVect.X, (int)sizeVect.Y);
+    }
+
+    /// <summary>
+    /// Divide Width and Height as real numbers and return the Ceiling.
+    /// </summary>
+    public static Size DivideRoundUp(this Size originalSize, int divisor) =>
+        DivideRoundUp(originalSize, divisor, divisor);
+
+    /// <summary>
+    /// Divide Width and Height as real numbers and return the Ceiling.
+    /// </summary>
+    public static Size DivideRoundUp(this Size originalSize, Size divisor) =>
+        DivideRoundUp(originalSize, divisor.Width, divisor.Height);
 }

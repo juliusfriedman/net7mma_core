@@ -6,6 +6,8 @@ using Media.Common;
 using Media.Common.Collections.Generic;
 using Media.Codec.Jpeg.Classes;
 using Media.Codec.Jpeg.Segments;
+using Codecs.Image;
+using System.Linq;
 
 namespace Media.Codec.Jpeg;
 
@@ -104,16 +106,59 @@ public class JpegImage : Image
                     {
                         var frameComponent = tag[componentIndex];
                         var componentId = frameComponent.ComponentIdentifier;
+
+                        // Store the sampling factors
+                        // Todo determine if the shifts need to be adjusted by - 1
                         widths[componentIndex] = frameComponent.HorizontalSamplingFactor;
                         heights[componentIndex] = frameComponent.VerticalSamplingFactor;
 
+                        if (frameComponent.HorizontalSamplingFactor > jpegState.MaximumHorizontalSamplingFactor)
+                            jpegState.MaximumHorizontalSamplingFactor = (byte)frameComponent.HorizontalSamplingFactor;
+
+                        if (frameComponent.VerticalSamplingFactor > jpegState.MaximumVerticalSamplingFactor)
+                            jpegState.MaximumVerticalSamplingFactor = (byte)frameComponent.VerticalSamplingFactor;
+
                         var quantizationTableNumber = frameComponent.QuantizationTableDestinationSelector;
 
-                        var mediaComponent = new Component((byte)quantizationTableNumber, (byte)componentId, bitsPerComponent);
-
+                        var mediaComponent = new Component((byte)quantizationTableNumber, (byte)componentId, bitsPerComponent)
+                        {
+                            HorizontalSamplingFactor = (byte)frameComponent.HorizontalSamplingFactor,
+                            VerticalSamplingFactor = (byte)frameComponent.VerticalSamplingFactor
+                        };
+                        
                         mediaComponents[componentIndex] = mediaComponent;
 
                         remains -= frameComponent.Count;
+                    }
+
+                    //Initialize the components
+                    for (int i = 0, e = mediaComponents.Length; i < e; ++i)
+                    {
+                        var jpegComponent = mediaComponents[i];
+
+                        jpegState.McusPerLine = (int)Binary.DivideCeil((uint)width, (uint)jpegState.MaximumHorizontalSamplingFactor * JpegCodec.BlockSize);
+                        jpegState.McusPerColumn = (int)Binary.DivideCeil((uint)height, (uint)jpegState.MaximumVerticalSamplingFactor * JpegCodec.BlockSize);
+
+                        uint widthInBlocks = ((uint)width + 7) / JpegCodec.BlockSize;
+                        uint heightInBlocks = ((uint)height + 7) / JpegCodec.BlockSize;
+
+                        jpegComponent.WidthInBlocks = (int)MathF.Ceiling(
+                            (float)widthInBlocks * jpegComponent.HorizontalSamplingFactor / jpegState.MaximumHorizontalSamplingFactor);
+
+                        jpegComponent.HeightInBlocks = (int)MathF.Ceiling(
+                            (float)heightInBlocks * jpegComponent.VerticalSamplingFactor / jpegState.MaximumVerticalSamplingFactor);
+
+                        int blocksPerLineForMcu = jpegState.McusPerLine * jpegComponent.HorizontalSamplingFactor;
+                        int blocksPerColumnForMcu = jpegState.McusPerColumn * jpegComponent.VerticalSamplingFactor;
+                        jpegComponent.SizeInBlocks = new Size(blocksPerLineForMcu, blocksPerColumnForMcu);
+                        jpegComponent.SamplingFactors = new Size(jpegComponent.HorizontalSamplingFactor, jpegComponent.VerticalSamplingFactor);
+
+                        jpegComponent.SubSamplingDivisors = new Size(jpegState.MaximumHorizontalSamplingFactor, jpegState.MaximumVerticalSamplingFactor) / jpegComponent.SamplingFactors;
+
+                        if (jpegComponent.SubSamplingDivisors.Width == 0 || jpegComponent.SubSamplingDivisors.Height == 0)
+                        {
+                            throw new InvalidDataException("Bad Subsampling.");
+                        }
                     }
 
                     // Create the image format based on the SOF0 data

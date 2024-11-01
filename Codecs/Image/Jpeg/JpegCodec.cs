@@ -264,12 +264,12 @@ namespace Media.Codec.Jpeg
 
                 if (imageComponent is Component jpegComponent)
                 {
-                    var frameComponent = new FrameComponent(jpegComponent.Id, jpegImage.ImageFormat.HorizontalSamplingFactors[i], jpegImage.ImageFormat.VerticalSamplingFactors[i], jpegComponent.Tqi);
+                    var frameComponent = new FrameComponent(jpegComponent.Id, jpegComponent.HorizontalSamplingFactor, jpegComponent.VerticalSamplingFactor, jpegComponent.Tqi);
                     sof[i] = frameComponent;
                 }
                 else
                 {
-                    var frameComponent = new FrameComponent(imageComponent.Id, jpegImage.ImageFormat.HorizontalSamplingFactors[i], jpegImage.ImageFormat.VerticalSamplingFactors[i], i);
+                    var frameComponent = new FrameComponent(imageComponent.Id, jpegImage.ImageFormat.HorizontalSamplingFactors[i] + 1, jpegImage.ImageFormat.VerticalSamplingFactors[i] + 1, i);
                     sof[i] = frameComponent;
                 }
             }

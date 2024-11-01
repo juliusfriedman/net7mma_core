@@ -48,6 +48,18 @@ internal sealed class JpegState : IEquatable<JpegState>
     public byte Precision;
 
     /// <summary>
+    /// </summary>
+    public byte MaximumHorizontalSamplingFactor;
+
+    /// <summary>
+    /// </summary>
+    public byte MaximumVerticalSamplingFactor;
+
+    public int McusPerLine;
+
+    public int McusPerColumn;
+
+    /// <summary>
     /// Any <see cref="Segments.QuantizationTables"/> which are contained in the image.
     /// </summary>
     public readonly List<QuantizationTables> QuantizationTables = new();
@@ -217,10 +229,12 @@ internal sealed class JpegState : IEquatable<JpegState>
 
             if(mediaComponent is not Component jpegComponent)
             {
-                jpegComponent = new Component((byte)i, (byte)i, mediaComponent.Size);
+                jpegComponent = new Component((byte)i, (byte)i, mediaComponent.Size)
+                {
+                    HorizontalSamplingFactor = (byte)(jpegImage.ImageFormat.VerticalSamplingFactors[i] + 1),
+                    VerticalSamplingFactor = (byte)(jpegImage.ImageFormat.HorizontalSamplingFactors[i] + 1)
+                };
                 jpegImage.ImageFormat.Components[i] = jpegComponent;
-                jpegImage.ImageFormat.VerticalSamplingFactors[i] = 0;
-                jpegImage.ImageFormat.HorizontalSamplingFactors[i] = 0;
             }
         }
 

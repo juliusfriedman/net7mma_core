@@ -83,7 +83,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rtcp.Feedback", "RtcpFeedba
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codec.Bmp", "Codecs\Image\Bmp\Codec.Bmp\Codec.Bmp.csproj", "{839F7784-2C36-40D7-909F-873FE8D897D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codec.Png", "Codecs\Image\Png\Codec.Png\Codec.Png.csproj", "{A897B44B-7C49-48A7-A2C9-8F726BF8BE3D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Codec.Png", "Codecs\Image\Png\Codec.Png.csproj", "{A897B44B-7C49-48A7-A2C9-8F726BF8BE3D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
