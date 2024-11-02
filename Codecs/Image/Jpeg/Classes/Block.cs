@@ -130,10 +130,10 @@ internal class Block : MemorySegment
     /// <param name="dest"></param>
     private static void MultiplyIntoInt16_Avx2(Block a, Block b, Block dest)
     {
-        Vector256<float> aBase = a.V0f;
-        Vector256<float> bBase = b.V0f;
+        ref Vector256<float> aBase = ref a.V0f;
+        ref Vector256<float> bBase = ref b.V0f;
 
-        Vector256<short> destRef = dest.V01;
+        ref Vector256<short> destRef = ref dest.V01;
         Vector256<int> multiplyIntoInt16ShuffleMask = Vector256.Create(0, 1, 4, 5, 2, 3, 6, 7);
 
         for (nuint i = 0; i < JpegCodec.BlockSize; i += 2)
@@ -334,168 +334,128 @@ internal class Block : MemorySegment
 
     #region Vector 256<float>
 
-    public Vector256<float> V0f
+    public ref Vector256<float> V0f
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<float>>(ref GetReference(0));
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref GetReference(0), value);
+        get => ref Unsafe.As<byte, Vector256<float>>(ref GetReference(0));
     }
     
-    public Vector256<float> V1f
+    public ref Vector256<float> V1f
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<float>>(ref GetReference(32));
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref GetReference(32), value);
+        get => ref Unsafe.As<byte, Vector256<float>>(ref GetReference(32));
     }
     
-    public Vector256<float> V2f 
+    public ref Vector256<float> V2f 
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<float>>(ref GetReference(64));
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref GetReference(64), value);
+        get => ref Unsafe.As<byte, Vector256<float>>(ref GetReference(64));
     }
     
-    public Vector256<float> V3f
+    public ref Vector256<float> V3f
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<float>>(ref GetReference(96));
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref GetReference(96), value);
+        get => ref Unsafe.As<byte, Vector256<float>>(ref GetReference(96));
     }
     
-    public Vector256<float> V4f
+    public ref Vector256<float> V4f
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<float>>(ref GetReference(128));
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref GetReference(128), value);
+        get => ref Unsafe.As<byte, Vector256<float>>(ref GetReference(128));
     }
     
-    public Vector256<float> V5f
+    public ref Vector256<float> V5f
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<float>>(ref GetReference(160));
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref GetReference(160), value);
+        get => ref Unsafe.As<byte, Vector256<float>>(ref GetReference(160));
     }
     
-    public Vector256<float> V6f
+    public ref Vector256<float> V6f
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<float>>(ref GetReference(192));
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref GetReference(192), value);
+        get => ref Unsafe.As<byte, Vector256<float>>(ref GetReference(192));
     }
     
-    public Vector256<float> V7f
+    public ref Vector256<float> V7f
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<float>>(ref GetReference(224));
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref GetReference(224), value);
+        get => ref Unsafe.As<byte, Vector256<float>>(ref GetReference(224));
     }
 
     #endregion
 
     #region Vector 128<short>
 
-    public Vector128<short> V0
+    public ref Vector128<short> V0
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector128<short>>(ref Array[Offset]);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset], value);
+        get => ref Unsafe.As<byte, Vector128<short>>(ref GetReference(0));
     }
 
-    public Vector128<short> V1
+    public ref Vector128<short> V1
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector128<short>>(ref Array[Offset + 16]);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 16], value);
+        get => ref Unsafe.As<byte, Vector128<short>>(ref GetReference(16));
     }
 
-    public Vector128<short> V2
+    public ref Vector128<short> V2
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector128<short>>(ref Array[Offset + 32]);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 32], value);
+        get => ref Unsafe.As<byte, Vector128<short>>(ref GetReference(32));
     }
 
-    public Vector128<short> V3
+    public ref Vector128<short> V3
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector128<short>>(ref Array[Offset + 48]);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 48], value);
+        get => ref Unsafe.As<byte, Vector128<short>>(ref GetReference(48));
     }
 
-    public Vector128<short> V4
+    public ref Vector128<short> V4
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector128<short>>(ref Array[Offset + 64]);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 64], value);
+        get => ref Unsafe.As<byte, Vector128<short>>(ref GetReference(64));
     }
 
-    public Vector128<short> V5
+    public ref Vector128<short> V5
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector128<short>>(ref Array[Offset + 80]);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 80], value);
+        get => ref Unsafe.As<byte, Vector128<short>>(ref GetReference(80));
     }
 
-    public Vector128<short> V6
+    public ref Vector128<short> V6
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector128<short>>(ref Array[Offset + 96]);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 96], value);
+        get => ref Unsafe.As<byte, Vector128<short>>(ref GetReference(96));
     }
 
-    public Vector128<short> V7
+    public ref Vector128<short> V7
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector128<short>>(ref Array[Offset + 112]);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 112], value);
+        get => ref Unsafe.As<byte, Vector128<short>>(ref GetReference(112));
     }
 
-    public Vector256<short> V01
+    public ref Vector256<short> V01
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<short>>(ref Array[Offset]);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset], value);
+        get => ref Unsafe.As<byte, Vector256<short>>(ref GetReference(0));
     }
 
-    public Vector256<short> V23
+    public ref Vector256<short> V23
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<short>>(ref Array[Offset + 32]);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 32], value);
+        get => ref Unsafe.As<byte, Vector256<short>>(ref GetReference(32));
     }
 
-    public Vector256<short> V45
+    public ref Vector256<short> V45
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<short>>(ref Array[Offset + 64]);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 64], value);
+        get => ref Unsafe.As<byte, Vector256<short>>(ref GetReference(64));
     }
 
-    public Vector256<short> V67
+    public ref Vector256<short> V67
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => Unsafe.ReadUnaligned<Vector256<short>>(ref Array[Offset + 96]);
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        set => Unsafe.WriteUnaligned(ref Array[Offset + 96], value);
+        get => ref Unsafe.As<byte, Vector256<short>>(ref GetReference(96));
     }
 
     #endregion
@@ -715,7 +675,7 @@ internal class Block : MemorySegment
 
     public void LoadFromInt16Scalar(Block source)
     {
-        ref short selfRef = ref Unsafe.As<byte, short>(ref source.Array[Offset]);
+        ref short selfRef = ref Unsafe.As<byte, short>(ref source.GetReference(0));
 
         Vector4 stack = V0L;
 
@@ -1202,8 +1162,7 @@ internal class Block : MemorySegment
         {
             for (int i = 0, e = block.FloatLength; i < e; i++)
             {
-                //int idx = ZigZag.TransposingOrder[i];
-                int idx = 0;
+                int idx = ZigZag.TransposingOrder[i];
                 float quantizedVal = block[idx] * qt[idx];
                 quantizedVal += quantizedVal < 0 ? -0.5f : 0.5f;
                 dest[i] = (short)quantizedVal;
@@ -1418,14 +1377,14 @@ internal class Block : MemorySegment
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void ScaledCopyFrom(ref float areaOrigin, int areaStride) =>
-        CopyFrom1x1Scale(ref Unsafe.As<float, byte>(ref areaOrigin), ref Array[Offset], areaStride);
+        CopyFrom1x1Scale(ref Unsafe.As<float, byte>(ref areaOrigin), ref GetReference(0), areaStride);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void ScaledCopyTo(ref float areaOrigin, int areaStride, int horizontalScale, int verticalScale)
     {
         if (horizontalScale == 1 && verticalScale == 1)
         {
-            CopyTo1x1Scale(ref Array[Offset], ref Unsafe.As<float, byte>(ref areaOrigin), areaStride);
+            CopyTo1x1Scale(ref GetReference(0), ref Unsafe.As<float, byte>(ref areaOrigin), areaStride);
             return;
         }
 

@@ -94,6 +94,8 @@ namespace Media.Common
 
         #region Properties
 
+        public bool IsEmpty => m_Length == 0;
+
         /// <summary>
         /// The amount of bytes this instance references
         /// </summary>
@@ -434,7 +436,7 @@ namespace Media.Common
         {
             return ref m_Array[m_Offset + offset];
         }
-
+        
         #region Operators
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]

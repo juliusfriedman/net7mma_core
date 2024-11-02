@@ -250,6 +250,11 @@ namespace Media.Codec
         public bool IsAligned => (Size & 7) == 0;
 
         /// <summary>
+        /// The amount of bits in one sample.
+        /// </summary>
+        public int BitsPerSample => Size / Length;
+
+        /// <summary>
         /// Gets the component at the given index.
         /// </summary>
         /// <param name="index">The index</param>

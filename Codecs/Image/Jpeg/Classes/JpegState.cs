@@ -78,6 +78,11 @@ internal sealed class JpegState : IEquatable<JpegState>
     public float MaxColorChannelValue;
 
     /// <summary>
+    /// Value as obtained from the <see cref="Segments.RestartInterval"/> segment.
+    /// </summary>
+    public int RestartInterval;
+
+    /// <summary>
     /// Any <see cref="Segments.QuantizationTables"/> which are contained in the image.
     /// </summary>
     public readonly List<QuantizationTables> QuantizationTables = new();
@@ -159,7 +164,7 @@ internal sealed class JpegState : IEquatable<JpegState>
     /// <summary>
     /// Data from the <see cref="Scan"/> (Compressed or Decompressed)
     /// </summary>
-    public MemorySegment? ScanData;
+    public MemorySegment? ScanBuffer;
 
     /// <summary>
     /// Constructs a <see cref="JpegState"/>
@@ -180,6 +185,9 @@ internal sealed class JpegState : IEquatable<JpegState>
 
     public void InitializeDefaultHuffmanTables()
     {
+        if (HuffmanTables.Count > 0)
+            return;
+
         var huffmanTables = new HuffmanTable[4];
         huffmanTables[0] = new HuffmanTable(JpegCodec.DcLuminanceBits, JpegCodec.DcLuminanceValues);
         huffmanTables[0].Te = 0;
@@ -206,6 +214,9 @@ internal sealed class JpegState : IEquatable<JpegState>
 
     public void InitializeDefaultQuantizationTables(int precision, int quality)
     {
+        if (QuantizationTables.Count > 0)
+            return;
+
         var quantizationTables = new QuantizationTable[2];
 
         quantizationTables[0] = QuantizationTable.CreateQuantizationTable(precision, 0, quality, QuantizationTableType.Luminance);
@@ -228,7 +239,10 @@ internal sealed class JpegState : IEquatable<JpegState>
             case Markers.StartOfBaselineFrame:
             case Markers.StartOfHuffmanFrame:
             case Markers.StartOfProgressiveHuffmanFrame:
-                Scan = new HuffmanScan();
+                Scan = new HuffmanScan()
+                {
+                    RestartInterval = jpegImage.JpegState.RestartInterval
+                };
                 break;
             case Markers.StartOfExtendedSequentialArithmeticFrame:
             case Markers.StartOfProgressiveArithmeticFrame:
@@ -254,12 +268,28 @@ internal sealed class JpegState : IEquatable<JpegState>
                     HorizontalSamplingFactor = (byte)(jpegImage.ImageFormat.VerticalSamplingFactors[i] + 1),
                     VerticalSamplingFactor = (byte)(jpegImage.ImageFormat.HorizontalSamplingFactors[i] + 1)
                 };
+
+                if (jpegComponent.HorizontalSamplingFactor > jpegImage.JpegState.MaximumHorizontalSamplingFactor)
+                    jpegImage.JpegState.MaximumHorizontalSamplingFactor = jpegComponent.HorizontalSamplingFactor;
+
+                if (jpegComponent.VerticalSamplingFactor > jpegImage.JpegState.MaximumVerticalSamplingFactor)
+                    jpegImage.JpegState.MaximumVerticalSamplingFactor = jpegComponent.VerticalSamplingFactor;
+
+                uint widthInBlocks = ((uint)jpegImage.Width + 7) / JpegCodec.BlockSize;
+                uint heightInBlocks = ((uint)jpegImage.Height + 7) / JpegCodec.BlockSize;
+
+                jpegComponent.WidthInBlocks = (int)MathF.Ceiling(
+                            (float)widthInBlocks * jpegComponent.HorizontalSamplingFactor / jpegImage.JpegState.MaximumHorizontalSamplingFactor);
+
+                jpegComponent.HeightInBlocks = (int)MathF.Ceiling(
+                    (float)heightInBlocks * jpegComponent.VerticalSamplingFactor / jpegImage.JpegState.MaximumVerticalSamplingFactor);
+
                 jpegImage.ImageFormat.Components[i] = jpegComponent;
             }
         }
 
         //Create the memory which will store the scan data
-        ScanData = new MemorySegment(Binary.Max(jpegImage.Data.Count, Block.DefaultSize * Binary.BitsPerInteger));
+        ScanBuffer = new MemorySegment(Binary.Max(jpegImage.Data.Count, Block.DefaultSize * Binary.BitsPerInteger));
     }
 
     public override bool Equals(object? obj)

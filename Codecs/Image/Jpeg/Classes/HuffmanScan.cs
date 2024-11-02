@@ -3,9 +3,10 @@ using System.IO;
 using System.Numerics;
 using System;
 using Codec.Jpeg.Classes;
-using Codec.Jpeg.Segments;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Media.Codec.Jpeg.Segments;
+using Media.Codecs.Image;
 
 namespace Media.Codec.Jpeg.Classes;
 
@@ -112,7 +113,16 @@ internal class HuffmanScan : Scan
 
     #region Fields
 
-    public int RestartInterval;
+    public int RestartInterval
+    {
+        get => restartInterval;
+        set
+        {
+            restartInterval = todo = value;
+        }
+    }
+
+    private int restartInterval;
 
     /// <summary>
     /// Emitted bits 'micro buffer' before being transferred to the <see cref="emitBuffer"/>.
@@ -124,28 +134,30 @@ internal class HuffmanScan : Scan
     /// </summary>
     private int bitCount;
 
+    /// <summary>
+    /// Amount of restart intervals remaining
+    /// </summary>
+    private int todo;
+
     #endregion
 
     #region Decompress
 
     public override void Decompress(JpegImage jpegImage)
     {
-
         int mcu = 0;
         int mcusPerColumn = jpegImage.JpegState.McusPerColumn;
         int mcusPerLine = jpegImage.JpegState.McusPerLine;
 
         using var bitReader = new BitReader(jpegImage.Data.Array, Binary.BitOrder.MostSignificant, 0, 0, true, Environment.ProcessorCount * Environment.ProcessorCount);
 
-        using var bitWriter = new BitWriter(jpegImage.JpegState.ScanData.ToMemoryStream(), Binary.BitOrder.MostSignificant, Environment.ProcessorCount * Environment.ProcessorCount);
+        var scanData = jpegImage.JpegState.ScanBuffer.ToSpan();        
 
         for (int j = 0; j < mcusPerColumn; j++)
         {
             // decode from binary to spectral
             for (int i = 0; i < mcusPerLine; i++)
             {
-                // Scan an interleaved mcu... process components in order
-                int mcuCol = mcu % mcusPerLine;
                 for (int k = 0; k < jpegImage.ImageFormat.Components.Length; k++)
                 {
                     var component = jpegImage.ImageFormat.Components[k] as Component;
@@ -177,6 +189,9 @@ internal class HuffmanScan : Scan
 
                     var blockAreaSize = component.SubSamplingDivisors * BlockSize;
 
+                    //var blocksPerLine = (int)Math.Ceiling(Math.Ceiling((double)jpegImage.Width / BlockSize) *
+                                        //h / jpegImage.JpegState.MaximumHorizontalSamplingFactor);
+
                     // Scan out an mcu's worth of this component; that's just determined
                     // by the basic H and V specified for the component
                     for (int y = 0; y < v; y++)
@@ -205,17 +220,18 @@ internal class HuffmanScan : Scan
                                 // To be "more accurate", we need to emulate this by rounding!
                                 block.NormalizeColorsAndRoundInPlace(jpegImage.JpegState.MaxColorChannelValue);
 
-                                // Write to color buffer acording to sampling factors
+                                // Write to scan buffer acording to sampling factors
                                 int xColorBufferStart = x * blockAreaSize.Width;
 
-                                var span = jpegImage.JpegState.ScanData.ToSpan().Slice(xColorBufferStart);
-                                var floatSpan = MemoryMarshal.Cast<byte, float>(span);
+                                var floatSpan = MemoryMarshal.Cast<byte, float>(scanData);
 
                                 block.ScaledCopyTo(
                                     ref floatSpan[xColorBufferStart],
                                     jpegImage.Width,
                                     component.SubSamplingDivisors!.Width,
                                     component.SubSamplingDivisors!.Height);
+
+                                scanData = scanData.Slice(block.FloatLength);
                             }
                         }
                     }
@@ -224,9 +240,65 @@ internal class HuffmanScan : Scan
                 // After all interleaved components, that's an interleaved MCU,
                 // so now count down the restart interval
                 mcu++;
-                //this.HandleRestart();
+                HandleRestart(jpegImage, bitReader);
             }           
         }
+
+        //scanData and jpegImage.Data need to be swapped so the pixel accessors work.
+        //This indicates there should be a CompressedImage class.
+        //Compress would return a CompressedImage and Decompress would return an Image.
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private bool HandleRestart(JpegImage jpegImage, BitReader reader)
+    {
+        var markerPosition = reader.BaseStream.Position;
+        Marker? marker = null;
+        if (restartInterval > 0 && (--todo) == 0)
+        {
+            if (reader.Buffer[reader.ByteIndex] == Markers.Prefix)
+            {
+                marker = new Marker(reader.Cache.Slice(reader.ByteIndex));
+                if (!Markers.IsKnownFunctionCode(marker.FunctionCode))
+                {
+                    return false;
+                }
+            }
+
+            todo = restartInterval;
+
+            if (marker != null && Markers.IsRestartMarker(marker.FunctionCode))
+            {
+                Reset(jpegImage);
+                return true;
+            }
+
+            if (marker != null && !Markers.IsKnownFunctionCode(marker.FunctionCode))
+            {
+                reader.BaseStream.Position = markerPosition;
+                Reset(jpegImage);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void Reset(JpegImage jpegImage)
+    {
+        for (int i = 0; i < jpegImage.ImageFormat.Components.Length; i++)
+        {
+            var jpegComponent = jpegImage.ImageFormat.Components[i] as Component;
+
+            if (jpegComponent == null)
+                continue;
+
+            jpegComponent.DcPredictor = 0;
+        }
+
+        //Used in progressive mode.
+        //this.eobrun = 0;
     }
 
     private void DecodeBlockBaseline(
@@ -288,70 +360,6 @@ internal class HuffmanScan : Scan
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int Extend(int v, int nbits) => v - ((((v + v) >> nbits) - 1) & ((1 << nbits) - 1));
 
-    private void PlaceBlockInImage(JpegImage jpegImage, Component component, Block block, int bx, int by)
-    {
-        // Calculate the starting position in the image
-        int startX = bx * block.FloatLength;
-        int startY = by * block.FloatLength;
-
-        // Copy the block data into the image's pixel data
-        for (int y = 0; y < BlockSize; y++)
-        {
-            for (int x = 0; x < BlockSize; x++)
-            {
-                int imageX = bx * BlockSize + x;
-                int imageY = by * BlockSize + y;
-
-                // Check if the calculated coordinates are within the image bounds
-                if (imageX >= 0 && imageX < jpegImage.Width && imageY >= 0 && imageY < jpegImage.Height)
-                {
-                    int pixelIndex = (startY + y) * jpegImage.Width + startX + x;
-                    jpegImage.JpegState.ScanData![pixelIndex] = (byte)block[x, y];
-                }
-            }
-        }
-    }
-
-    internal Block ReadBlock(BitReader bitReader, HuffmanLookupTable dcTable, HuffmanLookupTable acTable, ref int previousDC)
-    {
-        // Initialize a new block
-        Block block = new Block();
-
-        // Read the DC coefficient
-        int dcCoefficientSize = DecodeHuffman(bitReader, dcTable);
-        int dcCoefficient = (dcCoefficientSize == 0) ? 0 : (int)bitReader.ReadBitsSigned(dcCoefficientSize);
-        dcCoefficient += previousDC;
-        previousDC = dcCoefficient;
-        block[0] = (short)dcCoefficient;
-
-        // Read the AC coefficients
-        int index = 1;
-        while (index < BlockSize * BlockSize)
-        {
-            int acCoefficientSize = DecodeHuffman(bitReader, acTable);
-            if (acCoefficientSize == 0)
-            {
-                // End of Block (EOB)
-                break;
-            }
-
-            int runLength = acCoefficientSize >> 4;
-            acCoefficientSize &= 0xF;
-
-            index += runLength;
-            if (index >= BlockSize * BlockSize)
-            {
-                break;
-            }
-
-            int acCoefficient = (acCoefficientSize == 0) ? 0 : (int)bitReader.ReadBitsSigned(acCoefficientSize);
-            block[index] = (short)acCoefficient;
-            index++;
-        }
-
-        return block;
-    }
-
     private static int DecodeHuffman(BitReader bitReader, HuffmanLookupTable table)
     {
         try
@@ -386,13 +394,21 @@ internal class HuffmanScan : Scan
     {
         using var bitWriter = new BitWriter(outputStream, Environment.ProcessorCount * Environment.ProcessorCount);
 
-        using var bitReader = new BitReader(jpegImage.Data.Array, Binary.BitOrder.MostSignificant, 0, 0, true, Environment.ProcessorCount * Environment.ProcessorCount);
-
         int restarts = 0;
         int restartsToGo = RestartInterval;
+        
+        //Should be ScanBuffer
+        var span = jpegImage.Data.ToSpan();
 
-        foreach (Component component in jpegImage.ImageFormat.Components)
+        var floatData = MemoryMarshal.Cast<byte, float>(span);
+
+        for (var c = 0; c < jpegImage.ImageFormat.Components.Length; c++)
         {
+            var component = jpegImage.ImageFormat.Components[c] as Component;
+
+            if (component == null)
+                continue;
+
             int h = component.HeightInBlocks;
             int w = component.WidthInBlocks;
 
@@ -407,12 +423,34 @@ internal class HuffmanScan : Scan
 
             var acLookupTable = new HuffmanLookupTable(acTable);
 
+            var quantTable = jpegImage.JpegState.GetQuantizationTable(component.Tqi);
+
+            if (quantTable == null)
+                continue;
+
+            using var quantBlock = quantTable.AsBlock();
+
+            using var block = new Block();                        
+
             for (int i = 0; i < h; i++)
             {
-                using Block block = ReadBlock(bitReader, dcLookupTable, acLookupTable, ref component.DcPredictor);
-
                 for (nuint k = 0; k < (uint)w; k++)
                 {
+                    // load 8x8 block from 8 pixel strides
+                    int xBufferStart = i * (int)k * jpegImage.ImageFormat.Length * JpegCodec.BlockSize;
+                    block.ScaledCopyFrom(
+                        ref floatData[xBufferStart],
+                        w);
+
+                    // level shift via -128f
+                    block.AddInPlace(-128f);
+
+                    // FDCT
+                    DiscreteCosineTransformation.TransformFDCT(block);
+
+                    // Quantize and save to spectral blocks
+                    Block.Quantize(block, block, quantBlock);
+
                     if (RestartInterval > 0 && restartsToGo == 0)
                     {
                         WriteRestart(restarts % 8, bitWriter.BaseStream);

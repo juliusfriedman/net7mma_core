@@ -1,7 +1,6 @@
 ﻿using System.IO.Compression;
 using System.IO.Hashing;
 using System.Numerics;
-using System.Runtime.CompilerServices;
 using Media.Codecs.Image;
 using Media.Common;
 using Media.Common.Collections.Generic;
@@ -238,9 +237,7 @@ public class PngImage : Image
             }
         }
 
-        // Write the data chunk(s)
-        //PngCodec.WriteDataChunk(stream, this, compressionLevel);
-        // Todo, write multiple data chunks if needed.
+        // Write multiple data chunks if needed.
         PngCodec.WriteDataChunks(stream, this, compressionLevel);
 
         // Write the IEND chunk

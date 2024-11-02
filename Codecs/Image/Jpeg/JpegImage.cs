@@ -57,6 +57,10 @@ public class JpegImage : Image
                     var numberOfLines = new NumberOfLines(marker);
                     height = numberOfLines.Nl;
                     continue;
+                case Jpeg.Markers.DataRestartInterval:
+                    var dri = new RestartInterval(marker);
+                    jpegState.RestartInterval = dri.Ri;
+                    continue;
                 case Jpeg.Markers.StartOfBaselineFrame:
                 case Jpeg.Markers.StartOfHuffmanFrame:
                 case Jpeg.Markers.StartOfDifferentialSequentialArithmeticFrame:
@@ -84,6 +88,7 @@ public class JpegImage : Image
                     }                    
 
                     int bitDepth = Binary.Clamp(tag.P, Binary.BitsPerByte, Binary.BitsPerInteger);
+                    jpegState.Precision = (byte)bitDepth;
                     height = tag.Y;
                     width = tag.X;
 
@@ -256,7 +261,7 @@ public class JpegImage : Image
                     continue;
                 case Jpeg.Markers.EndOfInformation:
                     break;
-                default:
+                default:                    
                     markers.Add(marker.FunctionCode, marker);
                     continue;
             }
@@ -284,11 +289,11 @@ public class JpegImage : Image
         }
         else
         {
+            JpegState.Precision = (byte)ImageFormat.BitsPerSample;
+
             JpegState.InitializeDefaultHuffmanTables();
 
-            JpegState.InitializeDefaultQuantizationTables(JpegState.Precision, quality);
-
-            JpegState.InitializeScan(this);
+            JpegState.InitializeDefaultQuantizationTables(JpegState.Precision > 8 ? 1 : 0, quality);            
         }
 
         foreach (var marker in JpegState.QuantizationTables)
@@ -308,10 +313,16 @@ public class JpegImage : Image
             JpegCodec.WriteMarker(stream, marker);
         }
 
+        if (JpegState.RestartInterval > 0)
+        {
+            using var dri = new RestartInterval(JpegState.RestartInterval);
+            JpegCodec.WriteMarker(stream, dri);
+        }
+
         JpegCodec.WriteStartOfScan(this, stream);
 
         //Todo need to ensure that we have option to write scandata...
-        if (Markers != null && JpegState.ScanData == null)
+        if (Markers != null && JpegState.ScanBuffer == null)
         {
             // Write the compressed image data to the stream
             stream.Write(Data.Array, Data.Offset, Data.Count);
@@ -324,6 +335,8 @@ public class JpegImage : Image
         }
         else
         {
+            JpegState.InitializeScan(this);
+
             // Compress this image data to the stream
             JpegState.Scan!.Compress(this, stream);
 
@@ -333,7 +346,7 @@ public class JpegImage : Image
 
     internal void Decompress()
     {
-        if(JpegState.ScanData != null)
+        if(JpegState.ScanBuffer != null)
             return; // Already decompressed
         JpegState.InitializeScan(this);
         JpegState.Scan!.Decompress(this);
@@ -351,14 +364,14 @@ public class JpegImage : Image
         int rowSize = Width * bytesPerPixel;
         int offset = (y * rowSize) + (x * bytesPerPixel);
 
-        return JpegState.ScanData.Slice(offset, ImageFormat.Length);
+        return JpegState.ScanBuffer.Slice(offset, ImageFormat.Length);
     }
     
     public Vector<byte> GetVectorDataAt(int x, int y)
     {
         Decompress();
 
-        if(JpegState.ScanData is null)
+        if(JpegState.ScanBuffer is null)
             return Vector<byte>.Zero;
 
         // JPEG format stores pixels from top to bottom
@@ -366,14 +379,14 @@ public class JpegImage : Image
         int rowSize = Width * bytesPerPixel;
         int offset = (y * rowSize) + (x * bytesPerPixel);
         offset -= offset % Vector<byte>.Count; // Align the offset to vector size
-        return new Vector<byte>(JpegState.ScanData.Array, JpegState.ScanData.Offset + offset);
+        return new Vector<byte>(JpegState.ScanBuffer.Array, JpegState.ScanBuffer.Offset + offset);
     }
 
     public void SetVectorDataAt(int x, int y, Vector<byte> vectorData)
     {
         Decompress();
 
-        if (JpegState.ScanData is null)
+        if (JpegState.ScanBuffer is null)
             return;
 
         // JPEG format stores pixels from top to bottom
@@ -381,6 +394,6 @@ public class JpegImage : Image
         int rowSize = Width * bytesPerPixel;
         int offset = (y * rowSize) + (x * bytesPerPixel);
         offset -= offset % Vector<byte>.Count; // Align the offset to vector size
-        vectorData.CopyTo(new Span<byte>(JpegState.ScanData.Array, JpegState.ScanData.Offset + offset, Vector<byte>.Count));
+        vectorData.CopyTo(new Span<byte>(JpegState.ScanBuffer.Array, JpegState.ScanBuffer.Offset + offset, Vector<byte>.Count));
     }
 }
