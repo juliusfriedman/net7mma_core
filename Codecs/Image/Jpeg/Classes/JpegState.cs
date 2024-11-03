@@ -289,7 +289,11 @@ internal sealed class JpegState : IEquatable<JpegState>
         }
 
         //Create the memory which will store the scan data
-        ScanBuffer = new MemorySegment(Binary.Max(jpegImage.Data.Count, Block.DefaultSize * Binary.BitsPerInteger));
+        if (ScanBuffer == null)
+        {
+            //Should transform color space?
+            ScanBuffer = new MemorySegment(Binary.Max(jpegImage.Data.Count, Block.DefaultSize * Binary.BitsPerInteger));
+        }
     }
 
     public override bool Equals(object? obj)

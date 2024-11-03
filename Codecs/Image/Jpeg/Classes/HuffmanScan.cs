@@ -6,7 +6,6 @@ using Codec.Jpeg.Classes;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using Media.Codec.Jpeg.Segments;
-using Media.Codecs.Image;
 
 namespace Media.Codec.Jpeg.Classes;
 
@@ -212,6 +211,8 @@ internal class HuffmanScan : Scan
                                 // Dequantize
                                 block.MultiplyInPlace(dequantizationBlock);
 
+                                DiscreteCosineTransformation.AdjustToIDCT(dequantizationBlock);
+
                                 // Convert from spectral to color
                                 DiscreteCosineTransformation.TransformIDCT(block);
 
@@ -270,6 +271,7 @@ internal class HuffmanScan : Scan
             if (marker != null && Markers.IsRestartMarker(marker.FunctionCode))
             {
                 Reset(jpegImage);
+                marker.Dispose();
                 return true;
             }
 
@@ -277,6 +279,7 @@ internal class HuffmanScan : Scan
             {
                 reader.BaseStream.Position = markerPosition;
                 Reset(jpegImage);
+                marker.Dispose();
                 return true;
             }
         }
@@ -396,9 +399,8 @@ internal class HuffmanScan : Scan
 
         int restarts = 0;
         int restartsToGo = RestartInterval;
-        
-        //Should be ScanBuffer
-        var span = jpegImage.Data.ToSpan();
+
+        var span = jpegImage.JpegState.ScanBuffer.ToSpan();
 
         var floatData = MemoryMarshal.Cast<byte, float>(span);
 
@@ -447,6 +449,8 @@ internal class HuffmanScan : Scan
 
                     // FDCT
                     DiscreteCosineTransformation.TransformFDCT(block);
+
+                    DiscreteCosineTransformation.AdjustToFDCT(quantBlock);
 
                     // Quantize and save to spectral blocks
                     Block.Quantize(block, block, quantBlock);
