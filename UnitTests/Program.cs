@@ -471,7 +471,7 @@ namespace Media.UnitTests
                 //Local VLC...
                 new
                 {
-                    Uri = "rtsp://192.168.1.249:8554/stream",
+                    Uri = "rtsp://192.168.1.170:8550/stream",
                     Creds = default(System.Net.NetworkCredential),
                     Proto = (Media.Rtsp.RtspClient.ClientProtocolType?)null,
                     Type = System.Net.AuthenticationSchemes.None
@@ -2300,19 +2300,28 @@ namespace Media.UnitTests
                     //server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("NVT3", "rtsp://admin:11111111@118.70.125.33:7801/Streaming/channels/201", Media.Rtsp.RtspClient.ClientProtocolType.Tcp));
                     //server.TryAddMedia(new Media.Rtsp.Server.MediaTypes.RtspSource("NVT4", "rtsp://admin:11111111@118.70.125.33:8801/Streaming/channels/201", Media.Rtsp.RtspClient.ClientProtocolType.Tcp));
 
-                    //Apollo - 
-
-                    //Traffic
                     var sources = new List<Rtsp.Server.MediaTypes.RtspSource>();
-                    for (int i = 1; i <= 9; ++i)
-                    {
-                        var source = new Media.Rtsp.Server.MediaTypes.RtspSource($"R2_05{i}", $"rtsp://8.15.251.101:1935/rtplive/R2_05{i}", Rtsp.RtspClient.ClientProtocolType.Tcp, 0, null, null, null, true);
-                        source.RtpClient.ThreadEvents = true;
-                        source.RtpClient.IListSockets = true;
-                        source.RtspClient.DisableKeepAliveRequest = true;
-                        server.TryAddMedia(source);
-                        sources.Add(source);
-                    }
+
+                    //streaming against vlc
+                    //:sout=#transcode{vcodec=h264,acodec=mp4a,ab=0,channels=0,samplerate=0,scodec=tx3g}:rtp{sdp=rtsp://:8550/stream} :no-sout-all :sout-keep
+
+                    var someSource = new Media.Rtsp.Server.MediaTypes.RtspSource($"restream_udp", $"rtsp://localhost:8550/stream", Rtsp.RtspClient.ClientProtocolType.Udp, 0, null, null, null, true);
+                    someSource.RtpClient.ThreadEvents = true;
+                    someSource.RtpClient.IListSockets = true;
+                    someSource.RtspClient.DisableKeepAliveRequest = true;
+                    server.TryAddMedia(someSource);
+                    sources.Add(someSource);
+
+                    // Traffic
+                    //for (int i = 1; i <= 9; ++i)
+                    //{
+                    //    var source = new Media.Rtsp.Server.MediaTypes.RtspSource($"R2_05{i}", $"rtsp://8.15.251.101:1935/rtplive/R2_05{i}", Rtsp.RtspClient.ClientProtocolType.Tcp, 0, null, null, null, true);
+                    //    source.RtpClient.ThreadEvents = true;
+                    //    source.RtpClient.IListSockets = true;
+                    //    source.RtspClient.DisableKeepAliveRequest = true;
+                    //    server.TryAddMedia(source);
+                    //    sources.Add(source);
+                    //}
 
                     //string localPath = System.IO.Path.GetDirectoryName(executingAssemblyLocation);
 

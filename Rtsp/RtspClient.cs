@@ -358,6 +358,8 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
     /// </summary>
     private Uri m_InitialLocation, m_PreviousLocation, m_CurrentLocation;
 
+    private List<IPAddress> m_RemoteHostAddresses = new List<IPAddress>();
+
     /// <summary>
     /// The buffer this client uses for all requests 4MB * 2 by default.
     /// </summary>
@@ -2642,14 +2644,11 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                 //The description is no longer needed
                 describe.IsPersistent = false;
 
-                currentStatusCode = (RtspStatusCode)describe.StatusCode;
-
-                //DescribeHandler...
-
                 if (Common.IDisposedExtensions.IsNullOrDisposed(describe) ||
                     describe.RtspStatusCode == RtspStatusCode.Unknown ||
-                    describe.RtspStatusCode > RtspStatusCode.OK) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(describe, "Describe Response was null or not OK. See Tag.");
+                    !describe.IsSuccessful) Media.Common.TaggedExceptionExtensions.RaiseTaggedException(describe, "Describe Response was null or not OK. See Tag.");
 
+                currentStatusCode = (RtspStatusCode)describe.StatusCode;
             }
         }
         catch (Exception ex)
@@ -2751,7 +2750,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                 }
             }
 
-            //Todo track how many attempts.                
+            int setupAttempts = 0;
 
             //Send a setup while there was a bad request or no response.
             do using (RtspMessage setup = SendSetup(md))
@@ -2834,7 +2833,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                             }
                         case RtspStatusCode.Unknown:
                         case RtspStatusCode.InternalServerError:
-                        case RtspStatusCode.UnsupportedTransport: break;
+                        case RtspStatusCode.UnsupportedTransport: goto ContinueFor;
                         case RtspStatusCode.OK:
                             {
                                 //setup.IsPersistent = true;
@@ -2925,7 +2924,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
                     //Todo, should only do this for a few moments..
 
-                } while (IsConnected);
+                } while (IsConnected && ++setupAttempts < m_MaximumTransactionAttempts);
             ContinueFor:
             continue;
         }
@@ -3051,7 +3050,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
         m_KeepAliveTimer ??= new Timer(new TimerCallback(SendKeepAliveRequest), null, halfSessionTimeWithConnection, Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan);
 
         //Watch for pushed messages.
-        m_ProtocolMonitor = new System.Threading.Timer(new TimerCallback(MonitorProtocol), null, m_ConnectionTime.Add(LastMessageRoundTripTime.Duration()), Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan);
+        m_ProtocolMonitor = new System.Threading.Timer(new TimerCallback(MonitorProtocol), null, m_ConnectionTime.Add(LastMessageRoundTripTime.Duration()) * 2, Media.Common.Extensions.TimeSpan.TimeSpanExtensions.InfiniteTimeSpan);
 
         //Don't keep the tcp socket open when not required under Udp.
 
@@ -3311,6 +3310,11 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
             }
 
+            if (m_RemoteHostAddresses.Count == 0)
+            {
+                m_RemoteHostAddresses.AddRange(Dns.GetHostEntry(m_CurrentLocation.Host).AddressList);
+            }
+
             //We started connecting now.
             m_BeginConnect = DateTime.UtcNow;
 
@@ -3373,7 +3377,7 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
         }
 
         //Determine the poll time now.
-        m_SocketPollMicroseconds = Media.Common.Binary.Min((int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(m_ConnectionTime), m_SocketPollMicroseconds);
+        m_SocketPollMicroseconds = Media.Common.Binary.Min((int)m_ConnectionTime.TotalMicroseconds, m_SocketPollMicroseconds);
 
         //Use the multiplier to set the poll time.
         //m_SocketPollMicroseconds >>= multiplier;
@@ -4397,16 +4401,28 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                                                 goto Receive;
                                             }
                                         }
+                                        else if (++attempt <= m_MaximumTransactionAttempts && 
+                                                fatal is false &&
+                                                SharesSocket is false &&
+                                                IsConnected &&
+                                                m_RtspSocket.IsNullOrDisposed() is false &&
+                                                m_RtspSocket.Poll(m_SocketPollMicroseconds >> 4, SelectMode.SelectRead))
+                                        {
+                                            //Might need to retransmit...
+                                            //Allow time for the remote host to respond.
 
+                                            if (!System.Threading.Thread.Yield())
+                                                System.Threading.Thread.Sleep(m_ConnectionTime);
+
+                                            goto Receive;
+                                        }
                                     }
-
-
 
                                     //else the sequenceNumberReceived is >= startSequenceNumber
 
                                     //Calculate the amount of time taken to receive the message.
                                     //Which is given by the time on the wall clock minus when the message was transferred or created.
-                                    TimeSpan lastMessageRoundTripTime = (DateTime.UtcNow - (message.Transferred ?? message.Created));
+                                    TimeSpan lastMessageRoundTripTime = DateTime.UtcNow - (message.Transferred ?? message.Created);
 
                                     //Ensure positive values for the RTT
                                     //if (lastMessageRoundTripTime < TimeSpan.Zero) lastMessageRoundTripTime = lastMessageRoundTripTime.Negate();
@@ -4754,7 +4770,6 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
 
                 describe.SetHeader(RtspHeaders.Accept, Sdp.SessionDescription.MimeType);
 
-
                 Describe:
                 response = SendRtspMessage(describe, out SocketError error, true, true, m_MaximumTransactionAttempts) ?? m_LastTransmitted;
 
@@ -4914,11 +4929,24 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                                     }
                                     else //The Uri was absolute
                                     {
-                                        //Check for the host to change
-                                        if (baseUri.Host.Equals(m_CurrentLocation.Host, StringComparison.OrdinalIgnoreCase) is false)
+                                        if (IPAddress.TryParse(m_CurrentLocation.Host, out IPAddress remoteHost) && m_RemoteHostAddresses.Contains(remoteHost))
                                         {
-                                            Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "The server issued a response which indicates a required resource from another host.", new Common.TaggedException<RtspMessage>(m_LastTransmitted, "New Host Connection Required. See tag."));
+                                            goto IsSameHost;
                                         }
+
+                                        IPHostEntry remoteHostEntry = Dns.GetHostEntry(m_CurrentLocation.Host);
+
+                                        foreach(IPAddress address in remoteHostEntry.AddressList)
+                                        {
+                                            if (m_RemoteHostAddresses.Contains(address))
+                                            {
+                                                goto IsSameHost;
+                                            }
+                                        }
+
+                                        Media.Common.TaggedExceptionExtensions.RaiseTaggedException(this, "The server issued a response which indicates a required resource from another host.", new Common.TaggedException<RtspMessage>(m_LastTransmitted, "New Host Connection Required. See tag."));
+
+                                    IsSameHost:
 
                                         //Check for the Scheme to change
                                         if (baseUri.Scheme.Equals(m_CurrentLocation.Scheme, StringComparison.OrdinalIgnoreCase) is false)
@@ -5460,11 +5488,13 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                 bool triedTwoTimes = false;
 
 
-                //Make new connection if required.
+            //Make new connection if required.
 
-                Setup:
+            Setup:
                 //Get the response for the setup
                 RtspMessage response = SendRtspMessage(setup, out error, out int sequenceNumber, true, true, m_MaximumTransactionAttempts) ?? m_LastTransmitted;
+
+                if (!response.IsSuccessful) return response;
 
                 //Should check the cSeq or content type... 
 
@@ -5957,8 +5987,6 @@ public class RtspClient : Common.SuppressedFinalizerDisposable, Media.Common.ISo
                     DisableKeepAliveRequest = true;
 
                     //Common.ILoggingExtensions.Log(Logger, ToString() + "@MonitorProtocol: Receiving Data");
-
-
 
                     using (var response = SendRtspMessage(null, out SocketError error, out int cseq, false, true, m_MaximumTransactionAttempts))
                     {

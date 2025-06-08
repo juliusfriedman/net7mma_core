@@ -43,10 +43,8 @@ namespace Media.Common.Extensions.TimeSpan
     /// </summary>
     public static class TimeSpanExtensions
     {
-
         //(1e-6) = 0.000001
-
-        //TimeSpan.MinValue is already defined as
+        
         //public static System.TimeSpan Undefined = System.TimeSpan.FromTicks(unchecked((long)double.NaN));
         public const double MicrosecondsPerCentisecond = 10,
             MicrosecondsPerMillisecond = 1000, //(1e+3)
@@ -83,8 +81,6 @@ namespace Media.Common.Extensions.TimeSpan
         //const long would be a suitable replacement, then would use the .Ticks property of the instance.
         //public const long InfiniteTicks = -1;
 
-        //readonly ValueType....
-
         /// <summary>
         /// A <see cref="System.TimeSpan"/> with the value of -1 Millisecond
         /// </summary>
@@ -113,31 +109,12 @@ namespace Media.Common.Extensions.TimeSpan
         /// <summary>
         /// A <see cref="System.TimeSpan"/> with the value of 1 Microsecond (μs)
         /// </summary>
-        public static readonly System.TimeSpan OneMicrosecond = System.TimeSpan.FromTicks(10);
+        public static readonly System.TimeSpan OneMicrosecond = System.TimeSpan.FromTicks(TicksPerMicrosecond);
 
         /// <summary>
         /// A <see cref="System.TimeSpan"/> with the value of 1 Hour
         /// </summary>
         public static readonly System.TimeSpan OneHour = System.TimeSpan.FromHours(1);
-
-        /// <summary>
-        /// Calulcates the total amount of Microseconds (μs) in the given <see cref="TimeSpan"/>
-        /// </summary>
-        /// <param name="ts"></param>
-        /// <returns></returns>
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static double TotalMicroseconds(this System.TimeSpan ts) { unchecked { return ts.TotalMilliseconds * MicrosecondsPerMillisecond; } }
-
-        /// <summary>
-        /// Calulcates the total amount of Nanoseconds (ns) in the given <see cref="TimeSpan"/>
-        /// </summary>
-        /// <param name="ts"></param>
-        /// <returns></returns>
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static double TotalNanoseconds(this System.TimeSpan ts) { unchecked { return ts.TotalMilliseconds * NanosecondsPerMillisecond; } }
-
-        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static System.TimeSpan FromMicroseconds(double microSeconds) { unchecked { return System.TimeSpan.FromTicks((long)(microSeconds * OneMicrosecond.Ticks)); } }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public static System.TimeSpan FromNanoseconds(double nanoSeconds)
@@ -174,33 +151,6 @@ namespace Media.Common.Extensions.TimeSpan
         }
 
         public static System.TimeSpan Max(System.TimeSpan a, System.TimeSpan b) { return Max(ref a, ref b); }
-
-        ////
-        //// Structure used in select() call, taken from the BSD file sys/time.h.
-        ////
-        //[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-        //internal struct TimeValue
-        //{
-        //    internal long Value;
-
-        //    public int Seconds { get { return (int)Value; } }  // seconds
-        //& int.MaxValue
-        //    public int Microseconds { get { return (int)(Value << Binary.BitsPerInteger); } } // and microseconds
-
-        //    public TimeValue(long microSeconds)
-        //    {
-        //        Value = microSeconds;
-        //        //Seconds = System.Math.DivRem((int)microSeconds,(int)NanosecondsPerMillisecond, 
-        //        //    out Microseconds);
-        //    }
-
-        //}
-
-        //private static void MicrosecondsToTimeValue(long microSeconds, ref TimeValue timeValue)
-        //{
-        //    timeValue.Value = microSeconds;
-        //}
-
     }
 }
 
@@ -221,13 +171,7 @@ namespace Media.UnitTests
 
             if (Common.Extensions.TimeSpan.TimeSpanExtensions.FromNanoseconds(200).Ticks != 2) throw new System.Exception("FromNanoseconds");
 
-            if (Common.Extensions.TimeSpan.TimeSpanExtensions.FromMicroseconds(1).Ticks != Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond.Ticks) throw new System.Exception("FromMicroseconds");
-
-            if (Common.Extensions.TimeSpan.TimeSpanExtensions.FromMicroseconds(0.1) != Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick) throw new System.Exception("FromMicroseconds");
-
-            if (Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalNanoseconds(Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond) != Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMicrosecond) throw new System.Exception("TotalNanoseconds");
-
-            if (Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond) != 1) throw new System.Exception("TotalMicroseconds");
+            if (Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond.TotalNanoseconds != Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMicrosecond) throw new System.Exception("TotalNanoseconds");
         }
     }
 }

@@ -460,7 +460,7 @@ namespace Media.Http
             [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get
             {
-                return HttpStatusCode <= HttpStatusCode.BadRequest;
+                return HttpStatusCode >= HttpStatusCode.OK && StatusCode <= 299;
             }
         }
 

@@ -178,7 +178,7 @@ namespace Media.Rtsp
                 //10 ticks / 1μs  is missing data in high bandwidth environments with receive buffer = 0
                 double InterframeGapμs = Media.Common.Extensions.NetworkInterface.NetworkInterfaceExtensions.GetInterframeGapMicroseconds(Media.Common.Extensions.NetworkInterface.NetworkInterfaceExtensions.GetNetworkInterface(prototype));
 
-                TimeSpan InterframeGap = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.FromMicroseconds(InterframeGapμs);
+                TimeSpan InterframeGap = TimeSpan.FromMicroseconds(InterframeGapμs);
 
                 interFrameGap = (int)InterframeGapμs;
 
@@ -188,7 +188,7 @@ namespace Media.Rtsp
                 //m_SocketPollMicroseconds >>= 2;
 
                 //Ensure to use whatever is smaller, the inter packet gap or the default of 50,000 microseconds
-                interFrameGap = Media.Common.Binary.Min(interFrameGap, (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(RtspClient.DefaultConnectionTime));
+                interFrameGap = Media.Common.Binary.Min(interFrameGap, (int)RtspClient.DefaultConnectionTime.TotalMicroseconds);
 
                 //Set the send and receive timeout from the default connection time, it will backoff as required
                 //m_RtspSocket.SendTimeout = m_RtspSocket.ReceiveTimeout = (int)RtspClient.DefaultConnectionTime.TotalMilliseconds;
@@ -2460,6 +2460,8 @@ namespace Media.Rtsp
 
         #endregion
 
+        public bool SetReasonPhrases { get; set; } = true;
+
         /// <summary>
         /// Sends a Rtsp Response on the given client session
         /// </summary>
@@ -2481,6 +2483,9 @@ namespace Media.Rtsp
 
             //If we have a session
             if (IDisposedExtensions.IsNullOrDisposed(session)) return;
+
+            if (SetReasonPhrases && string.IsNullOrWhiteSpace(message.ReasonPhrase))
+                message.ReasonPhrase = message.RtspStatusCode.ToString();
 
             try
             {

@@ -2510,7 +2510,7 @@ namespace Media.Rtsp
             }
 
             //Determine the poll time now.
-            m_SocketPollMicroseconds = Media.Common.Binary.Min((int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(m_ConnectionTime), m_SocketPollMicroseconds);
+            m_SocketPollMicroseconds = Media.Common.Binary.Min((int)m_ConnectionTime.TotalMicroseconds, m_SocketPollMicroseconds);
 
             //Use the multiplier to set the poll time.
             //m_SocketPollMicroseconds >>= multiplier;

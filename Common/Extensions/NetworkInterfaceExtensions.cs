@@ -36,6 +36,8 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
 #endregion
 
+using System;
+
 namespace Media.Common.Extensions.NetworkInterface
 {
     public static class NetworkInterfaceExtensions
@@ -297,16 +299,16 @@ namespace Media.UnitTests
                 gapMicros = Media.Common.Extensions.NetworkInterface.NetworkInterfaceExtensions.GetInterframeGapMicroseconds(nif);
 
                 //Calulcate a TimeSpan which represents the total Microseconds.
-                microTime = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.FromMicroseconds((double)gapMicros);
+                microTime = TimeSpan.FromMicroseconds((double)gapMicros);
 
                 //Rounding ...
                 //if (Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(microTime) != gapMicros) throw new System.Exception("TotalMicroseconds");
 
                 //Verify that the conversion was correct
-                if ((int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(microTime) != (int)gapMicros) throw new System.Exception("TotalMicroseconds");
+                if ((int)microTime.TotalMicroseconds != (int)gapMicros) throw new System.Exception("TotalMicroseconds");
 
                 //Calculate how much difference there is when converting from the microsecond term to the nano second term.
-                double diff = gapMicros * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMicrosecond - Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalNanoseconds(microTime);
+                double diff = gapMicros * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.NanosecondsPerMicrosecond - microTime.TotalNanoseconds;
 
                 //If there was any difference 
                 if (diff > 0)

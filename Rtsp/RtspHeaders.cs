@@ -608,18 +608,18 @@ namespace Media.Rtsp
                                 }
                             case "seq":
                                 {
-                                    if (int.TryParse(subParts[1].Trim(), out int parsed))
+                                    if (uint.TryParse(subParts[1].Trim(), out uint parsed))
                                     {
-                                        seq = parsed;
+                                        seq = (int)parsed;
                                     }
 
                                     continue;
                                 }
                             case "rtptime":
                                 {
-                                    if (int.TryParse(subParts[1].Trim(), out int parsed))
+                                    if (uint.TryParse(subParts[1].Trim(), out uint parsed))
                                     {
-                                        rtpTime = parsed;
+                                        rtpTime = (int)parsed;
                                     }
 
                                     continue;
@@ -692,7 +692,7 @@ namespace Media.Rtsp
 
                 result.Append("seq=");
 
-                result.Append(seq.Value);
+                result.Append((uint)seq.Value);
             }
 
             if (rtpTime.HasValue)
@@ -702,7 +702,7 @@ namespace Media.Rtsp
 
                 result.Append("rtptime=");
 
-                result.Append(rtpTime.Value);
+                result.Append((uint)rtpTime.Value);
             }
 
             if (ssrc.HasValue)

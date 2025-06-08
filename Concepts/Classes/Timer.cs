@@ -382,7 +382,7 @@ namespace Media.UnitTests
 
                 System.Console.WriteLine("Finished: " + finished.ToString("MM/dd/yyyy hh:mm:ss.ffffff tt"));
 
-                System.Console.WriteLine("Taken Microseconds: " + Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(taken));
+                System.Console.WriteLine("Taken Microseconds: " + taken.TotalMicroseconds);
 
                 System.Console.WriteLine("Taken Total: " + taken.ToString());
 
@@ -408,10 +408,10 @@ namespace Media.UnitTests
                     (long)t.m_Ticks < count) throw new System.Exception("Did not count all intervals");
 
                 //Write the rough amount of time taken in nano seconds
-                System.Console.WriteLine("Time Estimated Taken: " + count * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalNanoseconds(t.Frequency) + "ns");
+                System.Console.WriteLine("Time Estimated Taken: " + count * t.Frequency.TotalNanoseconds + "ns");
 
                 //Write the rough amount of time taken in  micro seconds
-                System.Console.WriteLine("Time Estimated Taken: " + count * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(t.Frequency) + "μs");
+                System.Console.WriteLine("Time Estimated Taken: " + count * t.Frequency.TotalMicroseconds + "μs");
 
                 //How many more times the event was fired than needed
                 double overage = (count - maxCount);
@@ -476,7 +476,7 @@ namespace Media.UnitTests
 
                 System.Console.WriteLine("Finished: " + finished.ToString("MM/dd/yyyy hh:mm:ss.ffffff tt"));
 
-                System.Console.WriteLine("Taken Microseconds: " + Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(taken));
+                System.Console.WriteLine("Taken Microseconds: " + taken.TotalMicroseconds);
 
                 System.Console.WriteLine("Taken Total: " + taken.ToString());
 
@@ -502,10 +502,10 @@ namespace Media.UnitTests
                     (long)t.m_Ticks < count) throw new System.Exception("Did not count all intervals");
 
                 //Write the rough amount of time taken in nano seconds
-                System.Console.WriteLine("Time Estimated Taken: " + count * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalNanoseconds(t.Frequency) + "ns");
+                System.Console.WriteLine("Time Estimated Taken: " + count * t.Frequency.TotalNanoseconds + "ns");
 
                 //Write the rough amount of time taken in  micro seconds
-                System.Console.WriteLine("Time Estimated Taken: " + count * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(t.Frequency) + "μs");
+                System.Console.WriteLine("Time Estimated Taken: " + count * t.Frequency.TotalMicroseconds + "μs");
 
                 //How many more times the event was fired than needed
                 double overage = (count - maxCount);
@@ -568,16 +568,16 @@ namespace Media.UnitTests
 
                 System.Console.WriteLine("Finished: " + finished.ToString("MM/dd/yyyy hh:mm:ss.ffffff tt"));
 
-                System.Console.WriteLine("Taken Microseconds: " + Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(taken));
+                System.Console.WriteLine("Taken Microseconds: " + taken.TotalMicroseconds);
 
                 System.Console.WriteLine("Taken Total: " + taken.ToString());
 
                 System.Console.WriteLine("Managed Ticks: " + t.m_Ticks);
 
                 //The maximum amount of times the timer can elapse in the given frequency
-                double maxCount = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(taken) / Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(t.Frequency);
+                double maxCount = taken.TotalMicroseconds / t.Frequency.TotalMicroseconds;
 
-                System.Console.WriteLine("Maximum Count: " + Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(taken));
+                System.Console.WriteLine("Maximum Count: " + taken.TotalMicroseconds);
 
                 System.Console.WriteLine("Actual Count: " + count);
 
@@ -594,10 +594,10 @@ namespace Media.UnitTests
                     (long)t.m_Ticks < count) throw new System.Exception("Did not count all intervals");
 
                 //Write the rough amount of time taken in nano seconds
-                System.Console.WriteLine("Time Estimated Taken: " + count * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalNanoseconds(t.Frequency) + "ns");
+                System.Console.WriteLine("Time Estimated Taken: " + count * t.Frequency.TotalNanoseconds + "ns");
 
                 //Write the rough amount of time taken in  micro seconds
-                System.Console.WriteLine("Time Estimated Taken: " + count * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(t.Frequency) + "μs");
+                System.Console.WriteLine("Time Estimated Taken: " + count * t.Frequency.TotalMicroseconds + "μs");
 
                 //How many more times the event was fired than needed
                 double overage = (count - maxCount);
@@ -659,16 +659,16 @@ namespace Media.UnitTests
 
                 System.Console.WriteLine("Finished: " + finished.ToString("MM/dd/yyyy hh:mm:ss.ffffff tt"));
 
-                System.Console.WriteLine("Taken Microseconds: " + Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(taken));
+                System.Console.WriteLine("Taken Microseconds: " + taken.TotalMicroseconds);
 
                 System.Console.WriteLine("Taken Total: " + taken.ToString());
 
                 System.Console.WriteLine("Managed Ticks: " + t.m_Ticks);
 
                 //The maximum amount of times the timer can elapse in the given frequency
-                double maxCount = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(taken) / Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(t.Frequency);
+                double maxCount = taken.TotalMicroseconds / t.Frequency.TotalMicroseconds;
 
-                System.Console.WriteLine("Maximum Count: " + Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(taken));
+                System.Console.WriteLine("Maximum Count: " + taken.TotalMicroseconds);
 
                 System.Console.WriteLine("Actual Count: " + count);
 
@@ -685,10 +685,10 @@ namespace Media.UnitTests
                     (long)t.m_Ticks < count) throw new System.Exception("Did not count all intervals");
 
                 //Write the rough amount of time taken in nano seconds
-                System.Console.WriteLine("Time Estimated Taken: " + count * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalNanoseconds(t.Frequency) + "ns");
+                System.Console.WriteLine("Time Estimated Taken: " + count * t.Frequency.TotalNanoseconds     + "ns");
 
                 //Write the rough amount of time taken in  micro seconds
-                System.Console.WriteLine("Time Estimated Taken: " + count * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(t.Frequency) + "μs");
+                System.Console.WriteLine("Time Estimated Taken: " + count * t.Frequency.TotalMicroseconds + "μs");
 
                 //How many more times the event was fired than needed
                 double overage = (count - maxCount);
@@ -751,16 +751,16 @@ namespace Media.UnitTests
 
                 System.Console.WriteLine("Finished: " + finished.ToString("MM/dd/yyyy hh:mm:ss.ffffff tt"));
 
-                System.Console.WriteLine("Taken Microseconds: " + Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(taken));
+                System.Console.WriteLine("Taken Microseconds: " + taken.TotalMicroseconds);
 
                 System.Console.WriteLine("Taken Total: " + taken.ToString());
 
                 System.Console.WriteLine("Managed Ticks: " + t.m_Ticks);
 
                 //The maximum amount of times the timer can elapse in the given frequency
-                double maxCount = Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(taken) / Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(t.Frequency);
+                double maxCount = taken.TotalMicroseconds / t.Frequency.TotalMicroseconds;
 
-                System.Console.WriteLine("Maximum Count: " + Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(taken));
+                System.Console.WriteLine("Maximum Count: " + taken.TotalMicroseconds);
 
                 System.Console.WriteLine("Actual Count: " + count);
 
@@ -777,10 +777,10 @@ namespace Media.UnitTests
                     (long)t.m_Ticks < count) throw new System.Exception("Did not count all intervals");
 
                 //Write the rough amount of time taken in nano seconds
-                System.Console.WriteLine("Time Estimated Taken: " + count * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalNanoseconds(t.Frequency) + "ns");
+                System.Console.WriteLine("Time Estimated Taken: " + count * t.Frequency.TotalNanoseconds + "ns");
 
                 //Write the rough amount of time taken in  micro seconds, only when using the same bus frequency as was sampled in the clock
-                System.Console.WriteLine("Time Estimated Taken: " + count * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(t.Frequency) + "μs");
+                System.Console.WriteLine("Time Estimated Taken: " + count * t.Frequency.TotalMicroseconds + "μs");
 
                 //How many more times the event was fired than needed
                 double overage = (count - maxCount);

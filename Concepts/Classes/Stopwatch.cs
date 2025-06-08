@@ -68,8 +68,8 @@ namespace Media.Concepts.Classes
             get
             {
                 return Timer.Frequency <= Common.Extensions.TimeSpan.TimeSpanExtensions.OneTick
-                    ? Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalNanoseconds(Timer.Frequency) / Units
-                    : Units * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalNanoseconds(Timer.Frequency);
+                    ? Timer.Frequency.TotalNanoseconds / Units
+                    : Units * Timer.Frequency.TotalNanoseconds;
             }
         }
 
@@ -80,8 +80,8 @@ namespace Media.Concepts.Classes
             {
                 //return Units * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(Timer.Frequency);
                 return Timer.Frequency <= Common.Extensions.TimeSpan.TimeSpanExtensions.OneMicrosecond
-                    ? Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(Timer.Frequency) / Units
-                    : Units * Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(Timer.Frequency);
+                    ? Timer.Frequency.TotalMicroseconds / Units
+                    : Units * Timer.Frequency.TotalMicroseconds;
             }
         }
 
@@ -286,7 +286,7 @@ namespace Media.UnitTests
 
                     System.Console.WriteLine("Real Taken sec Total: " + taken.TotalSeconds.ToString());
 
-                    System.Console.WriteLine("Real Taken μs Total: " + Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(taken).ToString());
+                    System.Console.WriteLine("Real Taken μs Total: " + taken.TotalMicroseconds.ToString());
 
                     System.Console.WriteLine("Managed Taken Total: " + sw.Elapsed.ToString());
 
@@ -298,7 +298,7 @@ namespace Media.UnitTests
                     System.Console.WriteLine("Managed Time Estimated Taken: " + sw.ElapsedMicroseconds + "μs");
 
                     //Write the rough amount of time taken in  micro seconds
-                    System.Console.WriteLine("Diagnostic Time Estimated Taken: " + Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(testSw.Elapsed) + "μs");
+                    System.Console.WriteLine("Diagnostic Time Estimated Taken: " + testSw.Elapsed.TotalMicroseconds + "μs");
 
                     System.Console.WriteLine("Managed Time Estimated Taken: " + sw.ElapsedMilliseconds);
 

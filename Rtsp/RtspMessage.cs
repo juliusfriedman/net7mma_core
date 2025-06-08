@@ -419,7 +419,7 @@ namespace Media.Rtsp
 
         /// <summary>
         /// Indicates the StatusCode of the RtspResponse.
-        ///  A value of 200 or less usually indicates success.
+        ///  A value of 200 or more usually indicates success.
         /// </summary>
         public RtspStatusCode RtspStatusCode
         {

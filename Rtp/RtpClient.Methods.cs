@@ -34,6 +34,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  * v//
  */
 using Media.Common.Extensions.Socket;
+using System;
 using System.Linq;
 
 namespace Media.Rtp
@@ -74,12 +75,6 @@ namespace Media.Rtp
 
                     //If the identity will overlap the Payload type CANNOT be the same
 
-
-
-
-
-
-
                     //if chekcking local identifier
                     if (checkLocalIdentity && c.SynchronizationSourceIdentifier == context.SynchronizationSourceIdentifier)
                     {
@@ -96,10 +91,16 @@ namespace Media.Rtp
                     if (checkRemoteIdentity && context.InDiscovery is false && c.InDiscovery is false &&
                         c.RemoteSynchronizationSourceIdentifier == context.RemoteSynchronizationSourceIdentifier)
                     {
+                        if (c.RemoteSynchronizationSourceIdentifier == 0)
+                        {
+                            context.RemoteSynchronizationSourceIdentifier = RFC3550.Random32();
+                            continue;
+                        }
+
                         foreach (var pt in context.MediaDescription.PayloadTypes)
                         {
                             if (System.Linq.Enumerable.Contains(c.MediaDescription.PayloadTypes, pt))
-                            {
+                            {                                
                                 Media.Common.TaggedExceptionExtensions.RaiseTaggedException(c, "Requested Remote SSRC is already in use by the context in the Tag");
                             }
                         }
@@ -1022,7 +1023,7 @@ namespace Media.Rtp
                 else
                 {
                     //If the transportContext is changed to automatically update the timestamp by frequency then use transportContext.RtpTimestamp
-                    sent += SendData(System.Linq.Enumerable.ToArray(packet.Prepare(null, ssrc, null, null)), transportContext.DataChannel, transportContext.RtpSocket, transportContext.RemoteRtp, out error, (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(transportContext.m_SendInterval) >> 2);
+                    sent += SendData(System.Linq.Enumerable.ToArray(packet.Prepare(null, ssrc, null, null)), transportContext.DataChannel, transportContext.RtpSocket, transportContext.RemoteRtp, out error, (int)transportContext.m_SendInterval.TotalMicroseconds >> 2);
                 }
             }
             else
@@ -1038,14 +1039,14 @@ namespace Media.Rtp
                     //If the transportContext is changed to automatically update the timestamp by frequency then use transportContext.RtpTimestamp
                     sent += SendData(System.Linq.Enumerable.ToArray(packet.Prepare(null, ssrc, null, null)),
                         transportContext.DataChannel, transportContext.RtpSocket, transportContext.RemoteRtp, out error,
-                        (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(transportContext.m_SendInterval) >> 2);
+                        (int)transportContext.m_SendInterval.TotalMicroseconds >> 2);
                 }
                 else
                 {
                     //Send the data in place.
                     sent += SendData(packet.Header.First16Bits.m_Memory.Array, packet.Header.First16Bits.m_Memory.Offset, packet.Length,
                         transportContext.DataChannel, transportContext.RtpSocket, transportContext.RemoteRtp, out error,
-                        (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(transportContext.m_SendInterval) >> 2);
+                        (int)transportContext.m_SendInterval.TotalMicroseconds >> 2);
                 }
             }
 
@@ -2396,7 +2397,16 @@ namespace Media.Rtp
                             ////errorSockets.Clear();
 
                             //Obtain a context
-                            TransportContext tc = TransportContexts[i];
+                            TransportContext tc;
+
+                            try
+                            {
+                                tc = TransportContexts[i];
+                            }
+                            catch (IndexOutOfRangeException)
+                            {
+                                continue;
+                            }
 
                             //Check for a context which is able to receive data
                             if (Common.IDisposedExtensions.IsNullOrDisposed(tc)
@@ -2448,7 +2458,7 @@ namespace Media.Rtp
                             //Todo, handle timeouts?
 
                             //Determine how long to poll for, use 1 quarter of the entire interval
-                            int usec = (int)Media.Common.Extensions.TimeSpan.TimeSpanExtensions.TotalMicroseconds(tc.m_ReceiveInterval) >> 4;
+                            int usec = (int)tc.m_ReceiveInterval.TotalMicroseconds >> 4;
 
                             //If receiving Rtp and the socket is able to read
                             if (rtpEnabled &&
