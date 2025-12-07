@@ -306,7 +306,9 @@ namespace Media.Rtsp.Server.MediaTypes
                 RtspClient.Disconnect(true);
 
                 Common.ILoggingExtensions.LogException(RtspClient.Logger, ex);
-
+            }
+            finally
+            {
                 State = StreamState.Started;
             }
         }
