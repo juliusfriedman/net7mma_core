@@ -889,7 +889,7 @@ public class SimpleH264Encoder : IDisposable
 
     #region Fields
 
-    private CJOCh264encoder h264encoder = null;
+    private readonly CJOCh264encoder h264encoder = null;
     private readonly uint width = 0;
     private readonly uint height = 0;
     private readonly List<byte> nal = [];
@@ -986,7 +986,6 @@ public class SimpleH264Encoder : IDisposable
         if (h264encoder is not null)
         {
             h264encoder.Dispose();
-            h264encoder = null;
         }
     }
 }
